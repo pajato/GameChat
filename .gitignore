@@ -30,3 +30,11 @@ proguard/
 
 # Android Studio captures folder
 captures/
+
+# Android Studio other
+*.iml
+.idea/
+
+# Mac OS X detritus
+.DS_Store
+Icon\015
