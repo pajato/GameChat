@@ -14,27 +14,24 @@
  * You should have received a copy of the GNU General Public License along with GameChat. If not,
  * see <http://www.gnu.org/licenses/>.
  */
+
 package com.pajato.android.gamechat.account;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.URL;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Singular;
 
 /**
  * Provides an account data model class.
  *
  * @author Paul Michael Reilly
  */
-@Data public class Account {
-    private static final String KEY_ACCOUNT_TOKEN = "keyAccountToken";
-
-    /** The logcat tag constant. */
-    private static final String TAG = Account.class.getSimpleName();
-
-    // Activity request codes.
-    private static final int ACCOUNTS_PERMISSION_REQUEST = 1;
-    private static final int ACCOUNT_SETUP_REQUEST = 2;
+@Data
+@Builder(toBuilder=true)
+public final class Account {
 
     // Private instance variables
 
@@ -57,7 +54,8 @@ import lombok.Data;
     private String providerId;
 
     /** The account avatars. The key is the name, the value is a URL for the image. */
-    private Map<String, URL> avatarMap = new ConcurrentHashMap<>();
+    @Singular
+    private Map<String, URL> avatars = new ConcurrentHashMap<>();
 
     // Public class methods
 

@@ -6,6 +6,7 @@ import android.support.test.espresso.contrib.NavigationViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.pajato.android.gamechat.main.MainActivity;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
