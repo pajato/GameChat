@@ -33,12 +33,11 @@ http://www.gnu.org/licenses
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Add these as required ...
         <activity
             android:name=".intro.IntroActivity"
-            android:label="@string/name_intro_activity"
-            android:theme="@style/ThemeOverlay.NoTitleActivity">
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
+        <!-- Add these as required ...
         <activity
             android:name=".signin.SignInActivity"
             android:label="@string/name_sign_in_activity"

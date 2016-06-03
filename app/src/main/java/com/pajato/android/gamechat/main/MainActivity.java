@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -39,6 +40,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.intro.IntroActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,8 +99,10 @@ public class MainActivity extends AppCompatActivity
         // Determine if an account needs to be set up.
         if (!AccountManager.instance.hasAccount()) {
             // There is no account yet.  Present the intro activity to get things started.
-            // Intent intent = new Intent(intro-activity);
-            // intent.startActivity(intent, ?);
+            Intent introIntent = new Intent(this, IntroActivity.class);
+            startActivity(introIntent);
+            //onFinish();
+            finish();
         }
 
     }
