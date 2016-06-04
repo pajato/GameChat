@@ -12,7 +12,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        manifestPlaceholders = [gitScheme:"$rootProject.ext.gitScheme",
+                                gitApiKey:"$rootProject.ext.gitApiKey",
+                                gitServerClientId:"$rootProject.ext.gitServerClientId",
+                                gitServerWidgetUrl:"$rootProject.ext.gitServerWidgetUrl"]
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,6 +27,18 @@ android {
             // Run code coverage reports by default on debug builds.
             testCoverageEnabled = true
         }
+    }
+
+    lintOptions {
+        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
+        abortOnError true
+    }
+
+}
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
 }
 
