@@ -1,5 +1,6 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:fillViewport="true">
@@ -20,13 +21,15 @@
                 android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:id="@+id/icon_image1"
-                android:src="@drawable/ic_intro_home"/>
+                android:src="@drawable/ic_intro_home"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
                 android:layout_height="wrap_content"
-                android:id="@+id/icon_image2"/>
+                android:id="@+id/icon_image2"
+                tools:ignore="ContentDescription" />
 
         </FrameLayout>
 
@@ -70,19 +73,22 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp" />
+                android:layout_marginLeft="7dp"
+                android:layout_marginStart="7dp"/>
 
             <TextView
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp" />
+                android:layout_marginLeft="7dp"
+                android:layout_marginStart="7dp"/>
 
             <TextView
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp" />
+                android:layout_marginLeft="7dp"
+                android:layout_marginStart="7dp"/>
 
         </LinearLayout>
 

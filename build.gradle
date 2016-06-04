@@ -56,4 +56,11 @@ ext {
     powerMockito = '1.6.2'
     runnerVersion = '0.5'
     supportLibraryVersion = '23.4.0'
+
+    // Provide environment variables containing secrets for a Google Cloud
+    // Platform instance of GameChat using Google Identity Tookit (GIT).
+    gitScheme = project.hasProperty('scheme') ? project.getProperty('scheme') : ""
+    gitApiKey = project.hasProperty('api_key') ? project.getProperty('api_key') : ""
+    gitServerClientId = project.hasProperty('server_client_id') ? project.getProperty('server_client_id') : ""
+    gitServerWidgetUrl = project.hasProperty('server_widget_url') ? project.getProperty('server_widget_url') : ""
 }
