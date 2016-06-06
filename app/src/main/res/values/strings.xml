@@ -27,4 +27,17 @@
     <string name="tbd">(tbd)</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
+    <string name="player_1">p1</string>
+    <string name="player_2">p2</string>
+
+    <string name="current_turn">Current Turn:</string>
+    <string name="new_game">New Game</string>
+
+    <string name="spaceValue" />
+    <string name="xValue">X</string>
+    <string name="oValue">O</string>
+
+    <string name="tie">Tie!</string>
+    <string name="xWins">X Wins!</string>
+    <string name="oWins">O Wins!</string>
 </resources>
