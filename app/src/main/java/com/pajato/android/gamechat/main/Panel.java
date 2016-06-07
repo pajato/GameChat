@@ -32,7 +32,7 @@ import com.pajato.android.gamechat.fragment.RoomsFragment;
  */
 public enum Panel {
     chat(R.string.chat, R.layout.fragment_chat, ChatFragment.class),
-    game(R.string.game, R.layout.fragment_game, TTTFragment.class),
+    ttt(R.string.ttt, R.layout.fragment_ttt, TTTFragment.class),
     members(R.string.members, R.layout.fragment_members, MembersFragment.class),
     rooms(R.string.rooms, R.layout.fragment_rooms, RoomsFragment.class);
 
@@ -92,7 +92,7 @@ public enum Panel {
                 case R.string.chat:
                     fragment = ChatFragment.instantiate(context, name);
                     break;
-                case R.string.game:
+                case R.string.ttt:
                     fragment = TTTFragment.instantiate(context, name);
                     break;
                 case R.string.members:
