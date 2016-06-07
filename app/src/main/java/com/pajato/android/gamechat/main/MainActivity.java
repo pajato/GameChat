@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Sends a message alerting the event handling system that the new game button was clicked.
+     * An OnClick Listener for the new game button.
      *
      * @param view the new game button.
      */
@@ -181,8 +181,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Sends a message alerting the event handling system that there was a tile clicked, and
-     * swaps the mTurn to the opposite player.
+     * An OnClick Listener for the tic-tac-toe tiles.
      *
      * @param view the tile clicked
      */
