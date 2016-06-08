@@ -44,40 +44,6 @@ public class TTTWinConditionsTest {
     }
 
     /**
-     * Ensure that the game successfully ends with a tie.
-     */
-    @Test
-    public void testTie() {
-        // X - O - X in the top row.
-        // This row is no longer winnable.
-        onView(withTagValue(is((Object) "button00")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button01")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button02")))
-                .perform(click());
-        // O - X - O in the bottom row.
-        // Diagonal wins are no longer possible, nor are vertical wins, nor is a win in this row.
-        onView(withTagValue(is((Object) "button20")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button21")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button22")))
-                .perform(click());
-        // X - O - X in the middle row.
-        // Wins are no longer possible in this row, or at all.
-        onView(withTagValue(is((Object) "button10")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button11")))
-                .perform(click());
-        onView(withTagValue(is((Object) "button12")))
-                .perform(click());
-        // Ensure the Winner view displays a tie.
-        onView(withId(R.id.Winner)).
-                check(matches(withText("Tie!")));
-    }
-
-    /**
      * Ensure that after the game has ended, the value of a button cannot be changed.
      */
     @Test
@@ -117,6 +83,39 @@ public class TTTWinConditionsTest {
                 .check(matches(withText(spaceValue)));
     }
 
+    /**
+     * Ensure that the game successfully ends with a tie.
+     */
+    @Test
+    public void testTie() {
+        // X - O - X in the top row.
+        // This row is no longer winnable.
+        onView(withTagValue(is((Object) "button00")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button01")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button02")))
+                .perform(click());
+        // O - X - O in the bottom row.
+        // Diagonal wins are no longer possible, nor are vertical wins, nor is a win in this row.
+        onView(withTagValue(is((Object) "button20")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button21")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button22")))
+                .perform(click());
+        // X - O - X in the middle row.
+        // Wins are no longer possible in this row, or at all.
+        onView(withTagValue(is((Object) "button10")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button11")))
+                .perform(click());
+        onView(withTagValue(is((Object) "button12")))
+                .perform(click());
+        // Ensure the Winner view displays a tie.
+        onView(withId(R.id.Winner)).
+                check(matches(withText("Tie!")));
+    }
 
     /**
      * Each of the following tests determine if the line of 3 mentioned in the respective

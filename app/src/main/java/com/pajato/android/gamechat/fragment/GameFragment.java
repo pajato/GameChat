@@ -14,24 +14,20 @@ import java.util.ArrayList;
 
 public class GameFragment extends Fragment{
 
-    // The Match History
+    /* The Match History */
     private ArrayList<String> mInstructions;
-    // Keeps track of the mTurn user. True = Player 1, False = Player 2.
+    /* Keeps track of the mTurn user. True = Player 1, False = Player 2. */
     private boolean mTurn;
-    // Player Turn Strings
+    /* Player Turn Strings */
     private String mPLAYER1;
     private String mPLAYER2;
 
     // Game Fragments
+    /* The Tic-Tac-Toe fragment */
     private TTTFragment mTicTacToe;
 
     public GameFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -44,6 +40,7 @@ public class GameFragment extends Fragment{
         mInstructions = new ArrayList<>();
         mTurn = true;
 
+        // Inflate the layout and set up the default fragment.
         View layout = inflater.inflate(R.layout.fragment_game, container, false);
 
         mTicTacToe = new TTTFragment();
@@ -74,10 +71,10 @@ public class GameFragment extends Fragment{
         String newTurn = (getTurn().equals(getString(R.string.player_1)) ?
                 "Player 1 (" + getString(R.string.xValue) + ")" :
                 "Player 2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.activity_main), "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
+        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.activity_main),
+                "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
         start.show();
 
-        //TODO: replace this with an implemented event handling system.
         sendMessage(msg);
     }
 
@@ -94,7 +91,6 @@ public class GameFragment extends Fragment{
         // Keep track of mInstructions for recreating the board.
         mInstructions.add(msg);
 
-        //TODO: replace this with an implemented event handling system.
         sendMessage(msg);
 
         mTurn = !mTurn;
@@ -114,7 +110,9 @@ public class GameFragment extends Fragment{
 
 
     /**
-     * A placeholder method for a message handler / event coordinator to be implemented at a later time.
+     * A placeholder method for a message handler / event coordinator to be implemented at a later
+     * time. Currently, sendMessage sends a string to the current individual game fragment (for
+     * example, the TTTFragment) that it then interprets into a move.
      *
      * @param msg the message to transmit to the message handler.
      */
