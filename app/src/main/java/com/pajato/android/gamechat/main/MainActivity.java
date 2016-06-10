@@ -39,6 +39,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.fragment.GameFragment;
 import com.pajato.android.gamechat.fragment.TTTFragment;
 import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
@@ -171,7 +172,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the new game button.
      */
     public void onNewGame(final View view) {
-        ((TTTFragment) Panel.ttt.getFragment(getApplicationContext())).onNewGame(view);
+        ((GameFragment) Panel.game.getFragment(getApplicationContext())).onNewGame(view);
     }
 
     /** The FAB click handler.  Show the various options. */
@@ -186,7 +187,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the tile clicked
      */
     public void tileOnClick(final View view) {
-        ((TTTFragment) Panel.ttt.getFragment(getApplicationContext())).tileOnClick(view);
+        ((GameFragment) Panel.game.getFragment(getApplicationContext())).tileOnClick(view);
     }
 
     // Private instance methods.
@@ -211,7 +212,7 @@ public class MainActivity extends AppCompatActivity
         public GameChatPagerAdapter(final FragmentManager manager) {
             super(manager);
             panelList.add(Panel.chat);
-            panelList.add(Panel.ttt);
+            panelList.add(Panel.game);
         }
 
         @Override
