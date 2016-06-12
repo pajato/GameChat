@@ -17,94 +17,64 @@
 
 package com.pajato.android.gamechat.main;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.ChatFragment;
-import com.pajato.android.gamechat.fragment.TTTFragment;
 import com.pajato.android.gamechat.fragment.MembersFragment;
 import com.pajato.android.gamechat.fragment.RoomsFragment;
+import com.pajato.android.gamechat.fragment.TTTFragment;
 
 /**
  * Provide an enumeration of panels used in the app.
  */
 public enum Panel {
-    chat(R.string.chat, R.layout.fragment_chat, ChatFragment.class),
-    ttt(R.string.ttt, R.layout.fragment_ttt, TTTFragment.class),
-    members(R.string.members, R.layout.fragment_members, MembersFragment.class),
-    rooms(R.string.rooms, R.layout.fragment_rooms, RoomsFragment.class);
+    chat(R.string.chat, ChatFragment.class),
+    ttt(R.string.ttt, TTTFragment.class),
+    members(R.string.members, MembersFragment.class),
+    rooms(R.string.rooms, RoomsFragment.class);
+
+    // Private class constants.
 
     /** The logcat tag. */
     private static final String TAG = Panel.class.getSimpleName();
 
+    // Private instance variables.
+
     /** The panel title resource id. */
     private int titleId;
 
-    /** The fragment associated with the panel. */
-    private Fragment fragment;
-
-    /** The fragment class. */
+    /** The fragment class associated with the panel. */
     private Class<? extends Fragment> fragmentClass;
 
-    /** The panel layout id. */
-    private int layoutId;
+    // Constructor.
 
-    /**
-     * Create the enum value instance given a title resource id, layout resource id and fragment class..
-     *
-     * @param titleId The given title id.
-     * @param layoutId The given layout id.
-     * @param fragmentClass The given layout class.
-     */
-    Panel(final int titleId, final int layoutId, final Class<? extends Fragment> fragmentClass) {
+    /** Create the enum value instance given a title resource id and a fragment class. */
+    Panel(final int titleId, final Class<? extends Fragment> fragmentClass) {
         this.titleId = titleId;
-        this.layoutId = layoutId;
         this.fragmentClass = fragmentClass;
     }
+
+    // Public instance methods.
 
     /** @return The panel title string. */
     public int getTitleId() {
         return titleId;
     }
 
-    /**
-     * Builds a fragment associated with the panel using lazy creation, i.e. defer instantiation until the fragment
-     * is actually needed.
-     *
-     * @return The panel fragment.
-     */
-    public Fragment getFragment(final Context context) {
-        if (fragment == null) createFragment(context);
-        return fragment;
-    }
-
-    /**
-     * Create a panel fragment using the title resource id as a discriminant.
-     *
-     * @return The newly created fragment or null if the fragment cannot be created.
-     */
-    private void createFragment(final Context context) {
+    /** @return The panel fragment. */
+    public Fragment getFragment() {
+        Fragment result = null;
         try {
-            String name = fragmentClass.getName();
-            switch (titleId) {
-                case R.string.chat:
-                    fragment = ChatFragment.instantiate(context, name);
-                    break;
-                case R.string.ttt:
-                    fragment = TTTFragment.instantiate(context, name);
-                    break;
-                case R.string.members:
-                    fragment = MembersFragment.instantiate(context, name);
-                    break;
-                case R.string.rooms:
-                    fragment = RoomsFragment.instantiate(context, name);
-                    break;
-            }
-        } catch (Fragment.InstantiationException exc) {
-            String format = "Could not create the fragment for the {%s} panel.";
-            Log.e(TAG, String.format(format, context.getString(titleId)), exc);
+            String format = "getFragment: Creating fragment using class {%s}.";
+            Log.d(TAG, String.format(format, fragmentClass));
+            result = fragmentClass.newInstance();
+            Log.d(TAG, String.format("getFragment: Created fragment {%s}.", result));
+        } catch (InstantiationException | IllegalAccessException exc) {
+            Log.e(TAG, "Totally unexpected exception creating fragment!", exc);
         }
+
+        return result;
     }
 }

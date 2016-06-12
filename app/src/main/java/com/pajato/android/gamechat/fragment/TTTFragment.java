@@ -2,7 +2,8 @@ package com.pajato.android.gamechat.fragment;
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,9 @@ import com.pajato.android.gamechat.R;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class TTTFragment extends Fragment {
+public class TTTFragment extends BaseFragment {
+
+    private static final String TAG = TTTFragment.class.getSimpleName();
 
     // Keeps track of the turn number
     private int mTurnCount;
@@ -44,6 +47,10 @@ public class TTTFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
+        String format = "onCreateView: Layout fragment {%s} using inflater {%s} in container {%s} "
+            + "and bundle {%s}. Fragment manager: {%s}.";
+        FragmentManager manager = getFragmentManager();
+        Log.v(TAG, String.format(format, this, inflater, container, savedInstanceState, manager));
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
 
@@ -81,7 +88,7 @@ public class TTTFragment extends Fragment {
         String newTurn = (getTurn().equals(getString(R.string.player_1)) ?
                 "Player 1 (" + getString(R.string.xValue) + ")" :
                 "Player 2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.activity_main), "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
+        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.game_pane), "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
         start.show();
 
         //TODO: replace this with an implemented event handling system.
