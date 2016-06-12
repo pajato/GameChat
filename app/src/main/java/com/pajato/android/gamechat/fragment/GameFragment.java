@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License along with GameChat.  If not,
  * see http://www.gnu.org/licenses
  */
+
 package com.pajato.android.gamechat.fragment;
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,9 +30,9 @@ import java.util.ArrayList;
 /**
  *
  *
- * @author Bryan Scott -- bryan@pajato.com
+ * @author Bryan Scott
  */
-public class GameFragment extends Fragment{
+public class GameFragment extends BaseFragment{
 
     /* The Match History */
     private ArrayList<String> mInstructions;
@@ -65,8 +65,10 @@ public class GameFragment extends Fragment{
 
         mTicTacToe = new TTTFragment();
         mTicTacToe.setArguments(getActivity().getIntent().getExtras());
-        getActivity().getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, mTicTacToe).commit();
+        getActivity().getSupportFragmentManager()
+            .beginTransaction()
+            .add(R.id.fragment_container, mTicTacToe)
+            .commit();
 
         return layout;
     }
@@ -91,7 +93,7 @@ public class GameFragment extends Fragment{
         String newTurn = (getTurn().equals(getString(R.string.player_1)) ?
                 "Player 1 (" + getString(R.string.xValue) + ")" :
                 "Player 2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.activity_main),
+        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.game_pane),
                 "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
         start.show();
 

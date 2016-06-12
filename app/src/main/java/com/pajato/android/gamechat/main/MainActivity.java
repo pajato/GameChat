@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.main;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -25,7 +26,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -38,14 +39,13 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.fragment.GameFragment;
-import com.pajato.android.gamechat.fragment.TTTFragment;
-import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Provide a main activity to display the chat and game panesl. */
 public class MainActivity extends AppCompatActivity
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Init the app state.
-        GameChatPagerAdapter adapter = new GameChatPagerAdapter(getSupportFragmentManager());
+        GameChatPagerAdapter adapter = new GameChatPagerAdapter(getSupportFragmentManager(), this);
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setAdapter(adapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the new game button.
      */
     public void onNewGame(final View view) {
-        ((GameFragment) Panel.game.getFragment(getApplicationContext())).onNewGame(view);
+        ((GameFragment) Panel.game.getFragment()).onNewGame(view);
     }
 
     /** The FAB click handler.  Show the various options. */
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the tile clicked
      */
     public void tileOnClick(final View view) {
-        ((GameFragment) Panel.game.getFragment(getApplicationContext())).tileOnClick(view);
+        ((GameFragment) Panel.game.getFragment()).tileOnClick(view);
     }
 
     // Private instance methods.
@@ -197,37 +197,43 @@ public class MainActivity extends AppCompatActivity
     /**
      * Provide a class to handle the view pager setup.
      */
-    private class GameChatPagerAdapter extends FragmentStatePagerAdapter {
+    private class GameChatPagerAdapter extends FragmentPagerAdapter {
 
-        /**
-         * A list of panels ordered left to right.
-         */
+        /** A list of panels ordered left to right. */
         private List<Panel> panelList = new ArrayList<>();
+
+        /** The fragment manager used to commit the fragment. */
+        private Map<Panel, String> titles = new HashMap<>();
 
         /**
          * Build an adapter to handle the panels.
          *
          * @param manager The fragment manager.
          */
-        public GameChatPagerAdapter(final FragmentManager manager) {
+        public GameChatPagerAdapter(final FragmentManager manager, final Context context) {
+            // Create the adapter and add the panels to the panel list.
             super(manager);
             panelList.add(Panel.chat);
             panelList.add(Panel.game);
+            titles.put(Panel.chat, context.getString(Panel.chat.getTitleId()));
+            titles.put(Panel.game, context.getString(Panel.game.getTitleId()));
         }
 
-        @Override
-        public Fragment getItem(int position) {
-            return panelList.get(position).getFragment(MainActivity.this);
+        /** Implement the getItem() interface by dereferencing the fragment from the Panel. */
+        @Override public Fragment getItem(int position) {
+            return panelList.get(position).getFragment();
         }
 
-        @Override
-        public int getCount() {
+        /** Implement the getCount() interface by using the panel list size. */
+        @Override public int getCount() {
             return panelList.size();
         }
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return MainActivity.this.getString(panelList.get(position).getTitleId());
+        /** Implement the getTitle() interface by using the title stored in the fragment. */
+        @Override public CharSequence getPageTitle(int position) {
+            String title = titles.get(panelList.get(position));
+
+            return title;
         }
 
     }
