@@ -39,7 +39,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.fragment.TTTFragment;
+import com.pajato.android.gamechat.fragment.GameFragment;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import java.util.ArrayList;
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the new game button.
      */
     public void onNewGame(final View view) {
-        ((TTTFragment) Panel.ttt.getFragment()).onNewGame(view);
+        ((GameFragment) Panel.game.getFragment()).onNewGame(view);
     }
 
     /** The FAB click handler.  Show the various options. */
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
      * @param view the tile clicked
      */
     public void tileOnClick(final View view) {
-        ((TTTFragment) Panel.ttt.getFragment()).tileOnClick(view);
+        ((GameFragment) Panel.game.getFragment()).tileOnClick(view);
     }
 
     // Private instance methods.
@@ -214,9 +214,9 @@ public class MainActivity extends AppCompatActivity
             // Create the adapter and add the panels to the panel list.
             super(manager);
             panelList.add(Panel.chat);
-            panelList.add(Panel.ttt);
+            panelList.add(Panel.game);
             titles.put(Panel.chat, context.getString(Panel.chat.getTitleId()));
-            titles.put(Panel.ttt, context.getString(Panel.ttt.getTitleId()));
+            titles.put(Panel.game, context.getString(Panel.game.getTitleId()));
         }
 
         /** Implement the getItem() interface by dereferencing the fragment from the Panel. */

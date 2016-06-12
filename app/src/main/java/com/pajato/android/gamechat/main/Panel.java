@@ -17,11 +17,14 @@
 
 package com.pajato.android.gamechat.main;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.ChatFragment;
+import com.pajato.android.gamechat.fragment.GameFragment;
 import com.pajato.android.gamechat.fragment.MembersFragment;
 import com.pajato.android.gamechat.fragment.RoomsFragment;
 import com.pajato.android.gamechat.fragment.TTTFragment;
@@ -31,7 +34,7 @@ import com.pajato.android.gamechat.fragment.TTTFragment;
  */
 public enum Panel {
     chat(R.string.chat, ChatFragment.class),
-    ttt(R.string.ttt, TTTFragment.class),
+    game(R.string.game, GameFragment.class),
     members(R.string.members, MembersFragment.class),
     rooms(R.string.rooms, RoomsFragment.class);
 
@@ -64,6 +67,7 @@ public enum Panel {
     }
 
     /** @return The panel fragment. */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public Fragment getFragment() {
         Fragment result = null;
         try {

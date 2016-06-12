@@ -2,6 +2,7 @@
     <string name="action_settings">Settings</string>
     <string name="app_name">GameChat</string>
     <string name="chat">Chat</string>
+    <string name="game">Game</string>
     <string name="intro_chat_message">Public private secure messaging with any GameChat user</string>
     <string name="intro_game_message">Play popular well known games with other GameChat users or against the computer</string>
     <string name="intro_home_message">Chat and play games with friends and family</string>
@@ -24,7 +25,6 @@
     <string name="rooms">Rooms</string>
     <string name="intro_page_circle">\u25CF</string>
     <string name="tbd">(tbd)</string>
-    <string name="ttt">TicTacToe</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
     <string name="player_1">p1</string>
