@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.fragment;
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,10 +13,9 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
-public class TTTFragment extends BaseFragment {
+public class TTTFragment extends Fragment {
 
     private static final String TAG = TTTFragment.class.getSimpleName();
 
@@ -28,18 +28,6 @@ public class TTTFragment extends BaseFragment {
 
     // The mBoard view
     private View mBoard;
-
-    // The Match History
-    private ArrayList<String> mInstructions;
-    private static final String mKEY_INSTRUCTIONS = "match_history";
-
-    // Keeps track of the mTurn user. True = Player 1, False = Player 2.
-    private boolean mTurn;
-    private static final String mKEY_TURN = "current_turn";
-
-    // Player Turn Strings
-    private String mPLAYER1;
-    private String mPLAYER2;
 
     public TTTFragment() {
 
@@ -54,12 +42,6 @@ public class TTTFragment extends BaseFragment {
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
 
-        // Initialize the member variables.
-        mPLAYER1 = getString(R.string.player_1);
-        mPLAYER2 = getString(R.string.player_2);
-        mInstructions = new ArrayList<>();
-        mTurn = true;
-
         // Initialize the turn counter, and mBoard variables.
         mTurnCount = 9;
         mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
@@ -68,71 +50,6 @@ public class TTTFragment extends BaseFragment {
         turnDisplay.setText(getTurn(true));
 
         return mBoard;
-    }
-
-    /**
-     * Sends a message alerting the event handling system that the new game button was clicked.
-     *
-     * @param view the new game button.
-     */
-    public void onNewGame(final View view) {
-        // Create the message.
-        String msg = getTurn() + "\n";
-        msg += view.getTag().toString();
-
-        // Empty the instructions list, as a new game has begun.
-        mInstructions.clear();
-        mInstructions.add(msg);
-
-        // Output New Game Message
-        String newTurn = (getTurn().equals(getString(R.string.player_1)) ?
-                "Player 1 (" + getString(R.string.xValue) + ")" :
-                "Player 2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-        Snackbar start = Snackbar.make(getActivity().findViewById(R.id.game_pane), "New Game! " + newTurn, Snackbar.LENGTH_SHORT);
-        start.show();
-
-        //TODO: replace this with an implemented event handling system.
-        sendMessage(msg);
-    }
-
-    /**
-     * Sends a message alerting the event handling system that there was a tile clicked, and
-     * swaps the mTurn to the opposite player.
-     *
-     * @param view the tile clicked
-     */
-    public void tileOnClick(final View view) {
-        String msg = getTurn() + "\n";
-        msg = msg + view.getTag().toString();
-
-        // Keep track of mInstructions for recreating the board.
-        mInstructions.add(msg);
-
-        //TODO: replace this with an implemented event handling system.
-        sendMessage(msg);
-
-        mTurn = !mTurn;
-    }
-
-    /**
-     * A placeholder method for a message handler / event coordinator to be implemented at a later time.
-     *
-     * @param msg the message to transmit to the message handler.
-     */
-    private void sendMessage(final String msg) {
-        //TODO: replace this with an implemented event handling system.
-        // This will be a switch for each of the individual game fragment handlers.
-        messageHandler(msg);
-    }
-
-    /**
-     * Gets the current mTurn and returns a string reflecting the player's
-     * name who is currently playing.
-     *
-     * @return player 1 or player 2, depending on the mTurn.
-     */
-    private String getTurn() {
-        return mTurn ? mPLAYER1 : mPLAYER2;
     }
 
     /**
@@ -256,7 +173,7 @@ public class TTTFragment extends BaseFragment {
      *
      * @return false if a player has won or if the full number of turns has occurred, true otherwise.
      */
-    public boolean checkNotFinished() {
+    private boolean checkNotFinished() {
         int[][] boardValues = new int[3][3];
         // First, we need to check on the buttons' states.
         evaluateBoard(boardValues);
