@@ -247,6 +247,7 @@ public class MainActivity extends AppCompatActivity
                 if(currFragment == null) {
                     currFragment = panelList.get(position).fragmentClass.newInstance();
                     Log.d(TAG, String.format("getFragment: Created fragment {%s}.", currFragment));
+                    panelList.get(position).fragment = currFragment;
                 } else {
                     Log.d(TAG, String.format("getFragment: Fragment {%s} already exists.", currFragment));
                 }
