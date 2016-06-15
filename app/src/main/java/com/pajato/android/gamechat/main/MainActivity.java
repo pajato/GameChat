@@ -33,12 +33,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.fragment.ChatFragment;
 import com.pajato.android.gamechat.fragment.GameFragment;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity
     private static final String PREFS = "GameChatPrefs";
 
     // Private instance variables
+    private GameChatPagerAdapter mAdapter;
 
     // Public instance methods
 
@@ -94,9 +97,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Init the app state.
-        GameChatPagerAdapter adapter = new GameChatPagerAdapter(getSupportFragmentManager(), this);
+        mAdapter = new GameChatPagerAdapter(getSupportFragmentManager(), this);
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setAdapter(adapter);
+        viewPager.setAdapter(mAdapter);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -172,7 +175,8 @@ public class MainActivity extends AppCompatActivity
      * @param view the new game button.
      */
     public void onNewGame(final View view) {
-        ((GameFragment) Panel.game.getFragment()).onNewGame(view);
+        // Pass responsibility for this onClick listener onto GameFragment
+        ((GameFragment) mAdapter.getItem(1)).onNewGame(view);
     }
 
     /** The FAB click handler.  Show the various options. */
@@ -187,7 +191,8 @@ public class MainActivity extends AppCompatActivity
      * @param view the tile clicked
      */
     public void tileOnClick(final View view) {
-        ((GameFragment) Panel.game.getFragment()).tileOnClick(view);
+        // Pass responsibility for this onClick listener onto GameFragment
+        ((GameFragment) mAdapter.getItem(1)).tileOnClick(view);
     }
 
     // Private instance methods.
@@ -197,7 +202,23 @@ public class MainActivity extends AppCompatActivity
     /**
      * Provide a class to handle the view pager setup.
      */
-    private class GameChatPagerAdapter extends FragmentPagerAdapter {
+    private static class GameChatPagerAdapter extends FragmentPagerAdapter {
+        private enum Panel {
+            chat(R.string.chat, ChatFragment.class),
+            game(R.string.game, GameFragment.class);
+
+            /** The panel title resource id. */
+            public int titleId;
+            /** The fragment class associated with the panel. */
+            public Class<? extends Fragment> fragmentClass;
+            public Fragment fragment;
+
+            /** Create the enum value instance given a title resource id and a fragment class. */
+            Panel(final int titleId, final Class<? extends Fragment> fragmentClass) {
+                this.titleId = titleId;
+                this.fragmentClass = fragmentClass;
+            }
+        }
 
         /** A list of panels ordered left to right. */
         private List<Panel> panelList = new ArrayList<>();
@@ -215,13 +236,26 @@ public class MainActivity extends AppCompatActivity
             super(manager);
             panelList.add(Panel.chat);
             panelList.add(Panel.game);
-            titles.put(Panel.chat, context.getString(Panel.chat.getTitleId()));
-            titles.put(Panel.game, context.getString(Panel.game.getTitleId()));
+            titles.put(Panel.chat, context.getString(Panel.chat.titleId));
+            titles.put(Panel.game, context.getString(Panel.game.titleId));
         }
 
         /** Implement the getItem() interface by dereferencing the fragment from the Panel. */
         @Override public Fragment getItem(int position) {
-            return panelList.get(position).getFragment();
+            Fragment currFragment = panelList.get(position).fragment;
+            try {
+                if(currFragment == null) {
+                    currFragment = panelList.get(position).fragmentClass.newInstance();
+                    Log.d(TAG, String.format("getFragment: Created fragment {%s}.", currFragment));
+                } else {
+                    Log.d(TAG, String.format("getFragment: Fragment {%s} already exists.", currFragment));
+                }
+            } catch (InstantiationException exc) {
+                Log.e(TAG, "Unexpected Instantiation Exception creating fragment!", exc);
+            } catch (IllegalAccessException exc) {
+                Log.e(TAG, "Unexpected Illegal Access Exception creating fragment!", exc);
+            }
+            return currFragment;
         }
 
         /** Implement the getCount() interface by using the panel list size. */
@@ -229,11 +263,9 @@ public class MainActivity extends AppCompatActivity
             return panelList.size();
         }
 
-        /** Implement the getTitle() interface by using the title stored in the fragment. */
+        /** Implement the getPageTitle() interface by using the title stored in the fragment. */
         @Override public CharSequence getPageTitle(int position) {
-            String title = titles.get(panelList.get(position));
-
-            return title;
+            return titles.get(panelList.get(position));
         }
 
     }
