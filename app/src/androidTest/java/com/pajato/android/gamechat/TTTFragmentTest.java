@@ -23,13 +23,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 /**
- * Tests the Tic-Tac-Toe game
+ * Tests the Tic-Tac-Toe game feature of our MainActivity.
  */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
 public class TTTFragmentTest {
 
-    @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<MainActivity>(MainActivity.class);
+    @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<>(MainActivity.class);
     private String xValue;
     private String oValue;
     private String spaceValue;
@@ -131,7 +131,7 @@ public class TTTFragmentTest {
         // Attempt to click Bottom Center (to get 3 in a row for O).
         onView(withTagValue(is((Object) "button21")))
                 .perform(click())
-                // Assert that the command is not executed.
+                // Ensure that the command is not executed.
                 .check(matches(withText(spaceValue)));
     }
 
@@ -158,11 +158,11 @@ public class TTTFragmentTest {
         onView(withTagValue(is((Object) "button12")))
                 .perform(click());
 
-
         // Perform a new game.
-        onView(withId(R.id.newGame)).perform(click());
+        onView(withId(R.id.newGame))
+                .perform(click());
 
-        // Ensure that all buttons are empty now.
+        // Ensure that all buttons are now empty.
         onView(withTagValue(is((Object) "button00")))
                 .check(matches(withText(spaceValue)));
         onView(withTagValue(is((Object) "button01")))
@@ -216,7 +216,7 @@ public class TTTFragmentTest {
      */
     @Test
     public void testOWins() {
-        // 00 - 01 - 02
+        // Fill a win in for O in the top row. Buttons 00 - 01 - 02
         // Play an X in a non-relevant spot
         onView(withTagValue(is((Object) "button22")))
                 .perform((click()));
@@ -301,7 +301,7 @@ public class TTTFragmentTest {
      */
     @Test
     public void testXWins() {
-        // 10 - 11 - 12
+        // Fill a win in for X in the middle row. Buttons 10 - 11 - 12
         // Click Middle Left
         onView(withTagValue(is((Object) "button10")))
                 .perform(click())
