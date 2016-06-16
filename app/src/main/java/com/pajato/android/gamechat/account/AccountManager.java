@@ -16,6 +16,8 @@
  */
 package com.pajato.android.gamechat.account;
 
+import android.support.v7.app.AppCompatActivity;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -64,6 +66,11 @@ public enum AccountManager {
     /** Register a given account and provider ids. */
     public void register(final String accountId) {
         // Perform the Firebase authentication thing using the given ids.
+    }
+
+    /** Initialize the account manager. */
+    public void init(final AppCompatActivity context) {
+        // tbd
     }
 
     // Private instance methods.
