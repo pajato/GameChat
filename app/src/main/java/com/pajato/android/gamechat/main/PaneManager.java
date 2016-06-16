@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -94,9 +95,9 @@ public enum PaneManager {
     }
 
     /** Handle the delegated new game click by delegating it to the game fragment. */
-    public void onNewGame(final View view) {
+    public void onNewGame(final MenuItem item) {
         // Delegate this to the game fragment.
-        ((GameFragment) fragmentList.get(GAME_INDEX)).onNewGame(view);
+        ((GameFragment) fragmentList.get(GAME_INDEX)).onNewGame(item);
     }
 
     // Nested classes

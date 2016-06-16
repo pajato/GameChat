@@ -23,7 +23,7 @@ http://www.gnu.org/licenses
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -59,16 +59,26 @@ http://www.gnu.org/licenses
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:onClick="fabClickHandler"
+        <io.github.yavski.fabspeeddial.FabSpeedDial
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@android:drawable/ic_dialog_email" />
 
-    </android.support.design.widget.CoordinatorLayout>
+            app:layout_constraintBottom_toBottomOf="@+id/coordinator"
+            app:layout_constraintRight_toRightOf="@+id/coordinator"
+            app:fabGravity="bottom_end"
+
+            app:fabMenu="@menu/fab"
+            android:id="@+id/fab_speed_dial"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_dialog_email"
+
+            app:fabBackgroundTint="@color/colorAccent"
+
+            app:miniFabBackgroundTint="@color/colorAccent"
+            app:miniFabDrawableTint="@color/colorPrimaryDark"
+            app:miniFabTitleTextColor="@color/colorPrimaryDark"/>
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"

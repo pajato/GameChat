@@ -46,7 +46,7 @@ public class TTTFragmentTest {
 
         onView(withId(R.id.chat_pane))
                 .perform(swipeLeft());
-        onView(withId(R.id.newGame))
+        onView(withId(R.id.board))
                 .check(matches(isDisplayed()));
 
         // Very short sleep is required to mitigate a race condition between the tester and the code
@@ -92,7 +92,9 @@ public class TTTFragmentTest {
                 .perform(click())
                 .check(matches(withText(xValue)));
         // Confirm that the turn does not change from O's turn.
-        onView(withId(R.id.turnDisplay)).check(matches(withText(oValue)));
+        onView(withId(R.id.turnDisplay))
+                .check(matches(withText(oValue)));
+        //TODO: test for a bug that causes the piece played to switch despite the turn value not changing.
     }
 
     /**
@@ -159,8 +161,7 @@ public class TTTFragmentTest {
                 .perform(click());
 
         // Perform a new game.
-        onView(withId(R.id.newGame))
-                .perform(click());
+        getNewGame();
 
         // Ensure that all buttons are now empty.
         onView(withTagValue(is((Object) "button00")))
@@ -198,9 +199,7 @@ public class TTTFragmentTest {
         onView(withId(R.id.turnDisplay))
                 .check(matches(withText(oValue)));
 
-        // Initiate New Game
-        onView(withId(R.id.newGame))
-                .perform(click());
+        getNewGame();
 
         // The turn should still be O's, so after a press, the turn should become X's.
         onView(withTagValue(is((Object) "button00")))
@@ -328,6 +327,18 @@ public class TTTFragmentTest {
                 .check(matches(isDisplayed()))
                 .check(matches(withText("Player 1 (" + xValue + ") Wins!")));
 
+    }
+
+    /**
+     * A helper method that creates a new game using the Floating Action Button
+     */
+    private void getNewGame() {
+        // Open up the FAB menu and initiate a new game
+        onView(withId(R.id.fab_speed_dial))
+                .perform(click());
+
+        onView(withText(mRule.getActivity().getString(R.string.new_tictactoe_game)))
+                .perform(click());
     }
 
 }

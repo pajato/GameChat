@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/ttt_new_game"
+        android:title="@string/new_tictactoe_game"
+        android:tag="NewGame"/>
+
+    <item
+        android:id="@+id/checkers_new_game"
+        android:title="@string/new_checkers_game"
+        android:tag="NewGame"/>
+
+    <item
+        android:id="@+id/chess_new_game"
+        android:title="@string/new_chess_game"
+        android:tag="NewGame"/>
+
+    <item
+        android:id="@+id/adv_new_game"
+        android:title="@string/new_game_advanced_settings"
+        android:tag="NewGame"/>
+
+</menu>
