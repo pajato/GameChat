@@ -40,4 +40,9 @@
     <string name="tie">Tie!</string>
     <string name="xWins">X Wins!</string>
     <string name="oWins">O Wins!</string>
+
+    <string name="new_game_advanced_settings">New Game (Advanced Settings)</string>
+    <string name="new_chess_game">New Chess Game!</string>
+    <string name="new_checkers_game">New Checkers Game!</string>
+    <string name="new_tictactoe_game">New TicTacToe Game!</string>
 </resources>

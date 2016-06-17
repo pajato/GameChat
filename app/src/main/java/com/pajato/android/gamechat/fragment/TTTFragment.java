@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,9 +65,8 @@ public class TTTFragment extends Fragment {
         String player = input.nextLine();
         String buttonTag = input.nextLine();
         input.close();
-
         // Call appropriate methods for each button.
-        if(buttonTag.equals("NewGame")) {
+        if(buttonTag.equals(getString(R.string.new_game))) {
             handleNewGame(player, buttonTag);
         } else {
             handleTileClick(player, buttonTag);
@@ -207,11 +207,13 @@ public class TTTFragment extends Fragment {
         // Reveal Winning Messages
         if(xWins) {
             winMsg = Snackbar.make(mBoard, "Player 1 (" + mXValue + ") Wins!", Snackbar.LENGTH_SHORT);
+            winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             winMsg.show();
             Winner.setText(R.string.xWins);
             return false;
         } else if (oWins) {
             winMsg = Snackbar.make(mBoard, "Player 2 (" + mOValue + ") Wins!", Snackbar.LENGTH_SHORT);
+            winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             winMsg.show();
             Winner.setText(R.string.oWins);
             return false;

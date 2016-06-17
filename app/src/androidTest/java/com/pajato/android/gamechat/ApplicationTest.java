@@ -17,12 +17,10 @@ import static android.support.test.espresso.Espresso.openActionBarOverflowOrOpti
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.swipeLeft;
-import static android.support.test.espresso.action.ViewActions.swipeRight;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
 
 /**
  * All tests are based on the the following documentation:
@@ -38,12 +36,6 @@ public class ApplicationTest {
 
     /** The overflow menu label string. */
     private static final String OVERFLOW_MENU_ITEM_SETTINGS_TEXT = "Settings";
-
-    /** The nav drawer import from camera item label string. */
-    private static final String IMPORT_MENU_ITEM_TEXT = "Import";
-
-    /** The snack bar text. */
-    private static final String SNACKBAR_MESSAGE_TEXT = "Replace with your own action";
 
     // Public instance variables.
 
@@ -122,15 +114,4 @@ public class ApplicationTest {
         onView(withId(R.id.drawer_layout)).perform(DrawerActions.open()).check(matches(isDisplayed()));
         onView(withId(R.id.nav_view)).perform(NavigationViewActions.navigateTo(R.id.nav_send));
     }
-
-    /** Ensure that the FAB button is working as expected. */
-    @Test public void testFloatingActionButton() {
-        // Ensure that the FAB button is visible and click on it, verifying that a snackbar message is displayed and
-        // removing the snackbar message.
-        onView(withId(R.id.fab)).perform(click());
-        onView(allOf(withId(android.support.design.R.id.snackbar_text), withText(SNACKBAR_MESSAGE_TEXT)))
-            .check(matches(isDisplayed()))
-            .perform(swipeRight());
-    }
-
 }
