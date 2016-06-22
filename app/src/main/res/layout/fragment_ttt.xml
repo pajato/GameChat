@@ -26,25 +26,23 @@ http://www.gnu.org/licenses
         android:layout_width="wrap_content"
 
         android:text="@string/spaceValue"
+        android:textSize="20sp"
         android:id="@+id/turnDisplay"
 
         app:layout_constraintBottom_toTopOf="@+id/board"
-        app:layout_constraintTop_toTopOf="@+id/game_pane"
-        android:layout_marginTop="32dp"
-        app:layout_constraintRight_toRightOf="@+id/game_pane"
-        android:layout_marginRight="32dp"
-        android:layout_marginEnd="32dp"/>
+        app:layout_constraintLeft_toRightOf="@+id/board"
+        android:layout_marginBottom="16dp"/>
 
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
 
         android:text="@string/current_turn"
+        android:textSize="20sp"
         android:id="@+id/turnMarker"
 
         app:layout_constraintBottom_toTopOf="@+id/board"
-        app:layout_constraintTop_toTopOf="@+id/game_pane"
-        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintRight_toLeftOf="@+id/turnDisplay"
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp"/>
@@ -54,6 +52,7 @@ http://www.gnu.org/licenses
         android:layout_height="wrap_content"
 
         android:text=""
+        android:textSize="20sp"
         android:id="@+id/Winner"
         android:visibility="invisible"
 
@@ -71,6 +70,7 @@ http://www.gnu.org/licenses
         app:layout_constraintTop_toTopOf="@+id/game_pane"
         app:layout_constraintRight_toRightOf="@+id/game_pane"
         app:layout_constraintBottom_toBottomOf="@+id/game_pane"
+        android:layout_marginBottom="48dp"
 
         android:columnCount="3"
         android:rowOrderPreserved="true"

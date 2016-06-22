@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="@string/game"
+        android:icon="@drawable/ic_games_white"
+        android:id="@+id/toolbar_game_icon"
+        android:orderInCategory="0"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:title="@string/spaceValue"
+        android:icon="@drawable/ic_search_white"
+        android:id="@+id/toolbar_search_icon"
+        android:orderInCategory="1"
+        app:showAsAction="ifRoom"/>
+</menu>

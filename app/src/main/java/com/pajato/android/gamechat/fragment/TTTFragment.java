@@ -209,13 +209,13 @@ public class TTTFragment extends Fragment {
             winMsg = Snackbar.make(mBoard, "Player 1 (" + mXValue + ") Wins!", Snackbar.LENGTH_SHORT);
             winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             winMsg.show();
-            Winner.setText(R.string.xWins);
+            Winner.setText(R.string.winner_x);
             return false;
         } else if (oWins) {
             winMsg = Snackbar.make(mBoard, "Player 2 (" + mOValue + ") Wins!", Snackbar.LENGTH_SHORT);
             winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             winMsg.show();
-            Winner.setText(R.string.oWins);
+            Winner.setText(R.string.winner_o);
             return false;
 
         // If no one has won, and the turn timer has run out, end the game.
@@ -223,7 +223,7 @@ public class TTTFragment extends Fragment {
             // Reveal Tie Messages
             winMsg = Snackbar.make(mBoard, "It's a Tie!", Snackbar.LENGTH_SHORT);
             winMsg.show();
-            Winner.setText(R.string.tie);
+            Winner.setText(R.string.winner_tie);
             return false;
         }
 
