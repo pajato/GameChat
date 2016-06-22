@@ -21,12 +21,17 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.ArrayList;
 
@@ -70,6 +75,7 @@ public class GameFragment extends BaseFragment{
         mInstructions = new ArrayList<>();
         mTurn = true;
 
+        setHasOptionsMenu(true);
         // Inflate the layout and set up the default fragment.
         View layout = inflater.inflate(R.layout.fragment_game, container, false);
 
@@ -86,27 +92,41 @@ public class GameFragment extends BaseFragment{
     }
 
     // Public Instance Methods
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+
+        menuInflater.inflate(R.menu.game_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        // Determine if the new game being initiated is different than what is currently loaded.
+        switch(item.getItemId()) {
+            case R.id.toolbar_chat_icon:
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            default:
+            case R.id.adv_new_game: onNewGame(ADV_KEY);
+                break;
+            case R.id.ttt_new_game: onNewGame(TTT_KEY);
+                break;
+            case R.id.checkers_new_game: onNewGame(CHECKERS_KEY);
+                break;
+            case R.id.chess_new_game: onNewGame(CHESS_KEY);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * Sends a message alerting the event handling system that the new game button was clicked.
      *
-     * @param item one of the new game buttons in the floating action button menu.
+     * @param fragmentIndicator the ID of the new game button in the floating action button menu.
      */
-    public void onNewGame(final MenuItem item) {
-        // Determine if the new game being initiated is different than what is currently loaded.
-        int fragmentIndicator;
-        switch(item.getItemId()) {
-            default:
-            case R.id.adv_new_game: fragmentIndicator = ADV_KEY;
-                break;
-            case R.id.ttt_new_game: fragmentIndicator = TTT_KEY;
-                break;
-            case R.id.checkers_new_game: fragmentIndicator = CHECKERS_KEY;
-                break;
-            case R.id.chess_new_game: fragmentIndicator = CHESS_KEY;
-                break;
-        }
-
+    public void onNewGame(final int fragmentIndicator) {
         //If we are changing games, we need to swap out for that game's fragment.
         if(fragmentIndicator != mCurrentFragmentId) {
             FragmentTransaction swap = getActivity().getSupportFragmentManager().beginTransaction();

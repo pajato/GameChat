@@ -1,5 +1,6 @@
 package com.pajato.android.gamechat;
 
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -12,8 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.swipeLeft;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -44,13 +45,10 @@ public class TTTFragmentTest {
         oValue = mRule.getActivity().getString(R.string.oValue);
         spaceValue = mRule.getActivity().getString(R.string.spaceValue);
 
-        onView(withId(R.id.chat_pane))
-                .perform(swipeLeft());
+        onView(withId(R.id.toolbar_game_icon))
+                .perform(click());
         onView(withId(R.id.board))
                 .check(matches(isDisplayed()));
-
-        // Very short sleep is required to mitigate a race condition between the tester and the code
-        Thread.sleep(250);
     }
 
     /**
@@ -334,10 +332,9 @@ public class TTTFragmentTest {
      */
     private void getNewGame() {
         // Open up the FAB menu and initiate a new game
-        onView(withId(R.id.fab_speed_dial))
-                .perform(click());
-
-        onView(withText(mRule.getActivity().getString(R.string.new_tictactoe_game)))
+        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
+        onView(withText(R.string.new_game_ttt))
+                .check(matches(isDisplayed()))
                 .perform(click());
     }
 

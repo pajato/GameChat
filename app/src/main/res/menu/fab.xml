@@ -3,22 +3,14 @@
 
     <item
         android:id="@+id/ttt_new_game"
-        android:title="@string/new_tictactoe_game"
-        android:tag="NewGame"/>
+        android:title="@string/new_chat_select_user" />
 
     <item
         android:id="@+id/checkers_new_game"
-        android:title="@string/new_checkers_game"
-        android:tag="NewGame"/>
+        android:title="@string/new_game_settings" />
 
     <item
         android:id="@+id/chess_new_game"
-        android:title="@string/new_chess_game"
-        android:tag="NewGame"/>
-
-    <item
-        android:id="@+id/adv_new_game"
-        android:title="@string/new_game_advanced_settings"
-        android:tag="NewGame"/>
+        android:title="@string/new_chat_favorite_room" />
 
 </menu>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/toolbar_chat_icon"
+        android:icon="@drawable/ic_chat_bubble_outline_white"
+        android:title="@string/chat"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="0"/>
+    <item
+        android:id="@+id/adv_new_game"
+        android:title="@string/new_game_settings"
+        app:showAsAction="never"
+        android:orderInCategory="97" />
+    <item
+        android:id="@+id/ttt_new_game"
+        android:title="@string/new_game_ttt"
+        app:showAsAction="never"
+        android:orderInCategory="98"/>
+    <item
+        android:id="@+id/checkers_new_game"
+        android:title="@string/new_game_checkers"
+        app:showAsAction="never"
+        android:orderInCategory="99"/>
+    <item
+        android:id="@+id/chess_new_game"
+        android:title="@string/new_game_chess"
+        app:showAsAction="never"
+        android:orderInCategory="100"/>
+</menu>

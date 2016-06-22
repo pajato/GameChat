@@ -23,7 +23,7 @@ http://www.gnu.org/licenses
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <android.support.constraint.ConstraintLayout
+    <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -40,15 +40,7 @@ http://www.gnu.org/licenses
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:layout_scrollFlags="scroll|enterAlways" />
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tablayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                app:tabGravity="fill"/>
+                app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
         </android.support.design.widget.AppBarLayout>
 
@@ -58,27 +50,29 @@ http://www.gnu.org/licenses
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-
-        <io.github.yavski.fabspeeddial.FabSpeedDial
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/page_monitor"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="26dp">
 
-            app:layout_constraintBottom_toBottomOf="@+id/coordinator"
-            app:layout_constraintRight_toRightOf="@+id/coordinator"
-            app:fabGravity="bottom_end"
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-            app:fabMenu="@menu/fab"
-            android:id="@+id/fab_speed_dial"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@android:drawable/ic_dialog_email"
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:layout_marginStart="7dp"/>
 
-            app:fabBackgroundTint="@color/colorAccent"
+        </LinearLayout>
 
-            app:miniFabBackgroundTint="@color/colorAccent"
-            app:miniFabDrawableTint="@color/colorPrimaryDark"
-            app:miniFabTitleTextColor="@color/colorPrimaryDark"/>
-
-    </android.support.constraint.ConstraintLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
@@ -87,6 +81,17 @@ http://www.gnu.org/licenses
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:menu="@menu/drawer_body"
+        android:isScrollContainer="true">
+
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_footer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:fitsSystemWindows="true"
+            app:menu="@menu/drawer_footer"/>
+
+        </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
