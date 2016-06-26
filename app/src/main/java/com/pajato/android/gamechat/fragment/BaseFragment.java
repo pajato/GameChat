@@ -39,64 +39,64 @@ public class BaseFragment extends Fragment {
         super.onActivityCreated(bundle);
     }
 
-    public void onAttach(Context context) {
+    @Override public void onAttach(Context context) {
         String format = "onAttach: Attaching fragment {%s} to activity with context {%s}. Fragment "
             + "manager: {%s}.";
         Log.v(TAG, String.format(format, this, context, getFragmentManager()));
         super.onAttach(context);
     }
 
-    public void onCreate(Bundle bundle) {
+    @Override public void onCreate(Bundle bundle) {
         String format = "onCreate: Creating fragment {%s} with bundle {%s}. Fragment manager: "
             + "{%s}.";
         Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));
         super.onCreate(bundle);
     }
 
-    public void onDestroy() {
+    @Override public void onDestroy() {
         String format = "onDestroy: Destroying fragment {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onDestroy();
     }
 
-    public void onDestroyView() {
+    @Override public void onDestroyView() {
         String format = "onDestroyView: Destroying fragment {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onDestroyView();
     }
 
-    public void onDetach() {
+    @Override public void onDetach() {
         String format = "onDetach: Detaching fragment {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onDetach();
     }
 
-    public void onPause() {
+    @Override public void onPause() {
         String format = "onPause: Fragment {%s} is no longer visible and running. Fragment manager: "
             + "{%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onPause();
     }
 
-    public void onResume() {
+    @Override public void onResume() {
         String format = "onResume: Fragment {%s} is visible and running. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onResume();
     }
 
-    public void onStart() {
+    @Override public void onStart() {
         String format = "onStart: Make the fragment {%s} visible. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onStart();
     }
 
-    public void onStop() {
+    @Override public void onStop() {
         String format = "onStop: Fragment {%s} is no longer visible. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
         super.onStop();
     }
 
-    public void onViewStateRestored(Bundle bundle) {
+    @Override public void onViewStateRestored(Bundle bundle) {
         String format = "onViewStateRestored: The saved state has been restored to fragment {%s} "
             + "using bundle {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));

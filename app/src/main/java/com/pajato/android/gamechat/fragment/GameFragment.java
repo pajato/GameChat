@@ -147,6 +147,7 @@ public class GameFragment extends BaseFragment{
                     break;
             }
         }
+
         // Create the message.
         String msg = getTurn() + "\n";
         msg += getString(R.string.new_game);

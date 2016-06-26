@@ -89,10 +89,19 @@ public enum PaneManager {
         }
     }
 
+    /** Handle the delegated sign out menu selection by delegating to the chat fragment. */
+    public void signOut() {
+        ((ChatFragment) fragmentList.get(CHAT_INDEX)).signOut();
+    }
     /** Handle the delegated tile click by delegating it to the game fragment. */
     public void tileOnClick(final View view) {
         // Delegate this to the game fragment.
         ((GameFragment) fragmentList.get(GAME_INDEX)).tileOnClick(view);
+    }
+
+    public void fetchConfig() {
+        // Delegete to the chat fragment.
+        ((ChatFragment) fragmentList.get(CHAT_INDEX)).fetchConfig();
     }
 
     // Nested classes

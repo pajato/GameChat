@@ -74,5 +74,8 @@
         <item
             android:title="@string/spaceValue">
         </item>
+        <item
+            android:title="@string/spaceValue">
+        </item>
     </group>
 </menu>

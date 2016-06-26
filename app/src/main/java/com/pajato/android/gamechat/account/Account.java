@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License along with GameChat. If not,
  * see <http://www.gnu.org/licenses/>.
  */
+
 package com.pajato.android.gamechat.account;
 
 import java.util.Map;
