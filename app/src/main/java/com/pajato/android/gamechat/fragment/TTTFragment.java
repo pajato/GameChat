@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.fragment;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -13,12 +12,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.game.GameManager;
 
 import java.util.Scanner;
 
 public class TTTFragment extends Fragment {
 
     private static final String TAG = TTTFragment.class.getSimpleName();
+    /* Keeps track of the Turn user. True = Player 1, False = Player 2. */
+    public boolean mTurn;
 
     // Keeps track of the turn number
     private int mTurnCount;
@@ -36,12 +38,10 @@ public class TTTFragment extends Fragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        String format = "onCreateView: Layout fragment {%s} using inflater {%s} in container {%s} "
-            + "and bundle {%s}. Fragment manager: {%s}.";
-        FragmentManager manager = getFragmentManager();
-        Log.v(TAG, String.format(format, this, inflater, container, savedInstanceState, manager));
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
+
+        mTurn = true;
 
         // Initialize the turn counter, and mBoard variables.
         mTurnCount = 9;
@@ -67,7 +67,7 @@ public class TTTFragment extends Fragment {
         input.close();
         // Call appropriate methods for each button.
         if(buttonTag.equals(getString(R.string.new_game))) {
-            handleNewGame(player, buttonTag);
+            handleNewGame(player);
         } else {
             handleTileClick(player, buttonTag);
         }
@@ -78,16 +78,15 @@ public class TTTFragment extends Fragment {
      * Empties the instructions, mBoard tiles, and outputs a new game message.
      *
      * @param player the player who initiated the click.
-     * @param buttonTag the tag of the button clicked.
      */
-    private void handleNewGame(String player, String buttonTag) {
+    private void handleNewGame(String player) {
         // Reset initial variables and the Winner / Turn views.
         mTurnCount = 9;
         TextView Winner = (TextView) super.getActivity().findViewById(R.id.Winner);
         Winner.setVisibility(View.INVISIBLE);
 
         TextView turnDisplay = (TextView) mBoard.findViewById(R.id.turnDisplay);
-        turnDisplay.setText(getTurn(player.equals(getString(R.string.player_1))));
+        turnDisplay.setText(player);
 
         // Set values for each tile to empty.
         ((Button) mBoard.findViewWithTag("button00")).setText(getString(R.string.spaceValue));
@@ -99,6 +98,13 @@ public class TTTFragment extends Fragment {
         ((Button) mBoard.findViewWithTag("button20")).setText(getString(R.string.spaceValue));
         ((Button) mBoard.findViewWithTag("button21")).setText(getString(R.string.spaceValue));
         ((Button) mBoard.findViewWithTag("button22")).setText(getString(R.string.spaceValue));
+
+        // Output New Game Messages
+        String newTurn = "New Game! Player " + (mTurn ? "1 (" + getString(R.string.xValue) + ")" :
+                "2 (" + getString(R.string.oValue) + ")") + "'s Turn";
+
+        GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
+                R.color.colorPrimaryDark), false);
 
         checkNotFinished();
     }
@@ -116,10 +122,12 @@ public class TTTFragment extends Fragment {
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
             mTurnCount--;
 
-            b.setText(getTurn(player.equals(getString(R.string.player_1))));
+            b.setText(getTurn(mTurn));
+
+            mTurn = !mTurn;
 
             TextView turnNumber = (TextView) super.getActivity().findViewById(R.id.turnDisplay);
-            turnNumber.setText(getTurn(player.equals(getString(R.string.player_2))));
+            turnNumber.setText(getTurn(mTurn));
 
             checkNotFinished();
 
@@ -198,35 +206,30 @@ public class TTTFragment extends Fragment {
         boolean oWins = (topRow == 6 || midRow == 6 || botRow == 6 || startCol == 6
                 || centerCol == 6 || endCol == 6 || leftDiag == 6 || rightDiag == 6);
 
-        // Handle the win conditions.
-        TextView Winner = (TextView) super.getActivity().findViewById(R.id.Winner);
-        Winner.setText(getText(R.string.spaceValue));
-        Winner.setVisibility(View.VISIBLE);
-        Snackbar winMsg;
+        // If we have a win condition, reveal the winning messages.
+        if(xWins || oWins || mTurnCount == 0) {
+            // Setup the winner TextView and snackbar messages.
+            TextView Winner = (TextView) super.getActivity().findViewById(R.id.Winner);
+            Winner.setText(getText(R.string.spaceValue));
+            Winner.setVisibility(View.VISIBLE);
 
-        // Reveal Winning Messages
-        if(xWins) {
-            winMsg = Snackbar.make(mBoard, "Player 1 (" + mXValue + ") Wins!", Snackbar.LENGTH_SHORT);
-            winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-            winMsg.show();
-            Winner.setText(R.string.winner_x);
-            return false;
-        } else if (oWins) {
-            winMsg = Snackbar.make(mBoard, "Player 2 (" + mOValue + ") Wins!", Snackbar.LENGTH_SHORT);
-            winMsg.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-            winMsg.show();
-            Winner.setText(R.string.winner_o);
-            return false;
+            if(xWins) {
+                Winner.setText(R.string.winner_x);
+                GameManager.instance.generateSnackbar(mBoard, "Player 1 (" + mXValue + ") Wins!",
+                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
+            } else if (oWins) {
+                Winner.setText(R.string.winner_o);
+                GameManager.instance.generateSnackbar(mBoard, "Player 2 (" + mOValue + ") Wins!",
+                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
 
-        // If no one has won, and the turn timer has run out, end the game.
-        } else if(mTurnCount == 0) {
-            // Reveal Tie Messages
-            winMsg = Snackbar.make(mBoard, "It's a Tie!", Snackbar.LENGTH_SHORT);
-            winMsg.show();
-            Winner.setText(R.string.winner_tie);
+            // If no one has won, the turn timer has run out. End the game.
+            } else {
+                // Reveal Tie Messages
+                Winner.setText(R.string.winner_tie);
+                GameManager.instance.generateSnackbar(mBoard, "It's a Tie!", -1, true);
+            }
             return false;
         }
-
         // If none of the conditions are met, the game has not yet ended, and we can continue it.
         return true;
     }

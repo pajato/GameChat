@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -73,19 +74,21 @@ public enum PaneManager {
         titleList.add(context.getString(R.string.chat));
         titleList.add(context.getString(R.string.game));
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
+
+        fragmentList.add(new ChatFragment());
+        fragmentList.add(new GameFragment());
+
         if (viewPager != null) {
-            // The app is running on a smart phone.  Create the pane fragments and set up the
-            // adapter for the pager.
-            fragmentList.add(new ChatFragment());
-            fragmentList.add(new GameFragment());
+            // The app is running on a smart phone.  Set up the adapter for the pager.
             viewPager.setAdapter(new GameChatPagerAdapter(context.getSupportFragmentManager(),
                     (ViewGroup) context.findViewById(R.id.page_monitor)));
         } else {
-            // The app is running on a tablet and the fragments have been created.  Add them to the
-            // fragment map.
-            //TODO: uncomment these for tablets:
-            //fragmentList.add((Fragment) context.findViewById(R.id.chatFragment));
-            //fragmentList.add((Fragment) context.findViewById(R.id.gameFragment));
+            // The app is running on a tablet. Add the fragments to their containers.
+            context.getSupportFragmentManager().beginTransaction()
+                    .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
+                    .add(R.id.game_container, fragmentList.get(GAME_INDEX))
+                    .commit();
+            context.invalidateOptionsMenu();
         }
     }
 
