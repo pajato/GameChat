@@ -2,9 +2,8 @@ package com.pajato.android.gamechat.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,16 +39,11 @@ public class TTTFragment extends Fragment {
                                        Bundle savedInstanceState) {
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
-
         mTurn = true;
 
         // Initialize the turn counter, and mBoard variables.
         mTurnCount = 9;
         mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
-
-        TextView turnDisplay = (TextView) mBoard.findViewById(R.id.turnDisplay);
-        turnDisplay.setText(getTurn(true));
-
         return mBoard;
     }
 
@@ -82,11 +76,8 @@ public class TTTFragment extends Fragment {
     private void handleNewGame(String player) {
         // Reset initial variables and the Winner / Turn views.
         mTurnCount = 9;
-        TextView Winner = (TextView) super.getActivity().findViewById(R.id.Winner);
+        TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
         Winner.setVisibility(View.INVISIBLE);
-
-        TextView turnDisplay = (TextView) mBoard.findViewById(R.id.turnDisplay);
-        turnDisplay.setText(player);
 
         // Set values for each tile to empty.
         ((Button) mBoard.findViewWithTag("button00")).setText(getString(R.string.spaceValue));
@@ -99,10 +90,12 @@ public class TTTFragment extends Fragment {
         ((Button) mBoard.findViewWithTag("button21")).setText(getString(R.string.spaceValue));
         ((Button) mBoard.findViewWithTag("button22")).setText(getString(R.string.spaceValue));
 
+        // Ensure the icons are correctly indicating whose turn it is.
+        handlePlayerIcons(mTurn);
+
         // Output New Game Messages
         String newTurn = "New Game! Player " + (mTurn ? "1 (" + getString(R.string.xValue) + ")" :
                 "2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-
         GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
 
@@ -126,8 +119,7 @@ public class TTTFragment extends Fragment {
 
             mTurn = !mTurn;
 
-            TextView turnNumber = (TextView) super.getActivity().findViewById(R.id.turnDisplay);
-            turnNumber.setText(getTurn(mTurn));
+            handlePlayerIcons(mTurn);
 
             checkNotFinished();
 
@@ -209,16 +201,18 @@ public class TTTFragment extends Fragment {
         // If we have a win condition, reveal the winning messages.
         if(xWins || oWins || mTurnCount == 0) {
             // Setup the winner TextView and snackbar messages.
-            TextView Winner = (TextView) super.getActivity().findViewById(R.id.Winner);
+            TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
             Winner.setText(getText(R.string.spaceValue));
             Winner.setVisibility(View.VISIBLE);
 
             if(xWins) {
                 Winner.setText(R.string.winner_x);
+                handlePlayerIcons(true);
                 GameManager.instance.generateSnackbar(mBoard, "Player 1 (" + mXValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
                 Winner.setText(R.string.winner_o);
+                handlePlayerIcons(false);
                 GameManager.instance.generateSnackbar(mBoard, "Player 2 (" + mOValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
 
@@ -232,6 +226,53 @@ public class TTTFragment extends Fragment {
         }
         // If none of the conditions are met, the game has not yet ended, and we can continue it.
         return true;
+    }
+
+    /**
+     * A method that handles the management of a the turn indicators. If it is a player's turn,
+     * their icon is increased in size, changed to the accented color, and emphasized with auxiliary
+     * text views. The other player's icon decreases in size, is turned a dark color, and is no
+     * longer emphasized.
+     *
+     * @param turn differentiates between the turn. true = Player 1's turn, false = Player 2's turn.
+     */
+    private void handlePlayerIcons(boolean turn) {
+        final float LARGE = 60.0f;
+        final float SMALL = 45.0f;
+
+        // Collect all the pertinent textViews.
+        TextView p1 = (TextView) getActivity().findViewById(R.id.player_1_icon);
+        TextView p2 = (TextView) getActivity().findViewById(R.id.player_2_icon);
+
+        TextView p1left = (TextView) getActivity().findViewById(R.id.player_1_left_indicator);
+        TextView p1right = (TextView) getActivity().findViewById(R.id.player_1_right_indicator);
+
+        TextView p2left = (TextView) getActivity().findViewById(R.id.player_2_left_indicator);
+        TextView p2right = (TextView) getActivity().findViewById(R.id.player_2_right_indicator);
+
+        if(turn) {
+            // If it's player 1's turn, make their icon bigger and accented...
+            p1.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
+            p1.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+            p1left.setVisibility(View.VISIBLE);
+            p1right.setVisibility(View.VISIBLE);
+            // and de-emphasize player 2's icon.
+            p2.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
+            p2.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+            p2left.setVisibility(View.INVISIBLE);
+            p2right.setVisibility(View.INVISIBLE);
+        } else {
+            // If it's player 2's turn, make their icon bigger and accented...
+            p1.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
+            p1.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+            p1left.setVisibility(View.INVISIBLE);
+            p1right.setVisibility(View.INVISIBLE);
+            // and de-emphasize player 1's icon.
+            p2.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
+            p2.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+            p2left.setVisibility(View.VISIBLE);
+            p2right.setVisibility(View.VISIBLE);
+        }
     }
 
 }

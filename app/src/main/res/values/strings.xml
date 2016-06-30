@@ -39,7 +39,7 @@
 
     <string name="new_chat_favorite_room">New Chat (Favorite Room)</string>
     <string name="new_chat_select_user">New Chat (Select User)</string>
-    <string name="new_game_settings">Game Settings</string>
+    <string name="new_game_settings">New Game (Settings)</string>
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="new_game_chess">New Game (Chess)</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
@@ -47,4 +47,10 @@
     <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
     <string name="navigation_drawer_label_favorite_chat">Favorite Chat</string>
     <string name="play_again">Play Again!</string>
+    <string name="arrow_left"><![CDATA[<]]></string>
+    <string name="arrow_right"><![CDATA[>]]></string>
+    <string name="play_choose_game">Select a Game to Play!</string>
+    <string name="play_ttt">Play Tic-Tac-Toe!</string>
+    <string name="play_checkers">Play Checkers!</string>
+    <string name="play_chess">Play Chess!</string>
 </resources>
