@@ -28,8 +28,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
+
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
 
 public class ChatFragment extends BaseFragment {
@@ -44,6 +48,7 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.chat_menu, menu);
+        initFabListener();
     }
 
     @Override
@@ -61,4 +66,28 @@ public class ChatFragment extends BaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initFabListener() {
+        // Set up the FAB speed dial menu.
+        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.fab_speed_dial);
+        fab.setMenuListener(new SimpleMenuListenerAdapter() {
+            @Override
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                switch(menuItem.getItemId()) {
+                    // Start a new Tic-Tac-Toe game
+                    case R.id.fab_ttt:
+                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
+                        GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity());
+                        break;
+                    // Navigate to the Game Settings panel
+                    case R.id.fab_new_game:
+                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
+                        GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity());
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
+    }
 }

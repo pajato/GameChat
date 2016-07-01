@@ -8,22 +8,22 @@
         app:showAsAction="ifRoom"
         android:orderInCategory="0"/>
     <item
-        android:id="@+id/adv_new_game"
+        android:id="@+id/new_game_settings"
         android:title="@string/new_game_settings"
         app:showAsAction="never"
         android:orderInCategory="97" />
     <item
-        android:id="@+id/ttt_new_game"
+        android:id="@+id/new_game_ttt"
         android:title="@string/new_game_ttt"
         app:showAsAction="never"
         android:orderInCategory="98"/>
     <item
-        android:id="@+id/checkers_new_game"
+        android:id="@+id/new_game_checkers"
         android:title="@string/new_game_checkers"
         app:showAsAction="never"
         android:orderInCategory="99"/>
     <item
-        android:id="@+id/chess_new_game"
+        android:id="@+id/new_game_chess"
         android:title="@string/new_game_chess"
         app:showAsAction="never"
         android:orderInCategory="100"/>

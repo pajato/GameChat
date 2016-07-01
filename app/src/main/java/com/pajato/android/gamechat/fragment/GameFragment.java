@@ -60,35 +60,30 @@ public class GameFragment extends BaseFragment{
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Determine if the new game being initiated is different than what is currently loaded.
+        String msg = getTurn() + "\n" + getString(R.string.new_game);
         switch(item.getItemId()) {
+            // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
             case R.id.toolbar_chat_icon:
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if(viewPager != null) {
                     viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 break;
-            case R.id.adv_new_game: onNewGame(GameManager.SETTINGS_INDEX);
+            // Otherwise, we can initiate a new game based on which game was chosen.
+            case R.id.new_game_settings:
+                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity());
                 break;
-            case R.id.ttt_new_game: onNewGame(GameManager.TTT_INDEX);
+            case R.id.new_game_ttt:
+                GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity(), msg);
                 break;
-            case R.id.checkers_new_game: onNewGame(GameManager.CHECKERS_INDEX);
+            case R.id.new_game_checkers:
+                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
                 break;
-            case R.id.chess_new_game: onNewGame(GameManager.CHESS_INDEX);
+            case R.id.new_game_chess:
+                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Sends a message alerting the event handling system that the new game button was clicked.
-     *
-     * @param fragmentIndicator the ID of the new game button in the floating action button menu.
-     */
-    private void onNewGame(final int fragmentIndicator) {
-        // Create the message and send a new game.
-        String msg = getTurn() + "\n" + getString(R.string.new_game);
-        GameManager.instance.sendNewGame(msg, fragmentIndicator, getActivity());
     }
 
     /**
@@ -114,7 +109,7 @@ public class GameFragment extends BaseFragment{
         switch(GameManager.instance.getCurrentFragmentIndex()) {
             default:
             case GameManager.SETTINGS_INDEX:
-                // Do nothing. We do not have turns in this fragment, so it should never be called.
+                // This should never be called in an impactful way.
                 return null;
             case GameManager.TTT_INDEX:
                 return ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_INDEX))

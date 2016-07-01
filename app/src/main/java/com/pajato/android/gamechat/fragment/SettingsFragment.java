@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.game.GameManager;
 
 public class SettingsFragment extends BaseFragment{
 
@@ -38,6 +39,22 @@ public class SettingsFragment extends BaseFragment{
 
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater);
+
+        View ttt = getActivity().findViewById(R.id.settings_ttt);
+        ttt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch(v.getId()) {
+                    case R.id.settings_ttt:
+                        GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity());
+                        break;
+                    case R.id.settings_checkers:
+                        break;
+                    case R.id.settings_chess:
+                        break;
+                }
+            }
+        });
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
