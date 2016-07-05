@@ -21,7 +21,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 /**
  * Tests the Tic-Tac-Toe game feature of our MainActivity.
@@ -35,9 +34,7 @@ public class TTTFragmentTest {
     private String oValue;
     private String spaceValue;
 
-    /**
-     * Swipe left to navigate to the next pane.
-     */
+    /** Click on the game action button to navigate to the next pane. */
     @Before
     public void navigateToGameFragment() throws InterruptedException {
         // Establish String Values.
@@ -47,6 +44,7 @@ public class TTTFragmentTest {
 
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
+        getNewGame();
         onView(withId(R.id.board))
                 .check(matches(isDisplayed()));
     }
@@ -92,14 +90,15 @@ public class TTTFragmentTest {
         // Confirm that the turn does not change from O's turn.
         onView(withId(R.id.turnDisplay))
                 .check(matches(withText(oValue)));
-        //TODO: test for a bug that causes the piece played to switch despite the turn value not changing.
+        // Then confirm that the next itemm played is the other player's icon.
+        onView(withTagValue(is((Object) "button01")))
+                .check(matches(isDisplayed()))
+                .perform(click())
+                .check(matches(withText(oValue)));
     }
 
-    /**
-     * Ensure that after the game has ended, the value of a button cannot be changed.
-     */
-    //@Test: disable until Bryan fixes this.
-    public void testButtonsOffPostGame() {
+    /** Ensure that after the game has ended, the value of a button cannot be changed. */
+    @Test public void testButtonsOffPostGame() {
         // Set X to win with the top row (00 - 01 - 02).
         // Click Top Left
         onView(withTagValue(is((Object) "button00")))
@@ -135,11 +134,8 @@ public class TTTFragmentTest {
                 .check(matches(withText(spaceValue)));
     }
 
-    /**
-     * Ensure that the new game functions clear the board.
-     */
-    @Test
-    public void testNewGame() {
+    /** Ensure that the new game functions clear the board. */
+    @Test public void testNewGame() {
         // Fill the board with a non-ended state
         onView(withTagValue(is((Object) "button00")))
                 .perform(click());
@@ -208,11 +204,8 @@ public class TTTFragmentTest {
                 .check(matches(withText(xValue)));
     }
 
-    /**
-     * Ensure that a win for P2 (O) is handled correctly.
-     */
-    //@Test: disable until Bryan fixes this.
-    public void testOWins() {
+    /** Ensure that a win for P2 (O) is handled correctly. */
+    @Test public void testOWins() {
         // Fill a win in for O in the top row. Buttons 00 - 01 - 02
         // Play an X in a non-relevant spot
         onView(withTagValue(is((Object) "button22")))
@@ -245,16 +238,40 @@ public class TTTFragmentTest {
         onView(withId(R.id.Winner))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("O Wins!")));
+
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("Player 2 (" + oValue + ") Wins!")));
+
+        // Click on the play again option in the snackbar, then ensure it has initiated a new game.
+        onView(withText(R.string.play_again))
+                .check(matches(isDisplayed()))
+                .perform(click());
+
+        onView(withTagValue(is((Object) "button00")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button01")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button02")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button10")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button11")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button12")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button20")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button21")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button22")))
+                .check(matches(withText(spaceValue)));
     }
 
-    /**
-     * Ensure that the game successfully ends with a tie.
-     */
-    //@Test: disable until Bryan fixes this.
-    public void testTie() {
+    /** Ensure that the game successfully ends with a tie. */
+    @Test public void testTie() {
         // Layout the board in a tie.
         onView(withTagValue(is((Object) "button00")))
                 .perform(click());
@@ -283,21 +300,38 @@ public class TTTFragmentTest {
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("It's a Tie!")));
-    }
 
-    /**
-     * Ensure that the Winner's TextView is not visible at the start of play.
-     */
-    @Test
-    public void testWinnersInvisible() {
-        onView(withId(R.id.Winner)).check(matches(not(isDisplayed())));
+        // Click on the play again option in the snackbar, then ensure it has initiated a new game.
+        onView(withText(R.string.play_again))
+                .check(matches(isDisplayed()))
+                .perform(click());
+
+        onView(withTagValue(is((Object) "button00")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button01")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button02")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button10")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button11")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button12")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button20")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button21")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button22")))
+                .check(matches(withText(spaceValue)));
     }
 
     /**
      * Ensure that a P1 win (X) is handled properly.
      */
-    //@Test: disable until Bryan fixes this.
-    public void testXWins() {
+    @Test public void testXWins() {
         // Fill a win in for X in the middle row. Buttons 10 - 11 - 12
         // Click Middle Left
         onView(withTagValue(is((Object) "button10")))
@@ -325,11 +359,34 @@ public class TTTFragmentTest {
                 .check(matches(isDisplayed()))
                 .check(matches(withText("Player 1 (" + xValue + ") Wins!")));
 
+        // Click on the play again option in the snackbar, then ensure it has initiated a new game.
+        onView(withText(R.string.play_again))
+                .check(matches(isDisplayed()))
+                .perform(click());
+
+        onView(withTagValue(is((Object) "button00")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button01")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button02")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button10")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button11")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button12")))
+                .check(matches(withText(spaceValue)));
+
+        onView(withTagValue(is((Object) "button20")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button21")))
+                .check(matches(withText(spaceValue)));
+        onView(withTagValue(is((Object) "button22")))
+                .check(matches(withText(spaceValue)));
     }
 
-    /**
-     * A helper method that creates a new game using the Floating Action Button
-     */
+    /** A helper method that creates a new game using the Floating Action Button */
     private void getNewGame() {
         // Open up the FAB menu and initiate a new game
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());

@@ -36,14 +36,13 @@
     <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
     <string name="new_chat_favorite_room">New Chat (Favorite Room)</string>
     <string name="new_chat_select_user">New Chat (Select User)</string>
+    <string name="new_game">New Game</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
     <string name="new_game_chess">New Game (Chess)</string>
     <string name="new_game_settings">Game Settings</string>
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
-    <string name="new_game">New Game</string>
     <string name="oValue">O</string>
-    <string name="player_1">p1</string>
-    <string name="player_2">p2</string>
+    <string name="play_again">Play Again!</string>
     <string name="register_button_text">Lets Get Started</string>
     <string name="rooms">Rooms</string>
     <string name="sign_in">Sign In</string>

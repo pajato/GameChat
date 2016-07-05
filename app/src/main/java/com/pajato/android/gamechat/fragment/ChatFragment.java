@@ -320,7 +320,9 @@ public class ChatFragment extends BaseFragment
         switch(item.getItemId()) {
             case R.id.toolbar_game_icon:
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                if(viewPager != null) {
+                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                }
                 break;
             case R.id.toolbar_search_icon:
                 break;

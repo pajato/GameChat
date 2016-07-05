@@ -1,5 +1,6 @@
 package com.pajato.android.gamechat;
 
+import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.DrawerActions;
 import android.support.test.espresso.contrib.NavigationViewActions;
 import android.support.test.rule.ActivityTestRule;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.swipeLeft;
@@ -41,7 +43,7 @@ public class ApplicationTest {
     @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<>(MainActivity.class);
 
     /** Ensure that doing nothing breaks nothing but generates some code coverage results. */
-    @Test public void testDoNothing() throws Exception {
+    @Test public void testDoNothing() {
         // Do nothing initially.
     }
 
@@ -56,12 +58,12 @@ public class ApplicationTest {
         onView(withId(R.id.chat_pane))
                 .check(matches(isDisplayed()))
                 .perform(swipeLeft());
-        onView(withId(R.id.game_pane))
+        onView(withId(R.id.game_pane_fragment_container))
                 .check(matches(isDisplayed()));
     }
 
     /** Ensure that the toolbar buttons are displayed and function. */
-    @Test public void testActionButtons() throws Exception {
+    @Test public void testActionButtons() {
         // Ensure the search button is there
         onView(withId(R.id.toolbar_search_icon))
                 .check(matches(isDisplayed()));
@@ -69,13 +71,36 @@ public class ApplicationTest {
         onView(withId(R.id.toolbar_game_icon))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.game_pane))
+        onView(withId(R.id.game_pane_fragment_container))
                 .check(matches(isDisplayed()));
         // Ensure the chat button is present. Click on it, and ensure it navigates back to the chat.
         onView(withId(R.id.toolbar_chat_icon))
                 .check(matches(isDisplayed()))
                 .perform(click());
         onView(withId(R.id.chat_pane))
+                .check(matches(isDisplayed()));
+    }
+
+    /** Ensure that switching between two different game panels works properly */
+    @Test public void testGameSwitcher() {
+        // Move to the game pane and ensure that we are starting on the settings panel.
+        onView(withId(R.id.toolbar_game_icon))
+                .perform(click());
+        onView(withId(R.id.settings_panel))
+                .check(matches(isDisplayed()));
+        // Open the action bar overflow menu, then initiate a new TTT game. Ensure it functions.
+        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
+        onView(withText(R.string.new_game_ttt))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        onView(withId(R.id.board))
+                .check(matches(isDisplayed()));
+        // Reopen the action bar overflow menu, then ensure returning to the settings pane works.
+        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
+        onView(withText(R.string.new_game_settings))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        onView(withId(R.id.settings_panel))
                 .check(matches(isDisplayed()));
     }
 

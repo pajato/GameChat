@@ -17,7 +17,7 @@ http://www.gnu.org/licenses
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/game_pane"
+    android:id="@+id/ttt_panel"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -58,18 +58,18 @@ http://www.gnu.org/licenses
 
         app:layout_constraintTop_toBottomOf="@+id/board"
         android:layout_marginTop="32dp"
-        app:layout_constraintRight_toLeftOf="@+id/game_pane"
-        app:layout_constraintLeft_toRightOf="@+id/game_pane"/>
+        app:layout_constraintRight_toLeftOf="@+id/ttt_panel"
+        app:layout_constraintLeft_toRightOf="@+id/ttt_panel"/>
 
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/board"
 
-        app:layout_constraintLeft_toLeftOf="@+id/game_pane"
-        app:layout_constraintTop_toTopOf="@+id/game_pane"
-        app:layout_constraintRight_toRightOf="@+id/game_pane"
-        app:layout_constraintBottom_toBottomOf="@+id/game_pane"
+        app:layout_constraintLeft_toLeftOf="@+id/ttt_panel"
+        app:layout_constraintTop_toTopOf="@+id/ttt_panel"
+        app:layout_constraintRight_toRightOf="@+id/ttt_panel"
+        app:layout_constraintBottom_toBottomOf="@+id/ttt_panel"
         android:layout_marginBottom="48dp"
 
         android:columnCount="3"
