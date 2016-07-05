@@ -1,6 +1,8 @@
 <resources>
     <string name="action_settings">Settings</string>
     <string name="app_name">GameChat</string>
+    <string name="arrow_left"><![CDATA[<]]></string>
+    <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="cause_crash">Cause Crash</string>
     <string name="chat">Chat</string>
@@ -39,10 +41,14 @@
     <string name="new_game">New Game</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
     <string name="new_game_chess">New Game (Chess)</string>
-    <string name="new_game_settings">Game Settings</string>
+    <string name="new_game_settings">New Game (Settings)</string>
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="oValue">O</string>
     <string name="play_again">Play Again!</string>
+    <string name="play_checkers">Play Checkers!</string>
+    <string name="play_chess">Play Chess!</string>
+    <string name="play_choose_game">Select a Game to Play!</string>
+    <string name="play_ttt">Play Tic-Tac-Toe!</string>
     <string name="register_button_text">Lets Get Started</string>
     <string name="rooms">Rooms</string>
     <string name="sign_in">Sign In</string>

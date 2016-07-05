@@ -21,6 +21,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Tests the Tic-Tac-Toe game feature of our MainActivity.
@@ -88,8 +89,14 @@ public class TTTFragmentTest {
                 .perform(click())
                 .check(matches(withText(xValue)));
         // Confirm that the turn does not change from O's turn.
-        onView(withId(R.id.turnDisplay))
-                .check(matches(withText(oValue)));
+        onView(withId(R.id.player_2_right_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_2_left_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_1_left_indicator))
+                .check(matches(not(isDisplayed())));
+        onView(withId(R.id.player_1_right_indicator))
+                .check(matches(not(isDisplayed())));
         // Then confirm that the next itemm played is the other player's icon.
         onView(withTagValue(is((Object) "button01")))
                 .check(matches(isDisplayed()))
@@ -124,7 +131,7 @@ public class TTTFragmentTest {
                 .check(matches(withText(xValue)));
 
         // Ensure game has ended
-        onView(withId(R.id.Winner))
+        onView(withId(R.id.winner))
                 .check(matches(withText("X Wins!")));
 
         // Attempt to click Bottom Center (to get 3 in a row for O).
@@ -190,8 +197,15 @@ public class TTTFragmentTest {
                 .check(matches(isDisplayed()))
                 .perform(click())
                 .check(matches(withText(xValue)));
-        onView(withId(R.id.turnDisplay))
-                .check(matches(withText(oValue)));
+        // Check that the turn has switches to player 2.
+        onView(withId(R.id.player_2_right_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_2_left_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_1_left_indicator))
+                .check(matches(not(isDisplayed())));
+        onView(withId(R.id.player_1_right_indicator))
+                .check(matches(not(isDisplayed())));
 
         getNewGame();
 
@@ -200,8 +214,15 @@ public class TTTFragmentTest {
                 .check(matches(isDisplayed()))
                 .perform(click())
                 .check(matches(withText(oValue)));
-        onView(withId(R.id.turnDisplay))
-                .check(matches(withText(xValue)));
+        // Check that the turn goes back to X.
+        onView(withId(R.id.player_1_right_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_1_left_indicator))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.player_2_left_indicator))
+                .check(matches(not(isDisplayed())));
+        onView(withId(R.id.player_2_right_indicator))
+                .check(matches(not(isDisplayed())));
     }
 
     /** Ensure that a win for P2 (O) is handled correctly. */
@@ -235,7 +256,7 @@ public class TTTFragmentTest {
                 .check(matches(withText(oValue)));
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.Winner))
+        onView(withId(R.id.winner))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("O Wins!")));
 
@@ -295,7 +316,7 @@ public class TTTFragmentTest {
                 .perform(click());
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.Winner))
+        onView(withId(R.id.winner))
                 .check(matches(withText("Tie!")));
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))
@@ -353,7 +374,7 @@ public class TTTFragmentTest {
                 .check(matches(withText(xValue)));
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.Winner))
+        onView(withId(R.id.winner))
                 .check(matches(withText("X Wins!")));
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))

@@ -81,33 +81,9 @@ public class ApplicationTest {
                 .check(matches(isDisplayed()));
     }
 
-    /** Ensure that switching between two different game panels works properly */
-    @Test public void testGameSwitcher() {
-        // Move to the game pane and ensure that we are starting on the settings panel.
-        onView(withId(R.id.toolbar_game_icon))
-                .perform(click());
-        onView(withId(R.id.settings_panel))
-                .check(matches(isDisplayed()));
-        // Open the action bar overflow menu, then initiate a new TTT game. Ensure it functions.
-        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText(R.string.new_game_ttt))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        onView(withId(R.id.board))
-                .check(matches(isDisplayed()));
-        // Reopen the action bar overflow menu, then ensure returning to the settings pane works.
-        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText(R.string.new_game_settings))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        onView(withId(R.id.settings_panel))
-                .check(matches(isDisplayed()));
-    }
-
     /** Ensure that the hamburger menu is dismissed on a back press. */
     @Test public void testHamburgerMenuWithBack() {
-        // Test that the hamburger menu is acessible and can be opened and closed via the back
-        // button.
+        // Test that the hamburger menu is accessible & can be opened and closed via the back button
         onView(withId(R.id.drawer_layout))
                 .perform(DrawerActions.open())
                 .check(matches(isDisplayed()));

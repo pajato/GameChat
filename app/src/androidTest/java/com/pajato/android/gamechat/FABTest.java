@@ -13,6 +13,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.not;
@@ -38,24 +39,54 @@ public class FABTest {
         // Ensure that the speed dial Indicators are all visible.
         onView(withText(R.string.new_chat_select_user))
                 .check(matches(isDisplayed()));
+        onView(withText(R.string.new_chat_favorite_room))
+                .check(matches(isDisplayed()));
         onView(withText(R.string.new_game_settings))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.new_chat_favorite_room))
+        onView(withText(R.string.new_game_ttt))
                 .check(matches(isDisplayed()));
     }
 
-    /** Ensure that, when navigating to the game pane, the FAB disappears. *
-     * NOTE: This test is problematic on tablets, and has been commented out until the time comes
-     * that a better test is written to check this functionality.
-    @Test public void testFABNotDisplayedGameFragment() {
-        // Ensure the FAB is present. Then, Navigate to the game fragment.
-        onView(withId(R.id.fab_speed_dial))
+    @Test public void testFabFunctionality() {
+        onView(withId(R.id.chat_pane))
                 .check(matches(isDisplayed()));
+        // Open up the FAB menu and click on the new Tic-Tac-Toe game option
+        onView(withId(R.id.fab_speed_dial))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        onView(withText(R.string.new_game_ttt))
+                .perform(click());
+        // Ensure that the app navigates to the game pane and starts a new tic-tac-toe game.
+        onView(withId(R.id.game_pane_fragment_container))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.ttt_panel))
+                .check(matches(isDisplayed()));
+        // Navigate back to the chat pane, where the fab is located.
+        onView(withId(R.id.toolbar_chat_icon))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        onView(withId(R.id.fab_speed_dial))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        // Initiate a new settings pane and return to the settings pane
+        onView(withText(R.string.new_game_settings))
+                .perform(click());
+        onView(withId(R.id.game_pane_fragment_container))
+                .check(matches(isDisplayed()));
+        onView(withId(R.id.settings_panel))
+                .check(matches(isDisplayed()));
+    }
+
+    /** Ensure that, when navigating to the game pane, the FAB disappears. */
+    @Test public void testFabInHierarchy() {
+        // Ensure the FAB is present. Then, navigate to the game fragment.
+        onView(withId(R.id.chat_pane))
+                .check(matches(isDisplayed()))
+                .check(matches(withChild(withId(R.id.fab_speed_dial))));
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
         // Once there, ensure the FAB is no longer displayed.
-        onView(withId(R.id.fab_speed_dial))
-                .check(matches(not(isDisplayed())));
+        onView(withId(R.id.game_pane_fragment_container))
+                .check(matches(not(withChild(withId(R.id.fab_speed_dial)))));
     }
-    */
 }

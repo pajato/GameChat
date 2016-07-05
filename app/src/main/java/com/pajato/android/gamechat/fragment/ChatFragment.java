@@ -63,13 +63,16 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.ChatMessage;
+import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.signin.SignInActivity;
+import de.hdodenhof.circleimageview.CircleImageView;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -314,6 +317,7 @@ public class ChatFragment extends BaseFragment
 
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.chat_menu, menu);
+        initFabListener();
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
@@ -329,7 +333,6 @@ public class ChatFragment extends BaseFragment
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override public void onPause() {
         if (mAdView != null) {
@@ -423,6 +426,31 @@ public class ChatFragment extends BaseFragment
             // The virtual keyboard is active.  Dismiss it.
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    private void initFabListener() {
+        // Set up the FAB speed dial menu.
+        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.fab_speed_dial);
+        fab.setMenuListener(new SimpleMenuListenerAdapter() {
+            @Override
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                switch(menuItem.getItemId()) {
+                    // Start a new Tic-Tac-Toe game
+                    case R.id.fab_ttt:
+                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
+                        GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity());
+                        break;
+                    // Navigate to the Game Settings panel
+                    case R.id.fab_new_game:
+                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
+                        GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity());
+                    default:
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
 }
