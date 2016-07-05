@@ -36,8 +36,6 @@ import com.pajato.android.gamechat.intro.IntroActivity;
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
-    // Public class constants
-
     // Private class constants
 
     /** The logcat tag constant. */
@@ -86,7 +84,9 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_settings) {
+        if (id == R.id.nav_sign_out) {
+            PaneManager.instance.signOut();
+        } else if (id == R.id.nav_settings) {
 
         } else if (id == R.id.nav_learn) {
 
