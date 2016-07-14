@@ -65,6 +65,7 @@ dependencies {
     compile "com.google.firebase:firebase-crash:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-database:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-messaging:$rootProject.ext.gmsVersion"
+    compile "com.firebase:firebase-client-android:2.4.0"
 
     // Firebase UI
     compile 'com.firebaseui:firebase-ui-database:0.4.0'
