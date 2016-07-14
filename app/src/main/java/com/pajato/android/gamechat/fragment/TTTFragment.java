@@ -3,6 +3,7 @@ package com.pajato.android.gamechat.fragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,40 +11,76 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.GenericTypeIndicator;
+import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.game.GameManager;
 
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class TTTFragment extends Fragment {
 
     private static final String TAG = TTTFragment.class.getSimpleName();
+    private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";
+    private static final String TURN_INDICATOR = "turnIndicator";
+
     /* Keeps track of the Turn user. True = Player 1, False = Player 2. */
     public boolean mTurn;
-
-    // Keeps track of the turn number
-    private int mTurnCount;
 
     // Player Piece Strings
     private String mXValue;
     private String mOValue;
+    private String mSpace;
 
-    // The mBoard view
+    // Board management objects
     private View mBoard;
+    private HashMap<String, Integer> mBoardMap;
+    private Firebase mRef;
 
     public TTTFragment() {
-
+        // Required empty constructor.
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                                       final Bundle savedInstanceState) {
+        // Initialize Member Variables
+        mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
+        mSpace = getString(R.string.spaceValue);
         mTurn = true;
 
-        // Initialize the turn counter, and mBoard variables.
-        mTurnCount = 9;
-        mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
+        // Setup our Firebase database reference and a listener to keep track of the board.
+        Firebase.setAndroidContext(getContext());
+        mRef = new Firebase(FIREBASE_URL);
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            // If the data changes on Firebase, we want to capture the new board and replicate it locally.
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<HashMap<String, Integer>> t =
+                        new GenericTypeIndicator<HashMap<String, Integer>>() {};
+                mBoardMap = dataSnapshot.getValue(t);
+                // If there is a board to be had, fill our board out with it and adjust the turn.
+                if(mBoardMap != null) {
+                    recreateExistingBoard();
+                    checkNotFinished();
+                    mTurn = (mBoardMap.get(TURN_INDICATOR) == 1);
+                    handlePlayerIcons(mTurn);
+                } else {
+                    mBoardMap = new HashMap<String, Integer>();
+                }
+            }
+            // In the event that the request to listen is canceled, we need to
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(TAG, "Error reading Firebase board data: " + firebaseError.toString());
+            }
+        });
+
         return mBoard;
     }
 
@@ -53,7 +90,7 @@ public class TTTFragment extends Fragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(String msg) {
+    public void messageHandler(final String msg) {
         //TODO: Modify this when an implemented event handling system is implemented.
         Scanner input = new Scanner(msg);
         String player = input.nextLine();
@@ -61,7 +98,7 @@ public class TTTFragment extends Fragment {
         input.close();
         // Call appropriate methods for each button.
         if(buttonTag.equals(getString(R.string.new_game))) {
-            handleNewGame(player);
+            handleNewGame();
         } else {
             handleTileClick(player, buttonTag);
         }
@@ -69,114 +106,13 @@ public class TTTFragment extends Fragment {
     }
 
     /**
-     * Empties the instructions, mBoard tiles, and outputs a new game message.
-     *
-     * @param player the player who initiated the click.
-     */
-    private void handleNewGame(String player) {
-        // Reset initial variables and the Winner / Turn views.
-        mTurnCount = 9;
-        TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
-        Winner.setVisibility(View.INVISIBLE);
-
-        // Set values for each tile to empty.
-        ((Button) mBoard.findViewWithTag("button00")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button01")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button02")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button10")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button11")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button12")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button20")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button21")).setText(getString(R.string.spaceValue));
-        ((Button) mBoard.findViewWithTag("button22")).setText(getString(R.string.spaceValue));
-
-        // Ensure the icons are correctly indicating whose turn it is.
-        handlePlayerIcons(mTurn);
-
-        // Output New Game Messages
-        String newTurn = "New Game! Player " + (mTurn ? "1 (" + getString(R.string.xValue) + ")" :
-                "2 (" + getString(R.string.oValue) + ")") + "'s Turn";
-        GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
-                R.color.colorPrimaryDark), false);
-
-        checkNotFinished();
-    }
-
-    /**
-     * Assigns a value to a button without text, either X or O,
-     * depending on the player whose turn it is.
-     *
-     * @param player the player who initiated the click.
-     * @param buttonTag the tag of the button clicked.
-     */
-    private void handleTileClick(String player, String buttonTag) {
-        Button b = (Button) mBoard.findViewWithTag(buttonTag);
-        // Only changes the value if the current value is empty and the game has not finished yet.
-        if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
-            mTurnCount--;
-
-            b.setText(getTurn(mTurn));
-
-            mTurn = !mTurn;
-
-            handlePlayerIcons(mTurn);
-
-            checkNotFinished();
-
-        }
-    }
-
-    /**
-     * Returns a string enumerating the player, depending on the current turn.
-     *
-     * @return R.string.xValue or R.string.oValue, depending on whose turn it is.
-     */
-    private String getTurn(boolean turnIndicator) {
-        if(turnIndicator) {
-            return mXValue;
-        } else {
-            return mOValue;
-        }
-    }
-
-    /**
-     * Evaluates the current state of the individual tiles of the mBoard and stores them.
-     */
-    private void evaluateBoard(int[][] boardValues) {
-        // Go through all the buttons.
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
-                Button currTile = (Button) mBoard.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
-                String tileValue = currTile.getText().toString();
-
-                // Assign each possible state for each tile as a value. The only possible values
-                // of each row (that indicate and endgame state) are 3 in a row of X or O. There
-                // is no way to get a value of 3 without getting 3 Xs, and there's no way to get a
-                // value of 6 without getting 3 Os.
-
-                // If there's an X in this button, store a 1
-                if(tileValue.equals(mXValue)) {
-                    boardValues[i][j] = 1;
-                // If there's an O in this button, store a 2
-                } else if (tileValue.equals(mOValue)) {
-                    boardValues[i][j] = 2;
-                // Otherwise, there's a space. -5 was chosen arbitrarily to keep row values unique.
-                } else {
-                    boardValues[i][j] = -5;
-                }
-            }
-        }
-    }
-
-    /**
-     * Evaluates the state of the mBoard, determining if there are three in a row of either X or O.
+     * Evaluates the state of the board, determining if there are three in a row of either X or O.
      *
      * @return false if a player has won or if the full number of turns has occurred, true otherwise.
      */
     private boolean checkNotFinished() {
-        int[][] boardValues = new int[3][3];
         // First, we need to check on the buttons' states.
-        evaluateBoard(boardValues);
+        int[][] boardValues = evaluateBoard();
 
         // Evaluate all possible lines of 3.
         int topRow = boardValues[0][0] + boardValues[0][1] + boardValues[0][2];
@@ -199,12 +135,14 @@ public class TTTFragment extends Fragment {
                 || centerCol == 6 || endCol == 6 || leftDiag == 6 || rightDiag == 6);
 
         // If we have a win condition, reveal the winning messages.
-        if(xWins || oWins || mTurnCount == 0) {
+        if(xWins || oWins || mBoardMap.size() == 10) {
             // Setup the winner TextView and snackbar messages.
             TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
             Winner.setText(getText(R.string.spaceValue));
             Winner.setVisibility(View.VISIBLE);
 
+            // If there is a winner, output winning messages and ensure that the appropriate
+            // player's icon has been highlighted.
             if(xWins) {
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
@@ -226,6 +164,55 @@ public class TTTFragment extends Fragment {
         }
         // If none of the conditions are met, the game has not yet ended, and we can continue it.
         return true;
+    }
+
+    /**
+     * Evaluates the current state of the individual tiles of the board and stores them as a HashMap
+     * in the Firebase Database.
+     */
+    private int[][] evaluateBoard() {
+        int[][] boardValues = new int[3][3];
+        if(mBoardMap == null) mBoardMap = new HashMap<>();
+        // Go through all the buttons.
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                Button currTile = (Button) mBoard.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
+                String tileValue = currTile.getText().toString();
+
+                // Assign each possible state for each tile as a value. The only possible values
+                // of each row (that indicate and endgame state) are 3 in a row of X or O. There
+                // is no way to get a value of 3 without getting 3 Xs, and there's no way to get a
+                // value of 6 without getting 3 Os.
+
+                // If there's an X in this button, store a 1
+                if(tileValue.equals(mXValue)) {
+                    boardValues[i][j] = 1;
+                    if(!(mBoardMap.containsKey(i + "-" + j))) mBoardMap.put(i + "-" + j, 1);
+                    // If there's an O in this button, store a 2
+                } else if (tileValue.equals(mOValue)) {
+                    boardValues[i][j] = 2;
+                    if(!(mBoardMap.containsKey(i + "-" + j))) mBoardMap.put(i + "-" + j, 2);
+                    // Otherwise, there's a space. -5 was chosen arbitrarily to keep row values unique.
+                } else {
+                    boardValues[i][j] = -5;
+                }
+            }
+        }
+        mRef.setValue(mBoardMap);
+        return boardValues;
+    }
+
+    /**
+     * Returns a string enumerating the player, depending on the current turn.
+     *
+     * @return R.string.xValue or R.string.oValue, depending on whose turn it is.
+     */
+    private String getTurn(boolean turnIndicator) {
+        if(turnIndicator) {
+            return mXValue;
+        } else {
+            return mOValue;
+        }
     }
 
     /**
@@ -272,6 +259,93 @@ public class TTTFragment extends Fragment {
             p2.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
             p2left.setVisibility(View.VISIBLE);
             p2right.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Empties the instructions, board tiles, and outputs a new game message.
+     */
+    private void handleNewGame() {
+        // Reset the board map and update the Firebase database's copy.
+        if(mBoardMap != null) {
+            mBoardMap.clear();
+        } else {
+            mBoardMap = new HashMap<>();
+        }
+        mBoardMap.put(TURN_INDICATOR, (mTurn ? 1 : 2));
+        mRef.setValue(mBoardMap);
+
+        // Hide our winning messages and ensure the turn display is working properly.
+        TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
+        Winner.setVisibility(View.INVISIBLE);
+        handlePlayerIcons(mTurn);
+
+        // Set values for each tile to empty.
+        ((Button) mBoard.findViewWithTag("button00")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button01")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button02")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button10")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button11")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button12")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button20")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button21")).setText(mSpace);
+        ((Button) mBoard.findViewWithTag("button22")).setText(mSpace);
+
+        // Output New Game Messages
+        String newTurn = "New Game! Player " + (mTurn
+                ? "1 (" + mXValue + ")"
+                : "2 (" + mOValue + ")") + "'s Turn";
+        GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
+                R.color.colorPrimaryDark), false);
+
+        checkNotFinished();
+    }
+
+    /**
+     * Assigns a value to a button without text, either X or O,
+     * depending on the player whose turn it is.
+     *
+     * @param player the player who initiated the click.
+     * @param buttonTag the tag of the button clicked.
+     */
+    private void handleTileClick(String player, String buttonTag) {
+        Button b = (Button) mBoard.findViewWithTag(buttonTag);
+        // Only updates the tile if the current value is empty and the game has not finished yet.
+        if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
+            b.setText(getTurn(mTurn));
+            mBoardMap.put(TURN_INDICATOR, mTurn ? 2 : 1);
+            checkNotFinished();
+        }
+    }
+
+    /**
+     * Handles the recreation of the board based on the values stored in the BoardMap.
+     */
+    private void recreateExistingBoard() {
+        // If the board map is size 1, we know that there is only the turn stored in it, and send a
+        // new game out.
+        if(mBoardMap.size() == 1) {
+            GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity(),
+                    getTurn(mTurn) + "\n" + getString(R.string.new_game));
+        // Otherwise, we'll need to comb through the board and replace the remaining pieces.
+        } else {
+            for(int i = 0; i < 3; i++) {
+                for(int j = 0; j < 3; j++) {
+                    // If our keys are present, then put their corresponding piece onto the board.
+                    String currKey = i + "-" + j;
+                    Button currButton = (Button) mBoard.findViewWithTag("button" + i + j);
+                    if(mBoardMap.containsKey(currKey)) {
+                        if(mBoardMap.get(currKey) == 1) {
+                            currButton.setText(mXValue);
+                        } else {
+                            currButton.setText(mOValue);
+                        }
+                    // Otherwise, empty the tile.
+                    } else {
+                        currButton.setText(mSpace);
+                    }
+                }
+            }
         }
     }
 
