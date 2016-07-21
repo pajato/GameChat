@@ -28,7 +28,7 @@ http://www.gnu.org/licenses
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/currentAccountIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
@@ -36,6 +36,7 @@ http://www.gnu.org/licenses
         tools:ignore="ContentDescription" />
 
     <TextView
+        android:id="@+id/currentAccountDisplayName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
@@ -43,7 +44,7 @@ http://www.gnu.org/licenses
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/currentAccountEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/nav_header_label_android_studio_android_com" />

@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.intro;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -30,6 +29,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +47,7 @@ import static android.view.animation.AnimationUtils.loadAnimation;
  *
  * @author Paul Michael Reilly
  */
-public class IntroActivity extends Activity {
+public class IntroActivity extends AppCompatActivity {
 
     // Private class variables.
 
@@ -57,12 +57,14 @@ public class IntroActivity extends Activity {
     /** The view pager page change handler. */
     private PageChangeHandler mHandler;
 
-    /** Handle the let's get started button click by invoking the signin activity. */
-    public void startSignIn(final View view) {
-        Intent intent = new Intent(IntroActivity.this, SignInActivity.class);
-        intent.putExtra("fromIntro", true);
-        startActivity(intent);
-        finish();
+    /** Handle signing into an existing account by invoking the signin activity. */
+    public void doSignIn(final View view) {
+        invokeSignIn("signin");
+    }
+
+    /** Handle registering a new account by invoking the signin activity. */
+    public void doRegister(final View view) {
+        invokeSignIn("register");
     }
 
     /** Create the intro activity to highlight some features and provide a get started opertion. */
@@ -110,6 +112,14 @@ public class IntroActivity extends Activity {
         int [] viewState = viewStateId != -1 ? new int[] {viewStateId} : new int[] {};
         ObjectAnimator viewAnimator = ObjectAnimator.ofFloat(view, PROP, heights);
         animator.addState(viewState, viewAnimator.setDuration(DURATION));
+    }
+
+    /** Finish the intro screen and handle the given mode in a new activity. */
+    private void invokeSignIn(final String mode) {
+        Intent intent = new Intent(this, SignInActivity.class);
+        intent.putExtra(mode, true);
+        startActivity(intent);
+        finish();
     }
 
     /** Obtain the RTL state. */

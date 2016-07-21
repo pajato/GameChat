@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,13 +31,13 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -62,22 +62,24 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatMessage;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.game.GameManager;
-import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.signin.SignInActivity;
-import de.hdodenhof.circleimageview.CircleImageView;
-import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
+
 import static android.app.Activity.RESULT_OK;
 
 /**
+ * Display the chat associated with the room selected by the current logged in User.
  *
+ * @author Paul Michael Reilly
  */
 public class ChatFragment extends BaseFragment
     implements GoogleApiClient.OnConnectionFailedListener {

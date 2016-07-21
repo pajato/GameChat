@@ -17,7 +17,6 @@
         app:layout_constraintTop_toTopOf="@id/settings_panel"
         app:layout_constraintLeft_toLeftOf="@id/settings_panel"
         android:layout_marginTop="80dp"
-        android:layout_marginLeft="32dp"
         android:layout_marginStart="32dp"/>
 
     <TextView
@@ -29,8 +28,7 @@
 
         app:layout_constraintTop_toTopOf="@id/gamechat_logo"
         app:layout_constraintLeft_toRightOf="@id/gamechat_logo"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"/>
+        android:layout_marginStart="32dp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -54,17 +52,13 @@
             android:orientation="horizontal"
             android:layout_margin="8dp"
             android:id="@+id/settings_ttt">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_ttt"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/play_ttt"
                 android:textSize="20sp"
-                android:layout_margin="8dp"/>
+                android:layout_margin="8dp"
+                android:drawableStart="@drawable/ic_launcher"/>
         </LinearLayout>
 
         <LinearLayout
@@ -73,17 +67,13 @@
             android:orientation="horizontal"
             android:layout_margin="8dp"
             android:id="@+id/settings_checkers">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_checkers"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/play_checkers"
                 android:textSize="20sp"
-                android:layout_margin="8dp"/>
+                android:layout_margin="8dp"
+                android:drawableStart="@drawable/ic_launcher"/>
         </LinearLayout>
 
         <LinearLayout
@@ -92,17 +82,13 @@
             android:orientation="horizontal"
             android:layout_margin="8dp"
             android:id="@+id/settings_chess">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_chess"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/play_chess"
                 android:textSize="20sp"
-                android:layout_margin="8dp"/>
+                android:layout_margin="8dp"
+                android:drawableStart="@drawable/ic_launcher"/>
         </LinearLayout>
 
     </LinearLayout>

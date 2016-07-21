@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.chat;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

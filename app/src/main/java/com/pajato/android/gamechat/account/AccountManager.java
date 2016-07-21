@@ -18,6 +18,9 @@ package com.pajato.android.gamechat.account;
 
 import android.support.v7.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -51,16 +54,38 @@ public enum AccountManager {
     /** The account repository associating mulitple account id strings with the cloud account. */
     private ConcurrentHashMap<String, Account> mAccountMap = new ConcurrentHashMap<>();
 
+    /** The currently active account ID. */
+    private String mActiveAccountId;
+
     // Public instance methods
 
-    /**
-     * Override to implement.
-     *
-     * @see com.pajato.android.gamechat.account.AccountManager#hasAccount()
-     */
+    /** Return null if there is no active account, the current active account otherwise. */
+    public Account getActiveAccount() {
+        return mActiveAccountId != null ? mAccountMap.get(mActiveAccountId) : null;
+    }
+    /** Return true iff there is an account to select from. */
     public boolean hasAccount() {
         // The account is considered missing if there is no value with an associated key in the map.
         return mAccountMap.size() > 0;
+    }
+
+    /** Initialize the account manager. */
+    public void init(final AppCompatActivity context) {
+        // Determine if a User has signed in to Firebase.
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // User is signed in.  Add this account.
+            Account account = getAccount(user);
+            mActiveAccountId = account.getAccountId();
+            mAccountMap.put(mActiveAccountId, account);
+        } else {
+            // No user is signed in
+        }
+    }
+
+    /** Register the component during lifecycle resume events. */
+    public void register() {
+        //EventBus.getDefault().register(this);
     }
 
     /** Register a given account and provider ids. */
@@ -68,12 +93,23 @@ public enum AccountManager {
         // Perform the Firebase authentication thing using the given ids.
     }
 
-    /** Initialize the account manager. */
-    public void init(final AppCompatActivity context) {
-        // tbd
+    /** Unregister the component during lifecycle pause events. */
+    public void unregister() {
+        //EventBus.getDefault().unregister(this);
     }
 
     // Private instance methods.
+
+    /** Map the Firebase User to an Account. */
+    private Account getAccount(final FirebaseUser user) {
+        Account result = new Account();
+        result.setAccountId(user.getEmail());
+        result.setAccountUrl(user.getPhotoUrl());
+        result.setDisplayName(user.getDisplayName());
+        result.getAvatarMap().put(user.getDisplayName(), user.getPhotoUrl());
+        result.setProviderId(user.getProviderId());
+        return result;
+    }
 
     // Private classes
 
