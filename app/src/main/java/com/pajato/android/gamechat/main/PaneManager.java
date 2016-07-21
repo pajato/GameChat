@@ -17,26 +17,25 @@
 
 package com.pajato.android.gamechat.main;
 
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.fragment.ChatFragment;
+import com.pajato.android.gamechat.chat.ChatFragment;
+import com.pajato.android.gamechat.chat.RoomsFragment;
 import com.pajato.android.gamechat.fragment.GameFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Provide a singleton to manage the main fragments used to display the chat and game panels. */
+/** Provide a singleton to manage the main fragments used to display the app panels. */
 public enum PaneManager {
     instance;
 
@@ -46,12 +45,12 @@ public enum PaneManager {
     private static final String TAG = PaneManager.class.getSimpleName();
 
     /** The fragment list index for the game fragment. */
-    public static final int CHAT_INDEX = 0;
+    public static final int ROOMS_INDEX = 0;
     public static final int GAME_INDEX = 1;
 
     // Private instance variables
 
-    /** The view pager adapter. */
+    /** The view pager adapter used to manage paging on a smartphone layout. */
     private GameChatPagerAdapter mAdapter;
 
     /** The repository for the pane fragments. */
@@ -62,11 +61,7 @@ public enum PaneManager {
 
     // Public instance methods
 
-    /**
-     * Set up the app per the characteristics of the running device.
-     *
-     * @see android.app.Activity#onCreate(Bundle)
-     */
+    /** Initialize the two central panels in the app: chat and game/activity. */
     public void init(final AppCompatActivity context) {
         // Clear the current panes and determine if a paging layout is active.
         fragmentList.clear();
@@ -75,7 +70,7 @@ public enum PaneManager {
         titleList.add(context.getString(R.string.game));
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
 
-        fragmentList.add(new ChatFragment());
+        fragmentList.add(new RoomsFragment());
         fragmentList.add(new GameFragment());
 
         if (viewPager != null) {
@@ -85,7 +80,7 @@ public enum PaneManager {
         } else {
             // The app is running on a tablet. Add the fragments to their containers.
             context.getSupportFragmentManager().beginTransaction()
-                    .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
+                    .add(R.id.chat_container, fragmentList.get(ROOMS_INDEX))
                     .add(R.id.game_container, fragmentList.get(GAME_INDEX))
                     .commit();
             context.invalidateOptionsMenu();
@@ -94,7 +89,7 @@ public enum PaneManager {
 
     /** Handle the delegated sign out menu selection by delegating to the chat fragment. */
     public void signOut() {
-        ((ChatFragment) fragmentList.get(CHAT_INDEX)).signOut();
+        ((ChatFragment) fragmentList.get(ROOMS_INDEX)).signOut();
     }
     /** Handle the delegated tile click by delegating it to the game fragment. */
     public void tileOnClick(final View view) {
@@ -104,7 +99,17 @@ public enum PaneManager {
 
     public void fetchConfig() {
         // Delegete to the chat fragment.
-        ((ChatFragment) fragmentList.get(CHAT_INDEX)).fetchConfig();
+        ((ChatFragment) fragmentList.get(ROOMS_INDEX)).fetchConfig();
+    }
+
+    /** Unregister the component during lifecycle pause events. */
+    public void unregister() {
+        //EventBus.getDefault().unregister(this);
+    }
+
+    /** Register the component during lifecycle resume events. */
+    public void register() {
+        //EventBus.getDefault().register(this);
     }
 
     // Nested classes

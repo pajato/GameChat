@@ -22,7 +22,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.main.MainActivity;
 
 public class SignInActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -76,6 +75,7 @@ public class SignInActivity extends AppCompatActivity implements
             } else {
                 // Google Sign In failed
                 Log.e(TAG, "Google Sign In failed.");
+                Thread.dumpStack();
             }
         }
     }
@@ -119,7 +119,7 @@ public class SignInActivity extends AppCompatActivity implements
                             Toast.makeText(SignInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                            //startActivity(new Intent(SignInActivity.this, MainActivity.class));
                             finish();
                         }
                     }

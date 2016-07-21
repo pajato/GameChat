@@ -17,7 +17,9 @@
 
 package com.pajato.android.gamechat.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,14 +27,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.event.ButtonClickEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
-/** Provide a main activity to display the chat and game panesl. */
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+/**
+ * Provide a main activity to display the chat and game panels.
+ *
+ * @author Paul Michael Reilly
+ */
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -44,32 +58,23 @@ public class MainActivity extends AppCompatActivity
     /** The preferences file name. */
     private static final String PREFS = "GameChatPrefs";
 
-    // Protected instance methods
+    /** The preferences key for tracking a fresh install. */
+    private static final String FRESH_INSTALL = "FreshInstall";
 
-    /**
-     * Set up the app per the characteristics of the running device.
-     *
-     * @see android.app.Activity#onCreate(Bundle)
-     */
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        // Deal with the main activity creation.  Layout the main activity and initialize app state.
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        init();
-        PaneManager.instance.init(this);
-        AccountManager.instance.init(this);
+    // Public instance methods
 
-        // Determine if an account needs to be set up.
-        if (!AccountManager.instance.hasAccount()) {
-            // There is no account yet.  Present the intro activity to get things started.
-            Intent introIntent = new Intent(this, IntroActivity.class);
-            //startActivity(introIntent);
-            //finish();
-        }
+    /** Process a button click on a given view by posting a button click event. */
+    public void buttonClick(final View view) {
+        EventBus.getDefault().post(new ButtonClickEvent(view));
     }
 
-    @Override
-    public void onBackPressed() {
+    /** Process a given button click event by logging it. */
+    @Subscribe public void buttonClickHandler(final ButtonClickEvent event) {
+        String typeName = event.getView().getClass().getSimpleName();
+        Log.v(TAG, String.format("Button click event on view: {%s}.", typeName));
+    }
+
+    @Override public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
+     * TODO: Remove this method and use the event bus to propagate all button clicks.
      * An OnClick Listener for the tic-tac-toe tiles.
      *
      * @param view the tile clicked
@@ -109,13 +115,69 @@ public class MainActivity extends AppCompatActivity
         PaneManager.instance.tileOnClick(view);
     }
 
+    // Protected instance methods
+
+    /**
+     * Set up the app per the characteristics of the running device.
+     *
+     * @see android.app.Activity#onCreate(Bundle)
+     */
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        // Allow superclasses to initialize using the saved state and determine if there has been a
+        // fresh install on this device and proceed accordingly.
+        super.onCreate(savedInstanceState);
+        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        if (prefs.getBoolean(FRESH_INSTALL, true)) {
+            // This is a fresh installation of the app.  Present the intro activity to get things
+            // started, which will introduce the user to the app and provide a chnance to sign in or
+            // register an account.
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(FRESH_INSTALL, false);
+            editor.apply();
+            Intent introIntent = new Intent(this, IntroActivity.class);
+            startActivity(introIntent);
+        }
+
+        // Deal with the main activity creation.
+        setContentView(R.layout.activity_main);
+        PaneManager.instance.init(this);
+        AccountManager.instance.init(this);
+        init(savedInstanceState);
+    }
+
+    /** Respect the lifecycle and ensure that the event bus shuts down. */
+    @Override protected void onPause() {
+        // Unregister the components directly used by the main activity which will unregister
+        // sub-components in turn.
+        super.onPause();
+        PaneManager.instance.unregister();
+        AccountManager.instance.unregister();
+        EventBus.getDefault().unregister(this);
+    }
+
+    /** Respect the lifecycle and ensure that the event bus spins up. */
+    @Override protected void onResume() {
+        // Register the components directly used by the main activity which will register
+        // sub-components in turn.
+        super.onResume();
+        PaneManager.instance.register();
+        AccountManager.instance.register();
+        EventBus.getDefault().register(this);
+    }
+
     // Private instance methods.
 
     /** Initialize the main activity. */
-    private void init() {
-        // Set up the app components: toolbar, FAB button, and navigation drawer.
+    private void init(final Bundle savedInstanceState) {
+        // Set up the app components: toolbar and navigation drawer.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        initNavigationDrawer(toolbar);
+    }
+
+    /** Initialize the navigation drawer. */
+    private void initNavigationDrawer(final Toolbar toolbar) {
+        // Set up the action bar drawer toggle.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         final int OPEN_ID = R.string.navigation_drawer_action_open;
         final int CLOSE_ID = R.string.navigation_drawer_action_close;
@@ -123,8 +185,24 @@ public class MainActivity extends AppCompatActivity
             new ActionBarDrawerToggle(this, drawer, toolbar, OPEN_ID, CLOSE_ID);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        // Set up the nav view item listener to process clicks in this class.
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // If there is an account, set up the navigation drawer header accordingly.
+        Account account = AccountManager.instance.getActiveAccount();
+        if (account != null) {
+            // There is an account.  Set up the icon, display name and email address.
+            View header =  navigationView.inflateHeaderView(R.layout.nav_header_main);
+            ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
+            icon.setImageURI(account.getAccountUrl());
+            // TODO: Add Glide code to load the image.
+            TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+            name.setText(account.getDisplayName());
+            TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
+            email.setText(account.getAccountId());
+        }
     }
 
 }

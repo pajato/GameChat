@@ -17,9 +17,11 @@
 
 package com.pajato.android.gamechat.account;
 
+import android.net.Uri;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.URL;
+
 import lombok.Data;
 
 /**
@@ -42,11 +44,11 @@ import lombok.Data;
     /** The account id, usually an email address or a phone number. */
     private String accountId;
 
+    /** The account icon, a URL. */
+    private Uri accountUrl;
+
     /** The account display name, usually something like "Fred C. Jones". */
     private String displayName;
-
-    /** The account icon, a URL. */
-    private String accountUrl;
 
     /** The account token, an access key supplied by the provider. */
     private String token;
@@ -58,13 +60,6 @@ import lombok.Data;
     private String providerId;
 
     /** The account avatars. The key is the name, the value is a URL for the image. */
-    private Map<String, URL> avatarMap = new ConcurrentHashMap<>();
-
-    // Public class methods
-
-    /** Load an account for the given account and provider ids. */
-    public static void load(final String accountId, final String providerId) {
-        // TODO: figure out how to deal with this via Firebase.
-    }
+    private Map<String, Uri> avatarMap = new ConcurrentHashMap<>();
 
 }
