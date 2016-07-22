@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_sign_out"
-        android:title="@string/sign_out" />
+        android:id="@+id/nav_manage_accounts"
+        android:onClick="menuClick"
+        android:title="@string/manage_accounts" />
     <item
         android:id="@+id/nav_settings"
+        android:onClick="menuClick"
         android:icon="@drawable/ic_settings_black"
         android:title="@string/navigation_drawer_label_problems_settings" />
     <item
         android:id="@+id/nav_feedback"
         android:icon="@drawable/ic_help_black"
+        android:onClick="menuClick"
         android:title="@string/navigation_drawer_label_problems_feedback" />
     <item
         android:id="@+id/nav_learn"
+        android:tag="@integer/learnMore"
         android:icon="@drawable/ic_info_black"
+        android:onClick="menuClick"
         android:title="@string/navigation_drawer_label_problems_learn" />
 </menu>
-

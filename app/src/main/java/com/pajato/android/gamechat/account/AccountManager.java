@@ -16,10 +16,21 @@
  */
 package com.pajato.android.gamechat.account;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.signin.SignInActivity;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,24 +41,15 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Paul Michael Reilly
  */
-public enum AccountManager {
+public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
+
+    public static enum Actions {signIn, signOut}
 
     // Private class constants
 
     /** The logcat logger tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
-
-    // Local storage keys.
-    private static final String KEY_ACCOUNT_NAME = "keyAccountName";
-    private static final String KEY_ACCOUNT_DISPLAY_NAME = "keyAccountDisplayName";
-    private static final String KEY_ACCOUNT_TYPE = "keyAccountType";
-    private static final String KEY_ACCOUNT_URL = "keyAccountUrl";
-    private static final String KEY_ACCOUNT_TOKEN = "keyAccountToken";
-
-    // Activity request codes.
-    private static final int ACCOUNTS_PERMISSION_REQUEST = 1;
-    private static final int ACCOUNT_SETUP_REQUEST = 2;
 
     // Private instance variables
 
@@ -57,7 +59,27 @@ public enum AccountManager {
     /** The currently active account ID. */
     private String mActiveAccountId;
 
+    /** The array of click keys.  The ... */
+    private SparseArray<Actions> mActionMap = new SparseArray<>();
+
     // Public instance methods
+
+    /** Deal with authentication changes like sign in and sign out */
+    @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
+        FirebaseUser user = auth.getCurrentUser();
+        Account account = null;
+        if (user != null) {
+            // User is signed in.  Add this account.
+            Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+            account = getAccount(user);
+            mActiveAccountId = account.getAccountId();
+            mAccountMap.put(mActiveAccountId, account);
+        } else {
+            // User is signed out
+            Log.d(TAG, "onAuthStateChanged:signed_out");
+        }
+        EventBus.getDefault().post(new AccountStateChangeEvent(account));
+    }
 
     /** Return null if there is no active account, the current active account otherwise. */
     public Account getActiveAccount() {
@@ -71,21 +93,16 @@ public enum AccountManager {
 
     /** Initialize the account manager. */
     public void init(final AppCompatActivity context) {
-        // Determine if a User has signed in to Firebase.
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            // User is signed in.  Add this account.
-            Account account = getAccount(user);
-            mActiveAccountId = account.getAccountId();
-            mAccountMap.put(mActiveAccountId, account);
-        } else {
-            // No user is signed in
-        }
+        // Build a sparse array of click key values.
+        mActionMap.put(R.integer.signIn, Actions.signIn);
+        mActionMap.put(R.integer.signOut, Actions.signOut);
     }
 
     /** Register the component during lifecycle resume events. */
     public void register() {
-        //EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this);
+        // Deal with auth events in the listener.
+        FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     /** Register a given account and provider ids. */
@@ -95,7 +112,32 @@ public enum AccountManager {
 
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
-        //EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(this);
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
+    /** Handle a sign in or sign out operation. */
+    @Subscribe
+    public void processClick(final ClickEvent event) {
+        // Case on the view's tag content.
+        Actions action = mActionMap.get(event.getValue());
+        if (action != null) {
+            switch (action) {
+                case signIn:
+                    // Invoke the sign in process.
+                    Context context = event.getContext();
+                    Intent intent = new Intent(context, SignInActivity.class);
+                    intent.putExtra("signin", true);
+                    context.startActivity(intent);
+                    break;
+                case signOut:
+                    // Have Firebase log out the user.
+                    FirebaseAuth.getInstance().signOut();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     // Private instance methods.

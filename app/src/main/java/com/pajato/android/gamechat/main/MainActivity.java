@@ -30,13 +30,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.event.ButtonClickEvent;
+import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -65,13 +67,20 @@ public class MainActivity extends AppCompatActivity
 
     /** Process a button click on a given view by posting a button click event. */
     public void buttonClick(final View view) {
-        EventBus.getDefault().post(new ButtonClickEvent(view));
+        int value = view.getTag() != null ? getIntegerTag(view) : view.getId();
+        EventBus.getDefault().post(new ClickEvent(this, value, view.getClass().getSimpleName()));
+    }
+
+    /** Process a button click on a given view by posting a button click event. */
+    public void menuClick(final MenuItem item) {
+        int value = item.getItemId();
+        EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
     }
 
     /** Process a given button click event by logging it. */
-    @Subscribe public void buttonClickHandler(final ButtonClickEvent event) {
-        String typeName = event.getView().getClass().getSimpleName();
-        Log.v(TAG, String.format("Button click event on view: {%s}.", typeName));
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+        String format = "Button click event on type: {%s} with value {%d}.";
+        Log.v(TAG, String.format(format, event.getClassName(), event.getValue()));
     }
 
     @Override public void onBackPressed() {
@@ -83,22 +92,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_sign_out) {
-            PaneManager.instance.signOut();
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_learn) {
-
-        } else if (id == R.id.nav_feedback) {
-
-        }
-
+    @Override public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here by posting a click event and closing the drawer.
+        int value = item.getItemId();
+        EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -160,12 +157,26 @@ public class MainActivity extends AppCompatActivity
         // Register the components directly used by the main activity which will register
         // sub-components in turn.
         super.onResume();
+        EventBus.getDefault().register(this);
         PaneManager.instance.register();
         AccountManager.instance.register();
-        EventBus.getDefault().register(this);
     }
 
     // Private instance methods.
+
+    /** Return the integer value of the tag in the given view, -1 if the value is not an integer. */
+    private int getIntegerTag(final View view) {
+        Object o = view.getTag();
+        if (o instanceof String) {
+            String s = (String) o;
+            return Integer.valueOf(s).intValue();
+        } else if (o instanceof Integer) {
+            Integer i = (Integer) o;
+            return i.intValue();
+        } else {
+            return -1;
+        }
+    }
 
     /** Initialize the main activity. */
     private void init(final Bundle savedInstanceState) {
@@ -189,19 +200,41 @@ public class MainActivity extends AppCompatActivity
         // Set up the nav view item listener to process clicks in this class.
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
 
+    @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
         // If there is an account, set up the navigation drawer header accordingly.
-        Account account = AccountManager.instance.getActiveAccount();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View header = navigationView.getHeaderView(0);
+        if (header == null) header =  navigationView.inflateHeaderView(R.layout.nav_header_main);
+        Account account = event.getAccount();
         if (account != null) {
-            // There is an account.  Set up the icon, display name and email address.
-            View header =  navigationView.inflateHeaderView(R.layout.nav_header_main);
+            // There is an account.  Set up the icon, display name and email address and lose the
+            // sign in button.
             ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
+            icon.setVisibility(View.VISIBLE);
             icon.setImageURI(account.getAccountUrl());
             // TODO: Add Glide code to load the image.
             TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+            name.setVisibility(View.VISIBLE);
             name.setText(account.getDisplayName());
             TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
+            email.setVisibility(View.VISIBLE);
             email.setText(account.getAccountId());
+            Button button = (Button) header.findViewById(R.id.signInOutButton);
+            button.setTag(R.integer.signOut);
+            button.setText(getString(R.string.sign_out));
+        } else {
+            // There is no current user.  Hide the normal widgets and show the sign in button.
+            ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
+            icon.setVisibility(View.GONE);
+            TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+            name.setVisibility(View.GONE);
+            TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
+            email.setVisibility(View.GONE);
+            Button button = (Button) header.findViewById(R.id.signInOutButton);
+            button.setTag(R.integer.signIn);
+            button.setText(getString(R.string.sign_in));
         }
     }
 
