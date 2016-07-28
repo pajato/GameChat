@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,31 +26,33 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 
-public class SettingsFragment extends BaseFragment{
+public class InitialFragment extends BaseFragment {
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        return inflater.inflate(R.layout.fragment_initial, container, false);
     }
 
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater);
 
-        View ttt = getActivity().findViewById(R.id.settings_ttt);
+        View ttt = getActivity().findViewById(R.id.init_ttt);
         ttt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch(v.getId()) {
-                    case R.id.settings_ttt:
-                        GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity());
+                    case R.id.init_ttt_button:
+                    case R.id.init_ttt:
+                        GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                                getString(R.string.new_game_ttt));
                         break;
-                    case R.id.settings_checkers:
+                    case R.id.init_checkers:
                         break;
-                    case R.id.settings_chess:
+                    case R.id.init_chess:
                         break;
                 }
             }

@@ -73,7 +73,7 @@ public class FABTest {
                 .perform(click());
         onView(withId(R.id.game_pane_fragment_container))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.settings_panel))
+        onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
     }
 

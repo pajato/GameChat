@@ -1,4 +1,4 @@
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,12 +17,17 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class TTTFragment extends Fragment {
+/**
+ * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
+ *
+ * @author Bryan Scott
+ */
+public class TTTFragment extends BaseFragment {
 
     private static final String TAG = TTTFragment.class.getSimpleName();
     private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";
@@ -96,6 +101,7 @@ public class TTTFragment extends Fragment {
         String player = input.nextLine();
         String buttonTag = input.nextLine();
         input.close();
+
         // Call appropriate methods for each button.
         if(buttonTag.equals(getString(R.string.new_game))) {
             handleNewGame();
@@ -118,11 +124,9 @@ public class TTTFragment extends Fragment {
         int topRow = boardValues[0][0] + boardValues[0][1] + boardValues[0][2];
         int midRow = boardValues[1][0] + boardValues[1][1] + boardValues[1][2];
         int botRow = boardValues[2][0] + boardValues[2][1] + boardValues[2][2];
-
         int startCol = boardValues[0][0] + boardValues[1][0] + boardValues[2][0];
         int centerCol = boardValues[0][1] + boardValues[1][1] + boardValues[2][1];
         int endCol = boardValues[0][2] + boardValues[1][2] + boardValues[2][2];
-
         int leftDiag = boardValues[0][0] + boardValues[1][1] + boardValues[2][2];
         int rightDiag = boardValues[2][0] + boardValues[1][1] + boardValues [0][2];
 
@@ -325,7 +329,7 @@ public class TTTFragment extends Fragment {
         // If the board map is size 1, we know that there is only the turn stored in it, and send a
         // new game out.
         if(mBoardMap.size() == 1) {
-            GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity(),
+            GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity(),
                     getTurn(mTurn) + "\n" + getString(R.string.new_game));
         // Otherwise, we'll need to comb through the board and replace the remaining pieces.
         } else {

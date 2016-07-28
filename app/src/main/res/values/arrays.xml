@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="groups">
+        <item></item>
+        <item>Family</item>
+        <item>Work</item>
+    </string-array>
+
+    <string-array name="family_group">
+        <item>Mom</item>
+        <item>Dad</item>
+        <item>Grandpa</item>
+        <item>Grandma</item>
+        <item>Bro</item>
+        <item>Cousin</item>
+        <item>etc…</item>
+    </string-array>
+
+    <string-array name="work_group">
+        <item>CEO</item>
+        <item>Boss</item>
+        <item>Manager</item>
+        <item>Coworker</item>
+        <item>HR Rep</item>
+        <item>etc…</item>
+    </string-array>
+
+    <string-array name="empty_group"/>
+</resources>

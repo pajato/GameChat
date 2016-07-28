@@ -4,6 +4,8 @@
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="chat">Chat</string>
+    <string name="choose_group">Choose a Group:</string>
+    <string name="choose_user">Choose a User:</string>
     <string name="game">Game</string>
     <string name="intro_chat_message">Public private secure messaging with any GameChat user</string>
     <string name="intro_chat_title">Chat</string>
@@ -14,6 +16,7 @@
     <string name="intro_levels_message">Relaxed games for teaching and learning as well as competiitve levels for serious players</string>
     <string name="intro_levels_title">Levels</string>
     <string name="intro_page_circle">\u25CF</string>
+    <string name="invite_new_user">Invite a New User!</string>
     <string name="members">Members</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
@@ -35,10 +38,15 @@
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="oValue">O</string>
     <string name="play_again">Play Again!</string>
+    <string name="play_another_user">Play with Another User!</string>
     <string name="play_checkers">Play Checkers!</string>
     <string name="play_chess">Play Chess!</string>
     <string name="play_choose_game">Select a Game to Play!</string>
+    <string name="play_computer">Play against the Computer!</string>
+    <string name="play_locally">Play Locally with a Friend!</string>
     <string name="play_ttt">Play Tic-Tac-Toe!</string>
+    <string name="playing">Playing…</string>
+    <string name="playing_ttt">Playing Tic-Tac-Toe!</string>
     <string name="register">Register</string>
     <string name="register_button_text">Sign in to your account or register a new one to have fun with friends and family.</string>
     <string name="rooms">Rooms</string>
