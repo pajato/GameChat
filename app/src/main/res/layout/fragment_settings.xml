@@ -7,88 +7,124 @@
     android:layout_height="match_parent"
     android:id="@+id/settings_panel">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher"
-        android:contentDescription="@string/app_name"
-        android:id="@+id/gamechat_logo"
-
-        app:layout_constraintTop_toTopOf="@id/settings_panel"
-        app:layout_constraintLeft_toLeftOf="@id/settings_panel"
-        android:layout_marginTop="80dp"
-        android:layout_marginStart="32dp"/>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/new_game"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:id="@+id/settings_title"
-
-        app:layout_constraintTop_toTopOf="@id/gamechat_logo"
-        app:layout_constraintLeft_toRightOf="@id/gamechat_logo"
-        android:layout_marginStart="32dp"/>
+        android:text="@string/playing"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Display1"
+        android:layout_marginTop="64dp"
+        app:layout_constraintTop_toTopOf="@id/settings_panel"
+        app:layout_constraintLeft_toLeftOf="@id/settings_panel"
+        app:layout_constraintRight_toRightOf="@id/settings_panel"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/gamechat_logo"
-        app:layout_constraintLeft_toLeftOf="@id/settings_panel"
         app:layout_constraintRight_toRightOf="@id/settings_panel"
-        android:layout_marginTop="32dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/play_choose_game"
-            android:textSize="28sp"
-            android:layout_marginBottom="16dp"/>
+        app:layout_constraintLeft_toLeftOf="@id/settings_panel"
+        app:layout_constraintTop_toBottomOf="@+id/settings_title">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="8dp"
-            android:id="@+id/settings_ttt">
+            android:layout_marginTop="12dp">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ttt_online_button"
+                android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/play_ttt"
+                android:text="@string/play_another_user"
                 android:textSize="20sp"
-                android:layout_margin="8dp"
-                android:drawableStart="@drawable/ic_launcher"/>
+                android:layout_marginTop="20dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="8dp"
-            android:id="@+id/settings_checkers">
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/play_checkers"
-                android:textSize="20sp"
-                android:layout_margin="8dp"
-                android:drawableStart="@drawable/ic_launcher"/>
+                android:textSize="18sp"
+                android:text="@string/choose_group"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/settings_group_spinner"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginStart="32dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="@string/choose_user"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/settings_user_spinner"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="8dp"
-            android:id="@+id/settings_chess">
+            android:layout_marginTop="12dp" >
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ttt_local_button"
+                android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/play_chess"
+                android:text="@string/play_locally"
                 android:textSize="20sp"
-                android:layout_margin="8dp"
-                android:drawableStart="@drawable/ic_launcher"/>
+                android:layout_marginTop="20dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ttt_computer_button"
+                android:src="@drawable/ic_launcher"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/play_computer"
+                android:textSize="20sp"
+                android:layout_marginTop="20dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ttt_invite_button"
+                android:src="@drawable/ic_launcher"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/invite_new_user"
+                android:textSize="20sp"
+                android:layout_marginTop="20dp"/>
         </LinearLayout>
 
     </LinearLayout>

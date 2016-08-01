@@ -15,14 +15,13 @@
  */
 package com.pajato.android.gamechat.game;
 
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.fragment.SettingsFragment;
-import com.pajato.android.gamechat.fragment.TTTFragment;
 
 import java.util.ArrayList;
 
@@ -36,10 +35,15 @@ public enum GameManager {
     instance;
 
     // Public Class Constants
-    public static final int SETTINGS_INDEX = 0;
-    public static final int TTT_INDEX = 1;
-    public static final int CHECKERS_INDEX = 2;
-    public static final int CHESS_INDEX = 3;
+    public static final int INIT_INDEX = 0;
+    public static final int SETTINGS_INDEX = 1;
+    public static final int TTT_L_INDEX = 2;
+    public static final int TTT_O_INDEX = 3;
+    public static final int CHECKERS_INDEX = 4;
+    public static final int CHESS_INDEX = 5;
+    public static final int TOTAL_FRAGMENTS = 6;
+
+    public static final String GAME_KEY = "gameInit";
 
     // Public Instance Variables
     /** The Current Match History */
@@ -51,7 +55,7 @@ public enum GameManager {
 
     // Private instance variables
     /** Contains the list of all the fragments. */
-    private Fragment[] fragmentList = new Fragment[2];
+    private Fragment[] fragmentList = new Fragment[TOTAL_FRAGMENTS];
     /** Contains the fragment index */
     private int currentFragment;
 
@@ -63,8 +67,8 @@ public enum GameManager {
         fragmentList = new Fragment[4];
 
         // Set the current fragment to our default.
-        fragmentList[SETTINGS_INDEX] = new SettingsFragment();
-        sendNewGame(SETTINGS_INDEX, context);
+        fragmentList[INIT_INDEX] = new InitialFragment();
+        sendNewGame(INIT_INDEX, context);
     }
 
     /**
@@ -83,10 +87,15 @@ public enum GameManager {
             notification.setAction("Play Again!", new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     // Initiate a new TicTacToe game.
-                    if(getCurrentFragmentIndex() == TTT_INDEX) {
-                        String msg = (((TTTFragment) getFragment(TTT_INDEX)).mTurn ? "X" : "O")
+                    String msg;
+                    if(getCurrentFragmentIndex() == TTT_L_INDEX) {
+                        msg = (((LocalTTTFragment) getFragment(TTT_L_INDEX)).mTurn ? "X" : "O")
                                 + "\n" + "New Game";
-                        sendMessage(msg, TTT_INDEX);
+                        sendMessage(msg, TTT_L_INDEX);
+                    } else if (getCurrentFragmentIndex() == TTT_O_INDEX) {
+                        msg = (((TTTFragment) getFragment(TTT_O_INDEX)).mTurn ? "X" : "O")
+                                + "\n" + "New Game";
+                        sendMessage(msg, TTT_O_INDEX);
                     }
                 }
             });
@@ -132,14 +141,14 @@ public enum GameManager {
         //TODO: replace this with an implemented event handling system.
         switch(fragmentIndex) {
             default:
-            case GameManager.SETTINGS_INDEX:
                 break;
-            case GameManager.TTT_INDEX:
-                ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_INDEX)).messageHandler(msg);
+            case GameManager.TTT_L_INDEX:
+                ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_L_INDEX))
+                        .messageHandler(msg);
                 break;
-            case GameManager.CHECKERS_INDEX:
-                break;
-            case GameManager.CHESS_INDEX:
+            case GameManager.TTT_O_INDEX:
+                ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_O_INDEX))
+                        .messageHandler(msg);
                 break;
         }
     }
@@ -184,23 +193,32 @@ public enum GameManager {
      * @param msg (optional) sent to our current fragment.
      * @return true if the fragment index suggested is within our rights to access, false otherwise.
      */
-    private boolean setCurrentFragment(int fragmentIndex, final FragmentActivity context, String msg) {
+    public boolean setCurrentFragment(int fragmentIndex, final FragmentActivity context, String msg) {
         // TODO: allow for further fragment selection later.
-        if(fragmentIndex <= TTT_INDEX && fragmentIndex > -1) {
+        if(fragmentIndex <= TTT_O_INDEX && fragmentIndex > -1) {
             if (fragmentIndex != getCurrentFragmentIndex()) {
                 if(fragmentList[fragmentIndex] == null) {
                     switch(fragmentIndex) {
-                        case TTT_INDEX: fragmentList[TTT_INDEX] = new TTTFragment();
+                        case SETTINGS_INDEX: fragmentList[SETTINGS_INDEX] = new SettingsFragment();
                             break;
-                        case CHECKERS_INDEX: //fragmentList.add(new CheckersFragment());
+                        case TTT_L_INDEX: fragmentList[TTT_L_INDEX] = new LocalTTTFragment();
                             break;
-                        case CHESS_INDEX: //fragmentList.add(new ChessFragment());
+                        case TTT_O_INDEX: fragmentList[TTT_O_INDEX] = new TTTFragment();
+                            break;
+                        case CHECKERS_INDEX: // fragmentlist[CHECKERS_INDEX] = new CheckersFragment();
+                            break;
+                        case CHESS_INDEX: //fragmentList[CHESS_INDEX] = new ChessFragment();
                             break;
                     }
                 }
                 // Set up the new fragment in our fragment container.
                 currentFragment = fragmentIndex;
                 fragmentList[fragmentIndex].setArguments(context.getIntent().getExtras());
+                if(msg != null) {
+                    Bundle newGame = new Bundle();
+                    newGame.putString(GAME_KEY, msg);
+                    fragmentList[fragmentIndex].setArguments(newGame);
+                }
                 context.getSupportFragmentManager().beginTransaction()
                         .replace(R.id.game_pane_fragment_container, fragmentList[fragmentIndex])
                         .commit();

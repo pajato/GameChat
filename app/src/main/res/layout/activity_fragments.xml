@@ -19,8 +19,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/page_monitor"
         android:orientation="horizontal"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="26dp">
+        android:layout_gravity="bottom|center_horizontal">
 
         <TextView
             android:layout_gravity="center"

@@ -31,7 +31,7 @@ public class GameTest {
         // Move to the game pane and ensure that we are starting on the settings panel.
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
-        onView(withId(R.id.settings_panel))
+        onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
         // Open the action bar overflow menu, then initiate a new TTT game. Ensure it functions.
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
@@ -45,7 +45,7 @@ public class GameTest {
         onView(withText(R.string.new_game_settings))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.settings_panel))
+        onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
     }
 
@@ -56,10 +56,10 @@ public class GameTest {
                 .perform(click());
         onView(withId(R.id.game_pane_fragment_container))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.settings_panel))
+        onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
         // Click on the new Tic-Tac-Toe game section
-        onView(withId(R.id.settings_ttt))
+        onView(withId(R.id.init_ttt))
                 .check(matches(isDisplayed()))
                 .perform(click());
         onView(withId(R.id.ttt_panel))

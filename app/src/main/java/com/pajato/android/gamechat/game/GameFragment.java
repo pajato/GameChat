@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 /**
@@ -35,7 +35,7 @@ import com.pajato.android.gamechat.main.PaneManager;
  *
  * @author Bryan Scott
  */
-public class GameFragment extends BaseFragment{
+public class GameFragment extends BaseFragment {
 
     public GameFragment() {
         // Required empty public constructor
@@ -71,13 +71,17 @@ public class GameFragment extends BaseFragment{
                 break;
             // Otherwise, we can initiate a new game based on which game was chosen.
             case R.id.new_game_settings:
-                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity());
+                GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
                 break;
             case R.id.new_game_ttt:
-                GameManager.instance.sendNewGame(GameManager.TTT_INDEX, getActivity(), msg);
-                break;
+                if(GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_L_INDEX) {
+                    GameManager.instance.sendNewGame(GameManager.TTT_L_INDEX, getActivity(), msg);
+                } else if (GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_O_INDEX) {
+                    GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity(), msg);
+                }
+                    break;
             case R.id.new_game_checkers:
-                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
+                GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity());
                 break;
             case R.id.new_game_chess:
                 GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
@@ -108,16 +112,17 @@ public class GameFragment extends BaseFragment{
     private String getTurn() {
         switch(GameManager.instance.getCurrentFragmentIndex()) {
             default:
+            // These two cases should never be called in an impactful way.
+            case GameManager.INIT_INDEX:
+                return null;
             case GameManager.SETTINGS_INDEX:
-                // This should never be called in an impactful way.
                 return null;
-            case GameManager.TTT_INDEX:
-                return ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_INDEX))
+            case GameManager.TTT_L_INDEX:
+                return ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_L_INDEX))
                         .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
-            case GameManager.CHECKERS_INDEX:
-                return null;
-            case GameManager.CHESS_INDEX:
-                return null;
+            case GameManager.TTT_O_INDEX:
+                return ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_O_INDEX))
+                    .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
         }
     }
 
