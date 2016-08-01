@@ -94,8 +94,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Initialize the account manager. */
     public void init(final AppCompatActivity context) {
         // Build a sparse array of click key values.
-        mActionMap.put(R.integer.signIn, Actions.signIn);
-        mActionMap.put(R.integer.signOut, Actions.signOut);
+        mActionMap.put(R.id.signIn, Actions.signIn);
+        mActionMap.put(R.id.signOut, Actions.signOut);
     }
 
     /** Register the component during lifecycle resume events. */
@@ -117,8 +117,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Handle a sign in or sign out operation. */
-    @Subscribe
-    public void processClick(final ClickEvent event) {
+    @Subscribe public void processClick(final ClickEvent event) {
         // Case on the view's tag content.
         Actions action = mActionMap.get(event.getValue());
         if (action != null) {

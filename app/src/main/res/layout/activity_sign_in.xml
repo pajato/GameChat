@@ -1,25 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/sign_in_layout"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:gravity="center"
-             android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sign_in_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_100"
+    android:orientation="vertical"
+    android:weightSum="2">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:text="@string/sign_in"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:layout_gravity="center"/>
+        <ImageView
+            style="@style/ThemeOverlay.FirebaseIcon"
+            android:id="@+id/google_icon"
+            android:contentDescription="@string/desc_gamechat_logo"
+            android:src="@drawable/ic_launcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/title_bottom_margin"
+            android:text="@string/sign_in_title_text"
+            android:theme="@style/ThemeOverlay.MyTitleText" />
+
+        <TextView
+            android:id="@+id/status"
+            style="@style/ThemeOverlay.MyTextDetail"
+            android:text="@string/signed_out" />
+
+        <TextView
+            android:id="@+id/detail"
+            style="@style/ThemeOverlay.MyTextDetail"
+            tools:text="Firebase User ID: 123456789abc" />
+
+        <TextView
+            android:id="@+id/select_sign_in_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/section_margin"
+            android:gravity="center"
+            android:text="@string/select_sign_in_mode_text" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@color/grey_300">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/google_sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                tools:visibility="visible" />
+
+            <!-- add more provider sign in buttons here. -->
+
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/section_margin"
+            android:gravity="center"
+            android:text="@string/choice_text"/>
+
+        <LinearLayout
+            android:id="@+id/email_and_password_fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="visible"
+            tools:visibility="visible">
+
+            <EditText
+                android:id="@+id/field_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/hint_email"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+                android:id="@+id/field_password"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/hint_password"
+                android:inputType="textPassword" />
+
+        </LinearLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="doSignIn"
+            android:text="@string/sign_in"
+            android:theme="@style/ThemeOverlay.MyDarkButton" />
+
+    </LinearLayout>
+
+</LinearLayout>
