@@ -72,7 +72,7 @@ public class IntroActivity extends AppCompatActivity {
         // Establish the activity state and set up the intro layout.
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.intro_activity);
+        setContentView(R.layout.activity_intro);
 
         // Determine whether or not to enable button elevation animation. */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

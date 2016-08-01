@@ -19,16 +19,16 @@ package com.pajato.android.gamechat.event;
 
 import android.content.Context;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Provides a button click data model class.
  *
  * @author Paul Michael Reilly
  */
-@RequiredArgsConstructor(suppressConstructorProperties = true)
+@AllArgsConstructor(suppressConstructorProperties = true)
 @Data
 public class ClickEvent {
 
@@ -38,7 +38,7 @@ public class ClickEvent {
     @NonNull private Context context;
 
     /** The value associated with the click event. */
-    @NonNull private int value;
+    private int value;
 
     /** The class name of the object that generated the event. */
     @NonNull private String className;

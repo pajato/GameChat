@@ -22,17 +22,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
@@ -73,6 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     /** Process a button click on a given view by posting a button click event. */
     public void menuClick(final MenuItem item) {
+        // Post all menu button clicks.
         int value = item.getItemId();
         EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
     }
@@ -80,24 +75,33 @@ public class MainActivity extends AppCompatActivity
     /** Process a given button click event by logging it. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         String format = "Button click event on type: {%s} with value {%d}.";
-        Log.v(TAG, String.format(format, event.getClassName(), event.getValue()));
-    }
+        int value = event.getValue();
+        Log.v(TAG, String.format(format, event.getClassName(), value));
+
+        // Process the sign in and sign out button clicks.
+        switch (value) {
+            case R.id.currentProfile:
+            case R.id.signIn:
+            case R.id.signOut:
+                // On a sign in or sign out event, make sure the navigation drawer gets closed.
+                NavigationManager.instance.closeDrawerIfOpen(this);
+                break;
+            default:
+                // Ignore everything else.
+                break;
+        }    }
 
     @Override public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        NavigationManager.instance.closeDrawerIfOpen(this);
+        super.onBackPressed();
     }
 
+    /** Process a navigation menu item click by posting a click event. */
     @Override public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
         int value = item.getItemId();
         EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        NavigationManager.instance.closeDrawerIfOpen(this);
         return true;
     }
 
@@ -183,25 +187,14 @@ public class MainActivity extends AppCompatActivity
         // Set up the app components: toolbar and navigation drawer.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        initNavigationDrawer(toolbar);
-    }
+        NavigationManager.instance.init(this, toolbar);
 
-    /** Initialize the navigation drawer. */
-    private void initNavigationDrawer(final Toolbar toolbar) {
-        // Set up the action bar drawer toggle.
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final int OPEN_ID = R.string.navigation_drawer_action_open;
-        final int CLOSE_ID = R.string.navigation_drawer_action_close;
-        ActionBarDrawerToggle toggle =
-            new ActionBarDrawerToggle(this, drawer, toolbar, OPEN_ID, CLOSE_ID);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        // Set up the nav view item listener to process clicks in this class.
+        // Set up the handle navigation menu item clicks.
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+    /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
         // If there is an account, set up the navigation drawer header accordingly.
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -209,32 +202,11 @@ public class MainActivity extends AppCompatActivity
         if (header == null) header =  navigationView.inflateHeaderView(R.layout.nav_header_main);
         Account account = event.getAccount();
         if (account != null) {
-            // There is an account.  Set up the icon, display name and email address and lose the
-            // sign in button.
-            ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageURI(account.getAccountUrl());
-            // TODO: Add Glide code to load the image.
-            TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
-            name.setVisibility(View.VISIBLE);
-            name.setText(account.getDisplayName());
-            TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
-            email.setVisibility(View.VISIBLE);
-            email.setText(account.getAccountId());
-            Button button = (Button) header.findViewById(R.id.signInOutButton);
-            button.setTag(R.integer.signOut);
-            button.setText(getString(R.string.sign_out));
+            // There is an account.  Set it up in the header.
+            NavigationManager.instance.setAccount(account, header);
         } else {
-            // There is no current user.  Hide the normal widgets and show the sign in button.
-            ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-            icon.setVisibility(View.GONE);
-            TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
-            name.setVisibility(View.GONE);
-            TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
-            email.setVisibility(View.GONE);
-            Button button = (Button) header.findViewById(R.id.signInOutButton);
-            button.setTag(R.integer.signIn);
-            button.setText(getString(R.string.sign_in));
+            // There is no current user.  Provide the sign in button in the header.
+            NavigationManager.instance.setNoAccount(header);
         }
     }
 
