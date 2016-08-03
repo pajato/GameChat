@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
@@ -329,7 +328,7 @@ public class TTTFragment extends BaseFragment {
         // If the board map is size 1, we know that there is only the turn stored in it, and send a
         // new game out.
         if(mBoardMap.size() == 1) {
-            GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity(),
+            GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(),
                     getTurn(mTurn) + "\n" + getString(R.string.new_game));
         // Otherwise, we'll need to comb through the board and replace the remaining pieces.
         } else {

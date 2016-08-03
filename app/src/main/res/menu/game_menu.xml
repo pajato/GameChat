@@ -9,7 +9,7 @@
         android:orderInCategory="0"/>
     <item
         android:id="@+id/new_game_settings"
-        android:title="@string/new_game_settings"
+        android:title="@string/new_game_init"
         app:showAsAction="never"
         android:orderInCategory="97" />
     <item

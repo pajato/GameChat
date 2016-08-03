@@ -19,9 +19,6 @@ package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,37 +26,38 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 
 public class InitialFragment extends BaseFragment {
+    private View mLayout;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_initial, container, false);
+        mLayout = inflater.inflate(R.layout.fragment_initial, container, false);
+
+        // Handle Tic-Tac-Toe games.
+        View ttt = mLayout.findViewById(R.id.init_ttt);
+        ttt.setOnClickListener(new ClickHandler());
+        View tttButton = mLayout.findViewById(R.id.init_ttt_button);
+        tttButton.setOnClickListener(new ClickHandler());
+
+        // Handle Checkers Games.
+        View checkers = mLayout.findViewById(R.id.init_checkers);
+        checkers.setOnClickListener(new ClickHandler());
+        View checkersButton = mLayout.findViewById(R.id.init_checkers_button);
+        checkersButton.setOnClickListener(new ClickHandler());
+
+        return mLayout;
     }
 
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-
-        View ttt = getActivity().findViewById(R.id.init_ttt);
-        ttt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch(v.getId()) {
-                    case R.id.init_ttt_button:
-                    case R.id.init_ttt:
-                        GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                                getString(R.string.new_game_ttt));
-                        break;
-                    case R.id.init_checkers:
-                        break;
-                    case R.id.init_chess:
-                        break;
-                }
+    private class ClickHandler implements View.OnClickListener {
+        @Override public void onClick(View v) {
+            if(v.getId() == R.id.init_ttt || v.getId() == R.id.init_ttt_button) {
+                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                        getString(R.string.new_game_ttt));
+            } else if (v.getId() == R.id.init_checkers || v.getId() == R.id.init_checkers_button) {
+                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                        getString(R.string.new_game_checkers));
             }
-        });
-    }
-
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        }
     }
 }

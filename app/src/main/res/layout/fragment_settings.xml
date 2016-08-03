@@ -33,7 +33,7 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ttt_online_button"
+                android:id="@+id/settings_online_button"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ttt_local_button"
+                android:id="@+id/settings_local_button"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -100,7 +100,7 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ttt_computer_button"
+                android:id="@+id/settings_computer_button"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"

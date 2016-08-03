@@ -441,7 +441,7 @@ public class ChatFragment extends BaseFragment
                     // Start a new Tic-Tac-Toe game
                     case R.id.fab_ttt:
                         if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
-                        GameManager.instance.sendNewGame(GameManager.TTT_L_INDEX, getActivity());
+                        GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity());
                         break;
                     // Navigate to the Game Settings panel
                     case R.id.fab_new_game:
