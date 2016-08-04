@@ -51,7 +51,7 @@
     <string name="new_game">New Game</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
     <string name="new_game_chess">New Game (Chess)</string>
-    <string name="new_game_settings">New Game (Settings)</string>
+    <string name="new_game_init">Play a New Game</string>
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="oValue">O</string>
     <string name="play_again">Play Again!</string>
@@ -63,6 +63,7 @@
     <string name="play_locally">Play Locally with a Friend!</string>
     <string name="play_ttt">Play Tic-Tac-Toe!</string>
     <string name="playing">Playing…</string>
+    <string name="playing_checkers">Playing Checkers!</string>
     <string name="playing_ttt">Playing Tic-Tac-Toe!</string>
     <string name="register">Register</string>
     <string name="register_button_text">Sign in to your account or register a new one to have fun with friends and family.</string>

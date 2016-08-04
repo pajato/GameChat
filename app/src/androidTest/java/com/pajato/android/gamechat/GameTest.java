@@ -42,7 +42,7 @@ public class GameTest {
                 .check(matches(isDisplayed()));
         // Reopen the action bar overflow menu, then ensure returning to the settings pane works.
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText(R.string.new_game_settings))
+        onView(withText(R.string.new_game_init))
                 .check(matches(isDisplayed()))
                 .perform(click());
         onView(withId(R.id.init_panel))

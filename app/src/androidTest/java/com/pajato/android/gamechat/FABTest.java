@@ -41,7 +41,7 @@ public class FABTest {
                 .check(matches(isDisplayed()));
         onView(withText(R.string.new_chat_favorite_room))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.new_game_settings))
+        onView(withText(R.string.new_game_init))
                 .check(matches(isDisplayed()));
         onView(withText(R.string.new_game_ttt))
                 .check(matches(isDisplayed()));
@@ -69,7 +69,7 @@ public class FABTest {
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Initiate a new settings pane and return to the settings pane
-        onView(withText(R.string.new_game_settings))
+        onView(withText(R.string.new_game_init))
                 .perform(click());
         onView(withId(R.id.game_pane_fragment_container))
                 .check(matches(isDisplayed()));

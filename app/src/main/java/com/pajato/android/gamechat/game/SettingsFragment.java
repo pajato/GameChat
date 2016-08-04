@@ -19,19 +19,24 @@ public class SettingsFragment extends BaseFragment {
     private View mMain;
     private boolean isValidUser = false;
 
+    private ImageButton mComputer;
+    private ImageButton mLocal;
+    private ImageButton mOnline;
+
     public SettingsFragment() {
 
     }
 
-    @Override public void setArguments(Bundle args) {
+    @Override public void setArguments(final Bundle args) {
+        // Grab the game argument that we are accepting and creating settings for.
         if(args != null && args.containsKey(GameManager.GAME_KEY)) {
             game = args.getString(GameManager.GAME_KEY);
         }
         super.setArguments(args);
     }
 
-    @Override public View onCreateView(LayoutInflater layoutInflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override public View onCreateView(final LayoutInflater layoutInflater,
+                                       final ViewGroup container, final Bundle savedInstanceState) {
         mMain = layoutInflater.inflate(R.layout.fragment_settings, container, false);
         TextView title = (TextView) mMain.findViewById(R.id.settings_title);
 
@@ -78,34 +83,64 @@ public class SettingsFragment extends BaseFragment {
             }
         });
 
+        // Setup the references to the game option buttons.
+        mLocal = (ImageButton) mMain.findViewById(R.id.settings_local_button);
+        mOnline = (ImageButton) mMain.findViewById(R.id.settings_online_button);
+        mComputer = (ImageButton) mMain.findViewById(R.id.settings_computer_button);
+
         // Handle the game-specific portions of the layout.
         if(game.equals(getString(R.string.new_game_ttt))) {
             title.setText(R.string.playing_ttt);
             setupTTT();
+        } else if(game.equals(getString(R.string.new_game_checkers))) {
+            title.setText(R.string.playing_checkers);
+            setupCheckers();
         }
         return mMain;
     }
 
+    /**
+     * Setup the Tic-Tac-Toe game creation invitation onClicks for Local, Online and Computer games.
+     */
     private void setupTTT() {
-        ImageButton local = (ImageButton) mMain.findViewById(R.id.ttt_local_button);
-        ImageButton online = (ImageButton) mMain.findViewById(R.id.ttt_online_button);
-        ImageButton computer = (ImageButton) mMain.findViewById(R.id.ttt_computer_button);
-
-        local.setOnClickListener(new View.OnClickListener() {
+        mLocal.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                GameManager.instance.sendNewGame(GameManager.TTT_L_INDEX, getActivity());
+                GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity());
             }
         });
-        online.setOnClickListener(new View.OnClickListener() {
+        mOnline.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if(isValidUser) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity());
+                    GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity());
                 }
             }
         });
-        computer.setOnClickListener(new View.OnClickListener() {
+        mComputer.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 //GameManager.instance.sendNewGame(GameManager.TTT_C_INDEX, getActivity());
+            }
+        });
+    }
+
+    /**
+     * Setup the Checkers game creation invitation onClicks for Local, Online and Computer games.
+     */
+    private void setupCheckers() {
+        mLocal.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
+            }
+        });
+        mOnline.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if(isValidUser) {
+                    //GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
+                }
+            }
+        });
+        mComputer.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                //GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
             }
         });
     }

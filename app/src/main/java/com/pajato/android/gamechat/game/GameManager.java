@@ -37,8 +37,8 @@ public enum GameManager {
     // Public Class Constants
     public static final int INIT_INDEX = 0;
     public static final int SETTINGS_INDEX = 1;
-    public static final int TTT_L_INDEX = 2;
-    public static final int TTT_O_INDEX = 3;
+    public static final int TTT_LOCAL_INDEX = 2;
+    public static final int TTT_ONLINE_INDEX = 3;
     public static final int CHECKERS_INDEX = 4;
     public static final int CHESS_INDEX = 5;
     public static final int TOTAL_FRAGMENTS = 6;
@@ -64,7 +64,7 @@ public enum GameManager {
     public void init(final FragmentActivity context) {
         currentFragment = -1;
         mInstructions.clear();
-        fragmentList = new Fragment[4];
+        fragmentList = new Fragment[TOTAL_FRAGMENTS];
 
         // Set the current fragment to our default.
         fragmentList[INIT_INDEX] = new InitialFragment();
@@ -88,14 +88,17 @@ public enum GameManager {
                 @Override public void onClick(View v) {
                     // Initiate a new TicTacToe game.
                     String msg;
-                    if(getCurrentFragmentIndex() == TTT_L_INDEX) {
-                        msg = (((LocalTTTFragment) getFragment(TTT_L_INDEX)).mTurn ? "X" : "O")
+                    if(getCurrentFragmentIndex() == TTT_LOCAL_INDEX) {
+                        msg = (((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).mTurn ? "X" : "O")
                                 + "\n" + "New Game";
-                        sendMessage(msg, TTT_L_INDEX);
-                    } else if (getCurrentFragmentIndex() == TTT_O_INDEX) {
-                        msg = (((TTTFragment) getFragment(TTT_O_INDEX)).mTurn ? "X" : "O")
+                        sendMessage(msg, TTT_LOCAL_INDEX);
+                    } else if (getCurrentFragmentIndex() == TTT_ONLINE_INDEX) {
+                        msg = (((TTTFragment) getFragment(TTT_ONLINE_INDEX)).mTurn ? "X" : "O")
                                 + "\n" + "New Game";
-                        sendMessage(msg, TTT_O_INDEX);
+                        sendMessage(msg, TTT_ONLINE_INDEX);
+                    } else if (getCurrentFragmentIndex() == CHECKERS_INDEX) {
+                        msg = (((CheckersFragment) getFragment(CHECKERS_INDEX)).mTurn ?
+                                "Blue" : "Yellow") + "\n" + "New Game";
                     }
                 }
             });
@@ -142,12 +145,16 @@ public enum GameManager {
         switch(fragmentIndex) {
             default:
                 break;
-            case GameManager.TTT_L_INDEX:
-                ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_L_INDEX))
+            case GameManager.TTT_LOCAL_INDEX:
+                ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_LOCAL_INDEX))
                         .messageHandler(msg);
                 break;
-            case GameManager.TTT_O_INDEX:
-                ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_O_INDEX))
+            case GameManager.TTT_ONLINE_INDEX:
+                ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_ONLINE_INDEX))
+                        .messageHandler(msg);
+                break;
+            case GameManager.CHECKERS_INDEX:
+                ((CheckersFragment) GameManager.instance.getFragment(GameManager.CHECKERS_INDEX))
                         .messageHandler(msg);
                 break;
         }
@@ -194,18 +201,17 @@ public enum GameManager {
      * @return true if the fragment index suggested is within our rights to access, false otherwise.
      */
     public boolean setCurrentFragment(int fragmentIndex, final FragmentActivity context, String msg) {
-        // TODO: allow for further fragment selection later.
-        if(fragmentIndex <= TTT_O_INDEX && fragmentIndex > -1) {
+        if(fragmentIndex <= CHECKERS_INDEX && fragmentIndex > -1) {
             if (fragmentIndex != getCurrentFragmentIndex()) {
                 if(fragmentList[fragmentIndex] == null) {
                     switch(fragmentIndex) {
                         case SETTINGS_INDEX: fragmentList[SETTINGS_INDEX] = new SettingsFragment();
                             break;
-                        case TTT_L_INDEX: fragmentList[TTT_L_INDEX] = new LocalTTTFragment();
+                        case TTT_LOCAL_INDEX: fragmentList[TTT_LOCAL_INDEX] = new LocalTTTFragment();
                             break;
-                        case TTT_O_INDEX: fragmentList[TTT_O_INDEX] = new TTTFragment();
+                        case TTT_ONLINE_INDEX: fragmentList[TTT_ONLINE_INDEX] = new TTTFragment();
                             break;
-                        case CHECKERS_INDEX: // fragmentlist[CHECKERS_INDEX] = new CheckersFragment();
+                        case CHECKERS_INDEX: fragmentList[CHECKERS_INDEX] = new CheckersFragment();
                             break;
                         case CHESS_INDEX: //fragmentList[CHESS_INDEX] = new ChessFragment();
                             break;

@@ -51,7 +51,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/init_ttt"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp">
             <ImageButton
@@ -59,11 +58,12 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/init_ttt_button"
                 android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_ttt"/>
+                android:contentDescription="@string/play_ttt"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/init_ttt"
                 android:text="@string/play_ttt"
                 android:textSize="20sp"
                 android:layout_marginTop="20dp"/>
@@ -74,17 +74,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/init_checkers"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp">
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/init_checkers_button"
                 android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_checkers"/>
+                android:contentDescription="@string/play_checkers"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/init_checkers"
                 android:text="@string/play_checkers"
                 android:textSize="20sp"
                 android:layout_marginTop="20dp"/>
@@ -94,17 +95,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/init_chess"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp">
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/init_chess_button"
                 android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/new_game_chess"/>
+                android:contentDescription="@string/play_chess"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/init_chess"
                 android:text="@string/play_chess"
                 android:textSize="20sp"
                 android:layout_marginTop="20dp"/>

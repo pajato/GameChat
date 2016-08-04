@@ -11,7 +11,7 @@
 
     <item
         android:id="@+id/fab_new_game"
-        android:title="@string/new_game_settings" />
+        android:title="@string/new_game_init" />
 
     <item
         android:id="@+id/fab_ttt"

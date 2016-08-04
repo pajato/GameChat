@@ -74,14 +74,17 @@ public class GameFragment extends BaseFragment {
                 GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
                 break;
             case R.id.new_game_ttt:
-                if(GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_L_INDEX) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_L_INDEX, getActivity(), msg);
-                } else if (GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_O_INDEX) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity(), msg);
+                if(GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_LOCAL_INDEX) {
+                    GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(), msg);
+                } else if (GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_ONLINE_INDEX) {
+                    GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(), msg);
+                } else {
+                    GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                            getString(R.string.new_game_ttt));
                 }
                     break;
             case R.id.new_game_checkers:
-                GameManager.instance.sendNewGame(GameManager.TTT_O_INDEX, getActivity());
+                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(), msg);
                 break;
             case R.id.new_game_chess:
                 GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
@@ -117,12 +120,18 @@ public class GameFragment extends BaseFragment {
                 return null;
             case GameManager.SETTINGS_INDEX:
                 return null;
-            case GameManager.TTT_L_INDEX:
-                return ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_L_INDEX))
+            case GameManager.TTT_LOCAL_INDEX:
+                return ((LocalTTTFragment) GameManager.instance
+                        .getFragment(GameManager.TTT_LOCAL_INDEX))
                         .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
-            case GameManager.TTT_O_INDEX:
-                return ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_O_INDEX))
-                    .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
+            case GameManager.TTT_ONLINE_INDEX:
+                return ((TTTFragment) GameManager.instance
+                        .getFragment(GameManager.TTT_ONLINE_INDEX))
+                        .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
+            case GameManager.CHECKERS_INDEX:
+                return ((CheckersFragment) GameManager.instance
+                        .getFragment(GameManager.CHECKERS_INDEX))
+                        .mTurn ? "Blue" : "Yellow";
         }
     }
 
