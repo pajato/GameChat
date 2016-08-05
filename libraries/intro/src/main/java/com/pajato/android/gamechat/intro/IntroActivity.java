@@ -37,7 +37,6 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
 import static android.view.animation.AnimationUtils.loadAnimation;

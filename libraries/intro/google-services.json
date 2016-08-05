@@ -1,0 +1,195 @@
+{
+  "project_info": {
+    "project_number": "333615439696",
+    "firebase_url": "https://gamechat-1271.firebaseio.com",
+    "project_id": "gamechat-1271",
+    "storage_bucket": "gamechat-1271.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333615439696:android:3b3baffc624c885b",
+        "android_client_info": {
+          "package_name": "com.pajato.android.gamechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333615439696-7l8e4ke6s8gr0t79s660j061ul6ohuj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pajato.android.gamechat",
+            "certificate_hash": "F968ADA18E5E939D5ADCAB5C1F232D7AF3361B07"
+          }
+        },
+        {
+          "client_id": "333615439696-o9m1crps4hvlc8eltsd4bff566rdikq1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pajato.android.gamechat",
+            "certificate_hash": "F78390258A2613B5D38768D96745957A91D377DD"
+          }
+        },
+        {
+          "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNTXI36ztNW7sFxy27I3Mp8olGd-2c38g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333615439696:android:dd52f64fbf5a13a9",
+        "android_client_info": {
+          "package_name": "com.pajato.android.shoppinglistplusplus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333615439696-8qokceetl4fke8ejgb7864nco162r9fs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pajato.android.shoppinglistplusplus",
+            "certificate_hash": "F78390258A2613B5D38768D96745957A91D377DD"
+          }
+        },
+        {
+          "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNTXI36ztNW7sFxy27I3Mp8olGd-2c38g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333615439696:android:e2dcaa0c2c1cf236",
+        "android_client_info": {
+          "package_name": "com.pajato.android.gamechat.signin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333615439696-8rdbpkdlp862qfqm62g48q5pfl8du1i0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pajato.android.gamechat.signin",
+            "certificate_hash": "F78390258A2613B5D38768D96745957A91D377DD"
+          }
+        },
+        {
+          "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNTXI36ztNW7sFxy27I3Mp8olGd-2c38g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333615439696:android:22f1adda3c0c7f2f",
+        "android_client_info": {
+          "package_name": "com.pajato.android.gamechat.intro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333615439696-ih2h1de3arns6a6lktevgdadtt5jrli2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pajato.android.gamechat.intro",
+            "certificate_hash": "F78390258A2613B5D38768D96745957A91D377DD"
+          }
+        },
+        {
+          "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNTXI36ztNW7sFxy27I3Mp8olGd-2c38g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333615439696-stpog630b1l85hmb0q2gi4q9q5886kgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.intro;
 
-import com.pajato.android.gamechat.R;
-
 /**
  * Provide an enumeration of panels used in the app.
  */
@@ -38,12 +36,12 @@ public enum Pages {
     public int messageId;
 
     /**
-     * Create the enum value instance given a title resource id, layout resource id and fragment
+     * Create the enum value instance given an icon, a title resource id, and a message resources id.
      * class..
      *
      * @param iconId The given title id.
-     * @param layoutId The given layout id.
-     * @param fragmentClass The given layout class.
+     * @param titleId The given title resource id.
+     * @param messageId The given message resource id.
      */
     Pages(final int iconId, final int titleId, final int messageId) {
         this.iconId = iconId;

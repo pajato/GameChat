@@ -57,17 +57,20 @@
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center">
             <Button
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0"
+                android:layout_marginRight="16dp"
+                android:style="@style/Widget.AppCompat.Button.Colored"
                 android:onClick="doSignIn"
                 android:text="@string/sign_in"/>
             <Button
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.0"
+                android:layout_marginLeft="16dp"
+                android:style="@style/Widget.AppCompat.Button.Colored"
                 android:onClick="doRegister"
                 android:text="@string/register"/>
         </LinearLayout>

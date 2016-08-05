@@ -26,7 +26,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.pajato.android.gamechat.R;
 
 public class SignInActivity extends AppCompatActivity
     implements OnConnectionFailedListener, OnClickListener, AuthStateListener,
@@ -69,10 +68,10 @@ public class SignInActivity extends AppCompatActivity
 
     /** Deal with the button clicks. */
     @Override public void onClick(View v) {
-        switch (v.getId()) {
-        case R.id.google_sign_in_button:
+        int id = v.getId();
+        if (id == R.id.google_sign_in_button) {
             googleSignIn();
-            break;
+
         }
     }
 
@@ -142,8 +141,6 @@ public class SignInActivity extends AppCompatActivity
         // Establish the main layout, status and detail views and setup the click listeners on the buttons.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-        mStatusTextView = (TextView) findViewById(R.id.status);
-        mDetailTextView = (TextView) findViewById(R.id.detail);
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
     }
 
@@ -178,14 +175,8 @@ public class SignInActivity extends AppCompatActivity
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.sign_in_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
             findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
         } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
             findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
         }
     }
