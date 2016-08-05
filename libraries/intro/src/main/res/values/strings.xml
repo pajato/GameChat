@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Game Chat</string>
+    <string name="intro_chat_message">Public private secure messaging with any Google user</string>
+    <string name="intro_chat_title">Chat</string>
+    <string name="intro_game_message">Play popular well known games with other GameChat users or against the computer</string>
+    <string name="intro_game_title">Game</string>
+    <string name="intro_home_message">Chat and play games with friends and family</string>
+    <string name="intro_home_title">GameChat</string>
+    <string name="intro_levels_message">Relaxed games for teaching and learning as well as competiitve levels for serious players</string>
+    <string name="intro_levels_title">Levels</string>
+    <string name="intro_page_circle">\u25CF</string>
+    <string name="register">Register</string>
+    <string name="register_button_text">Sign in or register a new account to have fun with friends and family.</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_in_title_text">Sign In</string>
+</resources>

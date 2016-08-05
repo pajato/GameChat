@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato Technologies LLC.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+
+Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
+-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -18,37 +36,27 @@
 
         <ImageView
             style="@style/ThemeOverlay.FirebaseIcon"
-            android:id="@+id/google_icon"
-            android:contentDescription="@string/desc_gamechat_logo"
-            android:src="@drawable/ic_launcher"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/title_text"
+            android:id="@+id/signInIcon"
+            android:contentDescription="@string/descSignInLogo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/title_bottom_margin"
-            android:text="@string/sign_in_title_text"
-            android:theme="@style/ThemeOverlay.MyTitleText" />
+            tools:src="@drawable/sign_in_icon" />
 
         <TextView
-            android:id="@+id/status"
-            style="@style/ThemeOverlay.MyTextDetail"
-            android:text="@string/signed_out" />
-
-        <TextView
-            android:id="@+id/detail"
-            style="@style/ThemeOverlay.MyTextDetail"
-            tools:text="Firebase User ID: 123456789abc" />
+            android:id="@+id/signInTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/titleBottomMargin"
+            android:theme="@style/ThemeOverlay.MyTitleText"
+            tools:text="Sign In"/>
 
         <TextView
             android:id="@+id/select_sign_in_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/section_margin"
+            android:layout_margin="@dimen/sectionMargin"
             android:gravity="center"
-            android:text="@string/select_sign_in_mode_text" />
+            android:text="@string/selectSignInModeText" />
 
     </LinearLayout>
 
@@ -80,7 +88,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/section_margin"
+            android:layout_margin="@dimen/sectionMargin"
             android:gravity="center"
             android:text="@string/choice_text"/>
 
@@ -113,11 +121,12 @@
         </LinearLayout>
 
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorPrimary"
             android:onClick="doSignIn"
-            android:text="@string/sign_in"
-            android:theme="@style/ThemeOverlay.MyDarkButton" />
+            android:text="@string/signIn"/>
 
     </LinearLayout>
 

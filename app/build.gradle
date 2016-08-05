@@ -46,6 +46,8 @@ gradle.projectsEvaluated {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':libraries:signin')
+    compile project(':libraries:intro')
 
     // Android
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
