@@ -23,7 +23,7 @@ local.properties
 proguard/
 
 # The Google Services plugin configuration file
-app/google-services.json
+google-services.json
 
 # Log Files
 *.log
