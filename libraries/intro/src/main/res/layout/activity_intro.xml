@@ -1,8 +1,26 @@
-<FrameLayout android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:background="#fafafa"
-             xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato Technologies LLC.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#fafafa">
 
     <FrameLayout
         android:layout_gravity="top"
@@ -54,23 +72,23 @@
             android:id="@+id/register_button"/>
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
             android:gravity="center">
             <Button
+                style="@style/IntroTheme.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="16dp"
-                android:style="@style/Widget.AppCompat.Button.Colored"
                 android:onClick="doSignIn"
                 android:text="@string/sign_in"/>
             <Button
+                style="@style/IntroTheme.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
-                android:style="@style/Widget.AppCompat.Button.Colored"
                 android:onClick="doRegister"
                 android:text="@string/register"/>
         </LinearLayout>
