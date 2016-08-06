@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="feedback">0</integer>
     <integer name="learnMore">1</integer>
-    <integer name="settings">2</integer>
-    <integer name="signIn">3</integer>
-    <integer name="signOut">4</integer>
 </resources>

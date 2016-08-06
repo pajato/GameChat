@@ -24,4 +24,7 @@ http://www.gnu.org/licenses
     <string name="loading">Loading</string>
     <string name="selectSignInModeText">Choose to sign in with a social network or use a registered email address and password.</string>
     <string name="signIn">Sign In</string>
+    <string name="sign_in_with_email">Sign in with Email"</string>
+    <string name="sign_in_with_facebook">Sign in with Facebook"</string>
+    <string name="sign_in_with_google">Sign in with Google"</string>
 </resources>
