@@ -24,6 +24,40 @@ http://www.gnu.org/licenses
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BaseTheme.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:drawablePadding">20dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:layout_marginTop">8dp</item>"
+        <item name="android:layout_marginBottom">8dp</item>"
+        <item name="android:layout_marginLeft">24dp</item>
+        <item name="android:layout_marginRight">24dp</item>
+        <item name="android:gravity">center|center_vertical</item>
+        <item name="android:typeface">normal</item>
+    </style>
+
+    <style name="EmailButton" parent="BaseTheme.Button">
+        <item name="android:drawableLeft">@drawable/ic_email_white_18dp</item>
+        <item name="android:background">@drawable/idp_button_background_email</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+
+    <style name="FacebookButton" parent="BaseTheme.Button">
+        <item name="android:drawableLeft">@drawable/com_facebook_button_icon_white</item>
+        <item name="android:background">@drawable/idp_button_background_facebook</item>
+        <item name="android:textColor">@color/com_facebook_button_text_color</item>
+    </style>
+
+    <style name="GoogleButton" parent="BaseTheme.Button">
+        <item name="android:drawableLeft">@drawable/logo_googleg_color_18dp</item>
+        <item name="android:background">@drawable/idp_button_background_google</item>
+        <item name="android:textColor">#757575</item>
+    </style>
+
     <!-- Dark Buttons -->
     <style name="ThemeOverlay.MyDarkButton" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/colorAccent</item>

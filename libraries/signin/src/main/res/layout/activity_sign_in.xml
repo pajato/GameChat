@@ -24,13 +24,11 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_100"
-    android:orientation="vertical"
-    android:weightSum="2">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -40,7 +38,7 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
             android:contentDescription="@string/descSignInLogo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:src="@drawable/sign_in_icon" />
+            android:src="@drawable/sign_in_icon" />
 
         <TextView
             android:id="@+id/signInTitleText"
@@ -48,7 +46,7 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/titleBottomMargin"
             android:theme="@style/ThemeOverlay.MyTitleText"
-            tools:text="Sign In"/>
+            android:text="@string/signIn" />
 
         <TextView
             android:id="@+id/select_sign_in_mode"
@@ -62,72 +60,23 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
 
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:gravity="center"
         android:background="@color/grey_300">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/google_sign_in_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="visible"
-                tools:visibility="visible" />
-
-            <!-- add more provider sign in buttons here. -->
-
-        </LinearLayout>
-
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/sectionMargin"
-            android:gravity="center"
-            android:text="@string/choice_text"/>
-
-        <LinearLayout
-            android:id="@+id/email_and_password_fields"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:visibility="visible"
-            tools:visibility="visible">
-
-            <EditText
-                android:id="@+id/field_email"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_email"
-                android:inputType="textEmailAddress" />
-
-            <EditText
-                android:id="@+id/field_password"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_password"
-                android:inputType="textPassword" />
-
-        </LinearLayout>
-
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@color/colorPrimary"
-            android:onClick="doSignIn"
-            android:text="@string/signIn"/>
-
+            android:id="@+id/google_provider_button"
+            style="@style/GoogleButton"
+            android:text="@string/sign_in_with_google"/>
+        <Button
+            android:id="@+id/facebook_provider_button"
+            style="@style/FacebookButton"
+            android:text="@string/sign_in_with_facebook"/>
+        <Button
+            android:id="@+id/email_provider_button"
+            style="@style/EmailButton"
+            android:text="@string/sign_in_with_email"/>
     </LinearLayout>
 
 </LinearLayout>

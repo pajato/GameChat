@@ -1,0 +1,27 @@
+<resources>
+    <!--
+    The Facebook Application ID associated with this Android application. This
+    must be overridden by users of FirebaseUI auth in order to support Facebook
+    accounts in the authentication flow.
+
+    See:
+    https://developers.facebook.com/docs/facebook-login/android
+    -->
+    <string name="facebook_application_id" translatable="false">477157459160674</string>
+
+
+    <!--
+    The facebook permissions that this Android Application will request from the
+    user. Users of FirebaseUI auth can add additional items with the additional
+    permissions they want to request.
+
+    See:
+    https://developers.facebook.com/docs/facebook-login/android
+    https://developers.facebook.com/docs/facebook-login/permissions
+    -->
+    <array name="facebook_permissions">
+        <item>public_profile</item>
+        <item>email</item>
+    </array>
+
+</resources>

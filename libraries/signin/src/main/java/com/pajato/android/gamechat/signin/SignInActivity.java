@@ -69,7 +69,7 @@ public class SignInActivity extends AppCompatActivity
     /** Deal with the button clicks. */
     @Override public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.google_sign_in_button) {
+        if (id == R.id.google_provider_button) {
             googleSignIn();
 
         }
@@ -141,7 +141,7 @@ public class SignInActivity extends AppCompatActivity
         // Establish the main layout, status and detail views and setup the click listeners on the buttons.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
+        findViewById(R.id.google_provider_button).setOnClickListener(this);
     }
 
     // Private instance methods.
@@ -175,9 +175,9 @@ public class SignInActivity extends AppCompatActivity
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.google_provider_button).setVisibility(View.GONE);
         } else {
-            findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.google_provider_button).setVisibility(View.VISIBLE);
         }
     }
 

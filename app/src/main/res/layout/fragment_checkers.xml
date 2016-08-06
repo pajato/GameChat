@@ -31,7 +31,6 @@
         android:id="@+id/checkers_turn_display"
         android:src="@drawable/ic_account_circle_black_36dp"
 
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
 

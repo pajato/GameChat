@@ -34,6 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/settings_online_button"
+                android:contentDescription="@string/play_another_user_desc"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -47,7 +48,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginLeft="32dp"
             android:layout_marginStart="32dp">
             <TextView
                 android:layout_width="wrap_content"
@@ -63,7 +63,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginLeft="32dp"
             android:layout_marginStart="32dp">
             <TextView
                 android:layout_width="wrap_content"
@@ -84,6 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/settings_local_button"
+                android:contentDescription="@string/play_locally_desc"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -101,6 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/settings_computer_button"
+                android:contentDescription="@string/play_computer_desc"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -118,6 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/ttt_invite_button"
+                android:contentDescription="@string/invite_new_user_desc"
                 android:src="@drawable/ic_launcher"/>
             <TextView
                 android:layout_width="wrap_content"
