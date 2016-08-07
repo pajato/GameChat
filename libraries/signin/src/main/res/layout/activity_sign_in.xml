@@ -23,7 +23,6 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
     android:id="@+id/sign_in_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_100"
     android:orientation="vertical">
 
     <LinearLayout
@@ -63,8 +62,7 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:background="@color/grey_300">
+        android:gravity="center">
         <Button
             android:id="@+id/google_provider_button"
             style="@style/GoogleButton"
