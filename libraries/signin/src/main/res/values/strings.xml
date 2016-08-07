@@ -17,10 +17,7 @@ http://www.gnu.org/licenses
 -->
 <resources>
     <string name="app_name">SignIn</string>
-    <string name="choice_text">or</string>
     <string name="descSignInLogo">Sign in logo</string>
-    <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
     <string name="loading">Loading</string>
     <string name="selectSignInModeText">Choose to sign in with a social network or use a registered email address and password.</string>
     <string name="signIn">Sign In</string>

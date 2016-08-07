@@ -84,7 +84,7 @@ dependencies {
     provided "org.projectlombok:lombok:$rootProject.ext.lombokVersion"
     apt "org.projectlombok:lombok:$rootProject.ext.lombokVersion"
 
-    androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
+    //androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
 
     // Android Testing Support Library's runner and rules. In the
     // following, exclude the support annotations library to resolve a
