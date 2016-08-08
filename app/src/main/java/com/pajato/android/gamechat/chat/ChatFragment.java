@@ -447,6 +447,7 @@ public class ChatFragment extends BaseFragment
                     case R.id.fab_new_game:
                         if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
                         GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
+                        break;
                     default:
                         break;
                 }

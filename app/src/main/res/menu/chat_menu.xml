@@ -3,15 +3,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:title="@string/game"
-        android:icon="@drawable/ic_games_white"
-        android:id="@+id/toolbar_game_icon"
-        android:orderInCategory="0"
-        app:showAsAction="ifRoom"/>
-    <item
         android:title="@string/spaceValue"
         android:icon="@drawable/ic_search_white"
         android:id="@+id/toolbar_search_icon"
+        android:orderInCategory="0"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:title="@string/game"
+        android:icon="@drawable/ic_games_white"
+        android:id="@+id/toolbar_game_icon"
         android:orderInCategory="1"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/nav_settings"
+        android:onClick="menuClick"
+        android:icon="@drawable/ic_settings_black"
+        android:title="@string/navigation_drawer_label_problems_settings" />
+    <item
+        android:id="@+id/nav_feedback"
+        android:icon="@drawable/ic_help_black"
+        android:onClick="menuClick"
+        android:title="@string/navigation_drawer_label_problems_feedback" />
+    <item
+        android:id="@+id/nav_learn"
+        android:tag="@integer/learnMore"
+        android:icon="@drawable/ic_info_black"
+        android:onClick="menuClick"
+        android:title="@string/navigation_drawer_label_problems_learn" />
 </menu>
