@@ -113,7 +113,7 @@ public class RoomsFragment extends Fragment {
     /** Setup the chat functions provided by the FAB button. */
     private void initFabListener() {
         // Set up the FAB speed dial menu.
-        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.fab_speed_dial);
+        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.room_fab_speed_dial);
         fab.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
             public boolean onMenuItemSelected(MenuItem menuItem) {

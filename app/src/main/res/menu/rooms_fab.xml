@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/fab_new_room"
+        android:title="@string/room_new" />
+
+    <item
+        android:id="@+id/fab_favorite_room"
+        android:title="@string/room_favorite" />
+
+</menu>
