@@ -33,60 +33,36 @@ public class FABTest {
     /** Ensure that all items in the FAB Menu are present. */
     @Test public void testFABMenuPresent() {
         // Open up the FAB menu
-        onView(withId(R.id.fab_speed_dial))
+        onView(withId(R.id.room_fab_speed_dial))
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.
-        onView(withText(R.string.new_chat_select_user))
+        onView(withText(R.string.room_new))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.new_chat_favorite_room))
-                .check(matches(isDisplayed()));
-        onView(withText(R.string.new_game_init))
-                .check(matches(isDisplayed()));
-        onView(withText(R.string.new_game_ttt))
+        onView(withText(R.string.room_favorite))
                 .check(matches(isDisplayed()));
     }
 
     @Test public void testFabFunctionality() {
-        onView(withId(R.id.chat_pane))
+        onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()));
         // Open up the FAB menu and click on the new Tic-Tac-Toe game option
-        onView(withId(R.id.fab_speed_dial))
+        onView(withId(R.id.room_fab_speed_dial))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        onView(withText(R.string.new_game_ttt))
-                .perform(click());
-        // Ensure that the app navigates to the game pane and starts a new tic-tac-toe game.
-        onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(isDisplayed()));
-        onView(withId(R.id.ttt_panel))
-                .check(matches(isDisplayed()));
-        // Navigate back to the chat pane, where the fab is located.
-        onView(withId(R.id.toolbar_chat_icon))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        onView(withId(R.id.fab_speed_dial))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        // Initiate a new settings pane and return to the settings pane
-        onView(withText(R.string.new_game_init))
-                .perform(click());
-        onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(isDisplayed()));
-        onView(withId(R.id.init_panel))
-                .check(matches(isDisplayed()));
+        // Todo: test out the menu functionality.
     }
 
     /** Ensure that, when navigating to the game pane, the FAB disappears. */
     @Test public void testFabInHierarchy() {
         // Ensure the FAB is present. Then, navigate to the game fragment.
-        onView(withId(R.id.chat_pane))
+        onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()))
-                .check(matches(withChild(withId(R.id.fab_speed_dial))));
+                .check(matches(withChild(withId(R.id.room_fab_speed_dial))));
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
         // Once there, ensure the FAB is no longer displayed.
         onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(not(withChild(withId(R.id.fab_speed_dial)))));
+                .check(matches(not(withChild(withId(R.id.room_fab_speed_dial)))));
     }
 }
