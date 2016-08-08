@@ -91,9 +91,10 @@ public class MainActivity extends AppCompatActivity
                 break;
         }    }
 
+    /** Handle a back button press. */
     @Override public void onBackPressed() {
-        NavigationManager.instance.closeDrawerIfOpen(this);
-        super.onBackPressed();
+        // If the navigation drawer is open, close it, otherwise let the system deal with it.
+        if (!NavigationManager.instance.closeDrawerIfOpen(this)) super.onBackPressed();
     }
 
     /** Process a navigation menu item click by posting a click event. */

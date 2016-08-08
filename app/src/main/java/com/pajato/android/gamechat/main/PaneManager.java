@@ -66,7 +66,7 @@ public enum PaneManager {
         // Clear the current panes and determine if a paging layout is active.
         fragmentList.clear();
         titleList.clear();
-        titleList.add(context.getString(R.string.chat));
+        titleList.add(context.getString(R.string.rooms));
         titleList.add(context.getString(R.string.game));
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
 

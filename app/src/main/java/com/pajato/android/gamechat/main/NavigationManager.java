@@ -101,11 +101,14 @@ public enum NavigationManager {
     }
 
     /** Check for an open navigation drawer and close it if one is found. */
-    public void closeDrawerIfOpen(final Activity activity) {
+    public boolean closeDrawerIfOpen(final Activity activity) {
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+            return true;
         }
+
+        return false;
     }
 
     /**

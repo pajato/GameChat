@@ -45,15 +45,15 @@ public class ApplicationTest {
         // Do nothing initially.
     }
 
-    /** Ensure that the chat panel is being displayed. */
+    /** Ensure that the rooms panel is being displayed. */
     @Test public void testChatPaneIsVisible() {
-        onView(withId(R.id.chat_pane))
+        onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()));
     }
 
     /** Ensure that the chat panel is being displayed. */
     @Test public void testGamePaneIsVisible() {
-        onView(withId(R.id.chat_pane))
+        onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()))
                 .perform(swipeLeft());
         onView(withId(R.id.game_pane_fragment_container))
@@ -75,7 +75,7 @@ public class ApplicationTest {
         onView(withId(R.id.toolbar_chat_icon))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.chat_pane))
+        onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()));
     }
 
