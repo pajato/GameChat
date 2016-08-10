@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.account;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -36,15 +35,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the account related aspects of the GameChat application.  These include setting up the
- * first time sign-in, creating a persona (nickname and avatar), switching accounts and personas,
- * ...
+ * first time sign-in result, creating and persisting a profile on this device and switching
+ * accounts.
  *
  * @author Paul Michael Reilly
  */
 public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
 
-    public static enum Actions {signIn, signOut}
+    public enum Actions {signIn, signOut}
 
     /** A key used to access account available data. */
     public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
@@ -59,9 +58,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The account repository associating mulitple account id strings with the cloud account. */
     private ConcurrentHashMap<String, Account> mAccountMap = new ConcurrentHashMap<>();
 
-    /** The currently active account ID. */
-    private String mActiveAccountId;
-
     /** The array of click keys.  The ... */
     private SparseArray<Actions> mActionMap = new SparseArray<>();
 
@@ -75,8 +71,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // User is signed in.  Add this account.
             Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
             account = getAccount(user);
-            mActiveAccountId = account.getAccountId();
-            mAccountMap.put(mActiveAccountId, account);
+            /* The currently active account ID. */
+            String activeAccountId = account.getAccountId();
+            mAccountMap.put(activeAccountId, account);
         } else {
             // User is signed out
             Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -84,18 +81,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         EventBus.getDefault().post(new AccountStateChangeEvent(account));
     }
 
-    /** Return null if there is no active account, the current active account otherwise. */
-    public Account getActiveAccount() {
-        return mActiveAccountId != null ? mAccountMap.get(mActiveAccountId) : null;
-    }
-    /** Return true iff there is an account to select from. */
-    public boolean hasAccount() {
-        // The account is considered missing if there is no value with an associated key in the map.
-        return mAccountMap.size() > 0;
-    }
-
     /** Initialize the account manager. */
-    public void init(final AppCompatActivity context) {
+    public void init() {
         // Build a sparse array of click key values.
         mActionMap.put(R.id.signIn, Actions.signIn);
         mActionMap.put(R.id.signOut, Actions.signOut);
@@ -146,11 +133,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Map the Firebase User to an Account. */
     private Account getAccount(final FirebaseUser user) {
+        // Create and persist an account for the user.
         Account result = new Account();
         result.setAccountId(user.getEmail());
         result.setAccountUrl(user.getPhotoUrl());
         result.setDisplayName(user.getDisplayName());
-        result.getAvatarMap().put(user.getDisplayName(), user.getPhotoUrl());
         result.setProviderId(user.getProviderId());
         return result;
     }

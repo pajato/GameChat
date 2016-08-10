@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         // Deal with the main activity creation.
         setContentView(R.layout.activity_main);
         PaneManager.instance.init(this);
-        AccountManager.instance.init(this);
+        AccountManager.instance.init();
         init(savedInstanceState);
     }
 

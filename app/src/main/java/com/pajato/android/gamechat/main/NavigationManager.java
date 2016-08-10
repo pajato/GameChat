@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -39,13 +40,10 @@ import com.pajato.android.gamechat.account.Account;
 
 
 /** Provide a singleton to manage the app navigation provided by the navigation drawer. */
-public enum NavigationManager {
+enum NavigationManager {
     instance;
 
     // Private class constants
-
-    /** The logcat tag constant. */
-    private static final String TAG = NavigationManager.class.getSimpleName();
 
     // Navigation drawer action constants.
     private static final int OPEN_ID = R.string.navigation_drawer_action_open;
@@ -75,15 +73,8 @@ public enum NavigationManager {
         view.setVisibility(View.VISIBLE);
 
         // Load the account image, display name and email address.
-        ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-        icon.setVisibility(View.VISIBLE);
-        icon.setImageURI(account.getAccountUrl());
-        Glide.with(header.getContext())
-                .load(account.getAccountUrl())
-                .transform(new CircleTransform(header.getContext()))
-                .into(icon);
-        TextView name = (TextView) header.findViewById(R.id.currentAccountDisplayName);
-        name.setText(account.getDisplayName());
+        loadAccountIcon(account, header);
+        setDisplayName(account, header);
         TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
         email.setText(account.getAccountId());
     }
@@ -117,7 +108,7 @@ public enum NavigationManager {
      * http://stackoverflow.com/questions/25278821/how-do-rounded-image-with-glide-library
      */
     public static class CircleTransform extends BitmapTransformation {
-        public CircleTransform(Context context) {
+        CircleTransform(Context context) {
             super(context);
         }
 
@@ -151,6 +142,45 @@ public enum NavigationManager {
         public String getId() {
             return getClass().getName();
         }
+    }
+
+    // Private instance methods.
+
+    /** Load the account icon, if available, using a placeholder otherwise. */
+    private void loadAccountIcon(final Account account, final View header) {
+        // Determine if there is an image to be loaded.
+        ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
+        Uri imageUri = account.getAccountUrl();
+        if (imageUri != null) {
+            // There is an image to load.  Use Glide to do the heavy lifting.
+            icon.setImageURI(account.getAccountUrl());
+            Glide.with(header.getContext())
+                .load(account.getAccountUrl())
+                .transform(new CircleTransform(header.getContext()))
+                .into(icon);
+        } else {
+            // There is no image.  Use an anonymous image.
+            icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+        }
+        icon.setVisibility(View.VISIBLE);
+    }
+
+
+    /** Load the display name, if available, using a placeholder otherwise. */
+    private void setDisplayName(final Account account, final View header) {
+        // Determine if there is a display name to use.
+        String name = account.getDisplayName();
+        if (name == null) {
+            // There is no display name, use a conjured name based on the email address, i.e. the
+            // username part of the email address with an initial cap.
+            name = account.getAccountId();
+            int index = name.indexOf('@');
+            name = name.substring(0, index);
+            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        }
+        TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+        view.setText(name);
+        view.setVisibility(View.VISIBLE);
     }
 
 }

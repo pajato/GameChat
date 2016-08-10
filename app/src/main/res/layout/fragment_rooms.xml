@@ -23,49 +23,49 @@ http://www.gnu.org/licenses
     android:layout_height="match_parent"
     android:id="@+id/rooms_pane">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context="com.pajato.android.gamechat.chat.ChatFragment">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/messageRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/adView" />
-
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:paddingBottom="8dp"
-            android:layout_marginTop="44dp"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id">
-        </com.google.android.gms.ads.AdView>
-
-    </RelativeLayout>
-
-    <io.github.yavski.fabspeeddial.FabSpeedDial
+    <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/room_fab_speed_dial"
+        android:gravity="bottom|start"
+        android:id="@+id/rooms_fab"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_dialog_email"
-        app:fabMenu="@menu/rooms_fab"
-        app:fabGravity="bottom_end"
-        app:layout_constraintBottom_toBottomOf="@+id/rooms_pane"
-        app:layout_constraintRight_toRightOf="@+id/rooms_pane"
-        app:fabBackgroundTint="@color/colorAccent"
-        app:miniFabBackgroundTint="@color/colorAccent"
-        app:miniFabDrawableTint="@color/colorPrimaryDark"
-        app:miniFabTitleTextColor="@color/colorPrimaryDark"
+        android:src="@drawable/ic_plus"
+        android:layout_marginEnd="16dp"
+        app:elevation="2dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible"/>
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rooms_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/adView"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rooms_message"
+        android:padding="24dp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@+id/adView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/adView"
+        app:layout_constraintRight_toRightOf="@id/adView"
+        tools:text="Placeholder message ... updated at runtime."
         tools:visibility="visible"/>
 
 </android.support.constraint.ConstraintLayout>
