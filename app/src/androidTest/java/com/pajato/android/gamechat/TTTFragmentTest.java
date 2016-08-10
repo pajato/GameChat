@@ -31,8 +31,7 @@ public class TTTFragmentTest extends BaseTest {
     private String spaceValue;
 
     /** Click on the game action button to navigate to the next pane. */
-    @Before
-    public void navigateToGameFragment() throws InterruptedException {
+    @Before public void navigateToGameFragment() {
         // Establish String Values.
         xValue = mRule.getActivity().getString(R.string.xValue);
         oValue = mRule.getActivity().getString(R.string.oValue);
@@ -40,7 +39,7 @@ public class TTTFragmentTest extends BaseTest {
 
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
-        getNewGame();
+        getNewGame(true);
         onView(withId(R.id.board))
                 .check(matches(isDisplayed()));
     }
@@ -92,7 +91,7 @@ public class TTTFragmentTest extends BaseTest {
                 .check(matches(not(isDisplayed())));
         onView(withId(R.id.player_1_right_indicator))
                 .check(matches(not(isDisplayed())));
-        // Then confirm that the next itemm played is the other player's icon.
+        // Then confirm that the next item played is the other player's icon.
         onView(withTagValue(is((Object) "button01")))
                 .check(matches(isDisplayed()))
                 .perform(click())
@@ -156,8 +155,8 @@ public class TTTFragmentTest extends BaseTest {
         onView(withTagValue(is((Object) "button12")))
                 .perform(click());
 
-        // Perform a new game.
-        getNewGame();
+        // Initiate a new game.
+        getNewGame(false);
 
         // Ensure that all buttons are now empty.
         onView(withTagValue(is((Object) "button00")))
@@ -202,7 +201,8 @@ public class TTTFragmentTest extends BaseTest {
         onView(withId(R.id.player_1_right_indicator))
                 .check(matches(not(isDisplayed())));
 
-        getNewGame();
+        // Initiate a new game.
+        getNewGame(false);
 
         // The turn should still be O's, so after a press, the turn should become X's.
         onView(withTagValue(is((Object) "button00")))
@@ -403,12 +403,22 @@ public class TTTFragmentTest extends BaseTest {
     }
 
     /** A helper method that creates a new game using the Floating Action Button */
-    private void getNewGame() {
-        // Open up the FAB menu and initiate a new game
+    private void getNewGame(final boolean onStart) {
+        // Open the options menu and initiate a new game.
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
         onView(withText(R.string.new_game_ttt))
                 .check(matches(isDisplayed()))
                 .perform(click());
+
+        // If it's the start of the test, we'll have to navigate through the settings panel.
+        if(onStart) {
+            onView(withId(R.id.settings_local_button))
+                    .check(matches(isDisplayed()))
+                    .perform(click());
+        }
+        // Then we should have reached the board.
+        onView(withId(R.id.board))
+                .check(matches(isDisplayed()));
     }
 
 }

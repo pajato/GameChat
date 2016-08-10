@@ -23,15 +23,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
  */
 @RunWith(AndroidJUnit4.class)
 public class ApplicationTest extends BaseTest {
-
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = ApplicationTest.class.getSimpleName();
-
-    /** The overflow menu label string. */
-    private static final String OVERFLOW_MENU_ITEM_SETTINGS_TEXT = "Settings";
-
     /** Ensure that the rooms panel is being displayed. */
     @Test public void testChatPaneIsVisible() {
         onView(withId(R.id.rooms_pane))

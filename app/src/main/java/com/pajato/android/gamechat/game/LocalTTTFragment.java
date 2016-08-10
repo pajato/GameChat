@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import com.pajato.android.gamechat.fragment.BaseFragment;
 import java.util.Scanner;
 
 public class LocalTTTFragment extends BaseFragment {
-    private static final String TAG = TTTFragment.class.getSimpleName();
     // Keeps track of the Turn user. True = Player 1, False = Player 2.
     public boolean mTurn;
 

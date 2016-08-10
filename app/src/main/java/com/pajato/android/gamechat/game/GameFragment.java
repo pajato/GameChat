@@ -70,10 +70,10 @@ public class GameFragment extends BaseFragment {
                 }
                 break;
             // Otherwise, we can initiate a new game based on which game was chosen.
-            case R.id.new_game_settings:
+            case R.id.options_menu_new_game:
                 GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
                 break;
-            case R.id.new_game_ttt:
+            case R.id.options_menu_new_ttt:
                 if(GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_LOCAL_INDEX) {
                     GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(), msg);
                 } else if (GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_ONLINE_INDEX) {
@@ -83,10 +83,10 @@ public class GameFragment extends BaseFragment {
                             getString(R.string.new_game_ttt));
                 }
                     break;
-            case R.id.new_game_checkers:
+            case R.id.options_menu_new_checkers:
                 GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(), msg);
                 break;
-            case R.id.new_game_chess:
+            case R.id.options_menu_new_chess:
                 GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
                 break;
         }

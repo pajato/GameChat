@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.BaseFragment;
@@ -44,7 +45,18 @@ public class CheckersFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         mLayout = inflater.inflate(R.layout.fragment_checkers, container, false);
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
+        mTurn = true;
         onNewGame();
+
+        // Color the turn tiles.
+        ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
+        playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
+                PorterDuff.Mode.SRC_ATOP);
+
+        ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
+        playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
+                PorterDuff.Mode.SRC_ATOP);
+
         return mLayout;
     }
 
@@ -54,7 +66,7 @@ public class CheckersFragment extends BaseFragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(String msg) {
+    public void messageHandler(final String msg) {
         //TODO: Replace with the event bus system.
         Scanner input = new Scanner(msg);
         String player = input.nextLine();
@@ -86,13 +98,13 @@ public class CheckersFragment extends BaseFragment {
         mBoardMap.clear();
         mPossibleMoves = new ArrayList<>();
         mPossibleMoves.clear();
-        mTurn = false;
 
         // Go through and populate the GridLayout / Board.
         for(int i = 0; i < 64; i++) {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
+            //TODO: Handle alternate resolutions in a better way.
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = 90;
             param.width = 90;
@@ -151,7 +163,7 @@ public class CheckersFragment extends BaseFragment {
             mBoard.addView(currentTile);
         }
 
-        handleTurnChange(true);
+        handleTurnChange(false);
     }
 
     /**
@@ -167,7 +179,7 @@ public class CheckersFragment extends BaseFragment {
         }
 
         int highlightedIndex = (int) mHighlightedTile.getTag();
-        findPossibleMoves(highlightedIndex);
+        findPossibleMoves(highlightedIndex, mPossibleMoves);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
         if(mIsHighlighted) {
@@ -180,8 +192,8 @@ public class CheckersFragment extends BaseFragment {
                     // If the tile clicked is one of the possible positions, and it's the correct
                     // turn/piece combination, the piece moves there.
                     if(indexClicked == possiblePosition) {
-                        boolean capturesPiece = (indexClicked > 10 + highlightedIndex) ||
-                                (indexClicked < highlightedIndex - 10);
+                        boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
+                                (indexClicked < highlightedIndex - 9);
 
                         if(mTurn && (mBoardMap.get(highlightedIndex) == BLUE_PIECE ||
                                 mBoardMap.get(highlightedIndex) == BLUE_KING)) {
@@ -254,7 +266,8 @@ public class CheckersFragment extends BaseFragment {
      * @param highlightedIndex the current index of the tile looking to jump.
      * @param jumpable the index of the tile that the piece can potentially jump to.
      */
-    private void findJumpables(final int highlightedIndex, final int jumpable) {
+    private void findJumpables(final int highlightedIndex, final int jumpable,
+                               final ArrayList<Integer> movementOptions) {
         // Create the boolean calculations for each of our conditions.
         boolean withinBounds = jumpable < 64 && jumpable > -1;
         boolean emptySpace = mBoardMap.get(jumpable, -1) == -1;
@@ -273,7 +286,7 @@ public class CheckersFragment extends BaseFragment {
         }
 
         if(withinBounds && emptySpace && !breaksBorders && !jumpsAlly) {
-            mPossibleMoves.add(jumpable);
+            movementOptions.add(jumpable);
         }
     }
 
@@ -282,12 +295,12 @@ public class CheckersFragment extends BaseFragment {
      *
      * @param highlightedIndex the index containing the highlighted piece.
      */
-    private void findPossibleMoves(final int highlightedIndex) {
+    private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves) {
         if(highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
 
-        mPossibleMoves.clear();
+        possibleMoves.clear();
         int highlightedPieceType = mBoardMap.get(highlightedIndex);
 
         // Get the possible positions, post-move, for the piece.
@@ -317,27 +330,27 @@ public class CheckersFragment extends BaseFragment {
         // Handle tiles that already contain other pieces. You can jump over enemy pieces,
         // but not allied pieces.
         if(mBoardMap.get(upLeft, -1) != -1) {
-            findJumpables(highlightedIndex, upLeft - 9);
+            findJumpables(highlightedIndex, upLeft - 9, possibleMoves);
             upLeft = -1;
         }
         if(mBoardMap.get(upRight, -1) != -1) {
-            findJumpables(highlightedIndex, upRight - 7);
+            findJumpables(highlightedIndex, upRight - 7, possibleMoves);
             upRight = -1;
         }
         if(mBoardMap.get(downLeft, -1) != -1) {
-            findJumpables(highlightedIndex, downLeft + 7);
+            findJumpables(highlightedIndex, downLeft + 7, possibleMoves);
             downLeft = -1;
         }
         if(mBoardMap.get(downRight, -1) != -1) {
-            findJumpables(highlightedIndex, downRight + 9);
+            findJumpables(highlightedIndex, downRight + 9, possibleMoves);
             downRight = -1;
         }
 
         // Put the values in our int array to return
-        mPossibleMoves.add(upLeft);
-        mPossibleMoves.add(upRight);
-        mPossibleMoves.add(downLeft);
-        mPossibleMoves.add(downRight);
+        possibleMoves.add(upLeft);
+        possibleMoves.add(upRight);
+        possibleMoves.add(downLeft);
+        possibleMoves.add(downRight);
     }
 
     /**
@@ -346,7 +359,8 @@ public class CheckersFragment extends BaseFragment {
      * @param player indicates the current player. True is blue, False is yellow.
      * @param indexClicked the index of the clicked tile and the new position of the piece.
      */
-    private void handleMovement(boolean player, int indexClicked, boolean capturesPiece) {
+    private void handleMovement(final boolean player, final int indexClicked,
+                                final boolean capturesPiece) {
         // Reset the highlighted tile's image.
         mHighlightedTile.setImageResource(0);
         int highlightedIndex = (int) mHighlightedTile.getTag();
@@ -364,7 +378,7 @@ public class CheckersFragment extends BaseFragment {
         // Find the new tile and give it a piece.
         ImageButton newLocation = (ImageButton) mBoard.getChildAt(indexClicked);
         if(mBoardMap.get(indexClicked) == BLUE_KING || mBoardMap.get(indexClicked) == YELLOW_KING) {
-            newLocation.setImageResource(R.drawable.ic_info_black);
+            newLocation.setImageResource(R.drawable.ic_stars_black_36dp);
         } else {
             newLocation.setImageResource(R.drawable.ic_account_circle_black_36dp);
         }
@@ -379,42 +393,61 @@ public class CheckersFragment extends BaseFragment {
         newLocation.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 
         // Handle capturing pieces.
+        boolean finishedJumping = true;
         if(capturesPiece) {
             int pieceCaptuedIndex = (indexClicked + highlightedIndex) / 2;
             ImageButton capturedTile = (ImageButton) mBoard.getChildAt(pieceCaptuedIndex);
             capturedTile.setImageResource(0);
             mBoardMap.delete(pieceCaptuedIndex);
+
+            // If there are no more jumps, change turns. If there is at least one jump left, don't.
+            ArrayList<Integer> possibleJumps = new ArrayList<>();
+            findPossibleMoves(indexClicked, possibleJumps);
+            for(int possiblePosition: possibleJumps) {
+                if(possiblePosition != -1 && (possiblePosition > 9 + indexClicked
+                        || (possiblePosition < indexClicked - 9))) {
+                    finishedJumping = false;
+                }
+            }
         }
 
         mBoardMap.delete(highlightedIndex);
-        handleTurnChange(!capturesPiece);
+        handleTurnChange(finishedJumping);
         checkFinished();
     }
 
     /**
      * Handles changing the turn and turn indicator.
      */
-    private void handleTurnChange(boolean switchPlayer) {
+    private void handleTurnChange(final boolean switchPlayer) {
         if(switchPlayer) {
             mTurn = !mTurn;
         }
-        ImageView turnDisplay = (ImageView) mLayout.findViewById(R.id.checkers_turn_display);
 
-        int color;
+        // Handle the textviews that serve as our turn indicator.
+        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.player_1_left_indicator);
+        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.player_1_right_indicator);
+        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.player_2_left_indicator);
+        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.player_2_right_indicator);
+
         if(mTurn) {
-            color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
+            playerOneLeft.setVisibility(View.VISIBLE);
+            playerOneRight.setVisibility(View.VISIBLE);
+            playerTwoLeft.setVisibility(View.INVISIBLE);
+            playerTwoRight.setVisibility(View.INVISIBLE);
         } else {
-            color = ContextCompat.getColor(getContext(), R.color.colorAccent);
+            playerOneLeft.setVisibility(View.INVISIBLE);
+            playerOneRight.setVisibility(View.INVISIBLE);
+            playerTwoLeft.setVisibility(View.VISIBLE);
+            playerTwoRight.setVisibility(View.VISIBLE);
         }
-        turnDisplay.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
-
 
     /**
      * A View.OnClickListener that is called whenever a board tile is clicked.
      */
     private class CheckersClick implements View.OnClickListener {
-        @Override public void onClick(View v) {
+        @Override public void onClick(final View v) {
             int index = (int) v.getTag();
             if(mHighlightedTile != null) {
                 showPossibleMoves(index);
