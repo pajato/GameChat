@@ -1,14 +1,10 @@
 package com.pajato.android.gamechat;
 
 import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.pajato.android.gamechat.main.MainActivity;
-
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,9 +24,8 @@ import static org.hamcrest.Matchers.not;
  */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
-public class TTTFragmentTest {
+public class TTTFragmentTest extends BaseTest {
 
-    @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<>(MainActivity.class);
     private String xValue;
     private String oValue;
     private String spaceValue;

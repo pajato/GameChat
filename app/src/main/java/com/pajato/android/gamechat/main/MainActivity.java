@@ -38,6 +38,8 @@ import com.pajato.android.gamechat.intro.IntroActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILABLE_KEY;
+
 /**
  * Provide a main activity to display the chat and game panels.
  *
@@ -46,7 +48,12 @@ import org.greenrobot.eventbus.Subscribe;
 public class MainActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
-    // Private class constants
+    // Public class constants.
+
+    /** The intent extras key conveying the desire to skip the intro activity. */
+    public static final String SKIP_INTRO_ACTIVITY_KEY = "skipIntroActivityKey";
+
+    // Private class constants.
 
     /** The logcat tag constant. */
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -56,6 +63,9 @@ public class MainActivity extends AppCompatActivity
 
     /** The preferences key for tracking a fresh install. */
     private static final String FRESH_INSTALL = "FreshInstall";
+
+    /** The Intro activity request code. */
+    private static final int RC_INTRO = 1;
 
     // Public instance methods
 
@@ -119,6 +129,23 @@ public class MainActivity extends AppCompatActivity
 
     // Protected instance methods
 
+    /** Process the result from the Intro activity. */
+    @Override protected void onActivityResult(final int requestCode, final int resultCode,
+                                              final Intent intent) {
+        // Ensure that the request code and the result are valid.
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == RC_INTRO && resultCode == RESULT_OK) {
+            // The request code is valid and the result is good.  Update the account available flag
+            // based on the result from the intro activity intent data.
+            SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            String uid = intent.getStringExtra(Intent.EXTRA_TEXT);
+            String key = ACCOUNT_AVAILABLE_KEY;
+            editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
+            editor.apply();
+        }
+    }
+
     /**
      * Set up the app per the characteristics of the running device.
      *
@@ -128,16 +155,20 @@ public class MainActivity extends AppCompatActivity
         // Allow superclasses to initialize using the saved state and determine if there has been a
         // fresh install on this device and proceed accordingly.
         super.onCreate(savedInstanceState);
-        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        if (prefs.getBoolean(FRESH_INSTALL, true)) {
-            // This is a fresh installation of the app.  Present the intro activity to get things
-            // started, which will introduce the user to the app and provide a chnance to sign in or
-            // register an account.
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(FRESH_INSTALL, false);
-            editor.apply();
-            Intent introIntent = new Intent(this, IntroActivity.class);
-            startActivity(introIntent);
+
+        // Determine if the calling intent wants to skip the intro activity.
+        Intent intent = getIntent();
+        if (!intent.getBooleanExtra(SKIP_INTRO_ACTIVITY_KEY, false)) {
+            // Do not skip running the intro screen activity.
+            SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+            if (prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, true)) {
+                // This is a fresh installation of the app.  Present the intro activity to get things
+                // started, which will introduce the user to the app and provide a chnance to sign in or
+                // register an account.
+
+                Intent introIntent = new Intent(this, IntroActivity.class);
+                startActivityForResult(introIntent, RC_INTRO);
+            }
         }
 
         // Deal with the main activity creation.
