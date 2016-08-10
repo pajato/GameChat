@@ -89,12 +89,13 @@ public class SignInActivity extends AppCompatActivity
     }
 
     /** Process the result returned from the Google sign in activity. */
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override protected void onActivityResult(final int requestCode, final int resultCode,
+                                              final Intent intent) {
         // Determine if the result is valid.
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == RC_SIGN_IN) {
             // The result is valid.  Determine if the sign in succeeded.
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
@@ -120,8 +121,11 @@ public class SignInActivity extends AppCompatActivity
                            Toast.LENGTH_SHORT).show();
         } else {
             // Deal with a completed and successful sign in by hiding the progress diealog and
-            // wrapping up this acivity.
+            // passing back the User uid to the calling intent.
             hideProgressDialog();
+            Intent intent = new Intent();
+            intent.putExtra(Intent.EXTRA_TEXT, task.getResult().getUser().getUid());
+            setResult(RESULT_OK, intent);
             finish();
         }
     }

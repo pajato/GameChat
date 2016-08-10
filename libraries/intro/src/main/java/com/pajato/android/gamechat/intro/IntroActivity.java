@@ -48,13 +48,12 @@ import static android.view.animation.AnimationUtils.loadAnimation;
  */
 public class IntroActivity extends AppCompatActivity {
 
+    // Private class constants.
+
+    /** The request code passed into the sign in activity. */
+    private static final int RC_SIGN_IN = 1;
+
     // Private class variables.
-
-    /** The animated view pager. */
-    private ViewPager mPager;
-
-    /** The view pager page change handler. */
-    private PageChangeHandler mHandler;
 
     /** Handle signing into an existing account by invoking the signin activity. */
     public void doSignIn(final View view) {
@@ -66,6 +65,18 @@ public class IntroActivity extends AppCompatActivity {
         invokeSignIn("register");
     }
 
+    // Protected instance methods.
+
+    /** Handle the sign in activity result, if any. */
+    @Override protected void onActivityResult(final int requestCode, final int resultCode,
+                                              final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
+            // Pass the intent obtained from the sign in activity through to the calling intent.
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
     /** Create the intro activity to highlight some features and provide a get started opertion. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
         // Establish the activity state and set up the intro layout.
@@ -78,8 +89,8 @@ public class IntroActivity extends AppCompatActivity {
             // From lollippop on, enable the button elevation animation.
             final StateListAnimator animator = new StateListAnimator();
             final TextView button = (TextView) findViewById(R.id.register_button);
-            addState(animator, android.R.attr.state_pressed, button, new float[] {2.0f, 4.0f});
-            addState(animator, -1, button, new float[] {4.0f, 2.0f});
+            addState(animator, android.R.attr.state_pressed, button, 2.0f, 4.0f);
+            addState(animator, -1, button, 4.0f, 2.0f);
             button.setStateListAnimator(animator);
         }
 
@@ -91,12 +102,12 @@ public class IntroActivity extends AppCompatActivity {
 
         // Set up the view pager adapter, the page change handler and the view pager.
         IntroAdapter adapter = new IntroAdapter(pageMonitor);
-        mPager = (ViewPager) findViewById(R.id.intro_view_pager);
-        mPager.setAdapter(adapter);
-        mPager.setPageMargin(0);
-        mPager.setOffscreenPageLimit(1);
-        mHandler = new PageChangeHandler(topImage1, topImage2, pageMonitor, mPager);
-        mPager.addOnPageChangeListener(mHandler);
+        ViewPager pager = (ViewPager) findViewById(R.id.intro_view_pager);
+        pager.setAdapter(adapter);
+        pager.setPageMargin(0);
+        pager.setOffscreenPageLimit(1);
+        PageChangeHandler handler = new PageChangeHandler(topImage1, topImage2, pageMonitor, pager);
+        pager.addOnPageChangeListener(handler);
     }
 
     // Private instance methods.
@@ -117,13 +128,7 @@ public class IntroActivity extends AppCompatActivity {
     private void invokeSignIn(final String mode) {
         Intent intent = new Intent(this, SignInActivity.class);
         intent.putExtra(mode, true);
-        startActivity(intent);
-        finish();
-    }
-
-    /** Obtain the RTL state. */
-    private boolean isRTL() {
-        return false;
+        startActivityForResult(intent, RC_SIGN_IN);
     }
 
     /** Update a given page monitor for a given selected position. */
@@ -133,7 +138,6 @@ public class IntroActivity extends AppCompatActivity {
         final float LARGE = 30.0f;
         final float SMALL = 15.0f;
         int count = pageMonitor.getChildCount();
-        int selectedIndex = isRTL() ? count - position - 1 : position;
         for (int index = 0; index < count; index++) {
             TextView child = (TextView) pageMonitor.getChildAt(index);
             child.setText(R.string.intro_page_circle);
@@ -158,7 +162,7 @@ public class IntroActivity extends AppCompatActivity {
         // Public constructor.
 
         /** Build the intro adapter with a given page monitor. */
-        public IntroAdapter(final ViewGroup pageMonitor) {
+        IntroAdapter(final ViewGroup pageMonitor) {
             mPageMonitor = pageMonitor;
         }
 
@@ -226,8 +230,8 @@ public class IntroActivity extends AppCompatActivity {
         // Public constructor.
 
         /** Build the page change handler for a given set of top images and a page monitor. */
-        public PageChangeHandler(final ImageView topImage1, final ImageView topImage2,
-                                 final ViewGroup pageMonitor, final ViewPager pager) {
+        PageChangeHandler(final ImageView topImage1, final ImageView topImage2,
+                          final ViewGroup pageMonitor, final ViewPager pager) {
             mTopImage1 = topImage1;
             mTopImage2 = topImage2;
             mPager = pager;
@@ -282,7 +286,7 @@ public class IntroActivity extends AppCompatActivity {
         private final ImageView mFadeoutImage;
 
         /** Build the animation handler. */
-        public AnimationHandler(final ImageView fadeinImage, final ImageView fadeoutImage) {
+        AnimationHandler(final ImageView fadeinImage, final ImageView fadeoutImage) {
             mFadeinImage = fadeinImage;
             mFadeoutImage = fadeoutImage;
         }

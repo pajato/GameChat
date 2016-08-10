@@ -1,11 +1,7 @@
 package com.pajato.android.gamechat;
 
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.pajato.android.gamechat.main.MainActivity;
-
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,9 +19,7 @@ import static org.hamcrest.Matchers.not;
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class FABTest {
-
-    @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<>(MainActivity.class);
+public class FABTest extends BaseTest {
 
     //TODO: Write more tests when the other features are implemented.
     // For example, ensuring that opening up new games works as intended.

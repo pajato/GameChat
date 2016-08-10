@@ -46,6 +46,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     public static enum Actions {signIn, signOut}
 
+    /** A key used to access account available data. */
+    public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
+
     // Private class constants
 
     /** The logcat logger tag. */

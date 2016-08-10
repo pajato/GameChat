@@ -2,12 +2,8 @@ package com.pajato.android.gamechat;
 
 import android.support.test.espresso.contrib.DrawerActions;
 import android.support.test.espresso.contrib.NavigationViewActions;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.pajato.android.gamechat.main.MainActivity;
-
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,7 +22,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class ApplicationTest {
+public class ApplicationTest extends BaseTest {
 
     // Private class constants.
 
@@ -35,15 +31,6 @@ public class ApplicationTest {
 
     /** The overflow menu label string. */
     private static final String OVERFLOW_MENU_ITEM_SETTINGS_TEXT = "Settings";
-
-    // Public instance variables.
-
-    @Rule public ActivityTestRule<MainActivity> mRule = new ActivityTestRule<>(MainActivity.class);
-
-    /** Ensure that doing nothing breaks nothing but generates some code coverage results. */
-    @Test public void testDoNothing() {
-        // Do nothing initially.
-    }
 
     /** Ensure that the rooms panel is being displayed. */
     @Test public void testChatPaneIsVisible() {
