@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -30,11 +31,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.main.PaneManager;
-
-import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -113,27 +110,8 @@ public class RoomsFragment extends Fragment {
     /** Setup the chat functions provided by the FAB button. */
     private void initFabListener() {
         // Set up the FAB speed dial menu.
-        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.room_fab_speed_dial);
-        fab.setMenuListener(new SimpleMenuListenerAdapter() {
-            @Override
-            public boolean onMenuItemSelected(MenuItem menuItem) {
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                switch(menuItem.getItemId()) {
-                    // Start a new Tic-Tac-Toe game
-                    case R.id.fab_ttt:
-                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
-                        GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity());
-                        break;
-                    // Navigate to the Game Settings panel
-                    case R.id.fab_new_game:
-                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
-                        GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
-                    default:
-                        break;
-                }
-                return false;
-            }
-        });
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.rooms_fab);
+
     }
 
 }

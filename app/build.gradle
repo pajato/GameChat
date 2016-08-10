@@ -52,7 +52,7 @@ dependencies {
     // Android
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha4'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha6'
     compile 'io.github.yavski:fab-speed-dial:1.0.4'
 
     // Google
