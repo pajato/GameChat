@@ -26,27 +26,26 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 
 public class InitialFragment extends BaseFragment {
-    private View mLayout;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        mLayout = inflater.inflate(R.layout.fragment_initial, container, false);
+        View layout = inflater.inflate(R.layout.fragment_initial, container, false);
 
         // Handle Tic-Tac-Toe games.
-        View ttt = mLayout.findViewById(R.id.init_ttt);
+        View ttt = layout.findViewById(R.id.init_ttt);
         ttt.setOnClickListener(new ClickHandler());
-        View tttButton = mLayout.findViewById(R.id.init_ttt_button);
+        View tttButton = layout.findViewById(R.id.init_ttt_button);
         tttButton.setOnClickListener(new ClickHandler());
 
         // Handle Checkers Games.
-        View checkers = mLayout.findViewById(R.id.init_checkers);
+        View checkers = layout.findViewById(R.id.init_checkers);
         checkers.setOnClickListener(new ClickHandler());
-        View checkersButton = mLayout.findViewById(R.id.init_checkers_button);
+        View checkersButton = layout.findViewById(R.id.init_checkers_button);
         checkersButton.setOnClickListener(new ClickHandler());
 
-        return mLayout;
+        return layout;
     }
 
     private class ClickHandler implements View.OnClickListener {

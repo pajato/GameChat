@@ -14,9 +14,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 
 public class SettingsFragment extends BaseFragment {
-
     private String game;
-    private View mMain;
     private boolean isValidUser = false;
 
     private ImageButton mComputer;
@@ -37,18 +35,18 @@ public class SettingsFragment extends BaseFragment {
 
     @Override public View onCreateView(final LayoutInflater layoutInflater,
                                        final ViewGroup container, final Bundle savedInstanceState) {
-        mMain = layoutInflater.inflate(R.layout.fragment_settings, container, false);
-        TextView title = (TextView) mMain.findViewById(R.id.settings_title);
+        View main = layoutInflater.inflate(R.layout.fragment_settings, container, false);
+        TextView title = (TextView) main.findViewById(R.id.settings_title);
 
         // Setup the group choice spinner and adapter.
-        Spinner groupChoices = (Spinner) mMain.findViewById(R.id.settings_group_spinner);
+        Spinner groupChoices = (Spinner) main.findViewById(R.id.settings_group_spinner);
         ArrayAdapter<CharSequence> groupAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.groups, android.R.layout.simple_spinner_item);
         groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         groupChoices.setAdapter(groupAdapter);
 
         // Setup the user choices spinner
-        final Spinner userChoices = (Spinner) mMain.findViewById(R.id.settings_user_spinner);
+        final Spinner userChoices = (Spinner) main.findViewById(R.id.settings_user_spinner);
 
         // We want different users to appear in the user spinner when a different group is chosen.
         //TODO: Find a procedural way to generate these arrays once accounts are implemented.
@@ -84,9 +82,9 @@ public class SettingsFragment extends BaseFragment {
         });
 
         // Setup the references to the game option buttons.
-        mLocal = (ImageButton) mMain.findViewById(R.id.settings_local_button);
-        mOnline = (ImageButton) mMain.findViewById(R.id.settings_online_button);
-        mComputer = (ImageButton) mMain.findViewById(R.id.settings_computer_button);
+        mLocal = (ImageButton) main.findViewById(R.id.settings_local_button);
+        mOnline = (ImageButton) main.findViewById(R.id.settings_online_button);
+        mComputer = (ImageButton) main.findViewById(R.id.settings_computer_button);
 
         // Handle the game-specific portions of the layout.
         if(game.equals(getString(R.string.new_game_ttt))) {
@@ -96,7 +94,7 @@ public class SettingsFragment extends BaseFragment {
             title.setText(R.string.playing_checkers);
             setupCheckers();
         }
-        return mMain;
+        return main;
     }
 
     /**
@@ -133,14 +131,14 @@ public class SettingsFragment extends BaseFragment {
         });
         mOnline.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                if(isValidUser) {
-                    //GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
-                }
+                /*if(isValidUser) {
+                    GameManager.instance.sendNewGame(GameManager.CHECKERS_ONLINE_INDEX, getActivity());
+                }*/
             }
         });
         mComputer.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                //GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
+                //GameManager.instance.sendNewGame(GameManager.CHECKERS_COMPUTER_INDEX, getActivity());
             }
         });
     }
