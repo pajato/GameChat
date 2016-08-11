@@ -178,11 +178,6 @@ public class SignInActivity extends AppCompatActivity
     /** Update the UI with authentication data. */
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
-        if (user != null) {
-            findViewById(R.id.google_provider_button).setVisibility(View.GONE);
-        } else {
-            findViewById(R.id.google_provider_button).setVisibility(View.VISIBLE);
-        }
     }
 
     /** Initialize and display the sign in progress dialog. */

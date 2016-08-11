@@ -18,6 +18,8 @@
 package com.pajato.android.gamechat.event;
 
 import android.content.Context;
+import android.view.MenuItem;
+import android.view.View;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,8 +39,14 @@ public class ClickEvent {
     /** The app context. */
     @NonNull private Context context;
 
-    /** The value associated with the click event. */
+    /** The value associated with the click event, either a tag value of the reoource id. */
     private int value;
+
+    /** The view associated with the click event, if any. */
+    private View view;
+
+    /** The menu item associated with the click event, if any. */
+    private MenuItem item;
 
     /** The class name of the object that generated the event. */
     @NonNull private String className;

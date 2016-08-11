@@ -31,7 +31,11 @@ import android.view.ViewGroup;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -45,22 +49,41 @@ public class RoomsFragment extends Fragment {
     /** Show an ad at the top of the view. */
     private AdView mAdView;
 
+    // Public instance methods.
+
+    /** Process a given button click event looking for one on the rooms fab button. */
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+        // Determine if this event is for the rooms fab button.
+        int value = event.getView() != null ? event.getView().getId() : 0;
+        switch (value) {
+        case R.id.rooms_fab:
+            // It is a rooms fab button.  Toggle the state.
+            FabManager.instance.toggle((FloatingActionButton) event.getView());
+            break;
+        default:
+            // Ignore everything else.
+            break;
+        }    }
+
     /** Handle the setup for the rooms panel. */
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        // Enable the options menu, layout the fragment and set up the ad view.
+        // Enable the options menu, layout the fragment, set up the ad view and the FAB button.
         setHasOptionsMenu(true);
         View result = inflater.inflate(R.layout.fragment_rooms, container, false);
         mAdView = (AdView) result.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        FloatingActionButton fab = (FloatingActionButton) result.findViewById(R.id.rooms_fab);
+        FabManager.instance.init(fab);
+
         return result;
     }
 
     /** Post the chat options menu on demand. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.chat_menu, menu);
-        initFabListener();
     }
 
     /** Handle an options menu choice. */
@@ -85,10 +108,11 @@ public class RoomsFragment extends Fragment {
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
     @Override public void onPause() {
+        super.onPause();
         if (mAdView != null) {
             mAdView.pause();
         }
-        super.onPause();
+        EventBus.getDefault().unregister(this);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -97,6 +121,7 @@ public class RoomsFragment extends Fragment {
         if (mAdView != null) {
             mAdView.resume();
         }
+        EventBus.getDefault().register(this);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -105,13 +130,6 @@ public class RoomsFragment extends Fragment {
             mAdView.destroy();
         }
         super.onDestroy();
-    }
-
-    /** Setup the chat functions provided by the FAB button. */
-    private void initFabListener() {
-        // Set up the FAB speed dial menu.
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.rooms_fab);
-
     }
 
 }
