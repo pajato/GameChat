@@ -24,6 +24,7 @@ import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -59,6 +60,10 @@ enum NavigationManager {
         toggle = new ActionBarDrawerToggle(activity, drawer, toolbar, OPEN_ID, CLOSE_ID);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        // Set up the handle navigation menu item clicks.
+        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(activity);
     }
 
     /** Set up the navigation header to show an account. */

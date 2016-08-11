@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -41,7 +42,7 @@ import org.greenrobot.eventbus.Subscribe;
 import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
 /**
- * Provide a main activity to display the chat and game panels.
+ * Provide a main activity to display the chat and game fragments.
  *
  * @author Paul Michael Reilly
  */
@@ -61,9 +62,6 @@ public class MainActivity extends AppCompatActivity
     /** The preferences file name. */
     private static final String PREFS = "GameChatPrefs";
 
-    /** The preferences key for tracking a fresh install. */
-    private static final String FRESH_INSTALL = "FreshInstall";
-
     /** The Intro activity request code. */
     private static final int RC_INTRO = 1;
 
@@ -72,14 +70,16 @@ public class MainActivity extends AppCompatActivity
     /** Process a button click on a given view by posting a button click event. */
     public void buttonClick(final View view) {
         int value = view.getTag() != null ? getIntegerTag(view) : view.getId();
-        EventBus.getDefault().post(new ClickEvent(this, value, view.getClass().getSimpleName()));
+        String className = view.getClass().getSimpleName();
+        EventBus.getDefault().post(new ClickEvent(this, value, view, null, className));
     }
 
     /** Process a button click on a given view by posting a button click event. */
     public void menuClick(final MenuItem item) {
         // Post all menu button clicks.
         int value = item.getItemId();
-        EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
+        String className = item.getClass().getSimpleName();
+        EventBus.getDefault().post(new ClickEvent(this, value, null, item, className));
     }
 
     /** Process a given button click event by logging it. */
@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity
     @Override public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
         int value = item.getItemId();
-        EventBus.getDefault().post(new ClickEvent(this, value, item.getClass().getSimpleName()));
+        String className = item.getClass().getSimpleName();
+        EventBus.getDefault().post(new ClickEvent(this, value, null, item, className));
         NavigationManager.instance.closeDrawerIfOpen(this);
         return true;
     }
@@ -175,7 +176,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         PaneManager.instance.init(this);
         AccountManager.instance.init();
-        init(savedInstanceState);
+        init();
     }
 
     /** Respect the lifecycle and ensure that the event bus shuts down. */
@@ -202,28 +203,28 @@ public class MainActivity extends AppCompatActivity
 
     /** Return the integer value of the tag in the given view, -1 if the value is not an integer. */
     private int getIntegerTag(final View view) {
+        // Handle a string tag.
         Object o = view.getTag();
         if (o instanceof String) {
             String s = (String) o;
-            return Integer.valueOf(s).intValue();
-        } else if (o instanceof Integer) {
-            Integer i = (Integer) o;
-            return i.intValue();
-        } else {
-            return -1;
+            return Integer.valueOf(s);
         }
+
+        // Handle an integer tag.
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+
+        // Default to -1.
+        return -1;
     }
 
     /** Initialize the main activity. */
-    private void init(final Bundle savedInstanceState) {
+    private void init() {
         // Set up the app components: toolbar and navigation drawer.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         NavigationManager.instance.init(this, toolbar);
-
-        // Set up the handle navigation menu item clicks.
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
