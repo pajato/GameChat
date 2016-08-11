@@ -50,8 +50,9 @@ public class SignInActivity extends AppCompatActivity
 
     /** On a destroy Activity lifecycle event lose the progress dialog. */
     @Override public void onDestroy() {
+        //hideProgressDialog();
+        mProgressDialog.dismiss();
         super.onDestroy();
-        hideProgressDialog();
     }
 
     /** Use the Activity lifecycle to start the Firebase authentication listener. */

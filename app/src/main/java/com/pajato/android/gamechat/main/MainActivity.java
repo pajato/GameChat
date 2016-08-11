@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -162,11 +161,10 @@ public class MainActivity extends AppCompatActivity
         if (!intent.getBooleanExtra(SKIP_INTRO_ACTIVITY_KEY, false)) {
             // Do not skip running the intro screen activity.
             SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            if (prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, true)) {
+            if (!prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false)) {
                 // This is a fresh installation of the app.  Present the intro activity to get things
                 // started, which will introduce the user to the app and provide a chnance to sign in or
                 // register an account.
-
                 Intent introIntent = new Intent(this, IntroActivity.class);
                 startActivityForResult(introIntent, RC_INTRO);
             }
