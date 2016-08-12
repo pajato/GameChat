@@ -67,10 +67,6 @@ dependencies {
     compile "com.google.firebase:firebase-database:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-messaging:$rootProject.ext.gmsVersion"
     compile "com.firebase:firebase-client-android:2.4.0"
-
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 }
 
 // Per Firebase instructions this comes last.
