@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -87,7 +88,7 @@ public abstract class BaseTest {
                 return imageView.getDrawable() == null;
             }
             Resources resources = target.getContext().getResources();
-            Drawable expectedDrawable = resources.getDrawable(expectedId);
+            Drawable expectedDrawable = ResourcesCompat.getDrawable(resources, expectedId, null);
             resourceName = resources.getResourceEntryName(expectedId);
 
             if (expectedDrawable == null) {

@@ -27,7 +27,7 @@ public class FABTest extends BaseTest {
     /** Ensure that all items in the FAB Menu are present. */
     @Test public void testFABMenuPresent() {
         // Open up the FAB menu
-        onView(withId(R.id.room_fab_speed_dial))
+        onView(withId(R.id.rooms_fab))
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.
@@ -41,7 +41,7 @@ public class FABTest extends BaseTest {
         onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()));
         // Open up the FAB menu and click on the new Tic-Tac-Toe game option
-        onView(withId(R.id.room_fab_speed_dial))
+        onView(withId(R.id.rooms_fab))
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Todo: test out the menu functionality.
@@ -52,11 +52,11 @@ public class FABTest extends BaseTest {
         // Ensure the FAB is present. Then, navigate to the game fragment.
         onView(withId(R.id.rooms_pane))
                 .check(matches(isDisplayed()))
-                .check(matches(withChild(withId(R.id.room_fab_speed_dial))));
+                .check(matches(withChild(withId(R.id.rooms_fab))));
         onView(withId(R.id.toolbar_game_icon))
                 .perform(click());
         // Once there, ensure the FAB is no longer displayed.
         onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(not(withChild(withId(R.id.room_fab_speed_dial)))));
+                .check(matches(not(withChild(withId(R.id.rooms_fab)))));
     }
 }

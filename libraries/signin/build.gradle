@@ -50,10 +50,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.google.android.gms:play-services-auth:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-auth:$rootProject.ext.gmsVersion"
-
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 }
 
 // Per Firebase instructions this comes last.
