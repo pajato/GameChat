@@ -24,8 +24,6 @@
     <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
     <string name="new_chat_favorite_room">New Chat (Favorite Room)</string>
     <string name="new_chat_select_user">New Chat (Select User)</string>
-    <string name="room_favorite">Favorite Chat Room</string>
-    <string name="room_new">New Chat Room</string>
     <string name="new_game">New Game</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
     <string name="new_game_chess">New Game (Chess)</string>

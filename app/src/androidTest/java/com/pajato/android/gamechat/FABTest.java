@@ -9,10 +9,8 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withChild;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.not;
 
 /**
  * All tests are based on the the following documentation:
@@ -31,32 +29,10 @@ public class FABTest extends BaseTest {
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.
-        onView(withText(R.string.room_new))
+        onView(withText(R.string.createRoom))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.room_favorite))
+        onView(withText(R.string.createGroup))
                 .check(matches(isDisplayed()));
     }
 
-    @Test public void testFabFunctionality() {
-        onView(withId(R.id.rooms_pane))
-                .check(matches(isDisplayed()));
-        // Open up the FAB menu and click on the new Tic-Tac-Toe game option
-        onView(withId(R.id.rooms_fab))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        // Todo: test out the menu functionality.
-    }
-
-    /** Ensure that, when navigating to the game pane, the FAB disappears. */
-    @Test public void testFabInHierarchy() {
-        // Ensure the FAB is present. Then, navigate to the game fragment.
-        onView(withId(R.id.rooms_pane))
-                .check(matches(isDisplayed()))
-                .check(matches(withChild(withId(R.id.rooms_fab))));
-        onView(withId(R.id.toolbar_game_icon))
-                .perform(click());
-        // Once there, ensure the FAB is no longer displayed.
-        onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(not(withChild(withId(R.id.rooms_fab)))));
-    }
 }
