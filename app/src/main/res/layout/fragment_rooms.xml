@@ -23,52 +23,75 @@ http://www.gnu.org/licenses
     android:layout_height="match_parent"
     android:id="@+id/rooms_pane">
 
+    <LinearLayout style="@style/FabMenu"
+        android:id="@+id/rooms_fab_menu"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/rooms_fab">
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/create_room_menu_item">
+            <Button style="@style/FabMenuButton"
+                android:text="@string/createRoom" />
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/createRoomDescription"
+                android:src="@drawable/ic_casino_black_24dp" />
+        </LinearLayout>
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/create_group_menu_item">
+            <Button style="@style/FabMenuButton"
+                android:text="@string/createGroup" />
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/createGroupDescription"
+                android:src="@drawable/ic_group_add_black_24dp" />
+        </LinearLayout>
+    </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         android:gravity="bottom|start"
         android:id="@+id/rooms_fab"
-        android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_add_white_24dp"
-        android:layout_marginEnd="16dp"
         android:onClick="buttonClick"
-        app:elevation="2dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:fabSize="normal"
         tools:visibility="visible"/>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rooms_content"
+        android:orientation="vertical"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rooms_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/adView"
-        tools:visibility="gone"/>
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/rooms_message"
-        android:padding="24dp"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        android:text="@string/no_rooms_message_text"
-        app:layout_constraintTop_toBottomOf="@+id/adView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="@id/adView"
-        app:layout_constraintRight_toRightOf="@id/adView"
-        tools:text="Placeholder message ... updated at runtime."
-        tools:visibility="visible"/>
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/banner_ad_unit_id"/>
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rooms_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:visibility="gone"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:id="@+id/rooms_message"
+            android:padding="24dp"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:text="@string/no_rooms_message_text"
+            tools:text="Placeholder message ... updated at runtime."
+            tools:visibility="visible"/>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

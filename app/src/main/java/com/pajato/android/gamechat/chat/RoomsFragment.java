@@ -76,7 +76,9 @@ public class RoomsFragment extends Fragment {
         mAdView.loadAd(adRequest);
 
         FloatingActionButton fab = (FloatingActionButton) result.findViewById(R.id.rooms_fab);
-        FabManager.instance.init(fab);
+        View menu = result.findViewById(R.id.rooms_fab_menu);
+        View content = result.findViewById(R.id.rooms_content);
+        FabManager.instance.init(fab, content, menu);
 
         return result;
     }
