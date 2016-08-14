@@ -59,39 +59,65 @@ http://www.gnu.org/licenses
         app:fabSize="normal"
         tools:visibility="visible"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/rooms_content"
-        android:orientation="vertical"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rooms_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:visibility="gone"/>
-
-        <TextView
+    <!-- The main content for the rooms pane is either an ad view
+         followed by a list of expandable groups or an intro screen
+         for Users with no groups. -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:id="@+id/rooms_message"
-            android:padding="24dp"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:text="@string/no_rooms_message_text"
-            tools:text="Placeholder message ... updated at runtime."
-            tools:visibility="visible"/>
-    </LinearLayout>
+            android:id="@+id/rooms_main"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="gone">
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                ads:adSize="BANNER"
+                ads:adUnitId="@string/banner_ad_unit_id"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rooms_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rooms_none"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            app:layout_constraintCenterX_toCenterX="parent"
+            app:layout_constraintCenterY_toCenterY="parent"
+            tools:visibility="visible">
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:useDefaultMargins="true"
+                android:columnOrderPreserved="true"
+                android:columnCount="2"
+                tools:ignore="ContentDescription">
+                <ImageView style="@style/RoomsIcon" android:tint="@color/colorRed" />
+                <ImageView style="@style/RoomsIcon" android:tint="@color/colorBlue" />
+                <ImageView style="@style/RoomsIcon" android:tint="@color/colorGray" />
+                <ImageView style="@style/RoomsIcon" android:tint="@color/colorGreen" />
+            </GridLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rooms_message"
+                android:padding="24dp"
+                android:text="@string/no_rooms_message_text"
+                android:textAlignment="center"
+                android:textSize="24sp"
+                tools:text="Placeholder message ... updated at runtime."
+                tools:visibility="visible" />
+        </LinearLayout>
 </android.support.constraint.ConstraintLayout>
