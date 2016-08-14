@@ -55,5 +55,4 @@
     <string name="winner_tie">Tie!</string>
     <string name="winner_x">X Wins!</string>
     <string name="xValue">X</string>
-    <string name="no_rooms_message_text">There are currently no rooms available.  GameChat is much more fun with rooms.  Use the + button to create one.</string>
 </resources>
