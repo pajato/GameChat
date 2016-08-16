@@ -55,22 +55,27 @@ enum FabManager {
         toggle(fab);
     }
 
+    /** Dismiss the menu associated with the given FAB button. */
+    public void dismissMenu(final FloatingActionButton fab) {
+        fab.setImageResource(R.drawable.ic_add_white_24dp);
+        fab.setTag(R.integer.fabStateKey, State.closed);
+        View menu = mMenuMap.get(fab.getId());
+        menu.setVisibility(View.GONE);
+    }
+
     /** Toggle the state of the FAB button. */
     public void toggle(final FloatingActionButton fab) {
         // Determine if the fab view STATE tag has a valid state value.
         Object payload = fab.getTag(R.integer.fabStateKey);
         if (payload instanceof State) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
-            View menu = mMenuMap.get(fab.getId());
             View content = mContentMap.get(fab.getId());
             State value = (State) payload;
             switch (value) {
                 case opened:
                     // The FAB is showing X and menu is visible.  Set the icon to +, close the
                     // menu and undim the frame.
-                    fab.setImageResource(R.drawable.ic_add_white_24dp);
-                    fab.setTag(R.integer.fabStateKey, State.closed);
-                    menu.setVisibility(View.GONE);
+                    dismissMenu(fab);
                     content.setVisibility(View.VISIBLE);
                     break;
                 case closed:
@@ -78,6 +83,7 @@ enum FabManager {
                     // the menu.
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
+                    View menu = mMenuMap.get(fab.getId());
                     menu.setVisibility(View.VISIBLE);
                     content.setVisibility(View.INVISIBLE);
                     break;
