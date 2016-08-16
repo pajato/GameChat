@@ -30,7 +30,7 @@ http://www.gnu.org/licenses
         android:layout_weight="1"
         android:text="@string/sign_in"
         android:gravity="center"
-        android:onClick="buttonClick"
+        android:onClick="onClick"
         tools:visibility="gone" />
 
     <LinearLayout
@@ -40,7 +40,6 @@ http://www.gnu.org/licenses
         android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="bottom"
-        android:onClick="buttonClick"
         tools:visibility="visible">
         <ImageView
             android:id="@+id/currentAccountIcon"
@@ -88,7 +87,7 @@ http://www.gnu.org/licenses
             android:layout_weight="1.0"
             android:gravity="center"
             android:text="@string/sign_out"
-            android:onClick="buttonClick"/>
+            android:onClick="onClick"/>
     </LinearLayout>
 
 </LinearLayout>

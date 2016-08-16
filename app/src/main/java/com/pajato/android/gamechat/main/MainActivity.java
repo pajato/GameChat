@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventUtils;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -46,7 +47,7 @@ import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILAB
  * @author Paul Michael Reilly
  */
 public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener {
+    implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     // Public class constants.
 
@@ -66,19 +67,16 @@ public class MainActivity extends AppCompatActivity
 
     // Public instance methods
 
-    /** Process a button click on a given view by posting a button click event. */
-    public void buttonClick(final View view) {
-        int value = view.getTag() != null ? getIntegerTag(view) : view.getId();
-        String className = view.getClass().getSimpleName();
-        EventBus.getDefault().post(new ClickEvent(this, value, view, null, className));
+    /** Process a click on a given view by posting a button click event. */
+    public void onClick(final View view) {
+        // Use the Event bus to post the click event.
+        EventUtils.post(this, view);
     }
 
     /** Process a button click on a given view by posting a button click event. */
     public void menuClick(final MenuItem item) {
         // Post all menu button clicks.
-        int value = item.getItemId();
-        String className = item.getClass().getSimpleName();
-        EventBus.getDefault().post(new ClickEvent(this, value, null, item, className));
+        EventUtils.post(this, item);
     }
 
     /** Process a given button click event by logging it. */
@@ -199,24 +197,6 @@ public class MainActivity extends AppCompatActivity
 
     // Private instance methods.
 
-    /** Return the integer value of the tag in the given view, -1 if the value is not an integer. */
-    private int getIntegerTag(final View view) {
-        // Handle a string tag.
-        Object o = view.getTag();
-        if (o instanceof String) {
-            String s = (String) o;
-            return Integer.valueOf(s);
-        }
-
-        // Handle an integer tag.
-        if (o instanceof Integer) {
-            return (Integer) o;
-        }
-
-        // Default to -1.
-        return -1;
-    }
-
     /** Initialize the main activity. */
     private void init() {
         // Set up the app components: toolbar and navigation drawer.
@@ -227,10 +207,14 @@ public class MainActivity extends AppCompatActivity
 
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
+        // Due to a "bug" in Android, using XML to configure the navigation header current profile
+        // click handler does not work.  Instead we do it here programmatically.
+        NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
+        View header = navView.getHeaderView(0) != null ? navView.getHeaderView(0) : navView.inflateHeaderView(R.layout.nav_header_main);
+        View layout = header.findViewById(R.id.currentProfile);
+        if (layout != null) layout.setOnClickListener(this);
+
         // If there is an account, set up the navigation drawer header accordingly.
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View header = navigationView.getHeaderView(0);
-        if (header == null) header =  navigationView.inflateHeaderView(R.layout.nav_header_main);
         Account account = event.getAccount();
         if (account != null) {
             // There is an account.  Set it up in the header.

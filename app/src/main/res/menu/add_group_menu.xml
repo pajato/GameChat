@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/add_group_learn_more"
+        android:title="@string/menuItemTitleLearnMore"
+        app:showAsAction="never"
+        android:orderInCategory="0"/>
+    <item
+        android:id="@+id/add_group_feedback"
+        android:title="@string/menuItemTitleFeedback"
+        app:showAsAction="never"
+        android:orderInCategory="97" />
+</menu>

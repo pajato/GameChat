@@ -17,9 +17,9 @@
 
 package com.pajato.android.gamechat.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,6 +32,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -42,7 +43,7 @@ import org.greenrobot.eventbus.Subscribe;
  *
  * @author Paul Michael Reilly
  */
-public class RoomsFragment extends Fragment {
+public class RoomsFragment extends BaseFragment {
 
     // Public instance variables.
 
@@ -60,10 +61,19 @@ public class RoomsFragment extends Fragment {
             // It is a rooms fab button.  Toggle the state.
             FabManager.instance.toggle((FloatingActionButton) event.getView());
             break;
+        case R.id.addGroupButton:
+        case R.id.addGroupMenuItem:
+            // Dismiss the FAB menu, and start up the add group activity.
+            View view = getActivity().findViewById(R.id.rooms_fab);
+            FabManager.instance.dismissMenu((FloatingActionButton) view);
+            Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
+            startActivity(intent);
+            break;
         default:
             // Ignore everything else.
             break;
-        }    }
+        }
+    }
 
     /** Handle the setup for the rooms panel. */
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,11 +84,6 @@ public class RoomsFragment extends Fragment {
         mAdView = (AdView) result.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-
-        FloatingActionButton fab = (FloatingActionButton) result.findViewById(R.id.rooms_fab);
-        View menu = result.findViewById(R.id.rooms_fab_menu);
-        View content = result.findViewById(R.id.rooms_none);
-        FabManager.instance.init(fab, content, menu);
 
         return result;
     }
@@ -119,10 +124,13 @@ public class RoomsFragment extends Fragment {
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
     @Override public void onResume() {
+        // When resuming, use the base class to log it, manage the ad view and the main view, and
+        // register the fragment to be an event handler.
         super.onResume();
         if (mAdView != null) {
             mAdView.resume();
         }
+        selectMainView();
         EventBus.getDefault().register(this);
     }
 
@@ -132,6 +140,19 @@ public class RoomsFragment extends Fragment {
             mAdView.destroy();
         }
         super.onDestroy();
+    }
+
+    // Private instance methods.
+
+    /** Select the view to be visible: either the "no groups" or the "show groups" view. */
+    private void selectMainView() {
+        View view = getView();
+        if (view != null) {
+            FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.rooms_fab);
+            View menu = view.findViewById(R.id.rooms_fab_menu);
+            View content = view.findViewById(R.id.rooms_none);
+            FabManager.instance.init(fab, content, menu);
+        }
     }
 
 }
