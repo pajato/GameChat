@@ -155,6 +155,9 @@ public enum GameManager {
                 ((CheckersFragment) GameManager.instance.getFragment(GameManager.CHECKERS_INDEX))
                         .messageHandler(msg);
                 break;
+            case GameManager.CHESS_INDEX:
+                ((ChessFragment) GameManager.instance.getFragment(GameManager.CHESS_INDEX))
+                        .messageHandler(msg);
         }
     }
 
@@ -200,7 +203,7 @@ public enum GameManager {
      */
     public boolean setCurrentFragment(final int fragmentIndex, final FragmentActivity context,
                                       final String msg) {
-        if(fragmentIndex <= CHECKERS_INDEX && fragmentIndex > -1) {
+        if(fragmentIndex < TOTAL_FRAGMENTS && fragmentIndex > -1) {
             if (fragmentIndex != getCurrentFragmentIndex()) {
                 if(fragmentList[fragmentIndex] == null) {
                     switch(fragmentIndex) {
@@ -212,7 +215,7 @@ public enum GameManager {
                             break;
                         case CHECKERS_INDEX: fragmentList[CHECKERS_INDEX] = new CheckersFragment();
                             break;
-                        case CHESS_INDEX: //fragmentList[CHESS_INDEX] = new ChessFragment();
+                        case CHESS_INDEX: fragmentList[CHESS_INDEX] = new ChessFragment();
                             break;
                     }
                 }

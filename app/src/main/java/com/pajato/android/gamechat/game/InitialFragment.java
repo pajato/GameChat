@@ -45,6 +45,11 @@ public class InitialFragment extends BaseFragment {
         View checkersButton = layout.findViewById(R.id.init_checkers_button);
         checkersButton.setOnClickListener(new ClickHandler());
 
+        View chess = layout.findViewById(R.id.init_chess);
+        chess.setOnClickListener(new ClickHandler());
+        View chessButton = layout.findViewById(R.id.init_chess_button);
+        chessButton.setOnClickListener(new ClickHandler());
+
         return layout;
     }
 
@@ -56,6 +61,9 @@ public class InitialFragment extends BaseFragment {
             } else if (v.getId() == R.id.init_checkers || v.getId() == R.id.init_checkers_button) {
                 GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
                         getString(R.string.new_game_checkers));
+            } else if (v.getId() == R.id.init_chess || v.getId() == R.id.init_chess_button) {
+                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                        getString(R.string.new_game_chess));
             }
         }
     }

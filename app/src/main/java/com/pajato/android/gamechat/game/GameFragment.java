@@ -87,7 +87,7 @@ public class GameFragment extends BaseFragment {
                 GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(), msg);
                 break;
             case R.id.options_menu_new_chess:
-                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
+                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity(), msg);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -132,6 +132,10 @@ public class GameFragment extends BaseFragment {
                 return ((CheckersFragment) GameManager.instance
                         .getFragment(GameManager.CHECKERS_INDEX))
                         .mTurn ? "Blue" : "Yellow";
+            case GameManager.CHESS_INDEX:
+                return ((ChessFragment) GameManager.instance
+                        .getFragment(GameManager.CHESS_INDEX))
+                        .mTurn ? "Blue" : "Purple";
         }
     }
 
