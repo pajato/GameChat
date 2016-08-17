@@ -395,10 +395,10 @@ public class CheckersFragment extends BaseFragment {
         // Handle capturing pieces.
         boolean finishedJumping = true;
         if(capturesPiece) {
-            int pieceCaptuedIndex = (indexClicked + highlightedIndex) / 2;
-            ImageButton capturedTile = (ImageButton) mBoard.getChildAt(pieceCaptuedIndex);
+            int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
+            ImageButton capturedTile = (ImageButton) mBoard.getChildAt(pieceCapturedIndex);
             capturedTile.setImageResource(0);
-            mBoardMap.delete(pieceCaptuedIndex);
+            mBoardMap.delete(pieceCapturedIndex);
 
             // If there are no more jumps, change turns. If there is at least one jump left, don't.
             ArrayList<Integer> possibleJumps = new ArrayList<>();

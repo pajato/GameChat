@@ -93,6 +93,9 @@ public class SettingsFragment extends BaseFragment {
         } else if(game.equals(getString(R.string.new_game_checkers))) {
             title.setText(R.string.playing_checkers);
             setupCheckers();
+        } else if(game.equals(getString(R.string.new_game_chess))) {
+            title.setText(R.string.playing_chess);
+            setupChess();
         }
         return main;
     }
@@ -139,6 +142,17 @@ public class SettingsFragment extends BaseFragment {
         mComputer.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 //GameManager.instance.sendNewGame(GameManager.CHECKERS_COMPUTER_INDEX, getActivity());
+            }
+        });
+    }
+
+    /**
+     * Setup the Chess game creation invitation onClicks for Local, Online, and Computer games.
+     */
+    private void setupChess() {
+        mLocal.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View v) {
+                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
             }
         });
     }

@@ -5,6 +5,10 @@
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="chat">Chat</string>
+    <string name="chess_promotion_bishop">Bishop</string>
+    <string name="chess_promotion_knight">Knight</string>
+    <string name="chess_promotion_queen">Queen</string>
+    <string name="chess_promotion_rook">Rook</string>
     <string name="choose_group">Choose a Group:</string>
     <string name="choose_user">Choose a User:</string>
     <string name="game">Game</string>
@@ -46,6 +50,7 @@
     <string name="play_ttt">Play Tic-Tac-Toe!</string>
     <string name="playing">Playing…</string>
     <string name="playing_checkers">Playing Checkers!</string>
+    <string name="playing_chess">Playing Chess!</string>
     <string name="playing_ttt">Playing Tic-Tac-Toe!</string>
     <string name="rooms">Rooms</string>
     <string name="send">SEND</string>
