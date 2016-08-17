@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -186,7 +187,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
             mSaveButton = button;
             Resources res = context.getResources();
             mDisabledColor = button.getCurrentTextColor();
-            mEnabledColor = res.getColor(R.color.colorPrimaryDark);
+            mEnabledColor = ContextCompat.getColor(context, R.color.colorPrimaryDark);
         }
 
         /** Make sure that the hint is restored when necessary and that the name is unique. */
