@@ -116,7 +116,7 @@ http://www.gnu.org/licenses
                 android:layout_height="wrap_content"
                 android:id="@+id/rooms_message"
                 android:padding="24dp"
-                android:text="@string/no_rooms_message_text"
+                android:text="@string/NoRoomsMessageText"
                 android:textAlignment="center"
                 android:textSize="24sp"
                 tools:text="Placeholder message ... updated at runtime."

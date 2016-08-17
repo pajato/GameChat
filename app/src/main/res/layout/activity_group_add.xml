@@ -51,14 +51,14 @@ http://www.gnu.org/licenses
             android:labelFor="@+id/groupNameText"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:text="Name:"/>
+            android:text="@string/GroupAddLabelText"/>
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/groupNameText"
             android:textSize="18sp"
             android:textStyle="normal"
-            android:hint="Enter group name"/>
+            android:hint="@string/GroupAddHintText"/>
     </LinearLayout>
 
 </LinearLayout>
