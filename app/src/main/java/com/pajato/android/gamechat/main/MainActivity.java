@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity
         if (layout != null) layout.setOnClickListener(this);
 
         // If there is an account, set up the navigation drawer header accordingly.
-        Account account = event.getAccount();
+        Account account = event.account;
         if (account != null) {
             // There is an account.  Set it up in the header.
             NavigationManager.instance.setAccount(account, header);
