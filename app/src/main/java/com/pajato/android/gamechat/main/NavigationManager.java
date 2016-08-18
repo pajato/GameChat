@@ -81,7 +81,7 @@ enum NavigationManager {
         loadAccountIcon(account, header);
         setDisplayName(account, header);
         TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
-        email.setText(account.getAccountId());
+        email.setText(account.accountEmail);
     }
 
     /** Set up the navigation header to show the sign in button. */
@@ -155,12 +155,12 @@ enum NavigationManager {
     private void loadAccountIcon(final Account account, final View header) {
         // Determine if there is an image to be loaded.
         ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-        Uri imageUri = account.getAccountUrl();
+        Uri imageUri = Uri.parse(account.accountUrl);
         if (imageUri != null) {
             // There is an image to load.  Use Glide to do the heavy lifting.
-            icon.setImageURI(account.getAccountUrl());
+            icon.setImageURI(imageUri);
             Glide.with(header.getContext())
-                .load(account.getAccountUrl())
+                .load(account.accountUrl)
                 .transform(new CircleTransform(header.getContext()))
                 .into(icon);
         } else {
@@ -174,11 +174,11 @@ enum NavigationManager {
     /** Load the display name, if available, using a placeholder otherwise. */
     private void setDisplayName(final Account account, final View header) {
         // Determine if there is a display name to use.
-        String name = account.getDisplayName();
+        String name = account.displayName;
         if (name == null) {
             // There is no display name, use a conjured name based on the email address, i.e. the
             // username part of the email address with an initial cap.
-            name = account.getAccountId();
+            name = account.accountEmail;
             int index = name.indexOf('@');
             name = name.substring(0, index);
             name = Character.toUpperCase(name.charAt(0)) + name.substring(1);

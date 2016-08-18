@@ -17,49 +17,61 @@
 
 package com.pajato.android.gamechat.account;
 
-import android.net.Uri;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import lombok.Data;
 
 /**
- * Provides an account data model class.
+ * Provides an account data model tailored to Firebase.
  *
  * @author Paul Michael Reilly
  */
-@Data public class Account {
-    private static final String KEY_ACCOUNT_TOKEN = "keyAccountToken";
+@IgnoreExtraProperties
+public class Account {
 
-    /** The logcat tag constant. */
-    private static final String TAG = Account.class.getSimpleName();
+    // Public instance variables
 
-    // Activity request codes.
-    private static final int ACCOUNTS_PERMISSION_REQUEST = 1;
-    private static final int ACCOUNT_SETUP_REQUEST = 2;
+    /** The account id, the backend push key. */
+    public String accountId;
 
-    // Private instance variables
-
-    /** The account id, usually an email address or a phone number. */
-    private String accountId;
+    /** The account email. */
+    public String accountEmail;
 
     /** The account icon, a URL. */
-    private Uri accountUrl;
+    public String accountUrl;
 
     /** The account display name, usually something like "Fred C. Jones". */
-    private String displayName;
+    public String displayName;
 
     /** The account token, an access key supplied by the provider. */
-    private String token;
+    public String token;
 
     /** The account provider name, a string like "Facebook". */
-    private String providerName;
+    public String providerName;
 
     /** The account provider id, a string like "google.com". */
-    private String providerId;
+    public String providerId;
 
-    /** The account avatars. The key is the name, the value is a URL for the image. */
-    private Map<String, Uri> avatarMap = new ConcurrentHashMap<>();
+    /** A list of group ids the account can access. */
+    public List<String> groupIdList = new ArrayList<>();
 
+    // Public instance methods.
+
+    /** Generate the map of data to persist into Firebase. */
+    @Exclude public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("accountId", accountId);
+        result.put("accountEmail", accountEmail);
+        result.put("accountUrl", accountUrl);
+        result.put("displayName", displayName);
+        result.put("providerName", providerName);
+        result.put("providerId", providerId);
+        result.put("groupIdList", groupIdList);
+
+        return result;
+    }
 }
