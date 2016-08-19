@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,13 +31,22 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.List;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -78,12 +88,17 @@ public class RoomsFragment extends BaseFragment {
     /** Handle the setup for the rooms panel. */
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
-        // Enable the options menu, layout the fragment, set up the ad view and the FAB button.
+        // Enable the options menu, layout the fragment, set up the ad view and the listeners for
+        // backend data changes.
         setHasOptionsMenu(true);
         View result = inflater.inflate(R.layout.fragment_rooms, container, false);
         mAdView = (AdView) result.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+        String accountId = AccountManager.instance.getCurrentAccount().accountId;
+        String path = String.format("/accounts/%s/groupIdList/", accountId);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
+        database.addValueEventListener(new GroupChangeHandler(result));
 
         return result;
     }
@@ -130,7 +145,6 @@ public class RoomsFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.resume();
         }
-        selectMainView();
         EventBus.getDefault().register(this);
     }
 
@@ -144,14 +158,60 @@ public class RoomsFragment extends BaseFragment {
 
     // Private instance methods.
 
-    /** Select the view to be visible: either the "no groups" or the "show groups" view. */
-    private void selectMainView() {
-        View view = getView();
-        if (view != null) {
-            FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.rooms_fab);
-            View menu = view.findViewById(R.id.rooms_fab_menu);
-            View content = view.findViewById(R.id.rooms_none);
+    // Private classes.
+
+    /** Provide a class to handle structural changes to a User's groups. */
+    private class GroupChangeHandler implements ValueEventListener {
+
+        // Private instance constants.
+
+        /** The logcat TAG. */
+        private final String TAG = this.getClass().getSimpleName();
+
+        // Private instance variables.
+
+        /** The top level view affected by change events. */
+        private View mLayout;
+
+        // Public constructors.
+
+        /** Build a handler with a given top level layout view. */
+        GroupChangeHandler(final View layout) {
+            mLayout = layout;
+        }
+
+        /** Get the current set of groups using a list of group identifiers. */
+        @Override public void onDataChange(final DataSnapshot dataSnapshot) {
+            // Determine how many groups are available to extract rooms from.
+            Log.d(TAG, "Value is: " + dataSnapshot.getValue());
+            GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+            List<String> groupIdList = dataSnapshot.getValue(t);
+            manageRoomsUI(groupIdList != null && groupIdList.size() > 0 ? groupIdList : null);
+        }
+
+        /** ... */
+        @Override public void onCancelled(DatabaseError error) {
+            // Failed to read value
+            Log.w(TAG, "Failed to read value.", error.toException());
+        }
+
+        // Private instance methods.
+
+        /** Manage the Rooms pane UI for a given set of groups. */
+        private void manageRoomsUI(final List<String> groups) {
+            // Setup the FAB menu.
+            FloatingActionButton fab = (FloatingActionButton) mLayout.findViewById(R.id.rooms_fab);
+            View menu = mLayout.findViewById(R.id.rooms_fab_menu);
+            View content = mLayout.findViewById(groups == null ? R.id.rooms_none : R.id.rooms_main);
             FabManager.instance.init(fab, content, menu);
+
+            // Set up the main content screen showing either a "no rooms" view or a list of groups.
+            View roomsNone = mLayout.findViewById(R.id.rooms_none);
+            View roomsMain = mLayout.findViewById(R.id.rooms_main);
+            if (roomsNone != null)
+                roomsNone.setVisibility(groups == null ? View.VISIBLE : View.GONE);
+            if (roomsMain != null)
+                roomsMain.setVisibility(groups == null ? View.GONE : View.VISIBLE);
         }
     }
 
