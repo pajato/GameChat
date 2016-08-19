@@ -104,10 +104,11 @@ public class CheckersFragment extends BaseFragment {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            //TODO: Handle alternate resolutions in a better way.
+            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container).getWidth();
+            int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-            param.height = 90;
-            param.width = 90;
+            param.height = pieceSideLength;
+            param.width = pieceSideLength;
             param.rightMargin = 0;
             param.topMargin = 0;
             param.setGravity(Gravity.CENTER);

@@ -97,6 +97,10 @@ public enum GameManager {
                         msg = (((CheckersFragment) getFragment(CHECKERS_INDEX)).mTurn ?
                                 "Blue" : "Yellow") + "\n" + "New Game";
                         sendMessage(msg, CHECKERS_INDEX);
+                    } else if (getCurrentFragmentIndex() == CHESS_INDEX) {
+                        msg = (((ChessFragment) getFragment(CHESS_INDEX)).mTurn ? "Blue" : "Purple")
+                                + "\n" + "New Game";
+                        sendMessage(msg, CHESS_INDEX);
                     }
                 }
             });

@@ -1,6 +1,5 @@
 package com.pajato.android.gamechat.game;
 
-import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -118,10 +117,11 @@ public class ChessFragment extends BaseFragment {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            //TODO: Handle alternate resolutions in a better way.
+            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container).getWidth();
+            int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-            param.height = 90;
-            param.width = 90;
+            param.height = pieceSideLength;
+            param.width = pieceSideLength;
             param.rightMargin = 0;
             param.topMargin = 0;
             param.setGravity(Gravity.CENTER);
@@ -273,6 +273,14 @@ public class ChessFragment extends BaseFragment {
         }
     }
 
+    /**
+     * A utility method that facilitates keeping the board's checker pattern in place throughout the
+     * highlighting and de-higlighting process. It accepts a tile and sets its background to white
+     * or dark grey, depending on its location in the board.
+     *
+     * @param index the index of the tile, used to determine the color of the background.
+     * @param currentTile the tile whose color we are changing.
+     */
     private void handleTileBackground(final int index, final ImageButton currentTile) {
         // Handle the checkerboard positions.
         boolean isEven = (index % 2 == 0);
