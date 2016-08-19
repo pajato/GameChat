@@ -20,10 +20,16 @@ package com.pajato.android.gamechat.account;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.signin.SignInActivity;
@@ -59,24 +65,30 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The array of click keys.  The ... */
     private SparseArray<Actions> mActionMap = new SparseArray<>();
 
+    /** The account value change listener that is managed during activity lifecycle events. */
+    private ValueEventListener mAccountChangeHandler;
+
     // Public instance methods
 
     /** Retrun the account for the current User, null if there is no signed in User. */
     public Account getCurrentAccount() {
+        // Use the default authentication object.
+        return getCurrentAccount(FirebaseAuth.getInstance());
+    }
+
+    /** Return the account for the current User for a given auth insntance. */
+    public Account getCurrentAccount(final FirebaseAuth auth) {
         // Obtain the account key from the logged in Firebase User to use to lookup the account in
         // the account map.  If the account is not in the map, load it using the Firebase User data.
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = auth.getCurrentUser();
         String uid = user != null ? user.getUid() : null;
-        Account account = uid != null && mAccountMap.containsKey(uid) ? mAccountMap.get(uid) : null;
-        return uid == null || account != null ? account : getAccount(user);
+        return uid != null ? mAccountMap.get(uid) : null;
     }
 
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
-        // Determine if the User is signed in or out.
-        FirebaseUser user = auth.getCurrentUser();
-        Account account = user != null ? getCurrentAccount() : null;
-        EventBus.getDefault().post(new AccountStateChangeEvent(account));
+        // Post the change event.
+        EventBus.getDefault().post(new AccountStateChangeEvent(getCurrentAccount(auth)));
     }
 
     /** Initialize the account manager. */
@@ -91,12 +103,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public void register() {
         // Deal with auth sign in and sign out events by propagating them to EventBus subscribers.
         EventBus.getDefault().register(this);
+        setValueEventListener(new AccountChangeHandler(mAccountMap));
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
         EventBus.getDefault().unregister(this);
+        setValueEventListener(null);
         FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
@@ -111,19 +125,23 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private instance methods.
 
-    /** Map the Firebase User to an Account. */
-    private Account getAccount(final FirebaseUser user) {
-        // Create and persist an account for the user.
-        Account result = new Account();
-        result.accountId = user.getUid();
-        result.accountEmail = user.getEmail();
-        result.accountUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
-        result.displayName = user.getDisplayName();
-        result.providerId = user.getProviderId();
-        result.providerName = "tbd";
-        mAccountMap.put(result.accountId, result);
-
-        return result;
+    /** Set or clear the account change value event listener. */
+    private void setValueEventListener(final AccountChangeHandler handler) {
+        // Determine whether to add or remove the account value event listener.
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String uid = user.getUid();
+            String path = String.format("/accounts/%s", uid);
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
+            if (handler != null) {
+                // Install a handler.
+                mAccountChangeHandler = handler;
+                database.addValueEventListener(mAccountChangeHandler);
+            } else {
+                // Remove a previously installed handler.
+                database.removeEventListener(mAccountChangeHandler);
+            }
+        }
     }
 
     /** Process a given action by providing handling for the relevant cases. */
@@ -146,5 +164,45 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     // Private classes
+
+    /** Provide a class to handle account changes. */
+    private class AccountChangeHandler implements ValueEventListener {
+
+        // Private instance constants.
+
+        /** The logcat TAG. */
+        private final String TAG = this.getClass().getSimpleName();
+
+        // Private instance variables.
+
+        /** The top level view affected by change events. */
+        private Map<String, Account> mAccountMap;
+
+        // Public constructors.
+
+        /** Build a handler with a given top level layout view. */
+        AccountChangeHandler(final Map<String, Account> accountMap) {
+            mAccountMap = accountMap;
+        }
+
+        /** Get the current of account using a list of account identifiers. */
+        @Override public void onDataChange(final DataSnapshot dataSnapshot) {
+            // Determine how many accounts are available to extract rooms from.
+            Log.d(TAG, "Account value is: " + dataSnapshot.getValue());
+            Account account = dataSnapshot.getValue(Account.class);
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = user != null ? user.getUid() : null;
+            if (uid != null) mAccountMap.put(uid, account);
+        }
+
+        /** ... */
+        @Override public void onCancelled(DatabaseError error) {
+            // Failed to read value
+            Log.w(TAG, "Failed to read value.", error.toException());
+        }
+
+        // Private instance methods.
+
+    }
 
 }

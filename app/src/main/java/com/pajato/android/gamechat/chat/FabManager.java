@@ -22,6 +22,10 @@ import android.util.SparseArray;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+
+import java.util.List;
 
 import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
@@ -46,9 +50,14 @@ enum FabManager {
     // Public instance methods
 
     /** Initialize the fab button. */
-    public void init(final FloatingActionButton fab, final View content, final View menu) {
+    public void init(final View layout) {
         // Initialize the fab button state to opened and then toggle it to put the panel into the
         // correct initial state.
+        Account account = AccountManager.instance.getCurrentAccount();
+        List<String> groups = account != null ? account.groupIdList : null;
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(R.id.rooms_fab);
+        View menu = layout.findViewById(R.id.rooms_fab_menu);
+        View content = layout.findViewById(groups == null ? R.id.rooms_none : R.id.rooms_main);
         fab.setTag(R.integer.fabStateKey, opened);
         mContentMap.put(fab.getId(), content);
         mMenuMap.put(fab.getId(), menu);
@@ -61,6 +70,11 @@ enum FabManager {
         fab.setTag(R.integer.fabStateKey, State.closed);
         View menu = mMenuMap.get(fab.getId());
         menu.setVisibility(View.GONE);
+    }
+
+    /** Set the current content view for the given FAB button. */
+    public void setContentView(final FloatingActionButton fab, final View content) {
+        mContentMap.put(fab.getId(), content);
     }
 
     /** Toggle the state of the FAB button. */
