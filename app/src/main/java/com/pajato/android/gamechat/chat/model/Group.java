@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@IgnoreExtraProperties
-public class Group {
+/** Provide a Firebase model class repesenting a chat group, a collection of members and rooms. */
+@IgnoreExtraProperties public class Group {
 
     /** The group owner's account id. */
     public String ownerId;
@@ -34,11 +34,11 @@ public class Group {
     /** The group name. */
     public String name;
 
-    /** The group member account ids. */
+    /** The group member account identifiers. */
     public List<String> memberIds = new ArrayList<>();
 
-    /** The list of rooms in the group. */
-    // Todo: public List<Room> = new ArrayList<>();
+    /** The list of room identifiers in the group. */
+    public List<String> roomIds = new ArrayList<>();
 
     /** The default constructor. */
     public Group() {}
@@ -49,12 +49,13 @@ public class Group {
         this.name = name;
     }
 
-    @Exclude
-    public Map<String, Object> toMap() {
+    /** Provide a default map for a Firebase create/update. */
+    @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("ownerId", ownerId);
         result.put("name", name);
         result.put("memberIds", memberIds);
+        result.put("roomIds", roomIds);
 
         return result;
     }
