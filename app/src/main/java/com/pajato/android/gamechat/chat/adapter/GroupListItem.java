@@ -48,42 +48,42 @@ public class GroupListItem {
             case 0:
                 name = "JCL Group";
                 count = 17;
-                rooms = "group, Sandy Scott, The Shovel, ChessWhiz, ...";
+                rooms = "<b>General</b>, Sandy Scott, <b>The Shovel</b>, ChessWhiz, ...";
                 break;
             case 1:
                 name = "ExaGrid";
                 count = 8;
-                rooms = "group, Harald Scardell, Lee Atwood, Matt Dunkirk, IT";
+                rooms = "<b>General</b>, Harald Scardell, Lee Atwood, Matt Dunkirk, IT";
                 break;
             case 2:
                 name = "The Jim Clemens Family";
                 count = 0;
-                rooms = "group, Sean Clemens, Sam Davis, Dad, ...";
+                rooms = "General, Sean Clemens, Sam Davis, Dad, ...";
                 break;
             case 3:
                 name = "CA";
                 count = 1;
-                rooms = "group, Walt Corey, The Idiot";
+                rooms = "General, <b>Walt Corey</b>, The Idiot";
                 break;
             case 4:
                 name = "The Warren Campaign";
                 count = 0;
-                rooms = "group";
+                rooms = "General";
                 break;
             case 5:
                 name = "PT LLC";
                 count = 0;
-                rooms = "group, Bryan Scott, Paul Matthew Reilly";
+                rooms = "General, Bryan Scott, Paul Matthew Reilly";
                 break;
             case 6:
                 name = "Edwin B. Newman School";
                 count = 0;
-                rooms = "group, Tommy Rooney, Pamela Reilly";
+                rooms = "General, Tommy Rooney, Pamela Reilly";
                 break;
             case 7:
                 name = "Ebeneezer Street Church";
                 count = 0;
-                rooms = "group, Pastor Frank, The Choir";
+                rooms = "General, Pastor Frank, The Choir";
                 break;
         }
 

@@ -85,7 +85,8 @@ http://www.gnu.org/licenses
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rooms_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_marginBottom="32dp"/>
         </LinearLayout>
 
         <LinearLayout

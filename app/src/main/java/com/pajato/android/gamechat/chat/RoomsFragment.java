@@ -184,13 +184,22 @@ public class RoomsFragment extends BaseFragment {
         String uid = user != null ? user.getUid() : null;
         String path = String.format("/accounts/%s/groupIdList", uid);
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
+
+        // Determine if a handler needs to be installed.
         if (uid != null && handler != null) {
-            // Install a handler.
+            // Install a handler after first removing one that may exist.
+            setValueEventListener(null);
             mAccountChangeHandler = handler;
             database.addValueEventListener(mAccountChangeHandler);
-        } else {
+            return;
+        }
+
+        // Determine if a handler needs to be removed.
+        if (uid != null && handler == null && mAccountChangeHandler != null) {
             // Remove a previously installed handler.
             database.removeEventListener(mAccountChangeHandler);
+            mAccountChangeHandler = null;
+            return;
         }
     }
 

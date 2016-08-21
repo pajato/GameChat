@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import com.pajato.android.gamechat.R;
 
 import java.util.List;
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.GROUP_ITEM_TYPE;
@@ -73,11 +75,12 @@ public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
                     // and the list of rooms with messages (possibly old).
                     GroupListViewHolder groupHolder = (GroupListViewHolder) holder;
                     groupHolder.title.setText(item.name);
-                    groupHolder.rooms.setText(item.roomsList);
+                    groupHolder.rooms.setText(Html.fromHtml(item.roomsList));
 
                     int newCount = item.newCount;
                     if (newCount > 0) {
-                        groupHolder.count.setText(String.format("%d new", item.newCount));
+                        String text = String.format(Locale.getDefault(), "%d new", item.newCount);
+                        groupHolder.count.setText(text);
                         groupHolder.count.setVisibility(View.VISIBLE);
                     } else {
                         groupHolder.count.setVisibility(View.GONE);
