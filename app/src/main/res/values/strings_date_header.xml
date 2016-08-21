@@ -1,0 +1,13 @@
+<resources>
+    <string name="now">Now</string>
+    <string name="recent">Recent</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="thisWeek">This Week</string>
+    <string name="lastWeek">Last Week</string>
+    <string name="thisMonth">This Month</string>
+    <string name="lastMonth">Last Month</string>
+    <string name="thisYear">This Year</string>
+    <string name="lastYear">Last Year</string>
+    <string name="old">Old</string>
+</resources>

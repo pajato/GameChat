@@ -27,31 +27,31 @@ import java.util.Map;
 /** Provide a Firebase model class repesenting a chat message, an icon, a name and text. */
 @IgnoreExtraProperties public class Message {
 
+    /** The account key of the message sender. */
+    public String accountKey;
+
+    /** The owning room's push key (room identifier). */
+    public String roomKey;
+
     /** The message text. */
     public String text;
-
-    /** The display name of the message sender. */
-    public String name;
-
-    /** The icon image url for the message sender. */
-    public String url;
 
     /** The default constructor. */
     public Message() {}
 
     /** Build a default Message. */
-    public Message(final String name, final String url, final String text) {
-        this.name = name;
-        this.url = url;
+    public Message(final String roomKey, final String accountKey, final String text) {
+        this.roomKey = roomKey;
+        this.accountKey = accountKey;
         this.text = text;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("name", name);
+        result.put("accountKey", accountKey);
+        result.put("roomKey", roomKey);
         result.put("text", text);
-        result.put("url", url);
 
         return result;
     }

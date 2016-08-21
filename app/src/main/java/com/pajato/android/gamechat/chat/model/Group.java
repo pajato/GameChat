@@ -28,34 +28,34 @@ import java.util.Map;
 /** Provide a Firebase model class repesenting a chat group, a collection of members and rooms. */
 @IgnoreExtraProperties public class Group {
 
-    /** The group owner's account id. */
-    public String ownerId;
+    /** The owning group's push key (group identifier). */
+    public String groupKey;
 
     /** The group name. */
     public String name;
 
     /** The group member account identifiers. */
-    public List<String> memberIds = new ArrayList<>();
+    public List<String> memberIdList = new ArrayList<>();
 
     /** The list of room identifiers in the group. */
-    public List<String> roomIds = new ArrayList<>();
+    public List<String> roomIdList = new ArrayList<>();
 
     /** The default constructor. */
     public Group() {}
 
     /** Build a default Group. */
-    public Group(final String ownerId, final String name) {
-        this.ownerId = ownerId;
+    public Group(final String groupKey, final String name) {
+        this.groupKey = groupKey;
         this.name = name;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("ownerId", ownerId);
+        result.put("groupKey", groupKey);
         result.put("name", name);
-        result.put("memberIds", memberIds);
-        result.put("roomIds", roomIds);
+        result.put("memberIdList", memberIdList);
+        result.put("roomIdList", roomIdList);
 
         return result;
     }

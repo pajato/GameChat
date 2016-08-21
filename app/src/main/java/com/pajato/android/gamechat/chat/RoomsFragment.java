@@ -21,6 +21,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +44,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.adapter.DummyData;
+import com.pajato.android.gamechat.chat.adapter.RoomsListAdapter;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -48,8 +54,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
-
-import static com.pajato.android.gamechat.R.array.groups;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -137,6 +141,18 @@ public class RoomsFragment extends BaseFragment {
         }
         setValueEventListener(null);
         EventBus.getDefault().unregister(this);
+    }
+
+    /** Set up the main recycler ... */
+    @Override public void onStart() {
+        super.onStart();
+        RoomsListAdapter adapter = new RoomsListAdapter(DummyData.getData());
+        LinearLayoutManager linearLayoutManager =
+            new LinearLayoutManager(getView().getContext(), OrientationHelper.VERTICAL, false);
+        RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.rooms_list);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setAdapter(adapter);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */

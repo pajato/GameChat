@@ -125,7 +125,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_add);
         mGroup = new Group();
-        mGroup.ownerId = AccountManager.instance.getCurrentAccount().accountId;
+        mGroup.groupKey = AccountManager.instance.getCurrentAccount().accountId;
         init();
     }
 
@@ -180,12 +180,12 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         String groupKey = database.child("groups").push().getKey();
         String roomKey = database.child("rooms").push().getKey();
         account.groupIdList.add(groupKey);
-        mGroup.roomIds.add(roomKey);
+        mGroup.roomIdList.add(roomKey);
 
         // Prepare for and execute the upload of the new group and it's default room.
-        Room room = new Room(mGroup.ownerId, "group");
+        Room room = new Room(groupKey, "group");
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/accounts/" + mGroup.ownerId, account.toMap());
+        childUpdates.put("/accounts/" + mGroup.groupKey, account.toMap());
         childUpdates.put("/groups/" + groupKey, mGroup.toMap());
         childUpdates.put("/rooms/" + roomKey, room.toMap());
         database.updateChildren(childUpdates);
