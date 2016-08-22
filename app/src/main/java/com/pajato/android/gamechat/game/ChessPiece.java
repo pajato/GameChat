@@ -71,11 +71,11 @@ class ChessPiece {
      */
     static void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
                       final SparseArray<ChessPiece> boardMap, final boolean[] castlingBooleans) {
-        final boolean blueQueenSidePawnHasMoved = castlingBooleans[0];
-        final boolean blueKingSidePawnHasMoved = castlingBooleans[1];
+        final boolean blueQueenSideRookHasMoved = castlingBooleans[0];
+        final boolean blueKingSideRookHasMoved = castlingBooleans[1];
         final boolean blueKingHasMoved = castlingBooleans[2];
-        final boolean otherQueenSidePawnHasMoved = castlingBooleans[3];
-        final boolean otherKingSidePawnHasMoved = castlingBooleans[4];
+        final boolean otherQueenSideRookHasMoved = castlingBooleans[3];
+        final boolean otherKingSideRookHasMoved = castlingBooleans[4];
         final boolean otherKingHasMoved = castlingBooleans[5];
 
         // Establish all possible movement options.
@@ -112,7 +112,7 @@ class ChessPiece {
         // Handle Castling for Blue
         if(boardMap.get(highlightedIndex).getTeam() == ChessPiece.BLUE_TEAM && !blueKingHasMoved) {
             // The more common Castling variant, "Queen-Side Castling" or "Short Castling"
-            boolean canCastleKingSide = highlightedIndex == 60 && !blueKingSidePawnHasMoved &&
+            boolean canCastleKingSide = highlightedIndex == 60 && !blueKingSideRookHasMoved &&
                     boardMap.get(highlightedIndex + 1, null) == null &&
                     boardMap.get(highlightedIndex + 2, null) == null &&
                     boardMap.get(highlightedIndex + 3, null) != null &&
@@ -121,7 +121,7 @@ class ChessPiece {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
-            boolean canCastleQueenSide = highlightedIndex == 60 && !blueQueenSidePawnHasMoved &&
+            boolean canCastleQueenSide = highlightedIndex == 60 && !blueQueenSideRookHasMoved &&
                     boardMap.get(highlightedIndex - 1, null) == null &&
                     boardMap.get(highlightedIndex - 2, null) == null &&
                     boardMap.get(highlightedIndex - 3, null) == null &&
@@ -132,7 +132,7 @@ class ChessPiece {
             }
         // Handle Castling for the other team
         } else if (boardMap.get(highlightedIndex).getTeam() == ChessPiece.OTHER_TEAM && !otherKingHasMoved) {
-            boolean canCastleKingSide = highlightedIndex == 4 && !otherKingSidePawnHasMoved &&
+            boolean canCastleKingSide = highlightedIndex == 4 && !otherKingSideRookHasMoved &&
                     boardMap.get(highlightedIndex + 1, null) == null &&
                     boardMap.get(highlightedIndex + 2, null) == null &&
                     boardMap.get(highlightedIndex + 3, null) != null &&
@@ -141,7 +141,7 @@ class ChessPiece {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
-            boolean canCastleQueenSide = highlightedIndex == 4 && !otherQueenSidePawnHasMoved &&
+            boolean canCastleQueenSide = highlightedIndex == 4 && !otherQueenSideRookHasMoved &&
                     boardMap.get(highlightedIndex - 1, null) == null &&
                     boardMap.get(highlightedIndex - 2, null) == null &&
                     boardMap.get(highlightedIndex - 3, null) == null &&

@@ -1,7 +1,10 @@
-package com.pajato.android.gamechat;
+package com.pajato.android.gamechat.game;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.pajato.android.gamechat.BaseTest;
+import com.pajato.android.gamechat.R;
 
 import org.junit.Before;
 import org.junit.Test;
