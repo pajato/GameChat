@@ -21,6 +21,7 @@ package com.pajato.android.gamechat.chat.model;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,9 @@ import java.util.Map;
     /** The message text. */
     public String text;
 
+    /** The message timestamp. */
+    public long timestamp;
+
     /** The default constructor. */
     public Message() {}
 
@@ -44,6 +48,7 @@ import java.util.Map;
         this.roomKey = roomKey;
         this.accountKey = accountKey;
         this.text = text;
+        timestamp = new Date().getTime();
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -52,6 +57,7 @@ import java.util.Map;
         result.put("accountKey", accountKey);
         result.put("roomKey", roomKey);
         result.put("text", text);
+        result.put("timestamp", timestamp);
 
         return result;
     }

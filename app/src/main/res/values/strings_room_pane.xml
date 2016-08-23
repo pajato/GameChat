@@ -1,4 +1,10 @@
 <resources>
+    <string name="AddGroup">Add Group</string>
+    <string name="AddGroupDescription">Add Group menu button</string>
+    <string name="AddRoom">Add Room</string>
+    <string name="AddRoomDescription">Add Room menu button</string>
+    <string name="JoinRoom">Join Room</string>
+    <string name="JoinRoomDescription">Join Room menu button</string>
     <string name="GroupAddHintText">Enter group name</string>
     <string name="GroupAddLabelText">Name:</string>
     <string name="GroupAddTitle">Add Group</string>

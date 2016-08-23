@@ -1,6 +1,4 @@
 <resources>
-    <string name="createGroup">Create Group</string>
-    <string name="createGroupDescription">Create a new group icon.</string>
-    <string name="createRoom">Create Room</string>
-    <string name="createRoomDescription">Create a new room icon.</string>
+    <string name="addGroup">Add Group</string>
+    <string name="addRoom">Add Room</string>
 </resources>

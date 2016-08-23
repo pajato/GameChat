@@ -29,7 +29,7 @@ public class AccountStateChangeEvent {
     /** The changed account: if null the User signed out, if non-null the User signed in. */
     public Account account;
 
-    /** Build the instance. */
+    /** Build the instance with the given account; null indicates a sign out occurred. */
     public AccountStateChangeEvent(final Account account) {
         this.account = account;
     }

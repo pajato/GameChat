@@ -27,11 +27,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.database.DatabaseEventHandler;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -59,58 +60,67 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private instance variables
 
+    /** The current account key, null if there is no current account. */
+    private String mCurrentAccountKey;
+
     /** The account repository associating mulitple account id strings with the cloud account. */
     private Map<String, Account> mAccountMap = new HashMap<>();
 
     /** The array of click keys.  The ... */
     private SparseArray<Actions> mActionMap = new SparseArray<>();
 
-    /** The account value change listener that is managed during activity lifecycle events. */
-    private ValueEventListener mAccountChangeHandler;
-
     // Public instance methods
 
     /** Retrun the account for the current User, null if there is no signed in User. */
     public Account getCurrentAccount() {
-        // Use the default authentication object.
-        return getCurrentAccount(FirebaseAuth.getInstance());
-    }
-
-    /** Return the account for the current User for a given auth insntance. */
-    public Account getCurrentAccount(final FirebaseAuth auth) {
-        // Obtain the account key from the logged in Firebase User to use to lookup the account in
-        // the account map.  If the account is not in the map, load it using the Firebase User data.
-        FirebaseUser user = auth.getCurrentUser();
-        String uid = user != null ? user.getUid() : null;
-        return uid != null ? mAccountMap.get(uid) : null;
+        return mCurrentAccountKey == null ? null : mAccountMap.get(mCurrentAccountKey);
     }
 
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
-        // Post the change event.
-        EventBus.getDefault().post(new AccountStateChangeEvent(getCurrentAccount(auth)));
+        // Determine if this state represents a User signing in or signing out.
+        String name = "accountStateChangeHandler";
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            // A User has signed in. Set up a database listener for the associated account.  That
+            // listener will post an account change event with the account information to the app.
+            String path = String.format("/accounts/%s", user.getUid());
+            if (!DatabaseManager.instance.isRegistered(name)) {
+                DatabaseManager.instance.registerHandler(new AccountChangeHandler(name, path));
+            }
+        } else {
+            // The User has signed out.  Disable the database account state change listener and
+            // notify the app of the sign out event.
+            mCurrentAccountKey = null;
+            DatabaseManager.instance.unregisterHandler(name);
+            EventBus.getDefault().post(new AccountStateChangeEvent(null));
+        }
     }
 
     /** Initialize the account manager. */
     public void init() {
         // Build a sparse array associating auth events by resource id (User clicked in a sign in or
-        // sign out button) with an auth action.
+        // sign out button) with an auth action, register the app event bus and finally add teh
+        // database auth change handler.  The auth state change listener will post app events so
+        // must come last.
         mActionMap.put(R.id.signIn, Actions.signIn);
         mActionMap.put(R.id.signOut, Actions.signOut);
+        EventBusManager.instance.register(this);
+        FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
-    /** Register the component during lifecycle resume events. */
+    /** Re-register the component during lifecycle resume events. */
     public void register() {
-        // Deal with auth sign in and sign out events by propagating them to EventBus subscribers.
-        EventBus.getDefault().register(this);
-        setValueEventListener(new AccountChangeHandler(mAccountMap));
+        // Remove listeners before registering them.  The listeners will likely be added during the
+        // lifecycle create state and removed during a pause, then readded during a resume.
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+        EventBusManager.instance.register(this);
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
-        EventBus.getDefault().unregister(this);
-        setValueEventListener(null);
+        EventBusManager.instance.unregister(this);
         FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
@@ -126,22 +136,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     // Private instance methods.
 
     /** Set or clear the account change value event listener. */
-    private void setValueEventListener(final AccountChangeHandler handler) {
-        // Determine whether to add or remove the account value event listener.
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            String uid = user.getUid();
-            String path = String.format("/accounts/%s", uid);
-            DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
-            if (handler != null) {
-                // Install a handler.
-                mAccountChangeHandler = handler;
-                database.addValueEventListener(mAccountChangeHandler);
-            } else {
-                // Remove a previously installed handler.
-                database.removeEventListener(mAccountChangeHandler);
-            }
-        }
+    private void registerValueEventListener(final AccountChangeHandler handler) {
+        // Determine whether to add or remove the account value event listener
     }
 
     /** Process a given action by providing handling for the relevant cases. */
@@ -166,23 +162,18 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     // Private classes
 
     /** Provide a class to handle account changes. */
-    private class AccountChangeHandler implements ValueEventListener {
+    private class AccountChangeHandler extends DatabaseEventHandler implements ValueEventListener {
 
         // Private instance constants.
 
         /** The logcat TAG. */
         private final String TAG = this.getClass().getSimpleName();
 
-        // Private instance variables.
-
-        /** The top level view affected by change events. */
-        private Map<String, Account> mAccountMap;
-
         // Public constructors.
 
         /** Build a handler with a given top level layout view. */
-        AccountChangeHandler(final Map<String, Account> accountMap) {
-            mAccountMap = accountMap;
+        AccountChangeHandler(final String name, final String path) {
+            super(name, path);
         }
 
         /** Get the current of account using a list of account identifiers. */
@@ -192,7 +183,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             Account account = dataSnapshot.getValue(Account.class);
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             String uid = user != null ? user.getUid() : null;
-            if (uid != null) mAccountMap.put(uid, account);
+            if (uid != null) {
+                // There is an account. Register it in the account map and post the account change
+                // event to the app.
+                mAccountMap.put(uid, account);
+                EventBus.getDefault().post(new AccountStateChangeEvent(account));
+            }
         }
 
         /** ... */
