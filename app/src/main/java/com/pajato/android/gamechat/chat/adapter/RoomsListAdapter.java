@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,12 +42,15 @@ import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.GROUP_ITEM_
  */
 public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    private List<RoomsListItem> mList;
+    private List<RoomsListItem> mList = new ArrayList<>();
 
-    public RoomsListAdapter(final List<RoomsListItem> list) {
-        mList = list;
-    }
     // Public instance methods.
+
+    /** Add items to the adapter's main list. */
+    public void addItems(final List<RoomsListItem> items) {
+        // Add all the items.
+        mList.addAll(items);
+    }
 
     /** Manage the recycler view view holder thingy. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {

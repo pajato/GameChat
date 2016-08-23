@@ -35,22 +35,22 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.adapter.DummyData;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.RoomsListAdapter;
+import com.pajato.android.gamechat.database.DatabaseEventHandler;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
@@ -64,8 +64,6 @@ public class RoomsFragment extends BaseFragment {
 
     // Public instance variables.
 
-    /** The Firebase account value event listener. */
-    private ValueEventListener mAccountChangeHandler;
     /** Show an ad at the top of the view. */
     private AdView mAdView;
 
@@ -95,8 +93,9 @@ public class RoomsFragment extends BaseFragment {
     }
 
     /** Handle the setup for the rooms panel. */
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override public View onCreateView(final LayoutInflater inflater,
+                                       final ViewGroup container,
+                                       final Bundle savedInstanceState) {
         // Enable the options menu, layout the fragment, set up the ad view and the listeners for
         // backend data changes.
         setHasOptionsMenu(true);
@@ -104,6 +103,7 @@ public class RoomsFragment extends BaseFragment {
         mAdView = (AdView) result.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+        EventBusManager.instance.register(this);
         FabManager.instance.init(result);
         return result;
     }
@@ -139,20 +139,22 @@ public class RoomsFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.pause();
         }
-        setValueEventListener(null);
-        EventBus.getDefault().unregister(this);
+        EventBusManager.instance.unregister(this);
     }
 
     /** Set up the main recycler ... */
     @Override public void onStart() {
+        // Initialize the recycler view.
         super.onStart();
-        RoomsListAdapter adapter = new RoomsListAdapter(DummyData.getData());
-        LinearLayoutManager linearLayoutManager =
-            new LinearLayoutManager(getView().getContext(), OrientationHelper.VERTICAL, false);
-        RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.rooms_list);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.setAdapter(adapter);
+        View view = getView();
+        if (view != null) {
+            LinearLayoutManager linearLayoutManager =
+                    new LinearLayoutManager(view.getContext(), OrientationHelper.VERTICAL, false);
+            RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.rooms_list);
+            mRecyclerView.setLayoutManager(linearLayoutManager);
+            mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            mRecyclerView.setAdapter(new RoomsListAdapter());
+        }
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -163,8 +165,18 @@ public class RoomsFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.resume();
         }
-        setValueEventListener(new GroupChangeHandler());
-        EventBus.getDefault().register(this);
+
+        // Register a group list change handler on the account, if there is one active and finally
+        // register the event bus for this class.
+        Account account = AccountManager.instance.getCurrentAccount();
+        String accountId = account != null ? account.accountId : null;
+        if (accountId != null) {
+            // There is an active account.  Register it.
+            String path = String.format("/accounts/%s/groupIdList", accountId);
+            DatabaseEventHandler handler = new GroupChangeHandler("roomsGroupChangeHandler", path);
+            DatabaseManager.instance.registerHandler(handler);
+        }
+        EventBusManager.instance.register(this);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -175,33 +187,12 @@ public class RoomsFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    // Private instance methods.
-
-    /** Set or clear the account change value event listener. */
-    private void setValueEventListener(final GroupChangeHandler handler) {
-        // Determine whether to add or remove the account value event listener.
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user != null ? user.getUid() : null;
-        String path = String.format("/accounts/%s/groupIdList", uid);
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
-
-        // Determine if a handler needs to be installed.
-        if (uid != null && handler != null) {
-            // Install a handler after first removing one that may exist.
-            setValueEventListener(null);
-            mAccountChangeHandler = handler;
-            database.addValueEventListener(mAccountChangeHandler);
-            return;
-        }
-
-        // Determine if a handler needs to be removed.
-        if (uid != null && handler == null && mAccountChangeHandler != null) {
-            // Remove a previously installed handler.
-            database.removeEventListener(mAccountChangeHandler);
-            mAccountChangeHandler = null;
-            return;
-        }
+    /** Update the UI based on the rooms and accounts present in the current account. */
+    @Subscribe public void updateUI(final AccountStateChangeEvent event) {
+        manageRoomsUI(event.account.groupIdList);
     }
+
+    // Private instance methods.
 
     /** Manage the Rooms pane UI for a given set of groups. */
     private void manageRoomsUI(final List<String> groups) {
@@ -210,38 +201,49 @@ public class RoomsFragment extends BaseFragment {
         View layout = getView();
         if (layout != null) {
             FloatingActionButton fab = (FloatingActionButton) layout.findViewById(R.id.rooms_fab);
-            View menu = layout.findViewById(R.id.rooms_fab_menu);
             View content = layout.findViewById(groups == null ? R.id.rooms_none : R.id.rooms_main);
             FabManager.instance.setContentView(fab, content);
 
             // Set up the main content screen showing either a "no rooms" view or a list of groups.
             View roomsNone = layout.findViewById(R.id.rooms_none);
             View roomsMain = layout.findViewById(R.id.rooms_main);
-            if (roomsNone != null)
+            if (roomsNone != null) {
                 roomsNone.setVisibility(groups == null ? View.VISIBLE : View.GONE);
-            if (roomsMain != null)
+            }
+            if (roomsMain != null) {
                 roomsMain.setVisibility(groups == null ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
     // Private classes.
 
     /** Provide a class to handle structural changes to a User's groups. */
-    private class GroupChangeHandler implements ValueEventListener {
+    private class GroupChangeHandler extends DatabaseEventHandler implements ValueEventListener {
 
         // Private instance constants.
 
         /** The logcat TAG. */
         private final String TAG = this.getClass().getSimpleName();
 
+        // Public constructors.
+
+        /** Build a handler with the given name and path. */
+        GroupChangeHandler(final String name, final String path) {
+            super(name, path);
+        }
+
         /** Get the current set of groups using a list of group identifiers. */
         @Override public void onDataChange(final DataSnapshot dataSnapshot) {
             // Determine how many groups are available to extract rooms from.
+
             if (dataSnapshot.exists()) {
                 Log.d(TAG, "Value is: " + dataSnapshot.getValue());
                 GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
                 List<String> groupIdList = dataSnapshot.getValue(t);
                 manageRoomsUI(groupIdList != null && groupIdList.size() > 0 ? groupIdList : null);
+            } else {
+                manageRoomsUI(null);
             }
         }
 

@@ -29,9 +29,9 @@ public class FABTest extends BaseTest {
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.
-        onView(withText(R.string.createRoom))
+        onView(withText(R.string.addRoom))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.createGroup))
+        onView(withText(R.string.addGroup))
                 .check(matches(isDisplayed()));
     }
 

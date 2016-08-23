@@ -39,6 +39,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventUtils;
@@ -173,21 +174,47 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Process a newly created group by saving it to Firebase. */
     private void processGroup() {
-        // Prepare to persist the new group to the backend by obtaining Firebase push keys for the
-        // new group and it's default room, and update the group and room objects with these keys.
+        // Update the group on the database.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        Account account = AccountManager.instance.getCurrentAccount();
-        String groupKey = database.child("groups").push().getKey();
-        String roomKey = database.child("rooms").push().getKey();
-        account.groupIdList.add(groupKey);
-        mGroup.roomIdList.add(roomKey);
+        String groupsPath = "/groups/";
+        String groupKey = database.child(groupsPath).push().getKey();
+        updateChildren(database, groupsPath, groupKey, mGroup.toMap());
 
-        // Prepare for and execute the upload of the new group and it's default room.
-        Room room = new Room(groupKey, "group");
+        // Update the account on the database.
+        Account account = AccountManager.instance.getCurrentAccount();
+        account.groupIdList.add(groupKey);
+        updateChildren(database, "/accounts/", mGroup.groupKey, account.toMap());
+
+        // Update the General room on the database.
+        String roomsPath = String.format("/groups/%s/rooms/", groupKey);
+        String generalRoomKey = database.child(roomsPath).push().getKey();
+        Room generalRoom = new Room(groupKey, "General");
+        updateChildren(database, roomsPath, generalRoomKey, generalRoom.toMap());
+
+        // Update the Me room on the database.
+        String meRoomKey = database.child(roomsPath).push().getKey();
+        Room meRoom = new Room(groupKey, "Me");
+        updateChildren(database, roomsPath, meRoomKey, meRoom.toMap());
+
+        // Update the General room default message on the database.
+        String generalMessagesPath = String.format("%s%s/messages/", roomsPath, generalRoomKey);
+        String generalMessageKey = database.child(generalMessagesPath).push().getKey();
+        String text = "Welcome to my new group!";
+        Message generalMessage = new Message(generalRoomKey, account.accountId, text);
+        updateChildren(database, generalMessagesPath, generalMessageKey, generalMessage.toMap());
+
+        // Update the Me room default message on the database.
+        String meMessagesPath = String.format("%s%s/messages/", roomsPath, meRoomKey);
+        String meMessageKey = database.child(meMessagesPath).push().getKey();
+        Message meMessage = new Message(meRoomKey, account.accountId, "Welcome dude.  Enjoy!");
+        updateChildren(database, meMessagesPath, meMessageKey, meMessage.toMap());
+    }
+
+    /** Helper method */
+    private void updateChildren(final DatabaseReference database, final String path,
+                                final String pushKey, final Map<String, Object> properties) {
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/accounts/" + mGroup.groupKey, account.toMap());
-        childUpdates.put("/groups/" + groupKey, mGroup.toMap());
-        childUpdates.put("/rooms/" + roomKey, room.toMap());
+        childUpdates.put(path + pushKey, properties);
         database.updateChildren(childUpdates);
     }
 

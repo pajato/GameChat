@@ -32,6 +32,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventUtils;
 import com.pajato.android.gamechat.intro.IntroActivity;
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         PaneManager.instance.unregister();
         AccountManager.instance.unregister();
+        DatabaseManager.instance.unregisterAll();
         EventBus.getDefault().unregister(this);
     }
 
