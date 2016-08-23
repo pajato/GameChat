@@ -1,8 +1,11 @@
-package com.pajato.android.gamechat;
+package com.pajato.android.gamechat.game;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
+
+import com.pajato.android.gamechat.BaseTest;
+import com.pajato.android.gamechat.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +27,7 @@ import static org.hamcrest.Matchers.not;
  */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
-public class TTTFragmentTest extends BaseTest {
+public class TTTTest extends BaseTest {
 
     private String xValue;
     private String oValue;

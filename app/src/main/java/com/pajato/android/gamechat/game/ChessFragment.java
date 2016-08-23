@@ -37,11 +37,11 @@ public class ChessFragment extends BaseFragment {
     private ArrayList<Integer> mPossibleMoves;
 
     // Castle Management Objects
-    private boolean mBlueQueenSidePawnHasMoved;
-    private boolean mBlueKingSidePawnHasMoved;
+    private boolean mBlueQueenSideRookHasMoved;
+    private boolean mBlueKingSideRookHasMoved;
     private boolean mBlueKingHasMoved;
-    private boolean mOtherQueenSidePawnHasMoved;
-    private boolean mOtherKingSidePawnHasMoved;
+    private boolean mOtherQueenSideRookHasMoved;
+    private boolean mOtherKingSideRookHasMoved;
     private boolean mOtherKingHasMoved;
 
 
@@ -83,11 +83,11 @@ public class ChessFragment extends BaseFragment {
             int color;
             if(player.equals("Purple")) {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
-                handleTurnChange();
             } else {
                 player = "Blue";
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
+            handleTurnChange();
             GameManager.instance.generateSnackbar(mLayout, getString(R.string.new_game) + " "
                     + player + "'s Turn!", color, false);
         }
@@ -105,11 +105,11 @@ public class ChessFragment extends BaseFragment {
         mPossibleMoves.clear();
 
         // Reset the castling booleans.
-        mBlueQueenSidePawnHasMoved = false;
-        mBlueKingSidePawnHasMoved = false;
+        mBlueQueenSideRookHasMoved = false;
+        mBlueKingSideRookHasMoved = false;
         mBlueKingHasMoved = false;
-        mOtherQueenSidePawnHasMoved = false;
-        mOtherKingSidePawnHasMoved = false;
+        mOtherQueenSideRookHasMoved = false;
+        mOtherKingSideRookHasMoved = false;
         mOtherKingHasMoved = false;
 
         // Go through and populate the GridLayout / Board.
@@ -328,8 +328,8 @@ public class ChessFragment extends BaseFragment {
                 ChessPiece.getQueenThreatRange(possibleMoves, highlightedIndex, mBoardMap);
                 break;
             case ChessPiece.KING:
-                boolean[] castlingBooleans = {mBlueQueenSidePawnHasMoved, mBlueKingSidePawnHasMoved,
-                        mBlueKingHasMoved, mOtherQueenSidePawnHasMoved, mOtherKingSidePawnHasMoved,
+                boolean[] castlingBooleans = {mBlueQueenSideRookHasMoved, mBlueKingSideRookHasMoved,
+                        mBlueKingHasMoved, mOtherQueenSideRookHasMoved, mOtherKingSideRookHasMoved,
                         mOtherKingHasMoved};
                 ChessPiece.getKingThreatRange(possibleMoves, highlightedIndex, mBoardMap,
                         castlingBooleans);
@@ -432,15 +432,15 @@ public class ChessFragment extends BaseFragment {
         } else if (currentPiece.getPiece() == ChessPiece.ROOK) {
             if(currentPiece.getTeam() == ChessPiece.BLUE_TEAM) {
                 if(highlightedIndex == 0) {
-                    mBlueQueenSidePawnHasMoved = true;
+                    mBlueQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 7) {
-                    mBlueKingSidePawnHasMoved = true;
+                    mBlueKingSideRookHasMoved = true;
                 }
             } else {
                 if(highlightedIndex == 56) {
-                    mOtherQueenSidePawnHasMoved = true;
+                    mOtherQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 63) {
-                    mOtherKingSidePawnHasMoved = true;
+                    mOtherKingSideRookHasMoved = true;
                 }
             }
         }
