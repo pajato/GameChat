@@ -25,22 +25,22 @@ import com.pajato.android.gamechat.R;
  *
  * @author Paul Michael Reilly
  */
-class DateHeaderItem {
+public class DateHeaderItem {
 
     // Public enums
 
     /** Provide an enumeration of the types of views presented in a rooms list. */
-    enum DateHeaderType {
-        now (60, R.string.now),
-        recent (3600, R.string.recent),
-        today (3600 * 24, R.string.today),
-        yesterday (3600 * 48, R.string.yesterday),
-        thisWeek (3600 * 24 * 7, R.string.thisWeek),
-        lastWeek (3600 * 24 * 14, R.string.lastWeek),
-        thisMonth (3600 * 24 * 30, R.string.thisMonth),
-        lastMonth (3600 * 24 * 60, R.string.lastMonth),
-        thisYear (3600 * 24 * 365, R.string.thisYear),
-        lastYear (3600 * 24 * 365 * 2, R.string.lastYear),
+    public enum DateHeaderType {
+        now (60000L, R.string.now),
+        recent (3600000L, R.string.recent),
+        today (3600000L * 24, R.string.today),
+        yesterday (3600000L * 48, R.string.yesterday),
+        thisWeek (3600000L * 24 * 7, R.string.thisWeek),
+        lastWeek (3600000L * 24 * 14, R.string.lastWeek),
+        thisMonth (3600000L * 24 * 30, R.string.thisMonth),
+        lastMonth (3600000L * 24 * 60, R.string.lastMonth),
+        thisYear (3600000L * 24 * 365, R.string.thisYear),
+        lastYear (3600000L * 24 * 365 * 2, R.string.lastYear),
         old (-1, R.string.old);
 
         private long mLimit;
@@ -70,5 +70,5 @@ class DateHeaderItem {
 
     // Public instance methods.
 
-    public int getNameResourceId() {return mType.getNameResourceId();}
+    int getNameResourceId() {return mType.getNameResourceId();}
 }
