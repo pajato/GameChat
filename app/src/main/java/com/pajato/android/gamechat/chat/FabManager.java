@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat;
 
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.util.SparseArray;
 import android.view.View;
@@ -44,24 +45,19 @@ enum FabManager {
     /** The association of FAB button resource identifiers and their menu layout. */
     private SparseArray<View> mMenuMap = new SparseArray<>();
 
-    /** The assoication of FAB button resource id and the content layout. */
-    private SparseArray<View> mContentMap = new SparseArray<>();
-
     // Public instance methods
 
     /** Initialize the fab button. */
-    public void init(final View layout) {
+    public void init(@NonNull final View layout) {
         // Initialize the fab button state to opened and then toggle it to put the panel into the
         // correct initial state.
         Account account = AccountManager.instance.getCurrentAccount();
         List<String> groups = account != null ? account.groupIdList : null;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(R.id.rooms_fab);
         View menu = layout.findViewById(R.id.rooms_fab_menu);
-        View content = layout.findViewById(groups == null ? R.id.rooms_none : R.id.rooms_main);
         fab.setTag(R.integer.fabStateKey, opened);
-        mContentMap.put(fab.getId(), content);
         mMenuMap.put(fab.getId(), menu);
-        toggle(fab);
+        dismissMenu(fab);
     }
 
     /** Dismiss the menu associated with the given FAB button. */
@@ -72,25 +68,18 @@ enum FabManager {
         menu.setVisibility(View.GONE);
     }
 
-    /** Set the current content view for the given FAB button. */
-    public void setContentView(final FloatingActionButton fab, final View content) {
-        mContentMap.put(fab.getId(), content);
-    }
-
     /** Toggle the state of the FAB button. */
     public void toggle(final FloatingActionButton fab) {
         // Determine if the fab view STATE tag has a valid state value.
         Object payload = fab.getTag(R.integer.fabStateKey);
         if (payload instanceof State) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
-            View content = mContentMap.get(fab.getId());
             State value = (State) payload;
             switch (value) {
                 case opened:
                     // The FAB is showing X and menu is visible.  Set the icon to +, close the
                     // menu and undim the frame.
                     dismissMenu(fab);
-                    content.setVisibility(View.VISIBLE);
                     break;
                 case closed:
                     // The FAB is showing + and the menu is not visible.  Set the icon to X and open
@@ -99,7 +88,6 @@ enum FabManager {
                     fab.setTag(R.integer.fabStateKey, opened);
                     View menu = mMenuMap.get(fab.getId());
                     menu.setVisibility(View.VISIBLE);
-                    content.setVisibility(View.INVISIBLE);
                     break;
             }
         }

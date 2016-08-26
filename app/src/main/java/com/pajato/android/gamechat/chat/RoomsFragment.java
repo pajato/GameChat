@@ -17,8 +17,10 @@
 
 package com.pajato.android.gamechat.chat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -26,6 +28,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,25 +38,17 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.RoomsListAdapter;
-import com.pajato.android.gamechat.database.DatabaseEventHandler;
-import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
+import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.List;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -62,10 +57,18 @@ import java.util.List;
  */
 public class RoomsFragment extends BaseFragment {
 
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = RoomsFragment.class.getSimpleName();
+
     // Public instance variables.
 
     /** Show an ad at the top of the view. */
     private AdView mAdView;
+
+    /** The array of content views.  One will be selected to show in the rooms panel. */
+    private SparseArray<View> mContentViewMap = new SparseArray<>();
 
     // Public instance methods.
 
@@ -96,16 +99,18 @@ public class RoomsFragment extends BaseFragment {
     @Override public View onCreateView(final LayoutInflater inflater,
                                        final ViewGroup container,
                                        final Bundle savedInstanceState) {
-        // Enable the options menu, layout the fragment, set up the ad view and the listeners for
-        // backend data changes.
+        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
+        // view and the listeners for backend data changes.
+        ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
-        View result = inflater.inflate(R.layout.fragment_rooms, container, false);
-        mAdView = (AdView) result.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        View layout = inflater.inflate(R.layout.fragment_rooms, container, false);
+        initAdView(layout);
+        initRoomsList(layout);
         EventBusManager.instance.register(this);
-        FabManager.instance.init(result);
-        return result;
+        FabManager.instance.init(layout);
+        ChatManager.instance.init();
+
+        return layout;
     }
 
     /** Post the chat options menu on demand. */
@@ -124,7 +129,7 @@ public class RoomsFragment extends BaseFragment {
             }
             break;
         case R.id.toolbar_search_icon:
-            // TODO: Handle a seach in the rooms panel by fast scrolling to room.
+            // TODO: Handle a search in the rooms panel by fast scrolling to room.
             break;
         default:
             break;
@@ -133,28 +138,14 @@ public class RoomsFragment extends BaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
+    /** Deal with the fragment's activity's lifecycle pause event. */
     @Override public void onPause() {
+        // Deal with the ad and turn off app event listeners.
         super.onPause();
         if (mAdView != null) {
             mAdView.pause();
         }
         EventBusManager.instance.unregister(this);
-    }
-
-    /** Set up the main recycler ... */
-    @Override public void onStart() {
-        // Initialize the recycler view.
-        super.onStart();
-        View view = getView();
-        if (view != null) {
-            LinearLayoutManager linearLayoutManager =
-                    new LinearLayoutManager(view.getContext(), OrientationHelper.VERTICAL, false);
-            RecyclerView mRecyclerView = (RecyclerView) getView().findViewById(R.id.rooms_list);
-            mRecyclerView.setLayoutManager(linearLayoutManager);
-            mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            mRecyclerView.setAdapter(new RoomsListAdapter());
-        }
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -165,18 +156,8 @@ public class RoomsFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.resume();
         }
-
-        // Register a group list change handler on the account, if there is one active and finally
-        // register the event bus for this class.
-        Account account = AccountManager.instance.getCurrentAccount();
-        String accountId = account != null ? account.accountId : null;
-        if (accountId != null) {
-            // There is an active account.  Register it.
-            String path = String.format("/accounts/%s/groupIdList", accountId);
-            DatabaseEventHandler handler = new GroupChangeHandler("roomsGroupChangeHandler", path);
-            DatabaseManager.instance.registerHandler(handler);
-        }
         EventBusManager.instance.register(this);
+        EventBusManager.instance.register(ChatManager.instance);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -187,74 +168,104 @@ public class RoomsFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    /** Update the UI based on the rooms and accounts present in the current account. */
-    @Subscribe public void updateUI(final AccountStateChangeEvent event) {
-        manageRoomsUI(event.account.groupIdList);
+    /** Deal with a change in the active rooms state. */
+    @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
+        // Turn off the loading progress dialog and handle a signed in account with some joined
+        // rooms by rendering the list.
+        ProgressManager.instance.hide();
+        if (event.joinedRoomList.size() == 0) {
+            // Handle the case where there are no active rooms by enabling the no rooms message.
+            showContent(R.id.rooms_none);
+        } else {
+            // Handle a joined rooms change by setting up database watchers on the messages in each
+            // room.
+            for (String joinedRoom : event.joinedRoomList) {
+                // Set up the database watcher on this list.
+                String[] split = joinedRoom.split(" ");
+                String groupKey = split[0];
+                String roomKey = split[1];
+                ChatManager.instance.setMessageWatcher(groupKey, roomKey);
+            }
+            showContent(R.id.rooms_main);
+        }
     }
 
     // Private instance methods.
 
-    /** Manage the Rooms pane UI for a given set of groups. */
-    private void manageRoomsUI(final List<String> groups) {
-        // Set the content screen in the FAB menu and render the content screen as well after
-        // determining that the content panel view exists.
+    /** Initialize the ad view by building and loading an ad request. */
+    private void initAdView(@NonNull final View layout) {
+        mAdView = (AdView) layout.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+    /** Initialize the active rooms list by setting up the recycler view. */
+    private void initRoomsList(@NonNull final View layout) {
+        // Initialize the recycler view.
+        Context context = layout.getContext();
+        int direction = OrientationHelper.VERTICAL;
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context, direction, false);
+        RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.rooms_list);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setAdapter(new RoomsListAdapter());
+    }
+
+    /** Manage the rooms panel content by showing the view for the given resource id. */
+    private void showContent(final int resourceId) {
+        // Determine if the rooms panel view exists.
+        View layout = getView();
+        if (layout == null) {
+            // It does not! Abort.
+            return;
+        }
+
+        // The rooms panel layout does exist.  Ensure that the view associated with the given
+        // resource is in the map.
+        View showView = mContentViewMap.get(resourceId);
+        if (showView == null) {
+            // The view is not in the map yet.  Add it now.
+            showView = layout.findViewById(resourceId);
+            mContentViewMap.append(resourceId, showView);
+        }
+
+        // Make all the content views be gone and then make the view associated with the given
+        // resource identifier visible.
+        for (int i = 0; i < mContentViewMap.size(); i++) {
+            int key = mContentViewMap.keyAt(i);
+            View view = mContentViewMap.get(key);
+            view.setVisibility(View.GONE);
+        }
+
+        // Make the desired content view visible, if it actually exists.
+        if (showView != null) showView.setVisibility(View.VISIBLE);
+    }
+
+    /** Manage the rooms list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Determine if the active rooms view has been inflated.  It damned well should be.
         View layout = getView();
         if (layout != null) {
-            FloatingActionButton fab = (FloatingActionButton) layout.findViewById(R.id.rooms_fab);
-            View content = layout.findViewById(groups == null ? R.id.rooms_none : R.id.rooms_main);
-            FabManager.instance.setContentView(fab, content);
-
-            // Set up the main content screen showing either a "no rooms" view or a list of groups.
-            View roomsNone = layout.findViewById(R.id.rooms_none);
-            View roomsMain = layout.findViewById(R.id.rooms_main);
-            if (roomsNone != null) {
-                roomsNone.setVisibility(groups == null ? View.VISIBLE : View.GONE);
+            // It has.  Publish the active rooms state using a Inbox by Google layout.
+            RecyclerView roomsListView = (RecyclerView) layout.findViewById(R.id.rooms_list);
+            if (roomsListView != null) {
+                RecyclerView.Adapter adapter = roomsListView.getAdapter();
+                if (adapter instanceof RoomsListAdapter) {
+                    // TODO: parse the rooms to build a list of active room information.  For now,
+                    // inject dummy data into the list view adapter.
+                    RoomsListAdapter listAdapter = (RoomsListAdapter) adapter;
+                    listAdapter.clearItems();
+                    //listAdapter.addItems(DummyData.getData());
+                    listAdapter.addItems(ChatManager.instance.getData());
+                    roomsListView.setVisibility(View.VISIBLE);
+                    showContent(R.id.rooms_main);
+                }
             }
-            if (roomsMain != null) {
-                roomsMain.setVisibility(groups == null ? View.GONE : View.VISIBLE);
-            }
+        } else {
+            Log.e(TAG, "The rooms fragment layout does not exist yet!");
         }
     }
 
     // Private classes.
-
-    /** Provide a class to handle structural changes to a User's groups. */
-    private class GroupChangeHandler extends DatabaseEventHandler implements ValueEventListener {
-
-        // Private instance constants.
-
-        /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
-
-        // Public constructors.
-
-        /** Build a handler with the given name and path. */
-        GroupChangeHandler(final String name, final String path) {
-            super(name, path);
-        }
-
-        /** Get the current set of groups using a list of group identifiers. */
-        @Override public void onDataChange(final DataSnapshot dataSnapshot) {
-            // Determine how many groups are available to extract rooms from.
-
-            if (dataSnapshot.exists()) {
-                Log.d(TAG, "Value is: " + dataSnapshot.getValue());
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> groupIdList = dataSnapshot.getValue(t);
-                manageRoomsUI(groupIdList != null && groupIdList.size() > 0 ? groupIdList : null);
-            } else {
-                manageRoomsUI(null);
-            }
-        }
-
-        /** ... */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-
-        // Private instance methods.
-
-    }
 
 }

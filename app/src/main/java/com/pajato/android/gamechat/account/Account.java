@@ -30,8 +30,7 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-@IgnoreExtraProperties
-public class Account {
+@IgnoreExtraProperties public class Account {
 
     // Public instance variables
 
@@ -50,14 +49,14 @@ public class Account {
     /** The account token, an access key supplied by the provider. */
     public String token;
 
-    /** The account provider name, a string like "Facebook". */
-    public String providerName;
-
     /** The account provider id, a string like "google.com". */
-    public String providerId;
+    String providerId;
 
     /** A list of group ids the account can access. */
     public List<String> groupIdList = new ArrayList<>();
+
+    /** The list of joined rooms providing the group and room push keys. */
+    public List<String> joinedRoomList = new ArrayList<>();
 
     // Public instance methods.
 
@@ -68,9 +67,10 @@ public class Account {
         result.put("accountEmail", accountEmail);
         result.put("accountUrl", accountUrl);
         result.put("displayName", displayName);
-        result.put("providerName", providerName);
+        result.put("token", token);
         result.put("providerId", providerId);
         result.put("groupIdList", groupIdList);
+        result.put("joinedRoomList", joinedRoomList);
 
         return result;
     }

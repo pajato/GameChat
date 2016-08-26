@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.chat.RoomsFragment;
 import com.pajato.android.gamechat.game.GameFragment;
 
@@ -41,17 +40,11 @@ public enum PaneManager {
 
     // Private class constants
 
-    /** The logcat tag constant. */
-    private static final String TAG = PaneManager.class.getSimpleName();
-
     /** The fragment list index for the game fragment. */
     public static final int ROOMS_INDEX = 0;
     public static final int GAME_INDEX = 1;
 
     // Private instance variables
-
-    /** The view pager adapter used to manage paging on a smartphone layout. */
-    private GameChatPagerAdapter mAdapter;
 
     /** The repository for the pane fragments. */
     private List<Fragment> fragmentList = new ArrayList<>();
@@ -63,22 +56,24 @@ public enum PaneManager {
 
     /** Initialize the two central panels in the app: chat and game/activity. */
     public void init(final AppCompatActivity context) {
-        // Clear the current panes and determine if a paging layout is active.
+        // Clear the two main panels.
         fragmentList.clear();
         titleList.clear();
         titleList.add(context.getString(R.string.rooms));
         titleList.add(context.getString(R.string.game));
-        ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
-
         fragmentList.add(new RoomsFragment());
         fragmentList.add(new GameFragment());
 
+        // Determine if a paging layout is active.
+        ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
         if (viewPager != null) {
             // The app is running on a smart phone.  Set up the adapter for the pager.
+            // TODO: force portrait mode.
             viewPager.setAdapter(new GameChatPagerAdapter(context.getSupportFragmentManager(),
                     (ViewGroup) context.findViewById(R.id.page_monitor)));
         } else {
             // The app is running on a tablet. Add the fragments to their containers.
+            // TODO: force landscape mode.
             context.getSupportFragmentManager().beginTransaction()
                     .add(R.id.chat_container, fragmentList.get(ROOMS_INDEX))
                     .add(R.id.game_container, fragmentList.get(GAME_INDEX))
@@ -87,29 +82,10 @@ public enum PaneManager {
         }
     }
 
-    /** Handle the delegated sign out menu selection by delegating to the chat fragment. */
-    public void signOut() {
-        ((ChatFragment) fragmentList.get(ROOMS_INDEX)).signOut();
-    }
     /** Handle the delegated tile click by delegating it to the game fragment. */
     public void tileOnClick(final View view) {
         // Delegate this to the game fragment.
         ((GameFragment) fragmentList.get(GAME_INDEX)).tileOnClick(view);
-    }
-
-    public void fetchConfig() {
-        // Delegete to the chat fragment.
-        ((ChatFragment) fragmentList.get(ROOMS_INDEX)).fetchConfig();
-    }
-
-    /** Unregister the component during lifecycle pause events. */
-    public void unregister() {
-        //EventBus.getDefault().unregister(this);
-    }
-
-    /** Register the component during lifecycle resume events. */
-    public void register() {
-        //EventBus.getDefault().register(this);
     }
 
     // Nested classes
@@ -119,7 +95,7 @@ public enum PaneManager {
         private ViewGroup mPageMonitor;
 
         /** Build an adapter to handle the panels for a given fragment manager. */
-        public GameChatPagerAdapter(final FragmentManager manager, final ViewGroup pageMonitor) {
+        GameChatPagerAdapter(final FragmentManager manager, final ViewGroup pageMonitor) {
             // Create the adapter and add the panels to the panel list.
             super(manager);
             mPageMonitor = pageMonitor;

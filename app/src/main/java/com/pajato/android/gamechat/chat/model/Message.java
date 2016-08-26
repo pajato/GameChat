@@ -21,43 +21,56 @@ package com.pajato.android.gamechat.chat.model;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class repesenting a chat message, an icon, a name and text. */
 @IgnoreExtraProperties public class Message {
 
-    /** The account key of the message sender. */
-    public String accountKey;
+    /** The group owner/creator. */
+    public String owner;
 
-    /** The owning room's push key (room identifier). */
-    public String roomKey;
+    /** The group name. */
+    public String name;
+
+    /** The creation timestamp. */
+    public long createTime;
+
+    /** The last modification timestamp. */
+    public long modTime;
 
     /** The message text. */
     public String text;
 
-    /** The message timestamp. */
-    public long timestamp;
+    /** A list of users (by account identifier) in the room, that have not yet read the message. */
+    public List<String> unreadList;
 
-    /** The default constructor. */
+    // Public constructors.
+
+    /** Build an empty args constructor for the database. */
     public Message() {}
 
     /** Build a default Message. */
-    public Message(final String roomKey, final String accountKey, final String text) {
-        this.roomKey = roomKey;
-        this.accountKey = accountKey;
+    public Message(final String owner, final String name, final long createTime, final long modTime,
+                   final String text, final List<String> unreadList) {
+        this.owner = owner;
+        this.name = name;
+        this.createTime = createTime;
+        this.modTime = modTime;
         this.text = text;
-        timestamp = new Date().getTime();
+        this.unreadList = unreadList;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("accountKey", accountKey);
-        result.put("roomKey", roomKey);
+        result.put("owner", owner);
+        result.put("name", name);
+        result.put("createTime", createTime);
+        result.put("modTime", modTime);
         result.put("text", text);
-        result.put("timestamp", timestamp);
+        result.put("unreadList", unreadList);
 
         return result;
     }

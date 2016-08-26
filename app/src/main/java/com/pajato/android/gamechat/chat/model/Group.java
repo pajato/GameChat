@@ -20,42 +20,49 @@ package com.pajato.android.gamechat.chat.model;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class repesenting a chat group, a collection of members and rooms. */
-@IgnoreExtraProperties public class Group {
+@IgnoreExtraProperties public class Group  {
 
-    /** The owning group's push key (group identifier). */
-    public String groupKey;
+    /** The group owner/creator. */
+    public String owner;
 
     /** The group name. */
     public String name;
 
+    /** The creation timestamp. */
+    public long createTime;
+
+    /** The last modification timestamp. */
+    public long modTime;
+
     /** The group member account identifiers. */
-    public List<String> memberIdList = new ArrayList<>();
+    public List<String> memberIdList;
 
-    /** The list of room identifiers in the group. */
-    public List<String> roomIdList = new ArrayList<>();
-
-    /** The default constructor. */
+    /** Build an empty args constructor for the database. */
     public Group() {}
 
     /** Build a default Group. */
-    public Group(final String groupKey, final String name) {
-        this.groupKey = groupKey;
+    public Group(final String owner, final String name, final long createTime, final long modTime,
+                 final List<String> members) {
         this.name = name;
+        this.owner = owner;
+        this.createTime = createTime;
+        this.modTime = modTime;
+        memberIdList = members;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("groupKey", groupKey);
+        result.put("owner", owner);
         result.put("name", name);
+        result.put("createTime", createTime);
+        result.put("modTime", modTime);
         result.put("memberIdList", memberIdList);
-        result.put("roomIdList", roomIdList);
 
         return result;
     }
