@@ -68,16 +68,11 @@ public enum ChatManager {
     /** The collection of profiles for the joined groups, keyed by the gruop push key. */
     private Map<String, Group> mGroupProfileMap = new HashMap<>();
 
-    /** The collection of profiles for the joined rooms, keyed by the room push key. */
-    private Map<String, Room> mRoomProfileMap = new HashMap<>();
-
     /** The collection of messages in the rooms in a group, keyed by the group push key. */
     private Map<String, Map<String, List<Message>>> mGroupMessageMap = new HashMap<>();
 
-    /** Get the profile for a given group. */
-    public Group getGroupProfile(final String groupKey) {
-        return mGroupProfileMap.get(groupKey);
-    }
+    /** The collection of profiles for the joined rooms, keyed by the room push key. */
+    private Map<String, Room> mRoomProfileMap = new HashMap<>();
 
     // Public instance methods.
 
@@ -96,14 +91,19 @@ public enum ChatManager {
         return result;
     }
 
-    /** Get the profile for a given room. */
-    public Room getRoomProfile(final String roomKey) {
-        return mRoomProfileMap.get(roomKey);
+    /** Get the profile for a given group. */
+    public Group getGroupProfile(final String groupKey) {
+        return mGroupProfileMap.get(groupKey);
     }
 
     /** Get a map of messages by room in a given group. */
     public Map<String, List<Message>> getGroupMessages(final String groupKey) {
         return mGroupMessageMap.get(groupKey);
+    }
+
+    /** Get the profile for a given room. */
+    public Room getRoomProfile(final String roomKey) {
+        return mRoomProfileMap.get(roomKey);
     }
 
     /** Initialize the component. */
@@ -131,8 +131,6 @@ public enum ChatManager {
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
     @Subscribe public void onJoinedRoomsChange(@NonNull final JoinedRoomListChangeEvent event) {
-        String path;
-        String name;
         DatabaseEventHandler handler;
         for (String entry : event.joinedRoomList) {
             // Kick off a value event listener for the group profile.  Tag each listener with the
@@ -140,8 +138,8 @@ public enum ChatManager {
             String[] split = entry.split(" ");
             String groupKey = split[0];
             String roomKey = split[1];
-            path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
-            name = "profileChangeHandler" + groupKey;
+            String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
+            String name = "profileChangeHandler" + groupKey;
             handler = new ProfileChangeHandler<Group>(name, path, groupKey, Group.class);
             DatabaseManager.instance.registerHandler(handler);
 
