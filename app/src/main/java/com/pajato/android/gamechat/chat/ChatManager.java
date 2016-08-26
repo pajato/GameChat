@@ -3,15 +3,16 @@
  *
  * This file is part of Pajato GameChat.
 
- * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
 
- * You should have received a copy of the GNU General Public License along with GameChat.  If not, see
- * <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see <http://www.gnu.org/licenses/>.
  */
 
 package com.pajato.android.gamechat.chat;
@@ -25,6 +26,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
+import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupListItem;
 import com.pajato.android.gamechat.chat.adapter.RoomsListItem;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -42,10 +45,13 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
 
 /**
  * Provides the interface to the database/back end, primarily Firebase.
@@ -65,6 +71,12 @@ public enum ChatManager {
 
     // Private instance variables.
 
+    /** A map associating date header type values with lists of group push keys. */
+    private Map<DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap = new HashMap<>();
+
+    /** A map associating a group push key with it's most recent message. */
+    private Map<String, Message> mGroupToLastNewMessageMap = new HashMap<>();
+
     /** The collection of profiles for the joined groups, keyed by the gruop push key. */
     private Map<String, Group> mGroupProfileMap = new HashMap<>();
 
@@ -78,15 +90,19 @@ public enum ChatManager {
 
     /** Get the data as a set of list items. */
     public List<RoomsListItem> getData() {
-        // Walk through all the messages and parcel each into a map keyed by a data header value.
+        // Generate a list of items to render in the chat main list by extracting the items based on
+        // the date header type ordering.
         List<RoomsListItem> result = new ArrayList<>();
-
-        for (String groupKey : mGroupMessageMap.keySet()) {
-            result.add(new RoomsListItem(new GroupListItem(groupKey)));
+        for (DateHeaderType dht : DateHeaderType.values()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            if (groupList != null && groupList.size() > 0) {
+                // Add the header item followed by all the groups.
+                result.add(new RoomsListItem(new DateHeaderItem(dht)));
+                for (String groupKey : groupList) {
+                    result.add(new RoomsListItem(new GroupListItem(groupKey)));
+                }
+            }
         }
-
-        // Build the result list by walking through each map entries using the date header ordinal
-        // value to sequence the entries.
 
         return result;
     }
@@ -140,21 +156,21 @@ public enum ChatManager {
             String roomKey = split[1];
             String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
             String name = "profileChangeHandler" + groupKey;
-            handler = new ProfileChangeHandler<Group>(name, path, groupKey, Group.class);
+            handler = new ProfileChangeHandler<>(name, path, groupKey, Group.class);
             DatabaseManager.instance.registerHandler(handler);
 
             // Kick off a value event listener for the room profile.  Tag each listener with the
             // room key to ensure only one listener per room is ever active at any one time.
             path = String.format(Locale.US, ROOMS_PROFILE_PATH, groupKey, roomKey);
             name = "profileChangeHandler" + roomKey;
-            handler = new ProfileChangeHandler<Room>(name, path, roomKey, Room.class);
+            handler = new ProfileChangeHandler<>(name, path, roomKey, Room.class);
             DatabaseManager.instance.registerHandler(handler);
         }
     }
 
     /** Handle a message change event. */
     @Subscribe public void onMessageChange(@NonNull final MessageChangeEvent event) {
-        // Collect the message found in the event payload and trigger an adapter update.
+        // Collect the message found in the event payload.
         Map<String, List<Message>> roomMap = mGroupMessageMap.get(event.groupKey);
         if (roomMap == null) {
             // Initialize the map of room messages for this group.
@@ -164,6 +180,9 @@ public enum ChatManager {
         }
         List<Message> messageList = roomMap.get(event.roomKey);
         messageList.add(event.message);
+
+        // Update the date headers for this message and post an event to trigger an adpater refresh.
+        updateGroupHeaders(event.groupKey, event.message);
         EventBus.getDefault().post(new MessageListChangeEvent());
     }
 
@@ -178,6 +197,36 @@ public enum ChatManager {
         String name = "messagesChangeHandler";
         DatabaseEventHandler handler = new MessagesChangeHandler(name, groupKey, roomKey);
         DatabaseManager.instance.registerHandler(handler);
+    }
+
+    // Private instance methods.
+
+    /** Update the headers used to bracket the messages in the main list. */
+    private void updateGroupHeaders(final String groupKey, final Message message) {
+        // Add the new message to be the last message eminating from
+        // the given group.  The rebuild the lists of date header type to group list associations.
+        mGroupToLastNewMessageMap.put(groupKey, message);
+        mDateHeaderTypeToGroupListMap.clear();
+        long nowTimestamp = new Date().getTime();
+        for (String key : mGroupToLastNewMessageMap.keySet()) {
+            // Determine which date header type the current group should be associated with.
+            long groupTimestamp = message.createTime;
+            for (DateHeaderType dht : DateHeaderType.values()) {
+                // Determine if the current group fits the constraints of the current date header
+                // type.  The declaration of DateHeaderType is ordered so that this algorithm will
+                // work.
+                if (dht == old || nowTimestamp - groupTimestamp <= dht.getLimit()) {
+                    // This is the one.  Add this group to the associated list.
+                    List<String> list = mDateHeaderTypeToGroupListMap.get(dht);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        mDateHeaderTypeToGroupListMap.put(dht, list);
+                    }
+                    list.add(key);
+                    break;
+                }
+            }
+        }
     }
 
     // Private inner classes.
