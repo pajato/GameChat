@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.account;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
@@ -27,8 +28,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -38,7 +44,10 @@ import com.pajato.android.gamechat.signin.SignInActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,6 +83,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Retrun the account for the current User, null if there is no signed in User. */
     public Account getCurrentAccount() {
         return mCurrentAccountKey == null ? null : mAccountMap.get(mCurrentAccountKey);
+    }
+
+    /** Return the current account id, null if there is no curent signed in User. */
+    public String getCurrentAccountId() {
+        return mCurrentAccountKey;
     }
 
     /** Deal with authentication backend changes: sign in and sign out */
@@ -120,7 +134,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
-        EventBusManager.instance.unregister(this);
         FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
@@ -128,17 +141,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     @Subscribe public void processClick(final ClickEvent event) {
         // Case on the view's tag content.
         Actions action = mActionMap.get(event.getValue());
-        if (action != null) {
-            processAction(event, action);
-        }
+        if (action != null) processAction(event, action);
     }
 
     // Private instance methods.
-
-    /** Set or clear the account change value event listener. */
-    private void registerValueEventListener(final AccountChangeHandler handler) {
-        // Determine whether to add or remove the account value event listener
-    }
 
     /** Process a given action by providing handling for the relevant cases. */
     private void processAction(final ClickEvent event, final Actions action) {
@@ -176,18 +182,19 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             super(name, path);
         }
 
-        /** Get the current of account using a list of account identifiers. */
+        /** Get the current account using a list of account identifiers. */
         @Override public void onDataChange(final DataSnapshot dataSnapshot) {
-            // Determine how many accounts are available to extract rooms from.
-            Log.d(TAG, "Account value is: " + dataSnapshot.getValue());
-            Account account = dataSnapshot.getValue(Account.class);
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            String uid = user != null ? user.getUid() : null;
-            if (uid != null) {
-                // There is an account. Register it in the account map and post the account change
-                // event to the app.
-                mAccountMap.put(uid, account);
+            // Determine if the account exists.
+            if (dataSnapshot.exists()) {
+                // It does.  Register it and notify the app that this is the new account of record.
+                Account account = dataSnapshot.getValue(Account.class);
+                mAccountMap.put(account.accountId, account);
+                mCurrentAccountKey = account.accountId;
                 EventBus.getDefault().post(new AccountStateChangeEvent(account));
+            } else {
+                // The account does not exist.  Create it now, ensuring there really is a User.
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) createAccount(user);
             }
         }
 
@@ -199,6 +206,55 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Private instance methods.
 
+        /** Create a new account in the database. */
+        private void createAccount(@NonNull FirebaseUser user) {
+            // Creaate the push keys for the "me" group on the database with a single room in it,
+            // the "me" room.
+            long timestamp = new Date().getTime();
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            String groupKey = database.child("/groups/").push().getKey();
+            String roomPath = "/groups/" + groupKey + "/rooms/";
+            String roomKey = database.child(roomPath).push().getKey();
+
+            // Set up and persist the account for the given user.
+            String uid = user.getUid();
+            Account account = new Account();
+            account.accountId = uid;
+            account.accountEmail = user.getEmail();
+            account.displayName = user.getDisplayName();
+            account.accountUrl = getPhotoUrl(user);
+            account.providerId = user.getProviderId();
+            account.groupIdList.add(groupKey);
+            account.joinedRoomList.add(groupKey + " " + roomKey);
+            DatabaseManager.instance.updateChildren(database, "/accounts/", uid, account.toMap());
+
+            // Update the group profile on the database.
+            String name = account.displayName == null ? "Anonymous" : account.displayName;
+            List<String> memberList = new ArrayList<>();
+            memberList.add(uid);
+            Group group = new Group(uid, name, timestamp, timestamp, memberList);
+            DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile", group.toMap());
+
+            // Update the "me" room profile on the database.
+            Room room = new Room(uid, name, timestamp, timestamp, "me", memberList);
+            DatabaseManager.instance.updateChildren(database, roomPath, roomKey + "/profile", room.toMap());
+
+            // Update the "me" room default message on the database.
+            String messagesPath = String.format("%s%s/messages/", roomPath, roomKey);
+            String messageKey = database.child(messagesPath).push().getKey();
+            String text = "Welcome to your own private group and room.  Enjoy!";
+            List<String> unreadList = new ArrayList<>();
+            unreadList.add(uid);
+            Message message = new Message(uid, "", timestamp, timestamp, text, unreadList);
+            DatabaseManager.instance.updateChildren(database, messagesPath, messageKey, message.toMap());
+        }
+
+        /** Obtain a suitable Uri to use for the User's icon. */
+        private String getPhotoUrl(FirebaseUser user) {
+            // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
+            Uri icon = user.getPhotoUrl();
+            return icon != null ? icon.toString() : null;
+        }
     }
 
 }

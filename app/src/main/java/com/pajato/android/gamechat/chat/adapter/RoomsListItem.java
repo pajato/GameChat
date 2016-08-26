@@ -47,19 +47,19 @@ public class RoomsListItem {
     public int newCount;
 
     /** The list of rooms with messages to show in a group. */
-    public String roomsList;
+    public String roomsText;
 
     // Public constructors.
 
-    /** Build an instance for a given date item. */
+    /** Build an instance for a given group list item. */
     public RoomsListItem(final GroupListItem item) {
         type = GROUP_ITEM_TYPE;
         name = item.name;
-        newCount = item.count;
-        roomsList = item.rooms;
+        newCount = item.newMessageCount;
+        roomsText = item.roomsText;
     }
 
-    /** Build an instance for a given group entry. */
+    /** Build an instance for a given date header item. */
     public RoomsListItem(final DateHeaderItem item) {
         type = DATE_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();

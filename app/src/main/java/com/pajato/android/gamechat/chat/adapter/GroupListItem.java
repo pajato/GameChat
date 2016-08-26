@@ -17,6 +17,17 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
+import android.support.annotation.NonNull;
+
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * Provide a POJO to encapsulate a recycler view list item: either a date label view or a room list
  * view showing the rooms in a group with messages characterized by a preceding date label view.
@@ -27,68 +38,63 @@ public class GroupListItem {
 
     // Public instance variables.
 
-    /** The item type. */
-    public int type;
-
     /** The item name. */
     public String name;
 
     /** The number of new messages in the group rooms. */
-    public int count;
+    public int newMessageCount;
 
-    /** The list of rooms with unread messages. */
-    public String rooms;
+
+    /** The list of rooms with messages.  Bold items have new messages. */
+    public String roomsText;
 
     // Public constructors.
 
     /** Build an instance for the given group. */
     public GroupListItem(final String groupKey) {
         // TODO: flesh this out to populate the class using the Firebase data from the given group.
-        switch(Integer.parseInt(groupKey)) {
-            case 0:
-                name = "JCL Group";
-                count = 17;
-                rooms = "<b>General</b>, Sandy Scott, <b>The Shovel</b>, ChessWhiz, ...";
-                break;
-            case 1:
-                name = "ExaGrid";
-                count = 8;
-                rooms = "<b>General</b>, Harald Scardell, Lee Atwood, Matt Dunkirk, IT";
-                break;
-            case 2:
-                name = "The Jim Clemens Family";
-                count = 0;
-                rooms = "General, Sean Clemens, Sam Davis, Dad, ...";
-                break;
-            case 3:
-                name = "CA";
-                count = 1;
-                rooms = "General, <b>Walt Corey</b>, The Idiot";
-                break;
-            case 4:
-                name = "The Warren Campaign";
-                count = 0;
-                rooms = "General";
-                break;
-            case 5:
-                name = "PT LLC";
-                count = 0;
-                rooms = "General, Bryan Scott, Paul Matthew Reilly";
-                break;
-            case 6:
-                name = "Edwin B. Newman School";
-                count = 0;
-                rooms = "General, Tommy Rooney, Pamela Reilly";
-                break;
-            case 7:
-                name = "Ebeneezer Street Church";
-                count = 0;
-                rooms = "General, Pastor Frank, The Choir";
-                break;
+        // Use the group key to unpack a group's messages by walking the set of messages in
+        // each room in the group.
+        newMessageCount = 0;
+        StringBuilder textBuilder = new StringBuilder();
+        Group group = ChatManager.instance.getGroupProfile(groupKey);
+        name = group.name;
+        Map<String, List<Message>> rooms = ChatManager.instance.getGroupMessages(groupKey);
+        for (String roomKey : rooms.keySet()) {
+            boolean hasNew = false;
+            for (Message message : rooms.get(roomKey)) {
+                if (isUnseen(message)) {
+                    hasNew = true;
+                    newMessageCount++;
+                }
+                Room room = ChatManager.instance.getRoomProfile(roomKey);
+                updateRoomsText(textBuilder, room, hasNew);
+            }
         }
-
     }
 
-    // Public instance methods.
+    // Private instance methods.
 
+    /** Return TRUE iff the message has not been seen by this user. */
+    private boolean isUnseen(@NonNull final Message message) {
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        return message.unreadList != null && message.unreadList.contains(accountId);
+    }
+
+    /** Update the text indicating the rooms with messages bolding rooms with new messages. */
+    private void updateRoomsText(final StringBuilder textBuilder, final Room room, final boolean hasNew) {
+        // Determine if there is already text generated.
+        if (textBuilder.length() != 0) {
+            // There is.  Add a comma and space.
+            textBuilder.append(", ");
+        }
+
+        // Determine if bolding is needed and update the field.
+        if (hasNew) {
+            textBuilder.append("<b>").append(room.name).append("</b>");
+        } else {
+            textBuilder.append(room.name);
+        }
+        roomsText = textBuilder.toString();
+    }
 }

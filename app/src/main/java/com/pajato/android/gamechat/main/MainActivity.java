@@ -32,8 +32,10 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.EventUtils;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -169,11 +171,13 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        // Deal with the main activity creation.
+        // Deal with the main activity creation.  The account manager must be initialized last so
+        // that all other managers are initialized prior to the first authentication event.  If a
+        // manager misses an authentication event then the app will not behave as intended.
         setContentView(R.layout.activity_main);
         PaneManager.instance.init(this);
-        AccountManager.instance.init();
         init();
+        AccountManager.instance.init();
     }
 
     /** Respect the lifecycle and ensure that the event bus shuts down. */
@@ -181,10 +185,9 @@ public class MainActivity extends AppCompatActivity
         // Unregister the components directly used by the main activity which will unregister
         // sub-components in turn.
         super.onPause();
-        PaneManager.instance.unregister();
-        AccountManager.instance.unregister();
+        AccountManager.instance.unregister();   // Do this first to avoid a race condition.
         DatabaseManager.instance.unregisterAll();
-        EventBus.getDefault().unregister(this);
+        EventBusManager.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */
@@ -192,9 +195,9 @@ public class MainActivity extends AppCompatActivity
         // Register the components directly used by the main activity which will register
         // sub-components in turn.
         super.onResume();
-        EventBus.getDefault().register(this);
-        PaneManager.instance.register();
-        AccountManager.instance.register();
+        EventBusManager.instance.register(this);
+        EventBusManager.instance.register(ChatManager.instance);
+        EventBusManager.instance.register(AccountManager.instance);
     }
 
     // Private instance methods.

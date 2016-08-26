@@ -48,8 +48,14 @@ public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     /** Add items to the adapter's main list. */
     public void addItems(final List<RoomsListItem> items) {
-        // Add all the items.
+        // Add all the items after clearing the current ones.
         mList.addAll(items);
+        notifyDataSetChanged();
+    }
+
+    /** Clear all current items. */
+    public void clearItems() {
+        mList.clear();
     }
 
     /** Manage the recycler view view holder thingy. */
@@ -60,6 +66,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
             case GROUP_ITEM_TYPE:
                 return new GroupListViewHolder(getView(parent, R.layout.item_group_list));
         }
+
         return null;
     }
 
@@ -79,10 +86,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
                     // and the list of rooms with messages (possibly old).
                     GroupListViewHolder groupHolder = (GroupListViewHolder) holder;
                     groupHolder.title.setText(item.name);
-                    groupHolder.rooms.setText(Html.fromHtml(item.roomsList));
+                    groupHolder.rooms.setText(Html.fromHtml(item.roomsText));
 
-                    int newCount = item.newCount;
-                    if (newCount > 0) {
+                    if (item.newCount > 0) {
                         String text = String.format(Locale.getDefault(), "%d new", item.newCount);
                         groupHolder.count.setText(text);
                         groupHolder.count.setVisibility(View.VISIBLE);

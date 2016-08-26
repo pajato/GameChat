@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -41,14 +42,19 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import static android.R.attr.path;
 
 /**
  * Provide a main activity to manage the UI for adding a group.
@@ -62,6 +68,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** The logcat tag constant. */
     private static final String TAG = AddGroupActivity.class.getSimpleName();
+    private static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/" ;
 
     // Private instance variables.
 
@@ -76,7 +83,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         switch (value) {
             case R.id.saveGroupButton:
                 // Process the group (validate and persist it) and be done with the activity.
-                processGroup();
+                Account account = AccountManager.instance.getCurrentAccount();
+                if (account != null) processGroup(account);
                 finish();
                 break;
             default:
@@ -125,8 +133,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Render the form and initialize for the new group.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_add);
-        mGroup = new Group();
-        mGroup.groupKey = AccountManager.instance.getCurrentAccount().accountId;
+        mGroup = new Group("", "", 0, 0, new ArrayList<String>());
+        mGroup.owner = AccountManager.instance.getCurrentAccountId();
         init();
     }
 
@@ -173,49 +181,51 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
     }
 
     /** Process a newly created group by saving it to Firebase. */
-    private void processGroup() {
-        // Update the group on the database.
+    private void processGroup(@NonNull Account account) {
+        // Update the group profile on the database.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String groupsPath = "/groups/";
         String groupKey = database.child(groupsPath).push().getKey();
-        updateChildren(database, groupsPath, groupKey, mGroup.toMap());
+        String profilePath = String.format(Locale.US, "/groups/%s/profile", groupKey);
+        DatabaseManager.instance.updateChildren(database, profilePath, mGroup.toMap());
 
-        // Update the account on the database.
-        Account account = AccountManager.instance.getCurrentAccount();
+        // Create the General room and persist it to the database.
+        long timestamp = new Date().getTime();
+        List<String> list = new ArrayList<>();
+        list.add(account.accountId);
+        Room room = new Room(account.accountId, "General", timestamp, timestamp, "public", list);
+        String roomPath = String.format(Locale.US, "/groups/%s/rooms/", groupKey);
+        String roomKey = database.child(roomPath).push().getKey();
+        DatabaseManager.instance.updateChildren(database, path + "/profile", room.toMap());
+
+        // Update the account on the database to include the new Group and be joined to the
+        // "General" room.
         account.groupIdList.add(groupKey);
-        updateChildren(database, "/accounts/", mGroup.groupKey, account.toMap());
+        String joinedRoom = groupKey + " " + roomKey;
+        account.joinedRoomList.add(joinedRoom);
+        DatabaseManager.instance.updateChildren(database, "/accounts/", mGroup.owner, account.toMap());
 
-        // Update the General room on the database.
-        String roomsPath = String.format("/groups/%s/rooms/", groupKey);
-        String generalRoomKey = database.child(roomsPath).push().getKey();
-        Room generalRoom = new Room(groupKey, "General");
-        updateChildren(database, roomsPath, generalRoomKey, generalRoom.toMap());
-
-        // Update the Me room on the database.
-        String meRoomKey = database.child(roomsPath).push().getKey();
-        Room meRoom = new Room(groupKey, "Me");
-        updateChildren(database, roomsPath, meRoomKey, meRoom.toMap());
-
-        // Update the General room default message on the database.
-        String generalMessagesPath = String.format("%s%s/messages/", roomsPath, generalRoomKey);
-        String generalMessageKey = database.child(generalMessagesPath).push().getKey();
+        // Put a welcome message in the General room.
         String text = "Welcome to my new group!";
-        Message generalMessage = new Message(generalRoomKey, account.accountId, text);
-        updateChildren(database, generalMessagesPath, generalMessageKey, generalMessage.toMap());
-
-        // Update the Me room default message on the database.
-        String meMessagesPath = String.format("%s%s/messages/", roomsPath, meRoomKey);
-        String meMessageKey = database.child(meMessagesPath).push().getKey();
-        Message meMessage = new Message(meRoomKey, account.accountId, "Welcome dude.  Enjoy!");
-        updateChildren(database, meMessagesPath, meMessageKey, meMessage.toMap());
+        List<String> members = room.memberIdList;
+        createMessage(database, account, groupKey, roomKey, text, members);
     }
 
-    /** Helper method */
-    private void updateChildren(final DatabaseReference database, final String path,
-                                final String pushKey, final Map<String, Object> properties) {
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(path + pushKey, properties);
-        database.updateChildren(childUpdates);
+    /** Create a new message object on the given database. */
+    private void createMessage(final DatabaseReference database, final Account account,
+                               final String groupKey, final String roomKey, final String text,
+                               final List<String> members) {
+        String path = String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
+        String key = database.child(path).push().getKey();
+        long timestamp = new Date().getTime();
+        String id = account.accountId;
+        Message message = new Message(id, getName(account), timestamp, timestamp, text, members);
+        DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
+    }
+
+    /** Get a name to use for the group, preferring the display name. */
+    private String getName(Account account) {
+        return account.displayName != null ? account.displayName : "Anonymous";
     }
 
     // Private classes.

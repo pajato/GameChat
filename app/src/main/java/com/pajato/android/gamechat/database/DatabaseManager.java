@@ -39,7 +39,7 @@ public enum DatabaseManager {
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = "DatabaseManager";
+    private static final String TAG = DatabaseManager.class.getSimpleName();
 
     // Public instance variables.
 
@@ -94,6 +94,22 @@ public enum DatabaseManager {
             removeEventListener(database, handler);
             handlerMap.remove(name);
         }
+    }
+
+    /** Store an object on the database using a given path, pushKey, and properties. */
+    public void updateChildren(final DatabaseReference database, final String path,
+                               final String pushKey, final Map<String, Object> properties) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path + pushKey, properties);
+        database.updateChildren(childUpdates);
+    }
+
+    /** Store an object on the database using a given path, pushKey, and properties. */
+    public void updateChildren(final DatabaseReference database, final String path,
+                               final Map<String, Object> properties) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, properties);
+        database.updateChildren(childUpdates);
     }
 
     // Private instance methods.
