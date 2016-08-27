@@ -30,7 +30,7 @@ http://www.gnu.org/licenses
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/rooms_main"
+        android:id="@+id/groupsListContent"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -58,7 +58,7 @@ http://www.gnu.org/licenses
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/rooms_none"
+        android:id="@+id/emptyListContent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:visibility="gone"
@@ -84,7 +84,7 @@ http://www.gnu.org/licenses
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/rooms_message"
+            android:id="@+id/emptyListMessage"
             android:padding="24dp"
             android:text="@string/NoRoomsMessageText"
             android:textAlignment="center"

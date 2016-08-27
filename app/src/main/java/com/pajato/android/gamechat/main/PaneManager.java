@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.RoomsFragment;
+import com.pajato.android.gamechat.chat.GroupsFragment;
 import com.pajato.android.gamechat.game.GameFragment;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public enum PaneManager {
         titleList.clear();
         titleList.add(context.getString(R.string.rooms));
         titleList.add(context.getString(R.string.game));
-        fragmentList.add(new RoomsFragment());
+        fragmentList.add(new GroupsFragment());
         fragmentList.add(new GameFragment());
 
         // Determine if a paging layout is active.
