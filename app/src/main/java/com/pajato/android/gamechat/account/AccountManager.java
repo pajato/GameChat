@@ -103,11 +103,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 DatabaseManager.instance.registerHandler(new AccountChangeHandler(name, path));
             }
         } else {
-            // The User has signed out.  Disable the database account state change listener and
+            // The User is signed out.  Disable the database account state change listener and
             // notify the app of the sign out event.
             mCurrentAccountKey = null;
             DatabaseManager.instance.unregisterHandler(name);
-            EventBus.getDefault().post(new AccountStateChangeEvent(null));
         }
     }
 
@@ -185,17 +184,18 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         /** Get the current account using a list of account identifiers. */
         @Override public void onDataChange(final DataSnapshot dataSnapshot) {
             // Determine if the account exists.
+            Account account = null;
             if (dataSnapshot.exists()) {
                 // It does.  Register it and notify the app that this is the new account of record.
-                Account account = dataSnapshot.getValue(Account.class);
+                account = dataSnapshot.getValue(Account.class);
                 mAccountMap.put(account.accountId, account);
                 mCurrentAccountKey = account.accountId;
-                EventBus.getDefault().post(new AccountStateChangeEvent(account));
             } else {
                 // The account does not exist.  Create it now, ensuring there really is a User.
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user != null) createAccount(user);
             }
+            EventBus.getDefault().post(new AccountStateChangeEvent(account));
         }
 
         /** ... */

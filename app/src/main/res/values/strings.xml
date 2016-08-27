@@ -63,4 +63,5 @@
     <string name="winner_tie">Tie!</string>
     <string name="winner_x">X Wins!</string>
     <string name="xValue">X</string>
+    <string name="noSignInMessage">Sign in to get the full GameChat experience!  Meanwhile you can enjoy playing games while offline.</string>
 </resources>

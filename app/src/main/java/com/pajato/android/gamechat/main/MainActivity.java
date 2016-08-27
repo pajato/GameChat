@@ -177,7 +177,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         PaneManager.instance.init(this);
         init();
-        AccountManager.instance.init();
     }
 
     /** Respect the lifecycle and ensure that the event bus shuts down. */

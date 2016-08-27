@@ -20,12 +20,18 @@ package com.pajato.android.gamechat.main;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 /** Provide a singleton to manage showing and hiding the initial loading status. */
 public enum ProgressManager {
     instance;
 
-    // Private instance variables
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = ProgressManager.class.getSimpleName();
+
+    // Private instance variables.
 
     /** The view pager adapter used to manage paging on a smartphone layout. */
     private ProgressDialog mProgressDialog;
@@ -34,15 +40,25 @@ public enum ProgressManager {
 
     /** Show the initial loading dialog. */
     public void show(@NonNull final Context context) {
+        if (mProgressDialog != null) {
+            // A progress dialog already exists!  Generate a stack trace to help debug this.
+            Log.e(TAG, "A progress dialog already exists.  Generate a stack trace!");
+            Thread.dumpStack();
+        }
+
+        // Create and display the progress dialog.
         mProgressDialog = new ProgressDialog(context);
         mProgressDialog.setTitle("Loading...");
         mProgressDialog.setMessage("Please wait while the data is loaded...");
         mProgressDialog.show();
     }
 
-    /** Dismiss the initial loading dialog. */
+    /** Dismiss the initial loading dialog if one is showing. */
     public void hide() {
-        mProgressDialog.dismiss();
-        mProgressDialog = null;
+        Log.d(TAG, "Attempting to hide the progress dialog.");
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
     }
 }

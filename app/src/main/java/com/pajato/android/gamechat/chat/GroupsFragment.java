@@ -25,7 +25,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
@@ -35,10 +34,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.RoomsListAdapter;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
@@ -53,16 +55,18 @@ import org.greenrobot.eventbus.Subscribe;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 
 /**
- * Provide a fragment to handle the display of the rooms available to the current user.
+ * Provide a fragment to handle the display of the groups available to the current user.  This is
+ * the top level view in the chat hierarchy.  It shows all the joined groups and allows for drilling
+ * into rooms and chats within those rooms.
  *
  * @author Paul Michael Reilly
  */
-public class RoomsFragment extends BaseFragment {
+public class GroupsFragment extends BaseFragment {
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = RoomsFragment.class.getSimpleName();
+    private static final String TAG = GroupsFragment.class.getSimpleName();
 
     // Public instance variables.
 
@@ -97,6 +101,34 @@ public class RoomsFragment extends BaseFragment {
         }
     }
 
+    /** Handle an account state change event by showing the no sign in message. */
+    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
+        View layout = getView();
+        if (event.account == null) {
+            Log.e(TAG, "There is no account and no groups fragment layout!");
+            return;
+        }
+
+        // Dismiss the progress loading dialog if one is active and determine if there is no account
+        // (sign out).
+        ProgressManager.instance.hide();
+        if (event.account == null) {
+            // There is no account.  Set the empty list message text appropriately and show it as
+            // the main content.
+            TextView textView = (TextView) layout.findViewById(R.id.emptyListMessage);
+            textView.setText(layout.getContext().getString(R.string.noSignInMessage));
+            showContent(R.id.emptyListContent);
+        } else {
+            // There is an account.  Show the main list content.
+            showContent(R.id.groupsListContent);
+        }
+    }
+
+    /** Post the chat options menu on demand. */
+    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.chat_menu, menu);
+    }
+
     /** Handle the setup for the rooms panel. */
     @Override public View onCreateView(final LayoutInflater inflater,
                                        final ViewGroup container,
@@ -111,30 +143,56 @@ public class RoomsFragment extends BaseFragment {
         EventBusManager.instance.register(this);
         FabManager.room.init(layout);
         ChatManager.instance.init();
+        AccountManager.instance.init();
 
         return layout;
     }
 
-    /** Post the chat options menu on demand. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.chat_menu, menu);
+    /** Deal with the fragment's activity's lifecycle by managing the ad. */
+    @Override public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
+    }
+
+    /** Deal with a change in the active rooms state. */
+    @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
+        // Turn off the loading progress dialog and handle a signed in account with some joined
+        // rooms by rendering the list.
+        ProgressManager.instance.hide();
+        if (event.joinedRoomList.size() == 0) {
+            // Handle the case where there are no active rooms by enabling the no rooms message.
+            showContent(R.id.emptyListContent);
+        } else {
+            // Handle a joined rooms change by setting up database watchers on the messages in each
+            // room.
+            for (String joinedRoom : event.joinedRoomList) {
+                // Set up the database watcher on this list.
+                String[] split = joinedRoom.split(" ");
+                String groupKey = split[0];
+                String roomKey = split[1];
+                ChatManager.instance.setMessageWatcher(groupKey, roomKey);
+            }
+            showContent(R.id.groupsListContent);
+        }
     }
 
     /** Handle an options menu choice. */
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.toolbar_game_icon:
-            // Show the game panel.
-            ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-            if(viewPager != null) {
-                viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-            }
-            break;
-        case R.id.toolbar_search_icon:
-            // TODO: Handle a search in the rooms panel by fast scrolling to room.
-            break;
-        default:
-            break;
+            case R.id.toolbar_game_icon:
+                // Show the game panel.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if(viewPager != null) {
+                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                }
+                break;
+            case R.id.toolbar_search_icon:
+                // TODO: Handle a search in the rooms panel by fast scrolling to room.
+                break;
+            default:
+                break;
 
         }
         return super.onOptionsItemSelected(item);
@@ -160,36 +218,6 @@ public class RoomsFragment extends BaseFragment {
         }
         EventBusManager.instance.register(this);
         EventBusManager.instance.register(ChatManager.instance);
-    }
-
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
-    @Override public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
-    }
-
-    /** Deal with a change in the active rooms state. */
-    @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
-        // Turn off the loading progress dialog and handle a signed in account with some joined
-        // rooms by rendering the list.
-        ProgressManager.instance.hide();
-        if (event.joinedRoomList.size() == 0) {
-            // Handle the case where there are no active rooms by enabling the no rooms message.
-            showContent(R.id.rooms_none);
-        } else {
-            // Handle a joined rooms change by setting up database watchers on the messages in each
-            // room.
-            for (String joinedRoom : event.joinedRoomList) {
-                // Set up the database watcher on this list.
-                String[] split = joinedRoom.split(" ");
-                String groupKey = split[0];
-                String roomKey = split[1];
-                ChatManager.instance.setMessageWatcher(groupKey, roomKey);
-            }
-            showContent(R.id.rooms_main);
-        }
     }
 
     // Private instance methods.
@@ -259,7 +287,7 @@ public class RoomsFragment extends BaseFragment {
                     //listAdapter.addItems(DummyData.getData());
                     listAdapter.addItems(ChatManager.instance.getData());
                     roomsListView.setVisibility(View.VISIBLE);
-                    showContent(R.id.rooms_main);
+                    showContent(R.id.groupsListContent);
                 }
             }
         } else {

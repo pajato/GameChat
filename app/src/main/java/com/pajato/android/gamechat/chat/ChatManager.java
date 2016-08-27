@@ -74,14 +74,14 @@ public enum ChatManager {
     /** A map associating date header type values with lists of group push keys. */
     private Map<DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap = new HashMap<>();
 
-    /** A map associating a group push key with it's most recent message. */
-    private Map<String, Message> mGroupToLastNewMessageMap = new HashMap<>();
-
-    /** The collection of profiles for the joined groups, keyed by the gruop push key. */
-    private Map<String, Group> mGroupProfileMap = new HashMap<>();
-
     /** The collection of messages in the rooms in a group, keyed by the group push key. */
     private Map<String, Map<String, List<Message>>> mGroupMessageMap = new HashMap<>();
+
+    /** The collection of profiles for the joined groups, keyed by the group push key. */
+    private Map<String, Group> mGroupProfileMap = new HashMap<>();
+
+    /** A map associating a group push key with it's most recent message. */
+    private Map<String, Message> mGroupToLastNewMessageMap = new HashMap<>();
 
     /** The collection of profiles for the joined rooms, keyed by the room push key. */
     private Map<String, Room> mRoomProfileMap = new HashMap<>();
@@ -129,7 +129,7 @@ public enum ChatManager {
     }
 
     /** Handle a authentication event. */
-    @Subscribe public void onAuthStateChanged(@NonNull final AccountStateChangeEvent event) {
+    @Subscribe public void onAccountStateChange(@NonNull final AccountStateChangeEvent event) {
         // Register an active rooms change handler on the account, if there is an account..
         if (event.account != null) {
             // There is an active account.  Register it.
@@ -137,6 +137,13 @@ public enum ChatManager {
             String name = "joinedRoomListChangeHandler";
             DatabaseEventHandler handler = new JoinedRoomListChangeHandler(name, path);
             DatabaseManager.instance.registerHandler(handler);
+        } else {
+            // Deal with either a logout or no valid user by clearing the various state.
+            mDateHeaderTypeToGroupListMap.clear();
+            mGroupMessageMap.clear();
+            mGroupProfileMap.clear();
+            mGroupToLastNewMessageMap.clear();
+            mRoomProfileMap.clear();
         }
     }
 
