@@ -50,6 +50,8 @@ import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
+
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
  *
@@ -103,7 +105,7 @@ public class RoomsFragment extends BaseFragment {
         // view and the listeners for backend data changes.
         ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
-        View layout = inflater.inflate(R.layout.fragment_rooms, container, false);
+        View layout = inflater.inflate(R.layout.fragment_groups, container, false);
         initAdView(layout);
         initRoomsList(layout);
         EventBusManager.instance.register(this);
@@ -203,8 +205,7 @@ public class RoomsFragment extends BaseFragment {
     private void initRoomsList(@NonNull final View layout) {
         // Initialize the recycler view.
         Context context = layout.getContext();
-        int direction = OrientationHelper.VERTICAL;
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, direction, false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
         RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.rooms_list);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
