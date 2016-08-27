@@ -79,13 +79,13 @@ public class RoomsFragment extends BaseFragment {
         switch (value) {
         case R.id.rooms_fab:
             // It is a rooms fab button.  Toggle the state.
-            FabManager.instance.toggle((FloatingActionButton) event.getView());
+            FabManager.room.toggle((FloatingActionButton) event.getView());
             break;
         case R.id.addGroupButton:
         case R.id.addGroupMenuItem:
             // Dismiss the FAB menu, and start up the add group activity.
             View view = getActivity().findViewById(R.id.rooms_fab);
-            FabManager.instance.dismissMenu((FloatingActionButton) view);
+            FabManager.room.dismissMenu((FloatingActionButton) view);
             Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
             startActivity(intent);
             break;
@@ -107,7 +107,7 @@ public class RoomsFragment extends BaseFragment {
         initAdView(layout);
         initRoomsList(layout);
         EventBusManager.instance.register(this);
-        FabManager.instance.init(layout);
+        FabManager.room.init(layout);
         ChatManager.instance.init();
 
         return layout;

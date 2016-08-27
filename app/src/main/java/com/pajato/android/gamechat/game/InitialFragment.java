@@ -18,14 +18,40 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 
+import org.greenrobot.eventbus.Subscribe;
+
 public class InitialFragment extends BaseFragment {
+
+    private FloatingActionButton mFab;
+
+    /** Process a given button click event looking for one on the rooms fab button. */
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+        int v = event.getView() != null ? event.getView().getId() : 0;
+
+        if(v == R.id.init_ttt || v == R.id.init_ttt_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_ttt));
+        } else if (v == R.id.init_checkers || v == R.id.init_checkers_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_checkers));
+        } else if (v == R.id.init_chess || v == R.id.init_chess_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_chess));
+        } else if (v == R.id.games_fab) {
+            FabManager.game.toggle(mFab);
+        }
+    }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
@@ -33,38 +59,10 @@ public class InitialFragment extends BaseFragment {
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_initial, container, false);
 
-        // Handle Tic-Tac-Toe games.
-        View ttt = layout.findViewById(R.id.init_ttt);
-        ttt.setOnClickListener(new ClickHandler());
-        View tttButton = layout.findViewById(R.id.init_ttt_button);
-        tttButton.setOnClickListener(new ClickHandler());
-
-        // Handle Checkers Games.
-        View checkers = layout.findViewById(R.id.init_checkers);
-        checkers.setOnClickListener(new ClickHandler());
-        View checkersButton = layout.findViewById(R.id.init_checkers_button);
-        checkersButton.setOnClickListener(new ClickHandler());
-
-        View chess = layout.findViewById(R.id.init_chess);
-        chess.setOnClickListener(new ClickHandler());
-        View chessButton = layout.findViewById(R.id.init_chess_button);
-        chessButton.setOnClickListener(new ClickHandler());
-
+        EventBusManager.instance.register(this);
+        FabManager.game.init(layout);
+        mFab = (FloatingActionButton) layout.findViewById(R.id.games_fab);
         return layout;
     }
 
-    private class ClickHandler implements View.OnClickListener {
-        @Override public void onClick(View v) {
-            if(v.getId() == R.id.init_ttt || v.getId() == R.id.init_ttt_button) {
-                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                        getString(R.string.new_game_ttt));
-            } else if (v.getId() == R.id.init_checkers || v.getId() == R.id.init_checkers_button) {
-                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                        getString(R.string.new_game_checkers));
-            } else if (v.getId() == R.id.init_chess || v.getId() == R.id.init_chess_button) {
-                GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                        getString(R.string.new_game_chess));
-            }
-        }
-    }
 }

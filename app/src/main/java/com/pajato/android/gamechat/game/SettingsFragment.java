@@ -1,6 +1,7 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,37 +50,7 @@ public class SettingsFragment extends BaseFragment {
         final Spinner userChoices = (Spinner) main.findViewById(R.id.settings_user_spinner);
 
         // We want different users to appear in the user spinner when a different group is chosen.
-        //TODO: Find a procedural way to generate these arrays once accounts are implemented.
-        //TODO: Find a better way to handle isValidUser.
-        groupChoices.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ArrayAdapter<CharSequence> userAdapter;
-                // If the group spinner has chosen the family group, show the family members.
-                if(position == 1) {
-                    userAdapter = ArrayAdapter.createFromResource(getActivity(),
-                            R.array.family_group, android.R.layout.simple_spinner_item);
-                    userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    isValidUser = true;
-                // If the group spinner has chosen the work group, show the work members.
-                } else if (position == 2) {
-                    userAdapter = ArrayAdapter.createFromResource(getActivity(),
-                            R.array.work_group, android.R.layout.simple_spinner_item);
-                    userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    isValidUser = true;
-                // Otherwise, a group has not been chosen, so show an empty group.
-                } else {
-                    userAdapter = ArrayAdapter.createFromResource(getActivity(),
-                            R.array.empty_group, android.R.layout.simple_spinner_item);
-                    isValidUser = false;
-                }
-                userChoices.setAdapter(userAdapter);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        groupChoices.setOnItemSelectedListener(new UserSelector(userChoices));
 
         // Setup the references to the game option buttons.
         mLocal = (ImageButton) main.findViewById(R.id.settings_local_button);
@@ -98,6 +69,25 @@ public class SettingsFragment extends BaseFragment {
             setupChess();
         }
         return main;
+    }
+
+    /** Handle the back button after the view has been created. */
+    @Override public void onViewCreated(final View view, final Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if(this.getView() != null) {
+            this.getView().setFocusableInTouchMode(true);
+            this.getView().requestFocus();
+            this.getView().setOnKeyListener(new View.OnKeyListener() {
+                @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     /**
@@ -157,4 +147,41 @@ public class SettingsFragment extends BaseFragment {
         });
     }
 
+    private class UserSelector implements AdapterView.OnItemSelectedListener {
+        private Spinner mSpinner;
+
+        UserSelector(final Spinner userChoices) {
+            mSpinner = userChoices;
+        }
+
+        //TODO: Find a procedural way to generate these arrays once accounts are implemented.
+        //TODO: Find a better way to handle isValidUser.
+        @Override public void onItemSelected(final AdapterView<?> parent, final View view,
+                                             final int position, final long id) {
+            ArrayAdapter<CharSequence> userAdapter;
+            // If the group spinner has chosen the family group, show the family members.
+            if(position == 1) {
+                userAdapter = ArrayAdapter.createFromResource(getActivity(),
+                        R.array.family_group, android.R.layout.simple_spinner_item);
+                userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                isValidUser = true;
+                // If the group spinner has chosen the work group, show the work members.
+            } else if (position == 2) {
+                userAdapter = ArrayAdapter.createFromResource(getActivity(),
+                        R.array.work_group, android.R.layout.simple_spinner_item);
+                userAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                isValidUser = true;
+                // Otherwise, a group has not been chosen, so show an empty group.
+            } else {
+                userAdapter = ArrayAdapter.createFromResource(getActivity(),
+                        R.array.empty_group, android.R.layout.simple_spinner_item);
+                isValidUser = false;
+            }
+            mSpinner.setAdapter(userAdapter);
+        }
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    }
 }

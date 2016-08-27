@@ -2,111 +2,84 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/init_panel">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher"
-        android:contentDescription="@string/app_name"
-        android:id="@+id/gamechat_logo"
-
-        app:layout_constraintTop_toTopOf="@id/init_panel"
-        app:layout_constraintLeft_toLeftOf="@id/init_panel"
-        android:layout_marginTop="80dp"
-        android:layout_marginStart="32dp"/>
-
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/new_game"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:id="@+id/init_title"
+        android:id="@+id/game_message"
+        android:padding="24dp"
+        android:text="@string/NoRoomsMessageText"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        tools:text="Placeholder message ... updated at runtime."
+        tools:visibility="visible" />
 
-        app:layout_constraintTop_toTopOf="@id/gamechat_logo"
-        app:layout_constraintLeft_toRightOf="@id/gamechat_logo"
-        android:layout_marginStart="32dp"/>
+    <LinearLayout style="@style/FabMenu"
+        android:id="@+id/games_fab_menu"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/games_fab">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/gamechat_logo"
-        app:layout_constraintLeft_toLeftOf="@id/init_panel"
-        app:layout_constraintRight_toRightOf="@id/init_panel"
-        android:layout_marginTop="32dp">
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_ttt"
+            android:gravity="end">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/play_choose_game"
-            android:textSize="28sp"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp">
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <Button style="@style/FabMenuButton"
                 android:id="@+id/init_ttt_button"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/play_ttt"/>
+                android:text="@string/play_ttt"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/init_ttt"
-                android:text="@string/play_ttt"
-                android:textSize="20sp"
-                android:layout_marginTop="20dp"/>
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_ttt"
+                android:src="@drawable/ic_casino_black_24dp"/>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp">
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_checkers"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
                 android:id="@+id/init_checkers_button"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/play_checkers"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/init_checkers"
-                android:text="@string/play_checkers"
-                android:textSize="20sp"
-                android:layout_marginTop="20dp"/>
+                android:text="@string/play_checkers"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_checkers"
+                android:src="@drawable/ic_casino_black_24dp"/>
+
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp">
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_chess"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
                 android:id="@+id/init_chess_button"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="@string/play_chess"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/init_chess"
-                android:text="@string/play_chess"
-                android:textSize="20sp"
-                android:layout_marginTop="20dp"/>
+                android:text="@string/play_chess"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_chess"
+                android:src="@drawable/ic_group_add_black_24dp"/>
+
         </LinearLayout>
 
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="bottom|start"
+        android:id="@+id/games_fab"
+        android:src="@drawable/ic_add_white_24dp"
+        android:onClick="onClick"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:fabSize="normal"
+        tools:visibility="visible"/>
 
 </android.support.constraint.ConstraintLayout>

@@ -32,13 +32,21 @@ import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
 
 /** Provide a singleton to manage the rooms panel fab button. */
-enum FabManager {
-    instance;
+public enum FabManager {
+    room(R.id.rooms_fab, R.id.rooms_fab_menu),
+    game(R.id.games_fab, R.id.games_fab_menu);
+
+    FabManager(final int fabId, final int fabMenuId) {
+        mFabId = fabId;
+        mFabMenuId = fabMenuId;
+    }
 
     /** Provide FAB state constants. */
     enum State {opened, closed}
 
     // Private class constants.
+    int mFabId;
+    int mFabMenuId;
 
     // Private instance variables.
 
@@ -53,8 +61,8 @@ enum FabManager {
         // correct initial state.
         Account account = AccountManager.instance.getCurrentAccount();
         List<String> groups = account != null ? account.groupIdList : null;
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(R.id.rooms_fab);
-        View menu = layout.findViewById(R.id.rooms_fab_menu);
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        View menu = layout.findViewById(mFabMenuId);
         fab.setTag(R.integer.fabStateKey, opened);
         mMenuMap.put(fab.getId(), menu);
         dismissMenu(fab);
