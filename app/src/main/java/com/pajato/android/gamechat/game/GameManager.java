@@ -147,21 +147,17 @@ public enum GameManager {
         switch(fragmentIndex) {
             default:
                 break;
-            case GameManager.TTT_LOCAL_INDEX:
-                ((LocalTTTFragment) GameManager.instance.getFragment(GameManager.TTT_LOCAL_INDEX))
-                        .messageHandler(msg);
+            case TTT_LOCAL_INDEX:
+                ((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).messageHandler(msg);
                 break;
-            case GameManager.TTT_ONLINE_INDEX:
-                ((TTTFragment) GameManager.instance.getFragment(GameManager.TTT_ONLINE_INDEX))
-                        .messageHandler(msg);
+            case TTT_ONLINE_INDEX:
+                ((TTTFragment) getFragment(TTT_ONLINE_INDEX)).messageHandler(msg);
                 break;
-            case GameManager.CHECKERS_INDEX:
-                ((CheckersFragment) GameManager.instance.getFragment(GameManager.CHECKERS_INDEX))
-                        .messageHandler(msg);
+            case CHECKERS_INDEX:
+                ((CheckersFragment) getFragment(CHECKERS_INDEX)).messageHandler(msg);
                 break;
-            case GameManager.CHESS_INDEX:
-                ((ChessFragment) GameManager.instance.getFragment(GameManager.CHESS_INDEX))
-                        .messageHandler(msg);
+            case CHESS_INDEX:
+                ((ChessFragment) getFragment(CHESS_INDEX)).messageHandler(msg);
         }
     }
 
@@ -207,38 +203,47 @@ public enum GameManager {
      */
     public boolean setCurrentFragment(final int fragmentIndex, final FragmentActivity context,
                                       final String msg) {
-        if(fragmentIndex < TOTAL_FRAGMENTS && fragmentIndex > -1) {
-            if (fragmentIndex != getCurrentFragmentIndex()) {
-                if(fragmentList[fragmentIndex] == null) {
-                    switch(fragmentIndex) {
-                        case SETTINGS_INDEX: fragmentList[SETTINGS_INDEX] = new SettingsFragment();
-                            break;
-                        case TTT_LOCAL_INDEX: fragmentList[TTT_LOCAL_INDEX] = new LocalTTTFragment();
-                            break;
-                        case TTT_ONLINE_INDEX: fragmentList[TTT_ONLINE_INDEX] = new TTTFragment();
-                            break;
-                        case CHECKERS_INDEX: fragmentList[CHECKERS_INDEX] = new CheckersFragment();
-                            break;
-                        case CHESS_INDEX: fragmentList[CHESS_INDEX] = new ChessFragment();
-                            break;
-                    }
+        // Ensure we're not taking any requests we can't fill.
+        if(fragmentIndex < TOTAL_FRAGMENTS && fragmentIndex > -1 &&
+                fragmentIndex != getCurrentFragmentIndex()) {
+            // If our fragment doesn't exist yet, construct it.
+            if(fragmentList[fragmentIndex] == null) {
+                switch(fragmentIndex) {
+                    case SETTINGS_INDEX:
+                        fragmentList[SETTINGS_INDEX] = new SettingsFragment();
+                        break;
+                    case TTT_LOCAL_INDEX:
+                        fragmentList[TTT_LOCAL_INDEX] = new LocalTTTFragment();
+                        break;
+                    case TTT_ONLINE_INDEX:
+                        fragmentList[TTT_ONLINE_INDEX] = new TTTFragment();
+                        break;
+                    case CHECKERS_INDEX:
+                        fragmentList[CHECKERS_INDEX] = new CheckersFragment();
+                        break;
+                    case CHESS_INDEX:
+                        fragmentList[CHESS_INDEX] = new ChessFragment();
+                        break;
                 }
-                // Set up the new fragment in our fragment container.
-                currentFragment = fragmentIndex;
                 fragmentList[fragmentIndex].setArguments(context.getIntent().getExtras());
-                if(msg != null) {
-                    Bundle newGame = new Bundle();
-                    newGame.putString(GAME_KEY, msg);
-                    fragmentList[fragmentIndex].setArguments(newGame);
-                }
-                context.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.game_pane_fragment_container, fragmentList[fragmentIndex])
-                        .commit();
-                return true;
-            } else if(msg != null) {
-                sendMessage(msg, fragmentIndex);
-                return true;
             }
+            // Set up the new fragment in our fragment container.
+            currentFragment = fragmentIndex;
+            if(msg != null) {
+                Bundle newGame = new Bundle();
+                newGame.putString(GAME_KEY, msg);
+                fragmentList[fragmentIndex].setArguments(newGame);
+            }
+
+            // Initiate the transition between fragments.
+            context.getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.game_pane_fragment_container, fragmentList[fragmentIndex])
+                    .commit();
+            return true;
+
+        } else if(msg != null) {
+            sendMessage(msg, fragmentIndex);
+            return true;
         }
         return false;
     }
