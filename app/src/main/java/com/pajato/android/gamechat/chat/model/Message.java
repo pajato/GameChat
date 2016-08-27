@@ -29,7 +29,7 @@ import java.util.Map;
 @IgnoreExtraProperties public class Message {
 
     /** The group owner/creator. */
-    public String owner;
+    private String owner;
 
     /** The group name. */
     public String name;
@@ -38,7 +38,7 @@ import java.util.Map;
     public long createTime;
 
     /** The last modification timestamp. */
-    public long modTime;
+    private long modTime;
 
     /** The message text. */
     public String text;

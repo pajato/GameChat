@@ -42,11 +42,11 @@ public class GroupListItem {
     public String name;
 
     /** The number of new messages in the group rooms. */
-    public int newMessageCount;
+    int newMessageCount;
 
 
     /** The list of rooms with messages.  Bold items have new messages. */
-    public String roomsText;
+    String roomsText;
 
     // Public constructors.
 

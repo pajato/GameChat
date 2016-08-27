@@ -29,16 +29,16 @@ import java.util.Map;
 @IgnoreExtraProperties public class Room {
 
     /** The group owner/creator. */
-    public String owner;
+    private String owner;
 
     /** The group name. */
     public String name;
 
     /** The creation timestamp. */
-    public long createTime;
+    private long createTime;
 
     /** The last modification timestamp. */
-    public long modTime;
+    private long modTime;
 
     /** The room type, one of "public", "private" or "me". */
     public String type;

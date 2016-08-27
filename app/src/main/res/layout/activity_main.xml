@@ -31,15 +31,6 @@ http://www.gnu.org/licenses
         android:fitsSystemWindows="true"
         tools:context="com.pajato.android.gamechat.main.MainActivity">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/layout_frame">
-
-            <include layout="@layout/activity_fragments"/>
-
-        </FrameLayout>
-
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,6 +44,16 @@ http://www.gnu.org/licenses
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/layout_frame"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <include layout="@layout/activity_fragments"/>
+
+        </FrameLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 
