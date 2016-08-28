@@ -23,7 +23,7 @@ package com.pajato.android.gamechat.chat.adapter;
  *
  * @author Paul Michael Reilly
  */
-public class RoomsListItem {
+public class GroupsListItem {
 
     // Public constants.
 
@@ -52,7 +52,7 @@ public class RoomsListItem {
     // Public constructors.
 
     /** Build an instance for a given group list item. */
-    public RoomsListItem(final GroupListItem item) {
+    public GroupsListItem(final GroupItem item) {
         type = GROUP_ITEM_TYPE;
         name = item.name;
         newCount = item.newMessageCount;
@@ -60,7 +60,7 @@ public class RoomsListItem {
     }
 
     /** Build an instance for a given date header item. */
-    public RoomsListItem(final DateHeaderItem item) {
+    public GroupsListItem(final DateHeaderItem item) {
         type = DATE_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
         // TODO: flesh this out to encapsulate enough information to build the corresponding view.

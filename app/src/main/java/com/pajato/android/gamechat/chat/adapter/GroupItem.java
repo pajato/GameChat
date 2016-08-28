@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-public class GroupListItem {
+public class GroupItem {
 
     // Public instance variables.
 
@@ -51,7 +51,7 @@ public class GroupListItem {
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public GroupListItem(final String groupKey) {
+    public GroupItem(final String groupKey) {
         // TODO: flesh this out to populate the class using the Firebase data from the given group.
         // Use the group key to unpack a group's messages by walking the set of messages in
         // each room in the group.

@@ -41,7 +41,7 @@ import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.adapter.RoomsListAdapter;
+import com.pajato.android.gamechat.chat.adapter.GroupsListAdapter;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
@@ -73,24 +73,24 @@ public class GroupsFragment extends BaseFragment {
     /** Show an ad at the top of the view. */
     private AdView mAdView;
 
-    /** The array of content views.  One will be selected to show in the rooms panel. */
+    /** The array of content views.  One will be selected to show in the chat panel. */
     private SparseArray<View> mContentViewMap = new SparseArray<>();
 
     // Public instance methods.
 
-    /** Process a given button click event looking for one on the rooms fab button. */
+    /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Determine if this event is for the rooms fab button.
+        // Determine if this event is for the chat fab button.
         int value = event.getView() != null ? event.getView().getId() : 0;
         switch (value) {
-        case R.id.rooms_fab:
-            // It is a rooms fab button.  Toggle the state.
+        case R.id.groupsFab:
+            // It is a chat fab button.  Toggle the state.
             FabManager.room.toggle((FloatingActionButton) event.getView());
             break;
         case R.id.addGroupButton:
         case R.id.addGroupMenuItem:
             // Dismiss the FAB menu, and start up the add group activity.
-            View view = getActivity().findViewById(R.id.rooms_fab);
+            View view = getActivity().findViewById(R.id.groupsFab);
             FabManager.room.dismissMenu((FloatingActionButton) view);
             Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
             startActivity(intent);
@@ -103,9 +103,10 @@ public class GroupsFragment extends BaseFragment {
 
     /** Handle an account state change event by showing the no sign in message. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
+        // Ensure that there is a layout to use.
         View layout = getView();
-        if (event.account == null) {
-            Log.e(TAG, "There is no account and no groups fragment layout!");
+        if (layout == null) {
+            Log.e(TAG, "There is no groups fragment layout! Aborting.");
             return;
         }
 
@@ -117,10 +118,10 @@ public class GroupsFragment extends BaseFragment {
             // the main content.
             TextView textView = (TextView) layout.findViewById(R.id.emptyListMessage);
             textView.setText(layout.getContext().getString(R.string.noSignInMessage));
-            showContent(R.id.emptyListContent);
+            showContent(layout, R.id.emptyListContent);
         } else {
             // There is an account.  Show the main list content.
-            showContent(R.id.groupsListContent);
+            showContent(layout, R.id.groupsListContent);
         }
     }
 
@@ -129,7 +130,7 @@ public class GroupsFragment extends BaseFragment {
         menuInflater.inflate(R.menu.chat_menu, menu);
     }
 
-    /** Handle the setup for the rooms panel. */
+    /** Handle the setup for the groups panel. */
     @Override public View onCreateView(final LayoutInflater inflater,
                                        final ViewGroup container,
                                        final Bundle savedInstanceState) {
@@ -138,12 +139,7 @@ public class GroupsFragment extends BaseFragment {
         ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_groups, container, false);
-        initAdView(layout);
-        initRoomsList(layout);
-        EventBusManager.instance.register(this);
-        FabManager.room.init(layout);
-        ChatManager.instance.init();
-        AccountManager.instance.init();
+        init(layout);
 
         return layout;
     }
@@ -156,14 +152,15 @@ public class GroupsFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    /** Deal with a change in the active rooms state. */
+    /** Deal with a change in the joined rooms state. */
     @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
         // Turn off the loading progress dialog and handle a signed in account with some joined
         // rooms by rendering the list.
         ProgressManager.instance.hide();
+        View layout = getView();
         if (event.joinedRoomList.size() == 0) {
-            // Handle the case where there are no active rooms by enabling the no rooms message.
-            showContent(R.id.emptyListContent);
+            // Handle the case where there are no joined rooms by enabling the no rooms message.
+            showContent(layout, R.id.emptyListContent);
         } else {
             // Handle a joined rooms change by setting up database watchers on the messages in each
             // room.
@@ -174,7 +171,32 @@ public class GroupsFragment extends BaseFragment {
                 String roomKey = split[1];
                 ChatManager.instance.setMessageWatcher(groupKey, roomKey);
             }
-            showContent(R.id.groupsListContent);
+            showContent(layout, R.id.groupsListContent);
+        }
+    }
+
+    /** Manage the groups list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Determine if the groups panel has been inflated.  It damned well should be.
+        View layout = getView();
+        if (layout != null) {
+            // It has.  Publish the joined rooms state using a Inbox by Google layout.
+            RecyclerView groupsListView = (RecyclerView) layout.findViewById(R.id.groupsList);
+            if (groupsListView != null) {
+                RecyclerView.Adapter adapter = groupsListView.getAdapter();
+                if (adapter instanceof GroupsListAdapter) {
+                    // TODO: parse the rooms to build a list of active room information.  For now,
+                    // inject dummy data into the list view adapter.
+                    GroupsListAdapter listAdapter = (GroupsListAdapter) adapter;
+                    listAdapter.clearItems();
+                    //listAdapter.addItems(DummyData.getData());
+                    listAdapter.addItems(ChatManager.instance.getData());
+                    groupsListView.setVisibility(View.VISIBLE);
+                    showContent(layout, R.id.groupsListContent);
+                }
+            }
+        } else {
+            Log.e(TAG, "The groups fragment layout does not exist yet!");
         }
     }
 
@@ -189,7 +211,7 @@ public class GroupsFragment extends BaseFragment {
                 }
                 break;
             case R.id.toolbar_search_icon:
-                // TODO: Handle a search in the rooms panel by fast scrolling to room.
+                // TODO: Handle a search in the groups panel by fast scrolling to room.
                 break;
             default:
                 break;
@@ -218,9 +240,28 @@ public class GroupsFragment extends BaseFragment {
         }
         EventBusManager.instance.register(this);
         EventBusManager.instance.register(ChatManager.instance);
+        AccountManager.instance.register();
     }
 
     // Private instance methods.
+
+    /** Initialize for the given layout. */
+    private void init(final View layout) {
+        // Set up the ad view, the groups list and the listeners.
+        initAdView(layout);
+        initGroupsList(layout);
+        EventBusManager.instance.register(this);
+        FabManager.room.init(layout);
+        ChatManager.instance.init();
+        AccountManager.instance.init();
+
+        // Dismiss the progress manager if one is showing and show the empty list content by
+        // default.
+        ProgressManager.instance.hide();
+        if (mContentViewMap.size() == 0) {
+            showContent(layout, R.id.emptyListContent);
+        }
+    }
 
     /** Initialize the ad view by building and loading an ad request. */
     private void initAdView(@NonNull final View layout) {
@@ -229,27 +270,26 @@ public class GroupsFragment extends BaseFragment {
         mAdView.loadAd(adRequest);
     }
 
-    /** Initialize the active rooms list by setting up the recycler view. */
-    private void initRoomsList(@NonNull final View layout) {
+    /** Initialize the joined rooms list by setting up the recycler view. */
+    private void initGroupsList(@NonNull final View layout) {
         // Initialize the recycler view.
         Context context = layout.getContext();
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.rooms_list);
+        RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.groupsList);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.setAdapter(new RoomsListAdapter());
+        mRecyclerView.setAdapter(new GroupsListAdapter());
     }
 
-    /** Manage the rooms panel content by showing the view for the given resource id. */
-    private void showContent(final int resourceId) {
-        // Determine if the rooms panel view exists.
-        View layout = getView();
+    /** Manage the groups panel content by showing the view for the given resource id. */
+    private void showContent(final View layout, final int resourceId) {
+        // Determine if the groups panel view exists.
         if (layout == null) {
             // It does not! Abort.
             return;
         }
 
-        // The rooms panel layout does exist.  Ensure that the view associated with the given
+        // The groups panel layout does exist.  Ensure that the view associated with the given
         // resource is in the map.
         View showView = mContentViewMap.get(resourceId);
         if (showView == null) {
@@ -268,31 +308,6 @@ public class GroupsFragment extends BaseFragment {
 
         // Make the desired content view visible, if it actually exists.
         if (showView != null) showView.setVisibility(View.VISIBLE);
-    }
-
-    /** Manage the rooms list UI every time a message change occurs. */
-    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
-        // Determine if the active rooms view has been inflated.  It damned well should be.
-        View layout = getView();
-        if (layout != null) {
-            // It has.  Publish the active rooms state using a Inbox by Google layout.
-            RecyclerView roomsListView = (RecyclerView) layout.findViewById(R.id.rooms_list);
-            if (roomsListView != null) {
-                RecyclerView.Adapter adapter = roomsListView.getAdapter();
-                if (adapter instanceof RoomsListAdapter) {
-                    // TODO: parse the rooms to build a list of active room information.  For now,
-                    // inject dummy data into the list view adapter.
-                    RoomsListAdapter listAdapter = (RoomsListAdapter) adapter;
-                    listAdapter.clearItems();
-                    //listAdapter.addItems(DummyData.getData());
-                    listAdapter.addItems(ChatManager.instance.getData());
-                    roomsListView.setVisibility(View.VISIBLE);
-                    showContent(R.id.groupsListContent);
-                }
-            }
-        } else {
-            Log.e(TAG, "The rooms fragment layout does not exist yet!");
-        }
     }
 
     // Private classes.

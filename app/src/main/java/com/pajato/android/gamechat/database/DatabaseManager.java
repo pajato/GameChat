@@ -44,25 +44,30 @@ public enum DatabaseManager {
     // Public instance variables.
 
     /** The Firebase value event listener map. */
-    private Map<String, DatabaseEventHandler> handlerMap = new HashMap<>();
+    private Map<String, DatabaseEventHandler> mHandlerMap = new HashMap<>();
 
     // Public instance methods.
+
+    /** Return a handler registered with the given name, null if one is not found. */
+    public DatabaseEventHandler getHandler(final String name) {
+        return mHandlerMap.get(name);
+    }
 
     /** Register a given value event listener. */
     public void registerHandler(final DatabaseEventHandler handler) {
         // Determine if there is already a listener registered with this name.
         String name = handler.name;
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(handler.path);
-        DatabaseEventHandler registeredHandler = handlerMap.get(name);
+        DatabaseEventHandler registeredHandler = mHandlerMap.get(name);
         removeEventListener(database, registeredHandler);
 
         // Register the new listener both with the handler map and with Firebase.
-        handlerMap.put(name, handler);
+        mHandlerMap.put(name, handler);
         ValueEventListener valueEventListener = handler instanceof ValueEventListener ?
             (ValueEventListener) handler : null;
         ChildEventListener childEventListener = handler instanceof ChildEventListener ?
             (ChildEventListener) handler : null;
-        handlerMap.put(name, handler);
+        mHandlerMap.put(name, handler);
         if (valueEventListener != null) {
             database.addValueEventListener(valueEventListener);
         }
@@ -73,26 +78,24 @@ public enum DatabaseManager {
 
     /** Unregister all listeners. */
     public void unregisterAll() {
-        // Walk the set of registered handlers to remove them, then clear the map.
+        // Walk the set of registered handlers to remove them.  Leave them cached for possible reuse.
         DatabaseReference database;
         DatabaseEventHandler handler;
-        for (String name : handlerMap.keySet()) {
-            handler = handlerMap.get(name);
+        for (String name : mHandlerMap.keySet()) {
+            handler = mHandlerMap.get(name);
             database = FirebaseDatabase.getInstance().getReference(handler.path);
             removeEventListener(database, handler);
         }
-        handlerMap.clear();
     }
 
     /** Unregister a named listener. */
     public void unregisterHandler(final String name) {
         // Determine if there is a handler registered by the given name.
-        DatabaseEventHandler handler = handlerMap.get(name);
+        DatabaseEventHandler handler = mHandlerMap.get(name);
         if (handler != null) {
-            // There is.  Remove it both from the map and as a listener.
+            // There is.  Remove it as a listener but keep it cached for possible reuse.
             DatabaseReference database = FirebaseDatabase.getInstance().getReference(handler.path);
             removeEventListener(database, handler);
-            handlerMap.remove(name);
         }
     }
 
@@ -138,6 +141,6 @@ public enum DatabaseManager {
     }
 
     public boolean isRegistered(String name) {
-        return handlerMap.containsKey(name);
+        return mHandlerMap.containsKey(name);
     }
 }

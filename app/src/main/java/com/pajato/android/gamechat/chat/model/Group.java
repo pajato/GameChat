@@ -34,13 +34,13 @@ import java.util.Map;
     public String name;
 
     /** The creation timestamp. */
-    private long createTime;
+    public long createTime;
 
     /** The last modification timestamp. */
-    private long modTime;
+    public long modTime;
 
     /** The group member account identifiers. */
-    private List<String> memberIdList;
+    public List<String> memberIdList;
 
     /** Build an empty args constructor for the database. */
     public Group() {}

@@ -33,7 +33,7 @@ import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum FabManager {
-    room(R.id.rooms_fab, R.id.rooms_fab_menu),
+    room(R.id.groupsFab, R.id.rooms_fab_menu),
     game(R.id.games_fab, R.id.games_fab_menu);
 
     FabManager(final int fabId, final int fabMenuId) {

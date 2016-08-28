@@ -28,8 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
-import com.pajato.android.gamechat.chat.adapter.GroupListItem;
-import com.pajato.android.gamechat.chat.adapter.RoomsListItem;
+import com.pajato.android.gamechat.chat.adapter.GroupItem;
+import com.pajato.android.gamechat.chat.adapter.GroupsListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -89,17 +89,17 @@ public enum ChatManager {
     // Public instance methods.
 
     /** Get the data as a set of list items. */
-    public List<RoomsListItem> getData() {
+    public List<GroupsListItem> getData() {
         // Generate a list of items to render in the chat main list by extracting the items based on
         // the date header type ordering.
-        List<RoomsListItem> result = new ArrayList<>();
+        List<GroupsListItem> result = new ArrayList<>();
         for (DateHeaderType dht : DateHeaderType.values()) {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0) {
                 // Add the header item followed by all the groups.
-                result.add(new RoomsListItem(new DateHeaderItem(dht)));
+                result.add(new GroupsListItem(new DateHeaderItem(dht)));
                 for (String groupKey : groupList) {
-                    result.add(new RoomsListItem(new GroupListItem(groupKey)));
+                    result.add(new GroupsListItem(new GroupItem(groupKey)));
                 }
             }
         }
@@ -130,12 +130,14 @@ public enum ChatManager {
 
     /** Handle a authentication event. */
     @Subscribe public void onAccountStateChange(@NonNull final AccountStateChangeEvent event) {
-        // Register an active rooms change handler on the account, if there is an account..
+        // Register an active rooms change handler on the account, if there is an account,
+        // preferring a cached handler, if one is available.
         if (event.account != null) {
             // There is an active account.  Register it.
             String path = String.format("/accounts/%s/joinedRoomList", event.account.accountId);
             String name = "joinedRoomListChangeHandler";
-            DatabaseEventHandler handler = new JoinedRoomListChangeHandler(name, path);
+            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            if (handler == null) handler = new JoinedRoomListChangeHandler(name, path);
             DatabaseManager.instance.registerHandler(handler);
         } else {
             // Deal with either a logout or no valid user by clearing the various state.
@@ -154,7 +156,7 @@ public enum ChatManager {
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
     @Subscribe public void onJoinedRoomsChange(@NonNull final JoinedRoomListChangeEvent event) {
-        DatabaseEventHandler handler;
+        // Set up group and room profile value event listeners for the joined rooms.
         for (String entry : event.joinedRoomList) {
             // Kick off a value event listener for the group profile.  Tag each listener with the
             // room key to ensure only one listener per group is ever active at any one time.
@@ -163,7 +165,8 @@ public enum ChatManager {
             String roomKey = split[1];
             String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
             String name = "profileChangeHandler" + groupKey;
-            handler = new ProfileChangeHandler<>(name, path, groupKey, Group.class);
+            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            if (handler == null) handler = new ProfileChangeHandler<>(name, path, groupKey, Group.class);
             DatabaseManager.instance.registerHandler(handler);
 
             // Kick off a value event listener for the room profile.  Tag each listener with the
@@ -201,8 +204,9 @@ public enum ChatManager {
     /** Setup a Firebase child event listener for the messages in the given joined room. */
     public void setMessageWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
-        String name = "messagesChangeHandler";
-        DatabaseEventHandler handler = new MessagesChangeHandler(name, groupKey, roomKey);
+        String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
+        DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+        if (handler == null) handler = new MessagesChangeHandler(name, groupKey, roomKey);
         DatabaseManager.instance.registerHandler(handler);
     }
 
@@ -273,7 +277,7 @@ public enum ChatManager {
         }
     }
 
-    /** Provide a class to handle structural changes to a User's set of active rooms. */
+    /** Provide a class to handle new and changed messages inside a given room. */
     private class MessagesChangeHandler extends DatabaseEventHandler
             implements ChildEventListener {
         private static final String MESSSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
@@ -291,6 +295,9 @@ public enum ChatManager {
         /** The room key. */
         private String mRoomKey;
 
+        /** A list of received messages used to filter out activity lifecycle event dupes. */
+        private List<String> mMessageList = new ArrayList<>();
+
         // Public constructors.
 
         /** Build a handler with the given name and path. */
@@ -305,11 +312,13 @@ public enum ChatManager {
             String format = "A message has been added: {%s, %s}.";
             Log.d(TAG, String.format(Locale.getDefault(), format, dataSnapshot, s));
 
-            // TODO: get all the messages, for now.  Later on this will have to be paginated.
-            // Post the message to be collected and displayed.
+            // TODO: get all the messages, for now.  Later on this will have to be paginated.  Post
+            // the message to be collected and displayed after filtering out activity lifecycle
+            // duplicates arising from registering and unregistering Firebase event listeners.
             if (dataSnapshot.exists()) {
                 Message message = dataSnapshot.getValue(Message.class);
-                EventBus.getDefault().post(new MessageChangeEvent(mGroupKey, mRoomKey, message));
+                if (!isDupe(message))
+                    EventBus.getDefault().post(new MessageChangeEvent(mGroupKey, mRoomKey, message));
             } else {
                 Log.e(TAG, "The snapshot does not contain a message!");
             }
@@ -331,6 +340,22 @@ public enum ChatManager {
         @Override public void onCancelled(DatabaseError error) {
             // Failed to read value
             Log.w(TAG, "Failed to read value.", error.toException());
+        }
+
+        // Private instance methods.
+
+        /** Determine if the given message is a duplicate. */
+        private boolean isDupe(final Message message) {
+            // Determine if the message has already been received.  The message name is the push key
+            // value, hence unique.
+            String name = message.name;
+            if (mMessageList.contains(name))
+                // It has been received.  Flag it.
+                return true;
+
+            // The message has not been received.  Add it to the list for subsequent filtering.
+            mMessageList.add(name);
+            return false;
         }
     }
 
