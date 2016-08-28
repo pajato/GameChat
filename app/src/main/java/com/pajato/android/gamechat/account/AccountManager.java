@@ -99,14 +99,17 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // A User has signed in. Set up a database listener for the associated account.  That
             // listener will post an account change event with the account information to the app.
             String path = String.format("/accounts/%s", user.getUid());
-            if (!DatabaseManager.instance.isRegistered(name)) {
-                DatabaseManager.instance.registerHandler(new AccountChangeHandler(name, path));
-            }
+            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            if (handler == null) handler = new AccountChangeHandler(name, path);
+            DatabaseManager.instance.registerHandler(handler);
         } else {
-            // The User is signed out.  Disable the database account state change listener and
-            // notify the app of the sign out event.
+            // The User is signed out.  Clear the current account key and notify the app of the sign
+            // out event.
             mCurrentAccountKey = null;
-            DatabaseManager.instance.unregisterHandler(name);
+            if (DatabaseManager.instance.isRegistered(name)) {
+                DatabaseManager.instance.unregisterHandler(name);
+                EventBus.getDefault().post(new AccountStateChangeEvent(null));
+            }
         }
     }
 
@@ -122,6 +125,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
+    /** Handle a sign in or sign out button click. */
+    @Subscribe public void processClick(final ClickEvent event) {
+        // Case on the view's tag content.
+        Actions action = mActionMap.get(event.getValue());
+        if (action != null) processAction(event, action);
+    }
+
     /** Re-register the component during lifecycle resume events. */
     public void register() {
         // Remove listeners before registering them.  The listeners will likely be added during the
@@ -134,13 +144,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
         FirebaseAuth.getInstance().removeAuthStateListener(this);
-    }
-
-    /** Handle a sign in or sign out button click. */
-    @Subscribe public void processClick(final ClickEvent event) {
-        // Case on the view's tag content.
-        Actions action = mActionMap.get(event.getValue());
-        if (action != null) processAction(event, action);
     }
 
     // Private instance methods.
@@ -245,7 +248,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();
             unreadList.add(uid);
-            Message message = new Message(uid, "", timestamp, timestamp, text, unreadList);
+            Message message = new Message(uid, messageKey, timestamp, timestamp, text, unreadList);
             DatabaseManager.instance.updateChildren(database, messagesPath, messageKey, message.toMap());
         }
 

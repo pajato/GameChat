@@ -43,13 +43,11 @@ http://www.gnu.org/licenses
             android:id="@+id/adView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            ads:adSize="BANNER"
+            ads:adSize="SMART_BANNER"
             ads:adUnitId="@string/banner_ad_unit_id"/>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/rooms_list"
+            android:id="@+id/groupsList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="32dp"/>
@@ -96,7 +94,7 @@ http://www.gnu.org/licenses
     <LinearLayout style="@style/FabMenu"
                   android:id="@+id/rooms_fab_menu"
                   app:layout_constraintRight_toRightOf="parent"
-                  app:layout_constraintBottom_toTopOf="@+id/rooms_fab">
+                  app:layout_constraintBottom_toTopOf="@+id/groupsFab">
         <LinearLayout style="@style/FabMenuItem"
                       android:id="@+id/joinRoomMenuItem">
             <Button style="@style/FabMenuButton"
@@ -132,7 +130,7 @@ http://www.gnu.org/licenses
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:gravity="bottom|start"
-        android:id="@+id/rooms_fab"
+        android:id="@+id/groupsFab"
         android:src="@drawable/ic_add_white_24dp"
         android:onClick="onClick"
         app:layout_constraintRight_toRightOf="parent"

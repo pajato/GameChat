@@ -207,19 +207,25 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         NavigationManager.instance.init(this, toolbar);
+        processAccount(null);
+        EventBusManager.instance.register(this);
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.
+        processAccount(event.account);
+    }
+
+    /** Process a given account. */
+    private void processAccount(final Account account) {
         NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
         View header = navView.getHeaderView(0) != null ? navView.getHeaderView(0) : navView.inflateHeaderView(R.layout.nav_header_main);
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
 
         // If there is an account, set up the navigation drawer header accordingly.
-        Account account = event.account;
         if (account != null) {
             // There is an account.  Set it up in the header.
             NavigationManager.instance.setAccount(account, header);

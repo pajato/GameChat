@@ -25,7 +25,7 @@ public class FABTest extends BaseTest {
     /** Ensure that all items in the FAB Menu are present. */
     @Test public void testFABMenuPresent() {
         // Open up the FAB menu
-        onView(withId(R.id.rooms_fab))
+        onView(withId(R.id.groupsFab))
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.

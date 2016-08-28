@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.DATE_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.GroupsListItem.DATE_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.GroupsListItem.GROUP_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -40,14 +40,14 @@ import static com.pajato.android.gamechat.chat.adapter.RoomsListItem.GROUP_ITEM_
  *
  * @author Paul Michael Reilly
  */
-public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    private List<RoomsListItem> mList = new ArrayList<>();
+    private List<GroupsListItem> mList = new ArrayList<>();
 
     // Public instance methods.
 
     /** Add items to the adapter's main list. */
-    public void addItems(final List<RoomsListItem> items) {
+    public void addItems(final List<GroupsListItem> items) {
         // Add all the items after clearing the current ones.
         mList.addAll(items);
         notifyDataSetChanged();
@@ -72,7 +72,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     /** Populate the widgets for the item at the given position. */
     @Override public void onBindViewHolder(ViewHolder holder, int position) {
-        RoomsListItem item = mList.get(position);
+        GroupsListItem item = mList.get(position);
         if (item != null) {
             switch (item.type) {
                 case DATE_ITEM_TYPE:
