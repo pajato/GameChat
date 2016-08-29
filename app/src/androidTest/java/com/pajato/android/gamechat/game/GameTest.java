@@ -31,6 +31,9 @@ public class GameTest extends BaseTest {
                 .check(matches(isDisplayed()));
         onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
+        onView(withId(R.id.games_fab))
+                .check(matches(isDisplayed()))
+                .perform(click());
     }
 
     /** Ensure that switching between two different game panels works properly */
@@ -108,7 +111,11 @@ public class GameTest extends BaseTest {
         onView(withText(R.string.new_game_init))
                 .check(matches(isDisplayed()))
                 .perform(click());
+        // Ensure the init panel is present and open the FAB
         onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
+        onView(withId(R.id.games_fab))
+                .check(matches(isDisplayed()))
+                .perform(click());
     }
 }
