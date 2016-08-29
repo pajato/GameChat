@@ -66,7 +66,7 @@ public class GameFragment extends BaseFragment {
             case R.id.toolbar_chat_icon:
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.ROOMS_INDEX);
+                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 break;
             // Otherwise, we can initiate a new game based on which game was chosen.

@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.GroupsFragment;
+import com.pajato.android.gamechat.chat.ShowGroupListFragment;
 import com.pajato.android.gamechat.game.GameFragment;
 
 import java.util.ArrayList;
@@ -41,7 +41,9 @@ public enum PaneManager {
     // Private class constants
 
     /** The fragment list index for the game fragment. */
-    public static final int ROOMS_INDEX = 0;
+    public static final int CHAT_INDEX = 0;
+
+    /** The fragment list index for the game fragment. */
     public static final int GAME_INDEX = 1;
 
     // Private instance variables
@@ -59,9 +61,10 @@ public enum PaneManager {
         // Clear the two main panels.
         fragmentList.clear();
         titleList.clear();
-        titleList.add(context.getString(R.string.rooms));
+        titleList.add(context.getString(R.string.ChatTitle));
         titleList.add(context.getString(R.string.game));
-        fragmentList.add(new GroupsFragment());
+        // TODO: Use fragmentList.add(new ChatFragment()); instead of the show group list fragment.
+        fragmentList.add(new ShowGroupListFragment());
         fragmentList.add(new GameFragment());
 
         // Determine if a paging layout is active.
@@ -75,7 +78,7 @@ public enum PaneManager {
             // The app is running on a tablet. Add the fragments to their containers.
             // TODO: force landscape mode.
             context.getSupportFragmentManager().beginTransaction()
-                    .add(R.id.chat_container, fragmentList.get(ROOMS_INDEX))
+                    .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
                     .add(R.id.game_container, fragmentList.get(GAME_INDEX))
                     .commit();
             context.invalidateOptionsMenu();

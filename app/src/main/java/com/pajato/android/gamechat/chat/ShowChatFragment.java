@@ -81,11 +81,11 @@ import static android.app.Activity.RESULT_OK;
  *
  * @author Paul Michael Reilly
  */
-public class ChatFragment extends BaseFragment
+public class ShowChatFragment extends BaseFragment
     implements GoogleApiClient.OnConnectionFailedListener {
 
     /** The logcat tag constant. */
-    private static final String TAG = ChatFragment.class.getSimpleName();
+    private static final String TAG = ShowChatFragment.class.getSimpleName();
 
     // Public inner classes.
 
@@ -172,7 +172,7 @@ public class ChatFragment extends BaseFragment
                                        Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        View result = inflater.inflate(R.layout.fragment_chat, container, false);
+        View result = inflater.inflate(R.layout.fragment_chat_messages, container, false);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
             .enableAutoManage(getActivity() /* FragmentActivity */, this /* OnConnectionFailedListener */)
@@ -243,10 +243,10 @@ public class ChatFragment extends BaseFragment
                 if (chatMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView
                             .setImageDrawable(ContextCompat
-                                    .getDrawable(ChatFragment.this.getActivity(),
+                                    .getDrawable(ShowChatFragment.this.getActivity(),
                                             R.drawable.ic_account_circle_black_36dp));
                 } else {
-                    Glide.with(ChatFragment.this.getActivity())
+                    Glide.with(ShowChatFragment.this.getActivity())
                             .load(chatMessage.getPhotoUrl())
                             .into(viewHolder.messengerImageView);
                 }

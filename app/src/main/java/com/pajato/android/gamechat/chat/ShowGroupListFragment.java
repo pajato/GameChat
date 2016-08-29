@@ -61,12 +61,12 @@ import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
  *
  * @author Paul Michael Reilly
  */
-public class GroupsFragment extends BaseFragment {
+public class ShowGroupListFragment extends BaseFragment {
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = GroupsFragment.class.getSimpleName();
+    private static final String TAG = ShowGroupListFragment.class.getSimpleName();
 
     // Public instance variables.
 
@@ -138,7 +138,7 @@ public class GroupsFragment extends BaseFragment {
         // view and the listeners for backend data changes.
         ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
-        View layout = inflater.inflate(R.layout.fragment_groups, container, false);
+        View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         init(layout);
 
         return layout;
