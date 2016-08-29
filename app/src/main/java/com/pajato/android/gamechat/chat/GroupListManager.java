@@ -58,7 +58,7 @@ import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeader
  *
  * @author Paul Michael Reilly
  */
-public enum ChatManager {
+public enum GroupListManager {
     instance;
 
     // Private class constants.
