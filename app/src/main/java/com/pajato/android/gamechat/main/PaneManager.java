@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ShowGroupListFragment;
+import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.game.GameFragment;
 
 import java.util.ArrayList;
@@ -58,13 +58,12 @@ public enum PaneManager {
 
     /** Initialize the two central panels in the app: chat and game/activity. */
     public void init(final AppCompatActivity context) {
-        // Clear the two main panels.
+        // Clear then add in the two main panels.
         fragmentList.clear();
         titleList.clear();
         titleList.add(context.getString(R.string.ChatTitle));
         titleList.add(context.getString(R.string.game));
-        // TODO: Use fragmentList.add(new ChatFragment()); instead of the show group list fragment.
-        fragmentList.add(new ShowGroupListFragment());
+        fragmentList.add(new ChatFragment());
         fragmentList.add(new GameFragment());
 
         // Determine if a paging layout is active.

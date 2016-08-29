@@ -19,9 +19,6 @@ package com.pajato.android.gamechat.chat;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -38,34 +35,17 @@ public class ChatFragment extends BaseFragment {
 
     // Public instance methods.
 
-    /** Create the chat menu. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.chat_menu, menu);
-    }
-
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
     @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                                        final Bundle savedInstanceState) {
         // Inflate the layout, and initialize the game manager.
-        View layout = inflater.inflate(R.layout.fragment_chat, container, false);
-        setHasOptionsMenu(true);
-        // TODO: defer this to onStart: GroupListManager.instance.init(getActivity());
-
-        return layout;
-    }
-
-    /** Deal with a selected chat menu option. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        // TODO: tbd
-
-        return false;
+        return inflater.inflate(R.layout.fragment_chat, container, false);
     }
 
     /** Kick off fragment processing by having the chat manager decide what to do. */
     @Override public void onStart() {
         super.onStart();
-        // Turn it over to the chat manager ...
-        // TODO: reveal the new GroupListManager.instance.init(getActivity()) when it is ready.
+        // Turn it over to the chat manager to decide how to proceed.
+        ChatManager.instance.init(this.getActivity());
     }
 }
