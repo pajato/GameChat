@@ -32,7 +32,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.chat.GroupListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity
         // sub-components in turn.
         super.onResume();
         EventBusManager.instance.register(this);
-        EventBusManager.instance.register(ChatManager.instance);
+        EventBusManager.instance.register(GroupListManager.instance);
         EventBusManager.instance.register(AccountManager.instance);
     }
 

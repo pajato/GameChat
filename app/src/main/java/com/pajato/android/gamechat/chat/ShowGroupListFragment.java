@@ -169,7 +169,7 @@ public class ShowGroupListFragment extends BaseFragment {
                 String[] split = joinedRoom.split(" ");
                 String groupKey = split[0];
                 String roomKey = split[1];
-                ChatManager.instance.setMessageWatcher(groupKey, roomKey);
+                GroupListManager.instance.setMessageWatcher(groupKey, roomKey);
             }
             showContent(layout, R.id.groupsListContent);
         }
@@ -190,7 +190,7 @@ public class ShowGroupListFragment extends BaseFragment {
                     GroupsListAdapter listAdapter = (GroupsListAdapter) adapter;
                     listAdapter.clearItems();
                     //listAdapter.addItems(DummyData.getData());
-                    listAdapter.addItems(ChatManager.instance.getData());
+                    listAdapter.addItems(GroupListManager.instance.getData());
                     groupsListView.setVisibility(View.VISIBLE);
                     showContent(layout, R.id.groupsListContent);
                 }
@@ -239,7 +239,7 @@ public class ShowGroupListFragment extends BaseFragment {
             mAdView.resume();
         }
         EventBusManager.instance.register(this);
-        EventBusManager.instance.register(ChatManager.instance);
+        EventBusManager.instance.register(GroupListManager.instance);
         AccountManager.instance.register();
     }
 
@@ -252,7 +252,7 @@ public class ShowGroupListFragment extends BaseFragment {
         initGroupsList(layout);
         EventBusManager.instance.register(this);
         FabManager.room.init(layout);
-        ChatManager.instance.init();
+        GroupListManager.instance.init();
         AccountManager.instance.init();
 
         // Dismiss the progress manager if one is showing and show the empty list content by
