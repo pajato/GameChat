@@ -40,6 +40,10 @@ public class CheckersTest extends BaseTest {
                 .perform(click());
 
         // Begin the process of starting a local checkers game
+        onView(withId(R.id.games_fab))
+                .check(matches(isDisplayed()))
+                .perform(click());
+
         onView(withId(R.id.init_checkers_button))
                 .check(matches(isDisplayed()))
                 .perform(click());
