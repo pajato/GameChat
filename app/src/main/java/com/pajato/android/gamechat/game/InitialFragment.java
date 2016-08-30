@@ -49,7 +49,7 @@ public class InitialFragment extends BaseFragment {
             GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
                     getString(R.string.new_game_chess));
         } else if (v == R.id.games_fab) {
-            FabManager.game.toggle(mFab);
+            FabManager.game.toggle(mFab, getView());
         }
     }
 

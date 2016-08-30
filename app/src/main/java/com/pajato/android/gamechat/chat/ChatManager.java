@@ -26,8 +26,6 @@ import com.pajato.android.gamechat.R;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showGroupList;
-
 /**
  * Provides the interface to the database/back end, primarily Firebase.
  *
@@ -38,14 +36,14 @@ enum ChatManager {
 
     /** Provide a set of enum constants to identify the chat related fragments. */
     public enum ChatFragmentType {
-        showGroupList (ShowGroupListFragment.class);
+        showGroupList (ShowGroupListFragment.class),
         //showRoomList (ShowRoomListFragment.class),
         //showMessages (ShowMessagesFragment.class),
         //showNewGroup (ShowNewGroupFragment.class),
         //showNewRoom (ShowNewRoomFragment.class),
         //showJoinRoom (ShowJoinRoomFragment.class),
-        //showNoJoinedRooms (ShowNoJoinedRoomsFragment.class),
-        //showNoAccount (ShowNoAccountFragment.class);
+        showNoJoinedRooms (ShowNoJoinedRoomsFragment.class),
+        showNoAccount (ShowNoAccountFragment.class);
 
         // Private instance variables.
 
@@ -67,14 +65,6 @@ enum ChatManager {
 
     /** The repository for fragments created on demand. */
     private SparseArray<Fragment> mFragmentMap = new SparseArray<>();
-
-    /** Initialize the component. */
-    public void init(final FragmentActivity activity) {
-        // Create the fragment where the groups and rooms with messages to view will be summarized.
-        // These are derived from a User's joined rooms which are in turn derived from the groups
-        // which the User is a member.
-        replaceFragment(showGroupList, activity);
-    }
 
     // Private instance methods.
 

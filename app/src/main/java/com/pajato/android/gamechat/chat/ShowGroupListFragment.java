@@ -29,8 +29,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +51,7 @@ import com.pajato.android.gamechat.main.ProgressManager;
 import org.greenrobot.eventbus.Subscribe;
 
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
+import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -83,15 +82,15 @@ public class ShowGroupListFragment extends BaseFragment {
         // Determine if this event is for the chat fab button.
         int value = event.getView() != null ? event.getView().getId() : 0;
         switch (value) {
-        case R.id.groupsFab:
+        case R.id.chatFab:
             // It is a chat fab button.  Toggle the state.
-            FabManager.room.toggle((FloatingActionButton) event.getView());
+            FabManager.chat.toggle((FloatingActionButton) event.getView(), getView());
             break;
         case R.id.addGroupButton:
         case R.id.addGroupMenuItem:
             // Dismiss the FAB menu, and start up the add group activity.
-            View view = getActivity().findViewById(R.id.groupsFab);
-            FabManager.room.dismissMenu((FloatingActionButton) view);
+            View view = getActivity().findViewById(R.id.chatFab);
+            FabManager.chat.dismissMenu((FloatingActionButton) view);
             Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
             startActivity(intent);
             break;
@@ -125,18 +124,12 @@ public class ShowGroupListFragment extends BaseFragment {
         }
     }
 
-    /** Post the chat options menu on demand. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.chat_menu, menu);
-    }
-
     /** Handle the setup for the groups panel. */
     @Override public View onCreateView(final LayoutInflater inflater,
                                        final ViewGroup container,
                                        final Bundle savedInstanceState) {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
-        ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         init(layout);
@@ -160,7 +153,7 @@ public class ShowGroupListFragment extends BaseFragment {
         View layout = getView();
         if (event.joinedRoomList.size() == 0) {
             // Handle the case where there are no joined rooms by enabling the no rooms message.
-            showContent(layout, R.id.emptyListContent);
+            ChatManager.instance.replaceFragment(showNoJoinedRooms, this.getActivity());
         } else {
             // Handle a joined rooms change by setting up database watchers on the messages in each
             // room.
@@ -251,16 +244,8 @@ public class ShowGroupListFragment extends BaseFragment {
         initAdView(layout);
         initGroupsList(layout);
         EventBusManager.instance.register(this);
-        FabManager.room.init(layout);
         GroupListManager.instance.init();
         AccountManager.instance.init();
-
-        // Dismiss the progress manager if one is showing and show the empty list content by
-        // default.
-        ProgressManager.instance.hide();
-        if (mContentViewMap.size() == 0) {
-            showContent(layout, R.id.emptyListContent);
-        }
     }
 
     /** Initialize the ad view by building and loading an ad request. */

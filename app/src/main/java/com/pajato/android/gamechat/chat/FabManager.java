@@ -23,17 +23,13 @@ import android.util.SparseArray;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
-
-import java.util.List;
 
 import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum FabManager {
-    room(R.id.groupsFab, R.id.rooms_fab_menu),
+    chat(R.id.chatFab, R.id.chatFabMenu),
     game(R.id.games_fab, R.id.games_fab_menu);
 
     FabManager(final int fabId, final int fabMenuId) {
@@ -59,8 +55,6 @@ public enum FabManager {
     public void init(@NonNull final View layout) {
         // Initialize the fab button state to opened and then toggle it to put the panel into the
         // correct initial state.
-        Account account = AccountManager.instance.getCurrentAccount();
-        List<String> groups = account != null ? account.groupIdList : null;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         View menu = layout.findViewById(mFabMenuId);
         fab.setTag(R.integer.fabStateKey, opened);
@@ -77,10 +71,10 @@ public enum FabManager {
     }
 
     /** Toggle the state of the FAB button. */
-    public void toggle(final FloatingActionButton fab) {
-        // Determine if the fab view STATE tag has a valid state value.
+    public void toggle(final FloatingActionButton fab, final View contentView) {
+        // Determine if the fab view STATE tag has a valid state value and the content view exists.
         Object payload = fab.getTag(R.integer.fabStateKey);
-        if (payload instanceof State) {
+        if (payload instanceof State && contentView != null) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
             State value = (State) payload;
             switch (value) {
@@ -88,12 +82,14 @@ public enum FabManager {
                     // The FAB is showing X and menu is visible.  Set the icon to +, close the
                     // menu and undim the frame.
                     dismissMenu(fab);
+                    contentView.setVisibility(View.VISIBLE);
                     break;
                 case closed:
                     // The FAB is showing + and the menu is not visible.  Set the icon to X and open
                     // the menu.
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
+                    contentView.setVisibility(View.GONE);
                     View menu = mMenuMap.get(fab.getId());
                     menu.setVisibility(View.VISIBLE);
                     break;
