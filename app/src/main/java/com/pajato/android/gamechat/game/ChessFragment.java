@@ -7,6 +7,9 @@ import android.support.v7.app.AlertDialog;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
@@ -37,21 +40,28 @@ public class ChessFragment extends BaseFragment {
     private ArrayList<Integer> mPossibleMoves;
 
     // Castle Management Objects
-    private boolean mBlueQueenSideRookHasMoved;
-    private boolean mBlueKingSideRookHasMoved;
-    private boolean mBlueKingHasMoved;
-    private boolean mOtherQueenSideRookHasMoved;
-    private boolean mOtherKingSideRookHasMoved;
-    private boolean mOtherKingHasMoved;
+    private boolean mPrimaryQueenSideRookHasMoved;
+    private boolean mPrimaryKingSideRookHasMoved;
+    private boolean mPrimaryKingHasMoved;
+    private boolean mSecondaryQueenSideRookHasMoved;
+    private boolean mSecondaryKingSideRookHasMoved;
+    private boolean mSecondaryKingHasMoved;
 
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                                       final Bundle savedInstanceState) {
+        // Setup the board and start a new game to create the board.
         mLayout = inflater.inflate(R.layout.fragment_checkers, container, false);
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();
 
+        setHasOptionsMenu(true);
+
+        // Return the FAB to Visibility
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+
+        // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
                 PorterDuff.Mode.SRC_ATOP);
@@ -61,6 +71,19 @@ public class ChessFragment extends BaseFragment {
                 PorterDuff.Mode.SRC_ATOP);
 
         return mLayout;
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.chess_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.options_menu_new_chess) {
+            GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity(),
+                    GameManager.instance.getTurn() + "\n" + "New Game");
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -81,10 +104,10 @@ public class ChessFragment extends BaseFragment {
             onNewGame();
 
             int color;
-            if(player.equals("Purple")) {
+            if(player.equals(getString(R.string.player_secondary))) {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
             } else {
-                player = "Blue";
+                player = getString(R.string.player_primary);
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
             handleTurnChange();
@@ -105,19 +128,20 @@ public class ChessFragment extends BaseFragment {
         mPossibleMoves.clear();
 
         // Reset the castling booleans.
-        mBlueQueenSideRookHasMoved = false;
-        mBlueKingSideRookHasMoved = false;
-        mBlueKingHasMoved = false;
-        mOtherQueenSideRookHasMoved = false;
-        mOtherKingSideRookHasMoved = false;
-        mOtherKingHasMoved = false;
+        mPrimaryQueenSideRookHasMoved = false;
+        mPrimaryKingSideRookHasMoved = false;
+        mPrimaryKingHasMoved = false;
+        mSecondaryQueenSideRookHasMoved = false;
+        mSecondaryKingSideRookHasMoved = false;
+        mSecondaryKingHasMoved = false;
 
         // Go through and populate the GridLayout / Board.
         for(int i = 0; i < 64; i++) {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container).getWidth();
+            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container)
+                    .getWidth();
             int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = pieceSideLength;
@@ -134,19 +158,19 @@ public class ChessFragment extends BaseFragment {
             handleTileBackground(i, currentTile);
 
             // Handle the starting piece positions.
-            boolean containsNonBluePiece = i < 16;
-            boolean containsBluePiece = i > 47;
-            boolean containsPiece = containsBluePiece || containsNonBluePiece;
+            boolean containsSecondaryPlayerPiece = i < 16;
+            boolean containsPrimaryPlayerPiece = i > 47;
+            boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
             int team;
             int color;
 
             // If the tile is meant to contain a board piece at the start of play, give it a piece.
             if(containsPiece) {
-                if(containsBluePiece) {
-                    team = ChessPiece.BLUE_TEAM;
+                if(containsPrimaryPlayerPiece) {
+                    team = ChessPiece.PRIMARY_TEAM;
                     color = R.color.colorPrimary;
                 } else {
-                    team = ChessPiece.OTHER_TEAM;
+                    team = ChessPiece.SECONDARY_TEAM;
                     color = R.color.colorAccent;
                 }
                 switch(i) {
@@ -179,7 +203,8 @@ public class ChessFragment extends BaseFragment {
                         mBoardMap.put(i, new ChessPiece(ChessPiece.KING, team));
                         currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.KING));
                 }
-                currentTile.setColorFilter(ContextCompat.getColor(getContext(), color), PorterDuff.Mode.SRC_ATOP);
+                currentTile.setColorFilter(ContextCompat.getColor(getContext(), color),
+                        PorterDuff.Mode.SRC_ATOP);
             }
             currentTile.setOnClickListener(new ChessClick());
             mBoard.addView(currentTile);
@@ -213,9 +238,13 @@ public class ChessFragment extends BaseFragment {
                 if(indexClicked == possiblePosition) {
                     boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
                             (indexClicked < highlightedIndex - 9);
-                    if(mTurn && (mBoardMap.get(highlightedIndex).getTeam() == ChessPiece.BLUE_TEAM)) {
+
+                    if(mTurn && (mBoardMap.get(highlightedIndex).getTeam()
+                            == ChessPiece.PRIMARY_TEAM)) {
                         handleMovement(true, indexClicked, capturesPiece);
-                    } else if(!mTurn && (mBoardMap.get(highlightedIndex).getTeam() == ChessPiece.OTHER_TEAM)) {
+
+                    } else if(!mTurn && (mBoardMap.get(highlightedIndex).getTeam()
+                            == ChessPiece.SECONDARY_TEAM)) {
                         handleMovement(false, indexClicked, capturesPiece);
                     }
                 }
@@ -223,7 +252,7 @@ public class ChessFragment extends BaseFragment {
             }
             mHighlightedTile = null;
 
-            // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
+        // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
         } else {
             mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.holo_red_dark));
@@ -237,35 +266,35 @@ public class ChessFragment extends BaseFragment {
     }
 
     /**
-     * Checks to see if the game is over or not by counting the number of blue / yellow pieces on
-     * the board. If there are zero of one type of pieces, then the other side wins.
+     * Checks to see if the game is over or not by counting the number of primary / secondary pieces
+     * on the board. If there are zero of one type of pieces, then the other side wins.
      *
      * @return true if the game is over, false otherwise.
      */
     private boolean checkFinished() {
         // Generate win conditions. If one side runs out of pieces, the other side wins.
-        int otherKing = 0;
-        int blueKing = 0;
+        int secondaryKing = 0;
+        int primaryKing = 0;
 
         for(int i = 0; i < 64; i++) {
             ChessPiece tmp = mBoardMap.get(i, null);
             if(tmp != null) {
                 if(tmp.getPiece() == ChessPiece.KING) {
-                    if(tmp.getTeam() == ChessPiece.BLUE_TEAM) {
-                        blueKing++;
-                    } else if (tmp.getTeam() == ChessPiece.OTHER_TEAM) {
-                        otherKing++;
+                    if(tmp.getTeam() == ChessPiece.PRIMARY_TEAM) {
+                        primaryKing++;
+                    } else if (tmp.getTeam() == ChessPiece.SECONDARY_TEAM) {
+                        secondaryKing++;
                     }
                 }
             }
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
-        if(otherKing == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Blue Wins!",
+        if(secondaryKing == 0) {
+            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 1 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimary), true);
             return true;
-        } else if (blueKing == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Purple Wins!",
+        } else if (primaryKing == 0) {
+            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 2 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             return true;
         } else {
@@ -328,9 +357,10 @@ public class ChessFragment extends BaseFragment {
                 ChessPiece.getQueenThreatRange(possibleMoves, highlightedIndex, mBoardMap);
                 break;
             case ChessPiece.KING:
-                boolean[] castlingBooleans = {mBlueQueenSideRookHasMoved, mBlueKingSideRookHasMoved,
-                        mBlueKingHasMoved, mOtherQueenSideRookHasMoved, mOtherKingSideRookHasMoved,
-                        mOtherKingHasMoved};
+                boolean[] castlingBooleans = { mPrimaryQueenSideRookHasMoved,
+                        mPrimaryKingSideRookHasMoved, mPrimaryKingHasMoved,
+                        mSecondaryQueenSideRookHasMoved, mSecondaryKingSideRookHasMoved,
+                        mSecondaryKingHasMoved };
                 ChessPiece.getKingThreatRange(possibleMoves, highlightedIndex, mBoardMap,
                         castlingBooleans);
                 break;
@@ -341,7 +371,7 @@ public class ChessFragment extends BaseFragment {
     /**
      * Handles the movement of the pieces.
      *
-     * @param player indicates the current player. True is blue, False is yellow.
+     * @param player indicates the current player. True is primary, False is secondary.
      * @param indexClicked the index of the clicked tile and the new position of the piece.
      */
     private void handleMovement(final boolean player, final int indexClicked,
@@ -360,17 +390,18 @@ public class ChessFragment extends BaseFragment {
 
         // Check to see if our pawn can becomes another piece and put its value into the board map.
         if(indexClicked < 8 && highlightedPiece.getPiece() == ChessPiece.PAWN &&
-                highlightedPiece.getTeam() == ChessPiece.BLUE_TEAM) {
-            promotePawn(indexClicked, ChessPiece.BLUE_TEAM);
+                highlightedPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
+            promotePawn(indexClicked, ChessPiece.PRIMARY_TEAM);
         } else if (indexClicked > 55 && highlightedPiece.getPiece() == ChessPiece.PAWN &&
-                highlightedPiece.getTeam() == ChessPiece.OTHER_TEAM) {
-            promotePawn(indexClicked, ChessPiece.OTHER_TEAM);
+                highlightedPiece.getTeam() == ChessPiece.SECONDARY_TEAM) {
+            promotePawn(indexClicked, ChessPiece.SECONDARY_TEAM);
         } else {
             mBoardMap.put(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
             ImageButton newLocation = (ImageButton) mBoard.getChildAt(indexClicked);
-            newLocation.setImageResource(ChessPiece.getDrawableFor(mBoardMap.get(indexClicked).getPiece()));
+            newLocation.setImageResource(ChessPiece.getDrawableFor(mBoardMap.get(indexClicked)
+                    .getPiece()));
 
             // Color the piece according to the player.
             int color;
@@ -393,10 +424,10 @@ public class ChessFragment extends BaseFragment {
             // Handle the player-dependent pieces of the castle.
             if(player) {
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-                team = ChessPiece.BLUE_TEAM;
+                team = ChessPiece.PRIMARY_TEAM;
             } else {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
-                team = ChessPiece.OTHER_TEAM;
+                team = ChessPiece.SECONDARY_TEAM;
             }
             int rookPrevIndex;
             int rookFutureIndex;
@@ -424,23 +455,23 @@ public class ChessFragment extends BaseFragment {
         // Handle the Castling Booleans.
         ChessPiece currentPiece = mBoardMap.get(highlightedIndex);
         if(currentPiece.getPiece() == ChessPiece.KING) {
-            if(currentPiece.getTeam() == ChessPiece.BLUE_TEAM) {
-                mBlueKingHasMoved = true;
+            if(currentPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
+                mPrimaryKingHasMoved = true;
             } else {
-                mOtherKingHasMoved = true;
+                mSecondaryKingHasMoved = true;
             }
         } else if (currentPiece.getPiece() == ChessPiece.ROOK) {
-            if(currentPiece.getTeam() == ChessPiece.BLUE_TEAM) {
+            if(currentPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
                 if(highlightedIndex == 0) {
-                    mBlueQueenSideRookHasMoved = true;
+                    mPrimaryQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 7) {
-                    mBlueKingSideRookHasMoved = true;
+                    mPrimaryKingSideRookHasMoved = true;
                 }
             } else {
                 if(highlightedIndex == 56) {
-                    mOtherQueenSideRookHasMoved = true;
+                    mSecondaryQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 63) {
-                    mOtherKingSideRookHasMoved = true;
+                    mSecondaryKingSideRookHasMoved = true;
                 }
             }
         }
@@ -491,7 +522,7 @@ public class ChessFragment extends BaseFragment {
         AlertDialog pawnChooser = alertDialogBuilder.create();
         pawnChooser.show();
 
-        int color = (team == ChessPiece.BLUE_TEAM) ? ContextCompat.getColor(getContext(),
+        int color = (team == ChessPiece.PRIMARY_TEAM) ? ContextCompat.getColor(getContext(),
                 R.color.colorPrimary) : ContextCompat.getColor(getContext(), R.color.colorAccent);
 
         // Change the Dialog's Icon color.
@@ -571,7 +602,7 @@ public class ChessFragment extends BaseFragment {
             mBoardMap.put(position, new ChessPiece(pieceType, team));
             ImageButton promotedPieceTile = (ImageButton) mBoard.getChildAt(position);
             promotedPieceTile.setImageResource(ChessPiece.getDrawableFor(pieceType));
-            boolean teamColor = team == ChessPiece.BLUE_TEAM;
+            boolean teamColor = team == ChessPiece.PRIMARY_TEAM;
             int color = teamColor ? R.color.colorPrimary: R.color.colorAccent;
             promotedPieceTile.setColorFilter(ContextCompat.getColor(getContext(), color),
                     PorterDuff.Mode.SRC_ATOP);

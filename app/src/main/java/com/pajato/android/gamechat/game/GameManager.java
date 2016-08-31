@@ -86,20 +86,30 @@ public enum GameManager {
                     // Initiate a new TicTacToe game.
                     String msg;
                     if(getCurrentFragmentIndex() == TTT_LOCAL_INDEX) {
-                        msg = (((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).mTurn ? "X" : "O")
+                        msg = (((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).mTurn ?
+                                getFragment(getCurrentFragmentIndex()).getString(R.string.xValue) :
+                                getFragment(getCurrentFragmentIndex()).getString(R.string.oValue))
                                 + "\n" + "New Game";
                         sendMessage(msg, TTT_LOCAL_INDEX);
                     } else if (getCurrentFragmentIndex() == TTT_ONLINE_INDEX) {
-                        msg = (((TTTFragment) getFragment(TTT_ONLINE_INDEX)).mTurn ? "X" : "O")
+                        msg = (((TTTFragment) getFragment(TTT_ONLINE_INDEX)).mTurn ?
+                                getFragment(getCurrentFragmentIndex()).getString(R.string.xValue) :
+                                getFragment(getCurrentFragmentIndex()).getString(R.string.oValue))
                                 + "\n" + "New Game";
                         sendMessage(msg, TTT_ONLINE_INDEX);
                     } else if (getCurrentFragmentIndex() == CHECKERS_INDEX) {
                         msg = (((CheckersFragment) getFragment(CHECKERS_INDEX)).mTurn ?
-                                "Blue" : "Yellow") + "\n" + "New Game";
+                                getFragment(getCurrentFragmentIndex())
+                                        .getString(R.string.player_primary) :
+                                getFragment(getCurrentFragmentIndex())
+                                        .getString(R.string.player_secondary)) + "\n" + "New Game";
                         sendMessage(msg, CHECKERS_INDEX);
                     } else if (getCurrentFragmentIndex() == CHESS_INDEX) {
-                        msg = (((ChessFragment) getFragment(CHESS_INDEX)).mTurn ? "Blue" : "Purple")
-                                + "\n" + "New Game";
+                        msg = (((ChessFragment) getFragment(CHESS_INDEX)).mTurn ?
+                                getFragment(getCurrentFragmentIndex())
+                                        .getString(R.string.player_primary) :
+                                getFragment(getCurrentFragmentIndex())
+                                        .getString(R.string.player_secondary)) + "\n" + "New Game";
                         sendMessage(msg, CHESS_INDEX);
                     }
                 }
@@ -129,8 +139,46 @@ public enum GameManager {
      *
      * @return The current fragment loaded up in our fragment container.
      */
-    public Fragment getFragment(int index) {
+    public Fragment getFragment(final int index) {
         return fragmentList[index];
+    }
+
+    /**
+     * Gets the current mTurn and returns a string reflecting the player's
+     * name who is currently playing.
+     *
+     * @return player 1 or player 2, depending on the mTurn.
+     */
+    public String getTurn() {
+        switch(GameManager.instance.getCurrentFragmentIndex()) {
+            default:
+                // These two cases should never be called in an impactful way.
+            case INIT_INDEX:
+                return null;
+            case SETTINGS_INDEX:
+                return null;
+            // Depending on the turn of the game, we need one of two strings.
+            // For Tic-Tac-Toe, we need X or O.
+            case TTT_LOCAL_INDEX:
+                return ((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).mTurn ?
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.xValue) :
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.oValue);
+            // Once again, for Tic-Tac-Toe, we need X or O.
+            case TTT_ONLINE_INDEX:
+                return ((TTTFragment) getFragment(TTT_ONLINE_INDEX)).mTurn ?
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.xValue) :
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.oValue);
+            // For Checkers, we need either primary or secondary player strings.
+            case CHECKERS_INDEX:
+                return ((CheckersFragment) getFragment(CHECKERS_INDEX)).mTurn ?
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.player_primary) :
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.player_secondary);
+            // For Chess, we also need either primary or secondary player strings.
+            case CHESS_INDEX:
+                return ((ChessFragment) getFragment(CHESS_INDEX)).mTurn ?
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.player_primary) :
+                        getFragment(getCurrentFragmentIndex()).getString(R.string.player_secondary);
+        }
     }
 
     /**
@@ -169,7 +217,8 @@ public enum GameManager {
      * @param msg The message to transmit to the message handler.
      * @param fragmentIndex The index of the fragment that will handle the message.
      */
-    public void sendNewGame(final int fragmentIndex, final FragmentActivity context, final String msg) {
+    public void sendNewGame(final int fragmentIndex, final FragmentActivity context,
+                            final String msg) {
         mInstructions.clear();
         setCurrentFragment(fragmentIndex, context, msg);
     }

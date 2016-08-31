@@ -108,7 +108,7 @@ public class GameTest extends BaseTest {
     private void returnToInit() {
         // Open the action bar overflow menu, then return to the initial pane.
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText(R.string.new_game_init))
+        onView(withText(R.string.go_to_rooms))
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure the init panel is present and open the FAB

@@ -45,9 +45,9 @@ public class SettingsFragment extends BaseFragment {
                 R.array.groups, android.R.layout.simple_spinner_item);
         groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         groupChoices.setAdapter(groupAdapter);
+        Spinner userChoices = (Spinner) main.findViewById(R.id.settings_user_spinner);
 
-        // Setup the user choices spinner
-        final Spinner userChoices = (Spinner) main.findViewById(R.id.settings_user_spinner);
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
 
         // We want different users to appear in the user spinner when a different group is chosen.
         groupChoices.setOnItemSelectedListener(new UserSelector(userChoices));
@@ -179,8 +179,7 @@ public class SettingsFragment extends BaseFragment {
             }
             mSpinner.setAdapter(userAdapter);
         }
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
+        @Override public void onNothingSelected(AdapterView<?> parent) {
 
         }
     }

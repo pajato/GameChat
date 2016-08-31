@@ -1,8 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/game_pane_fragment_container">
+    android:layout_height="match_parent">
 
-</FrameLayout>
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/game_pane_fragment_container">
+
+    </FrameLayout>
+
+    <View
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/games_background_dimmer"
+        android:background="#E6FFFFFF"
+        android:visibility="gone"/>
+
+    <LinearLayout style="@style/FabMenu"
+        android:id="@+id/games_fab_menu"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/games_fab">
+
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_ttt"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
+                android:id="@+id/init_ttt_button"
+                android:text="@string/play_ttt"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_ttt"
+                android:src="@drawable/ic_casino_black_24dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_checkers"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
+                android:id="@+id/init_checkers_button"
+                android:text="@string/play_checkers"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_checkers"
+                android:src="@drawable/ic_casino_black_24dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_chess"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
+                android:id="@+id/init_chess_button"
+                android:text="@string/play_chess"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_chess"
+                android:src="@drawable/ic_casino_black_24dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FabMenuItem"
+            android:id="@+id/init_rooms"
+            android:gravity="end">
+
+            <Button style="@style/FabMenuButton"
+                android:id="@+id/init_rooms_button"
+                android:text="@string/go_to_rooms"/>
+
+            <ImageView style="@style/FabMenuIcon"
+                android:contentDescription="@string/play_chess"
+                android:src="@drawable/ic_casino_black_24dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="bottom|start"
+        android:id="@+id/games_fab"
+        android:src="@drawable/ic_add_white_24dp"
+        android:onClick="onClick"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:fabSize="normal"
+        tools:visibility="visible"/>
+
+</android.support.constraint.ConstraintLayout>

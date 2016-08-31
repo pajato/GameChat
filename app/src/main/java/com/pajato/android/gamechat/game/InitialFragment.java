@@ -18,10 +18,12 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.FabManager;
@@ -33,35 +35,16 @@ import org.greenrobot.eventbus.Subscribe;
 
 public class InitialFragment extends BaseFragment {
 
-    private FloatingActionButton mFab;
-
-    /** Process a given button click event looking for one on the rooms fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        int v = event.getView() != null ? event.getView().getId() : 0;
-
-        if(v == R.id.init_ttt || v == R.id.init_ttt_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_ttt));
-        } else if (v == R.id.init_checkers || v == R.id.init_checkers_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_checkers));
-        } else if (v == R.id.init_chess || v == R.id.init_chess_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_chess));
-        } else if (v == R.id.games_fab) {
-            FabManager.game.toggle(mFab);
-        }
-    }
-
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                                       final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_initial, container, false);
-
-        EventBusManager.instance.register(this);
-        FabManager.game.init(layout);
-        mFab = (FloatingActionButton) layout.findViewById(R.id.games_fab);
+        // Setup the No Rooms Message.
+        TextView message = (TextView) layout.findViewById(R.id.game_message);
+        message.setText(R.string.NoRoomsMessageText);
+        // Return the fab back to visible.
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
         return layout;
     }
 

@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,8 +28,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
+
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * A Fragment that contains and controls the current game being played.
@@ -41,56 +47,74 @@ public class GameFragment extends BaseFragment {
         // Required empty public constructor
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout, and initialize the game manager.
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
+        // Inflate the layout, and initialize the various managers.
         View layout = inflater.inflate(R.layout.fragment_game, container, false);
         setHasOptionsMenu(true);
+        EventBusManager.instance.register(this);
         GameManager.instance.init(getActivity());
+        FabManager.game.init(layout);
         return layout;
     }
 
-    // Public Instance Methods
-    @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
+    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.game_menu, menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        String msg = getTurn() + "\n" + getString(R.string.new_game);
-        switch(item.getItemId()) {
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
+        if(item.getItemId() ==  R.id.toolbar_chat_icon) {
             // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
-            case R.id.toolbar_chat_icon:
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                }
-                break;
-            // Otherwise, we can initiate a new game based on which game was chosen.
-            case R.id.options_menu_new_game:
-                GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
-                break;
-            case R.id.options_menu_new_ttt:
-                if(GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_LOCAL_INDEX) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(), msg);
-                } else if (GameManager.instance.getCurrentFragmentIndex() == GameManager.TTT_ONLINE_INDEX) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(), msg);
-                } else {
-                    GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                            getString(R.string.new_game_ttt));
-                }
-                    break;
-            case R.id.options_menu_new_checkers:
-                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(), msg);
-                break;
-            case R.id.options_menu_new_chess:
-                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity(), msg);
-                break;
+            ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+            if (viewPager != null) {
+                viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+            }
+        } else if (item.getItemId() == R.id.options_menu_new_game) {
+            GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Process a given button click event looking for one on the rooms fab button. */
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+        // Grab the View ID and the floating action button and dimmer views.
+        int viewId = event.getView() != null ? event.getView().getId() : 0;
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.games_fab);
+        View backgroundDimmer =getActivity().findViewById(R.id.games_background_dimmer);
+
+        // When a button is clicked, send a new game and reset the fab menu and background dimmer.
+        if(viewId == R.id.init_ttt || viewId == R.id.init_ttt_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_ttt));
+            FabManager.game.dismissMenu(fab);
+            backgroundDimmer.setVisibility(View.GONE);
+        // Do it for checkers.
+        } else if (viewId == R.id.init_checkers || viewId == R.id.init_checkers_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_checkers));
+            FabManager.game.dismissMenu(fab);
+            backgroundDimmer.setVisibility(View.GONE);
+        // Do it for chess.
+        } else if (viewId == R.id.init_chess || viewId == R.id.init_chess_button) {
+            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
+                    getString(R.string.new_game_chess));
+            FabManager.game.dismissMenu(fab);
+            backgroundDimmer.setVisibility(View.GONE);
+        // And do it for the rooms option buttons.
+        } else if (viewId == R.id.init_rooms || viewId == R.id.init_rooms_button) {
+            GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
+            FabManager.game.dismissMenu(fab);
+            backgroundDimmer.setVisibility(View.GONE);
+        // If the click is on the fab, we have to handle if it's open or closed.
+        } else if (viewId == R.id.games_fab) {
+            FabManager.game.toggle(fab);
+            if(backgroundDimmer.getVisibility() == View.VISIBLE) {
+                backgroundDimmer.setVisibility(View.GONE);
+            } else {
+                backgroundDimmer.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     /**
@@ -100,43 +124,8 @@ public class GameFragment extends BaseFragment {
      * @param view the tile clicked
      */
     public void tileOnClick(final View view) {
-        String msg = getTurn() + "\n" + view.getTag().toString();
+        String msg = GameManager.instance.getTurn() + "\n" + view.getTag().toString();
         GameManager.instance.sendMessage(msg, GameManager.instance.getCurrentFragmentIndex());
-    }
-
-    //Private Instance Methods
-
-    /**
-     * Gets the current mTurn and returns a string reflecting the player's
-     * name who is currently playing.
-     *
-     * @return player 1 or player 2, depending on the mTurn.
-     */
-    private String getTurn() {
-        switch(GameManager.instance.getCurrentFragmentIndex()) {
-            default:
-            // These two cases should never be called in an impactful way.
-            case GameManager.INIT_INDEX:
-                return null;
-            case GameManager.SETTINGS_INDEX:
-                return null;
-            case GameManager.TTT_LOCAL_INDEX:
-                return ((LocalTTTFragment) GameManager.instance
-                        .getFragment(GameManager.TTT_LOCAL_INDEX))
-                        .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
-            case GameManager.TTT_ONLINE_INDEX:
-                return ((TTTFragment) GameManager.instance
-                        .getFragment(GameManager.TTT_ONLINE_INDEX))
-                        .mTurn ? getString(R.string.xValue) : getString(R.string.oValue);
-            case GameManager.CHECKERS_INDEX:
-                return ((CheckersFragment) GameManager.instance
-                        .getFragment(GameManager.CHECKERS_INDEX))
-                        .mTurn ? "Blue" : "Yellow";
-            case GameManager.CHESS_INDEX:
-                return ((ChessFragment) GameManager.instance
-                        .getFragment(GameManager.CHESS_INDEX))
-                        .mTurn ? "Blue" : "Purple";
-        }
     }
 
 }
