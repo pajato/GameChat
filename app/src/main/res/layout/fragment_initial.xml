@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/game_message"
         android:padding="24dp"
-        android:text="@string/NoRoomsMessageText"
+        android:text="@string/NoGamesMessageText"
         android:textAlignment="center"
         android:textSize="24sp"
         tools:text="Placeholder message ... updated at runtime."

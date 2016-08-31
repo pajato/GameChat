@@ -48,8 +48,8 @@ public enum ProgressManager {
 
         // Create and display the progress dialog.
         mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setTitle("Loading...");
-        mProgressDialog.setMessage("Please wait while the data is loaded...");
+        mProgressDialog.setTitle("Starting...");
+        mProgressDialog.setMessage("Please wait while the app starts up...");
         mProgressDialog.show();
     }
 

@@ -318,7 +318,7 @@ public class ShowChatFragment extends BaseFragment
     }
 
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.chat_menu, menu);
+        menuInflater.inflate(R.menu.chat_menu_base, menu);
         initFabListener();
     }
 
