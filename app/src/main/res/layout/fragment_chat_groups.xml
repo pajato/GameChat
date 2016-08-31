@@ -29,7 +29,7 @@ http://www.gnu.org/licenses
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/groupsListContent"
+        android:id="@+id/groupListContent"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -46,10 +46,11 @@ http://www.gnu.org/licenses
             ads:adUnitId="@string/banner_ad_unit_id"/>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/groupsList"
+            android:id="@+id/chatList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="32dp"
+            android:tag="@integer/groupList"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

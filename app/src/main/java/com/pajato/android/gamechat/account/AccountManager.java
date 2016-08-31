@@ -236,11 +236,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             List<String> memberList = new ArrayList<>();
             memberList.add(uid);
             Group group = new Group(uid, name, timestamp, timestamp, memberList);
-            DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile", group.toMap());
+            DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile",
+                    group.toMap());
 
             // Update the "me" room profile on the database.
-            Room room = new Room(uid, name, timestamp, timestamp, "me", memberList);
-            DatabaseManager.instance.updateChildren(database, roomPath, roomKey + "/profile", room.toMap());
+            Room room = new Room(uid, name, groupKey, timestamp, timestamp, "me", memberList);
+            DatabaseManager.instance.updateChildren(database, roomPath, roomKey + "/profile",
+                    room.toMap());
 
             // Update the "me" room default message on the database.
             String messagesPath = String.format("%s%s/messages/", roomPath, roomKey);
@@ -248,8 +250,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();
             unreadList.add(uid);
-            Message message = new Message(uid, messageKey, timestamp, timestamp, text, unreadList);
-            DatabaseManager.instance.updateChildren(database, messagesPath, messageKey, message.toMap());
+            String displayName = account.displayName;
+            Message message = new Message(uid, displayName, messageKey, timestamp, timestamp, text,
+                    unreadList);
+            DatabaseManager.instance.updateChildren(database, messagesPath, messageKey,
+                    message.toMap());
         }
 
         /** Obtain a suitable Uri to use for the User's icon. */

@@ -193,7 +193,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         long timestamp = new Date().getTime();
         List<String> list = new ArrayList<>();
         list.add(account.accountId);
-        Room room = new Room(account.accountId, "General", timestamp, timestamp, "public", list);
+        String owner = account.accountId;
+        Room room = new Room(owner, "General", groupKey, timestamp, timestamp, "public", list);
         String roomPath = String.format(Locale.US, "/groups/%s/rooms/", groupKey);
         String roomKey = database.child(roomPath).push().getKey();
         DatabaseManager.instance.updateChildren(database, path + "/profile", room.toMap());
@@ -203,7 +204,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         account.groupIdList.add(groupKey);
         String joinedRoom = groupKey + " " + roomKey;
         account.joinedRoomList.add(joinedRoom);
-        DatabaseManager.instance.updateChildren(database, "/accounts/", mGroup.owner, account.toMap());
+        owner = mGroup.owner;
+        DatabaseManager.instance.updateChildren(database, "/accounts/", owner, account.toMap());
 
         // Put a welcome message in the General room.
         String text = "Welcome to my new group!";
@@ -219,7 +221,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         String key = database.child(path).push().getKey();
         long timestamp = new Date().getTime();
         String id = account.accountId;
-        Message message = new Message(id, getName(account), timestamp, timestamp, text, members);
+        String name = getName(account);
+        Message message = new Message(id, name, key, timestamp, timestamp, text, members);
         DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
     }
 

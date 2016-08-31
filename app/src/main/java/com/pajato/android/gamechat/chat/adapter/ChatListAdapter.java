@@ -26,13 +26,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.adapter.GroupsListItem.DATE_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.GroupsListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -40,14 +44,15 @@ import static com.pajato.android.gamechat.chat.adapter.GroupsListItem.GROUP_ITEM
  *
  * @author Paul Michael Reilly
  */
-public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
+    implements View.OnClickListener {
 
-    private List<GroupsListItem> mList = new ArrayList<>();
+    private List<ChatListItem> mList = new ArrayList<>();
 
     // Public instance methods.
 
     /** Add items to the adapter's main list. */
-    public void addItems(final List<GroupsListItem> items) {
+    public void addItems(final List<ChatListItem> items) {
         // Add all the items after clearing the current ones.
         mList.addAll(items);
         notifyDataSetChanged();
@@ -58,13 +63,15 @@ public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
         mList.clear();
     }
 
-    /** Manage the recycler view view holder thingy. */
+    /** Manage the recycler view holder thingy. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {
         switch (entryType) {
             case DATE_ITEM_TYPE:
                 return new DateHeaderViewHolder(getView(parent, R.layout.item_date_header));
             case GROUP_ITEM_TYPE:
-                return new GroupListViewHolder(getView(parent, R.layout.item_group_list));
+                return new ChatListViewHolder(getView(parent, R.layout.item_group_list));
+            case ROOM_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_room_list));
         }
 
         return null;
@@ -72,7 +79,7 @@ public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     /** Populate the widgets for the item at the given position. */
     @Override public void onBindViewHolder(ViewHolder holder, int position) {
-        GroupsListItem item = mList.get(position);
+        ChatListItem item = mList.get(position);
         if (item != null) {
             switch (item.type) {
                 case DATE_ITEM_TYPE:
@@ -84,20 +91,21 @@ public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
                 case GROUP_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
-                    GroupListViewHolder groupHolder = (GroupListViewHolder) holder;
-                    groupHolder.title.setText(item.name);
-                    groupHolder.rooms.setText(Html.fromHtml(item.roomsText));
-
-                    if (item.newCount > 0) {
-                        String text = String.format(Locale.getDefault(), "%d new", item.newCount);
-                        groupHolder.count.setText(text);
-                        groupHolder.count.setVisibility(View.VISIBLE);
-                    } else {
-                        groupHolder.count.setVisibility(View.GONE);
-                    }
+                    updateChatHolder((ChatListViewHolder) holder, item);
+                    break;
+                case ROOM_ITEM_TYPE:
+                    // The ...
+                    updateChatHolder((ChatListViewHolder) holder, item);
                     break;
             }
         }
+    }
+
+    /** Post any item clicks to the app. */
+    public void onClick(final View view) {
+        String className = view.getClass().getName();
+        ClickEvent event = new ClickEvent(view.getContext(), -1, view, null, className);
+        EventBus.getDefault().post(event);
     }
 
     /** Obtain the number of entries in the item list. */
@@ -115,7 +123,28 @@ public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     /** Obtain a view by inflating the given resource id. */
     private View getView(final ViewGroup parent, final int resourceId) {
-        return LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
+        View result = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
+        result.setOnClickListener(this);
+
+        return result;
+    }
+
+    /** Update the given view holder using the data from the given item. */
+    private void updateChatHolder(ChatListViewHolder holder, final ChatListItem item) {
+        // Set the title and list text view content based on the given item.  Provide the item in
+        // the view holder tag field.
+        holder.title.setText(item.name);
+        holder.list.setText(Html.fromHtml(item.text));
+        holder.itemView.setTag(item);
+
+        // Set the new message count field, if necessary.
+        if (item.count > 0) {
+            String text = String.format(Locale.getDefault(), "%d new", item.count);
+            holder.count.setText(text);
+            holder.count.setVisibility(View.VISIBLE);
+        } else {
+            holder.count.setVisibility(View.GONE);
+        }
     }
 
     // Nested classes.
@@ -130,16 +159,16 @@ public class GroupsListAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 
     /** ... */
-    private class GroupListViewHolder extends RecyclerView.ViewHolder {
+    private class ChatListViewHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView count;
-        TextView rooms;
+        TextView list;
 
-        GroupListViewHolder(View itemView) {
+        ChatListViewHolder(View itemView) {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.titleTextView);
-            count = (TextView) itemView.findViewById(R.id.groupNewCount);
-            rooms = (TextView) itemView.findViewById(R.id.groupRoomsList);
+            count = (TextView) itemView.findViewById(R.id.newCount);
+            list = (TextView) itemView.findViewById(R.id.list);
         }
     }
 

@@ -28,11 +28,14 @@ import java.util.Map;
 /** Provide a Firebase model class for representing a chat room. */
 @IgnoreExtraProperties public class Room {
 
-    /** The group owner/creator. */
+    /** The room owner/creator, an account identifier. */
     public String owner;
 
-    /** The group name. */
+    /** The room name. */
     public String name;
+
+    /** The parent group push key. */
+    public String groupKey;
 
     /** The creation timestamp. */
     public long createTime;
@@ -50,8 +53,8 @@ import java.util.Map;
     public Room() {}
 
     /** Build a default room. */
-    public Room(final String owner, final String name, final long createTime, final long modTime,
-                final String type, final List<String> members) {
+    public Room(final String owner, final String name, final String groupkey, final long createTime,
+                final long modTime, final String type, final List<String> members) {
         this.name = name;
         this.owner = owner;
         this.createTime = createTime;
@@ -65,6 +68,7 @@ import java.util.Map;
         Map<String, Object> result = new HashMap<>();
         result.put("owner", owner);
         result.put("name", name);
+        result.put("groupKey", groupKey);
         result.put("createTime", createTime);
         result.put("modTime", modTime);
         result.put("type", type);

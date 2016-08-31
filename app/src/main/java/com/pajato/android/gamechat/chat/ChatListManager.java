@@ -26,20 +26,22 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupItem;
-import com.pajato.android.gamechat.chat.adapter.GroupsListItem;
+import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
-import com.pajato.android.gamechat.event.ProfileChangeEvent;
+import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -54,11 +56,12 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
 
 /**
- * Provides the interface to the database/back end, primarily Firebase.
+ * Provide a class to manage the app interactions with the database for lists of members,
+ * chat messages, chat rooms, and chat groups.
  *
  * @author Paul Michael Reilly
  */
-public enum GroupListManager {
+public enum ChatListManager {
     instance;
 
     // Private class constants.
@@ -88,18 +91,38 @@ public enum GroupListManager {
 
     // Public instance methods.
 
-    /** Get the data as a set of list items. */
-    public List<GroupsListItem> getData() {
-        // Generate a list of items to render in the chat main list by extracting the items based on
+    /** Get the data as a set of list items for all groups. */
+    public List<ChatListItem> getGroupListData() {
+        // Generate a list of items to render in the chat group list by extracting the items based on
         // the date header type ordering.
-        List<GroupsListItem> result = new ArrayList<>();
+        List<ChatListItem> result = new ArrayList<>();
         for (DateHeaderType dht : DateHeaderType.values()) {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0) {
-                // Add the header item followed by all the groups.
-                result.add(new GroupsListItem(new DateHeaderItem(dht)));
+                // Add the header item followed by all the group items.
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
                 for (String groupKey : groupList) {
-                    result.add(new GroupsListItem(new GroupItem(groupKey)));
+                    result.add(new ChatListItem(new GroupItem(groupKey)));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /** Get the data as a set of room items for a given group key. */
+    public List<ChatListItem> getRoomListData(final String groupKey) {
+        // Generate a list of items to render in the chat group list by extracting the items based on
+        // the date header type ordering.
+        List<ChatListItem> result = new ArrayList<>();
+        for (DateHeaderType dht : DateHeaderType.values()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {
+                // Add the header item followed by all the room itemss in the given group.
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                Map<String, List<Message>> roomMap = mGroupMessageMap.get(groupKey);
+                for (String key : roomMap.keySet()) {
+                    result.add(new ChatListItem(new RoomItem(groupKey, key)));
                 }
             }
         }
@@ -150,8 +173,8 @@ public enum GroupListManager {
     }
 
     /** Handle a room profile change by updating the map. */
-    @Subscribe public void onGroupProfileChange(@NonNull final ProfileChangeEvent<Group> event) {
-        mGroupProfileMap.put(event.key, event.t);
+    @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
+        mGroupProfileMap.put(event.key, event.group);
     }
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
@@ -166,19 +189,19 @@ public enum GroupListManager {
             String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
             String name = "profileChangeHandler" + groupKey;
             DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
-            if (handler == null) handler = new ProfileChangeHandler<>(name, path, groupKey, Group.class);
+            if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
             DatabaseManager.instance.registerHandler(handler);
 
             // Kick off a value event listener for the room profile.  Tag each listener with the
             // room key to ensure only one listener per room is ever active at any one time.
             path = String.format(Locale.US, ROOMS_PROFILE_PATH, groupKey, roomKey);
             name = "profileChangeHandler" + roomKey;
-            handler = new ProfileChangeHandler<>(name, path, roomKey, Room.class);
+            handler = new ProfileRoomChangeHandler(name, path, roomKey);
             DatabaseManager.instance.registerHandler(handler);
         }
     }
 
-    /** Handle a message change event. */
+    /** Handle a message change event by adding the message into the correct room list.  */
     @Subscribe public void onMessageChange(@NonNull final MessageChangeEvent event) {
         // Collect the message found in the event payload.
         Map<String, List<Message>> roomMap = mGroupMessageMap.get(event.groupKey);
@@ -197,8 +220,8 @@ public enum GroupListManager {
     }
 
     /** Handle a room profile change by updating the map. */
-    @Subscribe public void onRoomProfileChange(@NonNull final ProfileChangeEvent<Room> event) {
-        mRoomProfileMap.put(event.key, event.t);
+    @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
+        mRoomProfileMap.put(event.key, event.room);
     }
 
     /** Setup a Firebase child event listener for the messages in the given joined room. */
@@ -348,19 +371,19 @@ public enum GroupListManager {
         private boolean isDupe(final Message message) {
             // Determine if the message has already been received.  The message name is the push key
             // value, hence unique.
-            String name = message.name;
-            if (mMessageList.contains(name))
+            String key = message.messageKey;
+            if (mMessageList.contains(key))
                 // It has been received.  Flag it.
                 return true;
 
             // The message has not been received.  Add it to the list for subsequent filtering.
-            mMessageList.add(name);
+            mMessageList.add(key);
             return false;
         }
     }
 
-    /** Provide a class to handle changes to a generic profile. */
-    private class ProfileChangeHandler<T> extends DatabaseEventHandler
+    /** Provide a class to handle changes to a group profile. */
+    private class ProfileGroupChangeHandler extends DatabaseEventHandler
             implements ValueEventListener {
 
         // Private instance constants.
@@ -368,29 +391,57 @@ public enum GroupListManager {
         /** The logcat TAG. */
         private final String TAG = this.getClass().getSimpleName();
 
-        // Private instance variables.
-
-        /** The discriminant used to build the object value. */
-        private Class<T> mType;
-
         // Public constructors.
 
         /** Build a handler with the given name, path and key. */
-        ProfileChangeHandler(final String name, final String path, final String key,
-                             final Class<T> type) {
+        ProfileGroupChangeHandler(final String name, final String path, final String key) {
             super(name, path, key);
-            mType = type;
         }
 
         /** Get the current generic profile. */
         @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
             // Ensure that some data exists.
             if (dataSnapshot.exists()) {
-                // There is data.  Publish the room profile to the app.
-                T t = dataSnapshot.getValue(mType);
-                EventBus.getDefault().post(new ProfileChangeEvent<>(key, t));
+                // There is data.  Publish the group profile to the app.
+                Group group = dataSnapshot.getValue(Group.class);
+                EventBus.getDefault().post(new ProfileGroupChangeEvent(key, group));
             } else {
-                Log.e(TAG, "Invalid room key.  No value returned.");
+                Log.e(TAG, "Invalid key.  No value returned.");
+            }
+        }
+
+        /** ... */
+        @Override public void onCancelled(DatabaseError error) {
+            // Failed to read value
+            Log.w(TAG, "Failed to read value.", error.toException());
+        }
+    }
+
+    /** Provide a class to handle changes to a room profile. */
+    private class ProfileRoomChangeHandler extends DatabaseEventHandler
+            implements ValueEventListener {
+
+        // Private instance constants.
+
+        /** The logcat TAG. */
+        private final String TAG = this.getClass().getSimpleName();
+
+        // Public constructors.
+
+        /** Build a handler with the given name, path and key. */
+        ProfileRoomChangeHandler(final String name, final String path, final String key) {
+            super(name, path, key);
+        }
+
+        /** Get the current generic profile. */
+        @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            // Ensure that some data exists.
+            if (dataSnapshot.exists()) {
+                // There is data.  Publish the group profile to the app.
+                Room room = dataSnapshot.getValue(Room.class);
+                EventBus.getDefault().post(new ProfileRoomChangeEvent(key, room));
+            } else {
+                Log.e(TAG, "Invalid key.  No value returned.");
             }
         }
 

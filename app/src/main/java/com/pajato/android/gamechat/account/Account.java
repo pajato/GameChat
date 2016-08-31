@@ -55,7 +55,7 @@ import java.util.Map;
     /** A list of group ids the account can access. */
     public List<String> groupIdList = new ArrayList<>();
 
-    /** The list of joined rooms providing the group and chat push keys. */
+    /** The list of joined rooms providing the group and room push keys. */
     public List<String> joinedRoomList = new ArrayList<>();
 
     // Public instance methods.

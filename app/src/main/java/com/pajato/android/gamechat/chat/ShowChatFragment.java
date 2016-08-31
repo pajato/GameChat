@@ -330,7 +330,7 @@ public class ShowChatFragment extends BaseFragment
                     viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 }
                 break;
-            case R.id.toolbar_search_icon:
+            case R.id.search:
                 break;
         }
         return super.onOptionsItemSelected(item);

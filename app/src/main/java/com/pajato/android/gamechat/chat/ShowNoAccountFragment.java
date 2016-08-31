@@ -83,7 +83,7 @@ public class ShowNoAccountFragment extends BaseFragment {
                     viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 }
                 break;
-            case R.id.toolbar_search_icon:
+            case R.id.search:
                 // TODO: Handle a search in the groups panel by fast scrolling to chat.
                 break;
             default:

@@ -23,5 +23,5 @@ package com.pajato.android.gamechat.event;
  * @author Paul Michael Reilly
  */
 public class MessageListChangeEvent {
-    // No data is needed as it is all contained in the GroupListManager class.
+    // No data is needed as it is all contained in the ChatListManager class.
 }

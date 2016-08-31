@@ -23,6 +23,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 
 import java.util.Locale;
 
@@ -31,13 +32,13 @@ import java.util.Locale;
  *
  * @author Paul Michael Reilly
  */
-enum ChatManager {
+public enum ChatManager {
     instance;
 
     /** Provide a set of enum constants to identify the chat related fragments. */
     public enum ChatFragmentType {
         showGroupList (ShowGroupListFragment.class),
-        //showRoomList (ShowRoomListFragment.class),
+        showRoomList (ShowRoomListFragment.class),
         //showMessages (ShowMessagesFragment.class),
         //showNewGroup (ShowNewGroupFragment.class),
         //showNewRoom (ShowNewRoomFragment.class),
@@ -69,16 +70,25 @@ enum ChatManager {
     // Private instance methods.
 
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */
-    public void chainFragment(final ChatFragmentType type, final FragmentActivity context) {
+    public void chainFragment(final ChatFragmentType type, final FragmentActivity context,
+                              final ChatListItem item) {
         // Determine if the replacement fragment has been attached yet.
         Fragment fragment = getFragment(type);
         if (fragment == null) return;
 
-        // Run the transaction to attach the fragment to the activity, adding a backstack.
+        // Set the item on the fragment and run the transaction to attach the fragment to the
+        // activity, adding a backstack.
+        setItem(fragment, item);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.chatFragmentContainer, fragment)
-            .addToBackStack(null)
+            //.addToBackStack(null)
             .commit();
+    }
+
+    private void setItem(Fragment fragment, ChatListItem item) {
+        if (fragment instanceof ShowRoomListFragment) {
+            ((ShowRoomListFragment) fragment).setItem(item);
+        }
     }
 
     /** Attach a fragment identified by a type, creating that fragment as necessary. */
