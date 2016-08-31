@@ -17,12 +17,13 @@ class ChessPiece {
     static final int ROOK = 4;
     static final int PAWN = 5;
 
-    static final int BLUE_TEAM = 10;
-    static final int OTHER_TEAM = 20;
+    static final int PRIMARY_TEAM = 10;
+    static final int SECONDARY_TEAM = 20;
 
     private int pieceId;
     private int teamId;
 
+    /** Constructor requires a piece and team specified, provided as constants in the class. */
     ChessPiece(final int piece, final int team) {
         this.pieceId = piece;
         this.teamId = team;
@@ -36,6 +37,12 @@ class ChessPiece {
         return this.teamId;
     }
 
+    /**
+     * Returns a specific drawable for the piece type specified in the parameter.
+     *
+     * @param pieceType the piece type, all of which are available as public constants in this class
+     * @return a drawable ID that corresponds to the parameter.
+     */
     static int getDrawableFor(final int pieceType) {
         int drawable;
         switch(pieceType) {
@@ -71,12 +78,13 @@ class ChessPiece {
      */
     static void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
                       final SparseArray<ChessPiece> boardMap, final boolean[] castlingBooleans) {
-        final boolean blueQueenSideRookHasMoved = castlingBooleans[0];
-        final boolean blueKingSideRookHasMoved = castlingBooleans[1];
-        final boolean blueKingHasMoved = castlingBooleans[2];
-        final boolean otherQueenSideRookHasMoved = castlingBooleans[3];
-        final boolean otherKingSideRookHasMoved = castlingBooleans[4];
-        final boolean otherKingHasMoved = castlingBooleans[5];
+        // Grab all the castling booleans and label them properly.
+        final boolean primaryQueenSideRookHasMoved = castlingBooleans[0];
+        final boolean primaryKingSideRookHasMoved = castlingBooleans[1];
+        final boolean primaryKingHasMoved = castlingBooleans[2];
+        final boolean secondaryQueenSideRookHasMoved = castlingBooleans[3];
+        final boolean secondaryKingSideRookHasMoved = castlingBooleans[4];
+        final boolean secondaryKingHasMoved = castlingBooleans[5];
 
         // Establish all possible movement options.
         int left = highlightedIndex - 1;
@@ -110,9 +118,10 @@ class ChessPiece {
         }
 
         // Handle Castling for Blue
-        if(boardMap.get(highlightedIndex).getTeam() == ChessPiece.BLUE_TEAM && !blueKingHasMoved) {
+        if(boardMap.get(highlightedIndex).getTeam()
+                == ChessPiece.PRIMARY_TEAM && !primaryKingHasMoved) {
             // The more common Castling variant, "Queen-Side Castling" or "Short Castling"
-            boolean canCastleKingSide = highlightedIndex == 60 && !blueKingSideRookHasMoved &&
+            boolean canCastleKingSide = highlightedIndex == 60 && !primaryKingSideRookHasMoved &&
                     boardMap.get(highlightedIndex + 1, null) == null &&
                     boardMap.get(highlightedIndex + 2, null) == null &&
                     boardMap.get(highlightedIndex + 3, null) != null &&
@@ -121,7 +130,7 @@ class ChessPiece {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
-            boolean canCastleQueenSide = highlightedIndex == 60 && !blueQueenSideRookHasMoved &&
+            boolean canCastleQueenSide = highlightedIndex == 60 && !primaryQueenSideRookHasMoved &&
                     boardMap.get(highlightedIndex - 1, null) == null &&
                     boardMap.get(highlightedIndex - 2, null) == null &&
                     boardMap.get(highlightedIndex - 3, null) == null &&
@@ -131,8 +140,10 @@ class ChessPiece {
                 threatRange.add(highlightedIndex - 3);
             }
         // Handle Castling for the other team
-        } else if (boardMap.get(highlightedIndex).getTeam() == ChessPiece.OTHER_TEAM && !otherKingHasMoved) {
-            boolean canCastleKingSide = highlightedIndex == 4 && !otherKingSideRookHasMoved &&
+        } else if (boardMap.get(highlightedIndex).getTeam()
+                == ChessPiece.SECONDARY_TEAM && !secondaryKingHasMoved) {
+            boolean canCastleKingSide = highlightedIndex == 4
+                    && !secondaryKingSideRookHasMoved &&
                     boardMap.get(highlightedIndex + 1, null) == null &&
                     boardMap.get(highlightedIndex + 2, null) == null &&
                     boardMap.get(highlightedIndex + 3, null) != null &&
@@ -141,7 +152,7 @@ class ChessPiece {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
-            boolean canCastleQueenSide = highlightedIndex == 4 && !otherQueenSideRookHasMoved &&
+            boolean canCastleQueenSide = highlightedIndex == 4 && !secondaryQueenSideRookHasMoved &&
                     boardMap.get(highlightedIndex - 1, null) == null &&
                     boardMap.get(highlightedIndex - 2, null) == null &&
                     boardMap.get(highlightedIndex - 3, null) == null &&
@@ -286,10 +297,11 @@ class ChessPiece {
      * @param highlightedIndex the index of the current piece.
      * @param boardMap a HashMap representing the board and the pieces located within.
      */
-    static void getPawnThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final SparseArray<ChessPiece> boardMap) {
-        // Pawns move differently depending on the team they are on.
-        if(boardMap.get(highlightedIndex).getTeam() == ChessPiece.BLUE_TEAM) {
+    static void getPawnThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+                                   final SparseArray<ChessPiece> boardMap) {
+        // Pawns move differently depending on the team they are on. First, handle the pawns that
+        // move "up". These pawns are on the primary team.
+        if(boardMap.get(highlightedIndex).getTeam() == ChessPiece.PRIMARY_TEAM) {
             int upLeft = highlightedIndex - 9;
             int upRight = highlightedIndex - 7;
             int up = highlightedIndex - 8;
@@ -304,17 +316,18 @@ class ChessPiece {
 
             // Pawns can move diagonally forward only if they are capturing a piece.
             if(boardMap.get(upLeft, null) != null && upLeft % 8 != 7
-                    && boardMap.get(upLeft).getTeam() == ChessPiece.OTHER_TEAM) {
+                    && boardMap.get(upLeft).getTeam() == ChessPiece.SECONDARY_TEAM) {
                 threatRange.add(upLeft);
             }
             if(boardMap.get(upRight, null) != null && upRight % 8 != 0
-                    && boardMap.get(upRight).getTeam() == ChessPiece.OTHER_TEAM) {
+                    && boardMap.get(upRight).getTeam() == ChessPiece.SECONDARY_TEAM) {
                 threatRange.add(upRight);
             }
             // Pawns can move forward only if they are not being blocked.
             if(boardMap.get(up, null) == null && up > -1) {
                 threatRange.add(up);
             }
+        // We also need to handle the second team, which moves "downward" on the board.
         } else {
             int downRight = highlightedIndex + 9;
             int downLeft = highlightedIndex + 7;
@@ -330,11 +343,11 @@ class ChessPiece {
 
             // Pawns can move diagonally forward only if they are capturing a piece.
             if(boardMap.get(downRight, null) != null && downRight % 8 != 0
-                    && boardMap.get(downRight).getTeam() == ChessPiece.BLUE_TEAM) {
+                    && boardMap.get(downRight).getTeam() == ChessPiece.PRIMARY_TEAM) {
                 threatRange.add(downRight);
             }
             if(boardMap.get(downLeft, null) != null && downRight % 8 != 7
-                    && boardMap.get(downLeft).getTeam() == ChessPiece.BLUE_TEAM) {
+                    && boardMap.get(downLeft).getTeam() == ChessPiece.PRIMARY_TEAM) {
                 threatRange.add(downLeft);
             }
             // Pawns can move forward only if they are not being blocked.
@@ -383,7 +396,8 @@ class ChessPiece {
             if (possibleMove > -1 && possibleMove < 64) {
                 if (boardMap.get(possibleMove, null) == null) {
                     threatRange.add(possibleMove);
-                } else if (boardMap.get(possibleMove).getTeam() != boardMap.get(highlightedIndex).getTeam()) {
+                } else if (boardMap.get(possibleMove).getTeam()
+                        != boardMap.get(highlightedIndex).getTeam()) {
                     threatRange.add(possibleMove);
                 }
             }
@@ -401,8 +415,8 @@ class ChessPiece {
      * @param highlightedIndex the index of the current piece.
      * @param boardMap a HashMap representing the board and the pieces located within.
      */
-    static void getRookThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final SparseArray<ChessPiece> boardMap) {
+    static void getRookThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+                                   final SparseArray<ChessPiece> boardMap) {
         // Set up our condition variables.
         boolean left = true;
         boolean right = true;

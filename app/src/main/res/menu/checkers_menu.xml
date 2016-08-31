@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/options_menu_new_checkers"
+        android:title="@string/new_game_checkers"
+        app:showAsAction="never"
+        android:orderInCategory="20" />
+</menu>

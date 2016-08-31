@@ -6,6 +6,9 @@ import android.support.v4.content.ContextCompat;
 import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
@@ -25,12 +28,12 @@ import java.util.Scanner;
  * @author Bryan Scott
  */
 public class CheckersFragment extends BaseFragment {
-    private static final int BLUE_PIECE = 1;
-    private static final int BLUE_KING = 2;
-    private static final int YELLOW_PIECE = 3;
-    private static final int YELLOW_KING = 4;
+    private static final int PRIMARY_PIECE = 1;
+    private static final int PRIMARY_KING = 2;
+    private static final int SECONDARY_PIECE = 3;
+    private static final int SECONDARY_KING = 4;
 
-    // Designates the turn. true = blue; false = yellow.
+    // Designates the turn. true = primary; false = secondary.
     public boolean mTurn;
 
     // Board Management Objects
@@ -41,12 +44,15 @@ public class CheckersFragment extends BaseFragment {
     private View mLayout;
     private ArrayList<Integer> mPossibleMoves;
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
         mLayout = inflater.inflate(R.layout.fragment_checkers, container, false);
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = true;
         onNewGame();
+
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        setHasOptionsMenu(true);
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -58,6 +64,19 @@ public class CheckersFragment extends BaseFragment {
                 PorterDuff.Mode.SRC_ATOP);
 
         return mLayout;
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.checkers_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.options_menu_new_checkers) {
+            GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(),
+                    GameManager.instance.getTurn() + "\n" + "New Game");
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -75,15 +94,14 @@ public class CheckersFragment extends BaseFragment {
 
         if(buttonTag.equals(getString(R.string.new_game))) {
             onNewGame();
-
             int color;
-            if(player.equals("Yellow")) {
+            if(player.equals(getString(R.string.player_secondary))) {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
             } else {
-                player = "Blue";
+                player = getString(R.string.player_primary);
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
-            GameManager.instance.generateSnackbar(mLayout, getString(R.string.new_game) + " "
+            GameManager.instance.generateSnackbar(mLayout, getString(R.string.new_game) + "! "
                     + player + "'s Turn!", color, false);
         }
 
@@ -104,7 +122,8 @@ public class CheckersFragment extends BaseFragment {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container).getWidth();
+            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container)
+                    .getWidth();
             int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = pieceSideLength;
@@ -134,8 +153,8 @@ public class CheckersFragment extends BaseFragment {
             boolean isSecondBottomRow = (47 < i && i < 56) && isEven;
             boolean isBottomRow = (55 < i && i < 64) && isOdd;
 
-            boolean containsYellowPiece = isTopRow || isSecondRow || isThirdRow;
-            boolean containsBluePiece = isThirdBottomRow || isSecondBottomRow || isBottomRow;
+            boolean containsSecondaryPiece = isTopRow || isSecondRow || isThirdRow;
+            boolean containsPrimaryPiece = isThirdBottomRow || isSecondBottomRow || isBottomRow;
 
             // Create the checkerboard pattern on the button backgrounds.
             if(evenRowEvenColumn || oddRowOddColumn) {
@@ -149,16 +168,16 @@ public class CheckersFragment extends BaseFragment {
             }
 
             // If the tile is meant to contain a board piece at the start of play, give it a piece.
-            if(containsYellowPiece) {
+            if(containsSecondaryPiece) {
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
-                mBoardMap.put(i, YELLOW_PIECE);
-            } else if (containsBluePiece) {
+                mBoardMap.put(i, SECONDARY_PIECE);
+            } else if (containsPrimaryPiece) {
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-                mBoardMap.put(i, BLUE_PIECE);
+                mBoardMap.put(i, PRIMARY_PIECE);
             }
             currentTile.setOnClickListener(new CheckersClick());
             mBoard.addView(currentTile);
@@ -196,13 +215,13 @@ public class CheckersFragment extends BaseFragment {
                         boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
                                 (indexClicked < highlightedIndex - 9);
 
-                        if(mTurn && (mBoardMap.get(highlightedIndex) == BLUE_PIECE ||
-                                mBoardMap.get(highlightedIndex) == BLUE_KING)) {
+                        if(mTurn && (mBoardMap.get(highlightedIndex) == PRIMARY_PIECE ||
+                                mBoardMap.get(highlightedIndex) == PRIMARY_KING)) {
 
                             handleMovement(true, indexClicked, capturesPiece);
 
-                        } else if(!mTurn && (mBoardMap.get(highlightedIndex) == YELLOW_PIECE
-                                || mBoardMap.get(highlightedIndex) == YELLOW_KING)) {
+                        } else if(!mTurn && (mBoardMap.get(highlightedIndex) == SECONDARY_PIECE
+                                || mBoardMap.get(highlightedIndex) == SECONDARY_KING)) {
 
                             handleMovement(false, indexClicked, capturesPiece);
                         }
@@ -230,8 +249,8 @@ public class CheckersFragment extends BaseFragment {
     }
 
     /**
-     * Checks to see if the game is over or not by counting the number of blue / yellow pieces on
-     * the board. If there are zero of one type of pieces, then the other side wins.
+     * Checks to see if the game is over or not by counting the number of primary / secondary pieces
+     * on the board. If there are zero of one type of pieces, then the other side wins.
      *
      * @return true if the game is over, false otherwise.
      */
@@ -241,19 +260,19 @@ public class CheckersFragment extends BaseFragment {
         int bCount = 0;
         for(int i = 0; i < 64; i++) {
             int tmp = mBoardMap.get(i);
-            if(tmp == BLUE_PIECE || tmp == BLUE_KING) {
+            if(tmp == PRIMARY_PIECE || tmp == PRIMARY_KING) {
                 bCount++;
-            } else if (tmp == YELLOW_PIECE || tmp == YELLOW_KING) {
+            } else if (tmp == SECONDARY_PIECE || tmp == SECONDARY_KING) {
                 yCount++;
             }
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
         if(yCount == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Blue Wins!",
+            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 1 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimary), true);
             return true;
         } else if (bCount == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Yellow Wins!",
+            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 2 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             return true;
         } else {
@@ -280,10 +299,13 @@ public class CheckersFragment extends BaseFragment {
         int highlightedPieceType = mBoardMap.get(highlightedIndex);
         int jumpedIndex = (highlightedIndex + jumpable) / 2;
         int jumpedPieceType = mBoardMap.get(jumpedIndex);
-        if (highlightedPieceType == BLUE_PIECE || highlightedPieceType == BLUE_KING) {
-            jumpsAlly = jumpedPieceType == BLUE_PIECE || jumpedPieceType == BLUE_KING;
-        } else if (highlightedPieceType == YELLOW_PIECE || highlightedPieceType == YELLOW_KING) {
-            jumpsAlly = jumpedPieceType == YELLOW_PIECE || jumpedPieceType == YELLOW_KING;
+
+        if (highlightedPieceType == PRIMARY_PIECE || highlightedPieceType == PRIMARY_KING) {
+            jumpsAlly = jumpedPieceType == PRIMARY_PIECE || jumpedPieceType == PRIMARY_KING;
+
+        } else if (highlightedPieceType == SECONDARY_PIECE
+                || highlightedPieceType == SECONDARY_KING) {
+            jumpsAlly = jumpedPieceType == SECONDARY_PIECE || jumpedPieceType == SECONDARY_KING;
         }
 
         if(withinBounds && emptySpace && !breaksBorders && !jumpsAlly) {
@@ -296,7 +318,8 @@ public class CheckersFragment extends BaseFragment {
      *
      * @param highlightedIndex the index containing the highlighted piece.
      */
-    private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves) {
+    private void findPossibleMoves(final int highlightedIndex,
+                                   final ArrayList<Integer> possibleMoves) {
         if(highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
@@ -311,10 +334,10 @@ public class CheckersFragment extends BaseFragment {
         int downRight = highlightedIndex + 9;
 
         // Handle vertical edges of the board and non-king pieces.
-        if(highlightedIndex / 8 == 0 || highlightedPieceType == YELLOW_PIECE) {
+        if(highlightedIndex / 8 == 0 || highlightedPieceType == SECONDARY_PIECE) {
             upLeft = -1;
             upRight = -1;
-        } else if (highlightedIndex / 8 == 7 || highlightedPieceType == BLUE_PIECE) {
+        } else if (highlightedIndex / 8 == 7 || highlightedPieceType == PRIMARY_PIECE) {
             downLeft = -1;
             downRight = -1;
         }
@@ -357,7 +380,7 @@ public class CheckersFragment extends BaseFragment {
     /**
      * Handles the movement of the pieces.
      *
-     * @param player indicates the current player. True is blue, False is yellow.
+     * @param player indicates the current player. True is Primary, False is Secondary.
      * @param indexClicked the index of the clicked tile and the new position of the piece.
      */
     private void handleMovement(final boolean player, final int indexClicked,
@@ -368,17 +391,18 @@ public class CheckersFragment extends BaseFragment {
         int highlightedPieceType = mBoardMap.get(highlightedIndex);
 
         // Check to see if our piece becomes a king piece and put its value into the board map.
-        if(indexClicked < 8 && highlightedPieceType == BLUE_PIECE) {
-            mBoardMap.put(indexClicked, BLUE_KING);
-        } else if (indexClicked > 55 && highlightedPieceType == YELLOW_PIECE) {
-            mBoardMap.put(indexClicked, YELLOW_KING);
+        if(indexClicked < 8 && highlightedPieceType == PRIMARY_PIECE) {
+            mBoardMap.put(indexClicked, PRIMARY_KING);
+        } else if (indexClicked > 55 && highlightedPieceType == SECONDARY_PIECE) {
+            mBoardMap.put(indexClicked, SECONDARY_KING);
         } else {
             mBoardMap.put(indexClicked, highlightedPieceType);
         }
 
         // Find the new tile and give it a piece.
         ImageButton newLocation = (ImageButton) mBoard.getChildAt(indexClicked);
-        if(mBoardMap.get(indexClicked) == BLUE_KING || mBoardMap.get(indexClicked) == YELLOW_KING) {
+        if(mBoardMap.get(indexClicked) == PRIMARY_KING ||
+                mBoardMap.get(indexClicked) == SECONDARY_KING) {
             newLocation.setImageResource(R.drawable.ic_stars_black_36dp);
         } else {
             newLocation.setImageResource(R.drawable.ic_account_circle_black_36dp);

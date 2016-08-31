@@ -204,8 +204,11 @@ public class TTTTest extends BaseTest {
         onView(withId(R.id.player_1_right_indicator))
                 .check(matches(not(isDisplayed())));
 
-        // Initiate a new game.
-        getNewGame(false);
+        // Initiate a new game via the overflow options menu.
+        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
+        onView(withText(R.string.new_game_ttt))
+                .check(matches(isDisplayed()))
+                .perform(click());
 
         // The turn should still be O's, so after a press, the turn should become X's.
         onView(withTagValue(is((Object) "button00")))
@@ -408,17 +411,16 @@ public class TTTTest extends BaseTest {
     /** A helper method that creates a new game using the Floating Action Button */
     private void getNewGame(final boolean onStart) {
         // Open the options menu and initiate a new game.
-        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
-        onView(withText(R.string.new_game_ttt))
+        onView(withId(R.id.games_fab))
+                .perform(click());
+        onView(withId(R.id.init_ttt_button))
+                .perform(click());
+
+        // Navigate through the settings panel.
+        onView(withId(R.id.settings_local_button))
                 .check(matches(isDisplayed()))
                 .perform(click());
 
-        // If it's the start of the test, we'll have to navigate through the settings panel.
-        if(onStart) {
-            onView(withId(R.id.settings_local_button))
-                    .check(matches(isDisplayed()))
-                    .perform(click());
-        }
         // Then we should have reached the board.
         onView(withId(R.id.board))
                 .check(matches(isDisplayed()));

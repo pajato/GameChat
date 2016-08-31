@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,7 +44,23 @@ public class LocalTTTFragment extends BaseFragment {
         mSpace = getString(R.string.spaceValue);
         turnCount = 0;
 
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        setHasOptionsMenu(true);
+
         return mBoard;
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.ttt_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.options_menu_new_ttt) {
+            GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(),
+                    GameManager.instance.getTurn() + "\n" + "New Game");
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -158,7 +177,7 @@ public class LocalTTTFragment extends BaseFragment {
      *
      * @return R.string.xValue or R.string.oValue, depending on whose turn it is.
      */
-    private String getTurn(boolean turnIndicator) {
+    private String getTurn(final boolean turnIndicator) {
         if(turnIndicator) {
             return mXValue;
         } else {
@@ -174,7 +193,7 @@ public class LocalTTTFragment extends BaseFragment {
      *
      * @param turn differentiates between the turn. true = Player 1's turn, false = Player 2's turn.
      */
-    protected void handlePlayerIcons(boolean turn) {
+    protected void handlePlayerIcons(final boolean turn) {
         final float LARGE = 60.0f;
         final float SMALL = 45.0f;
         // Collect all the pertinent textViews.
@@ -250,7 +269,7 @@ public class LocalTTTFragment extends BaseFragment {
      * @param player the player who initiated the click.
      * @param buttonTag the tag of the button clicked.
      */
-    private void handleTileClick(String player, String buttonTag) {
+    private void handleTileClick(final String player, final String buttonTag) {
         Button b = (Button) mBoard.findViewWithTag(buttonTag);
         // Only updates the tile if the current value is empty and the game has not finished yet.
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {

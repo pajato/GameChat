@@ -11,6 +11,7 @@
     <string name="choose_group">Choose a Group:</string>
     <string name="choose_user">Choose a User:</string>
     <string name="game">Game</string>
+    <string name="go_to_rooms">Go to My Rooms</string>
     <string name="invite_new_user">Invite a New User!</string>
     <string name="invite_new_user_desc">Invite a New User image button</string>
     <string name="menuItemTitleLearnMore">Learn More</string>
@@ -51,6 +52,8 @@
     <string name="playing_checkers">Playing Checkers!</string>
     <string name="playing_chess">Playing Chess!</string>
     <string name="playing_ttt">Playing Tic-Tac-Toe!</string>
+    <string name="player_primary">Player 1</string>
+    <string name="player_secondary">Player 2</string>
     <string name="send">SEND</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
