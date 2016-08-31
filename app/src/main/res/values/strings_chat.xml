@@ -15,4 +15,6 @@ You are signed out.  GameChat is much more fun when you can interact with your f
     </string>
     <string name="MarkAllReadDescription">Mark all read icon</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
+    <string name="RoomListIcon">The room list icon.</string>
+    <string name="backItemTitleText">Back</string>
 </resources>

@@ -28,10 +28,13 @@ import java.util.Map;
 /** Provide a Firebase model class repesenting a chat message, an icon, a name and text. */
 @IgnoreExtraProperties public class Message {
 
-    /** The group owner/creator. */
+    /** The member account identifer who posted the message. */
     public String owner;
 
-    /** The group name. */
+    /** The message push key. */
+    public String messageKey;
+
+    /** The poster's display name. */
     public String name;
 
     /** The creation timestamp. */
@@ -52,10 +55,12 @@ import java.util.Map;
     public Message() {}
 
     /** Build a default Message. */
-    public Message(final String owner, final String name, final long createTime, final long modTime,
-                   final String text, final List<String> unreadList) {
+    public Message(final String owner, final String name, final String messageKey,
+                   final long createTime, final long modTime, final String text,
+                   final List<String> unreadList) {
         this.owner = owner;
         this.name = name;
+        this.messageKey = messageKey;
         this.createTime = createTime;
         this.modTime = modTime;
         this.text = text;
@@ -67,6 +72,7 @@ import java.util.Map;
         Map<String, Object> result = new HashMap<>();
         result.put("owner", owner);
         result.put("name", name);
+        result.put("messageKey", messageKey);
         result.put("createTime", createTime);
         result.put("modTime", modTime);
         result.put("text", text);

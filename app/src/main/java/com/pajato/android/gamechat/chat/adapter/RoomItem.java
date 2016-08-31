@@ -21,10 +21,10 @@ import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatListManager;
-import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +34,15 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-public class GroupItem {
+public class RoomItem {
 
     // Public instance variables.
 
-    /** The group key. */
+    /** The group key */
     public String groupKey;
+
+    /** The room key. */
+    public String roomKey;
 
     /** The item name. */
     public String name;
@@ -47,31 +50,50 @@ public class GroupItem {
     /** The number of new messages in the group rooms. */
     int newMessageCount;
 
-    /** The list of rooms with messages.  Bold items have new messages. */
-    String roomsText;
+    /** The list of group members with messages.  Bold items are associated with new messages. */
+    String membersText;
 
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public GroupItem(final String groupKey) {
+    public RoomItem(final String groupKey, final String roomKey) {
         // Use the group key to unpack a group's messages by walking the set of messages in
         // each room in the group.
         this.groupKey = groupKey;
+        this.roomKey = roomKey;
         newMessageCount = 0;
         StringBuilder textBuilder = new StringBuilder();
-        Group group = ChatListManager.instance.getGroupProfile(groupKey);
-        name = group.name;
+        Map<String, Boolean> memberNameMap = new HashMap<>();
+        Room room = ChatListManager.instance.getRoomProfile(roomKey);
+        name = room.name;
         Map<String, List<Message>> rooms = ChatListManager.instance.getGroupMessages(groupKey);
-        for (String roomKey : rooms.keySet()) {
+        for (Message message : rooms.get(roomKey)) {
+            // Ensure that the member who posted the message is in the member display name map.
+            String displayName = message.name;
+            if (!memberNameMap.containsKey(displayName)) memberNameMap.put(displayName, false);
             boolean hasNew = false;
-            for (Message message : rooms.get(roomKey)) {
-                if (isUnseen(message)) {
-                    hasNew = true;
-                    newMessageCount++;
-                }
-                Room room = ChatListManager.instance.getRoomProfile(roomKey);
-                updateRoomsText(textBuilder, room, hasNew);
+            if (isUnseen(message)) {
+                memberNameMap.put(displayName, true);
+                newMessageCount++;
             }
+        }
+
+        // Update the members text field by walking the members name map.
+        for (String displayName : memberNameMap.keySet()) {
+            // Determine if there is already text generated.
+            if (textBuilder.length() != 0) {
+                // There is.  Add a comma and space.
+                textBuilder.append(", ");
+            }
+
+            // Determine if bolding is needed and update the field.
+            if (memberNameMap.get(displayName)) {
+                // Bolding is needed.
+                textBuilder.append("<b>").append(displayName).append("</b>");
+            } else {
+                textBuilder.append(displayName);
+            }
+            membersText = textBuilder.toString();
         }
     }
 
@@ -83,21 +105,4 @@ public class GroupItem {
         return message.unreadList != null && message.unreadList.contains(accountId);
     }
 
-    /** Update the text indicating the rooms with messages bolding rooms with new messages. */
-    private void updateRoomsText(final StringBuilder textBuilder, final Room room,
-                                 final boolean hasNew) {
-        // Determine if there is already text generated.
-        if (textBuilder.length() != 0) {
-            // There is.  Add a comma and space.
-            textBuilder.append(", ");
-        }
-
-        // Determine if bolding is needed and update the field.
-        if (hasNew) {
-            textBuilder.append("<b>").append(room.name).append("</b>");
-        } else {
-            textBuilder.append(room.name);
-        }
-        roomsText = textBuilder.toString();
-    }
 }

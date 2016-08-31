@@ -23,16 +23,20 @@ package com.pajato.android.gamechat.chat.adapter;
  *
  * @author Paul Michael Reilly
  */
-public class GroupsListItem {
+public class ChatListItem {
 
     // Public constants.
 
-    public static final int DATE_ITEM_TYPE = 0;
-    public static final int GROUP_ITEM_TYPE= 1;
+    static final int DATE_ITEM_TYPE = 0;
+    static final int GROUP_ITEM_TYPE= 1;
+    static final int ROOM_ITEM_TYPE = 2;
 
     // Public enums
 
     // Public instance variables.
+
+    /** The item key (push key for group and room, null for date header. */
+    public String key;
 
     /** The item type. */
     public int type;
@@ -43,27 +47,36 @@ public class GroupsListItem {
     /** The item name resource identifier. */
     public int nameResourceId;
 
-    /** The group list item count of new messages. */
-    public int newCount;
+    /** The chat list item count of new messages. */
+    public int count;
 
-    /** The list of rooms with messages to show in a group. */
-    public String roomsText;
+    /** The list of rooms or groups with messages to show. */
+    public String text;
 
     // Public constructors.
 
     /** Build an instance for a given group list item. */
-    public GroupsListItem(final GroupItem item) {
+    public ChatListItem(final GroupItem item) {
         type = GROUP_ITEM_TYPE;
+        key = item.groupKey;
         name = item.name;
-        newCount = item.newMessageCount;
-        roomsText = item.roomsText;
+        count = item.newMessageCount;
+        text = item.roomsText;
     }
 
     /** Build an instance for a given date header item. */
-    public GroupsListItem(final DateHeaderItem item) {
+    public ChatListItem(final DateHeaderItem item) {
         type = DATE_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
-        // TODO: flesh this out to encapsulate enough information to build the corresponding view.
+    }
+
+    /** Build an instance for a given room list item. */
+    public ChatListItem(final RoomItem item) {
+        type = ROOM_ITEM_TYPE;
+        key = item.roomKey;
+        name = item.name;
+        count = item.newMessageCount;
+        text = item.membersText;
     }
 
     // Public instance methods.

@@ -17,25 +17,27 @@
 
 package com.pajato.android.gamechat.event;
 
+import com.pajato.android.gamechat.chat.model.Group;
+
 /**
  * Provides an event class to encapsulate the profile for a generic model class.
  *
  * @author Paul Michael Reilly
  */
-public class ProfileChangeEvent<T> {
+public class ProfileGroupChangeEvent {
 
     // Public instance variables.
 
-    /** The push key for the group containing the message. */
-    public final T t;
+    /** The push key for the group. */
+    public final Group group;
 
-    /** The push key for the room containing the message. */
+    /** The push key for the group. */
     public final String key;
 
     /** Build the event for the generic type and it's push key. */
-    public ProfileChangeEvent(final String key, final T t) {
+    public ProfileGroupChangeEvent(final String key, final Group group) {
         this.key = key;
-        this.t = t;
+        this.group = group;
     }
 
 }

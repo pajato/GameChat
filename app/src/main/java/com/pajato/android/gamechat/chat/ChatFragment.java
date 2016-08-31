@@ -86,7 +86,7 @@ public class ChatFragment extends BaseFragment {
                     viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 }
                 break;
-            case R.id.toolbar_search_icon:
+            case R.id.search:
                 // TODO: Handle a search in the groups panel by fast scrolling to chat.
                 break;
             default:
@@ -106,7 +106,7 @@ public class ChatFragment extends BaseFragment {
             ProgressManager.instance.show(this.getActivity());
             FabManager.chat.init(layout);
             EventBusManager.instance.register(this);
-            GroupListManager.instance.init();
+            ChatListManager.instance.init();
             AccountManager.instance.init();
         }
     }
