@@ -21,11 +21,11 @@ http://www.gnu.org/licenses
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/chatPane">
 
-    <!-- The main content for the rooms pane is either an ad view
-         followed by a list of expandable groups or an intro screen
-         for Users with no groups. -->
+    <!-- The main content for the chat pane is an ad view followed by a list of expandable chat
+         items.  -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

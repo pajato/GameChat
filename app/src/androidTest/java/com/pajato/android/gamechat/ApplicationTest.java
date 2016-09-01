@@ -25,13 +25,13 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 public class ApplicationTest extends BaseTest {
     /** Ensure that the rooms panel is being displayed. */
     @Test public void testChatPaneIsVisible() {
-        onView(withId(R.id.rooms_pane))
+        onView(withId(R.id.chatPane))
                 .check(matches(isDisplayed()));
     }
 
     /** Ensure that the chat panel is being displayed. */
     @Test public void testGamePaneIsVisible() {
-        onView(withId(R.id.rooms_pane))
+        onView(withId(R.id.chatPane))
                 .check(matches(isDisplayed()))
                 .perform(swipeLeft());
         onView(withId(R.id.game_pane_fragment_container))
@@ -41,7 +41,7 @@ public class ApplicationTest extends BaseTest {
     /** Ensure that the toolbar buttons are displayed and function. */
     @Test public void testActionButtons() {
         // Ensure the search button is there
-        onView(withId(R.id.toolbar_search_icon))
+        onView(withId(R.id.search))
                 .check(matches(isDisplayed()));
         // Ensure the game button is there. Click on it, and ensure it navigates to the game pane.
         onView(withId(R.id.toolbar_game_icon))
@@ -53,7 +53,7 @@ public class ApplicationTest extends BaseTest {
         onView(withId(R.id.toolbar_chat_icon))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.rooms_pane))
+        onView(withId(R.id.chatPane))
                 .check(matches(isDisplayed()));
     }
 
