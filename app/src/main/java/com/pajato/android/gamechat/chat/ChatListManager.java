@@ -36,11 +36,10 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
+import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -143,12 +142,6 @@ public enum ChatListManager {
     /** Get the profile for a given room. */
     public Room getRoomProfile(final String roomKey) {
         return mRoomProfileMap.get(roomKey);
-    }
-
-    /** Initialize the component. */
-    public void init() {
-        // Set up the chat database listeners.
-        EventBusManager.instance.register(this);
     }
 
     /** Handle a authentication event. */

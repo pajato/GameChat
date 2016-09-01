@@ -121,8 +121,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // must come last.
         mActionMap.put(R.id.signIn, Actions.signIn);
         mActionMap.put(R.id.signOut, Actions.signOut);
-        EventBusManager.instance.register(this);
-        FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     /** Handle a sign in or sign out button click. */
@@ -132,11 +130,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         if (action != null) processAction(event, action);
     }
 
-    /** Re-register the component during lifecycle resume events. */
+    /** Register the account manager with the database and app event bus listeners. */
     public void register() {
-        // Remove listeners before registering them.  The listeners will likely be added during the
-        // lifecycle create state and removed during a pause, then readded during a resume.
-        FirebaseAuth.getInstance().removeAuthStateListener(this);
         EventBusManager.instance.register(this);
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
@@ -144,6 +139,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
         FirebaseAuth.getInstance().removeAuthStateListener(this);
+        EventBusManager.instance.unregister(this);
     }
 
     // Private instance methods.

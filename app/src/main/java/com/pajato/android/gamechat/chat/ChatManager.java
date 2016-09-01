@@ -32,7 +32,7 @@ import java.util.Locale;
  *
  * @author Paul Michael Reilly
  */
-public enum ChatManager {
+enum ChatManager {
     instance;
 
     /** Provide a set of enum constants to identify the chat related fragments. */
@@ -85,12 +85,6 @@ public enum ChatManager {
             .commit();
     }
 
-    private void setItem(Fragment fragment, ChatListItem item) {
-        if (fragment instanceof ShowRoomListFragment) {
-            ((ShowRoomListFragment) fragment).setItem(item);
-        }
-    }
-
     /** Attach a fragment identified by a type, creating that fragment as necessary. */
     public void replaceFragment(final ChatFragmentType type, final FragmentActivity context) {
         // Determine if the replacement fragment has been attached yet.
@@ -130,6 +124,13 @@ public enum ChatManager {
         }
 
         return null;
+    }
+
+    /** Set the item to be relevant for a list of rooms. */
+    private void setItem(Fragment fragment, ChatListItem item) {
+        if (fragment instanceof ShowRoomListFragment) {
+            ((ShowRoomListFragment) fragment).setItem(item);
+        }
     }
 
 }

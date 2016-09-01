@@ -46,7 +46,6 @@ import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -104,22 +103,10 @@ public class ShowRoomListFragment extends BaseFragment {
 
     /** Handle an account state change event by showing the no sign in message. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // Ensure that there is a layout to use.
-        View layout = getView();
-        if (layout == null) {
-            Log.e(TAG, "There is no groups fragment layout! Aborting.");
-            return;
-        }
-
-        // Dismiss the progress loading dialog if one is active and determine if there is no account
-        // (sign out).
-        ProgressManager.instance.hide();
+        // Determine if this represents a no account situation due to a sign out event.
         if (event.account == null) {
-            // There is no account.  Switch back to the show no account fragment.
+            // There is no account.  Switch to the no account fragment.
             ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
-        } else {
-            // There is an account.  Show the main list content.
-            ChatManager.instance.replaceFragment(showGroupList, this.getActivity());
         }
     }
 
@@ -224,7 +211,6 @@ public class ShowRoomListFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.pause();
         }
-        EventBusManager.instance.unregister(this);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
@@ -235,9 +221,7 @@ public class ShowRoomListFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.resume();
         }
-        //EventBusManager.instance.register(this);
-        //EventBusManager.instance.register(ChatListManager.instance);
-        //AccountManager.instance.register();
+        EventBusManager.instance.register(this);
     }
 
     /** Use the start lifecycle event to initialize the data. */
@@ -258,9 +242,6 @@ public class ShowRoomListFragment extends BaseFragment {
         // Set up the ad view, the groups list and the listeners.
         initAdView(layout);
         initRoomsList(layout);
-        //EventBusManager.instance.register(this);
-        //ChatListManager.instance.init();
-        //AccountManager.instance.init();
     }
 
     /** Initialize the ad view by building and loading an ad request. */
@@ -280,7 +261,5 @@ public class ShowRoomListFragment extends BaseFragment {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(new ChatListAdapter());
     }
-
-    // Private classes.
 
 }
