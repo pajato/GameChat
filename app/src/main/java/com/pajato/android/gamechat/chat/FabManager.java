@@ -74,7 +74,7 @@ public enum FabManager {
     public void toggle(final FloatingActionButton fab, final View contentView) {
         // Determine if the fab view STATE tag has a valid state value and the content view exists.
         Object payload = fab.getTag(R.integer.fabStateKey);
-        if (payload instanceof State && contentView != null) {
+        if (payload instanceof State) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
             State value = (State) payload;
             switch (value) {
@@ -82,14 +82,14 @@ public enum FabManager {
                     // The FAB is showing X and menu is visible.  Set the icon to +, close the
                     // menu and undim the frame.
                     dismissMenu(fab);
-                    contentView.setVisibility(View.VISIBLE);
+                    if (contentView != null) contentView.setVisibility(View.VISIBLE);
                     break;
                 case closed:
                     // The FAB is showing + and the menu is not visible.  Set the icon to X and open
                     // the menu.
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
-                    contentView.setVisibility(View.GONE);
+                    if (contentView != null) contentView.setVisibility(View.GONE);
                     View menu = mMenuMap.get(fab.getId());
                     menu.setVisibility(View.VISIBLE);
                     break;

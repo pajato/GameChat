@@ -42,7 +42,6 @@
     <string name="play_another_user_desc">Play with Another User button image</string>
     <string name="play_checkers">Play Checkers!</string>
     <string name="play_chess">Play Chess!</string>
-    <string name="play_choose_game">Select a Game to Play!</string>
     <string name="play_computer">Play against the Computer!</string>
     <string name="play_computer_desc">Play against the Computer image button</string>
     <string name="play_locally">Play Locally with a Friend!</string>

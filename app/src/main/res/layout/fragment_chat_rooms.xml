@@ -28,11 +28,6 @@ http://www.gnu.org/licenses
     android:id="@+id/roomListContent"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="testing ... testnig"/>
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
         android:layout_width="match_parent"
@@ -47,4 +42,3 @@ http://www.gnu.org/licenses
         android:layout_marginBottom="32dp"
         android:tag="@integer/roomList"/>
 </LinearLayout>
-

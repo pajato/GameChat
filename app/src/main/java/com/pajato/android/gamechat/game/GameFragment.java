@@ -108,7 +108,7 @@ public class GameFragment extends BaseFragment {
             backgroundDimmer.setVisibility(View.GONE);
         // If the click is on the fab, we have to handle if it's open or closed.
         } else if (viewId == R.id.games_fab) {
-            FabManager.game.toggle(fab);
+            FabManager.game.toggle(fab, null);
             if(backgroundDimmer.getVisibility() == View.VISIBLE) {
                 backgroundDimmer.setVisibility(View.GONE);
             } else {
