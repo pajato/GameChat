@@ -27,12 +27,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -68,7 +66,11 @@ public class ChatFragment extends BaseFragment {
                                        final Bundle savedInstanceState) {
         // Inflate the layout, and initialize the game manager.
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        View result = inflater.inflate(R.layout.fragment_chat, container, false);
+        FabManager.chat.init(result);
+        EventBusManager.instance.register(this);
+
+        return result;
     }
 
     /** Post the chat options menu on demand. */
@@ -94,21 +96,6 @@ public class ChatFragment extends BaseFragment {
 
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /** Kick off fragment processing by having the chat manager decide what to do. */
-    @Override public void onStart() {
-        // Now that the fragment is visible, initialize the account manager and show a progress
-        // spinner during the initialization process.
-        super.onStart();
-        View layout = getView();
-        if (layout != null) {
-            ProgressManager.instance.show(this.getActivity());
-            FabManager.chat.init(layout);
-            EventBusManager.instance.register(this);
-            ChatListManager.instance.init();
-            AccountManager.instance.init();
-        }
     }
 
 }

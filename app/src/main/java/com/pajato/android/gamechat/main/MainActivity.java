@@ -49,7 +49,7 @@ import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILAB
  *
  * @author Paul Michael Reilly
  */
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
     implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     // Public class constants.
@@ -70,16 +70,26 @@ public class MainActivity extends AppCompatActivity
 
     // Public instance methods
 
-    /** Process a click on a given view by posting a button click event. */
-    public void onClick(final View view) {
-        // Use the Event bus to post the click event.
-        EventUtils.post(this, view);
-    }
+    /** Handle an account state change by updating the navigation drawer header. */
+    @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
+        // Due to a "bug" in Android, using XML to configure the navigation header current profile
+        // click handler does not work.  Instead we do it here programmatically.
+        Account account = event != null ? event.account : null;
+        NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
+        View header = navView.getHeaderView(0) != null
+            ? navView.getHeaderView(0)
+            : navView.inflateHeaderView(R.layout.nav_header_main);
+        View layout = header.findViewById(R.id.currentProfile);
+        if (layout != null) layout.setOnClickListener(this);
 
-    /** Process a button click on a given view by posting a button click event. */
-    public void menuClick(final MenuItem item) {
-        // Post all menu button clicks.
-        EventUtils.post(this, item);
+        // If there is an account, set up the navigation drawer header accordingly.
+        if (account != null) {
+            // There is an account.  Set it up in the header.
+            NavigationManager.instance.setAccount(account, header);
+        } else {
+            // There is no current user yet.  Provide the sign in button in the header.
+            NavigationManager.instance.setNoAccount(header);
+        }
     }
 
     /** Process a given button click event by logging it. */
@@ -105,6 +115,19 @@ public class MainActivity extends AppCompatActivity
     @Override public void onBackPressed() {
         // If the navigation drawer is open, close it, otherwise let the system deal with it.
         if (!NavigationManager.instance.closeDrawerIfOpen(this)) super.onBackPressed();
+    }
+
+    /** Process a click on a given view by posting a button click event. */
+    public void onClick(final View view) {
+        // Use the Event bus to post the click event.
+        EventUtils.post(this, view);
+    }
+
+    /** Process a button click on a given view by posting a button click event. */
+    // TODO: rename this to onMenuClick
+    public void menuClick(final MenuItem item) {
+        // Post all menu button clicks.
+        EventUtils.post(this, item);
     }
 
     /** Process a navigation menu item click by posting a click event. */
@@ -175,7 +198,6 @@ public class MainActivity extends AppCompatActivity
         // that all other managers are initialized prior to the first authentication event.  If a
         // manager misses an authentication event then the app will not behave as intended.
         setContentView(R.layout.activity_main);
-        PaneManager.instance.init(this);
         init();
     }
 
@@ -184,55 +206,36 @@ public class MainActivity extends AppCompatActivity
         // Unregister the components directly used by the main activity which will unregister
         // sub-components in turn.
         super.onPause();
-        AccountManager.instance.unregister();   // Do this first to avoid a race condition.
+
+        // If and how this should be ordered is ill understood. :-()
+        AccountManager.instance.unregister();
         DatabaseManager.instance.unregisterAll();
         EventBusManager.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */
     @Override protected void onResume() {
-        // Register the components directly used by the main activity which will register
-        // sub-components in turn.
+        // Register the components carefully as there are order sensitivities betwee the account and
+        // database managers.
         super.onResume();
         EventBusManager.instance.register(this);
         EventBusManager.instance.register(ChatListManager.instance);
-        EventBusManager.instance.register(AccountManager.instance);
+        AccountManager.instance.register();
+        ProgressManager.instance.hide();
     }
 
     // Private instance methods.
 
-    /** Initialize the main activity. */
+    /** Initialize the main activity and all of it's subsystems. */
     private void init() {
-        // Set up the app components: toolbar and navigation drawer.
+        // Set up the toolbar and the app managers: navigation, chat and game panes, accounts and
+        // database, chat and chat list.
+        ProgressManager.instance.show(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         NavigationManager.instance.init(this, toolbar);
-        processAccount(null);
-        EventBusManager.instance.register(this);
-    }
-
-    /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
-        // Due to a "bug" in Android, using XML to configure the navigation header current profile
-        // click handler does not work.  Instead we do it here programmatically.
-        processAccount(event.account);
-    }
-
-    /** Process a given account. */
-    private void processAccount(final Account account) {
-        NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
-        View header = navView.getHeaderView(0) != null ? navView.getHeaderView(0) : navView.inflateHeaderView(R.layout.nav_header_main);
-        View layout = header.findViewById(R.id.currentProfile);
-        if (layout != null) layout.setOnClickListener(this);
-
-        // If there is an account, set up the navigation drawer header accordingly.
-        if (account != null) {
-            // There is an account.  Set it up in the header.
-            NavigationManager.instance.setAccount(account, header);
-        } else {
-            // There is no current user.  Provide the sign in button in the header.
-            NavigationManager.instance.setNoAccount(header);
-        }
+        PaneManager.instance.init(this);
+        AccountManager.instance.init();
     }
 
 }
