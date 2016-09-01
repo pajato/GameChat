@@ -172,6 +172,7 @@ public class ShowGroupListFragment extends BaseFragment {
                     // TODO: parse the rooms to build a list of active room information.  For now,
                     // inject dummy data into the list view adapter.
                     ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+                    listAdapter.clearItems();
                     listAdapter.addItems(ChatListManager.instance.getGroupListData());
                     listView.setVisibility(View.VISIBLE);
                 }
