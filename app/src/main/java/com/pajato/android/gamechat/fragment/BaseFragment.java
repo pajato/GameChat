@@ -20,7 +20,11 @@ package com.pajato.android.gamechat.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.pajato.android.gamechat.chat.ChatListManager;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -32,6 +36,7 @@ import android.util.Log;
 public class BaseFragment extends Fragment {
 
     private static final String TAG = BaseFragment.class.getSimpleName();
+
     public void onActivityCreated(Bundle bundle) {
         String format = "onActivityCreated: The activity associated with fragment {%s} has been "
             + "created using bundle {%s}. Fragment manager: {%s}.";
@@ -101,6 +106,16 @@ public class BaseFragment extends Fragment {
             + "using bundle {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));
         super.onViewStateRestored(bundle);
+    }
+
+    // Protected instance methods.
+
+    /** Set the title in the toolbar using the group name. */
+    protected void setSubTitle(final String groupKey) {
+        // Set a subtitle on the toolbar if possible.
+        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        String subtitle = groupKey != null ? ChatListManager.instance.getGroupName(groupKey) : null;
+        if (bar != null) bar.setSubtitle(subtitle);
     }
 
 }

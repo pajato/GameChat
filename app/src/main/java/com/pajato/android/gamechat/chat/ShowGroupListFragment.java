@@ -121,6 +121,7 @@ public class ShowGroupListFragment extends BaseFragment {
                                        final Bundle savedInstanceState) {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
+        setSubTitle(null);
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         initAdView(layout);

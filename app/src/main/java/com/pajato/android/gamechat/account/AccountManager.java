@@ -228,15 +228,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             DatabaseManager.instance.updateChildren(database, "/accounts/", uid, account.toMap());
 
             // Update the group profile on the database.
-            String name = account.displayName == null ? "Anonymous" : account.displayName;
             List<String> memberList = new ArrayList<>();
             memberList.add(uid);
-            Group group = new Group(uid, name, timestamp, timestamp, memberList);
+            Group group = new Group(uid, "Me Group", timestamp, timestamp, memberList);
             DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile",
                     group.toMap());
 
             // Update the "me" room profile on the database.
-            Room room = new Room(uid, name, groupKey, timestamp, timestamp, "me", memberList);
+            Room room = new Room(uid, "Me Room", groupKey, timestamp, timestamp, "me", memberList);
             DatabaseManager.instance.updateChildren(database, roomPath, roomKey + "/profile",
                     room.toMap());
 

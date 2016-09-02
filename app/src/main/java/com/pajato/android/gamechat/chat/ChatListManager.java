@@ -109,6 +109,22 @@ public enum ChatListManager {
         return result;
     }
 
+    /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
+    public String getGroupName(final String groupKey) {
+        Group group = mGroupProfileMap.get(groupKey);
+        return group != null ? group.name : "Anonymous";
+    }
+
+    /** Get the profile for a given group. */
+    public Group getGroupProfile(final String groupKey) {
+        return mGroupProfileMap.get(groupKey);
+    }
+
+    /** Get a map of messages by room in a given group. */
+    public Map<String, List<Message>> getGroupMessages(final String groupKey) {
+        return mGroupMessageMap.get(groupKey);
+    }
+
     /** Get the data as a set of room items for a given group key. */
     public List<ChatListItem> getRoomListData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based on
@@ -129,14 +145,10 @@ public enum ChatListManager {
         return result;
     }
 
-    /** Get the profile for a given group. */
-    public Group getGroupProfile(final String groupKey) {
-        return mGroupProfileMap.get(groupKey);
-    }
-
-    /** Get a map of messages by room in a given group. */
-    public Map<String, List<Message>> getGroupMessages(final String groupKey) {
-        return mGroupMessageMap.get(groupKey);
+    /** Obtain a name for the room with the given key, "Anonymous" if a name is not available. */
+    public String getRoomName(final String roomKey) {
+        Room room = mRoomProfileMap.get(roomKey);
+        return room != null ? room.name : "Anonymous";
     }
 
     /** Get the profile for a given room. */
