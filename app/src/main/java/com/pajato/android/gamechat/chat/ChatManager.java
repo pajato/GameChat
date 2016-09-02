@@ -39,7 +39,7 @@ enum ChatManager {
     public enum ChatFragmentType {
         showGroupList (ShowGroupListFragment.class),
         showRoomList (ShowRoomListFragment.class),
-        //showMessages (ShowMessagesFragment.class),
+        showMessages (ShowMessagesFragment.class),
         //showNewGroup (ShowNewGroupFragment.class),
         //showNewRoom (ShowNewRoomFragment.class),
         //showJoinRoom (ShowJoinRoomFragment.class),

@@ -35,8 +35,11 @@ public class ChatListItem {
 
     // Public instance variables.
 
-    /** The item key (push key for group and room, null for date header. */
-    public String key;
+    /** The group (push) key. */
+    public String groupKey;
+
+    /** The room (push) key, possibly null. */
+    public String roomKey;
 
     /** The item type. */
     public int type;
@@ -58,7 +61,7 @@ public class ChatListItem {
     /** Build an instance for a given group list item. */
     public ChatListItem(final GroupItem item) {
         type = GROUP_ITEM_TYPE;
-        key = item.groupKey;
+        groupKey = item.groupKey;
         name = item.name;
         count = item.newMessageCount;
         text = item.roomsText;
@@ -73,7 +76,8 @@ public class ChatListItem {
     /** Build an instance for a given room list item. */
     public ChatListItem(final RoomItem item) {
         type = ROOM_ITEM_TYPE;
-        key = item.roomKey;
+        groupKey = item.groupKey;
+        roomKey = item.roomKey;
         name = item.name;
         count = item.newMessageCount;
         text = item.membersText;

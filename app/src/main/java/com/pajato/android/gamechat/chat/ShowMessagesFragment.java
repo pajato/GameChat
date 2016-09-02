@@ -81,11 +81,11 @@ import static android.app.Activity.RESULT_OK;
  *
  * @author Paul Michael Reilly
  */
-public class ShowChatFragment extends BaseFragment
+public class ShowMessagesFragment extends BaseFragment
     implements GoogleApiClient.OnConnectionFailedListener {
 
     /** The logcat tag constant. */
-    private static final String TAG = ShowChatFragment.class.getSimpleName();
+    private static final String TAG = ShowMessagesFragment.class.getSimpleName();
 
     // Public inner classes.
 
@@ -227,8 +227,7 @@ public class ShowChatFragment extends BaseFragment
 
         // New child entries
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseAdapter = new FirebaseRecyclerAdapter<ChatMessage,
-                        MessageViewHolder>(
+        mFirebaseAdapter = new FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>(
                 ChatMessage.class,
                 R.layout.item_message,
                 MessageViewHolder.class,
@@ -243,10 +242,10 @@ public class ShowChatFragment extends BaseFragment
                 if (chatMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView
                             .setImageDrawable(ContextCompat
-                                    .getDrawable(ShowChatFragment.this.getActivity(),
+                                    .getDrawable(ShowMessagesFragment.this.getActivity(),
                                             R.drawable.ic_account_circle_black_36dp));
                 } else {
-                    Glide.with(ShowChatFragment.this.getActivity())
+                    Glide.with(ShowMessagesFragment.this.getActivity())
                             .load(chatMessage.getPhotoUrl())
                             .into(viewHolder.messengerImageView);
                 }

@@ -51,6 +51,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showGroupList;
+import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
 
@@ -95,9 +96,16 @@ public class ShowRoomListFragment extends BaseFragment {
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
-        default:
-            // Ignore everything else.
-            break;
+            default:
+                // Determine if the event has a chat list item representing a room with messages to
+                // show.
+                Object payload = event.getView().getTag();
+                if (payload instanceof ChatListItem) {
+                    // It does.  Show the messages in the room.
+                    ChatListItem item = (ChatListItem) payload;
+                    ChatManager.instance.chainFragment(showMessages, this.getActivity(), item);
+                }
+                break;
         }
     }
 
@@ -125,6 +133,7 @@ public class ShowRoomListFragment extends BaseFragment {
                                        final Bundle savedInstanceState) {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
+        setSubTitle(mItem.groupKey);
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_chat_rooms, container, false);
         init(layout);
@@ -172,7 +181,7 @@ public class ShowRoomListFragment extends BaseFragment {
                     // Get the data to display.
                     ChatListAdapter listAdapter = (ChatListAdapter) adapter;
                     listAdapter.clearItems();
-                    listAdapter.addItems(ChatListManager.instance.getRoomListData(mItem.key));
+                    listAdapter.addItems(ChatListManager.instance.getRoomListData(mItem.groupKey));
                     roomsListView.setVisibility(View.VISIBLE);
                 }
             }
@@ -259,7 +268,9 @@ public class ShowRoomListFragment extends BaseFragment {
         RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.chatList);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.setAdapter(new ChatListAdapter());
+        ChatListAdapter adapter = new ChatListAdapter();
+        adapter.addItems(ChatListManager.instance.getRoomListData(mItem.groupKey));
+        mRecyclerView.setAdapter(adapter);
     }
 
 }

@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import android.support.annotation.NonNull;
-
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.chat.model.Message;
@@ -44,7 +42,7 @@ public class RoomItem {
     /** The room key. */
     public String roomKey;
 
-    /** The item name. */
+    /** The room name. */
     public String name;
 
     /** The number of new messages in the group rooms. */
@@ -62,6 +60,7 @@ public class RoomItem {
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         newMessageCount = 0;
+        String accountId = AccountManager.instance.getCurrentAccountId();
         StringBuilder textBuilder = new StringBuilder();
         Map<String, Boolean> memberNameMap = new HashMap<>();
         Room room = ChatListManager.instance.getRoomProfile(roomKey);
@@ -69,10 +68,9 @@ public class RoomItem {
         Map<String, List<Message>> rooms = ChatListManager.instance.getGroupMessages(groupKey);
         for (Message message : rooms.get(roomKey)) {
             // Ensure that the member who posted the message is in the member display name map.
-            String displayName = message.name;
+            String displayName = message.owner.equals(accountId) ? "me" : message.name;
             if (!memberNameMap.containsKey(displayName)) memberNameMap.put(displayName, false);
-            boolean hasNew = false;
-            if (isUnseen(message)) {
+            if (message.unreadList != null && message.unreadList.contains(accountId)) {
                 memberNameMap.put(displayName, true);
                 newMessageCount++;
             }
@@ -95,14 +93,6 @@ public class RoomItem {
             }
             membersText = textBuilder.toString();
         }
-    }
-
-    // Private instance methods.
-
-    /** Return TRUE iff the message has not been seen by this user. */
-    private boolean isUnseen(@NonNull final Message message) {
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        return message.unreadList != null && message.unreadList.contains(accountId);
     }
 
 }
