@@ -24,6 +24,7 @@ import android.util.SparseArray;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.fragment.BaseFragment;
 
 import java.util.Locale;
 
@@ -81,8 +82,13 @@ enum ChatManager {
         setItem(fragment, item);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.chatFragmentContainer, fragment)
-            //.addToBackStack(null)
+            .addToBackStack(null)
             .commit();
+    }
+
+    /** Return to the previous fragment added to the back stack. */
+    public void popBackStack(final FragmentActivity context) {
+        context.getSupportFragmentManager().popBackStack();
     }
 
     /** Attach a fragment identified by a type, creating that fragment as necessary. */
@@ -128,8 +134,8 @@ enum ChatManager {
 
     /** Set the item to be relevant for a list of rooms. */
     private void setItem(Fragment fragment, ChatListItem item) {
-        if (fragment instanceof ShowRoomListFragment) {
-            ((ShowRoomListFragment) fragment).setItem(item);
+        if (fragment instanceof BaseFragment) {
+            ((BaseFragment) fragment).setItem(item);
         }
     }
 

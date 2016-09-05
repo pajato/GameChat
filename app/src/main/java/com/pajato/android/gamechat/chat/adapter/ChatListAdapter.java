@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 
 /**
@@ -69,9 +70,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             case DATE_ITEM_TYPE:
                 return new DateHeaderViewHolder(getView(parent, R.layout.item_date_header));
             case GROUP_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_group_list));
+                return new ChatListViewHolder(getView(parent, R.layout.item_group));
             case ROOM_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_room_list));
+                return new ChatListViewHolder(getView(parent, R.layout.item_room));
+            case MESSAGE_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_message));
+            default:
+                break;
         }
 
         return null;
@@ -89,12 +94,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                     ((DateHeaderViewHolder) holder).mTitle.setText(name);
                     break;
                 case GROUP_ITEM_TYPE:
+                case MESSAGE_ITEM_TYPE:
+                case ROOM_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
-                    updateChatHolder((ChatListViewHolder) holder, item);
-                    break;
-                case ROOM_ITEM_TYPE:
-                    // The ...
                     updateChatHolder((ChatListViewHolder) holder, item);
                     break;
             }
@@ -133,8 +136,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     private void updateChatHolder(ChatListViewHolder holder, final ChatListItem item) {
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
-        holder.title.setText(item.name);
-        holder.list.setText(Html.fromHtml(item.text));
+        holder.name.setText(item.name);
+        holder.text.setText(Html.fromHtml(item.text));
         holder.itemView.setTag(item);
 
         // Set the new message count field, if necessary.
@@ -143,7 +146,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             holder.count.setText(text);
             holder.count.setVisibility(View.VISIBLE);
         } else {
-            holder.count.setVisibility(View.GONE);
+            if (holder.count != null) holder.count.setVisibility(View.GONE);
         }
     }
 
@@ -154,21 +157,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView mTitle;
         DateHeaderViewHolder(View itemView) {
             super(itemView);
-            mTitle = (TextView) itemView.findViewById(R.id.titleTextView);
+            mTitle = (TextView) itemView.findViewById(R.id.chatName);
         }
     }
 
     /** ... */
     private class ChatListViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
+        TextView name;
         TextView count;
-        TextView list;
+        TextView text;
 
         ChatListViewHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.titleTextView);
+            name = (TextView) itemView.findViewById(R.id.chatName);
             count = (TextView) itemView.findViewById(R.id.newCount);
-            list = (TextView) itemView.findViewById(R.id.list);
+            text = (TextView) itemView.findViewById(R.id.chatText);
         }
     }
 

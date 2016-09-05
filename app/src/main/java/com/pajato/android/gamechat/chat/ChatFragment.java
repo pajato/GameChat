@@ -76,6 +76,8 @@ public class ChatFragment extends BaseFragment {
     /** Post the chat options menu on demand. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.chat_menu_base, menu);
+        MenuItem item = menu.findItem(R.id.back);
+        if (item != null) item.setVisible(false);
     }
 
     /** Handle an options menu choice. */

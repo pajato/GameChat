@@ -45,10 +45,10 @@ public class GroupItem {
     public String name;
 
     /** The number of new messages in the group rooms. */
-    int newMessageCount;
+    int count;
 
     /** The list of rooms with messages.  Bold items have new messages. */
-    String roomsText;
+    String text;
 
     // Public constructors.
 
@@ -57,7 +57,7 @@ public class GroupItem {
         // Use the group key to unpack a group's messages by walking the set of messages in
         // each room in the group.
         this.groupKey = groupKey;
-        newMessageCount = 0;
+        count = 0;
         StringBuilder textBuilder = new StringBuilder();
         Group group = ChatListManager.instance.getGroupProfile(groupKey);
         name = group.name;
@@ -67,7 +67,7 @@ public class GroupItem {
             for (Message message : rooms.get(roomKey)) {
                 if (isUnseen(message)) {
                     hasNew = true;
-                    newMessageCount++;
+                    count++;
                 }
                 Room room = ChatListManager.instance.getRoomProfile(roomKey);
                 updateRoomsText(textBuilder, room, hasNew);
@@ -98,6 +98,6 @@ public class GroupItem {
         } else {
             textBuilder.append(room.name);
         }
-        roomsText = textBuilder.toString();
+        text = textBuilder.toString();
     }
 }

@@ -46,10 +46,10 @@ public class RoomItem {
     public String name;
 
     /** The number of new messages in the group rooms. */
-    int newMessageCount;
+    int count;
 
     /** The list of group members with messages.  Bold items are associated with new messages. */
-    String membersText;
+    String text;
 
     // Public constructors.
 
@@ -59,7 +59,7 @@ public class RoomItem {
         // each room in the group.
         this.groupKey = groupKey;
         this.roomKey = roomKey;
-        newMessageCount = 0;
+        count = 0;
         String accountId = AccountManager.instance.getCurrentAccountId();
         StringBuilder textBuilder = new StringBuilder();
         Map<String, Boolean> memberNameMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class RoomItem {
             if (!memberNameMap.containsKey(displayName)) memberNameMap.put(displayName, false);
             if (message.unreadList != null && message.unreadList.contains(accountId)) {
                 memberNameMap.put(displayName, true);
-                newMessageCount++;
+                count++;
             }
         }
 
@@ -91,7 +91,7 @@ public class RoomItem {
             } else {
                 textBuilder.append(displayName);
             }
-            membersText = textBuilder.toString();
+            text = textBuilder.toString();
         }
     }
 

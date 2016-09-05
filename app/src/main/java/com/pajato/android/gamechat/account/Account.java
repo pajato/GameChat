@@ -60,6 +60,11 @@ import java.util.Map;
 
     // Public instance methods.
 
+    /** Get a non-null display name using "Anonymous" if need be. */
+    public String getDisplayName() {
+        return displayName != null ? displayName : "Anonymous";
+    }
+
     /** Generate the map of data to persist into Firebase. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();

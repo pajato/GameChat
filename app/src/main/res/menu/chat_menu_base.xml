@@ -26,14 +26,14 @@ more. -->
         android:icon="@drawable/ic_arrow_upward_white_24dp"
         android:title="@string/backItemTitleText"
         android:orderInCategory="0"
-        android:visibility="gone"
+        android:visible="false"
         app:showAsAction="always" />
     <item
         android:title="@string/spaceValue"
         android:icon="@drawable/ic_search_white"
         android:id="@+id/search"
         android:orderInCategory="20"
-        android:visibility="gone"
+        android:visible="false"
         app:showAsAction="ifRoom" />
     <item
         android:title="@string/game"

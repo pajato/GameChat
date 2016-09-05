@@ -53,7 +53,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
-    compile 'io.github.yavski:fab-speed-dial:1.0.4'
 
     // Google
     compile "com.google.android.gms:play-services-ads:$rootProject.ext.gmsVersion"
@@ -68,9 +67,6 @@ dependencies {
     compile "com.google.firebase:firebase-database:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-messaging:$rootProject.ext.gmsVersion"
     compile "com.firebase:firebase-client-android:2.4.0"
-
-    // Firebase UI
-    compile 'com.firebaseui:firebase-ui-database:0.4.0'
 
     // External
     compile 'com.github.bumptech.glide:glide:3.6.1'

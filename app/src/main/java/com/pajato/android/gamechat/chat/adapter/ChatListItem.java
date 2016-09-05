@@ -29,7 +29,8 @@ public class ChatListItem {
 
     static final int DATE_ITEM_TYPE = 0;
     static final int GROUP_ITEM_TYPE= 1;
-    static final int ROOM_ITEM_TYPE = 2;
+    static final int MESSAGE_ITEM_TYPE = 2;
+    static final int ROOM_ITEM_TYPE = 3;
 
     // Public enums
 
@@ -48,12 +49,12 @@ public class ChatListItem {
     public String name;
 
     /** The item name resource identifier. */
-    public int nameResourceId;
+    int nameResourceId;
 
-    /** The chat list item count of new messages. */
-    public int count;
+    /** The chat list item count of new messages in a group or a room. */
+    int count;
 
-    /** The list of rooms or groups with messages to show. */
+    /** The list of rooms or groups with messages to show, or the text of a message. */
     public String text;
 
     // Public constructors.
@@ -63,8 +64,8 @@ public class ChatListItem {
         type = GROUP_ITEM_TYPE;
         groupKey = item.groupKey;
         name = item.name;
-        count = item.newMessageCount;
-        text = item.roomsText;
+        count = item.count;
+        text = item.text;
     }
 
     /** Build an instance for a given date header item. */
@@ -74,13 +75,23 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given room list item. */
+    public ChatListItem(final MessageItem item) {
+        type = MESSAGE_ITEM_TYPE;
+        groupKey = item.groupKey;
+        roomKey = item.roomKey;
+        name = item.name;
+        count = 0;
+        text = item.text;
+    }
+
+    /** Build an instance for a given room list item. */
     public ChatListItem(final RoomItem item) {
         type = ROOM_ITEM_TYPE;
         groupKey = item.groupKey;
         roomKey = item.roomKey;
         name = item.name;
-        count = item.newMessageCount;
-        text = item.membersText;
+        count = item.count;
+        text = item.text;
     }
 
     // Public instance methods.

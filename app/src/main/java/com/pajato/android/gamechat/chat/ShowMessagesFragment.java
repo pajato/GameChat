@@ -18,15 +18,11 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -38,287 +34,116 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
-import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.signin.SignInActivity;
 
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
-
-import static android.app.Activity.RESULT_OK;
+import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 
 /**
  * Display the chat associated with the room selected by the current logged in User.
  *
  * @author Paul Michael Reilly
  */
-public class ShowMessagesFragment extends BaseFragment
-    implements GoogleApiClient.OnConnectionFailedListener {
+public class ShowMessagesFragment extends BaseFragment {
 
     /** The logcat tag constant. */
     private static final String TAG = ShowMessagesFragment.class.getSimpleName();
 
-    // Public inner classes.
-
-    public static class MessageViewHolder extends RecyclerView.ViewHolder {
-        public TextView messageTextView;
-        public TextView messengerTextView;
-        public CircleImageView messengerImageView;
-
-        public MessageViewHolder(View v) {
-            super(v);
-            messageTextView = (TextView) itemView.findViewById(R.id.messageTextView);
-            messengerTextView = (TextView) itemView.findViewById(R.id.messengerTextView);
-            messengerImageView = (CircleImageView) itemView.findViewById(R.id.messengerImageView);
-        }
-    }
+    /** The format used to generate the database path for messages. */
+    private static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
 
     // Public class constants.
 
     public static final String FRIENDLY_MSG_LENGTH = "friendly_msg_length";
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 60;
-    public static final String MESSAGES_CHILD = "messages";
-    public static final String ANONYMOUS = "anonymous";
 
     // Private class constants.
 
-    private static final int REQUEST_INVITE = 1;
-    private static final String MESSAGE_SENT_EVENT = "message_sent";
 
     // Private instance variables
 
-    private AdView mAdView;
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
-    private DatabaseReference mFirebaseDatabaseReference;
-    private FirebaseAnalytics mFirebaseAnalytics;
-    private FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder> mFirebaseAdapter;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
-    private String mUsername;
-    private String mPhotoUrl;
-    private SharedPreferences mSharedPreferences;
-    private GoogleApiClient mGoogleApiClient;
-    private Button mSendButton;
-    private RecyclerView mMessageRecyclerView;
-    private LinearLayoutManager mLinearLayoutManager;
-    private ProgressBar mProgressBar;
-    private EditText mMessageEditText;
-
     // Public instance methods
 
-    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
-
-        if (requestCode == REQUEST_INVITE) {
-            if (resultCode == RESULT_OK) {
-                Bundle payload = new Bundle();
-                payload.putString(FirebaseAnalytics.Param.VALUE, "sent");
-                mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE,
-                                            payload);
-                // Check how many invitations were sent and log.
-                String[] ids = AppInviteInvitation.getInvitationIds(resultCode,
-                                                                    data);
-                Log.d(TAG, "Invitations sent: " + ids.length);
-            } else {
-                Bundle payload = new Bundle();
-                payload.putString(FirebaseAnalytics.Param.VALUE, "not sent");
-                mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE,
-                                            payload);
-                // Sending failed or it was canceled, show failure message to
-                // the user
-                Log.d(TAG, "Failed to send invitation.");
-            }
+    /** Process a given button click event looking for one on the chat fab button. */
+    @Subscribe
+    public void buttonClickHandler(final ClickEvent event) {
+        // Determine if this event is for the chat fab button.
+        int value = event.getView() != null ? event.getView().getId() : 0;
+        switch (value) {
+            default:
+                // Provide an empty placeholder for would be handlers.
+                break;
         }
     }
 
-    @Override public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(getActivity(), "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    /** Obtain the remote configuration from Firebase. */
+    public void fetchConfig() {
+        // Set the cache expiration time to one hour (or not at all if developer mode is turned on).
+        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
+        boolean developerMode = config.getInfo().getConfigSettings().isDeveloperModeEnabled();
+        final long cacheExpiration = developerMode ? 0 : 3600;
+        config.fetch(cacheExpiration)
+            .addOnSuccessListener(new RemoteFetchSuccessHandler())
+            .addOnFailureListener(new RemoteFetchFailureHandler());
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                       Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        setHasOptionsMenu(true);
+    /** Handle an account state change event by showing the no sign in message. */
+    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
+        // Determine if this represents a no account situation due to a sign out event.
+        if (event.account == null) {
+            // There is no account.  Switch to the no account fragment.
+            ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
+        }
+    }
+
+    /** Deal with the options menu creation by making the search and back items visible. */
+    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
+        MenuItem item = menu.findItem(R.id.back);
+        item.setVisible(true);
+        item.setVisible(true);
+    }
+
+    /** Handle the setup of the list of messages. */
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                                       final Bundle savedInstanceState) {
+        // Inflate the layout for this fragment and initialize by setting the titles, declaring the
+        // use of the options menu, removing the FAB button, fetching any remote configurations,
+        // setting up the list of messages, setting up the edit text field and setting up the
+        // database analytics.
         View result = inflater.inflate(R.layout.fragment_chat_messages, container, false);
-
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-            .enableAutoManage(getActivity() /* FragmentActivity */, this /* OnConnectionFailedListener */)
-            .addApi(Auth.GOOGLE_SIGN_IN_API)
-            .build();
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-
-        // Set default username is anonymous.
-        mUsername = ANONYMOUS;
-
-        // Initialize Firebase Remote Config.
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-
-        // Define Firebase Remote Config Settings.
-        FirebaseRemoteConfigSettings firebaseRemoteConfigSettings =
-                new FirebaseRemoteConfigSettings.Builder()
-                        .setDeveloperModeEnabled(true)
-                        .build();
-
-        // Define default config values. Defaults are used when fetched config values are not
-        // available. Eg: if an error occurred fetching values from the server.
-        Map<String, Object> defaultConfigMap = new HashMap<>();
-        defaultConfigMap.put("friendly_msg_length", 10L);
-
-        // Apply config settings and default values.
-        mFirebaseRemoteConfig.setConfigSettings(firebaseRemoteConfigSettings);
-        mFirebaseRemoteConfig.setDefaults(defaultConfigMap);
-
-        // Fetch remote config.
-        fetchConfig();
-
-        // Initialize Firebase Auth
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
-        if (mFirebaseUser == null) {
-            // Not signed in, launch the Sign In activity
-            startActivity(new Intent(this.getActivity(), SignInActivity.class));
-            getActivity().finish();
-            return result;
-        } else {
-            mUsername = mFirebaseUser.getDisplayName();
-            if (mFirebaseUser.getPhotoUrl() != null) {
-                mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
-            }
-        }
-        // Initialize ProgressBar and RecyclerView.
-        mProgressBar = (ProgressBar) result.findViewById(R.id.progressBar);
-        mMessageRecyclerView = (RecyclerView) result.findViewById(R.id.messageRecyclerView);
-        mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        mLinearLayoutManager.setStackFromEnd(true);
-        mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
-
-        // New child entries
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseAdapter = new FirebaseRecyclerAdapter<ChatMessage, MessageViewHolder>(
-                ChatMessage.class,
-                R.layout.item_message,
-                MessageViewHolder.class,
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
-
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder,
-                                              ChatMessage chatMessage, int position) {
-                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                viewHolder.messageTextView.setText(chatMessage.getText());
-                viewHolder.messengerTextView.setText(chatMessage.getName());
-                if (chatMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView
-                            .setImageDrawable(ContextCompat
-                                    .getDrawable(ShowMessagesFragment.this.getActivity(),
-                                            R.drawable.ic_account_circle_black_36dp));
-                } else {
-                    Glide.with(ShowMessagesFragment.this.getActivity())
-                            .load(chatMessage.getPhotoUrl())
-                            .into(viewHolder.messengerImageView);
-                }
-            }
-        };
-
-        mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-
-            @Override public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                int chatMessageCount = mFirebaseAdapter.getItemCount();
-                int lastVisiblePosition =
-                        mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded or the
-                // user is at the bottom of the list, scroll to the bottom
-                // of the list to show the newly added message.
-                if (lastVisiblePosition == -1 ||
-                        (positionStart >= (chatMessageCount - 1) &&
-                                lastVisiblePosition == (positionStart - 1))) {
-                    mMessageRecyclerView.scrollToPosition(positionStart);
-                }
-            }
-        });
-
-        mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mMessageRecyclerView.setAdapter(mFirebaseAdapter);
-
-        mMessageEditText = (EditText) result.findViewById(R.id.messageEditText);
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
-                .getInt(FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
-
-            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
-                } else {
-                    mSendButton.setEnabled(false);
-                }
-            }
-
-            @Override public void afterTextChanged(Editable editable) {}
-        });
-
-        mSendButton = (Button) result.findViewById(R.id.sendButton);
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override public void onClick(View view) {
-                // Send messages on click.
-                ChatMessage chatMessage =
-                    new ChatMessage(mMessageEditText.getText().toString(), mUsername,
-                                        mPhotoUrl);
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD)
-                    .push().setValue(chatMessage);
-                mMessageEditText.setText("");
-                hideSoftKeyBoard(view);
-            }
-        });
-
-        // Setup analytics and integrate ad support for AdMob.  This allows Google to track user
-        // flows andhandle ad delivery for the app.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this.getContext());
-        mAdView = (AdView) result.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        setTitles(null, mItem.roomKey);
+        setHasOptionsMenu(true);
+        FabManager.chat.setState(View.GONE);
+        initRemoteConfig();
+        initList(result, ChatListManager.instance.getMessageListData(mItem), true);
+        initEditText(result);
+        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         return result;
-    }
-
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.chat_menu_base, menu);
-        initFabListener();
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
@@ -329,72 +154,14 @@ public class ShowMessagesFragment extends BaseFragment
                     viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 }
                 break;
+            case R.id.back:
+                // Return to the spawning room view.
+                ChatManager.instance.popBackStack(getActivity());
+                break;
             case R.id.search:
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override public void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
-        }
-        super.onPause();
-    }
-
-    /** Called when returning to the activity */
-    @Override public void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
-    }
-
-    /** Called before the activity is destroyed */
-    @Override public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
-    }
-
-    // Fetch the config to determine the allowed length of messages.
-    public void fetchConfig() {
-        long cacheExpiration = 3600; // 1 hour in seconds
-        // If developer mode is enabled reduce cacheExpiration to 0 so that
-        // each fetch goes to the server. This should not be used in release
-        // builds.
-        if (mFirebaseRemoteConfig.getInfo().getConfigSettings()
-                .isDeveloperModeEnabled()) {
-            cacheExpiration = 0;
-        }
-        mFirebaseRemoteConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Make the fetched config available via
-                        // FirebaseRemoteConfig get<type> calls.
-                        mFirebaseRemoteConfig.activateFetched();
-                        applyRetrievedLengthLimit();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // There has been an error fetching the config
-                        Log.w(TAG, "Error fetching config: " +
-                                e.getMessage());
-                        applyRetrievedLengthLimit();
-                    }
-                });
-    }
-
-    /** Disconnect the current user. */
-    public void signOut() {
-        mFirebaseAuth.signOut();
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-        mUsername = ANONYMOUS;
-        startActivity(new Intent(getActivity(), SignInActivity.class));
     }
 
     // Private instance methods.
@@ -405,17 +172,22 @@ public class ShowMessagesFragment extends BaseFragment
      * values.
      */
     private void applyRetrievedLengthLimit() {
-
         // Determine if there is a size constraint available to apply and a message text view to
         // apply it to.
-        Long friendly_msg_length = mFirebaseRemoteConfig.getLong("friendly_msg_length");
-        if (mMessageEditText != null) {
+        View layout = getView();
+        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
+        Long friendly_msg_length = config.getLong("friendly_msg_length");
+        int id = R.id.messageEditText;
+        EditText editText = layout != null ? (EditText) layout.findViewById(id) : null;
+        if (editText != null) {
             // The message text view has been created.  Establish the app size constraint.
             InputFilter filter = new InputFilter.LengthFilter(friendly_msg_length.intValue());
             InputFilter[] filterArray = new InputFilter[] {filter};
-            mMessageEditText.setFilters(filterArray);
+            editText.setFilters(filterArray);
+            return;
         }
-        Log.d(TAG, "FML is: " + friendly_msg_length);
+
+        Log.e(TAG, "Could not apply the retrieved message length: no edit text field found!");
     }
 
     /** Dismiss the virtual keyboard in response to a click on the given view. */
@@ -429,30 +201,116 @@ public class ShowMessagesFragment extends BaseFragment
         }
     }
 
-    private void initFabListener() {
-        // Set up the FAB speed dial menu.
-        FabSpeedDial fab = (FabSpeedDial) getActivity().findViewById(R.id.fab_speed_dial);
-        fab.setMenuListener(new SimpleMenuListenerAdapter() {
-            @Override
-            public boolean onMenuItemSelected(MenuItem menuItem) {
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                switch(menuItem.getItemId()) {
-                    // Start a new Tic-Tac-Toe game
-                    case R.id.fab_ttt:
-                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
-                        GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity());
-                        break;
-                    // Navigate to the Game Settings panel
-                    case R.id.fab_new_game:
-                        if(viewPager != null) { viewPager.setCurrentItem(PaneManager.GAME_INDEX); }
-                        GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
-                        break;
-                    default:
-                        break;
-                }
-                return false;
-            }
-        });
+    /** Initialize the edit text field. */
+    private void initEditText(@NonNull final View layout) {
+        // ...
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int lengthPref = prefs.getInt(FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT);
+        InputFilter lengthFilter = new InputFilter.LengthFilter(lengthPref);
+        InputFilter[] filters = new InputFilter[] {lengthFilter};
+        EditText editText = (EditText) layout.findViewById(R.id.messageEditText);
+        editText.setFilters(filters);
+        editText.addTextChangedListener(new EditTextWatcher(layout));
     }
 
+    /** Initialize the remote configuration. */
+    private void initRemoteConfig() {
+        // TODO: This should probably reside in the main activity or in the chat envelope fragment,
+        // likely a RemoteConfigManager.
+        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings settings = new FirebaseRemoteConfigSettings.Builder()
+            .setDeveloperModeEnabled(true)
+            .build();
+        Map<String, Object> defaultConfigMap = new HashMap<>();
+        defaultConfigMap.put("friendly_msg_length", 10L);
+        config.setConfigSettings(settings);
+        config.setDefaults(defaultConfigMap);
+    }
+
+    /** Post a message using the given view to clear the software keyboard. */
+    private void postMessage(final View view) {
+        // Setup the database to persist the message.
+        String path = String.format(Locale.US, MESSAGES_FORMAT, mItem.groupKey, mItem.roomKey);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
+        String key = database.child(path).push().getKey();
+
+        // Ensure that the edit text field and the account exist.
+        View layout = getView();
+        EditText editText = layout != null
+                ? (EditText) layout.findViewById(R.id.messageEditText)
+                : null;
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account != null && editText != null) {
+            // The account and the edit text field exist.  Create the message instance.
+            String uid = account.accountId;
+            String name = account.getDisplayName();
+            long tstamp = new Date().getTime();
+            String text = editText.getText().toString();
+            List<String> members = ChatListManager.instance.getMembers(mItem.roomKey);
+            String type = "standard";
+            Message message = new Message(uid, name, key, tstamp, tstamp, text, type, members);
+
+            // Persist the message instance, clear the message from the edit text control and hide
+            // the soft keyboard.
+            DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
+            editText.setText("");
+            hideSoftKeyBoard(view);
+        }
+    }
+
+    // Private inner classes.
+
+    /** Handle successful remote fetch operations. */
+    private class RemoteFetchSuccessHandler implements OnSuccessListener<Void> {
+        @Override public void onSuccess(Void aVoid) {
+            // Make the fetched config available via
+            // FirebaseRemoteConfig get<type> calls.
+            FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
+            config.activateFetched();
+            applyRetrievedLengthLimit();
+        }
+    }
+
+    /** Handle failed remote fetch operations. */
+    private class RemoteFetchFailureHandler implements OnFailureListener {
+        @Override public void onFailure(@NonNull Exception exc) {
+            // Log the remote fetch error and retrieve a default value.
+            Log.w(TAG, "Error fetching config: " + exc.getMessage());
+            applyRetrievedLengthLimit();
+        }
+    }
+
+    /** Provide a text handler for messages to be posted. */
+    private class EditTextWatcher implements TextWatcher {
+
+        // Private instance variables.
+
+        /** The send button. */
+        View mSendButton;
+
+        // Public constructor.
+
+        /** Build a handler with a given layout. */
+        EditTextWatcher(final View layout) {
+            mSendButton = layout.findViewById(R.id.sendButton);
+        }
+
+        // Public instance methods.
+
+        @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+        /** Ensure that the send button gets enabled when there is text to send. */
+        @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            // Don't accept any text if there is no send button.
+            if (mSendButton != null) {
+                boolean value = false;
+                if (charSequence.toString().trim().length() > 0) value = true;
+                mSendButton.setEnabled(value);
+            }
+        }
+
+        /** ... */
+        @Override public void afterTextChanged(Editable editable) {}
+
+    }
 }

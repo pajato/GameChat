@@ -247,7 +247,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             unreadList.add(uid);
             String displayName = account.displayName;
             Message message = new Message(uid, displayName, messageKey, timestamp, timestamp, text,
-                    unreadList);
+                    "standard", unreadList);
             DatabaseManager.instance.updateChildren(database, messagesPath, messageKey,
                     message.toMap());
         }
