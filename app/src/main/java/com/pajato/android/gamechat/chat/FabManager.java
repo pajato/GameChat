@@ -40,9 +40,16 @@ public enum FabManager {
     /** Provide FAB state constants. */
     enum State {opened, closed}
 
-    // Private class constants.
+    // Private instance variables.
+
+    /** The fab resource identifier. */
     int mFabId;
+
+    /** The fab menu resource identifier. */
     int mFabMenuId;
+
+    /** The fab view. */
+    private FloatingActionButton mFab;
 
     // Private instance variables.
 
@@ -55,25 +62,30 @@ public enum FabManager {
     public void init(@NonNull final View layout) {
         // Initialize the fab button state to opened and then toggle it to put the panel into the
         // correct initial state.
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        mFab = (FloatingActionButton) layout.findViewById(mFabId);
         View menu = layout.findViewById(mFabMenuId);
-        fab.setTag(R.integer.fabStateKey, opened);
-        mMenuMap.put(fab.getId(), menu);
-        dismissMenu(fab);
+        mFab.setTag(R.integer.fabStateKey, opened);
+        mMenuMap.put(mFab.getId(), menu);
+        dismissMenu();
     }
 
     /** Dismiss the menu associated with the given FAB button. */
-    public void dismissMenu(final FloatingActionButton fab) {
-        fab.setImageResource(R.drawable.ic_add_white_24dp);
-        fab.setTag(R.integer.fabStateKey, State.closed);
-        View menu = mMenuMap.get(fab.getId());
+    public void dismissMenu() {
+        mFab.setImageResource(R.drawable.ic_add_white_24dp);
+        mFab.setTag(R.integer.fabStateKey, State.closed);
+        View menu = mMenuMap.get(mFab.getId());
         menu.setVisibility(View.GONE);
     }
 
+    /** Set the FAB visibility state. */
+    public void setState(final int state) {
+        mFab.setVisibility(state);
+    }
+
     /** Toggle the state of the FAB button. */
-    public void toggle(final FloatingActionButton fab, final View contentView) {
+    public void toggle(final View contentView) {
         // Determine if the fab view STATE tag has a valid state value and the content view exists.
-        Object payload = fab.getTag(R.integer.fabStateKey);
+        Object payload = mFab.getTag(R.integer.fabStateKey);
         if (payload instanceof State) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
             State value = (State) payload;
@@ -81,16 +93,16 @@ public enum FabManager {
                 case opened:
                     // The FAB is showing X and menu is visible.  Set the icon to +, close the
                     // menu and undim the frame.
-                    dismissMenu(fab);
+                    dismissMenu();
                     if (contentView != null) contentView.setVisibility(View.VISIBLE);
                     break;
                 case closed:
                     // The FAB is showing + and the menu is not visible.  Set the icon to X and open
                     // the menu.
-                    fab.setImageResource(R.drawable.ic_clear_white_24dp);
-                    fab.setTag(R.integer.fabStateKey, opened);
+                    mFab.setImageResource(R.drawable.ic_clear_white_24dp);
+                    mFab.setTag(R.integer.fabStateKey, opened);
                     if (contentView != null) contentView.setVisibility(View.GONE);
-                    View menu = mMenuMap.get(fab.getId());
+                    View menu = mMenuMap.get(mFab.getId());
                     menu.setVisibility(View.VISIBLE);
                     break;
             }

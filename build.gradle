@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0-beta3'
+        classpath 'com.android.tools.build:gradle:2.2.0-rc1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.google.gms:google-services:3.0.0'
 
@@ -59,6 +59,6 @@ ext {
     mockitoVersion = '1.10.19'
     powerMockito = '1.6.2'
     runnerVersion = '0.5'
-    supportLibraryVersion = '24.1.1'
+    supportLibraryVersion = '24.2.0'
     uiautomatorVersion = '2.1.2'
 }

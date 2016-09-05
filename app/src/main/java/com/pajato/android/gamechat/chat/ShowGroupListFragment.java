@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,8 +33,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
@@ -68,11 +65,6 @@ public class ShowGroupListFragment extends BaseFragment {
     /** The logcat tag. */
     private static final String TAG = ShowGroupListFragment.class.getSimpleName();
 
-    // Public instance variables.
-
-    /** Show an ad at the top of the view. */
-    private AdView mAdView;
-
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
@@ -82,13 +74,12 @@ public class ShowGroupListFragment extends BaseFragment {
         switch (value) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
-                FabManager.chat.toggle((FloatingActionButton) event.getView(), getView());
+                FabManager.chat.toggle(getView());
                 break;
             case R.id.addGroupButton:
             case R.id.addGroupMenuItem:
                 // Dismiss the FAB menu, and start up the add group activity.
-                View view = getActivity().findViewById(R.id.chatFab);
-                FabManager.chat.dismissMenu((FloatingActionButton) view);
+                FabManager.chat.dismissMenu();
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
@@ -111,9 +102,8 @@ public class ShowGroupListFragment extends BaseFragment {
 
     /** Deal with the options menu by hiding the back button. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        if (!menu.hasVisibleItems()) inflater.inflate(R.menu.chat_menu_base, menu);
-        MenuItem item = menu.findItem(R.id.back);
-        if (item != null) item.setVisible(false);
+        // Turn off the back option and turn on the search option.
+        setOptionsMenu(menu, inflater, new int[] {R.id.search}, new int[] {R.id.back});
     }
 
     /** Handle the setup for the groups panel. */
@@ -121,7 +111,7 @@ public class ShowGroupListFragment extends BaseFragment {
                                        final Bundle savedInstanceState) {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
-        setSubTitle(null);
+        setTitles(null, null);
         setHasOptionsMenu(true);
         View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         initAdView(layout);
@@ -220,17 +210,11 @@ public class ShowGroupListFragment extends BaseFragment {
         if (mAdView != null) {
             mAdView.resume();
         }
+        FabManager.chat.setState(View.VISIBLE);
         EventBusManager.instance.register(this);
     }
 
     // Private instance methods.
-
-    /** Initialize the ad view by building and loading an ad request. */
-    private void initAdView(@NonNull final View layout) {
-        mAdView = (AdView) layout.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        if (mAdView != null) mAdView.loadAd(adRequest);
-    }
 
     /** Initialize the joined rooms list by setting up the recycler view. */
     private void initGroupsList(@NonNull final View layout) {

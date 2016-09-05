@@ -4,4 +4,5 @@
     <integer name="fabStateKey">0</integer>
     <integer name="roomList">1</integer>
     <integer name="groupList">0</integer>
+    <integer name="messagesList">3</integer>
 </resources>

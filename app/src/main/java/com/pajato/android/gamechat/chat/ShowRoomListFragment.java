@@ -17,14 +17,10 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,8 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
@@ -47,10 +41,9 @@ import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showGroupList;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
@@ -69,16 +62,6 @@ public class ShowRoomListFragment extends BaseFragment {
     /** The logcat tag. */
     private static final String TAG = ShowRoomListFragment.class.getSimpleName();
 
-    // Public instance variables.
-
-    /** Show an ad at the top of the view. */
-    private AdView mAdView;
-
-    /** The item information passed from the parent fragment. */
-    private ChatListItem mItem;
-
-    // Public instance methods.
-
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
@@ -86,13 +69,12 @@ public class ShowRoomListFragment extends BaseFragment {
         switch (value) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
-                FabManager.chat.toggle((FloatingActionButton) event.getView(), getView());
+                FabManager.chat.toggle(getView());
                 break;
             case R.id.addGroupButton:
             case R.id.addGroupMenuItem:
                 // Dismiss the FAB menu, and start up the add group activity.
-                View view = getActivity().findViewById(R.id.chatFab);
-                FabManager.chat.dismissMenu((FloatingActionButton) view);
+                FabManager.chat.dismissMenu();
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
@@ -103,7 +85,7 @@ public class ShowRoomListFragment extends BaseFragment {
                 if (payload instanceof ChatListItem) {
                     // It does.  Show the messages in the room.
                     ChatListItem item = (ChatListItem) payload;
-                    ChatManager.instance.chainFragment(showMessages, this.getActivity(), item);
+                    ChatManager.instance.chainFragment(showMessages, getActivity(), item);
                 }
                 break;
         }
@@ -118,35 +100,30 @@ public class ShowRoomListFragment extends BaseFragment {
         }
     }
 
+    /** Provide a general button click handler to post the click for general consumption. */
+    public void onClick(final View view) {
+        String className = view.getClass().getName();
+        EventBus.getDefault().post(new ClickEvent(getContext(), -1, view, null, className));
+    }
+
     /** Deal with the options menu creation by making the search and back items visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        MenuItem item = menu.findItem(R.id.back);
-        item.setVisible(true);
-        // TODO: deal with search...
-        //item = menu.findItem(R.id.search);
-        //item.setVisible(true);
+        // Turn on both the back and search buttons.
+        setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
     }
 
     /** Handle the setup for the groups panel. */
-    @Override public View onCreateView(final LayoutInflater inflater,
-                                       final ViewGroup container,
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                                        final Bundle savedInstanceState) {
-        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
-        // view and the listeners for backend data changes.
-        setSubTitle(mItem.groupKey);
+        // Inflate the layout for this fragment and initialize by setting the titles, declaring the
+        // use of the options menu, setting up the ad view and initializing the rooms handling.
+        View result = inflater.inflate(R.layout.fragment_chat_rooms, container, false);
+        setTitles(mItem.groupKey, null);
         setHasOptionsMenu(true);
-        View layout = inflater.inflate(R.layout.fragment_chat_rooms, container, false);
-        init(layout);
+        initAdView(result);
+        initList(result, ChatListManager.instance.getRoomListData(mItem.groupKey), false);
 
-        return layout;
-    }
-
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
-    @Override public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
+        return result;
     }
 
     /** Deal with a change in the joined rooms state. */
@@ -201,10 +178,12 @@ public class ShowRoomListFragment extends BaseFragment {
                 }
                 break;
             case R.id.back:
-                ChatManager.instance.replaceFragment(showGroupList, this.getActivity());
+                // Pop back to the groups list view.
+                ChatManager.instance.popBackStack(getActivity());
                 break;
             case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to room.
+                // TODO: Handle a search in the groups view by fast scrolling to some list item
+                // containting the search text.
                 break;
             default:
                 break;
@@ -213,64 +192,20 @@ public class ShowRoomListFragment extends BaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Deal with the fragment's activity's lifecycle pause event. */
-    @Override public void onPause() {
-        // Deal with the ad and turn off app event listeners.
-        super.onPause();
-        if (mAdView != null) {
-            mAdView.pause();
-        }
-    }
-
     /** Deal with the fragment's activity's lifecycle by managing the ad. */
     @Override public void onResume() {
         // When resuming, use the base class to log it, manage the ad view and the main view, set a
         // grooup id list value event listener and register the fragment to be an event handler.
         super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        FabManager.chat.setState(View.VISIBLE);
         EventBusManager.instance.register(this);
     }
 
     /** Use the start lifecycle event to initialize the data. */
     @Override public void onStart() {
+        // Display messages modified in the room using the message change handler with a null event.
         super.onStart();
         onMessageListChange(null);
-    }
-
-    /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
-    public void setItem(final ChatListItem item) {
-        mItem = item;
-    }
-
-    // Private instance methods.
-
-    /** Initialize for the given layout. */
-    private void init(final View layout) {
-        // Set up the ad view, the groups list and the listeners.
-        initAdView(layout);
-        initRoomsList(layout);
-    }
-
-    /** Initialize the ad view by building and loading an ad request. */
-    private void initAdView(@NonNull final View layout) {
-        mAdView = (AdView) layout.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-    }
-
-    /** Initialize the joined rooms list by setting up the recycler view. */
-    private void initRoomsList(@NonNull final View layout) {
-        // Initialize the recycler view.
-        Context context = layout.getContext();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.chatList);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        ChatListAdapter adapter = new ChatListAdapter();
-        adapter.addItems(ChatListManager.instance.getRoomListData(mItem.groupKey));
-        mRecyclerView.setAdapter(adapter);
     }
 
 }

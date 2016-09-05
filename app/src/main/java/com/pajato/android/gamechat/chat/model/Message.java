@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.model;
 
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -46,6 +45,9 @@ import java.util.Map;
     /** The message text. */
     public String text;
 
+    /** The message type. */
+    public String type;
+
     /** A list of users (by account identifier) in the room, that have not yet read the message. */
     public List<String> unreadList;
 
@@ -57,13 +59,14 @@ import java.util.Map;
     /** Build a default Message. */
     public Message(final String owner, final String name, final String messageKey,
                    final long createTime, final long modTime, final String text,
-                   final List<String> unreadList) {
+                   final String type, final List<String> unreadList) {
         this.owner = owner;
         this.name = name;
         this.messageKey = messageKey;
         this.createTime = createTime;
         this.modTime = modTime;
         this.text = text;
+        this.type = type;
         this.unreadList = unreadList;
     }
 
@@ -76,6 +79,7 @@ import java.util.Map;
         result.put("createTime", createTime);
         result.put("modTime", modTime);
         result.put("text", text);
+        result.put("type", type);
         result.put("unreadList", unreadList);
 
         return result;

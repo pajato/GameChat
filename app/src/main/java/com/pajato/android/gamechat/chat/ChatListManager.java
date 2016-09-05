@@ -30,6 +30,7 @@ import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupItem;
+import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
@@ -118,6 +119,63 @@ public enum ChatListManager {
     /** Get the profile for a given group. */
     public Group getGroupProfile(final String groupKey) {
         return mGroupProfileMap.get(groupKey);
+    }
+
+    /** Return a list of the members of a given room. */
+    public List<String> getMembers(final String roomKey) {
+        Room room = getRoomProfile(roomKey);
+        return room.memberIdList;
+    }
+
+    /** Return a list of messages, an empty list if there are none to be had, for a given item. */
+    public List<ChatListItem> getMessageListData(final ChatListItem item) {
+        // Generate a list of messages for the room and group specified in item.
+        List<ChatListItem> result = new ArrayList<>();
+        String groupKey = item.groupKey;
+        String roomKey = item.roomKey;
+        Map<DateHeaderType, List<Message>> messageMap = new HashMap<>();
+        List<Message> messageList = getGroupMessages(groupKey).get(roomKey);
+
+        // Stick the messages into the message map keyed by date header type.
+        for (Message message : messageList) {
+            // Append the message to the list keyed by the date header type value associated with
+            // the message creation date.
+            DateHeaderType type = getDateHeaderType(message);
+            List<Message> list = messageMap.get(type);
+            if (list == null) {
+                list = new ArrayList<>();
+                messageMap.put(type, list);
+            }
+            list.add(message);
+        }
+
+        // Build the list of display items.
+        for (DateHeaderType dht : DateHeaderType.values()) {
+            // Add the header item followed by all the room itemss in the given group.
+            List<Message> list = messageMap.get(dht);
+            if (list != null) {
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                for (Message message : list) {
+                    result.add(new ChatListItem(new MessageItem(groupKey, roomKey, message)));
+                }
+            }
+        }
+
+
+        return result;
+    }
+
+    /** Return the date header type most closely associated with the given message timestamp. */
+    private DateHeaderType getDateHeaderType(final Message message) {
+        long now = new Date().getTime();
+        for (DateHeaderType type : DateHeaderType.values()) {
+            // Determine if this is the right dht value.
+            if (now - message.createTime <= type.getLimit()) {
+                // This is the correct dht value to use. Done.
+                return type;
+            }
+        }
+        return old;
     }
 
     /** Get a map of messages by room in a given group. */

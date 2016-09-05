@@ -222,7 +222,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         long timestamp = new Date().getTime();
         String id = account.accountId;
         String name = getName(account);
-        Message message = new Message(id, name, key, timestamp, timestamp, text, members);
+        String type = "standard";
+        Message message = new Message(id, name, key, timestamp, timestamp, text, type, members);
         DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
     }
 
