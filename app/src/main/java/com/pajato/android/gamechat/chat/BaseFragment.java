@@ -128,27 +128,26 @@ public class BaseFragment extends Fragment {
         super.onDetach();
     }
 
-    /** Manage the groups list UI every time a message change occurs. */
+    /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
-        // Determine if the groups panel has been inflated.  It damned well should be.
+        // Determine if the fragment has a view and that it has a list type.
         View layout = getView();
-        if (layout != null) {
-            // It has.  Publish the joined rooms state using a Inbox by Google layout.
+        if (layout != null && mItemListType != null) {
+            // It has both.  Show the chat list, either groups, messages or rooms.
             RecyclerView listView = (RecyclerView) layout.findViewById(R.id.chatList);
             if (listView != null) {
                 // Obtain the data to be listed on the list view.
                 RecyclerView.Adapter adapter = listView.getAdapter();
                 if (adapter instanceof ChatListAdapter) {
-                    // TODO: parse the rooms to build a list of active room information.  For now,
-                    // inject dummy data into the list view adapter.
+                    // Inject the list items into the recycler view.
                     ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+                    listView.setVisibility(View.GONE);
                     listAdapter.clearItems();
                     listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
+                    listView.scrollToPosition(listAdapter.getItemCount() - 1);
                     listView.setVisibility(View.VISIBLE);
                 }
             }
-        } else {
-            Log.e(TAG, "The groups fragment layout does not exist yet!");
         }
     }
 

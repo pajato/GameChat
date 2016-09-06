@@ -23,9 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,12 +33,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
@@ -53,11 +47,10 @@ import com.pajato.android.gamechat.main.PaneManager;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.ChatListManager.MESSAGES_FORMAT;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 
 /**
@@ -67,23 +60,9 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  */
 public class ShowMessagesFragment extends BaseFragment implements View.OnClickListener {
 
-    /** The logcat tag constant. */
-    private static final String TAG = ShowMessagesFragment.class.getSimpleName();
-
-    /** The format used to generate the database path for messages. */
-    private static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
-
-    // Public class constants.
-
-    public static final String FRIENDLY_MSG_LENGTH = "friendly_msg_length";
-    public static final int DEFAULT_MSG_LENGTH_LIMIT = 60;
-
     // Private class constants.
 
-
-    // Private instance variables
-
-    // Public instance methods
+    // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
@@ -94,17 +73,6 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
                 // Provide an empty placeholder for would be handlers.
                 break;
         }
-    }
-
-    /** Obtain the remote configuration from Firebase. */
-    public void fetchConfig() {
-        // Set the cache expiration time to one hour (or not at all if developer mode is turned on).
-        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
-        boolean developerMode = config.getInfo().getConfigSettings().isDeveloperModeEnabled();
-        final long cacheExpiration = developerMode ? 0 : 3600;
-        config.fetch(cacheExpiration)
-            .addOnSuccessListener(new RemoteFetchSuccessHandler())
-            .addOnFailureListener(new RemoteFetchFailureHandler());
     }
 
     /** Handle an account state change event by showing the no sign in message. */
@@ -171,30 +139,6 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
 
     // Private instance methods.
 
-    /**
-     * Apply retrieved length limit to edit text field.
-     * This result may be fresh from the server or it may be from cached
-     * values.
-     */
-    private void applyRetrievedLengthLimit() {
-        // Determine if there is a size constraint available to apply and a message text view to
-        // apply it to.
-        View layout = getView();
-        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
-        Long friendly_msg_length = config.getLong("friendly_msg_length");
-        int id = R.id.messageEditText;
-        EditText editText = layout != null ? (EditText) layout.findViewById(id) : null;
-        if (editText != null) {
-            // The message text view has been created.  Establish the app size constraint.
-            InputFilter filter = new InputFilter.LengthFilter(friendly_msg_length.intValue());
-            InputFilter[] filterArray = new InputFilter[] {filter};
-            editText.setFilters(filterArray);
-            return;
-        }
-
-        Log.e(TAG, "Could not apply the retrieved message length: no edit text field found!");
-    }
-
     /** Dismiss the virtual keyboard in response to a click on the given view. */
     private void hideSoftKeyBoard(final View view) {
         // Determine if the keyboard is active before dismissing it.
@@ -213,21 +157,6 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
         editText.addTextChangedListener(new EditTextWatcher(layout));
         View sendButton = layout.findViewById(R.id.sendButton);
         sendButton.setOnClickListener(this);
-    }
-
-    /** Initialize the remote configuration. */
-    private void initRemoteConfig() {
-        // TODO: This should probably reside in the main activity or in the chat envelope fragment,
-        // likely a RemoteConfigManager.
-        FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings settings = new FirebaseRemoteConfigSettings.Builder()
-            .setDeveloperModeEnabled(true)
-            .build();
-        Map<String, Object> defaultConfigMap = new HashMap<>();
-        defaultConfigMap.put("friendly_msg_length", 10L);
-        config.setConfigSettings(settings);
-        config.setDefaults(defaultConfigMap);
-        fetchConfig();
     }
 
     /** Post a message using the given view to clear the software keyboard. */
@@ -265,26 +194,6 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
     }
 
     // Private inner classes.
-
-    /** Handle successful remote fetch operations. */
-    private class RemoteFetchSuccessHandler implements OnSuccessListener<Void> {
-        @Override public void onSuccess(Void aVoid) {
-            // Make the fetched config available via
-            // FirebaseRemoteConfig get<type> calls.
-            FirebaseRemoteConfig config = FirebaseRemoteConfig.getInstance();
-            config.activateFetched();
-            applyRetrievedLengthLimit();
-        }
-    }
-
-    /** Handle failed remote fetch operations. */
-    private class RemoteFetchFailureHandler implements OnFailureListener {
-        @Override public void onFailure(@NonNull Exception exc) {
-            // Log the remote fetch error and retrieve a default value.
-            Log.w(TAG, "Error fetching config: " + exc.getMessage());
-            applyRetrievedLengthLimit();
-        }
-    }
 
     /** Provide a text handler for messages to be posted. */
     private class EditTextWatcher implements TextWatcher {
