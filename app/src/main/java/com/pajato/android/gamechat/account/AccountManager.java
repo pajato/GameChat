@@ -245,9 +245,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();
             unreadList.add(uid);
-            String displayName = account.displayName;
-            Message message = new Message(uid, displayName, key, timestamp, timestamp, text,
-                    "standard", unreadList);
+            Message message = new Message(uid, "GameChat", key, timestamp, timestamp, text,
+                    "system", unreadList);
             DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
         }
 

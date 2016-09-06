@@ -113,7 +113,7 @@ public class ShowGroupListFragment extends BaseFragment {
         mItemListType = ChatListManager.ChatListType.group;
         View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         initAdView(layout);
-        initGroupsList(layout);
+        initList(layout);
         EventBusManager.instance.register(this);
 
         return layout;
@@ -191,7 +191,7 @@ public class ShowGroupListFragment extends BaseFragment {
     // Private instance methods.
 
     /** Initialize the joined rooms list by setting up the recycler view. */
-    private void initGroupsList(@NonNull final View layout) {
+    private void initList(@NonNull final View layout) {
         // Initialize the recycler view.
         Context context = layout.getContext();
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);

@@ -69,6 +69,14 @@ public enum ChatListManager {
         group, message, room
     }
 
+    // Public class constants.
+
+    /** The format used to generate the database path for the message list. */
+    public static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
+
+    /** The format used to generate the database path for a particular message. */
+    public static final String UNREAD_LIST_FORMAT = MESSAGES_FORMAT + "%s/unreadList";
+
     // Private class constants.
 
     /** The format specifying the path to the rooms profile on Firebase. */

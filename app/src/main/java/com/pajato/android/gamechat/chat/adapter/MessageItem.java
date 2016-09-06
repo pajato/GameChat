@@ -17,14 +17,21 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.database.DatabaseManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.pajato.android.gamechat.chat.ChatListManager.UNREAD_LIST_FORMAT;
 
 /**
  * Provide a POJO to encapsulate a message item to be added to a recycler view.
@@ -71,7 +78,12 @@ public class MessageItem {
             // The message is still marked new.  Change it to "seen" by removing the key and
             // persisting the message.
             unreadList.remove(accountId);
-            // TODO: persist the seen state.
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            String key = message.messageKey;
+            String path = String.format(Locale.US, UNREAD_LIST_FORMAT, groupKey, roomKey, key);
+            Map<String, Object> unreadMap = new HashMap<>();
+            unreadMap.put("unreadList", unreadList);
+            DatabaseManager.instance.updateChildren(database, path, unreadMap);
         }
     }
 
