@@ -20,6 +20,7 @@ http://www.gnu.org/licenses
          for Users with no groups. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -53,23 +54,40 @@ http://www.gnu.org/licenses
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:orientation="vertical">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/darker_gray"/>
         <EditText
             android:id="@+id/messageEditText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:inputType="textAutoCorrect"
-            tools:ignore="LabelFor" />
-        <Button
-            android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
+            android:hint="@string/editMessageHint" />
+        <LinearLayout
+            android:id="@+id/sendButtonBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:enabled="false"
-            android:text="@string/send"/>
+            android:layout_marginBottom="4dp"
+            android:orientation="horizontal">
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10.0"/>
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/sendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_send_black_24dp"
+                app:backgroundTint="@color/colorLightGray"
+                app:elevation="4dp"
+                app:fabSize="mini"/>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

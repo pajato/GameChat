@@ -13,8 +13,8 @@
     <string name="NoAccountMessageText">
 You are signed out.  GameChat is much more fun when you can interact with your family and friends.  Meanwhile play games by your self to enjoy your alone time.
     </string>
-    <string name="MarkAllReadDescription">Mark all read icon</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="RoomListIcon">The room list icon.</string>
     <string name="backItemTitleText">Back</string>
+    <string name="editMessageHint">Type a message</string>
 </resources>

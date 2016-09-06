@@ -61,8 +61,15 @@ import java.util.Map;
     // Public instance methods.
 
     /** Get a non-null display name using "Anonymous" if need be. */
-    public String getDisplayName() {
-        return displayName != null ? displayName : "Anonymous";
+    public String getDisplayName(final Account current, final String me, final String anonymous) {
+        // Determine if the given account is this account and return the me value if it has been provided.
+        if (current != null && current.accountId.equals(accountId) && me != null) return me;
+
+        // Determine if this account has a display name or should use the given default.
+        if (displayName == null && anonymous != null) return anonymous;
+
+        // Otherwise use this display name.
+        return displayName;
     }
 
     /** Generate the map of data to persist into Firebase. */

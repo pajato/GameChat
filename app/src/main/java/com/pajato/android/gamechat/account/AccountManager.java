@@ -212,8 +212,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             long timestamp = new Date().getTime();
             DatabaseReference database = FirebaseDatabase.getInstance().getReference();
             String groupKey = database.child("/groups/").push().getKey();
-            String roomPath = "/groups/" + groupKey + "/rooms/";
-            String roomKey = database.child(roomPath).push().getKey();
+            String path = "/groups/" + groupKey + "/rooms/";
+            String key = database.child(path).push().getKey();
 
             // Set up and persist the account for the given user.
             String uid = user.getUid();
@@ -224,7 +224,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             account.accountUrl = getPhotoUrl(user);
             account.providerId = user.getProviderId();
             account.groupIdList.add(groupKey);
-            account.joinedRoomList.add(groupKey + " " + roomKey);
+            account.joinedRoomList.add(groupKey + " " + key);
             DatabaseManager.instance.updateChildren(database, "/accounts/", uid, account.toMap());
 
             // Update the group profile on the database.
@@ -236,20 +236,19 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
             // Update the "me" room profile on the database.
             Room room = new Room(uid, "Me Room", groupKey, timestamp, timestamp, "me", memberList);
-            DatabaseManager.instance.updateChildren(database, roomPath, roomKey + "/profile",
+            DatabaseManager.instance.updateChildren(database, path, key + "/profile",
                     room.toMap());
 
             // Update the "me" room default message on the database.
-            String messagesPath = String.format("%s%s/messages/", roomPath, roomKey);
-            String messageKey = database.child(messagesPath).push().getKey();
+            path = String.format("%s%s/messages/", path, key);
+            key = database.child(path).push().getKey();
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();
             unreadList.add(uid);
             String displayName = account.displayName;
-            Message message = new Message(uid, displayName, messageKey, timestamp, timestamp, text,
+            Message message = new Message(uid, displayName, key, timestamp, timestamp, text,
                     "standard", unreadList);
-            DatabaseManager.instance.updateChildren(database, messagesPath, messageKey,
-                    message.toMap());
+            DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
         }
 
         /** Obtain a suitable Uri to use for the User's icon. */

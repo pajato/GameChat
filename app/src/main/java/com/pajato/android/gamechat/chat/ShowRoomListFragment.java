@@ -38,7 +38,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
-import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -120,8 +119,9 @@ public class ShowRoomListFragment extends BaseFragment {
         View result = inflater.inflate(R.layout.fragment_chat_rooms, container, false);
         setTitles(mItem.groupKey, null);
         setHasOptionsMenu(true);
+        mItemListType = ChatListManager.ChatListType.room;
         initAdView(result);
-        initList(result, ChatListManager.instance.getRoomListData(mItem.groupKey), false);
+        initList(result, ChatListManager.instance.getList(mItemListType, mItem), false);
 
         return result;
     }
@@ -158,7 +158,7 @@ public class ShowRoomListFragment extends BaseFragment {
                     // Get the data to display.
                     ChatListAdapter listAdapter = (ChatListAdapter) adapter;
                     listAdapter.clearItems();
-                    listAdapter.addItems(ChatListManager.instance.getRoomListData(mItem.groupKey));
+                    listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
                     roomsListView.setVisibility(View.VISIBLE);
                 }
             }

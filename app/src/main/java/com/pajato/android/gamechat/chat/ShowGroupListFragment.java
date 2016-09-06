@@ -25,7 +25,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,8 +39,6 @@ import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
-import com.pajato.android.gamechat.event.MessageListChangeEvent;
-import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -113,6 +110,7 @@ public class ShowGroupListFragment extends BaseFragment {
         // view and the listeners for backend data changes.
         setTitles(null, null);
         setHasOptionsMenu(true);
+        mItemListType = ChatListManager.ChatListType.group;
         View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
         initAdView(layout);
         initGroupsList(layout);
@@ -146,30 +144,6 @@ public class ShowGroupListFragment extends BaseFragment {
                 String roomKey = split[1];
                 ChatListManager.instance.setMessageWatcher(groupKey, roomKey);
             }
-        }
-    }
-
-    /** Manage the groups list UI every time a message change occurs. */
-    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
-        // Determine if the groups panel has been inflated.  It damned well should be.
-        View layout = getView();
-        if (layout != null) {
-            // It has.  Publish the joined rooms state using a Inbox by Google layout.
-            RecyclerView listView = (RecyclerView) layout.findViewById(R.id.chatList);
-            if (listView != null) {
-                // Obtain the data to be listed on the list view.
-                RecyclerView.Adapter adapter = listView.getAdapter();
-                if (adapter instanceof ChatListAdapter) {
-                    // TODO: parse the rooms to build a list of active room information.  For now,
-                    // inject dummy data into the list view adapter.
-                    ChatListAdapter listAdapter = (ChatListAdapter) adapter;
-                    listAdapter.clearItems();
-                    listAdapter.addItems(ChatListManager.instance.getGroupListData());
-                    listView.setVisibility(View.VISIBLE);
-                }
-            }
-        } else {
-            Log.e(TAG, "The groups fragment layout does not exist yet!");
         }
     }
 
@@ -225,7 +199,7 @@ public class ShowGroupListFragment extends BaseFragment {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         ChatListAdapter adapter = new ChatListAdapter();
-        adapter.addItems(ChatListManager.instance.getGroupListData());
+        adapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
         mRecyclerView.setAdapter(adapter);
     }
 

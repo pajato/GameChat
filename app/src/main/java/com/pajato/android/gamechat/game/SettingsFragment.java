@@ -12,7 +12,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.fragment.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseFragment;
 
 public class SettingsFragment extends BaseFragment {
     private String game;

@@ -30,7 +30,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.fragment.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
