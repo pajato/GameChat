@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.fragment.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseFragment;
 
 import java.util.ArrayList;
 import java.util.Scanner;

@@ -24,7 +24,6 @@ import android.util.SparseArray;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.fragment.BaseFragment;
 
 import java.util.Locale;
 

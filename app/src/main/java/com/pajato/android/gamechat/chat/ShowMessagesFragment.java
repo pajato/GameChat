@@ -18,10 +18,9 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -49,7 +48,6 @@ import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.fragment.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -67,7 +65,7 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  *
  * @author Paul Michael Reilly
  */
-public class ShowMessagesFragment extends BaseFragment {
+public class ShowMessagesFragment extends BaseFragment implements View.OnClickListener {
 
     /** The logcat tag constant. */
     private static final String TAG = ShowMessagesFragment.class.getSimpleName();
@@ -88,8 +86,7 @@ public class ShowMessagesFragment extends BaseFragment {
     // Public instance methods
 
     /** Process a given button click event looking for one on the chat fab button. */
-    @Subscribe
-    public void buttonClickHandler(final ClickEvent event) {
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
         int value = event.getView() != null ? event.getView().getId() : 0;
         switch (value) {
@@ -119,6 +116,15 @@ public class ShowMessagesFragment extends BaseFragment {
         }
     }
 
+    /** Handle a button click on the FAB button by posting a new message. */
+    @Override public void onClick(final View view) {
+        // Ensure that the click occurred on the send message button.
+        if (view instanceof FloatingActionButton) {
+            // It did.  Post the message.
+            postMessage(view);
+        }
+    }
+
     /** Deal with the options menu creation by making the search and back items visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
@@ -137,11 +143,10 @@ public class ShowMessagesFragment extends BaseFragment {
         View result = inflater.inflate(R.layout.fragment_chat_messages, container, false);
         setTitles(null, mItem.roomKey);
         setHasOptionsMenu(true);
+        mItemListType = ChatListManager.ChatListType.message;
         FabManager.chat.setState(View.GONE);
-        initRemoteConfig();
-        initList(result, ChatListManager.instance.getMessageListData(mItem), true);
+        initList(result, ChatListManager.instance.getList(mItemListType, mItem), true);
         initEditText(result);
-        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         return result;
     }
@@ -203,14 +208,11 @@ public class ShowMessagesFragment extends BaseFragment {
 
     /** Initialize the edit text field. */
     private void initEditText(@NonNull final View layout) {
-        // ...
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        int lengthPref = prefs.getInt(FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT);
-        InputFilter lengthFilter = new InputFilter.LengthFilter(lengthPref);
-        InputFilter[] filters = new InputFilter[] {lengthFilter};
+        // Set up the edit text field and the send button.
         EditText editText = (EditText) layout.findViewById(R.id.messageEditText);
-        editText.setFilters(filters);
         editText.addTextChangedListener(new EditTextWatcher(layout));
+        View sendButton = layout.findViewById(R.id.sendButton);
+        sendButton.setOnClickListener(this);
     }
 
     /** Initialize the remote configuration. */
@@ -225,13 +227,14 @@ public class ShowMessagesFragment extends BaseFragment {
         defaultConfigMap.put("friendly_msg_length", 10L);
         config.setConfigSettings(settings);
         config.setDefaults(defaultConfigMap);
+        fetchConfig();
     }
 
     /** Post a message using the given view to clear the software keyboard. */
     private void postMessage(final View view) {
         // Setup the database to persist the message.
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String path = String.format(Locale.US, MESSAGES_FORMAT, mItem.groupKey, mItem.roomKey);
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(path);
         String key = database.child(path).push().getKey();
 
         // Ensure that the edit text field and the account exist.
@@ -243,10 +246,13 @@ public class ShowMessagesFragment extends BaseFragment {
         if (account != null && editText != null) {
             // The account and the edit text field exist.  Create the message instance.
             String uid = account.accountId;
-            String name = account.getDisplayName();
+            String me = getResources().getString(R.string.me);
+            String anonymous = getResources().getString(R.string.anonymous);
+            String name = account.getDisplayName(account, me, anonymous);
             long tstamp = new Date().getTime();
             String text = editText.getText().toString();
             List<String> members = ChatListManager.instance.getMembers(mItem.roomKey);
+            members.remove(uid);
             String type = "standard";
             Message message = new Message(uid, name, key, tstamp, tstamp, text, type, members);
 

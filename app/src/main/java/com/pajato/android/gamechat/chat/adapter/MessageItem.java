@@ -67,7 +67,7 @@ public class MessageItem {
         // unread list.
         String accountId = AccountManager.instance.getCurrentAccountId();
         List<String> unreadList = message.unreadList;
-        if (unreadList.contains(accountId)) {
+        if (unreadList != null && unreadList.contains(accountId)) {
             // The message is still marked new.  Change it to "seen" by removing the key and
             // persisting the message.
             unreadList.remove(accountId);

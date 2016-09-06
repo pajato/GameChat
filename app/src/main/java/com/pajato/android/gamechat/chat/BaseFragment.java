@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.fragment;
+package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -35,9 +35,12 @@ import android.view.View;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.MessageListChangeEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -65,10 +68,16 @@ public class BaseFragment extends Fragment {
     /** The item information passed from the parent fragment. */
     protected ChatListItem mItem;
 
+    /** The list type. */
+    protected ChatListManager.ChatListType mItemListType;
+
     // Public constructors.
 
     /** Provide a default, no args constructor. */
-    public BaseFragment() {}
+    public BaseFragment() {
+        EventBusManager.instance.register(this);
+    }
+
 
     // Public instance methods.
 
@@ -119,6 +128,30 @@ public class BaseFragment extends Fragment {
         super.onDetach();
     }
 
+    /** Manage the groups list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Determine if the groups panel has been inflated.  It damned well should be.
+        View layout = getView();
+        if (layout != null) {
+            // It has.  Publish the joined rooms state using a Inbox by Google layout.
+            RecyclerView listView = (RecyclerView) layout.findViewById(R.id.chatList);
+            if (listView != null) {
+                // Obtain the data to be listed on the list view.
+                RecyclerView.Adapter adapter = listView.getAdapter();
+                if (adapter instanceof ChatListAdapter) {
+                    // TODO: parse the rooms to build a list of active room information.  For now,
+                    // inject dummy data into the list view adapter.
+                    ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+                    listAdapter.clearItems();
+                    listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
+                    listView.setVisibility(View.VISIBLE);
+                }
+            }
+        } else {
+            Log.e(TAG, "The groups fragment layout does not exist yet!");
+        }
+    }
+
     @Override public void onPause() {
         // Log the lifecycle event to help during development.
         String format = "onPause: Fragment {%s} is no longer visible and running. Fragment manager: "
@@ -141,6 +174,7 @@ public class BaseFragment extends Fragment {
         if (mAdView != null) {
             mAdView.resume();
         }
+        EventBusManager.instance.register(this);
         super.onResume();
     }
 

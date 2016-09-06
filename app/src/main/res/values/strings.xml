@@ -50,7 +50,6 @@
     <string name="playing_ttt">Playing Tic-Tac-Toe!</string>
     <string name="player_primary">Player 1</string>
     <string name="player_secondary">Player 2</string>
-    <string name="send">SEND</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
     <string name="spaceValue" />
@@ -61,4 +60,6 @@
     <string name="winner_x">X Wins!</string>
     <string name="xValue">X</string>
     <string name="NoGamesMessageText">You have no games.  Use the big purple button to create some.</string>
+    <string name="me">me</string>
+    <string name="anonymous">Anonymous</string>
 </resources>

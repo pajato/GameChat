@@ -19,7 +19,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.fragment.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseFragment;
 
 import java.util.HashMap;
 import java.util.Scanner;

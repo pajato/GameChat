@@ -25,6 +25,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,17 +62,23 @@ public class GroupItem {
         StringBuilder textBuilder = new StringBuilder();
         Group group = ChatListManager.instance.getGroupProfile(groupKey);
         name = group.name;
-        Map<String, List<Message>> rooms = ChatListManager.instance.getGroupMessages(groupKey);
-        for (String roomKey : rooms.keySet()) {
-            boolean hasNew = false;
-            for (Message message : rooms.get(roomKey)) {
+        Map<String, Integer> roomMap = new HashMap<>();
+        Map<String, List<Message>> roomMessageListMap = ChatListManager.instance.getGroupMessages(groupKey);
+        for (String roomKey : roomMessageListMap.keySet()) {
+            int roomNewCount = 0;
+            for (Message message : roomMessageListMap.get(roomKey)) {
                 if (isUnseen(message)) {
-                    hasNew = true;
+                    roomNewCount++;
                     count++;
                 }
-                Room room = ChatListManager.instance.getRoomProfile(roomKey);
-                updateRoomsText(textBuilder, room, hasNew);
+                roomMap.put(roomKey, roomNewCount);
             }
+        }
+
+        // Update the list of rooms
+        for (String roomKey : roomMap.keySet()) {
+            Room room = ChatListManager.instance.getRoomProfile(roomKey);
+            update(textBuilder, room, roomMap.get(roomKey) > 0);
         }
     }
 
@@ -84,8 +91,7 @@ public class GroupItem {
     }
 
     /** Update the text indicating the rooms with messages bolding rooms with new messages. */
-    private void updateRoomsText(final StringBuilder textBuilder, final Room room,
-                                 final boolean hasNew) {
+    private void update(final StringBuilder textBuilder, final Room room, final boolean hasNew) {
         // Determine if there is already text generated.
         if (textBuilder.length() != 0) {
             // There is.  Add a comma and space.

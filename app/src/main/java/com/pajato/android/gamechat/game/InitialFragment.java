@@ -18,20 +18,13 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.FabManager;
-import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.fragment.BaseFragment;
-
-import org.greenrobot.eventbus.Subscribe;
+import com.pajato.android.gamechat.chat.BaseFragment;
 
 public class InitialFragment extends BaseFragment {
 
