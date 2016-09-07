@@ -36,6 +36,9 @@ import java.util.Map;
     /** The poster's display name. */
     public String name;
 
+    /** The poster's url. */
+    public String url;
+
     /** The creation timestamp. */
     public long createTime;
 
@@ -46,7 +49,7 @@ import java.util.Map;
     public String text;
 
     /** The message type. */
-    public String type;
+    public int type;
 
     /** A list of users (by account identifier) in the room, that have not yet read the message. */
     public List<String> unreadList;
@@ -56,12 +59,13 @@ import java.util.Map;
     /** Build an empty args constructor for the database. */
     public Message() {}
 
-    /** Build a default Message. */
-    public Message(final String owner, final String name, final String messageKey,
-                   final long createTime, final long modTime, final String text,
-                   final String type, final List<String> unreadList) {
+    /** Build a default Message using all the parameters. */
+    public Message(final String owner, final String name, final String url, final String messageKey,
+                   final long createTime, final long modTime, final String text, final int type,
+                   final List<String> unreadList) {
         this.owner = owner;
         this.name = name;
+        this.url = url;
         this.messageKey = messageKey;
         this.createTime = createTime;
         this.modTime = modTime;
@@ -75,6 +79,7 @@ import java.util.Map;
         Map<String, Object> result = new HashMap<>();
         result.put("owner", owner);
         result.put("name", name);
+        result.put("url", url);
         result.put("messageKey", messageKey);
         result.put("createTime", createTime);
         result.put("modTime", modTime);

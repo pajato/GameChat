@@ -41,7 +41,7 @@ import com.pajato.android.gamechat.account.Account;
 
 
 /** Provide a singleton to manage the app navigation provided by the navigation drawer. */
-enum NavigationManager {
+public enum NavigationManager {
     instance;
 
     // Private class constants
@@ -113,11 +113,12 @@ enum NavigationManager {
      * http://stackoverflow.com/questions/25278821/how-do-rounded-image-with-glide-library
      */
     public static class CircleTransform extends BitmapTransformation {
-        CircleTransform(Context context) {
+        public CircleTransform(Context context) {
             super(context);
         }
 
-        @Override protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        @Override protected Bitmap transform(final BitmapPool pool, final Bitmap toTransform,
+                                             final int outWidth, final int outHeight) {
             return circleCrop(pool, toTransform);
         }
 

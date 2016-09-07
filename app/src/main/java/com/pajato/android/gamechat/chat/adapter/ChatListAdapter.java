@@ -17,16 +17,21 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
+import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.main.NavigationManager;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -132,12 +137,43 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         return result;
     }
 
+    /** Update the chat icon in the given holder based on the given item type. */
+    private void setChatIcon(final ChatListViewHolder holder, final ChatListItem item) {
+        // Ensure that both the holder and the item have an icon.
+        if (holder.icon == null || item.url == null) return;
+
+        // The icon and url both exist.  Case on the item type.
+        Context context = holder.icon.getContext();
+        switch (item.type) {
+            case MESSAGE_ITEM_TYPE:
+                // For a message, load the icon, if there is one.
+                Uri imageUri = Uri.parse(item.url);
+                if (imageUri != null) {
+                    // There is an image to load.  Use Glide to do the heavy lifting.
+                    holder.icon.setImageURI(imageUri);
+                    Glide.with(context)
+                        .load(item.url)
+                        .transform(new NavigationManager.CircleTransform(context))
+                        .into(holder.icon);
+                } else {
+                    // There is no image.  Use an anonymous image.
+                    holder.icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                }
+                holder.icon.setVisibility(View.VISIBLE);
+                break;
+            default:
+                // Ignore other types.
+                break;
+        }
+    }
+
     /** Update the given view holder using the data from the given item. */
     private void updateChatHolder(ChatListViewHolder holder, final ChatListItem item) {
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
         holder.text.setText(Html.fromHtml(item.text));
+        setChatIcon(holder, item);
         holder.itemView.setTag(item);
 
         // Set the new message count field, if necessary.
@@ -166,12 +202,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView name;
         TextView count;
         TextView text;
+        ImageView icon;
 
         ChatListViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.chatName);
             count = (TextView) itemView.findViewById(R.id.newCount);
             text = (TextView) itemView.findViewById(R.id.chatText);
+            icon = (ImageView) itemView.findViewById(R.id.chatIcon);
         }
     }
 

@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatListManager.MESSAGES_FORMAT;
+import static com.pajato.android.gamechat.chat.ChatListManager.STANDARD;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 
 /**
@@ -69,10 +71,36 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
         // Determine if this event is for the chat fab button.
         int value = event.getView() != null ? event.getView().getId() : 0;
         switch (value) {
+            case R.id.insertPhoto:
+                showFutureFeatureMessage(R.string.InsertPhoto);
+                break;
+            case R.id.takePicture:
+                showFutureFeatureMessage(R.string.TakePhoto);
+                break;
+            case R.id.takeVideo:
+                showFutureFeatureMessage(R.string.TakeVideo);
+                break;
+            case R.id.insertEmoticon:
+                showFutureFeatureMessage(R.string.InsertEmoticon);
+                break;
+            case R.id.insertMap:
+                showFutureFeatureMessage(R.string.InsertMap);
+                break;
             default:
                 // Provide an empty placeholder for would be handlers.
                 break;
         }
+    }
+
+    private void showFutureFeatureMessage(final int resourceId) {
+        // Post a toast message.
+        Context context = getContext();
+        String prefix = context.getString(resourceId);
+        String suffix = context.getString(R.string.FutureFeature);
+        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+        int duration = Toast.LENGTH_LONG;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     /** Handle an account state change event by showing the no sign in message. */
@@ -178,12 +206,13 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
             String me = getResources().getString(R.string.me);
             String anonymous = getResources().getString(R.string.anonymous);
             String name = account.getDisplayName(account, me, anonymous);
+            String url = account.accountUrl != null ? account.accountUrl : null;
             long tstamp = new Date().getTime();
             String text = editText.getText().toString();
             List<String> members = ChatListManager.instance.getMembers(mItem.roomKey);
             members.remove(uid);
-            String type = "standard";
-            Message message = new Message(uid, name, key, tstamp, tstamp, text, type, members);
+            int type = STANDARD;
+            Message message = new Message(uid, name, url, key, tstamp, tstamp, text, type, members);
 
             // Persist the message instance, clear the message from the edit text control and hide
             // the soft keyboard.
