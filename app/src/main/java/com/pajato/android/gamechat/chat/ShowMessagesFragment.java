@@ -62,8 +62,6 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  */
 public class ShowMessagesFragment extends BaseFragment implements View.OnClickListener {
 
-    // Private class constants.
-
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
@@ -75,7 +73,7 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
                 showFutureFeatureMessage(R.string.InsertPhoto);
                 break;
             case R.id.takePicture:
-                showFutureFeatureMessage(R.string.TakePhoto);
+                showFutureFeatureMessage(R.string.TakePicture);
                 break;
             case R.id.takeVideo:
                 showFutureFeatureMessage(R.string.TakeVideo);
@@ -125,8 +123,7 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
         MenuItem item = menu.findItem(R.id.back);
-        item.setVisible(true);
-        item.setVisible(true);
+        if (item != null) item.setVisible(true);
     }
 
     /** Handle the setup of the list of messages. */
@@ -163,6 +160,13 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Deal with the fragment's lifecycle by managing the FAB. */
+    @Override public void onResume() {
+        // Turn off the FAB.
+        FabManager.chat.setState(View.GONE);
+        super.onResume();
     }
 
     // Private instance methods.

@@ -7,8 +7,4 @@
     <integer name="groupList">0</integer>
     <integer name="messagesList">3</integer>
     <integer name="roomList">1</integer>
-
-    <!-- Message type constants. -->
-    <integer name="standard">0</integer>
-    <integer name="system">1</integer>
 </resources>

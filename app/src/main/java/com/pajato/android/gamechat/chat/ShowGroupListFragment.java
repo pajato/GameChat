@@ -40,6 +40,7 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -56,11 +57,6 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  * @author Paul Michael Reilly
  */
 public class ShowGroupListFragment extends BaseFragment {
-
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = ShowGroupListFragment.class.getSimpleName();
 
     // Public instance methods.
 
@@ -119,14 +115,6 @@ public class ShowGroupListFragment extends BaseFragment {
         return layout;
     }
 
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
-    @Override public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
-    }
-
     /** Deal with a change in the joined rooms state. */
     @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
         // Turn off the loading progress dialog and handle a signed in account with some joined
@@ -167,25 +155,12 @@ public class ShowGroupListFragment extends BaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Deal with the fragment's activity's lifecycle pause event. */
-    @Override public void onPause() {
-        // Deal with the ad and turn off app event listeners.
-        super.onPause();
-        if (mAdView != null) {
-            mAdView.pause();
-        }
-    }
-
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
+    /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
-        // When resuming, use the base class to log it, manage the ad view and the main view, set a
-        // grooup id list value event listener and register the fragment to be an event handler.
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        // Turn on the FAB and shut down the progress bar.
         FabManager.chat.setState(View.VISIBLE);
-        EventBusManager.instance.register(this);
+        ProgressManager.instance.hide();
+        super.onResume();
     }
 
     // Private instance methods.

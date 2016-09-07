@@ -103,15 +103,12 @@ public class BaseFragment extends Fragment {
         super.onCreate(bundle);
     }
 
+    /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
         // Log the lifecycle event to help during development.
         String format = "onDestroy: Destroying fragment {%s}. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
-
-        // Kill the ad view.
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
+        if (mAdView != null) mAdView.destroy();
         super.onDestroy();
     }
 
@@ -153,32 +150,28 @@ public class BaseFragment extends Fragment {
         }
     }
 
+    /** Log the lifecycle event and stop showing ads. */
     @Override public void onPause() {
-        // Log the lifecycle event to help during development.
+        // Log the lifecycle event to help during development and pause the ads.
         String format = "onPause: Fragment {%s} is no longer visible and running. Fragment manager: "
             + "{%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
-
-        // Pause the ad control.
-        if (mAdView != null) {
-            mAdView.pause();
-        }
+        if (mAdView != null) mAdView.pause();
         super.onPause();
     }
 
+    /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
-        // Log the lifecycle event to help during development.
+        // Log the lifecycle event to help during development, continue showing ads and reregister
+        // the app event bus.
         String format = "onResume: Fragment {%s} is visible and running. Fragment manager: {%s}.";
         Log.v(TAG, String.format(format, this, getFragmentManager()));
-
-        // Resume the ad view.
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        if (mAdView != null) mAdView.resume();
         EventBusManager.instance.register(this);
         super.onResume();
     }
 
+    /** Log the lifecycle event. */
     @Override public void onStart() {
         // Log the lifecycle event to help during development.
         String format = "onStart: Make the fragment {%s} visible. Fragment manager: {%s}.";
@@ -186,6 +179,7 @@ public class BaseFragment extends Fragment {
         super.onStart();
     }
 
+    /** Log the lifecycle event. */
     @Override public void onStop() {
         // Log the lifecycle event to help during development.
         String format = "onStop: Fragment {%s} is no longer visible. Fragment manager: {%s}.";
@@ -193,6 +187,7 @@ public class BaseFragment extends Fragment {
         super.onStop();
     }
 
+    /** Log the lifecycle event. */
     @Override public void onViewStateRestored(Bundle bundle) {
         // Log the lifecycle event to help during development.
         String format = "onViewStateRestored: The saved state has been restored to fragment {%s} "
@@ -208,7 +203,7 @@ public class BaseFragment extends Fragment {
 
     // Protected instance methods.
 
-    /** Initialize the fragment's list. */
+    /** Initialize the fragment's chat list. */
     protected void initList(@NonNull final View layout, final List<ChatListItem> items,
                             final boolean stackFromEnd) {
         // Initialize the recycler view.

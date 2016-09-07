@@ -21,8 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -131,7 +131,7 @@ public class MainActivity extends BaseActivity
     }
 
     /** Process a navigation menu item click by posting a click event. */
-    @Override public boolean onNavigationItemSelected(MenuItem item) {
+    @Override public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
         int value = item.getItemId();
         String className = item.getClass().getSimpleName();
@@ -221,7 +221,6 @@ public class MainActivity extends BaseActivity
         EventBusManager.instance.register(this);
         EventBusManager.instance.register(ChatListManager.instance);
         AccountManager.instance.register();
-        ProgressManager.instance.hide();
     }
 
     // Private instance methods.

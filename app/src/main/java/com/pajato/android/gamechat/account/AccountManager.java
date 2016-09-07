@@ -244,7 +244,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // Update the "me" room default message on the database.
             path = String.format("%s%s/messages/", path, key);
             key = database.child(path).push().getKey();
-            //String url = account.accountUrl;
             String url = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();

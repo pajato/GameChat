@@ -29,6 +29,7 @@ import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -69,6 +70,7 @@ public class ShowNoAccountFragment extends BaseFragment {
         //ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
         EventBusManager.instance.register(this);
+        ProgressManager.instance.hide();
         return inflater.inflate(R.layout.fragment_chat_no_account, container, false);
     }
 
