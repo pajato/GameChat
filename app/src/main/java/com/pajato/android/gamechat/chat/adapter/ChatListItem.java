@@ -45,6 +45,9 @@ public class ChatListItem {
     /** The item type. */
     public int type;
 
+    /** The URL for the item. */
+    public String url;
+
     /** The item name, possibly null. */
     public String name;
 
@@ -82,6 +85,7 @@ public class ChatListItem {
         name = item.name;
         count = 0;
         text = item.text;
+        url = item.url;
     }
 
     /** Build an instance for a given room list item. */

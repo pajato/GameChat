@@ -77,6 +77,10 @@ public enum ChatListManager {
     /** The format used to generate the database path for a particular message. */
     public static final String UNREAD_LIST_FORMAT = MESSAGES_FORMAT + "%s/unreadList";
 
+    // Message type constants.
+    public static final int STANDARD = 0;
+    public static final int SYSTEM = 1;
+
     // Private class constants.
 
     /** The format specifying the path to the rooms profile on Firebase. */
@@ -237,7 +241,7 @@ public enum ChatListManager {
         List<Message> messageList = roomMap.get(event.roomKey);
         messageList.add(event.message);
 
-        // Update the date headers for this message and post an event to trigger an adpater refresh.
+        // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.groupKey, event.message);
         EventBus.getDefault().post(new MessageListChangeEvent());
     }

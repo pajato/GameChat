@@ -62,4 +62,9 @@
     <string name="NoGamesMessageText">You have no games.  Use the big purple button to create some.</string>
     <string name="me">me</string>
     <string name="anonymous">Anonymous</string>
+    <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
+    <string name="TakePhoto">Inserting a picture using your camera</string>
+    <string name="TakeVideo">Inserting a video from your camera</string>
+    <string name="InsertEmoticon">Inserting an emoticon</string>
+    <string name="InsertMap">Inserting a map based on your location</string>
 </resources>

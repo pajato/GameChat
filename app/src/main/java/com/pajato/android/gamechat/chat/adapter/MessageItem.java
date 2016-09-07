@@ -50,6 +50,9 @@ public class MessageItem {
     /** The room key. */
     public String roomKey;
 
+    /** The message sender's icon URL, possibly null. */
+    String url;
+
     /** The owner (poster) name. */
     public String name;
 
@@ -60,12 +63,13 @@ public class MessageItem {
 
     /** Build an instance for the given group. */
     public MessageItem(final String groupKey, final String roomKey, final Message message) {
-        // Update the group and room keys, the message text and set the count to 0 to flag that it
-        // is not relevant for a message item.  Set the name field to the poster's display name and
-        // the creation date.
+        // Update the group and room keys, the message text and url fields, and set the count to 0
+        // to flag that it is not relevant for a message item.  Set the name field to the poster's
+        // display name concatenated with the creation date.
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         text = message.text;
+        url = message.url;
         DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
         String timestamp = dateFormat.format(new Date(message.createTime));
         name = String.format(Locale.getDefault(), "%s  %s", message.name, timestamp);

@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.ChatListManager.SYSTEM;
+
 /**
  * Manages the account related aspects of the GameChat application.  These include setting up the
  * first time sign-in result, creating and persisting a profile on this device and switching
@@ -209,7 +211,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         private void createAccount(@NonNull FirebaseUser user) {
             // Creaate the push keys for the "me" group on the database with a single room in it,
             // the "me" room.
-            long timestamp = new Date().getTime();
+            long tstamp = new Date().getTime();
             DatabaseReference database = FirebaseDatabase.getInstance().getReference();
             String groupKey = database.child("/groups/").push().getKey();
             String path = "/groups/" + groupKey + "/rooms/";
@@ -230,23 +232,26 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // Update the group profile on the database.
             List<String> memberList = new ArrayList<>();
             memberList.add(uid);
-            Group group = new Group(uid, "Me Group", timestamp, timestamp, memberList);
+            Group group = new Group(uid, "Me Group", tstamp, 0, memberList);
             DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile",
                     group.toMap());
 
             // Update the "me" room profile on the database.
-            Room room = new Room(uid, "Me Room", groupKey, timestamp, timestamp, "me", memberList);
+            Room room = new Room(uid, "Me Room", groupKey, tstamp, 0, "me", memberList);
             DatabaseManager.instance.updateChildren(database, path, key + "/profile",
                     room.toMap());
 
             // Update the "me" room default message on the database.
             path = String.format("%s%s/messages/", path, key);
             key = database.child(path).push().getKey();
+            //String url = account.accountUrl;
+            String url = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
             String text = "Welcome to your own private group and room.  Enjoy!";
             List<String> unreadList = new ArrayList<>();
             unreadList.add(uid);
-            Message message = new Message(uid, "GameChat", key, timestamp, timestamp, text,
-                    "system", unreadList);
+            String name = "GameChat";
+            int type = SYSTEM;
+            Message message = new Message(uid, name, url, key, tstamp, 0, text, type, unreadList);
             DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
         }
 

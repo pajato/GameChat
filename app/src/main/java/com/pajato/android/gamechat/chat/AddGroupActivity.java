@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.R.attr.path;
+import static com.pajato.android.gamechat.chat.ChatListManager.STANDARD;
 
 /**
  * Provide a main activity to manage the UI for adding a group.
@@ -219,11 +220,12 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
                                final List<String> members) {
         String path = String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
         String key = database.child(path).push().getKey();
+        String url = account.accountUrl;
         long timestamp = new Date().getTime();
         String id = account.accountId;
         String name = getName(account);
-        String type = "standard";
-        Message message = new Message(id, name, key, timestamp, timestamp, text, type, members);
+        int type = STANDARD;
+        Message message = new Message(id, name, url, key, timestamp, timestamp, text, type, members);
         DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
     }
 

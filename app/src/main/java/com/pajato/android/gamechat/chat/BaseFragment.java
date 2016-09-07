@@ -45,6 +45,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.List;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
+import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.message;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -132,22 +133,23 @@ public class BaseFragment extends Fragment {
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Determine if the fragment has a view and that it has a list type.
         View layout = getView();
-        if (layout != null && mItemListType != null) {
-            // It has both.  Show the chat list, either groups, messages or rooms.
-            RecyclerView listView = (RecyclerView) layout.findViewById(R.id.chatList);
-            if (listView != null) {
-                // Obtain the data to be listed on the list view.
-                RecyclerView.Adapter adapter = listView.getAdapter();
-                if (adapter instanceof ChatListAdapter) {
-                    // Inject the list items into the recycler view.
-                    ChatListAdapter listAdapter = (ChatListAdapter) adapter;
-                    listView.setVisibility(View.GONE);
-                    listAdapter.clearItems();
-                    listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
-                    listView.scrollToPosition(listAdapter.getItemCount() - 1);
-                    listView.setVisibility(View.VISIBLE);
-                }
-            }
+        if (layout == null || mItemListType == null) return;
+
+        // It has both.  Ensure that the list view (recycler) exists.
+        RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
+        if (view == null) return;
+
+        // The recycler view exists.  Show the chat list, either groups, messages or rooms.
+        RecyclerView.Adapter adapter = view.getAdapter();
+        if (adapter instanceof ChatListAdapter) {
+            // Inject the list items into the recycler view making sure to scroll to the end of the
+            // list when showing messages.
+            ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+            view.setVisibility(View.GONE);
+            listAdapter.clearItems();
+            listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
+            if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
+            view.setVisibility(View.VISIBLE);
         }
     }
 
