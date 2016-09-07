@@ -192,13 +192,11 @@ public class ShowRoomListFragment extends BaseFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Deal with the fragment's activity's lifecycle by managing the ad. */
+    /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // When resuming, use the base class to log it, manage the ad view and the main view, set a
-        // grooup id list value event listener and register the fragment to be an event handler.
-        super.onResume();
+        // Turn off the FAB.
         FabManager.chat.setState(View.VISIBLE);
-        EventBusManager.instance.register(this);
+        super.onResume();
     }
 
     /** Use the start lifecycle event to initialize the data. */

@@ -47,6 +47,7 @@ public enum ProgressManager {
         }
 
         // Create and display the progress dialog.
+        Log.d(TAG, "Turning on progress spinner now.");
         mProgressDialog = new ProgressDialog(context);
         mProgressDialog.setTitle("Starting...");
         mProgressDialog.setMessage("Please wait while the app starts up...");

@@ -71,20 +71,30 @@ http://www.gnu.org/licenses
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
             android:orientation="horizontal">
-            <ImageView style="@style/SendItemButtonTheme"
+            <ImageView
+                style="@style/SendItemButtonTheme"
                 android:id="@+id/insertPhoto"
+                android:contentDescription="@string/InsertPhotoDesc"
                 android:src="@drawable/ic_insert_photo_black_24dp"/>
-            <ImageView style="@style/SendItemButtonTheme"
+            <ImageView
+                style="@style/SendItemButtonTheme"
                 android:id="@+id/takePicture"
+                android:contentDescription="@string/TakePictureDesc"
                 android:src="@drawable/ic_photo_camera_black_24dp"/>
-            <ImageView style="@style/SendItemButtonTheme"
+            <ImageView
+                style="@style/SendItemButtonTheme"
                 android:id="@+id/takeVideo"
+                android:contentDescription="@string/TakeVideoDesc"
                 android:src="@drawable/ic_videocam_black_24dp"/>
-            <ImageView style="@style/SendItemButtonTheme"
+            <ImageView
+                style="@style/SendItemButtonTheme"
                 android:id="@+id/insertEmoticon"
+                android:contentDescription="@string/InsertEmoticonDesc"
                 android:src="@drawable/ic_insert_emoticon_black_24dp"/>
-            <ImageView style="@style/SendItemButtonTheme"
+            <ImageView
+                style="@style/SendItemButtonTheme"
                 android:id="@+id/insertMap"
+                android:contentDescription="@string/InsertMapDesc"
                 android:src="@drawable/ic_my_location_black_24dp"/>
             <android.support.v4.widget.Space
                 android:layout_width="0dp"
