@@ -1,14 +1,11 @@
 package com.pajato.android.gamechat.game;
 
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -27,17 +24,15 @@ public class LocalTTTFragment extends BaseFragment {
     private String mSpace;
 
     // Board management objects
-    private View mBoard;
     private int turnCount;
 
-    public LocalTTTFragment() {
+    public LocalTTTFragment() {}
 
-    }
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_ttt;}
 
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Initialize Member Variables
-        mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
         mTurn = true;
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
@@ -46,8 +41,6 @@ public class LocalTTTFragment extends BaseFragment {
 
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
         setHasOptionsMenu(true);
-
-        return mBoard;
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -121,18 +114,18 @@ public class LocalTTTFragment extends BaseFragment {
             if(xWins) {
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
-                GameManager.instance.generateSnackbar(mBoard, "Player 1 (" + mXValue + ") Wins!",
+                GameManager.instance.generateSnackbar(mLayout, "Player 1 (" + mXValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
                 Winner.setText(R.string.winner_o);
                 handlePlayerIcons(false);
-                GameManager.instance.generateSnackbar(mBoard, "Player 2 (" + mOValue + ") Wins!",
+                GameManager.instance.generateSnackbar(mLayout, "Player 2 (" + mOValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
                 // If no one has won, the turn timer has run out. End the game.
                 } else {
                 // Reveal Tie Messages
                 Winner.setText(R.string.winner_tie);
-                GameManager.instance.generateSnackbar(mBoard, "It's a Tie!", -1, true);
+                GameManager.instance.generateSnackbar(mLayout, "It's a Tie!", -1, true);
             }
             return false;
         }
@@ -149,7 +142,7 @@ public class LocalTTTFragment extends BaseFragment {
         // Go through all the buttons.
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++) {
-                Button currTile = (Button) mBoard.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
+                Button currTile = (Button) mLayout.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
                 String tileValue = currTile.getText().toString();
 
                 // Assign each possible state for each tile as a value. The only possible values
@@ -243,21 +236,21 @@ public class LocalTTTFragment extends BaseFragment {
         handlePlayerIcons(mTurn);
 
         // Set values for each tile to empty.
-        ((Button) mBoard.findViewWithTag("button00")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button01")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button02")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button10")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button11")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button12")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button20")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button21")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button22")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button00")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button01")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button02")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button10")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button11")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button12")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button20")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button21")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button22")).setText(mSpace);
         // Output New Game Messages
 
         String newTurn = "New Game! Player " + (mTurn
                 ? "1 ( " + mXValue + ")"
                 : "2 (" + mOValue + ")") + "'s Turn";
-        GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
+        GameManager.instance.generateSnackbar(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
         checkNotFinished();
     }
@@ -270,7 +263,7 @@ public class LocalTTTFragment extends BaseFragment {
      * @param buttonTag the tag of the button clicked.
      */
     private void handleTileClick(final String player, final String buttonTag) {
-        Button b = (Button) mBoard.findViewWithTag(buttonTag);
+        Button b = (Button) mLayout.findViewWithTag(buttonTag);
         // Only updates the tile if the current value is empty and the game has not finished yet.
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
             b.setText(getTurn(mTurn));

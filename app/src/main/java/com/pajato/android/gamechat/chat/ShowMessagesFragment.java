@@ -18,21 +18,18 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -90,16 +87,8 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
-    private void showFutureFeatureMessage(final int resourceId) {
-        // Post a toast message.
-        Context context = getContext();
-        String prefix = context.getString(resourceId);
-        String suffix = context.getString(R.string.FutureFeature);
-        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-        int duration = Toast.LENGTH_LONG;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-    }
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_messages;}
 
     /** Handle an account state change event by showing the no sign in message. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
@@ -127,21 +116,17 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
     }
 
     /** Handle the setup of the list of messages. */
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Inflate the layout for this fragment and initialize by setting the titles, declaring the
         // use of the options menu, removing the FAB button, fetching any remote configurations,
         // setting up the list of messages, setting up the edit text field and setting up the
         // database analytics.
-        View result = inflater.inflate(R.layout.fragment_chat_messages, container, false);
         setTitles(null, mItem.roomKey);
         setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.message;
-        FabManager.chat.setState(View.GONE);
-        initList(result, ChatListManager.instance.getList(mItemListType, mItem), true);
-        initEditText(result);
-
-        return result;
+        FabManager.chat.setState(this, View.GONE);
+        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), true);
+        initEditText(mLayout);
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
@@ -165,11 +150,18 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn off the FAB.
-        FabManager.chat.setState(View.GONE);
+        FabManager.chat.setState(this, View.GONE);
         super.onResume();
     }
 
     // Private instance methods.
+
+    /** Return the enveloping chat fragment layout using the saved tag value. */
+    private View getFragmentLayout() {
+        String tag = "chatFragment";
+        Fragment fragment = getActivity().getSupportFragmentManager().findFragmentByTag(tag);
+        return fragment.getView();
+    }
 
     /** Dismiss the virtual keyboard in response to a click on the given view. */
     private void hideSoftKeyBoard(final View view) {

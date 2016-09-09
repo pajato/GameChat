@@ -57,10 +57,14 @@ enum ChatManager {
         }
 
     }
+
     // Private class constants.
 
     /** The logcat tag. */
     private static final String TAG = ChatManager.class.getSimpleName();
+
+
+    public ChatFragmentType lastTypeShown;
 
     // Public instance methods.
 
@@ -78,6 +82,7 @@ enum ChatManager {
 
         // Set the item on the fragment and run the transaction to attach the fragment to the
         // activity, adding a backstack.
+        lastTypeShown = type;
         setItem(fragment, item);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.chatFragmentContainer, fragment)

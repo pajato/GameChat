@@ -2,9 +2,7 @@ package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -34,18 +32,19 @@ public class SettingsFragment extends BaseFragment {
         super.setArguments(args);
     }
 
-    @Override public View onCreateView(final LayoutInflater layoutInflater,
-                                       final ViewGroup container, final Bundle savedInstanceState) {
-        View main = layoutInflater.inflate(R.layout.fragment_settings, container, false);
-        TextView title = (TextView) main.findViewById(R.id.settings_title);
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_settings;}
+
+    @Override public void onInitialize() {
+        TextView title = (TextView) mLayout.findViewById(R.id.settings_title);
 
         // Setup the group choice spinner and adapter.
-        Spinner groupChoices = (Spinner) main.findViewById(R.id.settings_group_spinner);
+        Spinner groupChoices = (Spinner) mLayout.findViewById(R.id.settings_group_spinner);
         ArrayAdapter<CharSequence> groupAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.groups, android.R.layout.simple_spinner_item);
         groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         groupChoices.setAdapter(groupAdapter);
-        Spinner userChoices = (Spinner) main.findViewById(R.id.settings_user_spinner);
+        Spinner userChoices = (Spinner) mLayout.findViewById(R.id.settings_user_spinner);
 
         getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
 
@@ -53,9 +52,9 @@ public class SettingsFragment extends BaseFragment {
         groupChoices.setOnItemSelectedListener(new UserSelector(userChoices));
 
         // Setup the references to the game option buttons.
-        mLocal = (ImageButton) main.findViewById(R.id.settings_local_button);
-        mOnline = (ImageButton) main.findViewById(R.id.settings_online_button);
-        mComputer = (ImageButton) main.findViewById(R.id.settings_computer_button);
+        mLocal = (ImageButton) mLayout.findViewById(R.id.settings_local_button);
+        mOnline = (ImageButton) mLayout.findViewById(R.id.settings_online_button);
+        mComputer = (ImageButton) mLayout.findViewById(R.id.settings_computer_button);
 
         // Handle the game-specific portions of the layout.
         if(game.equals(getString(R.string.new_game_ttt))) {
@@ -68,7 +67,6 @@ public class SettingsFragment extends BaseFragment {
             title.setText(R.string.playing_chess);
             setupChess();
         }
-        return main;
     }
 
     /** Handle the back button after the view has been created. */

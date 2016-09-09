@@ -1,15 +1,12 @@
 package com.pajato.android.gamechat.game;
 
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -44,18 +41,18 @@ public class TTTFragment extends BaseFragment {
     private String mSpace;
 
     // Board management objects
-    private View mBoard;
-    private HashMap<String, Integer> mBoardMap;
+    private HashMap<String, Integer> mLayoutMap;
     private Firebase mRef;
 
     public TTTFragment() {
         // Required empty constructor.
     }
 
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_ttt;}
+
+    @Override public void onInitialize() {
         // Initialize Member Variables
-        mBoard = inflater.inflate(R.layout.fragment_ttt, container, false);
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
         mSpace = getString(R.string.spaceValue);
@@ -73,15 +70,15 @@ public class TTTFragment extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GenericTypeIndicator<HashMap<String, Integer>> t =
                         new GenericTypeIndicator<HashMap<String, Integer>>() {};
-                mBoardMap = dataSnapshot.getValue(t);
+                mLayoutMap = dataSnapshot.getValue(t);
                 // If there is a board to be had, fill our board out with it and adjust the turn.
-                if(mBoardMap != null) {
+                if(mLayoutMap != null) {
                     recreateExistingBoard();
                     checkNotFinished();
-                    mTurn = (mBoardMap.get(TURN_INDICATOR) == 1);
+                    mTurn = (mLayoutMap.get(TURN_INDICATOR) == 1);
                     handlePlayerIcons(mTurn);
                 } else {
-                    mBoardMap = new HashMap<String, Integer>();
+                    mLayoutMap = new HashMap<String, Integer>();
                 }
             }
             // In the event that the request to listen is canceled, we need to
@@ -91,7 +88,6 @@ public class TTTFragment extends BaseFragment {
             }
         });
 
-        return mBoard;
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -157,7 +153,7 @@ public class TTTFragment extends BaseFragment {
                 || centerCol == 6 || endCol == 6 || leftDiag == 6 || rightDiag == 6);
 
         // If we have a win condition, reveal the winning messages.
-        if(xWins || oWins || mBoardMap.size() == 10) {
+        if(xWins || oWins || mLayoutMap.size() == 10) {
             // Setup the winner TextView and snackbar messages.
             TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
             Winner.setText(getText(R.string.spaceValue));
@@ -168,19 +164,19 @@ public class TTTFragment extends BaseFragment {
             if(xWins) {
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
-                GameManager.instance.generateSnackbar(mBoard, "Player 1 (" + mXValue + ") Wins!",
+                GameManager.instance.generateSnackbar(mLayout, "Player 1 (" + mXValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
                 Winner.setText(R.string.winner_o);
                 handlePlayerIcons(false);
-                GameManager.instance.generateSnackbar(mBoard, "Player 2 (" + mOValue + ") Wins!",
+                GameManager.instance.generateSnackbar(mLayout, "Player 2 (" + mOValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
 
             // If no one has won, the turn timer has run out. End the game.
             } else {
                 // Reveal Tie Messages
                 Winner.setText(R.string.winner_tie);
-                GameManager.instance.generateSnackbar(mBoard, "It's a Tie!", -1, true);
+                GameManager.instance.generateSnackbar(mLayout, "It's a Tie!", -1, true);
             }
             return false;
         }
@@ -194,11 +190,11 @@ public class TTTFragment extends BaseFragment {
      */
     private int[][] evaluateBoard() {
         int[][] boardValues = new int[3][3];
-        if(mBoardMap == null) mBoardMap = new HashMap<>();
+        if(mLayoutMap == null) mLayoutMap = new HashMap<>();
         // Go through all the buttons.
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++) {
-                Button currTile = (Button) mBoard.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
+                Button currTile = (Button) mLayout.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
                 String tileValue = currTile.getText().toString();
 
                 // Assign each possible state for each tile as a value. The only possible values
@@ -209,18 +205,18 @@ public class TTTFragment extends BaseFragment {
                 // If there's an X in this button, store a 1
                 if(tileValue.equals(mXValue)) {
                     boardValues[i][j] = 1;
-                    if(!(mBoardMap.containsKey(i + "-" + j))) mBoardMap.put(i + "-" + j, 1);
+                    if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 1);
                     // If there's an O in this button, store a 2
                 } else if (tileValue.equals(mOValue)) {
                     boardValues[i][j] = 2;
-                    if(!(mBoardMap.containsKey(i + "-" + j))) mBoardMap.put(i + "-" + j, 2);
+                    if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 2);
                     // Otherwise, there's a space. -5 was chosen arbitrarily to keep row values unique.
                 } else {
                     boardValues[i][j] = -5;
                 }
             }
         }
-        mRef.setValue(mBoardMap);
+        mRef.setValue(mLayoutMap);
         return boardValues;
     }
 
@@ -289,13 +285,13 @@ public class TTTFragment extends BaseFragment {
      */
     private void handleNewGame() {
         // Reset the board map and update the Firebase database's copy.
-        if(mBoardMap != null) {
-            mBoardMap.clear();
+        if(mLayoutMap != null) {
+            mLayoutMap.clear();
         } else {
-            mBoardMap = new HashMap<>();
+            mLayoutMap = new HashMap<>();
         }
-        mBoardMap.put(TURN_INDICATOR, (mTurn ? 1 : 2));
-        mRef.setValue(mBoardMap);
+        mLayoutMap.put(TURN_INDICATOR, (mTurn ? 1 : 2));
+        mRef.setValue(mLayoutMap);
 
         // Hide our winning messages and ensure the turn display is working properly.
         TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
@@ -303,21 +299,21 @@ public class TTTFragment extends BaseFragment {
         handlePlayerIcons(mTurn);
 
         // Set values for each tile to empty.
-        ((Button) mBoard.findViewWithTag("button00")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button01")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button02")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button10")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button11")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button12")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button20")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button21")).setText(mSpace);
-        ((Button) mBoard.findViewWithTag("button22")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button00")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button01")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button02")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button10")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button11")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button12")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button20")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button21")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button22")).setText(mSpace);
 
         // Output New Game Messages
         String newTurn = "New Game! Player " + (mTurn
                 ? "1 (" + mXValue + ")"
                 : "2 (" + mOValue + ")") + "'s Turn";
-        GameManager.instance.generateSnackbar(mBoard, newTurn, ContextCompat.getColor(getActivity(),
+        GameManager.instance.generateSnackbar(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
 
         checkNotFinished();
@@ -331,11 +327,11 @@ public class TTTFragment extends BaseFragment {
      * @param buttonTag the tag of the button clicked.
      */
     private void handleTileClick(final String player, final String buttonTag) {
-        Button b = (Button) mBoard.findViewWithTag(buttonTag);
+        Button b = (Button) mLayout.findViewWithTag(buttonTag);
         // Only updates the tile if the current value is empty and the game has not finished yet.
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
             b.setText(getTurn(mTurn));
-            mBoardMap.put(TURN_INDICATOR, mTurn ? 2 : 1);
+            mLayoutMap.put(TURN_INDICATOR, mTurn ? 2 : 1);
             checkNotFinished();
         }
     }
@@ -346,7 +342,7 @@ public class TTTFragment extends BaseFragment {
     private void recreateExistingBoard() {
         // If the board map is size 1, we know that there is only the turn stored in it, and send a
         // new game out.
-        if(mBoardMap.size() == 1) {
+        if(mLayoutMap.size() == 1) {
             GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(),
                     getTurn(mTurn) + "\n" + getString(R.string.new_game));
         // Otherwise, we'll need to comb through the board and replace the remaining pieces.
@@ -355,9 +351,9 @@ public class TTTFragment extends BaseFragment {
                 for(int j = 0; j < 3; j++) {
                     // If our keys are present, then put their corresponding piece onto the board.
                     String currKey = i + "-" + j;
-                    Button currButton = (Button) mBoard.findViewWithTag("button" + i + j);
-                    if(mBoardMap.containsKey(currKey)) {
-                        if(mBoardMap.get(currKey) == 1) {
+                    Button currButton = (Button) mLayout.findViewWithTag("button" + i + j);
+                    if(mLayoutMap.containsKey(currKey)) {
+                        if(mLayoutMap.get(currKey) == 1) {
                             currButton.setText(mXValue);
                         } else {
                             currButton.setText(mOValue);

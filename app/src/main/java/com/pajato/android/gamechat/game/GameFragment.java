@@ -17,20 +17,17 @@
 
 package com.pajato.android.gamechat.game;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseFragment;
 import com.pajato.android.gamechat.chat.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.chat.BaseFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -46,15 +43,15 @@ public class GameFragment extends BaseFragment {
         // Required empty public constructor
     }
 
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_game;}
+
+    @Override public void onInitialize() {
         // Inflate the layout, and initialize the various managers.
-        View layout = inflater.inflate(R.layout.fragment_game, container, false);
         setHasOptionsMenu(true);
         EventBusManager.instance.register(this);
         GameManager.instance.init(getActivity());
-        FabManager.game.init(layout);
-        return layout;
+        FabManager.game.init(mLayout, this.getTag());
     }
 
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
@@ -85,28 +82,28 @@ public class GameFragment extends BaseFragment {
         if(viewId == R.id.init_ttt || viewId == R.id.init_ttt_button) {
             GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
                     getString(R.string.new_game_ttt));
-            FabManager.game.dismissMenu();
+            FabManager.game.dismissMenu(this);
             backgroundDimmer.setVisibility(View.GONE);
         // Do it for checkers.
         } else if (viewId == R.id.init_checkers || viewId == R.id.init_checkers_button) {
             GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
                     getString(R.string.new_game_checkers));
-            FabManager.game.dismissMenu();
+            FabManager.game.dismissMenu(this);
             backgroundDimmer.setVisibility(View.GONE);
         // Do it for chess.
         } else if (viewId == R.id.init_chess || viewId == R.id.init_chess_button) {
             GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
                     getString(R.string.new_game_chess));
-            FabManager.game.dismissMenu();
+            FabManager.game.dismissMenu(this);
             backgroundDimmer.setVisibility(View.GONE);
         // And do it for the rooms option buttons.
         } else if (viewId == R.id.init_rooms || viewId == R.id.init_rooms_button) {
             GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
-            FabManager.game.dismissMenu();
+            FabManager.game.dismissMenu(this);
             backgroundDimmer.setVisibility(View.GONE);
         // If the click is on the fab, we have to handle if it's open or closed.
         } else if (viewId == R.id.games_fab) {
-            FabManager.game.toggle(null);
+            FabManager.game.toggle(this);
             if(backgroundDimmer.getVisibility() == View.VISIBLE) {
                 backgroundDimmer.setVisibility(View.GONE);
             } else {

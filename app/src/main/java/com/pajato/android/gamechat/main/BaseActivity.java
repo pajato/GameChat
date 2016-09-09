@@ -35,52 +35,81 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     // Private class constants.
 
+    /** The lifecycle event format with no bundle. */
+    private static final String FORMAT_NO_BUNDLE = "Activity: %s; Lifecycle event: %s.";
+
+    /** The lifecycle event format with a bundle provided. */
+    private static final String FORMAT_WITH_BUNDLE =
+            "Activity: %s; Lifecycle event: %s; Bundle: %s.";
+
     /** The logcat tag constant. */
     private static final String TAG = BaseActivity.class.getSimpleName();
 
-    // Public instance methods
+    // Protected instance methods.
+
+    /** Log a lifecycle event that has no bundle. */
+    protected void logEvent(final String event) {
+        Log.v(TAG, String.format(Locale.US, FORMAT_NO_BUNDLE, this, event));
+    }
+
+    /** Log a lifecycle event that has a bundle. */
+    protected void logEvent(final String event, final Bundle bundle) {
+        Log.v(TAG, String.format(Locale.US, FORMAT_WITH_BUNDLE, this, event, bundle));
+    }
 
     /** Log the onCreate() state. */
     @Override protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        String format = "Main activity {%s} created with %sempty saved initialization state.";
-        Log.d(TAG, String.format(Locale.US, format, this, bundle == null ? "" : "non-"));
+        logEvent("onCreate", bundle);
     }
 
     /** Log the onDestroy() state. */
     @Override protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is dying.", this));
+        logEvent("onDestroy");
     }
 
     /** Log the onPause() state. */
     @Override protected void onPause() {
         super.onPause();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is pausing.", this));
+        logEvent("onPause");
     }
 
     /** Log the onRestart() state. */
     @Override protected void onRestart() {
         super.onRestart();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is restarting.", this));
+        logEvent("onRestart");
     }
 
     /** Log the onResume() state. */
     @Override protected void onResume() {
         super.onResume();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is resuming.", this));
+        logEvent("onResume");
+    }
+
+    /** Log the lifecycle event. */
+    @Override protected void onSaveInstanceState(final Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putBoolean("savingData", true);
+        logEvent("onSaveInstanceState", bundle);
+    }
+
+    /** Log the lifecycle event. */
+    @Override protected void onRestoreInstanceState(final Bundle bundle) {
+        super.onRestoreInstanceState(bundle);
+        logEvent("onRestoreInstanceState", bundle);
     }
 
     /** Log the onStart() state. */
     @Override protected void onStart() {
         super.onStart();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is starting.", this));
+        logEvent("onStart");
     }
 
     /** Log the onStop() state. */
     @Override protected void onStop() {
         super.onStop();
-        Log.d(TAG, String.format(Locale.US, "Main activity {%s} is stopping.", this));
+        logEvent("onStop");
     }
 
 }

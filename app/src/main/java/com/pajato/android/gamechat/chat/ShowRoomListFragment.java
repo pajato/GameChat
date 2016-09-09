@@ -18,24 +18,20 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -68,12 +64,12 @@ public class ShowRoomListFragment extends BaseFragment {
         switch (value) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
-                FabManager.chat.toggle(getView());
+                FabManager.chat.toggle(this);
                 break;
             case R.id.addGroupButton:
             case R.id.addGroupMenuItem:
                 // Dismiss the FAB menu, and start up the add group activity.
-                FabManager.chat.dismissMenu();
+                FabManager.chat.dismissMenu(this);
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
@@ -89,6 +85,9 @@ public class ShowRoomListFragment extends BaseFragment {
                 break;
         }
     }
+
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_rooms;}
 
     /** Handle an account state change event by showing the no sign in message. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
@@ -112,18 +111,14 @@ public class ShowRoomListFragment extends BaseFragment {
     }
 
     /** Handle the setup for the groups panel. */
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Inflate the layout for this fragment and initialize by setting the titles, declaring the
         // use of the options menu, setting up the ad view and initializing the rooms handling.
-        View result = inflater.inflate(R.layout.fragment_chat_rooms, container, false);
         setTitles(mItem.groupKey, null);
         setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.room;
-        initAdView(result);
-        initList(result, ChatListManager.instance.getList(mItemListType, mItem), false);
-
-        return result;
+        initAdView(mLayout);
+        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), false);
     }
 
     /** Deal with a change in the joined rooms state. */
@@ -195,7 +190,7 @@ public class ShowRoomListFragment extends BaseFragment {
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn off the FAB.
-        FabManager.chat.setState(View.VISIBLE);
+        FabManager.chat.setState(this, View.VISIBLE);
         super.onResume();
     }
 
