@@ -63,7 +63,7 @@ public class ChatFragment extends BaseFragment {
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
     @Override public void onInitialize() {
         // Declare the use of the options menu and intialize the FAB and it's menu.
-        setHasOptionsMenu(true);
+        super.onInitialize();
         FabManager.chat.init(mLayout, this.getTag());
     }
 

@@ -65,7 +65,7 @@ public class ShowNoAccountFragment extends BaseFragment {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
         //ProgressManager.instance.show(this.getContext());
-        setHasOptionsMenu(true);
+        super.onInitialize();
         ProgressManager.instance.hide();
     }
 

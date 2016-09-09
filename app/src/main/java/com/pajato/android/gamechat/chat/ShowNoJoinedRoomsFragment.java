@@ -51,12 +51,6 @@ public class ShowNoJoinedRoomsFragment extends BaseFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_no_joined_rooms;}
 
-    /** Handle the setup for the groups panel. */
-    @Override public void onInitialize() {
-        // Show the no joined rooms message.
-        setHasOptionsMenu(true);
-    }
-
     /** Handle an options menu choice. */
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {

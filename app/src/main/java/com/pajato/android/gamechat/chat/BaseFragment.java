@@ -84,9 +84,6 @@ public abstract class BaseFragment extends Fragment {
     /** The list type for this fragment. */
     protected ChatListManager.ChatListType mItemListType;
 
-    /** The list type of the last fragment shown in the chat pane. */
-    protected ChatListManager.ChatListType mLastChatListTypeShown;
-
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
@@ -150,7 +147,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     /** Initialize the fragment. */
-    abstract public void onInitialize();
+    public void onInitialize() {
+        // All chat and game fragments will use the options menu.
+        setHasOptionsMenu(true);
+    }
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {

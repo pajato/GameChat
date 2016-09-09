@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/init_panel">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@color/colorLightPurple"
+            android:contentDescription="@string/TicTacToeImageDesc"
+            android:src="@mipmap/ic_tictactoe"/>
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@color/colorLightPurple"
+            android:contentDescription="@string/CheckersImageDesc"
+            android:src="@mipmap/ic_checkers"/>
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@color/colorLightPurple"
+            android:contentDescription="@string/ChessImageDesc"
+            android:src="@mipmap/ic_chess"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/game_message"
+        android:padding="24dp"
+        android:text="@string/NoGamesMessageText"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        tools:text="Placeholder message ... updated at runtime."
+        tools:visibility="visible" />
+
+</LinearLayout>

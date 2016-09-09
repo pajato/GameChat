@@ -45,12 +45,12 @@ public class CheckersFragment extends BaseFragment {
     @Override public int getLayout() {return R.layout.fragment_checkers;}
 
     @Override public void onInitialize() {
+        super.onInitialize();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = true;
         onNewGame();
 
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
-        setHasOptionsMenu(true);
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
