@@ -17,12 +17,8 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
@@ -56,22 +52,21 @@ public class ShowNoAccountFragment extends BaseFragment {
         }
     }
 
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_no_account;}
+
     /** Handle an account state change event by showing the no sign in message. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
         // TODO: handle an account becoming available by switching to the show group list fragment.
     }
 
     /** Handle the setup for the groups panel. */
-    @Override public View onCreateView(final LayoutInflater inflater,
-                                       final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
         //ProgressManager.instance.show(this.getContext());
         setHasOptionsMenu(true);
-        EventBusManager.instance.register(this);
         ProgressManager.instance.hide();
-        return inflater.inflate(R.layout.fragment_chat_no_account, container, false);
     }
 
     /** Handle an options menu choice. */

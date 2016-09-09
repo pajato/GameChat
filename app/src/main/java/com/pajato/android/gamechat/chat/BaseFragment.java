@@ -27,10 +27,13 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -43,6 +46,7 @@ import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
+import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.message;
@@ -54,12 +58,20 @@ import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.mess
  *
  * @author Paul Michael Reilly
  */
-public class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
 
     // Private class constants.
 
     /** The logcat tag. */
     private static final String TAG = BaseFragment.class.getSimpleName();
+
+    /** The lifecycle event format string with no bundle. */
+    private static final String FORMAT_NO_BUNDLE =
+        "Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Lifecycle event: %s.";
+
+    /** The lifecycle event format string with a bundle provided. */
+    private static final String FORMAT_WITH_BUNDLE =
+        "Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Lifecycle event: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -69,8 +81,14 @@ public class BaseFragment extends Fragment {
     /** The item information passed from the parent fragment. */
     protected ChatListItem mItem;
 
-    /** The list type. */
+    /** The list type for this fragment. */
     protected ChatListManager.ChatListType mItemListType;
+
+    /** The list type of the last fragment shown in the chat pane. */
+    protected ChatListManager.ChatListType mLastChatListTypeShown;
+
+    /** The persisted layout view for this fragment. */
+    protected View mLayout;
 
     // Public constructors.
 
@@ -82,49 +100,57 @@ public class BaseFragment extends Fragment {
 
     // Public instance methods.
 
-    public void onActivityCreated(Bundle bundle) {
-        String format = "onActivityCreated: The activity associated with fragment {%s} has been "
-            + "created using bundle {%s}. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));
+    /** Obtain a layout file from the subclass. */
+    abstract public int getLayout();
+
+    @Override public void onActivityCreated(Bundle bundle) {
+        logEvent("onActivityCreated", bundle);
         super.onActivityCreated(bundle);
     }
 
     @Override public void onAttach(Context context) {
-        String format = "onAttach: Attaching fragment {%s} to activity with context {%s}. Fragment "
-            + "manager: {%s}.";
-        Log.v(TAG, String.format(format, this, context, getFragmentManager()));
+        logEvent("onAttach");
         super.onAttach(context);
     }
 
     @Override public void onCreate(Bundle bundle) {
-        String format = "onCreate: Creating fragment {%s} with bundle {%s}. Fragment manager: "
-            + "{%s}.";
-        Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));
+        logEvent("onCreate", bundle);
         super.onCreate(bundle);
+    }
+
+    /** Handle the onCreateView lifecycle event. */
+    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                                       final Bundle savedInstanceState) {
+        // Determine if the layout exists and reuse it if so.
+        if (mLayout != null) return mLayout;
+
+        // The layout does not exist.  Create and persist it, and initialize the fragment layout.
+        mLayout = inflater.inflate(getLayout(), container, false);
+        onInitialize();
+        logEvent("onCreateView", savedInstanceState);
+
+        return mLayout;
     }
 
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
-        // Log the lifecycle event to help during development.
-        String format = "onDestroy: Destroying fragment {%s}. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onDestroy");
         if (mAdView != null) mAdView.destroy();
         super.onDestroy();
     }
 
     @Override public void onDestroyView() {
-        // Log the lifecycle event to help during development.
-        String format = "onDestroyView: Destroying fragment {%s}. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onDestroyView");
         super.onDestroyView();
     }
 
     @Override public void onDetach() {
-        // Log the lifecycle event to help during development.
-        String format = "onDetach: Detaching fragment {%s}. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onDetach");
         super.onDetach();
     }
+
+    /** Initialize the fragment. */
+    abstract public void onInitialize();
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
@@ -150,22 +176,17 @@ public class BaseFragment extends Fragment {
         }
     }
 
-    /** Log the lifecycle event and stop showing ads. */
+    /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
     @Override public void onPause() {
-        // Log the lifecycle event to help during development and pause the ads.
-        String format = "onPause: Fragment {%s} is no longer visible and running. Fragment manager: "
-            + "{%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onPause");
         if (mAdView != null) mAdView.pause();
+        EventBusManager.instance.unregister(this);
         super.onPause();
     }
 
     /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
-        // Log the lifecycle event to help during development, continue showing ads and reregister
-        // the app event bus.
-        String format = "onResume: Fragment {%s} is visible and running. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onResume");
         if (mAdView != null) mAdView.resume();
         EventBusManager.instance.register(this);
         super.onResume();
@@ -173,26 +194,19 @@ public class BaseFragment extends Fragment {
 
     /** Log the lifecycle event. */
     @Override public void onStart() {
-        // Log the lifecycle event to help during development.
-        String format = "onStart: Make the fragment {%s} visible. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onStart");
         super.onStart();
     }
 
     /** Log the lifecycle event. */
     @Override public void onStop() {
-        // Log the lifecycle event to help during development.
-        String format = "onStop: Fragment {%s} is no longer visible. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, getFragmentManager()));
+        logEvent("onStop");
         super.onStop();
     }
 
     /** Log the lifecycle event. */
     @Override public void onViewStateRestored(Bundle bundle) {
-        // Log the lifecycle event to help during development.
-        String format = "onViewStateRestored: The saved state has been restored to fragment {%s} "
-            + "using bundle {%s}. Fragment manager: {%s}.";
-        Log.v(TAG, String.format(format, this, bundle, getFragmentManager()));
+        logEvent("onViewStateRestored", bundle);
         super.onViewStateRestored(bundle);
     }
 
@@ -218,6 +232,39 @@ public class BaseFragment extends Fragment {
         ChatListAdapter adapter = new ChatListAdapter();
         adapter.addItems(items);
         recyclerView.setAdapter(adapter);
+    }
+
+    /** Initialize the ad view by building and loading an ad request. */
+    protected void initAdView(@NonNull final View layout) {
+        mAdView = (AdView) layout.findViewById(R.id.adView);
+        if (mAdView != null) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+        }
+    }
+
+    /** Log a lifecycle event that has no bundle. */
+    protected void logEvent(final String event) {
+        String manager = getFragmentManager().toString();
+        String format = FORMAT_NO_BUNDLE;
+        Log.v(TAG, String.format(Locale.US, format, this, manager, mItemListType, event));
+    }
+
+    /** Log a lifecycle event that has a bundle. */
+    protected void logEvent(final String event, final Bundle bundle) {
+        String manager = getFragmentManager().toString();
+        String format = FORMAT_WITH_BUNDLE;
+        Log.v(TAG, String.format(Locale.US, format, this, manager, mItemListType, event, bundle));
+    }
+
+    /** Deal with the options menu by hiding the back button. */
+    protected void setOptionsMenu(final Menu menu, final MenuInflater inflater, final int[] visible,
+                                  final int[] gone) {
+        // Ensure that the menu options has been inflated and make the specified items visible and
+        // gone.
+        if (!menu.hasVisibleItems()) inflater.inflate(R.menu.chat_menu_base, menu);
+        if (visible != null) for (int itemId : visible) setItemState(menu, itemId, true);
+        if (gone != null) for (int itemId : gone) setItemState(menu, itemId, false);
     }
 
     /** Set the title in the toolbar using the group name. */
@@ -249,23 +296,16 @@ public class BaseFragment extends Fragment {
         Log.e(TAG, "The action bar is not accessible in order to set the titles!");
     }
 
-    /** Initialize the ad view by building and loading an ad request. */
-    protected void initAdView(@NonNull final View layout) {
-        mAdView = (AdView) layout.findViewById(R.id.adView);
-        if (mAdView != null) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mAdView.loadAd(adRequest);
-        }
-    }
-
-    /** Deal with the options menu by hiding the back button. */
-    protected void setOptionsMenu(final Menu menu, final MenuInflater inflater, final int[] visible,
-                                  final int[] gone) {
-        // Ensure that the menu options has been inflated and make the specified items visible and
-        // gone.
-        if (!menu.hasVisibleItems()) inflater.inflate(R.menu.chat_menu_base, menu);
-        if (visible != null) for (int itemId : visible) setItemState(menu, itemId, true);
-        if (gone != null) for (int itemId : gone) setItemState(menu, itemId, false);
+    /** Provide a way to handle volunteer solicitations for unimplemented functions. */
+    protected void showFutureFeatureMessage(final int resourceId) {
+        // Post a toast message.
+        Context context = getContext();
+        String prefix = context.getString(resourceId);
+        String suffix = context.getString(R.string.FutureFeature);
+        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+        int duration = Toast.LENGTH_LONG;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     // Private instance methods.

@@ -17,12 +17,8 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -52,14 +48,13 @@ public class ShowNoJoinedRoomsFragment extends BaseFragment {
         }
     }
 
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_no_joined_rooms;}
+
     /** Handle the setup for the groups panel. */
-    @Override public View onCreateView(final LayoutInflater inflater,
-                                       final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Show the no joined rooms message.
         setHasOptionsMenu(true);
-        EventBusManager.instance.register(this);
-        return inflater.inflate(R.layout.fragment_chat_no_joined_rooms, container, false);
     }
 
     /** Handle an options menu choice. */

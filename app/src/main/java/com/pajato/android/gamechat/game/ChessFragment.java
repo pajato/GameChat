@@ -1,17 +1,14 @@
 package com.pajato.android.gamechat.game;
 
 import android.graphics.PorterDuff;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.SparseArray;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -36,7 +33,6 @@ public class ChessFragment extends BaseFragment {
     private SparseArray<ChessPiece> mBoardMap;
     private ImageButton mHighlightedTile;
     private boolean mIsHighlighted = false;
-    private View mLayout;
     private ArrayList<Integer> mPossibleMoves;
 
     // Castle Management Objects
@@ -47,11 +43,11 @@ public class ChessFragment extends BaseFragment {
     private boolean mSecondaryKingSideRookHasMoved;
     private boolean mSecondaryKingHasMoved;
 
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_checkers;}
 
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Setup the board and start a new game to create the board.
-        mLayout = inflater.inflate(R.layout.fragment_checkers, container, false);
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();
@@ -69,8 +65,6 @@ public class ChessFragment extends BaseFragment {
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
                 PorterDuff.Mode.SRC_ATOP);
-
-        return mLayout;
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

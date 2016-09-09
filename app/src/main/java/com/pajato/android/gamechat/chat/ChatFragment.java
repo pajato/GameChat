@@ -17,18 +17,13 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -46,30 +41,30 @@ public class ChatFragment extends BaseFragment {
 
     // Public instance methods.
 
-    /** Handle a authentication event. */
+    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
+    @Override public int getLayout() {return R.layout.fragment_chat;}
+
+    /** Handle a authentication change event by dealing with the fragment to display. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // Register an active rooms change handler on the account, if there is an account,
-        // preferring a cached handler, if one is available.
+        // Log the event and determine if there is an active account.
+        logEvent("onAccountStateChange");
         if (event.account == null) {
             // There is no active account.  Show the no account fragment.
             ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
         } else {
-            // There is an active account.  Show a list of messages by room in the groups for which
-            // the account is a member.
-            ChatManager.instance.replaceFragment(showGroupList, this.getActivity());
+            // There is an active account.  Determine if a default fragment needs to be set up and,
+            // if so, show the group list, otherwise just let whatever fragment is running stay
+            // running.
+            ChatManager.ChatFragmentType type = ChatManager.instance.lastTypeShown;
+            if (type == null) ChatManager.instance.replaceFragment(showGroupList, getActivity());
         }
     }
 
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
-        // Inflate the layout, and initialize the game manager.
+    @Override public void onInitialize() {
+        // Declare the use of the options menu and intialize the FAB and it's menu.
         setHasOptionsMenu(true);
-        View result = inflater.inflate(R.layout.fragment_chat, container, false);
-        FabManager.chat.init(result);
-        EventBusManager.instance.register(this);
-
-        return result;
+        FabManager.chat.init(mLayout, this.getTag());
     }
 
     /** Post the chat options menu on demand. */

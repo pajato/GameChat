@@ -17,10 +17,7 @@
 
 package com.pajato.android.gamechat.game;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
@@ -28,17 +25,17 @@ import com.pajato.android.gamechat.chat.BaseFragment;
 
 public class InitialFragment extends BaseFragment {
 
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_initial;}
+
+    @Override public void onInitialize() {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
-        View layout = inflater.inflate(R.layout.fragment_initial, container, false);
         // Setup the No Rooms Message.
-        TextView message = (TextView) layout.findViewById(R.id.game_message);
+        TextView message = (TextView) mLayout.findViewById(R.id.game_message);
         message.setText(R.string.NoRoomsMessageText);
         // Return the fab back to visible.
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
-        return layout;
     }
 
 }

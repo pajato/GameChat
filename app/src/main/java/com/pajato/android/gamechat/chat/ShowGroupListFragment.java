@@ -19,25 +19,21 @@ package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
@@ -67,12 +63,12 @@ public class ShowGroupListFragment extends BaseFragment {
         switch (value) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
-                FabManager.chat.toggle(getView());
+                FabManager.chat.toggle(this);
                 break;
             case R.id.addGroupButton:
             case R.id.addGroupMenuItem:
                 // Dismiss the FAB menu, and start up the add group activity.
-                FabManager.chat.dismissMenu();
+                FabManager.chat.dismissMenu(this);
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
@@ -93,6 +89,9 @@ public class ShowGroupListFragment extends BaseFragment {
         }
     }
 
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_groups;}
+
     /** Deal with the options menu by hiding the back button. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         // Turn off the back option and turn on the search option.
@@ -100,19 +99,14 @@ public class ShowGroupListFragment extends BaseFragment {
     }
 
     /** Handle the setup for the groups panel. */
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
+    @Override public void onInitialize() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
         setTitles(null, null);
         setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.group;
-        View layout = inflater.inflate(R.layout.fragment_chat_groups, container, false);
-        initAdView(layout);
-        initList(layout);
-        EventBusManager.instance.register(this);
-
-        return layout;
+        initAdView(mLayout);
+        initList(mLayout);
     }
 
     /** Deal with a change in the joined rooms state. */
@@ -158,7 +152,7 @@ public class ShowGroupListFragment extends BaseFragment {
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
         // Turn on the FAB and shut down the progress bar.
-        FabManager.chat.setState(View.VISIBLE);
+        FabManager.chat.setState(this, View.VISIBLE);
         ProgressManager.instance.hide();
         super.onResume();
     }
