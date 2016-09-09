@@ -33,6 +33,7 @@ public class LocalTTTFragment extends BaseFragment {
 
     @Override public void onInitialize() {
         // Initialize Member Variables
+        super.onInitialize();
         mTurn = true;
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
@@ -40,7 +41,6 @@ public class LocalTTTFragment extends BaseFragment {
         turnCount = 0;
 
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
-        setHasOptionsMenu(true);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

@@ -48,11 +48,10 @@ public class ChessFragment extends BaseFragment {
 
     @Override public void onInitialize() {
         // Setup the board and start a new game to create the board.
+        super.onInitialize();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();
-
-        setHasOptionsMenu(true);
 
         // Return the FAB to Visibility
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);

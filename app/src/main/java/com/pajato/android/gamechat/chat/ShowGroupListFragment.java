@@ -102,8 +102,8 @@ public class ShowGroupListFragment extends BaseFragment {
     @Override public void onInitialize() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
+        super.onInitialize();
         setTitles(null, null);
-        setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.group;
         initAdView(mLayout);
         initList(mLayout);

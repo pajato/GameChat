@@ -63,7 +63,7 @@ public enum GameManager {
         fragmentList = new Fragment[TOTAL_FRAGMENTS];
 
         // Set the current fragment to our default.
-        fragmentList[INIT_INDEX] = new InitialFragment();
+        fragmentList[INIT_INDEX] = new ShowNoGamesFragment();
         sendNewGame(INIT_INDEX, context);
     }
 

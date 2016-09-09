@@ -44,21 +44,17 @@ public class TTTFragment extends BaseFragment {
     private HashMap<String, Integer> mLayoutMap;
     private Firebase mRef;
 
-    public TTTFragment() {
-        // Required empty constructor.
-    }
-
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
     @Override public void onInitialize() {
         // Initialize Member Variables
+        super.onInitialize();
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
         mSpace = getString(R.string.spaceValue);
         mTurn = true;
 
-        setHasOptionsMenu(true);
         getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
 
         // Setup our Firebase database reference and a listener to keep track of the board.
@@ -78,7 +74,7 @@ public class TTTFragment extends BaseFragment {
                     mTurn = (mLayoutMap.get(TURN_INDICATOR) == 1);
                     handlePlayerIcons(mTurn);
                 } else {
-                    mLayoutMap = new HashMap<String, Integer>();
+                    mLayoutMap = new HashMap<>();
                 }
             }
             // In the event that the request to listen is canceled, we need to
@@ -112,7 +108,6 @@ public class TTTFragment extends BaseFragment {
     public void messageHandler(final String msg) {
         //TODO: Modify this when an implemented event handling system is implemented.
         Scanner input = new Scanner(msg);
-        String player = input.nextLine();
         String buttonTag = input.nextLine();
         input.close();
 
@@ -120,7 +115,7 @@ public class TTTFragment extends BaseFragment {
         if(buttonTag.equals(getString(R.string.new_game))) {
             handleNewGame();
         } else {
-            handleTileClick(player, buttonTag);
+            handleTileClick(buttonTag);
         }
 
     }
@@ -323,10 +318,9 @@ public class TTTFragment extends BaseFragment {
      * Assigns a value to a button without text, either X or O,
      * depending on the player whose turn it is.
      *
-     * @param player the player who initiated the click.
      * @param buttonTag the tag of the button clicked.
      */
-    private void handleTileClick(final String player, final String buttonTag) {
+    private void handleTileClick(final String buttonTag) {
         Button b = (Button) mLayout.findViewWithTag(buttonTag);
         // Only updates the tile if the current value is empty and the game has not finished yet.
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {

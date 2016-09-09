@@ -121,8 +121,8 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
         // use of the options menu, removing the FAB button, fetching any remote configurations,
         // setting up the list of messages, setting up the edit text field and setting up the
         // database analytics.
+        super.onInitialize();
         setTitles(null, mItem.roomKey);
-        setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.message;
         FabManager.chat.setState(this, View.GONE);
         initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), true);

@@ -27,7 +27,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseFragment;
 import com.pajato.android.gamechat.chat.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -39,24 +38,21 @@ import org.greenrobot.eventbus.Subscribe;
  */
 public class GameFragment extends BaseFragment {
 
-    public GameFragment() {
-        // Required empty public constructor
-    }
-
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game;}
 
-    @Override public void onInitialize() {
-        // Inflate the layout, and initialize the various managers.
-        setHasOptionsMenu(true);
-        EventBusManager.instance.register(this);
-        GameManager.instance.init(getActivity());
-        FabManager.game.init(mLayout, this.getTag());
-    }
-
+    /** Handle the options menu by inflating it. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.game_menu, menu);
+    }
+
+    /** Intialize the game fragment envelope. */
+    @Override public void onInitialize() {
+        // Inflate the layout, and initialize the various managers.
+        super.onInitialize();
+        GameManager.instance.init(getActivity());
+        FabManager.game.init(mLayout, this.getTag());
     }
 
     @Override public boolean onOptionsItemSelected(final MenuItem item) {

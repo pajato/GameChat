@@ -114,8 +114,8 @@ public class ShowRoomListFragment extends BaseFragment {
     @Override public void onInitialize() {
         // Inflate the layout for this fragment and initialize by setting the titles, declaring the
         // use of the options menu, setting up the ad view and initializing the rooms handling.
+        super.onInitialize();
         setTitles(mItem.groupKey, null);
-        setHasOptionsMenu(true);
         mItemListType = ChatListManager.ChatListType.room;
         initAdView(mLayout);
         initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), false);
