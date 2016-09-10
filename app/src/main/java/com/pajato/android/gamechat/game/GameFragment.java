@@ -31,12 +31,57 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.game.GameManager.INIT_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
+
 /**
  * A Fragment that contains and controls the current game being played.
  *
  * @author Bryan Scott
  */
 public class GameFragment extends BaseFragment {
+
+    /** Process a given button click event looking for one on the game fab button. */
+    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+        // Grab the View ID and the floating action button and dimmer views.
+        int viewId = event.getView() != null ? event.getView().getId() : 0;
+        switch (viewId) {
+            case R.id.init_ttt:
+            case R.id.init_ttt_button:
+                // When a button is clicked, send a new game and reset the fab menu and background
+                // dimmer.
+                String title = getString(R.string.new_game_ttt);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.id.init_checkers:
+            case R.id.init_checkers_button:
+                // Do it for checkers.
+                title = getString(R.string.new_game_checkers);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.id.init_chess:
+            case R.id.init_chess_button:
+                // Do it for chess.
+                title = getString(R.string.new_game_chess);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.id.init_rooms:
+            case R.id.init_rooms_button:
+                // And do it for the rooms option buttons.
+                GameManager.instance.sendNewGame(INIT_INDEX, getActivity());
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.id.games_fab:
+                // If the click is on the fab, we have to handle if it's open or closed.
+                FabManager.game.toggle(this);
+                break;
+            default:
+                break;
+        }
+    }
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game;}
@@ -55,57 +100,24 @@ public class GameFragment extends BaseFragment {
         FabManager.game.init(mLayout, this.getTag());
     }
 
+    /** Handle a menu item selection. */
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        if(item.getItemId() ==  R.id.toolbar_chat_icon) {
-            // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
-            ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-            if (viewPager != null) {
-                viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-            }
-        } else if (item.getItemId() == R.id.options_menu_new_game) {
-            GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
+        // Case on the item.
+        switch (item.getItemId()) {
+            case R.id.toolbar_chat_icon:
+                // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            case R.id.options_menu_new_game:
+                // ...
+                GameManager.instance.sendNewGame(INIT_INDEX, getActivity());
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
-    }
 
-    /** Process a given button click event looking for one on the rooms fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Grab the View ID and the floating action button and dimmer views.
-        int viewId = event.getView() != null ? event.getView().getId() : 0;
-        View backgroundDimmer =getActivity().findViewById(R.id.games_background_dimmer);
-
-        // When a button is clicked, send a new game and reset the fab menu and background dimmer.
-        if(viewId == R.id.init_ttt || viewId == R.id.init_ttt_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_ttt));
-            FabManager.game.dismissMenu(this);
-            backgroundDimmer.setVisibility(View.GONE);
-        // Do it for checkers.
-        } else if (viewId == R.id.init_checkers || viewId == R.id.init_checkers_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_checkers));
-            FabManager.game.dismissMenu(this);
-            backgroundDimmer.setVisibility(View.GONE);
-        // Do it for chess.
-        } else if (viewId == R.id.init_chess || viewId == R.id.init_chess_button) {
-            GameManager.instance.sendNewGame(GameManager.SETTINGS_INDEX, getActivity(),
-                    getString(R.string.new_game_chess));
-            FabManager.game.dismissMenu(this);
-            backgroundDimmer.setVisibility(View.GONE);
-        // And do it for the rooms option buttons.
-        } else if (viewId == R.id.init_rooms || viewId == R.id.init_rooms_button) {
-            GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
-            FabManager.game.dismissMenu(this);
-            backgroundDimmer.setVisibility(View.GONE);
-        // If the click is on the fab, we have to handle if it's open or closed.
-        } else if (viewId == R.id.games_fab) {
-            FabManager.game.toggle(this);
-            if(backgroundDimmer.getVisibility() == View.VISIBLE) {
-                backgroundDimmer.setVisibility(View.GONE);
-            } else {
-                backgroundDimmer.setVisibility(View.VISIBLE);
-            }
-        }
+        return true;
     }
 
     /**

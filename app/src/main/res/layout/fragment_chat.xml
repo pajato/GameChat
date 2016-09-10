@@ -15,7 +15,8 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
 -->
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -26,6 +27,10 @@ http://www.gnu.org/licenses
         android:layout_height="match_parent"
         android:id="@+id/chatFragmentContainer">
     </FrameLayout>
+
+    <View style="@style/DimmerTheme"
+        android:id="@+id/chatDimmer"
+        tools:visibility="visible"/>
 
     <LinearLayout
         style="@style/FabMenu"

@@ -92,4 +92,11 @@ http://www.gnu.org/licenses
         <item name="android:onClick">onClick</item>
     </style>
 
+    <style name="DimmerTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">#E6FFFFFF</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
 </resources>
