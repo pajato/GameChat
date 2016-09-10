@@ -22,7 +22,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -35,13 +34,8 @@ import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum FabManager {
-    chat(R.id.chatFab, R.id.chatFabMenu),
-    game(R.id.games_fab, R.id.games_fab_menu);
-
-    FabManager(final int fabId, final int fabMenuId) {
-        mFabId = fabId;
-        mFabMenuId = fabMenuId;
-    }
+    chat(R.id.chatFab, R.id.chatFabMenu, R.id.chatDimmer),
+    game(R.id.games_fab, R.id.games_fab_menu, R.id.gameDimmer);
 
     /** Provide FAB state constants. */
     enum State {opened, closed}
@@ -54,35 +48,31 @@ public enum FabManager {
     /** The fab menu resource identifier. */
     private int mFabMenuId;
 
-    /** The tag used to find the main chat fragment, which spawns all others. */
+    /** The resource id used to access the dimmer view used to blur the content. */
+    private int mFabDimmerId;
+
+    /** The resource id used to access the main fragment. */
     private String mTag;
 
-    /** The association of FAB button resource identifiers and their menu layout. */
-    private SparseArray<View> mMenuMap = new SparseArray<>();
+    // Sole Constructor.
+
+    /** Build the instance with the given resource ids. */
+    FabManager(final int fabId, final int fabMenuId, final int fabDimmerId) {
+        mFabId = fabId;
+        mFabMenuId = fabMenuId;
+        mFabDimmerId = fabDimmerId;
+    }
 
     // Public instance methods
 
     /** Initialize the fab button. */
-    public void init(@NonNull final View layout, final String tag) {
+    public void init(@NonNull final View layout, final String fragmentTag) {
         // Initialize the fab button state to opened and then toggle it to put the panel into the
         // correct initial state.
-        mTag = tag;
+        mTag = fragmentTag;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        View menu = layout.findViewById(mFabMenuId);
         fab.setTag(R.integer.fabStateKey, opened);
-        mMenuMap.put(mFabId, menu);
         dismissMenu(layout);
-    }
-
-    /** Dismiss the menu associated with the given layout view. */
-    public void dismissMenu(@NonNull final View layout) {
-        // The fragment is accessible and the layout has been established.  Finish dismissing the
-        // fab menu.
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        fab.setImageResource(R.drawable.ic_add_white_24dp);
-        fab.setTag(R.integer.fabStateKey, State.closed);
-        View menu = mMenuMap.get(mFabId);
-        menu.setVisibility(View.GONE);
     }
 
     /** Dismiss the menu associated with the given FAB button. */
@@ -92,40 +82,27 @@ public enum FabManager {
         if (layout != null) dismissMenu(layout);
     }
 
-    /** Return the given fragment's layout view, if one exists, otherwise null. */
-    private View getView(@NonNull final Fragment fragment) {
-        // Determine if the given fragment has an associated fragment.
-        FragmentActivity activity = fragment.getActivity();
-        if (activity == null) {
-            // The fragment does not have an associated activity!.
-            String format = "The fragment {%s} does not have an attached activity!";
-            Log.e(TAG, String.format(Locale.US, format, fragment));
-            return null;
-        }
-
-        // Determine if the attached fragment has a view.  If so return the view, otherwise null.
-        Fragment chatFragment = activity.getSupportFragmentManager().findFragmentByTag(mTag);
-        return chatFragment != null ? chatFragment.getView() : null;
-    }
-
     /** Set the FAB visibility state. */
     public void setState(@NonNull final Fragment fragment, final int state) {
+        // Obtain the layout view owning the FAB.  If it is not accessible, just return since an
+        // error message will have been generated.  If it is accessible, apply the given visibility
+        // state.
         View layout = getView(fragment);
         if (layout == null) return;
-
-        // ...
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(state);
     }
 
-    /** Toggle the state of the FAB button. */
+    /** Toggle the state of the FAB button using a given fragment to obtain the layout view. */
     public void toggle(@NonNull final Fragment fragment) {
-        // Determine if the fab view STATE tag has a valid state value and the content view exists.
+        // Determine if the fragment layout exists.  Continue if it does.  Return if it does not.
+        // An error message with stack trace will have been generated if the view cannot be
+        // accessed.
         View layout = getView(fragment);
         if (layout == null) return;
 
         // The layout view is valid.  Use it to toggle the fab state.
-        View contentView = fragment.getView();
+        View dimmerView = layout.findViewById(mFabDimmerId);
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         Object payload = fab.getTag(R.integer.fabStateKey);
         if (payload instanceof State) {
@@ -133,22 +110,69 @@ public enum FabManager {
             State value = (State) payload;
             switch (value) {
                 case opened:
-                    // The FAB is showing X and menu is visible.  Set the icon to +, close the
-                    // menu and undim the frame.
+                    // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
+                    // the menu and undim the frame.
                     dismissMenu(layout);
-                    if (contentView != null) contentView.setVisibility(View.VISIBLE);
+                    dimmerView.setVisibility(View.GONE);
                     break;
                 case closed:
-                    // The FAB is showing + and the menu is not visible.  Set the icon to X and open
-                    // the menu.
+                    // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
+                    // open the menu.
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
-                    if (contentView != null) contentView.setVisibility(View.GONE);
-                    View menu = mMenuMap.get(mFabId);
+                    dimmerView.setVisibility(View.VISIBLE);
+                    View menu = layout.findViewById(mFabMenuId);
                     menu.setVisibility(View.VISIBLE);
                     break;
             }
         }
+    }
+
+    // Private instance methods.
+
+    /** Dismiss the menu associated with the given layout view. */
+    private void dismissMenu(@NonNull final View layout) {
+        // The fragment is accessible and the layout has been established.  Finish dismissing the
+        // fab menu.
+        View dimmerView = layout.findViewById(mFabDimmerId);
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        fab.setImageResource(R.drawable.ic_add_white_24dp);
+        fab.setTag(R.integer.fabStateKey, State.closed);
+        View menu = layout.findViewById(mFabMenuId);
+        menu.setVisibility(View.GONE);
+        dimmerView.setVisibility(View.GONE);
+    }
+
+    /** Return the given fragment's layout view, if one exists, otherwise null. */
+    private View getView(@NonNull final Fragment fragment) {
+        // Determine if the given fragment has an associated activity.
+        FragmentActivity activity = fragment.getActivity();
+        if (activity == null) {
+            // The activity is not accessible.  This is generally caused by a software error, in this
+            // case, it is likely that an app event subscribed handler has invoked this call
+            // inappropriately.  To that end, a stack trace is being appended to the error message
+            // being logged.
+            Throwable t = new Throwable();
+            String format = "The fragment {%s} does not have an activity attached!";
+            Log.e(TAG, String.format(Locale.US, format, fragment), t);
+            return null;
+        }
+
+        // Determine if the attached fragment has a view.  If so return the view, otherwise null.
+        Fragment envelopeFragment = activity.getSupportFragmentManager().findFragmentByTag(mTag);
+        if (envelopeFragment == null || envelopeFragment.getView() == null) {
+            // The envelope fragment or it's layout view is not accessible.  This is generally
+            // caused by a software error, in this case, it is likely that an app event subscribed
+            // handler has invoked this call inappropriately.  To that end, a stack trace is being
+            // appended to the error message being logged.
+            Throwable t = new Throwable();
+            String format = "The envelope fragment {%s} does not have a layout view!";
+            Log.e(TAG, String.format(Locale.US, format, envelopeFragment), t);
+            return null;
+        }
+
+        // There is a layout view to return.
+        return envelopeFragment.getView();
     }
 
 }

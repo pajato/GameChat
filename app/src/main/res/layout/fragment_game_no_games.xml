@@ -17,7 +17,7 @@
             android:layout_height="96dp"
             android:background="@color/colorLightPurple"
             android:contentDescription="@string/TicTacToeImageDesc"
-            android:src="@mipmap/ic_tictactoe"/>
+            android:src="@mipmap/ic_tictactoe_red"/>
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
