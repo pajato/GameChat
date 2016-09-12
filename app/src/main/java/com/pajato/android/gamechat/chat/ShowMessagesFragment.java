@@ -205,7 +205,7 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
             String url = account.accountUrl != null ? account.accountUrl : null;
             long tstamp = new Date().getTime();
             String text = editText.getText().toString();
-            List<String> members = ChatListManager.instance.getMembers(mItem.roomKey);
+            List<String> members = ChatListManager.instance.getRoomMembers(mItem.roomKey);
             members.remove(uid);
             int type = STANDARD;
             Message message = new Message(uid, name, url, key, tstamp, tstamp, text, type, members);

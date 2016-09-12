@@ -27,40 +27,63 @@ public class ChatListItem {
 
     // Public constants.
 
-    static final int DATE_ITEM_TYPE = 0;
-    static final int GROUP_ITEM_TYPE= 1;
-    static final int MESSAGE_ITEM_TYPE = 2;
-    static final int ROOM_ITEM_TYPE = 3;
+    static final int CONTACT_HEADER_ITEM_TYPE = 0;
+    static final int CONTACT_ITEM_TYPE = 1;
+    static final int DATE_ITEM_TYPE = 2;
+    static final int GROUP_ITEM_TYPE= 3;
+    static final int MESSAGE_ITEM_TYPE = 4;
+    static final int ROOM_ITEM_TYPE = 5;
 
     // Public enums
 
     // Public instance variables.
 
-    /** The group (push) key. */
+    /** The chat list item count of new messages in a group or a room. */
+    int count;
+
+    /** The item email address, possibly null, used for contact items. */
+    public String email;
+
+    /** The group (push) key, possibly null, used for chat list items (groups, rooms, messages) */
     public String groupKey;
 
-    /** The room (push) key, possibly null. */
-    public String roomKey;
-
-    /** The item type. */
-    public int type;
-
-    /** The URL for the item. */
-    public String url;
-
-    /** The item name, possibly null. */
+    /** The item name, possibly null, used for all items. */
     public String name;
 
     /** The item name resource identifier. */
     int nameResourceId;
 
-    /** The chat list item count of new messages in a group or a room. */
-    int count;
+    /** The item phone number, possibly null, used for contact items. */
+    public String phone;
+
+    /** The room (push) key, possibly null, used for chat list items. */
+    public String roomKey;
+
+    /** The item type, always non-null. */
+    public int type;
+
+    /** The URL for the item, possibly null, used for icons with contacts and chat list items. */
+    public String url;
 
     /** The list of rooms or groups with messages to show, or the text of a message. */
     public String text;
 
     // Public constructors.
+
+    /** Build an instance for a given contact header item. */
+    public ChatListItem(final ContactHeaderItem item) {
+        type = CONTACT_HEADER_ITEM_TYPE;
+        nameResourceId = item.getNameResourceId();
+    }
+
+    /** Build an instance for a given contact list item. */
+    public ChatListItem(final ContactItem item) {
+        type = CONTACT_ITEM_TYPE;
+        name = item.name;
+        email = item.email;
+        phone = item.phone;
+        url = item.url;
+    }
 
     /** Build an instance for a given group list item. */
     public ChatListItem(final GroupItem item) {
@@ -97,7 +120,5 @@ public class ChatListItem {
         count = item.count;
         text = item.text;
     }
-
-    // Public instance methods.
 
 }

@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -27,12 +28,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -55,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.R.attr.path;
+import static com.pajato.android.gamechat.R.id.clearGroupName;
 import static com.pajato.android.gamechat.chat.ChatListManager.STANDARD;
 
 /**
@@ -87,6 +91,15 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) processGroup(account);
                 finish();
+                break;
+            case clearGroupName:
+                clearGroupName();
+                break;
+            case R.id.addGroupMembers:
+                showFutureFeatureMessage(R.string.InviteGroupMembersFeature);
+                break;
+            case R.id.setGroupIcon:
+                showFutureFeatureMessage(R.string.SetAddGroupIconFeature);
                 break;
             default:
                 // Ignore everything else.
@@ -121,10 +134,23 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Handle a clear button click on the toolbar by canceling the activity. */
     @Override public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == android.R.id.home) {
-            finish();
+        // Determine how to deal with the selected options menu item.
+        switch (menuItem.getItemId()) {
+            case R.id.addGroupLearnMore:
+                showFutureFeatureMessage(R.string.LearnMoreFeature);
+                return true;
+            case R.id.addGroupFeedback:
+                sendFeedbackEmail("Add Group Feedback");
+                return true;
+            case R.id.addGroupInstallUsers:
+                addGroupInstallUsers();
+                return true;
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(menuItem);
         }
-        return super.onOptionsItemSelected(menuItem);
     }
 
     // Protected instance methods
@@ -157,10 +183,74 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     // Private instance methods.
 
+    /** Development utility to automagically add developers into a group. */
+    private void addGroupInstallUsers() {
+        // Brute force add some developer account ids to the member group id list.
+        String pmr = "090868899495965409893A9290F833E6EDFD0702AEEF";
+        String heatherbostonmusic = "oKHym8UTOQazGk36hK856FX7zZ12";
+        List<String> developers = new ArrayList<>();
+        developers.add(pmr);
+        developers.add(heatherbostonmusic);
+        for (String accountId : developers) mGroup.memberIdList.add(accountId);
+    }
+
+    /** Clear the group name edit text field by setting it to contain the empty string. */
+    private void clearGroupName() {
+        EditText editText = (EditText) findViewById(R.id.groupNameText);
+        if (editText != null) editText.setText("");
+    }
+
+    /** Create a new message object on the given database. */
+    private void createMessage(final DatabaseReference database, final Account account,
+                               final String groupKey, final String roomKey, final String text,
+                               final List<String> members) {
+        String path = String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
+        String key = database.child(path).push().getKey();
+        String url = account.accountUrl;
+        long timestamp = new Date().getTime();
+        String id = account.accountId;
+        String name = getName(account);
+        int type = STANDARD;
+        Message message = new Message(id, name, url, key, timestamp, timestamp, text, type, members);
+        DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
+    }
+
+    /** Return a default group name based on the given account. */
+    private String getDefaultAccountName() {
+        // Ensure that the account exists.
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null) return null;
+
+        // Obtain a sane default group name.
+        String group = getResources().getString(R.string.Group);
+        String value = account.displayName == null ? getEmailName(account) : account.displayName;
+        return String.format(Locale.getDefault(), "%s %s", value, group);
+    }
+
+    /** Return the base part of the email address (excludes domain). */
+    private String getEmailName(final Account account) {
+        String email = account.accountEmail;
+        int index = email.indexOf('@');
+        String value = email.substring(0, index);
+        return value.substring(0, 1).toUpperCase(Locale.getDefault()) + value.substring(1);
+    }
+
+    /** Get a name to use for the group, preferring the display name. */
+    private String getName(Account account) {
+        return account.displayName != null ? account.displayName : "Anonymous";
+    }
+
     /** Initialize the main activity. */
     private void init() {
-        // Set up the toolbar to support a cancel button in the "home" position and ensure that all
-        // is well.
+        // Set up the toolbar to support a cancel button in the "home" position; establish a group
+        // name default.
+        initToolbar();
+        TextView view = (TextView) findViewById(R.id.groupNameText);
+        view.setText(getDefaultAccountName());
+    }
+
+    /** Initialize the toolbar */
+    private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_clear_black_24dp);
         toolbar.setNavigationOnClickListener(this);
@@ -177,12 +267,14 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
             TextView button = (TextView) toolbar.findViewById(R.id.saveGroupButton);
             text.addTextChangedListener(new TextChangeHandler(this, text, button, mGroup));
         }
-
-        // TODO: Set up the member invitation list for this group.
     }
 
     /** Process a newly created group by saving it to Firebase. */
     private void processGroup(@NonNull Account account) {
+        // Ensure that the owner is also a group member.
+        String owner = account.accountId;
+        if (!mGroup.memberIdList.contains(owner)) mGroup.memberIdList.add(owner);
+
         // Update the group profile on the database.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String groupsPath = "/groups/";
@@ -194,7 +286,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         long timestamp = new Date().getTime();
         List<String> list = new ArrayList<>();
         list.add(account.accountId);
-        String owner = account.accountId;
         Room room = new Room(owner, "General", groupKey, timestamp, timestamp, "public", list);
         String roomPath = String.format(Locale.US, "/groups/%s/rooms/", groupKey);
         String roomKey = database.child(roomPath).push().getKey();
@@ -214,24 +305,30 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         createMessage(database, account, groupKey, roomKey, text, members);
     }
 
-    /** Create a new message object on the given database. */
-    private void createMessage(final DatabaseReference database, final Account account,
-                               final String groupKey, final String roomKey, final String text,
-                               final List<String> members) {
-        String path = String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
-        String key = database.child(path).push().getKey();
-        String url = account.accountUrl;
-        long timestamp = new Date().getTime();
-        String id = account.accountId;
-        String name = getName(account);
-        int type = STANDARD;
-        Message message = new Message(id, name, url, key, timestamp, timestamp, text, type, members);
-        DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
+    /** Send email to the support address. */
+    private void sendFeedbackEmail(final String subject) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("message/rfc822");
+        intent.putExtra(Intent.EXTRA_EMAIL  , new String[] {"support@pajato.com"});
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT   , "");
+        try {
+            startActivity(Intent.createChooser(intent, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(this, "No email clients are installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    /** Get a name to use for the group, preferring the display name. */
-    private String getName(Account account) {
-        return account.displayName != null ? account.displayName : "Anonymous";
+    /** Indicate a future feature opportunity. */
+    private void showFutureFeatureMessage(final int resourceId) {
+        // Post a toast message.
+        String prefix = getString(resourceId);
+        String suffix = getString(R.string.FutureFeature);
+        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+        int duration = Toast.LENGTH_LONG;
+        Toast toast = Toast.makeText(this, text, duration);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
     // Private classes.

@@ -1,13 +1,13 @@
 <resources>
-    <string name="AddGroup">Add Group</string>
-    <string name="AddGroupDescription">Add Group menu button</string>
+    <string name="AddGroupTitle">Add Group</string>
+    <string name="AddGroupDesc">Add Group menu button</string>
+    <string name="AddGroupMembers">Invite group members</string>
+    <string name="AddGroupNameHint">Type group name</string>Title">
     <string name="AddRoom">Add Room</string>
-    <string name="AddRoomDescription">Add Room menu button</string>
+    <string name="AddRoomDesc">Add Room menu button</string>
     <string name="ChatTitle">Chat</string>
     <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
-    <string name="GroupAddHintText">Enter group name</string>
-    <string name="GroupAddLabelText">Name:</string>
-    <string name="GroupAddTitle">Add Group</string>
+    <string name="Group">Group</string>
     <string name="GroupListIcon">The group icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
@@ -15,17 +15,22 @@
     <string name="InsertMapDesc">Inser map image button.</string>
     <string name="InsertPhoto">Inserting a photo from your device</string>
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
+    <string name="InstallDebugUsers">Install developer users</string>
+    <string name="InviteGroupMembersFeature">Inviting group members</string>
     <string name="JoinRoom">Join Room</string>
-    <string name="JoinRoomDescription">Join Room menu button</string>
-    <string name="NoAccountMessageText">
-You are signed out.  GameChat is much more fun when you can interact with your family and friends.  Meanwhile play games by your self to enjoy your alone time.
-    </string>
+    <string name="JoinRoomDesc">Join Room menu button</string>
+    <string name="LearnMoreFeature">Providing context help</string>
+    <string name="NoAccountMessageText">You are signed out.  GameChat is much more fun when you can interact with your family and friends.  Meanwhile play games by your self to enjoy your alone time.</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="RoomListIcon">The room list icon.</string>
+    <string name="SetAddGroupIconFeature">Setting the add group icon</string>
+    <string name="SetGroupIconDesc">Set the group icon</string>
     <string name="TakePicture">Inserting a picture using your camera</string>
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
     <string name="TakeVideoDesc">Take a video image button.</string>
     <string name="backItemTitleText">Back</string>
+    <string name="contacts">Contacts</string>
     <string name="editMessageHint">Type a message</string>
+    <string name="frequent">Frequent</string>
 </resources>

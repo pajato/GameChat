@@ -17,12 +17,11 @@ http://www.gnu.org/licenses
 
 Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
 -->
-<LinearLayout
+<LinearLayout style="@style/DateHeaderTheme"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="@style/DateHeaderTheme">
+    xmlns:tools="http://schemas.android.com/tools">
     <TextView
-        android:id="@+id/chatName"
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -31,5 +30,5 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
         android:textAlignment="center"
         android:textSize="20sp"
         android:textStyle="bold"
-        tools:text="Now"/>
- </LinearLayout>
+        tools:text="Header Title"/>
+</LinearLayout>

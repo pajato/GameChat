@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEADER_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
@@ -72,8 +74,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     /** Manage the recycler view holder thingy. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {
         switch (entryType) {
+            case CONTACT_HEADER_ITEM_TYPE:
+                return new HeaderViewHolder(getView(parent, R.layout.item_header));
+            case CONTACT_ITEM_TYPE:
+                return new ContactViewHolder(getView(parent, R.layout.item_contact));
             case DATE_ITEM_TYPE:
-                return new DateHeaderViewHolder(getView(parent, R.layout.item_date_header));
+                return new HeaderViewHolder(getView(parent, R.layout.item_header));
             case GROUP_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_group));
             case ROOM_ITEM_TYPE:
@@ -96,7 +102,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                     // The date header simply updates the section title.
                     int id = item.nameResourceId;
                     String name = holder.itemView.getContext().getResources().getString(id);
-                    ((DateHeaderViewHolder) holder).mTitle.setText(name);
+                    ((HeaderViewHolder) holder).title.setText(name);
                     break;
                 case GROUP_ITEM_TYPE:
                 case MESSAGE_ITEM_TYPE:
@@ -186,16 +192,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    // Nested classes.
-
-    /** ... */
-    private class DateHeaderViewHolder extends RecyclerView.ViewHolder {
-        TextView mTitle;
-        DateHeaderViewHolder(View itemView) {
-            super(itemView);
-            mTitle = (TextView) itemView.findViewById(R.id.chatName);
-        }
-    }
+    // Inner classes.
 
     /** ... */
     private class ChatListViewHolder extends RecyclerView.ViewHolder {
@@ -204,12 +201,46 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView text;
         ImageView icon;
 
+        /** ... */
         ChatListViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.chatName);
             count = (TextView) itemView.findViewById(R.id.newCount);
             text = (TextView) itemView.findViewById(R.id.chatText);
             icon = (ImageView) itemView.findViewById(R.id.chatIcon);
+        }
+    }
+
+    /** Provide a class to include a contact header in the list. */
+    private class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        /** The text view showing the date or contact header. */
+        TextView title;
+
+        /** ... */
+        HeaderViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.header);
+        }
+    }
+
+    /** Provide a class to include a contact header in the list. */
+    private class ContactViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        TextView name;
+        TextView email;
+        ImageView icon;
+
+        /** ... */
+        ContactViewHolder(View itemView) {
+            super(itemView);
+            name = (TextView) itemView.findViewById(R.id.contactName);
+            email = (TextView) itemView.findViewById(R.id.contactEmail);
+            icon = (ImageView) itemView.findViewById(R.id.contactIcon);
         }
     }
 
