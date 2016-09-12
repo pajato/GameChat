@@ -48,7 +48,7 @@ http://www.gnu.org/licenses
                 android:text="@string/JoinRoom" />
             <ImageView
                 style="@style/FabMenuIcon"
-                android:contentDescription="@string/JoinRoomDescription"
+                android:contentDescription="@string/JoinRoomDesc"
                 android:src="@drawable/ic_casino_black_24dp" />
         </LinearLayout>
         <LinearLayout
@@ -60,7 +60,7 @@ http://www.gnu.org/licenses
                 android:text="@string/AddRoom" />
             <ImageView
                 style="@style/FabMenuIcon"
-                android:contentDescription="@string/AddRoomDescription"
+                android:contentDescription="@string/AddRoomDesc"
                 android:src="@drawable/ic_casino_black_24dp" />
         </LinearLayout>
         <LinearLayout
@@ -69,10 +69,10 @@ http://www.gnu.org/licenses
             <Button
                 style="@style/FabMenuButton"
                 android:id="@+id/addGroupButton"
-                android:text="@string/AddGroup" />
+                android:text="@string/AddGroupTitle" />
             <ImageView
                 style="@style/FabMenuIcon"
-                android:contentDescription="@string/AddGroupDescription"
+                android:contentDescription="@string/AddGroupDesc"
                 android:src="@drawable/ic_group_add_black_24dp" />
         </LinearLayout>
     </LinearLayout>

@@ -27,6 +27,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupItem;
@@ -53,6 +54,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
+import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
 
 /**
@@ -66,7 +69,7 @@ public enum ChatListManager {
 
     /** The chat list type. */
     public enum ChatListType {
-        group, message, room
+        group, message, room, member
     }
 
     // Public class constants.
@@ -117,6 +120,8 @@ public enum ChatListManager {
                 return getMessageListData(item);
             case room:
                 return getRoomListData(item.groupKey);
+            case member:
+                return getMemberListData(item);
             default:
                 // TODO: log a message here.
                 break;
@@ -157,9 +162,25 @@ public enum ChatListManager {
     }
 
     /** Return a list of the members of a given room. */
-    public List<String> getMembers(final String roomKey) {
+    public List<String> getRoomMembers(final String roomKey) {
         Room room = getRoomProfile(roomKey);
         return room.memberIdList;
+    }
+
+    /** Return a set of potential group members. */
+    private List<ChatListItem> getMemberListData(final ChatListItem item) {
+        // Determine if there are any frequent members to add.  If so, add them and then add the
+        // members from the User's device contacts.
+        List<ChatListItem> result = new ArrayList<>();
+        if (item != null) {
+            // TODO: extract the list of frequent members from the item, somehow and add it to the
+            // result.
+            result.add(new ChatListItem(new ContactHeaderItem(frequent)));
+        }
+        result.add(new ChatListItem(new ContactHeaderItem(contacts)));
+        result.addAll(ContactManager.instance.getDeviceContactList());
+
+        return result;
     }
 
     /** Get a map of messages by room in a given group. */

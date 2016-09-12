@@ -1,13 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/add_group_learn_more"
+        android:id="@+id/addGroupLearnMore"
         android:title="@string/menuItemTitleLearnMore"
         app:showAsAction="never"
         android:orderInCategory="0"/>
     <item
-        android:id="@+id/add_group_feedback"
+        android:id="@+id/addGroupFeedback"
         android:title="@string/menuItemTitleFeedback"
         app:showAsAction="never"
-        android:orderInCategory="97" />
+        android:orderInCategory="55" />
+    <item
+        android:id="@+id/addGroupInstallUsers"
+        android:title="@string/InstallDebugUsers"
+        app:showAsAction="never"
+        android:orderInCategory="100" />
 </menu>
