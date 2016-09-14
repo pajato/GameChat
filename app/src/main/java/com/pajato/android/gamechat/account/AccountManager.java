@@ -28,13 +28,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Message;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -44,13 +39,10 @@ import com.pajato.android.gamechat.signin.SignInActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.chat.ChatListManager.SYSTEM;
+import static com.pajato.android.gamechat.account.Account.STANDARD;
 
 /**
  * Manages the account related aspects of the GameChat application.  These include setting up the
@@ -62,6 +54,9 @@ import static com.pajato.android.gamechat.chat.ChatListManager.SYSTEM;
 public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
 
+    // Public enum constants.
+
+    /** The account login states. */
     public enum Actions {signIn, signOut}
 
     /** A key used to access account available data. */
@@ -90,6 +85,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Return the current account id, null if there is no curent signed in User. */
     public String getCurrentAccountId() {
         return mCurrentAccountKey;
+    }
+
+    /** Obtain a suitable Uri to use for the User's icon. */
+    public String getPhotoUrl(FirebaseUser user) {
+        // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
+        Uri icon = user.getPhotoUrl();
+        return icon != null ? icon.toString() : null;
     }
 
     /** Deal with authentication backend changes: sign in and sign out */
@@ -189,12 +191,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             if (dataSnapshot.exists()) {
                 // It does.  Register it and notify the app that this is the new account of record.
                 account = dataSnapshot.getValue(Account.class);
-                mAccountMap.put(account.accountId, account);
-                mCurrentAccountKey = account.accountId;
+                mAccountMap.put(account.id, account);
+                mCurrentAccountKey = account.id;
             } else {
                 // The account does not exist.  Create it now, ensuring there really is a User.
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user != null) createAccount(user);
+                if (user != null) DatabaseManager.instance.createAccount(user, STANDARD);
             }
             EventBus.getDefault().post(new AccountStateChangeEvent(account));
         }
@@ -206,60 +208,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
 
         // Private instance methods.
-
-        /** Create a new account in the database. */
-        private void createAccount(@NonNull FirebaseUser user) {
-            // Creaate the push keys for the "me" group on the database with a single room in it,
-            // the "me" room.
-            long tstamp = new Date().getTime();
-            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-            String groupKey = database.child("/groups/").push().getKey();
-            String path = "/groups/" + groupKey + "/rooms/";
-            String key = database.child(path).push().getKey();
-
-            // Set up and persist the account for the given user.
-            String uid = user.getUid();
-            Account account = new Account();
-            account.accountId = uid;
-            account.accountEmail = user.getEmail();
-            account.displayName = user.getDisplayName();
-            account.accountUrl = getPhotoUrl(user);
-            account.providerId = user.getProviderId();
-            account.groupIdList.add(groupKey);
-            account.joinedRoomList.add(groupKey + " " + key);
-            DatabaseManager.instance.updateChildren(database, "/accounts/", uid, account.toMap());
-
-            // Update the group profile on the database.
-            List<String> memberList = new ArrayList<>();
-            memberList.add(uid);
-            Group group = new Group(uid, "Me Group", tstamp, 0, memberList);
-            DatabaseManager.instance.updateChildren(database, "/groups/", groupKey + "/profile",
-                    group.toMap());
-
-            // Update the "me" room profile on the database.
-            Room room = new Room(uid, "Me Room", groupKey, tstamp, 0, "me", memberList);
-            DatabaseManager.instance.updateChildren(database, path, key + "/profile",
-                    room.toMap());
-
-            // Update the "me" room default message on the database.
-            path = String.format("%s%s/messages/", path, key);
-            key = database.child(path).push().getKey();
-            String url = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
-            String text = "Welcome to your own private group and room.  Enjoy!";
-            List<String> unreadList = new ArrayList<>();
-            unreadList.add(uid);
-            String name = "GameChat";
-            int type = SYSTEM;
-            Message message = new Message(uid, name, url, key, tstamp, 0, text, type, unreadList);
-            DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
-        }
-
-        /** Obtain a suitable Uri to use for the User's icon. */
-        private String getPhotoUrl(FirebaseUser user) {
-            // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
-            Uri icon = user.getPhotoUrl();
-            return icon != null ? icon.toString() : null;
-        }
     }
 
 }

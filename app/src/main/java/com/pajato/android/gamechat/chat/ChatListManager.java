@@ -74,24 +74,6 @@ public enum ChatListManager {
 
     // Public class constants.
 
-    /** The format used to generate the database path for the message list. */
-    public static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
-
-    /** The format used to generate the database path for a particular message. */
-    public static final String UNREAD_LIST_FORMAT = MESSAGES_FORMAT + "%s/unreadList";
-
-    // Message type constants.
-    public static final int STANDARD = 0;
-    public static final int SYSTEM = 1;
-
-    // Private class constants.
-
-    /** The format specifying the path to the rooms profile on Firebase. */
-    private static final String GROUP_PROFILE_PATH = "/groups/%s/profile/";
-
-    /** The format specifying the path to the rooms profile on Firebase. */
-    private static final String ROOMS_PROFILE_PATH = "/groups/%s/rooms/%s/profile/";
-
     // Private instance variables.
 
     /** A map associating date header type values with lists of group push keys. */
@@ -204,8 +186,8 @@ public enum ChatListManager {
         // Register an active rooms change handler on the account, if there is an account,
         // preferring a cached handler, if one is available.
         if (event.account != null) {
-            // There is an active account.  Register it.
-            String path = String.format("/accounts/%s/joinedRoomList", event.account.accountId);
+            // There is an active account.  Register a joined room list change handler.
+            String path = DatabaseManager.instance.getJoinedRoomListPath(event.account);
             String name = "joinedRoomListChangeHandler";
             DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
             if (handler == null) handler = new JoinedRoomListChangeHandler(name, path);
@@ -234,7 +216,7 @@ public enum ChatListManager {
             String[] split = entry.split(" ");
             String groupKey = split[0];
             String roomKey = split[1];
-            String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
+            String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
             String name = "profileChangeHandler" + groupKey;
             DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
             if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
@@ -242,7 +224,7 @@ public enum ChatListManager {
 
             // Kick off a value event listener for the room profile.  Tag each listener with the
             // room key to ensure only one listener per room is ever active at any one time.
-            path = String.format(Locale.US, ROOMS_PROFILE_PATH, groupKey, roomKey);
+            path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
             name = "profileChangeHandler" + roomKey;
             handler = new ProfileRoomChangeHandler(name, path, roomKey);
             DatabaseManager.instance.registerHandler(handler);
@@ -458,8 +440,7 @@ public enum ChatListManager {
 
         /** Build a handler with the given name and path. */
         MessagesChangeHandler(final String name, final String groupKey, final String roomKey) {
-            super(name, String.format(Locale.US, MESSSAGES_FORMAT, groupKey,
-                    roomKey));
+            super(name, String.format(Locale.US, MESSSAGES_FORMAT, groupKey, roomKey));
             mGroupKey = groupKey;
             mRoomKey = roomKey;
         }

@@ -32,38 +32,54 @@ import java.util.Map;
  */
 @IgnoreExtraProperties public class Account {
 
+    // Public constants
+
+    /** The account types. */
+    public final static int STANDARD = 1;
+    public final static int PROTECTED = 2;
+
     // Public instance variables
 
-    /** The account id, the backend push key. */
-    public String accountId;
-
-    /** The account email. */
-    public String accountEmail;
-
-    /** The account icon, a URL. */
-    public String accountUrl;
+    /** The account creation timestamp. */
+    public long createTime;
 
     /** The account display name, usually something like "Fred C. Jones". */
     public String displayName;
 
-    /** The account token, an access key supplied by the provider. */
-    public String token;
-
-    /** The account provider id, a string like "google.com". */
-    String providerId;
+    /** The account email. */
+    public String email;
 
     /** A list of group ids the account can access. */
     public List<String> groupIdList = new ArrayList<>();
 
+    /** The account id, the backend push key. */
+    public String id;
+
     /** The list of joined rooms providing the group and room push keys. */
     public List<String> joinedRoomList = new ArrayList<>();
+
+    /** The modification timestamp. */
+    public long modTime;
+
+    /** The account provider id, a string like "google.com". */
+    public String providerId;
+
+    /** The account token, an access key supplied by the provider. */
+    public String token;
+
+    /** The account type. */
+    public int type;
+
+    /** The account icon, a URL. */
+    public String url;
 
     // Public instance methods.
 
     /** Get a non-null display name using "Anonymous" if need be. */
     public String getDisplayName(final Account current, final String me, final String anonymous) {
-        // Determine if the given account is this account and return the me value if it has been provided.
-        if (current != null && current.accountId.equals(accountId) && me != null) return me;
+        // Determine if the given account is this account and return the me value if it has been
+        // provided.
+        if (current != null && current.id.equals(id) && me != null) return me;
 
         // Determine if this account has a display name or should use the given default.
         if (displayName == null && anonymous != null) return anonymous;
@@ -75,14 +91,17 @@ import java.util.Map;
     /** Generate the map of data to persist into Firebase. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("accountId", accountId);
-        result.put("accountEmail", accountEmail);
-        result.put("accountUrl", accountUrl);
+        result.put("createTime", createTime);
         result.put("displayName", displayName);
-        result.put("token", token);
-        result.put("providerId", providerId);
+        result.put("email", email);
         result.put("groupIdList", groupIdList);
+        result.put("id", id);
         result.put("joinedRoomList", joinedRoomList);
+        result.put("modTime", modTime);
+        result.put("providerId", providerId);
+        result.put("token", token);
+        result.put("type", type);
+        result.put("url", url);
 
         return result;
     }

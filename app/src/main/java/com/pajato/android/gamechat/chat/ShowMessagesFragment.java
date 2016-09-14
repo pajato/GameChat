@@ -20,7 +20,7 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,26 +31,19 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import static com.pajato.android.gamechat.chat.ChatListManager.MESSAGES_FORMAT;
-import static com.pajato.android.gamechat.chat.ChatListManager.STANDARD;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
+import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 
 /**
  * Display the chat associated with the room selected by the current logged in User.
@@ -156,13 +149,6 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
 
     // Private instance methods.
 
-    /** Return the enveloping chat fragment layout using the saved tag value. */
-    private View getFragmentLayout() {
-        String tag = "chatFragment";
-        Fragment fragment = getActivity().getSupportFragmentManager().findFragmentByTag(tag);
-        return fragment.getView();
-    }
-
     /** Dismiss the virtual keyboard in response to a click on the given view. */
     private void hideSoftKeyBoard(final View view) {
         // Determine if the keyboard is active before dismissing it.
@@ -185,37 +171,29 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
 
     /** Post a message using the given view to clear the software keyboard. */
     private void postMessage(final View view) {
-        // Setup the database to persist the message.
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String path = String.format(Locale.US, MESSAGES_FORMAT, mItem.groupKey, mItem.roomKey);
-        String key = database.child(path).push().getKey();
-
         // Ensure that the edit text field and the account exist.
         View layout = getView();
         EditText editText = layout != null
-                ? (EditText) layout.findViewById(R.id.messageEditText)
-                : null;
+                ? (EditText) layout.findViewById(R.id.messageEditText) : null;
         Account account = AccountManager.instance.getCurrentAccount();
-        if (account != null && editText != null) {
-            // The account and the edit text field exist.  Create the message instance.
-            String uid = account.accountId;
-            String me = getResources().getString(R.string.me);
-            String anonymous = getResources().getString(R.string.anonymous);
-            String name = account.getDisplayName(account, me, anonymous);
-            String url = account.accountUrl != null ? account.accountUrl : null;
-            long tstamp = new Date().getTime();
-            String text = editText.getText().toString();
-            List<String> members = ChatListManager.instance.getRoomMembers(mItem.roomKey);
-            members.remove(uid);
-            int type = STANDARD;
-            Message message = new Message(uid, name, url, key, tstamp, tstamp, text, type, members);
-
-            // Persist the message instance, clear the message from the edit text control and hide
-            // the soft keyboard.
-            DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
-            editText.setText("");
+        if (account == null || editText == null) {
+            // Something is wrong.  Log it and tell the User.
+            Snackbar.make(view, "Software error: could not send message!", Snackbar.LENGTH_LONG);
             hideSoftKeyBoard(view);
+            return;
         }
+
+        // The account and the edit text field exist.  Persist the message to the database and
+        // inform the User that the message has been sent.
+        String text = editText.getText().toString();
+        int type = STANDARD;
+        String groupKey = mItem.groupKey;
+        String roomKey = mItem.roomKey;
+        Room room = ChatListManager.instance.getRoomProfile(roomKey);
+        DatabaseManager.instance.createMessage(text, type, account, groupKey, roomKey, room);
+        editText.setText("");
+        Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
+        hideSoftKeyBoard(view);
     }
 
     // Private inner classes.

@@ -27,6 +27,13 @@ import java.util.Map;
 /** Provide a Firebase model class repesenting a chat message, an icon, a name and text. */
 @IgnoreExtraProperties public class Message {
 
+    // Public class constants.
+
+    /** The message types. */
+    public final static int SYSTEM = 0;
+    public final static int STANDARD = 1;
+    public final static int PROTECTED = 2;
+
     /** The member account identifer who posted the message. */
     public String owner;
 

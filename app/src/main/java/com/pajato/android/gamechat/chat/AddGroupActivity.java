@@ -37,13 +37,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -54,12 +51,10 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
-import static android.R.attr.path;
 import static com.pajato.android.gamechat.R.id.clearGroupName;
-import static com.pajato.android.gamechat.chat.ChatListManager.STANDARD;
+import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 
 /**
  * Provide a main activity to manage the UI for adding a group.
@@ -73,7 +68,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** The logcat tag constant. */
     private static final String TAG = AddGroupActivity.class.getSimpleName();
-    private static final String MESSAGES_FORMAT = "/groups/%s/rooms/%s/messages/" ;
 
     // Private instance variables.
 
@@ -142,9 +136,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
             case R.id.addGroupFeedback:
                 sendFeedbackEmail("Add Group Feedback");
                 return true;
-            case R.id.addGroupInstallUsers:
-                addGroupInstallUsers();
-                return true;
             case android.R.id.home:
                 finish();
                 return true;
@@ -160,8 +151,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Render the form and initialize for the new group.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_add);
-        mGroup = new Group("", "", 0, 0, new ArrayList<String>());
-        mGroup.owner = AccountManager.instance.getCurrentAccountId();
         init();
     }
 
@@ -183,36 +172,10 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     // Private instance methods.
 
-    /** Development utility to automagically add developers into a group. */
-    private void addGroupInstallUsers() {
-        // Brute force add some developer account ids to the member group id list.
-        String pmr = "090868899495965409893A9290F833E6EDFD0702AEEF";
-        String heatherbostonmusic = "oKHym8UTOQazGk36hK856FX7zZ12";
-        List<String> developers = new ArrayList<>();
-        developers.add(pmr);
-        developers.add(heatherbostonmusic);
-        for (String accountId : developers) mGroup.memberIdList.add(accountId);
-    }
-
     /** Clear the group name edit text field by setting it to contain the empty string. */
     private void clearGroupName() {
         EditText editText = (EditText) findViewById(R.id.groupNameText);
         if (editText != null) editText.setText("");
-    }
-
-    /** Create a new message object on the given database. */
-    private void createMessage(final DatabaseReference database, final Account account,
-                               final String groupKey, final String roomKey, final String text,
-                               final List<String> members) {
-        String path = String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
-        String key = database.child(path).push().getKey();
-        String url = account.accountUrl;
-        long timestamp = new Date().getTime();
-        String id = account.accountId;
-        String name = getName(account);
-        int type = STANDARD;
-        Message message = new Message(id, name, url, key, timestamp, timestamp, text, type, members);
-        DatabaseManager.instance.updateChildren(database, path, key, message.toMap());
     }
 
     /** Return a default group name based on the given account. */
@@ -229,24 +192,18 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Return the base part of the email address (excludes domain). */
     private String getEmailName(final Account account) {
-        String email = account.accountEmail;
+        String email = account.email;
         int index = email.indexOf('@');
         String value = email.substring(0, index);
         return value.substring(0, 1).toUpperCase(Locale.getDefault()) + value.substring(1);
     }
 
-    /** Get a name to use for the group, preferring the display name. */
-    private String getName(Account account) {
-        return account.displayName != null ? account.displayName : "Anonymous";
-    }
-
     /** Initialize the main activity. */
     private void init() {
-        // Set up the toolbar to support a cancel button in the "home" position; establish a group
-        // name default.
+        // Initialize the group Firebase model class and the toolbar.
+        long tstamp = new Date().getTime();
+        mGroup = new Group("", "", tstamp, 0, new ArrayList<String>());
         initToolbar();
-        TextView view = (TextView) findViewById(R.id.groupNameText);
-        view.setText(getDefaultAccountName());
     }
 
     /** Initialize the toolbar */
@@ -266,43 +223,32 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
             EditText text = (EditText) findViewById(R.id.groupNameText);
             TextView button = (TextView) toolbar.findViewById(R.id.saveGroupButton);
             text.addTextChangedListener(new TextChangeHandler(this, text, button, mGroup));
+            text.setText(getDefaultAccountName());
         }
     }
 
     /** Process a newly created group by saving it to Firebase. */
     private void processGroup(@NonNull Account account) {
-        // Ensure that the owner is also a group member.
-        String owner = account.accountId;
-        if (!mGroup.memberIdList.contains(owner)) mGroup.memberIdList.add(owner);
+        // Ensure that the owner is also a group member and persist the group to the database.
+        mGroup.owner = account.id;
+        if (!mGroup.memberIdList.contains(mGroup.owner)) mGroup.memberIdList.add(mGroup.owner);
+        String groupKey = DatabaseManager.instance.createGroupProfile(mGroup);
 
-        // Update the group profile on the database.
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String groupsPath = "/groups/";
-        String groupKey = database.child(groupsPath).push().getKey();
-        String profilePath = String.format(Locale.US, "/groups/%s/profile", groupKey);
-        DatabaseManager.instance.updateChildren(database, profilePath, mGroup.toMap());
+        // Create the default room and persist it to the database.
+        String name = getString(R.string.DefaultRoomName);
+        Room room = new Room(mGroup.owner, name, groupKey, mGroup.createTime, 0, "public", null);
+        String roomKey = DatabaseManager.instance.createRoomProfile(groupKey, room);
 
-        // Create the General room and persist it to the database.
-        long timestamp = new Date().getTime();
-        List<String> list = new ArrayList<>();
-        list.add(account.accountId);
-        Room room = new Room(owner, "General", groupKey, timestamp, timestamp, "public", list);
-        String roomPath = String.format(Locale.US, "/groups/%s/rooms/", groupKey);
-        String roomKey = database.child(roomPath).push().getKey();
-        DatabaseManager.instance.updateChildren(database, path + "/profile", room.toMap());
-
-        // Update the account on the database to include the new Group and be joined to the
-        // "General" room.
+        // Update the owner's account to add the new group to the group id list and the joined room
+        // list on the account profile.
         account.groupIdList.add(groupKey);
         String joinedRoom = groupKey + " " + roomKey;
         account.joinedRoomList.add(joinedRoom);
-        owner = mGroup.owner;
-        DatabaseManager.instance.updateChildren(database, "/accounts/", owner, account.toMap());
+        DatabaseManager.instance.updateAccount(account);
 
-        // Put a welcome message in the General room.
+        // Put a welcome message in the default room from the owner.
         String text = "Welcome to my new group!";
-        List<String> members = room.memberIdList;
-        createMessage(database, account, groupKey, roomKey, text, members);
+        DatabaseManager.instance.createMessage(text, STANDARD, account, groupKey, roomKey, room);
     }
 
     /** Send email to the support address. */
@@ -358,7 +304,8 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Public constructor.
 
         /** Build a text change handler to manage a given edit text field, save button and group. */
-        TextChangeHandler(Context context, final EditText text, final TextView button, final Group group) {
+        TextChangeHandler(Context context, final EditText text, final TextView button,
+                          final Group group) {
             mEditText = text;
             mSaveButton = button;
             mGroup = group;
