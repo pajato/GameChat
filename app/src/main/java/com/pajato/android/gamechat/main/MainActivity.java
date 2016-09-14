@@ -232,6 +232,7 @@ public class MainActivity extends BaseActivity
         ProgressManager.instance.show(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        DatabaseManager.instance.init(this);
         NavigationManager.instance.init(this, toolbar);
         PaneManager.instance.init(this);
         AccountManager.instance.init();
