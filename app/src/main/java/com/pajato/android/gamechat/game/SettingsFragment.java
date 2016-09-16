@@ -10,9 +10,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 
-public class SettingsFragment extends BaseFragment {
+public class SettingsFragment extends BaseGameFragment {
     private String game;
     private boolean isValidUser = false;
 

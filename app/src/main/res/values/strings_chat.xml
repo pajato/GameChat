@@ -36,4 +36,5 @@
     <string name="contacts">Contacts</string>
     <string name="editMessageHint">Type a message</string>
     <string name="frequent">Frequent</string>
+    <string name="joinDeveloperGroups">Join Developer Groups</string>
 </resources>

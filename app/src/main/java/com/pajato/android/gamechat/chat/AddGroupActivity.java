@@ -50,11 +50,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.pajato.android.gamechat.R.id.clearGroupName;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
 
 /**
  * Provide a main activity to manage the UI for adding a group.
@@ -201,8 +204,9 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
     /** Initialize the main activity. */
     private void init() {
         // Initialize the group Firebase model class and the toolbar.
-        long tstamp = new Date().getTime();
-        mGroup = new Group("", "", tstamp, 0, new ArrayList<String>());
+        List<String> memberList = new ArrayList<>();
+        Map<String, String> roomMap = new HashMap<>();
+        mGroup = new Group(null, null, null, 0, 0, memberList, roomMap);
         initToolbar();
     }
 
@@ -229,24 +233,28 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Process a newly created group by saving it to Firebase. */
     private void processGroup(@NonNull Account account) {
-        // Ensure that the owner is also a group member and persist the group to the database.
+        // Ensure that the account holder has been added to the group member list and fetch group
+        // and room push keys.
         mGroup.owner = account.id;
         if (!mGroup.memberIdList.contains(mGroup.owner)) mGroup.memberIdList.add(mGroup.owner);
-        String groupKey = DatabaseManager.instance.createGroupProfile(mGroup);
+        String groupKey = DatabaseManager.instance.getGroupKey();
+        String roomKey = DatabaseManager.instance.getRoomKey(groupKey);
 
-        // Create the default room and persist it to the database.
+        // Obtain the default room name, create the default room, update the group's room map and
+        // add the group key to the account's group id list.
         String name = getString(R.string.DefaultRoomName);
-        Room room = new Room(mGroup.owner, name, groupKey, mGroup.createTime, 0, "public", null);
-        String roomKey = DatabaseManager.instance.createRoomProfile(groupKey, room);
-
-        // Update the owner's account to add the new group to the group id list and the joined room
-        // list on the account profile.
+        Room room = new Room(null, mGroup.owner, name, groupKey, 0, 0, PUBLIC, null);
+        mGroup.roomMap.put(name, roomKey);
         account.groupIdList.add(groupKey);
-        String joinedRoom = groupKey + " " + roomKey;
-        account.joinedRoomList.add(joinedRoom);
+
+        // Persist the group and room to the database and update the account with the new joined
+        // list entry.
+        DatabaseManager.instance.createGroupProfile(groupKey, mGroup);
+        DatabaseManager.instance.createRoomProfile(groupKey, roomKey, room);
+        DatabaseManager.instance.appendDefaultJoinedRoomEntry(account, mGroup);
         DatabaseManager.instance.updateAccount(account);
 
-        // Put a welcome message in the default room from the owner.
+        // Post a welcome message to the default room from the owner.
         String text = "Welcome to my new group!";
         DatabaseManager.instance.createMessage(text, STANDARD, account, groupKey, roomKey, room);
     }

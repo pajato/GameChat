@@ -17,14 +17,13 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.event.EventBusManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -37,7 +36,7 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  *
  * @author Paul Michael Reilly (based on GameFragment written by Bryan Scott)
  */
-public class ChatFragment extends BaseFragment {
+public class ChatFragment extends BaseChatFragment {
 
     // Public instance methods.
 
@@ -64,6 +63,7 @@ public class ChatFragment extends BaseFragment {
     @Override public void onInitialize() {
         // Declare the use of the options menu and intialize the FAB and it's menu.
         super.onInitialize();
+        EventBusManager.instance.register(this);
         FabManager.chat.init(mLayout, this.getTag());
     }
 
@@ -72,26 +72,6 @@ public class ChatFragment extends BaseFragment {
         menuInflater.inflate(R.menu.chat_menu_base, menu);
         MenuItem item = menu.findItem(R.id.back);
         if (item != null) item.setVisible(false);
-    }
-
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to chat.
-                break;
-            default:
-                break;
-
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -25,7 +25,7 @@ import java.util.Scanner;
  *
  * @author Bryan Scott
  */
-public class ChessFragment extends BaseFragment {
+public class ChessFragment extends BaseGameFragment {
     public boolean mTurn;
 
     // Board Management Objects

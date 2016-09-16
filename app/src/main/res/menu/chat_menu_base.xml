@@ -54,4 +54,7 @@ more. -->
         android:tag="@integer/learnMore"
         android:icon="@drawable/ic_info_black"
         android:title="@string/navigation_drawer_label_problems_learn" />
+    <item
+        android:id="@+id/joinDeveloperGroups"
+        android:title="@string/joinDeveloperGroups" />
 </menu>

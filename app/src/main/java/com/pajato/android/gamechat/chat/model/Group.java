@@ -27,42 +27,52 @@ import java.util.Map;
 /** Provide a Firebase model class repesenting a chat group, a collection of members and rooms. */
 @IgnoreExtraProperties public class Group  {
 
-    /** The group owner/creator. */
-    public String owner;
+    /** The creation timestamp. */
+    public long createTime;
+
+    /** The group push key value. */
+    public String key;
 
     /** The group name. */
     public String name;
 
-    /** The creation timestamp. */
-    public long createTime;
+    /** The group member account identifiers. */
+    public List<String> memberIdList;
 
     /** The last modification timestamp. */
     public long modTime;
 
-    /** The group member account identifiers. */
-    public List<String> memberIdList;
+    /** The group owner/creator. */
+    public String owner;
+
+    /** The map associating a room name with it's push key. */
+    public Map<String, String> roomMap;
 
     /** Build an empty args constructor for the database. */
     public Group() {}
 
     /** Build a default Group. */
-    public Group(final String owner, final String name, final long createTime, final long modTime,
-                 final List<String> members) {
-        this.name = name;
-        this.owner = owner;
+    public Group(final String key, final String owner, final String name, final long createTime,
+                 final long modTime, final List<String> members, final Map<String, String> map) {
         this.createTime = createTime;
+        this.key = key;
+        this.name = name;
         this.modTime = modTime;
+        this.owner = owner;
         memberIdList = members;
+        roomMap = map;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("owner", owner);
-        result.put("name", name);
         result.put("createTime", createTime);
-        result.put("modTime", modTime);
+        result.put("key", key);
+        result.put("name", name);
         result.put("memberIdList", memberIdList);
+        result.put("modTime", modTime);
+        result.put("owner", owner);
+        result.put("roomMap", roomMap);
 
         return result;
     }

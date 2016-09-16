@@ -57,6 +57,10 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.event.MessageChangeEvent.CHANGED;
+import static com.pajato.android.gamechat.event.MessageChangeEvent.MOVED;
+import static com.pajato.android.gamechat.event.MessageChangeEvent.NEW;
+import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -138,15 +142,21 @@ public enum ChatListManager {
         return group != null ? group.name : "Anonymous";
     }
 
-    /** Get the profile for a given group. */
+    /** Get the profile for a given group, queueing it up to be loaded if necessary. */
     public Group getGroupProfile(final String groupKey) {
-        return mGroupProfileMap.get(groupKey);
-    }
+        // Return the group if it has been loaded.
+        Group result = mGroupProfileMap.get(groupKey);
+        if (result != null) return result;
 
-    /** Return a list of the members of a given room. */
-    public List<String> getRoomMembers(final String roomKey) {
-        Room room = getRoomProfile(roomKey);
-        return room.memberIdList;
+        // The given group needs to be loaded.  Do so now (checking that it has not already been
+        // registered.)
+        String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
+        String name = "profileChangeHandler" + groupKey;
+        DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
+        DatabaseManager.instance.registerHandler(handler);
+
+        return null;
     }
 
     /** Return a set of potential group members. */
@@ -416,14 +426,14 @@ public enum ChatListManager {
     }
 
     /** Provide a class to handle new and changed messages inside a given room. */
-    private class MessagesChangeHandler extends DatabaseEventHandler
+    private static class MessagesChangeHandler extends DatabaseEventHandler
             implements ChildEventListener {
-        private static final String MESSSAGES_FORMAT = "/groups/%s/rooms/%s/messages/";
 
-        // Private instance constants.
+        /** The logcat format string. */
+        private static final String LOG_FORMAT = "%s: {%s, %s}.";
 
         /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
+        private static final String TAG = MessagesChangeHandler.class.getSimpleName();
 
         // Private instance variables.
 
@@ -440,37 +450,33 @@ public enum ChatListManager {
 
         /** Build a handler with the given name and path. */
         MessagesChangeHandler(final String name, final String groupKey, final String roomKey) {
-            super(name, String.format(Locale.US, MESSSAGES_FORMAT, groupKey, roomKey));
+            super(name, DatabaseManager.instance.getMessagesPath(groupKey, roomKey));
             mGroupKey = groupKey;
             mRoomKey = roomKey;
         }
 
+        /** Deal with a new message. */
         @Override public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            String format = "A message has been added: {%s, %s}.";
-            Log.d(TAG, String.format(Locale.getDefault(), format, dataSnapshot, s));
-
-            // TODO: get all the messages, for now.  Later on this will have to be paginated.  Post
-            // the message to be collected and displayed after filtering out activity lifecycle
-            // duplicates arising from registering and unregistering Firebase event listeners.
-            if (dataSnapshot.exists()) {
-                Message message = dataSnapshot.getValue(Message.class);
-                if (!isDupe(message))
-                    EventBus.getDefault().post(new MessageChangeEvent(mGroupKey, mRoomKey, message));
-            } else {
-                Log.e(TAG, "The snapshot does not contain a message!");
-            }
+            // Log the event and determine if the data snapshot exists, aborting if it does not.
+            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildAdded", dataSnapshot, s));
+            process(dataSnapshot, true, NEW);
         }
 
+        /** Deal with a change in an existing message. */
         @Override public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            Log.d(TAG, "A message child has changed.");
+            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildChanged", dataSnapshot, s));
+            process(dataSnapshot, false, CHANGED);
         }
 
         @Override public void onChildRemoved(DataSnapshot dataSnapshot) {
-            Log.d(TAG, "A message child has been removed.");
+            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildRemoved", dataSnapshot, null));
+            process(dataSnapshot, false, REMOVED);
         }
 
         @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            Log.d(TAG, "A message child has moved.");
+            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildMoved", dataSnapshot, s));
+            if (!dataSnapshot.exists()) return;
+            process(dataSnapshot, false, MOVED);
         }
 
         /** ... */
@@ -485,7 +491,7 @@ public enum ChatListManager {
         private boolean isDupe(final Message message) {
             // Determine if the message has already been received.  The message name is the push key
             // value, hence unique.
-            String key = message.messageKey;
+            String key = message.key;
             if (mMessageList.contains(key))
                 // It has been received.  Flag it.
                 return true;
@@ -494,6 +500,24 @@ public enum ChatListManager {
             mMessageList.add(key);
             return false;
         }
+
+        /** Process the change by determining if an app event should be posted. */
+        private void process(final DataSnapshot snapshot, final boolean filter, final int type) {
+            // Abort if the data snapshot does not exist.
+            if (!snapshot.exists()) return;
+
+            // Build the message and process the filter flag by checking for a duplicated message.
+            // This code is suspect in origin and likely not needed, hence the logging.
+            Message message = snapshot.getValue(Message.class);
+            if (filter && isDupe(message)) {
+                Log.e(TAG, "Encountered a duplicated message!", new Throwable());
+                return;
+            }
+
+            // The event should be propagated to the app.
+            EventBus.getDefault().post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
+        }
+
     }
 
     /** Provide a class to handle changes to a group profile. */
@@ -524,7 +548,7 @@ public enum ChatListManager {
             }
         }
 
-        /** ... */
+        /** Deal with a canceled event by logging it. */
         @Override public void onCancelled(DatabaseError error) {
             // Failed to read value
             Log.w(TAG, "Failed to read value.", error.toException());

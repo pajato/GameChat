@@ -18,9 +18,8 @@
 package com.pajato.android.gamechat.game;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
 
-public class ShowNoGamesFragment extends BaseFragment {
+public class ShowNoGamesFragment extends BaseGameFragment {
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game_no_games;}

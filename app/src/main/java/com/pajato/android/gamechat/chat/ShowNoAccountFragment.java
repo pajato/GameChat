@@ -17,14 +17,9 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.support.v4.view.ViewPager;
-import android.view.MenuItem;
-
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -36,7 +31,7 @@ import org.greenrobot.eventbus.Subscribe;
  *
  * @author Paul Michael Reilly
  */
-public class ShowNoAccountFragment extends BaseFragment {
+public class ShowNoAccountFragment extends BaseChatFragment {
 
     // Public instance methods.
 
@@ -55,11 +50,6 @@ public class ShowNoAccountFragment extends BaseFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_no_account;}
 
-    /** Handle an account state change event by showing the no sign in message. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // TODO: handle an account becoming available by switching to the show group list fragment.
-    }
-
     /** Handle the setup for the groups panel. */
     @Override public void onInitialize() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
@@ -67,26 +57,6 @@ public class ShowNoAccountFragment extends BaseFragment {
         //ProgressManager.instance.show(this.getContext());
         super.onInitialize();
         ProgressManager.instance.hide();
-    }
-
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to chat.
-                break;
-            default:
-                break;
-
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

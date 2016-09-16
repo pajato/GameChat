@@ -24,7 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -39,7 +39,7 @@ import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
  *
  * @author Bryan Scott
  */
-public class GameFragment extends BaseFragment {
+public class GameFragment extends BaseGameFragment {
 
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {

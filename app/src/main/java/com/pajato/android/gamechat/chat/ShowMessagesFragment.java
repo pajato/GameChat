@@ -21,7 +21,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -38,7 +37,7 @@ import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.event.EventBusManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -50,7 +49,7 @@ import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
  *
  * @author Paul Michael Reilly
  */
-public class ShowMessagesFragment extends BaseFragment implements View.OnClickListener {
+public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
 
     // Public instance methods.
 
@@ -112,8 +111,7 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
     @Override public void onInitialize() {
         // Inflate the layout for this fragment and initialize by setting the titles, declaring the
         // use of the options menu, removing the FAB button, fetching any remote configurations,
-        // setting up the list of messages, setting up the edit text field and setting up the
-        // database analytics.
+        // setting up the list of messages, and by setting up the edit text field.
         super.onInitialize();
         setTitles(null, mItem.roomKey);
         mItemListType = ChatListManager.ChatListType.message;
@@ -122,22 +120,18 @@ public class ShowMessagesFragment extends BaseFragment implements View.OnClickLi
         initEditText(mLayout);
     }
 
+    /** Handle the back button here, all others in the base class. */
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
             case R.id.back:
-                // Return to the spawning room view.
+                // Pop the fragment back stack to return to the rooms view.
                 ChatManager.instance.popBackStack(getActivity());
                 break;
-            case R.id.search:
-                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
+        return true;
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */
