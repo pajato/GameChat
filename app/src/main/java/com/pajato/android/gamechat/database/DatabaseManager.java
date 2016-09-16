@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
+import static com.pajato.android.gamechat.chat.model.Room.ME;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -57,6 +58,9 @@ public enum DatabaseManager {
 
     /** The lookup key for the localized "anonymous" name. */
     private static final String ANONYMOUS_NAME_KEY = "anonymousNameKey";
+
+    /** The lookup key for the default room name. */
+    private static final String DEFAULT_ROOM_NAME_KEY = "defaultRoomNameKey";
 
     /** The path to the groups node on the database. */
     private static final String GROUPS_PATH = "/groups/";
@@ -102,13 +106,42 @@ public enum DatabaseManager {
     /** The database reference object. */
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-    /** The map providing localized resources. */
-    private Map<String, String> mResourceMap = new HashMap<>();
+    /** The map managing group invitations. */
+    private Map<String, List<String>> mGroupInviteMap = new HashMap<>();
 
     /** The Firebase value event listener map. */
     private Map<String, DatabaseEventHandler> mHandlerMap = new HashMap<>();
 
+    /** The map providing localized resources. */
+    private Map<String, String> mResourceMap = new HashMap<>();
+
     // Public instance methods.
+
+    /** Accept a group invite for a given account by updating both the group and the account. */
+    public void acceptGroupInvite(@NonNull final Account account, @NonNull Group group,
+                                  @NonNull final String groupKey) {
+        // Ensure that the account is not already a member of the given group and that there is an
+        // invitation to join extended.
+        boolean isMember = account.groupIdList.contains(groupKey);
+        boolean isInvited = hasGroupInvite(account, groupKey);
+        if (isMember || !isInvited) return;
+
+        // Update the group member list, the account group list, and the joined room list on the
+        // database.
+        group.memberIdList.add(account.id);
+        updateGroup(group, groupKey);
+        account.groupIdList.add(groupKey);
+        appendDefaultJoinedRoomEntry(account, group);
+        updateAccount(account);
+    }
+
+    /** Return the default room name and group key from the given room as a joined list entry. */
+    public void appendDefaultJoinedRoomEntry(final Account account, final Group group) {
+        String name = mResourceMap.get(DEFAULT_ROOM_NAME_KEY);
+        String roomKey = group.roomMap.get(name);
+        String entry = AccountManager.instance.getJoinedRoomEntry(group.key, roomKey);
+        if (roomKey != null) account.joinedRoomList.add(entry);
+    }
 
     /** Create and persist an account to the database. */
     public void createAccount(@NonNull FirebaseUser user, final int accountType) {
@@ -128,19 +161,21 @@ public enum DatabaseManager {
         account.type = accountType;
         account.createTime = tstamp;
         account.groupIdList.add(groupKey);
-        account.joinedRoomList.add(groupKey + " " + roomKey);
+        account.joinedRoomList.add(AccountManager.instance.getJoinedRoomEntry(groupKey, roomKey));
         updateChildren(String.format(Locale.US, ACCOUNT_FORMAT, account.id), account.toMap());
 
         // Update the group profile on the database.
         List<String> memberList = new ArrayList<>();
         memberList.add(account.id);
         String name = mResourceMap.get(ME_GROUP_KEY);
-        Group group = new Group(account.id, name, tstamp, 0, memberList);
+        Map<String, String> roomMap = new HashMap<>();
+        roomMap.put(name, roomKey);
+        Group group = new Group(groupKey, account.id, name, tstamp, 0, memberList, roomMap);
         updateChildren(String.format(Locale.US, GROUP_PROFILE_FORMAT, groupKey), group.toMap());
 
         // Update the "me" room profile on the database.
         name = mResourceMap.get(ME_ROOM_KEY);
-        Room room = new Room(account.id, name, groupKey, tstamp, 0, "me", memberList);
+        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME, memberList);
         String roomProfilePath = String.format(Locale.US, ROOM_PROFILE_FORMAT, groupKey, roomKey);
         updateChildren(roomProfilePath, room.toMap());
 
@@ -149,14 +184,11 @@ public enum DatabaseManager {
         createMessage(text, SYSTEM, account, groupKey, roomKey, room);
     }
 
-    /** Return a group push key resulting from persisting the given group on the database. */
-    public String createGroupProfile(final Group group) {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        String groupKey = database.child(GROUPS_PATH).push().getKey();
+    /** Persist a given group object using the given key. */
+    public void createGroupProfile(final String groupKey, final Group group) {
         String profilePath = String.format(Locale.US, GROUP_PROFILE_FORMAT, groupKey);
+        group.createTime = new Date().getTime();
         updateChildren(profilePath, group.toMap());
-
-        return groupKey;
     }
 
     /** Persist a standard message (one sent from a standard user) to the database. */
@@ -169,19 +201,30 @@ public enum DatabaseManager {
         String url = getPhotoUrl(type, account);
         long tstamp = new Date().getTime();
         List<String> members = room.memberIdList;
-        Message message = new Message(id, name, url, key, tstamp, 0, text, type, members);
+        Message message = new Message(key, id, name, url, tstamp, 0, text, type, members);
         path = String.format(Locale.US, MESSAGE_FORMAT, groupKey, roomKey, key);
         updateChildren(path, message.toMap());
     }
 
     /** Return a room push key resulting from persisting the given room on the database. */
-    public String createRoomProfile(final String groupKey, final Room room) {
-        String roomsPath = String.format(Locale.US, ROOMS_FORMAT, groupKey);
-        String roomKey = mDatabase.child(roomsPath).push().getKey();
+    public void createRoomProfile(final String groupKey, final String roomKey, final Room room) {
         String profilePath = String.format(Locale.US, ROOM_PROFILE_FORMAT, groupKey, roomKey);
+        room.createTime = new Date().getTime();
         updateChildren(profilePath, room.toMap());
+    }
 
-        return roomKey;
+    /** Extend a group invite to a given account by registering both. */
+    public void extendGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Insert the account id into the list associated with the group key.
+        List<String> memberList = mGroupInviteMap.get(groupKey);
+        if (memberList == null) memberList = new ArrayList<>();
+        memberList.add(account.id);
+        mGroupInviteMap.put(groupKey, memberList);
+    }
+
+    /** Return a room push key to use with a subsequent room object persistence. */
+    public String getGroupKey() {
+        return mDatabase.child(GROUPS_PATH).push().getKey();
     }
 
     /** Return the database path to the given group's profile. */
@@ -192,6 +235,17 @@ public enum DatabaseManager {
     /** Return the database path to the joined list in a given account. */
     public String getJoinedRoomListPath(final Account account) {
         return String.format(Locale.US, JOINED_ROOM_LIST_FORMAT, account.id);
+    }
+
+    /** Return the path to the messages for the given group and room keys. */
+    public String getMessagesPath(final String groupKey, final String roomKey) {
+        return String.format(Locale.US, MESSAGES_FORMAT, groupKey, roomKey);
+    }
+
+    /** Return a room push key to use with a subsequent room object persistence. */
+    public String getRoomKey(final String groupKey) {
+        String roomsPath = String.format(Locale.US, ROOMS_FORMAT, groupKey);
+        return mDatabase.child(roomsPath).push().getKey();
     }
 
     /** Return the database path to the given group's profile. */
@@ -212,6 +266,7 @@ public enum DatabaseManager {
         mResourceMap.put(SYSTEM_NAME_KEY, context.getString(R.string.app_name));
         mResourceMap.put(ANONYMOUS_NAME_KEY, context.getString(R.string.anonymous));
         mResourceMap.put(ME_NAME_KEY, context.getString(R.string.me));
+        mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));
     }
 
     /** Return TRUE iff the a handler with the given name is registered. */
@@ -279,10 +334,17 @@ public enum DatabaseManager {
         mDatabase.updateChildren(childUpdates);
     }
 
+    /** Update the given group on the database. */
+    public void updateGroup(final Group group, final String groupKey) {
+        String path = String.format(Locale.US, GROUP_PROFILE_FORMAT, groupKey);
+        group.modTime = new Date().getTime();
+        updateChildren(path, group.toMap());
+    }
+
     /** Persist the given message to reflect a change to the unread list. */
     public void updateUnreadList(final String groupKey, final String roomKey,
                                  final Message message) {
-        String key = message.messageKey;
+        String key = message.key;
         String path = String.format(Locale.US, UNREAD_LIST_FORMAT, groupKey, roomKey, key);
         Map<String, Object> unreadMap = new HashMap<>();
         unreadMap.put("unreadList", message.unreadList);
@@ -307,6 +369,21 @@ public enum DatabaseManager {
         String systemUrl = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
         if (type == SYSTEM) return systemUrl;
         return account.url;
+    }
+
+    /** Return TRUE iff the given group has an invitation registered for the given account owner. */
+    private boolean hasGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Ensure that there is a list of invites for the given group.
+        List<String> invitedMembers = mGroupInviteMap.get(groupKey);
+        if (invitedMembers == null) return false;
+
+        // Ensure that the invited members list includes the account owner.
+        if (!invitedMembers.contains(account.id)) return false;
+
+        // Remove the invited account holder from the list and possibly the list from the map.
+        invitedMembers.remove(account.id);
+        if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
+        return true;
     }
 
     /** Remove the database event listener, if any is found associated with the given handler. */

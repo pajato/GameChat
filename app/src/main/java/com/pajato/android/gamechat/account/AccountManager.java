@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,6 +41,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.account.Account.STANDARD;
@@ -82,9 +84,25 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return mCurrentAccountKey == null ? null : mAccountMap.get(mCurrentAccountKey);
     }
 
+    /** Retrun the account for the current User, null if there is no signed in User. */
+    public Account getCurrentAccount(final Context context) {
+        // Determine if there is a logged in account.  If so, return it.
+        if (mCurrentAccountKey != null) return mAccountMap.get(mCurrentAccountKey);
+
+        // The User is not signed in.  Prompt them to do so now.
+        String text = "Not logged in!  Please sign in.";
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+        return null;
+    }
+
     /** Return the current account id, null if there is no curent signed in User. */
     public String getCurrentAccountId() {
         return mCurrentAccountKey;
+    }
+
+    /** Return a joined room entry, well formed (space separated) group key and room key pair. */
+    public String getJoinedRoomEntry(final String groupKey, final String roomKey) {
+        return String.format(Locale.US, "%s %s", groupKey, roomKey);
     }
 
     /** Obtain a suitable Uri to use for the User's icon. */

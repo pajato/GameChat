@@ -16,7 +16,6 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -26,7 +25,7 @@ import java.util.Scanner;
  *
  * @author Bryan Scott
  */
-public class TTTFragment extends BaseFragment {
+public class TTTFragment extends BaseGameFragment {
 
     private static final String TAG = TTTFragment.class.getSimpleName();
     private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";

@@ -10,11 +10,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 
 import java.util.Scanner;
 
-public class LocalTTTFragment extends BaseFragment {
+public class LocalTTTFragment extends BaseGameFragment {
     // Keeps track of the Turn user. True = Player 1, False = Player 2.
     public boolean mTurn;
 

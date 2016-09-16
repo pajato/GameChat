@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -38,18 +39,22 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.event.MessageListChangeEvent;
+import com.pajato.android.gamechat.main.PaneManager;
 
-import org.greenrobot.eventbus.Subscribe;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.message;
+import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.room;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -58,12 +63,12 @@ import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.mess
  *
  * @author Paul Michael Reilly
  */
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseChatFragment extends Fragment {
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = BaseFragment.class.getSimpleName();
+    private static final String TAG = BaseChatFragment.class.getSimpleName();
 
     /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
@@ -87,13 +92,13 @@ public abstract class BaseFragment extends Fragment {
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
+    /** A flag used to queue adapter list updates during the onResume lifecycle event. */
+    protected boolean mUpdateOnResume;
+
     // Public constructors.
 
     /** Provide a default, no args constructor. */
-    public BaseFragment() {
-        EventBusManager.instance.register(this);
-    }
-
+    public BaseChatFragment() {}
 
     // Public instance methods.
 
@@ -101,31 +106,31 @@ public abstract class BaseFragment extends Fragment {
     abstract public int getLayout();
 
     @Override public void onActivityCreated(Bundle bundle) {
-        logEvent("onActivityCreated", bundle);
         super.onActivityCreated(bundle);
+        logEvent("onActivityCreated", bundle);
     }
 
     @Override public void onAttach(Context context) {
-        logEvent("onAttach");
         super.onAttach(context);
+        EventBusManager.instance.register(this);
+        logEvent("onAttach");
     }
 
     @Override public void onCreate(Bundle bundle) {
-        logEvent("onCreate", bundle);
         super.onCreate(bundle);
+        logEvent("onCreate", bundle);
     }
 
     /** Handle the onCreateView lifecycle event. */
     @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                                        final Bundle savedInstanceState) {
         // Determine if the layout exists and reuse it if so.
+        logEvent("onCreateView", savedInstanceState);
         if (mLayout != null) return mLayout;
 
         // The layout does not exist.  Create and persist it, and initialize the fragment layout.
         mLayout = inflater.inflate(getLayout(), container, false);
         onInitialize();
-        logEvent("onCreateView", savedInstanceState);
-
         return mLayout;
     }
 
@@ -137,13 +142,14 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override public void onDestroyView() {
-        logEvent("onDestroyView");
         super.onDestroyView();
+        logEvent("onDestroyView");
     }
 
     @Override public void onDetach() {
-        logEvent("onDetach");
         super.onDetach();
+        logEvent("onDetach");
+        EventBusManager.instance.unregister(this);
     }
 
     /** Initialize the fragment. */
@@ -152,67 +158,92 @@ public abstract class BaseFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
-        // Determine if the fragment has a view and that it has a list type.
-        View layout = getView();
-        if (layout == null || mItemListType == null) return;
-
-        // It has both.  Ensure that the list view (recycler) exists.
-        RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
-        if (view == null) return;
-
-        // The recycler view exists.  Show the chat list, either groups, messages or rooms.
-        RecyclerView.Adapter adapter = view.getAdapter();
-        if (adapter instanceof ChatListAdapter) {
-            // Inject the list items into the recycler view making sure to scroll to the end of the
-            // list when showing messages.
-            ChatListAdapter listAdapter = (ChatListAdapter) adapter;
-            view.setVisibility(View.GONE);
-            listAdapter.clearItems();
-            listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
-            if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
-            view.setVisibility(View.VISIBLE);
+    /** Handle an options menu choice. */
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.toolbar_game_icon:
+                // Show the game panel.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if(viewPager != null) {
+                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                }
+                break;
+            case R.id.search:
+                // TODO: Handle a search in the groups panel by fast scrolling to chat.
+                break;
+            case R.id.joinDeveloperGroups:
+                joinDeveloperGroups();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+
+        return true;
     }
 
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
     @Override public void onPause() {
+        super.onPause();
         logEvent("onPause");
         if (mAdView != null) mAdView.pause();
-        EventBusManager.instance.unregister(this);
-        super.onPause();
     }
 
     /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
+        // Log the event, handle ads and apply any queued adapter updates.  Only one try is
+        // attempted.
+        super.onResume();
         logEvent("onResume");
         if (mAdView != null) mAdView.resume();
-        EventBusManager.instance.register(this);
-        super.onResume();
+        if (!mUpdateOnResume) return;
+        updateAdapterList();
+        mUpdateOnResume = false;
     }
 
     /** Log the lifecycle event. */
     @Override public void onStart() {
-        logEvent("onStart");
         super.onStart();
+        logEvent("onStart");
     }
 
     /** Log the lifecycle event. */
     @Override public void onStop() {
-        logEvent("onStop");
         super.onStop();
+        logEvent("onStop");
     }
 
     /** Log the lifecycle event. */
     @Override public void onViewStateRestored(Bundle bundle) {
-        logEvent("onViewStateRestored", bundle);
         super.onViewStateRestored(bundle);
+        logEvent("onViewStateRestored", bundle);
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
     public void setItem(final ChatListItem item) {
         mItem = item;
+    }
+
+    /** Return TRUE iff the list can be considered up to date. */
+    public boolean updateAdapterList() {
+        // Determine if the fragment has a view and that it has a list type.
+        View layout = getView();
+        if (layout == null || mItemListType == null) return false;
+
+        // It has both.  Ensure that the list view (recycler) exists.
+        RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
+        if (view == null) return false;
+
+        // The recycler view exists.  Show the chat list, either groups, messages or rooms.
+        RecyclerView.Adapter adapter = view.getAdapter();
+        if (!(adapter instanceof ChatListAdapter)) return true;
+
+        // Inject the list items into the recycler view making sure to scroll to the end of the
+        // list when showing messages.
+        ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+        listAdapter.clearItems();
+        listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
+        if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
+        return true;
     }
 
     // Protected instance methods.
@@ -303,12 +334,38 @@ public abstract class BaseFragment extends Fragment {
         String prefix = context.getString(resourceId);
         String suffix = context.getString(R.string.FutureFeature);
         CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-        int duration = Toast.LENGTH_LONG;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 
     // Private instance methods.
+
+    /** Development hack: poor man's invite handler to join one or more developer groups. */
+    private void joinDeveloperGroups() {
+        // Ensure that the supported developer groups have been joined.  This a short term hack in
+        // lieu of dynamic linking support.  First ensure that the User is signed in.  Note they
+        // will be prompted to sign in if they have not already done so.
+        Account account = AccountManager.instance.getCurrentAccount(getContext());
+        if (account == null) return;
+
+        // Walk the list of developer groups to ensure that all are joined.
+        List<String> groupList = new ArrayList<>();
+        groupList.add("");      // Paul Reilly Group
+        groupList.add("");      // Game Chat Group
+        groupList.add("");      // Pajato Technologies LLC
+        for (String groupKey : groupList) {
+            // Extend an invitation to the group and est that this group has been joined.
+            DatabaseManager.instance.extendGroupInvite(account, groupKey);
+            if (!account.groupIdList.contains(groupKey)) {
+                // Join the group now if it has been loaded.  It will be queued for joining later if
+                // necessary.
+                Group group = ChatListManager.instance.getGroupProfile(groupKey);
+                if (group != null && room != null)
+                    // The group is available.  Accept any open invitations ... and there should be
+                    // at least one!
+                    DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);
+            }
+        }
+    }
 
     /** Make the given menu item either visible or invisible. */
     private void setItemState(final Menu menu, final int itemId, final boolean state) {

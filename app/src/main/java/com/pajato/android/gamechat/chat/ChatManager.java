@@ -138,8 +138,8 @@ enum ChatManager {
 
     /** Set the item to be relevant for a list of rooms. */
     private void setItem(Fragment fragment, ChatListItem item) {
-        if (fragment instanceof BaseFragment) {
-            ((BaseFragment) fragment).setItem(item);
+        if (fragment instanceof BaseChatFragment) {
+            ((BaseChatFragment) fragment).setItem(item);
         }
     }
 

@@ -38,7 +38,7 @@ import java.util.Map;
     public String owner;
 
     /** The message push key. */
-    public String messageKey;
+    public String key;
 
     /** The poster's display name. */
     public String name;
@@ -67,31 +67,31 @@ import java.util.Map;
     public Message() {}
 
     /** Build a default Message using all the parameters. */
-    public Message(final String owner, final String name, final String url, final String messageKey,
+    public Message(final String key, final String owner, final String name, final String url,
                    final long createTime, final long modTime, final String text, final int type,
                    final List<String> unreadList) {
-        this.owner = owner;
-        this.name = name;
-        this.url = url;
-        this.messageKey = messageKey;
         this.createTime = createTime;
+        this.key = key;
         this.modTime = modTime;
+        this.name = name;
+        this.owner = owner;
         this.text = text;
         this.type = type;
+        this.url = url;
         this.unreadList = unreadList;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("owner", owner);
-        result.put("name", name);
-        result.put("url", url);
-        result.put("messageKey", messageKey);
         result.put("createTime", createTime);
+        result.put("key", key);
         result.put("modTime", modTime);
+        result.put("name", name);
+        result.put("owner", owner);
         result.put("text", text);
         result.put("type", type);
+        result.put("url", url);
         result.put("unreadList", unreadList);
 
         return result;

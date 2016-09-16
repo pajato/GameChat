@@ -20,25 +20,31 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
-import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.event.MessageListChangeEvent;
+import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
@@ -52,13 +58,14 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  *
  * @author Paul Michael Reilly
  */
-public class ShowGroupListFragment extends BaseFragment {
+public class ShowGroupListFragment extends BaseChatFragment {
 
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
+        logEvent(String.format("onClick: with event {%s};", event));
         int value = event.getView() != null ? event.getView().getId() : 0;
         switch (value) {
             case R.id.chatFab:
@@ -83,6 +90,7 @@ public class ShowGroupListFragment extends BaseFragment {
     /** Handle an account state change event by showing the no account fragment if necessary. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
         // Determine if this represents a no account situation due to a sign out event.
+        logEvent("onAccountStateChange:");
         if (event.account == null) {
             // There is no account.  Switch to the no account fragment.
             ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
@@ -96,6 +104,20 @@ public class ShowGroupListFragment extends BaseFragment {
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         // Turn off the back option and turn on the search option.
         setOptionsMenu(menu, inflater, new int[] {R.id.search}, new int[] {R.id.back});
+    }
+
+    /** A new group loaded event has been detected.  Join it if not already joined. */
+    @Subscribe public void onGroupProfileChange(final ProfileGroupChangeEvent event) {
+        // Ensure that the User is logged in (a prompting will be generated if not.)
+        Account account = AccountManager.instance.getCurrentAccount(getContext());
+        if (account == null) return;
+
+        // Ensure that a group key and group are packaged in the event.
+        String groupKey = event.key;
+        Group group = event.group;
+        if (groupKey != null && group != null)
+            // The group and key are available.  Accept any open invitations.
+            DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);
     }
 
     /** Handle the setup for the groups panel. */
@@ -129,24 +151,11 @@ public class ShowGroupListFragment extends BaseFragment {
         }
     }
 
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to room.
-                break;
-            default:
-                break;
-
-        }
-        return super.onOptionsItemSelected(item);
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Log the event and update the list saving the result for a retry later.
+        logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
+        mUpdateOnResume = !updateAdapterList();
     }
 
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */

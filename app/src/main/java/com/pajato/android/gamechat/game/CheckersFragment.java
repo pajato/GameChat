@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseFragment;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -24,7 +24,7 @@ import java.util.Scanner;
  *
  * @author Bryan Scott
  */
-public class CheckersFragment extends BaseFragment {
+public class CheckersFragment extends BaseGameFragment {
     private static final int PRIMARY_PIECE = 1;
     private static final int PRIMARY_KING = 2;
     private static final int SECONDARY_PIECE = 3;

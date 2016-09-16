@@ -26,6 +26,12 @@ import com.pajato.android.gamechat.chat.model.Message;
  */
 public class MessageChangeEvent {
 
+    // Public type constants.
+    public static final int NEW = 0;
+    public static final int CHANGED = 1;
+    public static final int REMOVED = 2;
+    public static final int MOVED = 3;
+
     // Public instance variables.
 
     /** The push key for the group containing the message. */
@@ -37,11 +43,16 @@ public class MessageChangeEvent {
     /** The value associated with the click event, either a tag value of the reoource id. */
     public Message message;
 
+    /** The change type. */
+    public int type;
+
     /** Build the event with the given list. */
-    public MessageChangeEvent(final String groupKey, final String roomKey, final Message message) {
+    public MessageChangeEvent(final String groupKey, final String roomKey, final Message message,
+                              final int type) {
         this.groupKey = groupKey;
         this.roomKey =  roomKey;
         this.message = message;
+        this.type = type;
     }
 
 }

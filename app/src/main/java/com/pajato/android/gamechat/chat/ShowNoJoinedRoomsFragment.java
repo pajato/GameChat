@@ -17,59 +17,18 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.support.v4.view.ViewPager;
-import android.view.MenuItem;
-
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.main.PaneManager;
-
-import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Provide a fragment to handle the case where there are no joined rooms.
  *
  * @author Paul Michael Reilly
  */
-public class ShowNoJoinedRoomsFragment extends BaseFragment {
+public class ShowNoJoinedRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Process a given button click event looking for one on the chat fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Determine if this event is for the chat fab button.
-        int value = event.getView() != null ? event.getView().getId() : 0;
-        switch (value) {
-            // TODO: Deal with a FAB join room choice.
-        default:
-            // Ignore everything else.
-            break;
-        }
-    }
-
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_no_joined_rooms;}
-
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to chat.
-                break;
-            default:
-                break;
-
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
 }

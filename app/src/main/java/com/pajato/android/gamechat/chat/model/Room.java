@@ -28,37 +28,48 @@ import java.util.Map;
 /** Provide a Firebase model class for representing a chat room. */
 @IgnoreExtraProperties public class Room {
 
-    /** The room owner/creator, an account identifier. */
-    public String owner;
-
-    /** The room name. */
-    public String name;
-
-    /** The parent group push key. */
-    public String groupKey;
+    /** The room types. */
+    public final static int ME = 0;
+    public final static int PRIVATE = 1;
+    public final static int PUBLIC = 2;
 
     /** The creation timestamp. */
     public long createTime;
 
-    /** The last modification timestamp. */
-    public long modTime;
+    /** The parent group push key. */
+    public String groupKey;
 
-    /** The room type, one of "public", "private" or "me". */
-    public String type;
+    /** The room push key. */
+    public String key;
 
     /** The room member account identifiers. These are the people currently in the room. */
     public List<String> memberIdList = new ArrayList<>();
+
+    /** The last modification timestamp. */
+    public long modTime;
+
+    /** The room name. */
+    public String name;
+
+    /** The room owner/creator, an account identifier. */
+    public String owner;
+
+    /** The room type, one of "public", "private" or "me". */
+    public int type;
 
     /** Build an empty args constructor for the database. */
     public Room() {}
 
     /** Build a default room. */
-    public Room(final String owner, final String name, final String groupkey, final long createTime,
-                final long modTime, final String type, final List<String> members) {
+    public Room(final String key, final String owner, final String name, final String groupkey,
+                final long createTime, final long modTime, final int type,
+                final List<String> members) {
+        this.createTime = createTime;
+        this.groupKey = groupKey;
+        this.key = key;
+        this.modTime = modTime;
         this.name = name;
         this.owner = owner;
-        this.createTime = createTime;
-        this.modTime = modTime;
         this.type = type;
         memberIdList = members;
     }
@@ -66,10 +77,11 @@ import java.util.Map;
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("owner", owner);
-        result.put("name", name);
-        result.put("groupKey", groupKey);
         result.put("createTime", createTime);
+        result.put("groupKey", groupKey);
+        result.put("key", key);
+        result.put("name", name);
+        result.put("owner", owner);
         result.put("modTime", modTime);
         result.put("type", type);
         result.put("memberIdList", memberIdList);
