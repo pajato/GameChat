@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,7 +33,6 @@ import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
@@ -55,11 +55,13 @@ public class ShowRoomListFragment extends BaseChatFragment {
     /** The logcat tag. */
     private static final String TAG = ShowRoomListFragment.class.getSimpleName();
 
-    /** Process a given button click event looking for one on the chat fab button. */
+    // Public instance methods.
+
+    /** Process a given button click event from the FAB, it's menu or a recycler list row. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
-        int value = event.getView() != null ? event.getView().getId() : 0;
-        switch (value) {
+        View view = event.view;
+        switch (view.getId()) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
                 FabManager.chat.toggle(this);
@@ -72,14 +74,8 @@ public class ShowRoomListFragment extends BaseChatFragment {
                 startActivity(intent);
                 break;
             default:
-                // Determine if the event has a chat list item representing a room with messages to
-                // show.
-                Object payload = event.getView().getTag();
-                if (payload instanceof ChatListItem) {
-                    // It does.  Show the messages in the room.
-                    ChatListItem item = (ChatListItem) payload;
-                    ChatManager.instance.chainFragment(showMessages, getActivity(), item);
-                }
+                // Process the event payload, if any.
+                processPayload(view);
                 break;
         }
     }
@@ -98,8 +94,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     /** Provide a general button click handler to post the click for general consumption. */
     public void onClick(final View view) {
-        String className = view.getClass().getName();
-        EventBus.getDefault().post(new ClickEvent(getContext(), -1, view, null, className));
+        EventBusManager.instance.post(new ClickEvent(view));
     }
 
     /** Deal with the options menu creation by making the search and back items visible. */
@@ -141,6 +136,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
+        Log.d(TAG, "ShowRoomListFragment checking in; I got the message!");
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();
     }
@@ -161,8 +157,9 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // Turn off the FAB.
+        // Turn on the FAB and force a recycler view  update.
         FabManager.chat.setState(this, View.VISIBLE);
+        mUpdateOnResume = true;
         super.onResume();
     }
 

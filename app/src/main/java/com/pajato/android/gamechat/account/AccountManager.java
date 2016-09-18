@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +38,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.HashMap;
@@ -130,7 +130,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             mCurrentAccountKey = null;
             if (DatabaseManager.instance.isRegistered(name)) {
                 DatabaseManager.instance.unregisterHandler(name);
-                EventBus.getDefault().post(new AccountStateChangeEvent(null));
+                EventBusManager.instance.post(new AccountStateChangeEvent(null));
             }
         }
     }
@@ -146,10 +146,28 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Handle a sign in or sign out button click. */
-    @Subscribe public void processClick(final ClickEvent event) {
-        // Case on the view's tag content.
-        Actions action = mActionMap.get(event.getValue());
-        if (action != null) processAction(event, action);
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Determine if there was a button click on a view.  If not, abort (since it is a menu item
+        // that is not interesting here.)
+        View view = event.view;
+        if (view == null) return;
+
+        // Handle the button click if it is either a sign-in or a sign-out.
+        switch (view.getId()) {
+            case R.id.signIn:
+                // Invoke the sign in activity to kick off a Firebase auth event.
+                Context context = view.getContext();
+                Intent intent = new Intent(context, SignInActivity.class);
+                intent.putExtra("signin", true);
+                context.startActivity(intent);
+                break;
+            case R.id.signOut:
+                // Have Firebase log out the user.
+                FirebaseAuth.getInstance().signOut();
+                break;
+            default:
+                break;
+        }
     }
 
     /** Register the account manager with the database and app event bus listeners. */
@@ -162,27 +180,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public void unregister() {
         FirebaseAuth.getInstance().removeAuthStateListener(this);
         EventBusManager.instance.unregister(this);
-    }
-
-    // Private instance methods.
-
-    /** Process a given action by providing handling for the relevant cases. */
-    private void processAction(final ClickEvent event, final Actions action) {
-        switch (action) {
-            case signIn:
-                // Invoke the sign in activity to kick off a Firebase auth event.
-                Context context = event.getContext();
-                Intent intent = new Intent(context, SignInActivity.class);
-                intent.putExtra("signin", true);
-                context.startActivity(intent);
-                break;
-            case signOut:
-                // Have Firebase log out the user.
-                FirebaseAuth.getInstance().signOut();
-                break;
-            default:
-                break;
-        }
     }
 
     // Private classes
@@ -216,7 +213,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user != null) DatabaseManager.instance.createAccount(user, STANDARD);
             }
-            EventBus.getDefault().post(new AccountStateChangeEvent(account));
+            EventBusManager.instance.post(new AccountStateChangeEvent(account));
         }
 
         /** ... */

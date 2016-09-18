@@ -28,7 +28,6 @@ import com.pajato.android.gamechat.R;
 
 import java.util.Locale;
 
-import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.pajato.android.gamechat.chat.FabManager.State.opened;
 
 
@@ -39,6 +38,11 @@ public enum FabManager {
 
     /** Provide FAB state constants. */
     enum State {opened, closed}
+
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = FabManager.class.getSimpleName();
 
     // Private instance variables.
 

@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -36,7 +37,6 @@ import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
@@ -60,14 +60,19 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  */
 public class ShowGroupListFragment extends BaseChatFragment {
 
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = ShowGroupListFragment.class.getSimpleName();
+
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
-        logEvent(String.format("onClick: with event {%s};", event));
-        int value = event.getView() != null ? event.getView().getId() : 0;
-        switch (value) {
+        View view = event.view;
+        logEvent(String.format("onClick: with event {%s};", view));
+        switch (view.getId()) {
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
                 FabManager.chat.toggle(this);
@@ -81,8 +86,8 @@ public class ShowGroupListFragment extends BaseChatFragment {
                 break;
 
         default:
-            // Drill down into the the group.
-            showRooms(event.getView());
+            // Process the event payload, if any.
+            processPayload(view);
             break;
         }
     }
@@ -154,15 +159,19 @@ public class ShowGroupListFragment extends BaseChatFragment {
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
+        Log.d(TAG, "ShowGroupListFragment checking in; I got the message!");
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();
     }
 
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
-        // Turn on the FAB and shut down the progress bar.
+        // Turn on the FAB, shut down the progress bar (if it is showing), and force a recycle view
+        // update.
+        setTitles(null, null);
         FabManager.chat.setState(this, View.VISIBLE);
         ProgressManager.instance.hide();
+        mUpdateOnResume = true;
         super.onResume();
     }
 
@@ -179,17 +188,6 @@ public class ShowGroupListFragment extends BaseChatFragment {
         ChatListAdapter adapter = new ChatListAdapter();
         adapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
         mRecyclerView.setAdapter(adapter);
-    }
-
-    /** Handle a button click on a group by showing the rooms in the group. */
-    private void showRooms(final View view) {
-        // Ensure that the list item contains a list item payload.
-        Object payload = view.getTag();
-        if (payload instanceof ChatListItem) {
-            // It does.  Show the rooms in the group.
-            ChatListItem item = (ChatListItem) payload;
-            ChatManager.instance.chainFragment(showRoomList, this.getActivity(), item);
-        }
     }
 
 }

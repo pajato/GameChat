@@ -17,9 +17,12 @@
 
 package com.pajato.android.gamechat.event;
 
+import android.util.Log;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -32,12 +35,22 @@ public enum EventBusManager {
 
     // Private class constants.
 
+    /** The logcat tag. */
+    private static final String TAG = EventBusManager.class.getSimpleName();
+
     // Public instance variables.
 
     /** The EventBus event listener map. */
     private Map<String, Object> mHandlerMap = new HashMap<>();
 
     // Public instance methods.
+
+    /** Post an event using the GreenRobot library. */
+    public void post(final Object event) {
+        EventBus.getDefault().post(event);
+        String name = event != null ? event.getClass().getSimpleName() : "null";
+        Log.d(TAG, String.format(Locale.US, "Posted event {%s}.", name));
+    }
 
     /** Register a given value event listener. */
     public void register(final Object handler) {
@@ -47,18 +60,8 @@ public enum EventBusManager {
             // Register the new listener both with the handler map and with Firebase.
             mHandlerMap.put(name, handler);
             EventBus.getDefault().register(handler);
+            Log.d(TAG, String.format(Locale.US, "Registered app event listener {%s}.", name));
         }
-    }
-
-    /** Unregister all listeners. */
-    public void unregisterAll() {
-        // Walk the set of registered handlers to remove them, then clear the map.
-        Object handler;
-        for (String name : mHandlerMap.keySet()) {
-            handler = mHandlerMap.get(name);
-            EventBus.getDefault().unregister(handler);
-        }
-        mHandlerMap.clear();
     }
 
     /** Unregister a named listener. */
@@ -69,16 +72,7 @@ public enum EventBusManager {
             // There is.  Remove it both from the map and as a listener.
             EventBus.getDefault().unregister(handler);
             mHandlerMap.remove(name);
-        }
-    }
-
-    // Private instance methods.
-
-    /** Remove the database event listener, if any is found associated with the given handler. */
-    private void removeEventListener(final String name, final Object handler) {
-        if (handler != null) {
-            // There is a handler found.  Remove it.
-            mHandlerMap.remove(name);
+            Log.d(TAG, String.format(Locale.US, "Unregistered app event listener {%s}.", name));
         }
     }
 
