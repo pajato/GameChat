@@ -23,7 +23,6 @@ import android.view.MenuItem;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 
 import org.greenrobot.eventbus.Subscribe;
 

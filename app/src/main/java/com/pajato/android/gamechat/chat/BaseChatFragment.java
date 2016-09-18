@@ -45,8 +45,9 @@ import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.PaneManager;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,7 @@ public abstract class BaseChatFragment extends Fragment {
     @Override public void onAttach(Context context) {
         super.onAttach(context);
         logEvent("onAttach");
-        EventBusManager.instance.register(this);
+        AppEventManager.instance.register(this);
     }
 
     @Override public void onCreate(Bundle bundle) {
@@ -152,7 +153,7 @@ public abstract class BaseChatFragment extends Fragment {
     @Override public void onDetach() {
         super.onDetach();
         logEvent("onDetach");
-        EventBusManager.instance.unregister(this);
+        AppEventManager.instance.unregister(this);
     }
 
     /** Initialize the fragment. */
@@ -197,6 +198,7 @@ public abstract class BaseChatFragment extends Fragment {
         // attempted.
         super.onResume();
         logEvent("onResume");
+        ProgressManager.instance.hide();
         if (mAdView != null) mAdView.resume();
         if (!mUpdateOnResume) return;
         updateAdapterList();

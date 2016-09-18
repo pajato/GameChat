@@ -23,7 +23,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -53,11 +52,6 @@ import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
  * @author Paul Michael Reilly
  */
 public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
-
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = ShowMessagesFragment.class.getSimpleName();
 
     // Public instance methods.
 
@@ -145,7 +139,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
-        Log.d(TAG, "ShowMessagesListFragment checking in; I got the message!");
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();
     }
@@ -153,6 +146,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn off the FAB and force a recycler view update.
+        setTitles(null, mItem.roomKey);
         FabManager.chat.setState(this, View.GONE);
         mUpdateOnResume = true;
         super.onResume();

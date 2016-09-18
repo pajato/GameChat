@@ -31,7 +31,7 @@ public abstract class  DatabaseEventHandler {
     public String name;
 
     /** The relevant Firebase path. */
-    public String path;
+    String path;
 
     /** The push key. */
     public String key;

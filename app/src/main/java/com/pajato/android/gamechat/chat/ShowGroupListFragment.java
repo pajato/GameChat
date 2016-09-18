@@ -17,13 +17,8 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -32,24 +27,19 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showRoomList;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -59,11 +49,6 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  * @author Paul Michael Reilly
  */
 public class ShowGroupListFragment extends BaseChatFragment {
-
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = ShowGroupListFragment.class.getSimpleName();
 
     // Public instance methods.
 
@@ -133,7 +118,7 @@ public class ShowGroupListFragment extends BaseChatFragment {
         setTitles(null, null);
         mItemListType = ChatListManager.ChatListType.group;
         initAdView(mLayout);
-        initList(mLayout);
+        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), false);
     }
 
     /** Deal with a change in the joined rooms state. */
@@ -159,7 +144,6 @@ public class ShowGroupListFragment extends BaseChatFragment {
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
-        Log.d(TAG, "ShowGroupListFragment checking in; I got the message!");
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();
     }
@@ -170,24 +154,8 @@ public class ShowGroupListFragment extends BaseChatFragment {
         // update.
         setTitles(null, null);
         FabManager.chat.setState(this, View.VISIBLE);
-        ProgressManager.instance.hide();
         mUpdateOnResume = true;
         super.onResume();
-    }
-
-    // Private instance methods.
-
-    /** Initialize the joined rooms list by setting up the recycler view. */
-    private void initList(@NonNull final View layout) {
-        // Initialize the recycler view.
-        Context context = layout.getContext();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        RecyclerView mRecyclerView = (RecyclerView) layout.findViewById(R.id.chatList);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        ChatListAdapter adapter = new ChatListAdapter();
-        adapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
-        mRecyclerView.setAdapter(adapter);
     }
 
 }

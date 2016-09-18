@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,9 +26,8 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
@@ -37,7 +35,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
 
@@ -49,11 +46,6 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
  * @author Paul Michael Reilly
  */
 public class ShowRoomListFragment extends BaseChatFragment {
-
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = ShowRoomListFragment.class.getSimpleName();
 
     // Public instance methods.
 
@@ -94,7 +86,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     /** Provide a general button click handler to post the click for general consumption. */
     public void onClick(final View view) {
-        EventBusManager.instance.post(new ClickEvent(view));
+        AppEventManager.instance.post(new ClickEvent(view));
     }
 
     /** Deal with the options menu creation by making the search and back items visible. */
@@ -136,7 +128,6 @@ public class ShowRoomListFragment extends BaseChatFragment {
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
-        Log.d(TAG, "ShowRoomListFragment checking in; I got the message!");
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();
     }
@@ -158,16 +149,10 @@ public class ShowRoomListFragment extends BaseChatFragment {
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn on the FAB and force a recycler view  update.
+        setTitles(mItem.groupKey, null);
         FabManager.chat.setState(this, View.VISIBLE);
         mUpdateOnResume = true;
         super.onResume();
-    }
-
-    /** Use the start lifecycle event to initialize the data. */
-    @Override public void onStart() {
-        // Display messages modified in the room using the message change handler with a null event.
-        super.onStart();
-        onMessageListChange(null);
     }
 
 }

@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.widget.Toast;
 
@@ -34,8 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -56,15 +55,10 @@ import static com.pajato.android.gamechat.account.Account.STANDARD;
 public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
 
-    // Public enum constants.
-
-    /** The account login states. */
-    public enum Actions {signIn, signOut}
+    // Public class constants.
 
     /** A key used to access account available data. */
     public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
-
-    // Private class constants
 
     // Private instance variables
 
@@ -73,9 +67,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** The account repository associating mulitple account id strings with the cloud account. */
     private Map<String, Account> mAccountMap = new HashMap<>();
-
-    /** The array of click keys.  The ... */
-    private SparseArray<Actions> mActionMap = new SparseArray<>();
 
     // Public instance methods
 
@@ -130,19 +121,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             mCurrentAccountKey = null;
             if (DatabaseManager.instance.isRegistered(name)) {
                 DatabaseManager.instance.unregisterHandler(name);
-                EventBusManager.instance.post(new AccountStateChangeEvent(null));
+                AppEventManager.instance.post(new AccountStateChangeEvent(null));
             }
         }
-    }
-
-    /** Initialize the account manager. */
-    public void init() {
-        // Build a sparse array associating auth events by resource id (User clicked in a sign in or
-        // sign out button) with an auth action, register the app event bus and finally add teh
-        // database auth change handler.  The auth state change listener will post app events so
-        // must come last.
-        mActionMap.put(R.id.signIn, Actions.signIn);
-        mActionMap.put(R.id.signOut, Actions.signOut);
     }
 
     /** Handle a sign in or sign out button click. */
@@ -172,14 +153,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Register the account manager with the database and app event bus listeners. */
     public void register() {
-        EventBusManager.instance.register(this);
+        AppEventManager.instance.register(this);
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     /** Unregister the component during lifecycle pause events. */
     public void unregister() {
         FirebaseAuth.getInstance().removeAuthStateListener(this);
-        EventBusManager.instance.unregister(this);
+        AppEventManager.instance.unregister(this);
     }
 
     // Private classes
@@ -213,7 +194,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user != null) DatabaseManager.instance.createAccount(user, STANDARD);
             }
-            EventBusManager.instance.post(new AccountStateChangeEvent(account));
+            AppEventManager.instance.post(new AccountStateChangeEvent(account));
         }
 
         /** ... */

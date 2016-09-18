@@ -26,7 +26,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -184,17 +183,5 @@ public abstract class BaseGameFragment extends Fragment {
         String format = FORMAT_WITH_BUNDLE;
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, bundle));
     }
-
-    /** Provide a way to handle volunteer solicitations for unimplemented functions. */
-    protected void showFutureFeatureMessage(final int resourceId) {
-        // Post a toast message.
-        Context context = getContext();
-        String prefix = context.getString(resourceId);
-        String suffix = context.getString(R.string.FutureFeature);
-        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
-    }
-
-    // Private instance methods.
 
 }
