@@ -36,11 +36,12 @@ import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.EventBusManager;
-import com.pajato.android.gamechat.event.EventUtils;
+import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
@@ -94,12 +95,12 @@ public class MainActivity extends BaseActivity
 
     /** Process a given button click event by logging it. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        String format = "Button click event on type: {%s} with value {%d}.";
-        int value = event.getValue();
-        Log.v(TAG, String.format(format, event.getClassName(), value));
+        View view = event.view;
+        String format = "Button click event on view: {%s}.";
+        Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
 
         // Process the sign in and sign out button clicks.
-        switch (value) {
+        switch (view.getId()) {
             case R.id.currentProfile:
             case R.id.signIn:
             case R.id.signOut:
@@ -120,22 +121,21 @@ public class MainActivity extends BaseActivity
     /** Process a click on a given view by posting a button click event. */
     public void onClick(final View view) {
         // Use the Event bus to post the click event.
-        EventUtils.post(this, view);
-    }
-
-    /** Process a button click on a given view by posting a button click event. */
-    // TODO: rename this to onMenuClick
-    public void menuClick(final MenuItem item) {
-        // Post all menu button clicks.
-        EventUtils.post(this, item);
+        EventBusManager.instance.post(new ClickEvent(view));
     }
 
     /** Process a navigation menu item click by posting a click event. */
     @Override public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
-        int value = item.getItemId();
-        String className = item.getClass().getSimpleName();
-        EventBus.getDefault().post(new ClickEvent(this, value, null, item, className));
+        switch (item.getItemId()) {
+            case R.id.nav_manage_accounts:
+            case R.id.nav_settings:
+            case R.id.nav_feedback:
+            case R.id.nav_learn:
+                // Todo: add menu button handling as a future feature.
+                break;
+
+        }
         NavigationManager.instance.closeDrawerIfOpen(this);
         return true;
     }
@@ -201,6 +201,12 @@ public class MainActivity extends BaseActivity
         init();
     }
 
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Log the event and update the list saving the result for a retry later.
+        Log.d(TAG, "MainActivity checking in; I got the message!");
+    }
+
     /** Respect the lifecycle and ensure that the event bus shuts down. */
     @Override protected void onPause() {
         // Unregister the components directly used by the main activity which will unregister
@@ -210,7 +216,7 @@ public class MainActivity extends BaseActivity
         // If and how this should be ordered is ill understood. :-()
         AccountManager.instance.unregister();
         DatabaseManager.instance.unregisterAll();
-        EventBusManager.instance.unregisterAll();
+        //EventBusManager.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */

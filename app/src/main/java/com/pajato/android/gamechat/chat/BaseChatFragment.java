@@ -54,7 +54,10 @@ import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
 import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.message;
-import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.room;
+import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
+import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showRoomList;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -72,11 +75,11 @@ public abstract class BaseChatFragment extends Fragment {
 
     /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
-        "Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Lifecycle event: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment Type: %s.";
 
     /** The lifecycle event format string with a bundle provided. */
     private static final String FORMAT_WITH_BUNDLE =
-        "Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Lifecycle event: %s; Bundle: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -112,8 +115,8 @@ public abstract class BaseChatFragment extends Fragment {
 
     @Override public void onAttach(Context context) {
         super.onAttach(context);
-        EventBusManager.instance.register(this);
         logEvent("onAttach");
+        EventBusManager.instance.register(this);
     }
 
     @Override public void onCreate(Bundle bundle) {
@@ -278,14 +281,37 @@ public abstract class BaseChatFragment extends Fragment {
     protected void logEvent(final String event) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_NO_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, this, manager, mItemListType, event));
+        Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType));
     }
 
     /** Log a lifecycle event that has a bundle. */
     protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_WITH_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, this, manager, mItemListType, event, bundle));
+        Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType, bundle));
+    }
+
+    /** Proces a button click that may be a chat list item click. */
+    protected void processPayload(final View view) {
+        // Determine if some action needs to be taken, i.e if the button click is coming
+        // from a group or room item view.
+        Object payload = view.getTag();
+        if (!(payload instanceof ChatListItem)) return;
+
+        // Action needs be taken.  Case on the item to determine what action.
+        ChatListItem item = (ChatListItem) payload;
+        switch (item.type) {
+            case GROUP_ITEM_TYPE:
+                // Drill into the rooms in group.
+                ChatManager.instance.chainFragment(showRoomList, getActivity(), item);
+                break;
+            case ROOM_ITEM_TYPE:
+                // Show the messages in a room.
+                ChatManager.instance.chainFragment(showMessages, getActivity(), item);
+                break;
+            default:
+                break;
+        }
     }
 
     /** Deal with the options menu by hiding the back button. */
@@ -359,7 +385,7 @@ public abstract class BaseChatFragment extends Fragment {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
                 Group group = ChatListManager.instance.getGroupProfile(groupKey);
-                if (group != null && room != null)
+                if (group != null)
                     // The group is available.  Accept any open invitations ... and there should be
                     // at least one!
                     DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);

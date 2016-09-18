@@ -44,8 +44,8 @@ public class GameFragment extends BaseGameFragment {
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Grab the View ID and the floating action button and dimmer views.
-        int viewId = event.getView() != null ? event.getView().getId() : 0;
-        switch (viewId) {
+        View view = event.view;
+        switch (view.getId()) {
             case R.id.init_ttt:
             case R.id.init_ttt_button:
                 // When a button is clicked, send a new game and reset the fab menu and background

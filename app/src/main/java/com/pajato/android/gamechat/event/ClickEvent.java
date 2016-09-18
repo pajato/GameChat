@@ -17,37 +17,25 @@
 
 package com.pajato.android.gamechat.event;
 
-import android.content.Context;
-import android.view.MenuItem;
 import android.view.View;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
 
 /**
  * Provides a button click data model class.
  *
  * @author Paul Michael Reilly
  */
-@AllArgsConstructor(suppressConstructorProperties = true)
-@Data
 public class ClickEvent {
 
-    // Private instance variables
-
-    /** The app context. */
-    @NonNull private Context context;
-
-    /** The value associated with the click event, either a tag value of the reoource id. */
-    private int value;
+    // Private instance variables.
 
     /** The view associated with the click event, if any. */
-    private View view;
+    public View view;
 
-    /** The menu item associated with the click event, if any. */
-    private MenuItem item;
+    // Public constructors.
 
-    /** The class name of the object that generated the event. */
-    @NonNull private String className;
+    /** Build the event with the given view. */
+    public ClickEvent(final View view) {
+        this.view = view;
+    }
+
 }

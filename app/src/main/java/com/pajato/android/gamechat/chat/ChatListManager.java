@@ -38,13 +38,13 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -115,25 +115,6 @@ public enum ChatListManager {
 
         // Return an empty list by default.  This should never happen.
         return new ArrayList<>();
-    }
-
-    /** Get the data as a set of list items for all groups. */
-    private List<ChatListItem> getGroupListData() {
-        // Generate a list of items to render in the chat group list by extracting the items based on
-        // the date header type ordering.
-        List<ChatListItem> result = new ArrayList<>();
-        for (DateHeaderType dht : DateHeaderType.values()) {
-            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
-            if (groupList != null && groupList.size() > 0) {
-                // Add the header item followed by all the group items.
-                result.add(new ChatListItem(new DateHeaderItem(dht)));
-                for (String groupKey : groupList) {
-                    result.add(new ChatListItem(new GroupItem(groupKey)));
-                }
-            }
-        }
-
-        return result;
     }
 
     /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
@@ -256,7 +237,7 @@ public enum ChatListManager {
 
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.groupKey, event.message);
-        EventBus.getDefault().post(new MessageListChangeEvent());
+        EventBusManager.instance.post(new MessageListChangeEvent());
     }
 
     /** Handle a room profile change by updating the map. */
@@ -286,6 +267,25 @@ public enum ChatListManager {
             }
         }
         return old;
+    }
+
+    /** Get the data as a set of list items for all groups. */
+    private List<ChatListItem> getGroupListData() {
+        // Generate a list of items to render in the chat group list by extracting the items based on
+        // the date header type ordering.
+        List<ChatListItem> result = new ArrayList<>();
+        for (DateHeaderType dht : DateHeaderType.values()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            if (groupList != null && groupList.size() > 0) {
+                // Add the header item followed by all the group items.
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                for (String groupKey : groupList) {
+                    result.add(new ChatListItem(new GroupItem(groupKey)));
+                }
+            }
+        }
+
+        return result;
     }
 
     /** Return a list of ordered chat items from a map of chronologically ordered messages. */
@@ -415,7 +415,7 @@ public enum ChatListManager {
                 t = new GenericTypeIndicator<List<String>>() {};
                 list.addAll(dataSnapshot.getValue(t));
             }
-            EventBus.getDefault().post(new JoinedRoomListChangeEvent(list));
+            EventBusManager.instance.post(new JoinedRoomListChangeEvent(list));
         }
 
         /** ... */
@@ -515,7 +515,7 @@ public enum ChatListManager {
             }
 
             // The event should be propagated to the app.
-            EventBus.getDefault().post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
+            EventBusManager.instance.post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
         }
 
     }
@@ -542,7 +542,7 @@ public enum ChatListManager {
             if (dataSnapshot.exists()) {
                 // There is data.  Publish the group profile to the app.
                 Group group = dataSnapshot.getValue(Group.class);
-                EventBus.getDefault().post(new ProfileGroupChangeEvent(key, group));
+                EventBusManager.instance.post(new ProfileGroupChangeEvent(key, group));
             } else {
                 Log.e(TAG, "Invalid key.  No value returned.");
             }
@@ -577,7 +577,7 @@ public enum ChatListManager {
             if (dataSnapshot.exists()) {
                 // There is data.  Publish the group profile to the app.
                 Room room = dataSnapshot.getValue(Room.class);
-                EventBus.getDefault().post(new ProfileRoomChangeEvent(key, room));
+                EventBusManager.instance.post(new ProfileRoomChangeEvent(key, room));
             } else {
                 Log.e(TAG, "Invalid key.  No value returned.");
             }

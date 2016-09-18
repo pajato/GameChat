@@ -44,9 +44,8 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventUtils;
+import com.pajato.android.gamechat.event.EventBusManager;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
@@ -55,7 +54,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.R.id.clearGroupName;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
 
@@ -81,15 +79,14 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Handle group add button clicks by processing them. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        int value = event.getValue();
-        switch (value) {
+        switch (event.view.getId()) {
             case R.id.saveGroupButton:
                 // Process the group (validate and persist it) and be done with the activity.
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) processGroup(account);
                 finish();
                 break;
-            case clearGroupName:
+            case R.id.clearGroupName:
                 clearGroupName();
                 break;
             case R.id.addGroupMembers:
@@ -104,14 +101,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    /** Process a button click on a given view by posting a button click event. */
-    public void menuClick(final MenuItem item) {
-        // Post all menu button clicks.
-        int value = item.getItemId();
-        String className = item.getClass().getSimpleName();
-        EventBus.getDefault().post(new ClickEvent(this, value, null, item, className));
-    }
-
     /** Handle a back button press by cancelling out of the activity. */
     @Override public void onBackPressed() {
         finish();
@@ -119,7 +108,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Process a button click on a given view by posting a button click event. */
     public void onClick(final View view) {
-        EventUtils.post(this, view);
+        EventBusManager.instance.post(new ClickEvent(view));
     }
 
     /** Post the options menu on demand. */
@@ -162,7 +151,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Unregister the components directly used by the main activity which will unregister
         // sub-components in turn.
         super.onPause();
-        EventBus.getDefault().unregister(this);
+        EventBusManager.instance.unregister(this);
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */
@@ -170,7 +159,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Register the components directly used by the main activity which will register
         // sub-components in turn.
         super.onResume();
-        EventBus.getDefault().register(this);
+        EventBusManager.instance.register(this);
     }
 
     // Private instance methods.
@@ -239,6 +228,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         if (!mGroup.memberIdList.contains(mGroup.owner)) mGroup.memberIdList.add(mGroup.owner);
         String groupKey = DatabaseManager.instance.getGroupKey();
         String roomKey = DatabaseManager.instance.getRoomKey(groupKey);
+        mGroup.key = groupKey;
 
         // Obtain the default room name, create the default room, update the group's room map and
         // add the group key to the account's group id list.

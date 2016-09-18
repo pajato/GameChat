@@ -48,11 +48,11 @@ public abstract class BaseGameFragment extends Fragment {
 
     /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
-        "Fragment: %s; Fragment Manager: %s; Lifecycle event: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s.";
 
     /** The lifecycle event format string with a bundle provided. */
     private static final String FORMAT_WITH_BUNDLE =
-        "Fragment: %s; Fragment Manager: %s; Lifecycle event: %s; Bundle: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -175,14 +175,14 @@ public abstract class BaseGameFragment extends Fragment {
     protected void logEvent(final String event) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_NO_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, this, manager, event));
+        Log.v(TAG, String.format(Locale.US, format, event, this, manager));
     }
 
     /** Log a lifecycle event that has a bundle. */
     protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_WITH_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, this, manager, event, bundle));
+        Log.v(TAG, String.format(Locale.US, format, event, this, manager, bundle));
     }
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */

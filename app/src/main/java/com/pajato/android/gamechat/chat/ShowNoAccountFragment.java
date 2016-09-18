@@ -35,18 +35,6 @@ public class ShowNoAccountFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Process a given button click event looking for one on the chat fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Determine if this event is for the chat fab button.
-        int value = event.getView() != null ? event.getView().getId() : 0;
-        switch (value) {
-            // TODO: add cases for sign in, add account and switch account?
-        default:
-            // Ignore everything else.
-            break;
-        }
-    }
-
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_no_account;}
 

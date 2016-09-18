@@ -25,14 +25,13 @@ package com.pajato.android.gamechat.chat.adapter;
  */
 public class ChatListItem {
 
-    // Public constants.
-
+    // Type constants.
     static final int CONTACT_HEADER_ITEM_TYPE = 0;
     static final int CONTACT_ITEM_TYPE = 1;
     static final int DATE_ITEM_TYPE = 2;
-    static final int GROUP_ITEM_TYPE= 3;
+    public static final int GROUP_ITEM_TYPE= 3;
     static final int MESSAGE_ITEM_TYPE = 4;
-    static final int ROOM_ITEM_TYPE = 5;
+    public static final int ROOM_ITEM_TYPE = 5;
 
     // Public enums
 
@@ -54,7 +53,7 @@ public class ChatListItem {
     int nameResourceId;
 
     /** The item phone number, possibly null, used for contact items. */
-    public String phone;
+    String phone;
 
     /** The room (push) key, possibly null, used for chat list items. */
     public String roomKey;

@@ -23,6 +23,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,9 +38,11 @@ import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
@@ -51,13 +54,18 @@ import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
  */
 public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
 
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = ShowMessagesFragment.class.getSimpleName();
+
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
-        int value = event.getView() != null ? event.getView().getId() : 0;
-        switch (value) {
+        View view = event.view;
+        switch (view.getId()) {
             case R.id.insertPhoto:
                 showFutureFeatureMessage(R.string.InsertPhoto);
                 break;
@@ -134,10 +142,19 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         return true;
     }
 
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+        // Log the event and update the list saving the result for a retry later.
+        Log.d(TAG, "ShowMessagesListFragment checking in; I got the message!");
+        logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
+        mUpdateOnResume = !updateAdapterList();
+    }
+
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // Turn off the FAB.
+        // Turn off the FAB and force a recycler view update.
         FabManager.chat.setState(this, View.GONE);
+        mUpdateOnResume = true;
         super.onResume();
     }
 
