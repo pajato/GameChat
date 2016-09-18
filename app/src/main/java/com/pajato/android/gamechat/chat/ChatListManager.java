@@ -38,7 +38,7 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
@@ -237,7 +237,7 @@ public enum ChatListManager {
 
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.groupKey, event.message);
-        EventBusManager.instance.post(new MessageListChangeEvent());
+        AppEventManager.instance.post(new MessageListChangeEvent());
     }
 
     /** Handle a room profile change by updating the map. */
@@ -415,7 +415,7 @@ public enum ChatListManager {
                 t = new GenericTypeIndicator<List<String>>() {};
                 list.addAll(dataSnapshot.getValue(t));
             }
-            EventBusManager.instance.post(new JoinedRoomListChangeEvent(list));
+            AppEventManager.instance.post(new JoinedRoomListChangeEvent(list));
         }
 
         /** ... */
@@ -515,7 +515,7 @@ public enum ChatListManager {
             }
 
             // The event should be propagated to the app.
-            EventBusManager.instance.post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
+            AppEventManager.instance.post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
         }
 
     }
@@ -542,7 +542,7 @@ public enum ChatListManager {
             if (dataSnapshot.exists()) {
                 // There is data.  Publish the group profile to the app.
                 Group group = dataSnapshot.getValue(Group.class);
-                EventBusManager.instance.post(new ProfileGroupChangeEvent(key, group));
+                AppEventManager.instance.post(new ProfileGroupChangeEvent(key, group));
             } else {
                 Log.e(TAG, "Invalid key.  No value returned.");
             }
@@ -577,7 +577,7 @@ public enum ChatListManager {
             if (dataSnapshot.exists()) {
                 // There is data.  Publish the group profile to the app.
                 Room room = dataSnapshot.getValue(Room.class);
-                EventBusManager.instance.post(new ProfileRoomChangeEvent(key, room));
+                AppEventManager.instance.post(new ProfileRoomChangeEvent(key, room));
             } else {
                 Log.e(TAG, "Invalid key.  No value returned.");
             }

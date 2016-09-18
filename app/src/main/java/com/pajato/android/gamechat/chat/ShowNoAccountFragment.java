@@ -18,11 +18,7 @@
 package com.pajato.android.gamechat.chat;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.main.ProgressManager;
-
-import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Provide a fragment to deal with no account or a signed out account.

@@ -34,8 +34,8 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -121,7 +121,7 @@ public class MainActivity extends BaseActivity
     /** Process a click on a given view by posting a button click event. */
     public void onClick(final View view) {
         // Use the Event bus to post the click event.
-        EventBusManager.instance.post(new ClickEvent(view));
+        AppEventManager.instance.post(new ClickEvent(view));
     }
 
     /** Process a navigation menu item click by posting a click event. */
@@ -216,7 +216,6 @@ public class MainActivity extends BaseActivity
         // If and how this should be ordered is ill understood. :-()
         AccountManager.instance.unregister();
         DatabaseManager.instance.unregisterAll();
-        //EventBusManager.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */
@@ -224,8 +223,8 @@ public class MainActivity extends BaseActivity
         // Register the components carefully as there are order sensitivities betwee the account and
         // database managers.
         super.onResume();
-        EventBusManager.instance.register(this);
-        EventBusManager.instance.register(ChatListManager.instance);
+        AppEventManager.instance.register(this);
+        AppEventManager.instance.register(ChatListManager.instance);
         AccountManager.instance.register();
     }
 
@@ -241,7 +240,6 @@ public class MainActivity extends BaseActivity
         DatabaseManager.instance.init(this);
         NavigationManager.instance.init(this, toolbar);
         PaneManager.instance.init(this);
-        AccountManager.instance.init();
     }
 
 }

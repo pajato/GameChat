@@ -30,13 +30,13 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-public enum EventBusManager {
+public enum AppEventManager {
     instance;
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = EventBusManager.class.getSimpleName();
+    private static final String TAG = AppEventManager.class.getSimpleName();
 
     // Public instance variables.
 

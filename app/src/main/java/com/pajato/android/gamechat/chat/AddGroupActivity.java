@@ -43,8 +43,8 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -108,7 +108,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Process a button click on a given view by posting a button click event. */
     public void onClick(final View view) {
-        EventBusManager.instance.post(new ClickEvent(view));
+        AppEventManager.instance.post(new ClickEvent(view));
     }
 
     /** Post the options menu on demand. */
@@ -151,7 +151,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Unregister the components directly used by the main activity which will unregister
         // sub-components in turn.
         super.onPause();
-        EventBusManager.instance.unregister(this);
+        AppEventManager.instance.unregister(this);
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */
@@ -159,7 +159,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Register the components directly used by the main activity which will register
         // sub-components in turn.
         super.onResume();
-        EventBusManager.instance.register(this);
+        AppEventManager.instance.register(this);
     }
 
     // Private instance methods.

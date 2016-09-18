@@ -31,7 +31,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.EventBusManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import java.util.ArrayList;
@@ -116,7 +116,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     /** Post any item clicks to the app. */
     public void onClick(final View view) {
-        EventBusManager.instance.post(new ClickEvent(view));
+        AppEventManager.instance.post(new ClickEvent(view));
     }
 
     /** Obtain the number of entries in the item list. */
