@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
@@ -76,6 +77,7 @@ public abstract class BaseGameFragment extends Fragment {
     @Override public void onAttach(Context context) {
         super.onAttach(context);
         logEvent("onAttach");
+        AppEventManager.instance.register(this);
     }
 
     @Override public void onCreate(Bundle bundle) {
@@ -110,6 +112,7 @@ public abstract class BaseGameFragment extends Fragment {
     @Override public void onDetach() {
         super.onDetach();
         logEvent("onDetach");
+        AppEventManager.instance.unregister(this);
     }
 
     /** Initialize the fragment. */

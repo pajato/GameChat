@@ -91,11 +91,9 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         }
     }
 
-    /** Deal with the options menu creation by making the search and back items visible. */
+    /** Deal with the options menu creation by making the search item visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
-        MenuItem item = menu.findItem(R.id.back);
-        if (item != null) item.setVisible(true);
+        setItemState(menu, R.id.search, true);
     }
 
     /** Handle the setup of the list of messages. */
@@ -109,21 +107,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         FabManager.chat.setState(this, View.GONE);
         initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), true);
         initEditText(mLayout);
-    }
-
-    /** Handle the back button here, all others in the base class. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.back:
-                // Pop the fragment back stack to return to the rooms view.
-                logEvent("onOptionsItemSelected (showMessageList, back)");
-                ChatManager.instance.popBackStack(getActivity());
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-        return true;
     }
 
     /** Manage the list UI every time a message change occurs. */

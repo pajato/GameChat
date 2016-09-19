@@ -22,13 +22,6 @@ more. -->
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/back"
-        android:icon="@drawable/ic_arrow_upward_white_24dp"
-        android:title="@string/backItemTitleText"
-        android:orderInCategory="0"
-        android:visible="false"
-        app:showAsAction="always" />
-    <item
         android:title="@string/spaceValue"
         android:icon="@drawable/ic_search_white"
         android:id="@+id/search"

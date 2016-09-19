@@ -18,10 +18,25 @@
 package com.pajato.android.gamechat.game;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 public class ShowNoGamesFragment extends BaseGameFragment {
 
+    @Subscribe public void onClick(final ClickEvent event) {
+        // todo add some code here.
+        logEvent("onClick (showNoGames)");
+    }
+
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game_no_games;}
+
+
+    /** Initialize the fragment by setting in the FAB. */
+    @Override public void onInitialize() {
+        FabManager.game.init(this);
+    }
 
 }

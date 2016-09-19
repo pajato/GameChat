@@ -32,7 +32,6 @@
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
     <string name="TakeVideoDesc">Take a video image button.</string>
-    <string name="backItemTitleText">Back</string>
     <string name="contacts">Contacts</string>
     <string name="editMessageHint">Type a message</string>
     <string name="frequent">Frequent</string>
