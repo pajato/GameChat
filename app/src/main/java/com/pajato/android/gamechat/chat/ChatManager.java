@@ -84,6 +84,7 @@ enum ChatManager {
         // activity, adding a backstack.
         lastTypeShown = type;
         setItem(fragment, item);
+        context.getSupportFragmentManager().enableDebugLogging(true);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.chatFragmentContainer, fragment)
             .addToBackStack(null)

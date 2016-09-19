@@ -60,10 +60,10 @@ public class ShowRoomListFragment extends BaseChatFragment {
         AppEventManager.instance.post(new ClickEvent(view));
     }
 
-    /** Deal with the options menu creation by making the search and back items visible. */
+    /** Deal with the options menu creation by making the search item visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         // Turn on both the back and search buttons.
-        setOptionsMenu(menu, inflater, new int[] {R.id.back, R.id.search}, null);
+        setItemState(menu, R.id.search, true);
     }
 
     /** Handle the setup for the groups panel. */
@@ -84,20 +84,6 @@ public class ShowRoomListFragment extends BaseChatFragment {
         String format = "onMessageListChange (showRoomList) with event {%s}";
         logEvent(String.format(Locale.US, format, event));
         mUpdateOnResume = !updateAdapterList();
-    }
-
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.back:
-                // Pop back to the groups list view.
-                ChatManager.instance.popBackStack(getActivity());
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-        return true;
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */

@@ -51,10 +51,10 @@ public class ShowGroupListFragment extends BaseChatFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_groups;}
 
-    /** Deal with the options menu by hiding the back button. */
+    /** Deal with the options menu by making the search button visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        // Turn off the back option and turn on the search option.
-        setOptionsMenu(menu, inflater, new int[] {R.id.search}, new int[] {R.id.back});
+        // Turn on the search option.
+        setItemState(menu, R.id.search, true);
     }
 
     /** Handle the setup for the groups panel. */

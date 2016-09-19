@@ -317,14 +317,10 @@ public abstract class BaseChatFragment extends Fragment {
         }
     }
 
-    /** Deal with the options menu by hiding the back button. */
-    protected void setOptionsMenu(final Menu menu, final MenuInflater inflater, final int[] visible,
-                                  final int[] gone) {
-        // Ensure that the menu options has been inflated and make the specified items visible and
-        // gone.
-        if (!menu.hasVisibleItems()) inflater.inflate(R.menu.chat_menu_base, menu);
-        if (visible != null) for (int itemId : visible) setItemState(menu, itemId, true);
-        if (gone != null) for (int itemId : gone) setItemState(menu, itemId, false);
+    /** Make the given menu item either visible or invisible. */
+    protected void setItemState(final Menu menu, final int itemId, final boolean state) {
+        MenuItem item = menu.findItem(itemId);
+        if (item != null) item.setVisible(state);
     }
 
     /** Set the title in the toolbar using the group name. */
@@ -394,12 +390,6 @@ public abstract class BaseChatFragment extends Fragment {
                     DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);
             }
         }
-    }
-
-    /** Make the given menu item either visible or invisible. */
-    private void setItemState(final Menu menu, final int itemId, final boolean state) {
-        MenuItem item = menu.findItem(itemId);
-        if (item != null) item.setVisible(state);
     }
 
 }
