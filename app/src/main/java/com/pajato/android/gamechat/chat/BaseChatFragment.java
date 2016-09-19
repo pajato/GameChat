@@ -372,9 +372,10 @@ public abstract class BaseChatFragment extends Fragment {
 
         // Walk the list of developer groups to ensure that all are joined.
         List<String> groupList = new ArrayList<>();
-        groupList.add("");      // Paul Reilly Group
-        groupList.add("");      // Game Chat Group
-        groupList.add("");      // Pajato Technologies LLC
+        groupList.add("-KRqycW-uywIkt4Ro0iu");      // Paul Reilly Group
+        groupList.add("-KS3dt8unvPfxIKnOJ49");      // GameChat Group
+        groupList.add("-KS3dgEy77X0tjE6f5pY");      // Pajato Technologies LLC
+        groupList.add("-KS3fObxrr04gpLoCIno");      // Pajato Support Group
         for (String groupKey : groupList) {
             // Extend an invitation to the group and est that this group has been joined.
             DatabaseManager.instance.extendGroupInvite(account, groupKey);
