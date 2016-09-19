@@ -76,11 +76,11 @@ public abstract class BaseChatFragment extends Fragment {
 
     /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
-        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment Type: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment List Type: %s.";
 
     /** The lifecycle event format string with a bundle provided. */
     private static final String FORMAT_WITH_BUNDLE =
-        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment Type: %s; Bundle: %s.";
+        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment List Type: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -158,7 +158,8 @@ public abstract class BaseChatFragment extends Fragment {
 
     /** Initialize the fragment. */
     public void onInitialize() {
-        // All chat and game fragments will use the options menu.
+        // All chat and game fragments will use the options menu and start with the FAB in the
+        // closed state.
         setHasOptionsMenu(true);
     }
 

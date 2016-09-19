@@ -36,6 +36,9 @@ public enum ProgressManager {
     /** The view pager adapter used to manage paging on a smartphone layout. */
     private ProgressDialog mProgressDialog;
 
+    /** Indicates if the dialog is showing. */
+    private boolean mIsShowing;
+
     // Public instance methods
 
     /** Show the initial loading dialog. */
@@ -52,14 +55,16 @@ public enum ProgressManager {
         mProgressDialog.setTitle("Starting...");
         mProgressDialog.setMessage("Please wait while the app starts up...");
         mProgressDialog.show();
+        mIsShowing = true;
     }
 
     /** Dismiss the initial loading dialog if one is showing. */
     public void hide() {
         Log.d(TAG, "Attempting to hide the progress dialog.");
-        if (mProgressDialog != null) {
+        if (mIsShowing && mProgressDialog != null) {
             mProgressDialog.dismiss();
             mProgressDialog = null;
+            mIsShowing = false;
         }
     }
 }

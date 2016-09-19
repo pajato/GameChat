@@ -507,12 +507,10 @@ public enum ChatListManager {
             if (!snapshot.exists()) return;
 
             // Build the message and process the filter flag by checking for a duplicated message.
-            // This code is suspect in origin and likely not needed, hence the logging.
+            // Duplicate messages have been detected by GameChat and is mentioned on StackOverflow:
+            // http://stackoverflow.com/questions/38206413/firebase-childeventlistener-onchildadded-adding-duplicate-objects
             Message message = snapshot.getValue(Message.class);
-            if (filter && isDupe(message)) {
-                Log.e(TAG, "Encountered a duplicated message!", new Throwable());
-                return;
-            }
+            if (filter && isDupe(message)) return;
 
             // The event should be propagated to the app.
             AppEventManager.instance.post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
