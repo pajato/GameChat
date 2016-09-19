@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat;
 
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -31,8 +30,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showGroupList;
-
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
  * the top level view in the chat hierarchy.  It shows all the joined groups and allows for drilling
@@ -43,14 +40,6 @@ import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.show
 public class ShowRoomListFragment extends BaseChatFragment {
 
     // Public instance methods.
-
-    /** Process a given button click event from the FAB, it's menu or a recycler list row. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Assume that the button click is from a group view list item and give the base class a
-        // chance to verify or refute the assumption.  If verified, the group view will drill into
-        // the room view.
-        processPayload(event.view);
-    }
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_rooms;}

@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -68,6 +67,9 @@ public class ChatFragment extends BaseChatFragment {
                 startActivity(intent);
                 break;
             default:
+                // Determine if the button click was generaged by a group view or room view drill
+                // down.  Handle it by adding the next fragment to the back stack.
+                processPayload(event.view);
                 break;
         }
     }
