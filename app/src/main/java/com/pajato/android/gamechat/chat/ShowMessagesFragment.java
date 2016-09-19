@@ -33,7 +33,6 @@ import android.widget.EditText;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -43,7 +42,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 
 /**
@@ -84,15 +82,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_messages;}
 
-    /** Handle an account state change event by showing the no sign in message. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // Determine if this represents a no account situation due to a sign out event.
-        if (event.account == null) {
-            // There is no account.  Switch to the no account fragment.
-            ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
-        }
-    }
-
     /** Handle a button click on the FAB button by posting a new message. */
     @Override public void onClick(final View view) {
         // Ensure that the click occurred on the send message button.
@@ -127,6 +116,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         switch(item.getItemId()) {
             case R.id.back:
                 // Pop the fragment back stack to return to the rooms view.
+                logEvent("onOptionsItemSelected (showMessageList, back)");
                 ChatManager.instance.popBackStack(getActivity());
                 break;
             default:

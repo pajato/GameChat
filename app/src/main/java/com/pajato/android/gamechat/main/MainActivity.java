@@ -36,7 +36,6 @@ import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -199,12 +198,6 @@ public class MainActivity extends BaseActivity
         // manager misses an authentication event then the app will not behave as intended.
         setContentView(R.layout.activity_main);
         init();
-    }
-
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
-        // Log the event and update the list saving the result for a retry later.
-        Log.d(TAG, "MainActivity checking in; I got the message!");
     }
 
     /** Respect the lifecycle and ensure that the event bus shuts down. */

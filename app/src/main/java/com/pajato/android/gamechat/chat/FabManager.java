@@ -75,6 +75,15 @@ public enum FabManager {
         // correct initial state.
         mTag = fragmentTag;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+    }
+
+    /** Initialize the fab state. */
+    public void init(final Fragment fragment) {
+        View layout = getView(fragment);
+        if (layout == null) return;
+
+        // Set the fab state to closed.
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
         dismissMenu(layout);
     }

@@ -136,7 +136,7 @@ enum ChatManager {
         return null;
     }
 
-    /** Set the item to be relevant for a list of rooms. */
+    /** Set the item to be relevant for a list of groups, rooms or messages. */
     private void setItem(Fragment fragment, ChatListItem item) {
         if (fragment instanceof BaseChatFragment) {
             ((BaseChatFragment) fragment).setItem(item);
