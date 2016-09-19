@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -84,16 +85,12 @@ enum ChatManager {
         // activity, adding a backstack.
         lastTypeShown = type;
         setItem(fragment, item);
-        context.getSupportFragmentManager().enableDebugLogging(true);
-        context.getSupportFragmentManager().beginTransaction()
+        FragmentManager manager = context.getSupportFragmentManager();
+        FragmentManager.enableDebugLogging(true);
+        manager.beginTransaction()
             .replace(R.id.chatFragmentContainer, fragment)
-            .addToBackStack(null)
+            .addToBackStack(type.toString())
             .commit();
-    }
-
-    /** Return to the previous fragment added to the back stack. */
-    public void popBackStack(final FragmentActivity context) {
-        context.getSupportFragmentManager().popBackStack();
     }
 
     /** Attach a fragment identified by a type, creating that fragment as necessary. */

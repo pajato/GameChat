@@ -22,7 +22,6 @@ import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -39,14 +38,6 @@ import java.util.Locale;
 public class ShowGroupListFragment extends BaseChatFragment {
 
     // Public instance methods.
-
-    /** Process a given button click event looking for one on the chat fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        // Assume that the button click is from a group view list item and give the base class a
-        // chance to verify or refute the assumption.  If verified, the group view will drill into
-        // the room view.
-        processPayload(event.view);
-    }
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_groups;}

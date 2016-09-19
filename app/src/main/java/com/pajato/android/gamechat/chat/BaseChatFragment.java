@@ -30,7 +30,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,8 +157,7 @@ public abstract class BaseChatFragment extends Fragment {
 
     /** Initialize the fragment. */
     public void onInitialize() {
-        // All chat and game fragments will use the options menu and start with the FAB in the
-        // closed state.
+        // All chat and game fragments will use the options menu.
         setHasOptionsMenu(true);
     }
 

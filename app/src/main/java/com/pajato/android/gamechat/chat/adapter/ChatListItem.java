@@ -17,6 +17,10 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
+import java.util.Locale;
+
+import static android.R.attr.key;
+
 /**
  * Provide a POJO to encapsulate a recycler view list item: either a date label view or a room list
  * view showing the rooms in a group with messages characterized by a preceding date label view.
@@ -39,6 +43,9 @@ public class ChatListItem {
 
     /** The chat list item count of new messages in a group or a room. */
     int count;
+
+    /** A description of the item. */
+    public String desc;
 
     /** The item email address, possibly null, used for contact items. */
     public String email;
@@ -73,6 +80,7 @@ public class ChatListItem {
     public ChatListItem(final ContactHeaderItem item) {
         type = CONTACT_HEADER_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
+        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given contact list item. */
@@ -82,6 +90,8 @@ public class ChatListItem {
         email = item.email;
         phone = item.phone;
         url = item.url;
+        String format = "Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}.";
+        desc = String.format(Locale.US, format, name, email, phone, url);
     }
 
     /** Build an instance for a given group list item. */
@@ -91,12 +101,15 @@ public class ChatListItem {
         name = item.name;
         count = item.count;
         text = item.text;
+        String format = "Group item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
+        desc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given date header item. */
     public ChatListItem(final DateHeaderItem item) {
         type = DATE_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
+        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given room list item. */
@@ -108,6 +121,8 @@ public class ChatListItem {
         count = 0;
         text = item.text;
         url = item.url;
+        String format = "Message item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
+        desc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given room list item. */
@@ -118,6 +133,8 @@ public class ChatListItem {
         name = item.name;
         count = item.count;
         text = item.text;
+        String format = "Room item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
+        desc = String.format(Locale.US, format, name, key, count, text);
     }
 
 }
