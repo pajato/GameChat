@@ -111,7 +111,7 @@ public class TTTFragment extends BaseGameFragment {
         input.close();
 
         // Call appropriate methods for each button.
-        if(buttonTag.equals(getString(R.string.new_game))) {
+        if(buttonTag.equals(getString(R.string.NewGame))) {
             handleNewGame();
         } else {
             handleTileClick(buttonTag);
@@ -158,19 +158,19 @@ public class TTTFragment extends BaseGameFragment {
             if(xWins) {
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
-                GameManager.instance.generateSnackbar(mLayout, "Player 1 (" + mXValue + ") Wins!",
+                GameManager.instance.notify(mLayout, "Player 1 (" + mXValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
                 Winner.setText(R.string.winner_o);
                 handlePlayerIcons(false);
-                GameManager.instance.generateSnackbar(mLayout, "Player 2 (" + mOValue + ") Wins!",
+                GameManager.instance.notify(mLayout, "Player 2 (" + mOValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
 
             // If no one has won, the turn timer has run out. End the game.
             } else {
                 // Reveal Tie Messages
                 Winner.setText(R.string.winner_tie);
-                GameManager.instance.generateSnackbar(mLayout, "It's a Tie!", -1, true);
+                GameManager.instance.notify(mLayout, "It's a Tie!", -1, true);
             }
             return false;
         }
@@ -307,7 +307,7 @@ public class TTTFragment extends BaseGameFragment {
         String newTurn = "New Game! Player " + (mTurn
                 ? "1 (" + mXValue + ")"
                 : "2 (" + mOValue + ")") + "'s Turn";
-        GameManager.instance.generateSnackbar(mLayout, newTurn, ContextCompat.getColor(getActivity(),
+        GameManager.instance.notify(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
 
         checkNotFinished();
@@ -337,7 +337,7 @@ public class TTTFragment extends BaseGameFragment {
         // new game out.
         if(mLayoutMap.size() == 1) {
             GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(),
-                    getTurn(mTurn) + "\n" + getString(R.string.new_game));
+                    getTurn(mTurn) + "\n" + getString(R.string.NewGame));
         // Otherwise, we'll need to comb through the board and replace the remaining pieces.
         } else {
             for(int i = 0; i < 3; i++) {

@@ -10,13 +10,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Scanner;
 
 public class LocalTTTFragment extends BaseGameFragment {
-    // Keeps track of the Turn user. True = Player 1, False = Player 2.
-    public boolean mTurn;
 
     // Player piece strings
     private String mXValue;
@@ -31,6 +31,11 @@ public class LocalTTTFragment extends BaseGameFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
+    /** Placeholder for button click handling. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // TODO: flesh this out.
+    }
+    
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();
@@ -70,7 +75,7 @@ public class LocalTTTFragment extends BaseGameFragment {
         input.close();
 
         // Call appropriate methods for each button.
-        if(buttonTag.equals(getString(R.string.new_game))) {
+        if(buttonTag.equals(getString(R.string.NewGame))) {
             handleNewGame();
         } else {
             handleTileClick(player, buttonTag);
@@ -114,18 +119,18 @@ public class LocalTTTFragment extends BaseGameFragment {
             if(xWins) {
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
-                GameManager.instance.generateSnackbar(mLayout, "Player 1 (" + mXValue + ") Wins!",
+                GameManager.instance.notify(mLayout, "Player 1 (" + mXValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
                 Winner.setText(R.string.winner_o);
                 handlePlayerIcons(false);
-                GameManager.instance.generateSnackbar(mLayout, "Player 2 (" + mOValue + ") Wins!",
+                GameManager.instance.notify(mLayout, "Player 2 (" + mOValue + ") Wins!",
                         ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
                 // If no one has won, the turn timer has run out. End the game.
                 } else {
                 // Reveal Tie Messages
                 Winner.setText(R.string.winner_tie);
-                GameManager.instance.generateSnackbar(mLayout, "It's a Tie!", -1, true);
+                GameManager.instance.notify(mLayout, "It's a Tie!", -1, true);
             }
             return false;
         }
@@ -250,7 +255,7 @@ public class LocalTTTFragment extends BaseGameFragment {
         String newTurn = "New Game! Player " + (mTurn
                 ? "1 ( " + mXValue + ")"
                 : "2 (" + mOValue + ")") + "'s Turn";
-        GameManager.instance.generateSnackbar(mLayout, newTurn, ContextCompat.getColor(getActivity(),
+        GameManager.instance.notify(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
         checkNotFinished();
     }

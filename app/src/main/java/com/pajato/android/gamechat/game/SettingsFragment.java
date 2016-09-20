@@ -10,7 +10,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 public class SettingsFragment extends BaseGameFragment {
     private String game;
@@ -21,6 +23,10 @@ public class SettingsFragment extends BaseGameFragment {
     private ImageButton mOnline;
 
     public SettingsFragment() {
+
+    }
+
+    @Subscribe public void onClick(final ClickEvent event) {
 
     }
 
@@ -79,7 +85,7 @@ public class SettingsFragment extends BaseGameFragment {
             this.getView().setOnKeyListener(new View.OnKeyListener() {
                 @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        GameManager.instance.sendNewGame(GameManager.INIT_INDEX, getActivity());
+                        GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
                         return true;
                     }
                     return false;

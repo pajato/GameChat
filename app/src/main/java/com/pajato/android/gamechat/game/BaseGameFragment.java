@@ -59,12 +59,20 @@ public abstract class BaseGameFragment extends Fragment {
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
+    /** The current turn indicator: True = Player 1, False = Player 2. */
+    protected boolean mTurn;
+
     // Public constructors.
 
     /** Provide a default, no args constructor. */
     public BaseGameFragment() {}
 
     // Public instance methods.
+
+    /** Return the current turn indicator, TRUE -> Player 1; FALSE -> Player 2. */
+    public boolean getTurn() {
+        return mTurn;
+    }
 
     /** Obtain a layout file from the subclass. */
     abstract public int getLayout();

@@ -266,7 +266,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText("Player 2 (" + oValue + ") Wins!")));
 
         // Click on the play again option in the snackbar, then ensure it has initiated a new game.
-        onView(withText(R.string.play_again))
+        onView(withText(R.string.PlayAgain))
                 .check(matches(isDisplayed()))
                 .perform(click());
 
@@ -324,7 +324,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText("It's a Tie!")));
 
         // Click on the play again option in the snackbar, then ensure it has initiated a new game.
-        onView(withText(R.string.play_again))
+        onView(withText(R.string.PlayAgain))
                 .check(matches(isDisplayed()))
                 .perform(click());
 
@@ -382,7 +382,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText("Player 1 (" + xValue + ") Wins!")));
 
         // Click on the play again option in the snackbar, then ensure it has initiated a new game.
-        onView(withText(R.string.play_again))
+        onView(withText(R.string.PlayAgain))
                 .check(matches(isDisplayed()))
                 .perform(click());
 

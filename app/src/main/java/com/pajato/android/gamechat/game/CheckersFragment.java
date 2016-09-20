@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -88,7 +87,7 @@ public class CheckersFragment extends BaseGameFragment {
         String buttonTag = input.nextLine();
         input.close();
 
-        if(buttonTag.equals(getString(R.string.new_game))) {
+        if(buttonTag.equals(getString(R.string.NewGame))) {
             onNewGame();
             int color;
             if(player.equals(getString(R.string.player_secondary))) {
@@ -97,7 +96,7 @@ public class CheckersFragment extends BaseGameFragment {
                 player = getString(R.string.player_primary);
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
-            GameManager.instance.generateSnackbar(mLayout, getString(R.string.new_game) + "! "
+            GameManager.instance.notify(mLayout, getString(R.string.NewGame) + "! "
                     + player + "'s Turn!", color, false);
         }
 
@@ -264,11 +263,11 @@ public class CheckersFragment extends BaseGameFragment {
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
         if(yCount == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 1 Wins!",
+            GameManager.instance.notify(mBoard, "Game Over! Player 1 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimary), true);
             return true;
         } else if (bCount == 0) {
-            GameManager.instance.generateSnackbar(mBoard, "Game Over! Player 2 Wins!",
+            GameManager.instance.notify(mBoard, "Game Over! Player 2 Wins!",
                     ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             return true;
         } else {
