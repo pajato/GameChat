@@ -24,14 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.game.GameManager.INIT_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.NO_GAMES_INDEX;
 import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
 
 /**
@@ -71,7 +70,7 @@ public class GameFragment extends BaseGameFragment {
             case R.id.init_rooms:
             case R.id.init_rooms_button:
                 // And do it for the rooms option buttons.
-                GameManager.instance.sendNewGame(INIT_INDEX, getActivity());
+                GameManager.instance.sendNewGame(NO_GAMES_INDEX, getActivity());
                 FabManager.game.dismissMenu(this);
                 break;
             case R.id.games_fab:
@@ -111,7 +110,7 @@ public class GameFragment extends BaseGameFragment {
                 break;
             case R.id.options_menu_new_game:
                 // ...
-                GameManager.instance.sendNewGame(INIT_INDEX, getActivity());
+                GameManager.instance.sendNewGame(NO_GAMES_INDEX, getActivity());
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -128,7 +127,7 @@ public class GameFragment extends BaseGameFragment {
      */
     public void tileOnClick(final View view) {
         String msg = GameManager.instance.getTurn() + "\n" + view.getTag().toString();
-        GameManager.instance.sendMessage(msg, GameManager.instance.getCurrentFragmentIndex());
+        GameManager.instance.sendMessage(msg, GameManager.instance.getCurrent());
     }
 
 }
