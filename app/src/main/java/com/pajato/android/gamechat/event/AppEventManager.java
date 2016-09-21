@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Provide a fragment to handle the display of the rooms available to the current user.
+ * Provide a thin veneer over the GreenRobot EventBus facility.
  *
  * @author Paul Michael Reilly
  */
@@ -44,6 +44,12 @@ public enum AppEventManager {
     private Map<String, Object> mHandlerMap = new HashMap<>();
 
     // Public instance methods.
+
+    /** Cancel further processing on a given event. */
+    public void cancel(final Object event) {
+        // All subsequent subscribers will not see the given event.
+        EventBus.getDefault().cancelEventDelivery(event);
+    }
 
     /** Post an event using the GreenRobot library. */
     public void post(final Object event) {
@@ -74,6 +80,15 @@ public enum AppEventManager {
             mHandlerMap.remove(name);
             Log.d(TAG, String.format(Locale.US, "Unregistered app event listener {%s}.", name));
         }
+    }
+    /** Unregister all named listeners. */
+    public void unregisterAll() {
+        // Remove all registered listeners and clear the map.
+        for (Object handler : mHandlerMap.values()) {
+            EventBus.getDefault().unregister(handler);
+        }
+        mHandlerMap.clear();
+        Log.d(TAG, "Unregistered all app event listeners.");
     }
 
 }

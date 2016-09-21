@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -10,7 +9,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.BackPressEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -26,8 +27,14 @@ public class SettingsFragment extends BaseGameFragment {
 
     }
 
-    @Subscribe public void onClick(final ClickEvent event) {
-
+    /** Handle a back press event by canceling out of the settings fragment. */
+    @Subscribe(priority=1)
+    public void onBackPressed(final BackPressEvent event) {
+        // Re-enable the FAB and return to the start fragment after disabling further event
+        // subscribers.
+        AppEventManager.instance.cancel(event);
+        FabManager.game.setState(this, View.VISIBLE);
+        GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
     }
 
     @Override public void setArguments(final Bundle args) {
@@ -72,25 +79,6 @@ public class SettingsFragment extends BaseGameFragment {
         } else if(game.equals(getString(R.string.new_game_chess))) {
             title.setText(R.string.playing_chess);
             setupChess();
-        }
-    }
-
-    /** Handle the back button after the view has been created. */
-    @Override public void onViewCreated(final View view, final Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        if(this.getView() != null) {
-            this.getView().setFocusableInTouchMode(true);
-            this.getView().requestFocus();
-            this.getView().setOnKeyListener(new View.OnKeyListener() {
-                @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
-                        return true;
-                    }
-                    return false;
-                }
-            });
         }
     }
 

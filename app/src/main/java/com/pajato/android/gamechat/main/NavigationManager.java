@@ -38,6 +38,12 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.BackPressEvent;
+
+import org.greenrobot.eventbus.Subscribe;
+
+import static android.graphics.Shader.TileMode.CLAMP;
 
 
 /** Provide a singleton to manage the app navigation provided by the navigation drawer. */
@@ -61,9 +67,18 @@ public enum NavigationManager {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set up the handle navigation menu item clicks.
+        // Set up the handle navigation menu item clicks and register this manager with the app
+        // event manager.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(activity);
+        AppEventManager.instance.register(this);
+    }
+
+    /** Handle a back press event. */
+    @Subscribe(priority = 1)
+    public void onBackPressed(final BackPressEvent event) {
+        // Detect and close an open nav drawer.  Cancel propagation if the drawer is open.
+        if (closeDrawerIfOpen(event.activity)) AppEventManager.instance.cancel(event);
     }
 
     /** Set up the navigation header to show an account. */
@@ -137,7 +152,7 @@ public enum NavigationManager {
 
             Canvas canvas = new Canvas(result);
             Paint paint = new Paint();
-            paint.setShader(new BitmapShader(squared, BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP));
+            paint.setShader(new BitmapShader(squared, CLAMP, CLAMP));
             paint.setAntiAlias(true);
             float r = size / 2f;
             canvas.drawCircle(r, r, r, paint);
