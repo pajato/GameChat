@@ -85,7 +85,6 @@ public abstract class BaseGameFragment extends Fragment {
     @Override public void onAttach(Context context) {
         super.onAttach(context);
         logEvent("onAttach");
-        AppEventManager.instance.register(this);
     }
 
     @Override public void onCreate(Bundle bundle) {
@@ -120,7 +119,6 @@ public abstract class BaseGameFragment extends Fragment {
     @Override public void onDetach() {
         super.onDetach();
         logEvent("onDetach");
-        AppEventManager.instance.unregister(this);
     }
 
     /** Initialize the fragment. */
@@ -151,14 +149,18 @@ public abstract class BaseGameFragment extends Fragment {
 
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
     @Override public void onPause() {
+        // Log the event and stop listening for app events.
         super.onPause();
         logEvent("onPause");
+        AppEventManager.instance.unregister(this);
     }
 
     /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
+        // Log the event and start listening for app events.
         super.onResume();
         logEvent("onResume");
+        AppEventManager.instance.register(this);
     }
 
     /** Log the lifecycle event. */

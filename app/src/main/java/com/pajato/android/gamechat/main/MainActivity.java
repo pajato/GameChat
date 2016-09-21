@@ -35,6 +35,7 @@ import com.pajato.android.gamechat.account.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -111,10 +112,16 @@ public class MainActivity extends BaseActivity
                 break;
         }    }
 
-    /** Handle a back button press. */
+    /** Handle a back button press event posted by the event manager. */
+    @Subscribe public void onBackPressed(final BackPressEvent event) {
+        // No other subscriber has handled the back press.  Let the system deal with it.
+        super.onBackPressed();
+    }
+
+    /** Handle a back button press event delivered by the system. */
     @Override public void onBackPressed() {
         // If the navigation drawer is open, close it, otherwise let the system deal with it.
-        if (!NavigationManager.instance.closeDrawerIfOpen(this)) super.onBackPressed();
+        AppEventManager.instance.post(new BackPressEvent(this));
     }
 
     /** Process a click on a given view by posting a button click event. */
@@ -198,6 +205,12 @@ public class MainActivity extends BaseActivity
         // manager misses an authentication event then the app will not behave as intended.
         setContentView(R.layout.activity_main);
         init();
+    }
+
+    /** Handle the imminent destruction of the app by shutting down the app event manager. */
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        AppEventManager.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus shuts down. */
