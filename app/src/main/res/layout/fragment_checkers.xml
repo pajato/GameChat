@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/player_1_icon"
         android:src="@drawable/ic_account_circle_black_36dp"
-        android:contentDescription="@string/play_checkers"
+        android:contentDescription="@string/PlayCheckers"
 
         android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@id/board"
@@ -73,7 +73,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/player_2_icon"
         android:src="@drawable/ic_account_circle_black_36dp"
-        android:contentDescription="@string/play_checkers"
+        android:contentDescription="@string/PlayCheckers"
 
         android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@id/board"
