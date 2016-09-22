@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies LLC.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see http://www.gnu.org/licenses
+ */
+
 package com.pajato.android.gamechat.game;
 
 import android.support.v4.content.ContextCompat;
@@ -10,6 +27,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -31,11 +51,21 @@ public class LocalTTTFragment extends BaseGameFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
+    /** Handle a back press event by canceling out of the settings fragment. */
+    @Subscribe(priority=1)
+    public void onBackPressed(final BackPressEvent event) {
+        // Re-enable the FAB and return to the start fragment after disabling further event
+        // subscribers.
+        AppEventManager.instance.cancel(event);
+        FabManager.game.setState(this, View.VISIBLE);
+        GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
+    }
+
     /** Placeholder for button click handling. */
     @Subscribe public void onClick(final ClickEvent event) {
         // TODO: flesh this out.
     }
-    
+
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();
@@ -45,7 +75,7 @@ public class LocalTTTFragment extends BaseGameFragment {
         mSpace = getString(R.string.spaceValue);
         turnCount = 0;
 
-        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
