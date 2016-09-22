@@ -40,6 +40,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
+import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -81,6 +82,12 @@ public enum NavigationManager {
         if (closeDrawerIfOpen(event.activity)) AppEventManager.instance.cancel(event);
     }
 
+    /** Process a given button click event handling the nav drawer closing. */
+    @Subscribe public void onClick(final NavDrawerOpenEvent event) {
+        // The nav drawer is probably open so close it.
+        closeDrawerIfOpen(event.activity);
+    }
+
     /** Set up the navigation header to show an account. */
     public void setAccount(final Account account, final View header) {
         // Hide the sign in text and show the current profile and the sign
@@ -111,8 +118,10 @@ public enum NavigationManager {
         view.setVisibility(View.GONE);
     }
 
+    // Private instance methods.
+
     /** Check for an open navigation drawer and close it if one is found. */
-    public boolean closeDrawerIfOpen(final Activity activity) {
+    private boolean closeDrawerIfOpen(final Activity activity) {
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -121,6 +130,45 @@ public enum NavigationManager {
 
         return false;
     }
+
+    /** Load the account icon, if available, using a placeholder otherwise. */
+    private void loadAccountIcon(final Account account, final View header) {
+        // Determine if there is an image to be loaded.
+        ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
+        Uri imageUri = Uri.parse(account.url);
+        if (imageUri != null) {
+            // There is an image to load.  Use Glide to do the heavy lifting.
+            icon.setImageURI(imageUri);
+            Glide.with(header.getContext())
+                .load(account.url)
+                .transform(new CircleTransform(header.getContext()))
+                .into(icon);
+        } else {
+            // There is no image.  Use an anonymous image.
+            icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+        }
+        icon.setVisibility(View.VISIBLE);
+    }
+
+
+    /** Load the display name, if available, using a placeholder otherwise. */
+    private void setDisplayName(final Account account, final View header) {
+        // Determine if there is a display name to use.
+        String name = account.displayName;
+        if (name == null) {
+            // There is no display name, use a conjured name based on the email address, i.e. the
+            // username part of the email address with an initial cap.
+            name = account.email;
+            int index = name.indexOf('@');
+            name = name.substring(0, index);
+            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        }
+        TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+        view.setText(name);
+        view.setVisibility(View.VISIBLE);
+    }
+
+    // Inner classes.
 
     /**
      * Provide a Glide transform that allows for circular image containers.  Provided by Harsha
@@ -163,45 +211,6 @@ public enum NavigationManager {
         public String getId() {
             return getClass().getName();
         }
-    }
-
-    // Private instance methods.
-
-    /** Load the account icon, if available, using a placeholder otherwise. */
-    private void loadAccountIcon(final Account account, final View header) {
-        // Determine if there is an image to be loaded.
-        ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-        Uri imageUri = Uri.parse(account.url);
-        if (imageUri != null) {
-            // There is an image to load.  Use Glide to do the heavy lifting.
-            icon.setImageURI(imageUri);
-            Glide.with(header.getContext())
-                .load(account.url)
-                .transform(new CircleTransform(header.getContext()))
-                .into(icon);
-        } else {
-            // There is no image.  Use an anonymous image.
-            icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
-        }
-        icon.setVisibility(View.VISIBLE);
-    }
-
-
-    /** Load the display name, if available, using a placeholder otherwise. */
-    private void setDisplayName(final Account account, final View header) {
-        // Determine if there is a display name to use.
-        String name = account.displayName;
-        if (name == null) {
-            // There is no display name, use a conjured name based on the email address, i.e. the
-            // username part of the email address with an initial cap.
-            name = account.email;
-            int index = name.indexOf('@');
-            name = name.substring(0, index);
-            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-        }
-        TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
-        view.setText(name);
-        view.setVisibility(View.VISIBLE);
     }
 
 }
