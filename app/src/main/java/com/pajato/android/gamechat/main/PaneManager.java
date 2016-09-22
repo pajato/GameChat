@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.main;
 
+import android.content.pm.ActivityInfo;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -69,18 +70,20 @@ public enum PaneManager {
         // Determine if a paging layout is active.
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
         if (viewPager != null) {
-            // The app is running on a smart phone.  Set up the adapter for the pager.
-            // TODO: force portrait mode.
+            // The app is running on a smart phone.  Set up the adapter for the pager and force
+            // orientation to portrait.
             viewPager.setAdapter(new GameChatPagerAdapter(context.getSupportFragmentManager(),
                     (ViewGroup) context.findViewById(R.id.page_monitor)));
+            context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
-            // The app is running on a tablet. Add the fragments to their containers.
-            // TODO: force landscape mode.
+            // The app is running on a tablet. Add the fragments to their containers and force
+            // orientation to landscape.
             context.getSupportFragmentManager().beginTransaction()
                     .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
                     .add(R.id.game_container, fragmentList.get(GAME_INDEX))
                     .commit();
             context.invalidateOptionsMenu();
+            context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
