@@ -4,11 +4,7 @@
     <string name="arrow_left"><![CDATA[<]]></string>
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="choose_group">Choose a Group:</string>
-    <string name="choose_user">Choose a User:</string>
     <string name="go_to_rooms">Go to My Rooms</string>
-    <string name="invite_new_user">Invite a New User!</string>
-    <string name="invite_new_user_desc">Invite a New User image button</string>
     <string name="menuItemTitleLearnMore">Learn More</string>
     <string name="menuItemTitleFeedback">Feedback</string>
     <string name="manage_accounts">Manage Accounts</string>
