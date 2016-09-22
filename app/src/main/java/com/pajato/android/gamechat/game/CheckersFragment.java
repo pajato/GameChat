@@ -37,7 +37,6 @@ public class CheckersFragment extends BaseGameFragment {
     private SparseIntArray mBoardMap;
     private ImageButton mHighlightedTile;
     private boolean mIsHighlighted = false;
-    private View mLayout;
     private ArrayList<Integer> mPossibleMoves;
 
     /** Set the layout file. */

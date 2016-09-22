@@ -37,6 +37,7 @@ import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -93,26 +94,7 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    /** Process a given button click event by logging it. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
-        View view = event.view;
-        String format = "Button click event on view: {%s}.";
-        Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
-
-        // Process the sign in and sign out button clicks.
-        switch (view.getId()) {
-            case R.id.currentProfile:
-            case R.id.signIn:
-            case R.id.signOut:
-                // On a sign in or sign out event, make sure the navigation drawer gets closed.
-                NavigationManager.instance.closeDrawerIfOpen(this);
-                break;
-            default:
-                // Ignore everything else.
-                break;
-        }    }
-
-    /** Handle a back button press event posted by the event manager. */
+    /** Handle a back button press event posted by the app event manager. */
     @Subscribe public void onBackPressed(final BackPressEvent event) {
         // No other subscriber has handled the back press.  Let the system deal with it.
         super.onBackPressed();
@@ -122,6 +104,25 @@ public class MainActivity extends BaseActivity
     @Override public void onBackPressed() {
         // If the navigation drawer is open, close it, otherwise let the system deal with it.
         AppEventManager.instance.post(new BackPressEvent(this));
+    }
+
+    /** Process a given button click event handling the nav drawer closing. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Log all button clicks and rocess the sign in and sign out button clicks.
+        View view = event.view;
+        String format = "Button click event on view: {%s}.";
+        Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
+        switch (view.getId()) {
+            case R.id.currentProfile:
+            case R.id.signIn:
+            case R.id.signOut:
+                // On a sign in or sign out event, make sure the navigation drawer gets closed.
+                AppEventManager.instance.post(new NavDrawerOpenEvent(this));
+                break;
+            default:
+                // Ignore everything else.
+                break;
+        }
     }
 
     /** Process a click on a given view by posting a button click event. */
@@ -140,9 +141,8 @@ public class MainActivity extends BaseActivity
             case R.id.nav_learn:
                 // Todo: add menu button handling as a future feature.
                 break;
-
         }
-        NavigationManager.instance.closeDrawerIfOpen(this);
+        AppEventManager.instance.post(new NavDrawerOpenEvent(this));
         return true;
     }
 

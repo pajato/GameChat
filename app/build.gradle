@@ -52,7 +52,6 @@ dependencies {
     // Android
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
 
     // Google
     compile "com.google.android.gms:play-services-ads:$rootProject.ext.gmsVersion"
