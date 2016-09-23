@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.common;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -28,7 +28,7 @@ import com.pajato.android.gamechat.R;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.FabManager.State.opened;
+import static com.pajato.android.gamechat.common.FabManager.State.opened;
 
 
 /** Provide a singleton to manage the rooms panel fab button. */

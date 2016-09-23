@@ -20,20 +20,12 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -43,9 +35,9 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import java.util.ArrayList;
@@ -66,7 +58,7 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TY
  *
  * @author Paul Michael Reilly
  */
-public abstract class BaseChatFragment extends Fragment {
+public abstract class BaseChatFragment extends BaseFragment {
 
     // Private class constants.
 
@@ -92,9 +84,6 @@ public abstract class BaseChatFragment extends Fragment {
     /** The list type for this fragment. */
     protected ChatListManager.ChatListType mItemListType;
 
-    /** The persisted layout view for this fragment. */
-    protected View mLayout;
-
     /** A flag used to queue adapter list updates during the onResume lifecycle event. */
     protected boolean mUpdateOnResume;
 
@@ -105,75 +94,25 @@ public abstract class BaseChatFragment extends Fragment {
 
     // Public instance methods.
 
-    /** Obtain a layout file from the subclass. */
-    abstract public int getLayout();
-
-    @Override public void onActivityCreated(Bundle bundle) {
-        super.onActivityCreated(bundle);
-        logEvent("onActivityCreated", bundle);
-    }
-
     @Override public void onAttach(Context context) {
         super.onAttach(context);
-        logEvent("onAttach");
         AppEventManager.instance.register(this);
-    }
-
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        logEvent("onCreate", bundle);
-    }
-
-    /** Handle the onCreateView lifecycle event. */
-    @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                                       final Bundle savedInstanceState) {
-        // Determine if the layout exists and reuse it if so.
-        logEvent("onCreateView", savedInstanceState);
-        if (mLayout != null) return mLayout;
-
-        // The layout does not exist.  Create and persist it, and initialize the fragment layout.
-        mLayout = inflater.inflate(getLayout(), container, false);
-        onInitialize();
-        return mLayout;
     }
 
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
-        logEvent("onDestroy");
-        if (mAdView != null) mAdView.destroy();
         super.onDestroy();
-    }
-
-    @Override public void onDestroyView() {
-        super.onDestroyView();
-        logEvent("onDestroyView");
+        if (mAdView != null) mAdView.destroy();
     }
 
     @Override public void onDetach() {
         super.onDetach();
-        logEvent("onDetach");
         AppEventManager.instance.unregister(this);
-    }
-
-    /** Initialize the fragment. */
-    public void onInitialize() {
-        // All chat and game fragments will use the options menu.
-        setHasOptionsMenu(true);
     }
 
     /** Handle an options menu choice. */
     @Override public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to chat.
-                break;
             case R.id.joinDeveloperGroups:
                 joinDeveloperGroups();
                 break;
@@ -187,7 +126,6 @@ public abstract class BaseChatFragment extends Fragment {
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
     @Override public void onPause() {
         super.onPause();
-        logEvent("onPause");
         if (mAdView != null) mAdView.pause();
     }
 
@@ -196,30 +134,11 @@ public abstract class BaseChatFragment extends Fragment {
         // Log the event, handle ads and apply any queued adapter updates.  Only one try is
         // attempted.
         super.onResume();
-        logEvent("onResume");
         ProgressManager.instance.hide();
         if (mAdView != null) mAdView.resume();
         if (!mUpdateOnResume) return;
         updateAdapterList();
         mUpdateOnResume = false;
-    }
-
-    /** Log the lifecycle event. */
-    @Override public void onStart() {
-        super.onStart();
-        logEvent("onStart");
-    }
-
-    /** Log the lifecycle event. */
-    @Override public void onStop() {
-        super.onStop();
-        logEvent("onStop");
-    }
-
-    /** Log the lifecycle event. */
-    @Override public void onViewStateRestored(Bundle bundle) {
-        super.onViewStateRestored(bundle);
-        logEvent("onViewStateRestored", bundle);
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
@@ -279,14 +198,14 @@ public abstract class BaseChatFragment extends Fragment {
     }
 
     /** Log a lifecycle event that has no bundle. */
-    protected void logEvent(final String event) {
+    @Override protected void logEvent(final String event) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_NO_BUNDLE;
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType));
     }
 
     /** Log a lifecycle event that has a bundle. */
-    protected void logEvent(final String event, final Bundle bundle) {
+    @Override protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
         String format = FORMAT_WITH_BUNDLE;
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType, bundle));
@@ -313,51 +232,6 @@ public abstract class BaseChatFragment extends Fragment {
             default:
                 break;
         }
-    }
-
-    /** Make the given menu item either visible or invisible. */
-    protected void setItemState(final Menu menu, final int itemId, final boolean state) {
-        MenuItem item = menu.findItem(itemId);
-        if (item != null) item.setVisible(state);
-    }
-
-    /** Set the title in the toolbar using the group name. */
-    protected void setTitles(final String groupKey, final String roomKey) {
-        // Ensure that the action bar exists.
-        String title;
-        String subtitle = null;
-        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (bar != null) {
-            // The action bar does exist, as expected.  Set the title and subtitle accordingly.
-            if (groupKey == null && roomKey == null) {
-                title = getResources().getString(R.string.app_name);
-            } else if (groupKey != null && roomKey == null) {
-                title = ChatListManager.instance.getGroupName(groupKey);
-            } else if (groupKey == null) {
-                title = ChatListManager.instance.getRoomName(roomKey);
-            } else {
-                title = ChatListManager.instance.getRoomName(roomKey);
-                subtitle = ChatListManager.instance.getGroupName(groupKey);
-            }
-
-            // Apply the title and subtitle to the action bar.
-            bar.setTitle(title);
-            bar.setSubtitle(subtitle);
-            return;
-        }
-
-        // The action bar does not exist!  Log the error.
-        Log.e(TAG, "The action bar is not accessible in order to set the titles!");
-    }
-
-    /** Provide a way to handle volunteer solicitations for unimplemented functions. */
-    protected void showFutureFeatureMessage(final int resourceId) {
-        // Post a toast message.
-        Context context = getContext();
-        String prefix = context.getString(resourceId);
-        String suffix = context.getString(R.string.FutureFeature);
-        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 
     // Private instance methods.

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License along with GameChat.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
+
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
@@ -35,6 +36,55 @@ import java.util.ArrayList;
 enum GameManager {
     instance;
 
+    // Public enums
+
+    /** The games enum values associate games, modes, and fragments in a very flexible fashion. */
+    public enum Game {
+        checkers (-1, CHECKERS_INDEX, -1, R.string.PlayCheckers, R.string.player_primary,
+                  R.string.player_secondary, R.string.FutureCheckers),
+        chess (-1, CHESS_INDEX, -1, R.string.PlayChess, R.string.player_primary,
+               R.string.player_secondary, R.string.FutureChess),
+        ttt (TTT_ONLINE_INDEX, TTT_LOCAL_INDEX, -1, R.string.PlayTicTacToe, R.string.xValue,
+             R.string.oValue, R.string.FutureTTT);
+
+        // Instance variables.
+
+        /** The online fragment index. */
+        int onlineFragmentIndex;
+
+        /** The local fragment index. */
+        int localFragmentIndex;
+
+        /** The computer fragment index. */
+        int computerFragmentIndex;
+
+        /** The primary player index. */
+        int primaryIndex;
+
+        /** The secondary player index. */
+        int secondaryIndex;
+
+        /** The game title resource id. */
+        int titleResId;
+
+        /** The game future feature prefix resource id. */
+        int futureResId;
+
+        // Constructor.
+
+        /** Build an instance given the online, local and computer opponent fragment indexes. */
+        Game(final int online, final int local, final int computer, final int titleId,
+             final int primary, final int secondary, final int futureId) {
+            onlineFragmentIndex = online;
+            localFragmentIndex = local;
+            computerFragmentIndex = computer;
+            titleResId = titleId;
+            primaryIndex = primary;
+            secondaryIndex = secondary;
+            futureResId = futureId;
+        }
+    }
+
     // Public class constants.
 
     // Fragment array index constants.
@@ -46,8 +96,11 @@ enum GameManager {
     public static final int CHESS_INDEX = 5;
     public static final int TOTAL_FRAGMENTS = 6;
 
-    /** A key value ... */
+    /** A key value for some funky stuff going on with parsing strings, aka messages. */
     public static final String GAME_KEY = "gameInit";
+
+    /** A key value accessing the game enum ordinal value. */
+    public static final String ORDINAL_KEY = "ordinallKey";
 
     // Public instance variables.
 
@@ -141,32 +194,29 @@ enum GameManager {
             default:
                 break;
             case TTT_LOCAL_INDEX:
-                ((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).messageHandler(msg);
-                break;
             case TTT_ONLINE_INDEX:
-                ((TTTFragment) getFragment(TTT_ONLINE_INDEX)).messageHandler(msg);
-                break;
             case CHECKERS_INDEX:
-                ((CheckersFragment) getFragment(CHECKERS_INDEX)).messageHandler(msg);
-                break;
             case CHESS_INDEX:
-                ((ChessFragment) getFragment(CHESS_INDEX)).messageHandler(msg);
+                getFragment(fragmentIndex).messageHandler(msg);
+                break;
         }
     }
 
     /** Return TRUE iff the given fragment is running in the experience panel. */
-    public boolean sendNewGame(final int index, final FragmentActivity context, final String msg) {
+    public boolean sendNewGame(final int index, final FragmentActivity context, final String msg,
+                               final Game game) {
         instructions.clear();
-        return setFragment(index, context, msg);
+        return setFragment(index, context, msg, game);
     }
 
     /** Return TRUE iff the given fragment is running in the experience panel. */
     public boolean sendNewGame(final int index, final FragmentActivity context) {
-        return sendNewGame(index, context, null);
+        return sendNewGame(index, context, null, null);
     }
 
     /** Return true iff the fragment at the given index is created and all is well. */
-    public boolean setFragment(final int index, final FragmentActivity context, final String msg) {
+    public boolean setFragment(final int index, final FragmentActivity context, final String msg,
+                               Game game) {
         // Ensure we're not taking any requests we can't fill.
         if (index < TOTAL_FRAGMENTS && index > -1 && index != getCurrent()) {
             // If our fragment doesn't exist yet, construct it.
@@ -191,12 +241,13 @@ enum GameManager {
                 mFragmentList[index].setArguments(context.getIntent().getExtras());
             }
 
-            // Set up the new fragment in our fragment container.
+            // Set up the fragment in the fragment container.
             mCurrentFragment = index;
-            if (msg != null) {
-                Bundle newGame = new Bundle();
-                newGame.putString(GAME_KEY, msg);
-                mFragmentList[index].setArguments(newGame);
+            if (msg != null || game != null) {
+                Bundle bundle = new Bundle();
+                bundle.putString(GAME_KEY, msg);
+                bundle.putInt(ORDINAL_KEY, game.ordinal());
+                mFragmentList[index].setArguments(bundle);
             }
 
             // Initiate the transition between fragments.
@@ -225,34 +276,18 @@ enum GameManager {
     /** Provide an inner class to handle a notification action click. */
     private class NotificationActionHandler implements View.OnClickListener {
         @Override public void onClick(final View v) {
-            // Initiate a new game by casing on the current fragment index.
-            String message = null;
-            final String newGame = getFragment(getCurrent()).getString(R.string.NewGame);
+            // Ensure that this is truly a game fragment.  Abort if not.
             final int index = getCurrent();
-            final Fragment context = getFragment(index);
-            switch (index) {
-                case TTT_LOCAL_INDEX:
-                    message = (((LocalTTTFragment) getFragment(TTT_LOCAL_INDEX)).mTurn
-                           ? context.getString(R.string.xValue)
-                           : context.getString(R.string.oValue));
-                    break;
-                case TTT_ONLINE_INDEX:
-                    message = (((TTTFragment) getFragment(TTT_ONLINE_INDEX)).mTurn
-                           ? context.getString(R.string.xValue)
-                           : context.getString(R.string.oValue));
-                    break;
-                case CHECKERS_INDEX:
-                    message = (((CheckersFragment) getFragment(CHECKERS_INDEX)).mTurn
-                           ? context.getString(R.string.player_primary)
-                           : context.getString(R.string.player_secondary));
-                    break;
-                case CHESS_INDEX:
-                    message = (((ChessFragment) getFragment(CHESS_INDEX)).mTurn
-                           ? context.getString(R.string.player_primary)
-                           : context.getString(R.string.player_secondary));
-                    break;
-            }
-            if (message != null) sendMessage(message + "\n" + newGame, index);
+            final BaseGameFragment context = getFragment(index);
+            if (context == null || context.mGame == null) return;
+
+            // There is a game being played.  Ensure that there is a valid message and send it if
+            // so.
+            final String primary = context.getString(context.mGame.primaryIndex);
+            final String secondary = context.getString(context.mGame.secondaryIndex);
+            final String message = getFragment(index).mTurn ? primary : secondary;
+            final String newGameTitle = context.getString(R.string.NewGame);
+            if (message != null) sendMessage(message + "\n" + newGameTitle, index);
         }
     }
 
