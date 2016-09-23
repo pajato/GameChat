@@ -16,18 +16,24 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:background="@color/colorLightPurple"
+            android:id="@+id/IconTicTacToe"
+            android:onClick="onClick"
             android:contentDescription="@string/TicTacToeImageDesc"
             android:src="@mipmap/ic_tictactoe_red"/>
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:background="@color/colorLightPurple"
+            android:id="@+id/IconCheckers"
+            android:onClick="onClick"
             android:contentDescription="@string/CheckersImageDesc"
             android:src="@mipmap/ic_checkers"/>
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:background="@color/colorLightPurple"
+            android:id="@+id/IconChess"
+            android:onClick="onClick"
             android:contentDescription="@string/ChessImageDesc"
             android:src="@mipmap/ic_chess"/>
     </LinearLayout>

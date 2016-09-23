@@ -48,6 +48,7 @@ public class GameFragment extends BaseGameFragment {
         // Grab the View ID and the floating action button and dimmer views.
         View view = event.view;
         switch (view.getId()) {
+            case R.id.IconTicTacToe:
             case R.id.init_ttt:
             case R.id.init_ttt_button:
                 // When a button is clicked, send a new game and reset the fab menu and background
@@ -56,6 +57,7 @@ public class GameFragment extends BaseGameFragment {
                 GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, ttt);
                 FabManager.game.dismissMenu(this);
                 break;
+            case R.id.IconCheckers:
             case R.id.init_checkers:
             case R.id.init_checkers_button:
                 // Do it for checkers.
@@ -63,6 +65,7 @@ public class GameFragment extends BaseGameFragment {
                 GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, checkers);
                 FabManager.game.dismissMenu(this);
                 break;
+            case R.id.IconChess:
             case R.id.init_chess:
             case R.id.init_chess_button:
                 // Do it for chess.
