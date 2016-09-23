@@ -2,29 +2,23 @@ package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
+import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.game.GameManager.ORDINAL_KEY;
+
 public class SettingsFragment extends BaseGameFragment {
-    private String game;
-    private boolean isValidUser = false;
 
-    private View mComputer;
-    private View mLocal;
-    private View mOnline;
+    // Private instance variables.
 
-    public SettingsFragment() {
-
-    }
+    // Public instance methods.
 
     /** Handle a back press event by canceling out of the settings fragment. */
     @Subscribe(priority=1)
@@ -36,11 +30,30 @@ public class SettingsFragment extends BaseGameFragment {
         GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
     }
 
+    /** Handle button clicks to pass control to set up to play a particular mode. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        int index = getFragmentIndex(event.view.getId());
+        if (index != -1) {
+            // Start a new game by passing the fragment index and context.
+            GameManager.instance.sendNewGame(index, getActivity());
+            return;
+        }
+
+        // This mode is a future feature, let the User know with an opportunity to volunteer.
+        int resId = mGame != null ? mGame.futureResId : -1;
+        if (resId != -1) showFutureFeatureMessage(resId);
+    }
+
+    /** Satisfy the base game fragment contract with a nop message handler. */
+    @Override public void messageHandler(final String message) {}
+
     /** Provide the construction time arguments to be delivered by the fragment manager. */
     @Override public void setArguments(final Bundle args) {
         // Grab the game argument that we are accepting and creating settings for.
-        if(args != null && args.containsKey(GameManager.GAME_KEY)) {
-            game = args.getString(GameManager.GAME_KEY);
+        if (args != null && args.containsKey(ORDINAL_KEY)) {
+            // Get the game emum value.
+            int ordinal = args.getInt(ORDINAL_KEY, -1);
+            mGame = ordinal != -1 ? GameManager.Game.values()[ordinal] : null;
         }
         super.setArguments(args);
     }
@@ -48,84 +61,24 @@ public class SettingsFragment extends BaseGameFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_settings;}
 
-    @Override public void onInitialize() {
-        TextView title = (TextView) mLayout.findViewById(R.id.settings_title);
-
+    @Override public void onResume() {
+        // Hide the FAB and set the title string.
+        super.onResume();
         getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
+        TextView title = (TextView) mLayout.findViewById(R.id.settings_title);
+        title.setText(mGame != null ? mGame.titleResId : R.string.GameError);
+    }
 
-        // Setup the references to the game option buttons.
-        mLocal = mLayout.findViewById(R.id.settings_local_button);
-        mOnline = mLayout.findViewById(R.id.settings_online_button);
-        mComputer = mLayout.findViewById(R.id.settings_computer_button);
+    // Private instance methods.
 
-        // Handle the game-specific portions of the layout.
-        if(game.equals(getString(R.string.new_game_ttt))) {
-            title.setText(R.string.PlayTicTacToe);
-            setupTTT();
-        } else if(game.equals(getString(R.string.new_game_checkers))) {
-            title.setText(R.string.PlayCheckers);
-            setupCheckers();
-        } else if(game.equals(getString(R.string.new_game_chess))) {
-            title.setText(R.string.PlayChess);
-            setupChess();
+    /** Return the fragument index for the selected game mode. */
+    private int getFragmentIndex(final int viewId) {
+        switch (viewId) {
+            case R.id.settings_local_button: return mGame.localFragmentIndex;
+            case R.id.settings_online_button: return mGame.onlineFragmentIndex;
+            case R.id.settings_computer_button: return mGame.computerFragmentIndex;
+            default: return -1;
         }
-    }
-
-    /**
-     * Setup the Tic-Tac-Toe game creation invitation onClicks for Local, Online and Computer games.
-     */
-    private void setupTTT() {
-        mLocal.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity());
-            }
-        });
-        mOnline.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if(isValidUser) {
-                    GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity());
-                }
-            }
-        });
-        mComputer.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                //GameManager.instance.sendNewGame(GameManager.TTT_C_INDEX, getActivity());
-            }
-        });
-    }
-
-    /**
-     * Setup the Checkers game creation invitation onClicks for Local, Online and Computer games.
-     */
-    private void setupCheckers() {
-        mLocal.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity());
-            }
-        });
-        mOnline.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                /*if(isValidUser) {
-                    GameManager.instance.sendNewGame(GameManager.CHECKERS_ONLINE_INDEX, getActivity());
-                }*/
-            }
-        });
-        mComputer.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                //GameManager.instance.sendNewGame(GameManager.CHECKERS_COMPUTER_INDEX, getActivity());
-            }
-        });
-    }
-
-    /**
-     * Setup the Chess game creation invitation onClicks for Local, Online, and Computer games.
-     */
-    private void setupChess() {
-        mLocal.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v) {
-                GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity());
-            }
-        });
     }
 
 }

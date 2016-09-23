@@ -24,12 +24,15 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.game.GameManager.Game.checkers;
+import static com.pajato.android.gamechat.game.GameManager.Game.chess;
+import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
 import static com.pajato.android.gamechat.game.GameManager.NO_GAMES_INDEX;
 import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
 
@@ -50,21 +53,21 @@ public class GameFragment extends BaseGameFragment {
                 // When a button is clicked, send a new game and reset the fab menu and background
                 // dimmer.
                 String title = getString(R.string.new_game_ttt);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, ttt);
                 FabManager.game.dismissMenu(this);
                 break;
             case R.id.init_checkers:
             case R.id.init_checkers_button:
                 // Do it for checkers.
                 title = getString(R.string.new_game_checkers);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, checkers);
                 FabManager.game.dismissMenu(this);
                 break;
             case R.id.init_chess:
             case R.id.init_chess_button:
                 // Do it for chess.
                 title = getString(R.string.new_game_chess);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title);
+                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, chess);
                 FabManager.game.dismissMenu(this);
                 break;
             case R.id.init_rooms:
@@ -95,6 +98,7 @@ public class GameFragment extends BaseGameFragment {
     @Override public void onInitialize() {
         // Inflate the layout, and initialize the various managers.
         super.onInitialize();
+        mGame = null;
         GameManager.instance.init(getActivity());
         FabManager.game.init(mLayout, this.getTag());
     }
@@ -118,6 +122,9 @@ public class GameFragment extends BaseGameFragment {
 
         return true;
     }
+
+    /** Satisfy the base game fragment contract with a nop message handler. */
+    @Override public void messageHandler(final String message) {}
 
     /**
      * Sends a message alerting the event handling system that there was a tile clicked, and

@@ -16,7 +16,11 @@ import android.widget.TextView;
 import com.pajato.android.gamechat.R;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
+
+import static com.pajato.android.gamechat.game.GameManager.CHECKERS_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.Game.checkers;
 
 /**
  * A simple Checkers game for use in GameChat.
@@ -28,9 +32,6 @@ public class CheckersFragment extends BaseGameFragment {
     private static final int PRIMARY_KING = 2;
     private static final int SECONDARY_PIECE = 3;
     private static final int SECONDARY_KING = 4;
-
-    // Designates the turn. true = primary; false = secondary.
-    public boolean mTurn;
 
     // Board Management Objects
     private GridLayout mBoard;
@@ -45,6 +46,7 @@ public class CheckersFragment extends BaseGameFragment {
     @Override public void onInitialize() {
         super.onInitialize();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
+        mGame = checkers;
         mTurn = true;
         onNewGame();
 
@@ -66,9 +68,9 @@ public class CheckersFragment extends BaseGameFragment {
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.options_menu_new_checkers) {
-            GameManager.instance.sendNewGame(GameManager.CHECKERS_INDEX, getActivity(),
-                    GameManager.instance.getTurn() + "\n" + "New Game");
+        if (item.getItemId() == R.id.options_menu_new_checkers) {
+            String message = GameManager.instance.getTurn() + "\n" + "New Game";
+            GameManager.instance.sendNewGame(CHECKERS_INDEX, getActivity(), message, checkers);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -79,7 +81,7 @@ public class CheckersFragment extends BaseGameFragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(final String msg) {
+    @Override public void messageHandler(final String msg) {
         //TODO: Replace with the event bus system.
         Scanner input = new Scanner(msg);
         String player = input.nextLine();
@@ -89,14 +91,15 @@ public class CheckersFragment extends BaseGameFragment {
         if(buttonTag.equals(getString(R.string.NewGame))) {
             onNewGame();
             int color;
-            if(player.equals(getString(R.string.player_secondary))) {
+            if (player.equals(getString(R.string.player_secondary))) {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
             } else {
                 player = getString(R.string.player_primary);
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
-            GameManager.instance.notify(mLayout, getString(R.string.NewGame) + "! "
-                    + player + "'s Turn!", color, false);
+            String newGame = getString(R.string.NewGame);
+            String message = String.format(Locale.US, "%s! %s's Turn!", newGame, player);
+            GameManager.instance.notify(mLayout, message, color, false);
         }
 
     }

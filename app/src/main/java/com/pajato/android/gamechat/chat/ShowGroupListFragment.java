@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;

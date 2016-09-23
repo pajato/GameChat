@@ -19,13 +19,14 @@ import com.pajato.android.gamechat.R;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import static com.pajato.android.gamechat.game.GameManager.Game.chess;
+
 /**
  * A simple Chess game for use in GameChat.
  *
  * @author Bryan Scott
  */
 public class ChessFragment extends BaseGameFragment {
-    public boolean mTurn;
 
     // Board Management Objects
     private GridLayout mBoard;
@@ -49,6 +50,7 @@ public class ChessFragment extends BaseGameFragment {
         // Setup the board and start a new game to create the board.
         super.onInitialize();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
+        mGame = chess;
         mTurn = false;
         onNewGame();
 
@@ -73,7 +75,7 @@ public class ChessFragment extends BaseGameFragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.options_menu_new_chess) {
             GameManager.instance.sendNewGame(GameManager.CHESS_INDEX, getActivity(),
-                    GameManager.instance.getTurn() + "\n" + "New Game");
+                    GameManager.instance.getTurn() + "\n" + "New Game", chess);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -85,7 +87,7 @@ public class ChessFragment extends BaseGameFragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(final String msg) {
+    @Override public void messageHandler(final String msg) {
         //TODO: Replace with the event bus system.
         Scanner input = new Scanner(msg);
         String player = input.nextLine();

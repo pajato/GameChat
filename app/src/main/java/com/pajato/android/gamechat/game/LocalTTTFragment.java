@@ -27,7 +27,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.FabManager;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -35,6 +35,8 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Scanner;
+
+import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
 
 public class LocalTTTFragment extends BaseGameFragment {
 
@@ -69,6 +71,7 @@ public class LocalTTTFragment extends BaseGameFragment {
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();
+        mGame = ttt;
         mTurn = true;
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
@@ -86,7 +89,7 @@ public class LocalTTTFragment extends BaseGameFragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.options_menu_new_ttt) {
             GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(),
-                    GameManager.instance.getTurn() + "\n" + "New Game");
+                    GameManager.instance.getTurn() + "\n" + "New Game", ttt);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -97,7 +100,7 @@ public class LocalTTTFragment extends BaseGameFragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(final String msg) {
+    @Override public void messageHandler(final String msg) {
         //TODO: Modify this when an implemented event handling system is implemented.
         Scanner input = new Scanner(msg);
         String player = input.nextLine();

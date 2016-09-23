@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies, Inc.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
 package com.pajato.android.gamechat.game;
 
 import android.support.v4.content.ContextCompat;
@@ -16,9 +33,16 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.HashMap;
 import java.util.Scanner;
+
+import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
+import static com.pajato.android.gamechat.game.GameManager.TTT_LOCAL_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.TTT_ONLINE_INDEX;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -30,9 +54,6 @@ public class TTTFragment extends BaseGameFragment {
     private static final String TAG = TTTFragment.class.getSimpleName();
     private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";
     private static final String TURN_INDICATOR = "turnIndicator";
-
-    /* Keeps track of the Turn user. True = Player 1, False = Player 2. */
-    public boolean mTurn;
 
     // Player Piece Strings
     private String mXValue;
@@ -46,9 +67,12 @@ public class TTTFragment extends BaseGameFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
+    @Subscribe public void onClick(final ClickEvent event) {}
+
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();
+        mGame = ttt;
         mXValue = getString(R.string.xValue);
         mOValue = getString(R.string.oValue);
         mSpace = getString(R.string.spaceValue);
@@ -61,7 +85,8 @@ public class TTTFragment extends BaseGameFragment {
         mRef = new Firebase(FIREBASE_URL);
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
-            // If the data changes on Firebase, we want to capture the new board and replicate it locally.
+            // If the data changes on Firebase, we want to capture the new board and replicate it
+            // locally.
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GenericTypeIndicator<HashMap<String, Integer>> t =
                         new GenericTypeIndicator<HashMap<String, Integer>>() {};
@@ -92,8 +117,8 @@ public class TTTFragment extends BaseGameFragment {
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.options_menu_new_ttt) {
-            GameManager.instance.sendNewGame(GameManager.TTT_LOCAL_INDEX, getActivity(),
-                    GameManager.instance.getTurn() + "\n" + "New Game");
+            String message = GameManager.instance.getTurn() + "\n" + "New Game";
+            GameManager.instance.sendNewGame(TTT_LOCAL_INDEX, getActivity(), message, ttt);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -104,7 +129,7 @@ public class TTTFragment extends BaseGameFragment {
      *
      * @param msg the message to be handled.
      */
-    public void messageHandler(final String msg) {
+    @Override public void messageHandler(final String msg) {
         //TODO: Modify this when an implemented event handling system is implemented.
         Scanner input = new Scanner(msg);
         String buttonTag = input.nextLine();
@@ -336,10 +361,10 @@ public class TTTFragment extends BaseGameFragment {
         // If the board map is size 1, we know that there is only the turn stored in it, and send a
         // new game out.
         if(mLayoutMap.size() == 1) {
-            GameManager.instance.sendNewGame(GameManager.TTT_ONLINE_INDEX, getActivity(),
-                    getTurn(mTurn) + "\n" + getString(R.string.NewGame));
-        // Otherwise, we'll need to comb through the board and replace the remaining pieces.
+            String message = getTurn(mTurn) + "\n" + getString(R.string.NewGame);
+            GameManager.instance.sendNewGame(TTT_ONLINE_INDEX, getActivity(), message, ttt);
         } else {
+            // Comb through the board and replace the remaining pieces.
             for(int i = 0; i < 3; i++) {
                 for(int j = 0; j < 3; j++) {
                     // If our keys are present, then put their corresponding piece onto the board.
