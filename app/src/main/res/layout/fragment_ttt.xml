@@ -134,57 +134,57 @@ http://www.gnu.org/licenses
 
         <Button
             android:tag="button00"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button01"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button02"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
 
         <Button
             android:tag="button10"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button11"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button12"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
 
         <Button
             android:tag="button20"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button21"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
         <Button
             android:tag="button22"
-            android:onClick="tileOnClick"
+            android:onClick="onTileClick"
             android:layout_gravity="top|start"
             android:text="@string/spaceValue"
             android:textAppearance="@style/TextAppearance.AppCompat.Display3"/>
