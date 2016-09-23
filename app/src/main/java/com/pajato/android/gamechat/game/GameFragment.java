@@ -26,6 +26,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.TileClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -91,6 +92,15 @@ public class GameFragment extends BaseGameFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game;}
 
+    /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
+    @Subscribe public void onClick(final TileClickEvent event) {
+        int index = GameManager.instance.getCurrent();
+        if (index == GameManager.TTT_LOCAL_INDEX || index == GameManager.TTT_ONLINE_INDEX) {
+            String msg = GameManager.instance.getTurn() + "\n" + event.view.getTag().toString();
+            GameManager.instance.sendMessage(msg, index);
+        }
+    }
+
     /** Handle the options menu by inflating it. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -128,16 +138,5 @@ public class GameFragment extends BaseGameFragment {
 
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
-
-    /**
-     * Sends a message alerting the event handling system that there was a tile clicked, and
-     * swaps the mTurn to the opposite player.
-     *
-     * @param view the tile clicked
-     */
-    public void tileOnClick(final View view) {
-        String msg = GameManager.instance.getTurn() + "\n" + view.getTag().toString();
-        GameManager.instance.sendMessage(msg, GameManager.instance.getCurrent());
-    }
 
 }

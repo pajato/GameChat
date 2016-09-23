@@ -87,12 +87,6 @@ public enum PaneManager {
         }
     }
 
-    /** Handle the delegated tile click by delegating it to the game fragment. */
-    public void tileOnClick(final View view) {
-        // Delegate this to the game fragment.
-        ((GameFragment) fragmentList.get(GAME_INDEX)).tileOnClick(view);
-    }
-
     // Nested classes
 
     /** Provide a class to handle the view pager setup. */

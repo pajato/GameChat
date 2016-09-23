@@ -63,11 +63,6 @@ public class LocalTTTFragment extends BaseGameFragment {
         GameManager.instance.sendNewGame(GameManager.NO_GAMES_INDEX, getActivity());
     }
 
-    /** Placeholder for button click handling. */
-    @Subscribe public void onClick(final ClickEvent event) {
-        // TODO: flesh this out.
-    }
-
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();

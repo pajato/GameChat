@@ -38,6 +38,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
+import com.pajato.android.gamechat.event.TileClickEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -147,14 +148,13 @@ public class MainActivity extends BaseActivity
     }
 
     /**
-     * TODO: Remove this method and use the event bus to propagate all button clicks.
      * An OnClick Listener for the tic-tac-toe tiles.
      *
      * @param view the tile clicked
      */
-    public void tileOnClick(final View view) {
-        // Pass responsibility for this onClick listener onto GameFragment
-        PaneManager.instance.tileOnClick(view);
+    public void onTileClick(final View view) {
+        // Post this event to the game fragment via the app event manager.
+        AppEventManager.instance.post(new TileClickEvent(view));
     }
 
     // Protected instance methods
