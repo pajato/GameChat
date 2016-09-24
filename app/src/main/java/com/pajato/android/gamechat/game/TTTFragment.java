@@ -40,7 +40,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
+import static com.pajato.android.gamechat.game.Game.ttt;
 import static com.pajato.android.gamechat.game.GameManager.TTT_LOCAL_INDEX;
 import static com.pajato.android.gamechat.game.GameManager.TTT_ONLINE_INDEX;
 

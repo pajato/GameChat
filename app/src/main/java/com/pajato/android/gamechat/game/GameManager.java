@@ -36,55 +36,6 @@ import java.util.ArrayList;
 enum GameManager {
     instance;
 
-    // Public enums
-
-    /** The games enum values associate games, modes, and fragments in a very flexible fashion. */
-    public enum Game {
-        checkers (-1, CHECKERS_INDEX, -1, R.string.PlayCheckers, R.string.player_primary,
-                  R.string.player_secondary, R.string.FutureCheckers),
-        chess (-1, CHESS_INDEX, -1, R.string.PlayChess, R.string.player_primary,
-               R.string.player_secondary, R.string.FutureChess),
-        ttt (TTT_ONLINE_INDEX, TTT_LOCAL_INDEX, -1, R.string.PlayTicTacToe, R.string.xValue,
-             R.string.oValue, R.string.FutureTTT);
-
-        // Instance variables.
-
-        /** The online fragment index. */
-        int onlineFragmentIndex;
-
-        /** The local fragment index. */
-        int localFragmentIndex;
-
-        /** The computer fragment index. */
-        int computerFragmentIndex;
-
-        /** The primary player index. */
-        int primaryIndex;
-
-        /** The secondary player index. */
-        int secondaryIndex;
-
-        /** The game title resource id. */
-        int titleResId;
-
-        /** The game future feature prefix resource id. */
-        int futureResId;
-
-        // Constructor.
-
-        /** Build an instance given the online, local and computer opponent fragment indexes. */
-        Game(final int online, final int local, final int computer, final int titleId,
-             final int primary, final int secondary, final int futureId) {
-            onlineFragmentIndex = online;
-            localFragmentIndex = local;
-            computerFragmentIndex = computer;
-            titleResId = titleId;
-            primaryIndex = primary;
-            secondaryIndex = secondary;
-            futureResId = futureId;
-        }
-    }
-
     // Public class constants.
 
     // Fragment array index constants.
@@ -129,25 +80,6 @@ enum GameManager {
         sendNewGame(NO_GAMES_INDEX, context);
     }
 
-    /** Create and show a Snackbar notification based on the given parameters. */
-    public void notify(final View view, final String output, final int color, final boolean done) {
-        Snackbar notification;
-        if (done) {
-            // The game is ended so generate a notification that could start a new game.
-            notification = Snackbar.make(view, output, Snackbar.LENGTH_INDEFINITE);
-            final String playAgain = getFragment(getCurrent()).getString(R.string.PlayAgain);
-            notification.setAction(playAgain, new NotificationActionHandler());
-        } else {
-            // The game hasn't ended so generate a notification without an action.
-            notification = Snackbar.make(view, output, Snackbar.LENGTH_SHORT);
-        }
-
-        // Determine if a color has been specified. If so, set it, otherwise display the
-        // notification to the User.
-        if (color != -1) notification.getView().setBackgroundColor(color);
-        notification.show();
-    }
-
     /** Return the current fragment's index value. */
     public int getCurrent() {
         return mCurrentFragment;
@@ -177,6 +109,25 @@ enum GameManager {
                 // For chess and checkers, we need either primary or secondary player strings.
                 return getTurn(index, context, R.string.player_primary, R.string.player_secondary);
         }
+    }
+
+    /** Create and show a Snackbar notification based on the given parameters. */
+    public void notify(final View view, final String output, final int color, final boolean done) {
+        Snackbar notification;
+        if (done) {
+            // The game is ended so generate a notification that could start a new game.
+            notification = Snackbar.make(view, output, Snackbar.LENGTH_INDEFINITE);
+            final String playAgain = getFragment(getCurrent()).getString(R.string.PlayAgain);
+            notification.setAction(playAgain, new NotificationActionHandler());
+        } else {
+            // The game hasn't ended so generate a notification without an action.
+            notification = Snackbar.make(view, output, Snackbar.LENGTH_SHORT);
+        }
+
+        // Determine if a color has been specified. If so, set it, otherwise display the
+        // notification to the User.
+        if (color != -1) notification.getView().setBackgroundColor(color);
+        notification.show();
     }
 
     /**

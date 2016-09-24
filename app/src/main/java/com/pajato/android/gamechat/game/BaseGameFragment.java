@@ -58,7 +58,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     /**
      * The game type (enum), set at fragment view creation time.
      */
-    GameManager.Game mGame;
+    Game mGame;
 
     /**
      * The current turn indicator: True = Player 1, False = Player 2.

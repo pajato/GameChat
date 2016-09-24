@@ -15,7 +15,6 @@
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:background="@color/colorLightPurple"
             android:id="@+id/IconTicTacToe"
             android:onClick="onClick"
             android:contentDescription="@string/TicTacToeImageDesc"
@@ -23,7 +22,6 @@
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:background="@color/colorLightPurple"
             android:id="@+id/IconCheckers"
             android:onClick="onClick"
             android:contentDescription="@string/CheckersImageDesc"
@@ -31,7 +29,6 @@
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:background="@color/colorLightPurple"
             android:id="@+id/IconChess"
             android:onClick="onClick"
             android:contentDescription="@string/ChessImageDesc"

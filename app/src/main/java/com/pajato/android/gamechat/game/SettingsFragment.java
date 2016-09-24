@@ -1,7 +1,25 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies, Inc.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
 package com.pajato.android.gamechat.game;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
@@ -15,8 +33,6 @@ import org.greenrobot.eventbus.Subscribe;
 import static com.pajato.android.gamechat.game.GameManager.ORDINAL_KEY;
 
 public class SettingsFragment extends BaseGameFragment {
-
-    // Private instance variables.
 
     // Public instance methods.
 
@@ -53,7 +69,7 @@ public class SettingsFragment extends BaseGameFragment {
         if (args != null && args.containsKey(ORDINAL_KEY)) {
             // Get the game emum value.
             int ordinal = args.getInt(ORDINAL_KEY, -1);
-            mGame = ordinal != -1 ? GameManager.Game.values()[ordinal] : null;
+            mGame = ordinal != -1 ? Game.values()[ordinal] : null;
         }
         super.setArguments(args);
     }
@@ -62,11 +78,14 @@ public class SettingsFragment extends BaseGameFragment {
     @Override public int getLayout() {return R.layout.fragment_settings;}
 
     @Override public void onResume() {
-        // Hide the FAB and set the title string.
+        // Hide the FAB and set the title string and the icon source.
         super.onResume();
         getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
         TextView title = (TextView) mLayout.findViewById(R.id.settings_title);
         title.setText(mGame != null ? mGame.titleResId : R.string.GameError);
+        ImageButton icon = (ImageButton) mLayout.findViewById(R.id.settings_icon);
+        int imageResId = mGame != null ? mGame.iconResId : R.drawable.ic_launcher;
+        icon.setImageResource(imageResId);
     }
 
     // Private instance methods.
