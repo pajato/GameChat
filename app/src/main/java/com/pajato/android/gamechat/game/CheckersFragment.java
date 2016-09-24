@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
+import static com.pajato.android.gamechat.game.Game.checkers;
 import static com.pajato.android.gamechat.game.GameManager.CHECKERS_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.Game.checkers;
 
 /**
  * A simple Checkers game for use in GameChat.

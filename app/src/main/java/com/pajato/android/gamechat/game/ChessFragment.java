@@ -19,7 +19,7 @@ import com.pajato.android.gamechat.R;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static com.pajato.android.gamechat.game.GameManager.Game.chess;
+import static com.pajato.android.gamechat.game.Game.chess;
 
 /**
  * A simple Chess game for use in GameChat.

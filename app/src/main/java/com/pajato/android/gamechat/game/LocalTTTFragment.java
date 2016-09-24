@@ -30,13 +30,12 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
-import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Scanner;
 
-import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
+import static com.pajato.android.gamechat.game.Game.ttt;
 
 public class LocalTTTFragment extends BaseGameFragment {
 
@@ -89,24 +88,19 @@ public class LocalTTTFragment extends BaseGameFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Translates the messages sent by the event system and handles the individual clicks
-     * based on messages sent.
-     *
-     * @param msg the message to be handled.
-     */
+    /** Handle the given message by either starting a new game or dealing with a tile click. */
     @Override public void messageHandler(final String msg) {
-        //TODO: Modify this when an implemented event handling system is implemented.
+        // Parse the message to obtain the button tag, skipping over the player indicator.
         Scanner input = new Scanner(msg);
-        String player = input.nextLine();
+        input.nextLine();
         String buttonTag = input.nextLine();
         input.close();
 
         // Call appropriate methods for each button.
-        if(buttonTag.equals(getString(R.string.NewGame))) {
+        if (buttonTag.equals(getString(R.string.NewGame))) {
             handleNewGame();
         } else {
-            handleTileClick(player, buttonTag);
+            handleTileClick(buttonTag);
         }
     }
 
@@ -288,17 +282,12 @@ public class LocalTTTFragment extends BaseGameFragment {
         checkNotFinished();
     }
 
-    /**
-     * Assigns a value to a button without text, either X or O, depending on the player whose
-     * turn it is.
-     *
-     * @param player the player who initiated the click.
-     * @param buttonTag the tag of the button clicked.
-     */
-    private void handleTileClick(final String player, final String buttonTag) {
-        Button b = (Button) mLayout.findViewWithTag(buttonTag);
+    /** Handle a click on a tile by setting the turn indicator, count and completion. */
+    private void handleTileClick(final String buttonTag) {
         // Only updates the tile if the current value is empty and the game has not finished yet.
+        Button b = (Button) mLayout.findViewWithTag(buttonTag);
         if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
+            // Update the state of the board base on the current turn.
             b.setText(getTurn(mTurn));
             mTurn = !mTurn;
             turnCount++;

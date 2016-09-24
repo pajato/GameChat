@@ -31,9 +31,9 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.game.GameManager.Game.checkers;
-import static com.pajato.android.gamechat.game.GameManager.Game.chess;
-import static com.pajato.android.gamechat.game.GameManager.Game.ttt;
+import static com.pajato.android.gamechat.game.Game.checkers;
+import static com.pajato.android.gamechat.game.Game.chess;
+import static com.pajato.android.gamechat.game.Game.ttt;
 import static com.pajato.android.gamechat.game.GameManager.NO_GAMES_INDEX;
 import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
 
