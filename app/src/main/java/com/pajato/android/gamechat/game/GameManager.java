@@ -154,6 +154,12 @@ enum GameManager {
     }
 
     /** Return TRUE iff the given fragment is running in the experience panel. */
+    public boolean sendNewGame(final Game game, final FragmentActivity context, final String msg) {
+        int index = game.localFragmentIndex;
+        return sendNewGame(index, context, msg, game);
+    }
+
+    /** Return TRUE iff the given fragment is running in the experience panel. */
     public boolean sendNewGame(final int index, final FragmentActivity context, final String msg,
                                final Game game) {
         instructions.clear();
@@ -173,9 +179,6 @@ enum GameManager {
             // If our fragment doesn't exist yet, construct it.
             if (mFragmentList[index] == null) {
                 switch (index) {
-                    case SETTINGS_INDEX:
-                        mFragmentList[SETTINGS_INDEX] = new SettingsFragment();
-                        break;
                     case TTT_LOCAL_INDEX:
                         mFragmentList[TTT_LOCAL_INDEX] = new LocalTTTFragment();
                         break;
