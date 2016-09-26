@@ -71,8 +71,6 @@ public class LocalTTTFragment extends BaseGameFragment {
         mOValue = getString(R.string.oValue);
         mSpace = getString(R.string.spaceValue);
         turnCount = 0;
-
-        getActivity().findViewById(R.id.gameFab).setVisibility(View.GONE);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

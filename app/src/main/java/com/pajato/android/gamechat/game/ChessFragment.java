@@ -15,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -43,8 +46,13 @@ public class ChessFragment extends BaseGameFragment {
     private boolean mSecondaryKingSideRookHasMoved;
     private boolean mSecondaryKingHasMoved;
 
+    // Public instance methods.
+
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_checkers;}
+
+    /** Handle button clicks ... placeholder. */
+    @Subscribe public void onClick(final ClickEvent event) {}
 
     @Override public void onInitialize() {
         // Setup the board and start a new game to create the board.

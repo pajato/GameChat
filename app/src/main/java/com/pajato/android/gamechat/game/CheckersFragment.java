@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -40,8 +43,13 @@ public class CheckersFragment extends BaseGameFragment {
     private boolean mIsHighlighted = false;
     private ArrayList<Integer> mPossibleMoves;
 
+    // Public instance methods.
+
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_checkers;}
+
+    /** Handle button clicks ... placeholder. */
+    @Subscribe public void onClick(final ClickEvent event) {}
 
     @Override public void onInitialize() {
         super.onInitialize();
