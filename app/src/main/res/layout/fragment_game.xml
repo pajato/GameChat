@@ -32,68 +32,16 @@ http://www.gnu.org/licenses
         android:id="@+id/gameDimmer"
         tools:visibility="visible"/>
 
-    <LinearLayout style="@style/FabMenu"
-        android:id="@+id/games_fab_menu"
+    <FrameLayout style="@style/FabMenu"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/gameFabMenu"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/games_fab">
-
-        <LinearLayout style="@style/FabMenuItem"
-            android:id="@+id/init_ttt"
-            android:gravity="end">
-
-            <Button style="@style/FabMenuButton"
-                android:id="@+id/init_ttt_button"
-                android:text="@string/PlayTicTacToe"/>
-
-            <ImageView style="@style/FabMenuIcon"
-                android:contentDescription="@string/PlayTicTacToe"
-                android:src="@drawable/ic_casino_black_24dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout style="@style/FabMenuItem"
-            android:id="@+id/init_checkers"
-            android:gravity="end">
-
-            <Button style="@style/FabMenuButton"
-                android:id="@+id/init_checkers_button"
-                android:text="@string/PlayCheckers"/>
-
-            <ImageView style="@style/FabMenuIcon"
-                android:contentDescription="@string/PlayCheckers"
-                android:src="@drawable/ic_casino_black_24dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout style="@style/FabMenuItem"
-            android:id="@+id/init_chess"
-            android:gravity="end">
-
-            <Button style="@style/FabMenuButton"
-                android:id="@+id/init_chess_button"
-                android:text="@string/PlayChess"/>
-
-            <ImageView style="@style/FabMenuIcon"
-                android:contentDescription="@string/PlayChess"
-                android:src="@drawable/ic_casino_black_24dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout style="@style/FabMenuItem"
-            android:id="@+id/init_rooms"
-            android:gravity="end">
-
-            <Button style="@style/FabMenuButton"
-                android:id="@+id/init_rooms_button"
-                android:text="@string/go_to_rooms"/>
-
-            <ImageView style="@style/FabMenuIcon"
-                android:contentDescription="@string/PlayChess"
-                android:src="@drawable/ic_casino_black_24dp"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
+        app:layout_constraintBottom_toTopOf="@+id/gameFab">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/gameList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
@@ -101,7 +49,7 @@ http://www.gnu.org/licenses
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:gravity="bottom|start"
-        android:id="@+id/games_fab"
+        android:id="@+id/gameFab"
         android:src="@drawable/ic_add_white_24dp"
         android:onClick="onClick"
         app:layout_constraintRight_toRightOf="parent"

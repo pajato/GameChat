@@ -42,7 +42,7 @@ http://www.gnu.org/licenses
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="DateHeaderTheme">
+    <style name="HeaderTheme">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@color/colorLightGray</item>
@@ -59,11 +59,9 @@ http://www.gnu.org/licenses
     </style>
 
     <style name="FabMenuItem">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:onClick">onClick</item>
     </style>
 
     <style name="FabMenuButton">
@@ -80,6 +78,12 @@ http://www.gnu.org/licenses
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:tint">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="GameMenuIcon">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
     <style name="RoomsIcon">

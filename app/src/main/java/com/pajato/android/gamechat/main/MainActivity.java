@@ -38,7 +38,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.event.TileClickEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -154,7 +154,7 @@ public class MainActivity extends BaseActivity
      */
     public void onTileClick(final View view) {
         // Post this event to the game fragment via the app event manager.
-        AppEventManager.instance.post(new TileClickEvent(view));
+        AppEventManager.instance.post(new TagClickEvent(view));
     }
 
     // Protected instance methods

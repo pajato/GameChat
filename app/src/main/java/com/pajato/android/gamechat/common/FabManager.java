@@ -17,24 +17,34 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.adapter.MenuAdapter;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FabManager.State.opened;
 
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum FabManager {
     chat(R.id.chatFab, R.id.chatFabMenu, R.id.chatDimmer),
-    game(R.id.games_fab, R.id.games_fab_menu, R.id.gameDimmer);
+    game(R.id.gameFab, R.id.gameFabMenu, R.id.gameDimmer);
 
     /** Provide FAB state constants. */
     enum State {opened, closed}
@@ -55,6 +65,9 @@ public enum FabManager {
     /** The resource id used to access the dimmer view used to blur the content. */
     private int mFabDimmerId;
 
+    /** The cache of menus (FAM) supported by the this manager. */
+    private Map<String, List<MenuEntry>> mMenuMap = new HashMap<>();
+
     /** The resource id used to access the main fragment. */
     private String mTag;
 
@@ -69,30 +82,53 @@ public enum FabManager {
 
     // Public instance methods
 
-    /** Initialize the fab button. */
-    public void init(@NonNull final View layout, final String fragmentTag) {
-        // Initialize the fab button state to opened and then toggle it to put the panel into the
-        // correct initial state.
-        mTag = fragmentTag;
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+    /** Dismiss the menu associated with the given FAB button. */
+    public void dismissMenu(@NonNull final Fragment fragment) {
+        // Determine if the chat fragment is accessible.  If not, abort.
+        View layout = getGameFragmentLayout(fragment);
+        if (layout != null) dismissMenu(layout);
     }
 
     /** Initialize the fab state. */
     public void init(final Fragment fragment) {
-        View layout = getView(fragment);
+        // Ensure that the layout exists. Abort if it does not.  Set the FAB state to closed if it
+        // does.
+        View layout = getGameFragmentLayout(fragment);
         if (layout == null) return;
-
-        // Set the fab state to closed.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
         dismissMenu(layout);
     }
 
-    /** Dismiss the menu associated with the given FAB button. */
-    public void dismissMenu(@NonNull final Fragment fragment) {
-        // Determine if the chat fragment is accessible.  If not, abort.
-        View layout = getView(fragment);
-        if (layout != null) dismissMenu(layout);
+    /** Set the floating action menu (FAM) with a given name and menu. */
+    public void setMenu(final String name, final List<MenuEntry> menu) {
+        // Cache the menu, if one is provided.
+        if (menu != null && name != null) mMenuMap.put(name, menu);
+    }
+
+    /** Set the current FAM using the cached item with the given name. */
+    public void setMenu(final Fragment fragment, final String name) {
+        // Ensure that the game fragment layout is accessible.  Abort if not (error is logged).
+        View gameFragmentLayout = getGameFragmentLayout(fragment);
+        if (gameFragmentLayout == null) return;
+
+        // Add the menu to the recycler view.
+        // Initialize the recycler view.
+        Context context = fragment.getContext();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
+        RecyclerView recyclerView = (RecyclerView) gameFragmentLayout.findViewById(R.id.gameList);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        // Ensure that the recycler view has an adapter installed.  Install one if not.  Set up the
+        // adapter on the recycler view with the given menu.
+        MenuAdapter adapter = (MenuAdapter) recyclerView.getAdapter();
+        if (adapter == null) {
+            adapter = new MenuAdapter();
+            recyclerView.setAdapter(adapter);
+        }
+        adapter.clearEntries();
+        adapter.addEntries(mMenuMap.get(name));
     }
 
     /** Set the FAB visibility state. */
@@ -100,10 +136,16 @@ public enum FabManager {
         // Obtain the layout view owning the FAB.  If it is not accessible, just return since an
         // error message will have been generated.  If it is accessible, apply the given visibility
         // state.
-        View layout = getView(fragment);
+        View layout = getGameFragmentLayout(fragment);
         if (layout == null) return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(state);
+    }
+
+    /** Initialize the tag used to find the main fragment that contains the fab button. */
+    public void setTag(final String fragmentTag) {
+        // Use the fragment tag string to find the main fragment and then in turn, the FAB.
+        mTag = fragmentTag;
     }
 
     /** Toggle the state of the FAB button using a given fragment to obtain the layout view. */
@@ -111,7 +153,7 @@ public enum FabManager {
         // Determine if the fragment layout exists.  Continue if it does.  Return if it does not.
         // An error message with stack trace will have been generated if the view cannot be
         // accessed.
-        View layout = getView(fragment);
+        View layout = getGameFragmentLayout(fragment);
         if (layout == null) return;
 
         // The layout view is valid.  Use it to toggle the fab state.
@@ -145,8 +187,7 @@ public enum FabManager {
 
     /** Dismiss the menu associated with the given layout view. */
     private void dismissMenu(@NonNull final View layout) {
-        // The fragment is accessible and the layout has been established.  Finish dismissing the
-        // fab menu.
+        // The fragment is accessible and the layout has been established.  Dismiss the FAM.
         View dimmerView = layout.findViewById(mFabDimmerId);
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setImageResource(R.drawable.ic_add_white_24dp);
@@ -156,36 +197,33 @@ public enum FabManager {
         dimmerView.setVisibility(View.GONE);
     }
 
-    /** Return the given fragment's layout view, if one exists, otherwise null. */
-    private View getView(@NonNull final Fragment fragment) {
-        // Determine if the given fragment has an associated activity.
+    /** Return the main envelope game fragment's layout view, if one exists, otherwise null. */
+    private View getGameFragmentLayout(@NonNull final Fragment fragment) {
+        // Determine if the given fragment has an associated activity.  Abort if not and log an
+        // error.
         FragmentActivity activity = fragment.getActivity();
-        if (activity == null) {
-            // The activity is not accessible.  This is generally caused by a software error, in this
-            // case, it is likely that an app event subscribed handler has invoked this call
-            // inappropriately.  To that end, a stack trace is being appended to the error message
-            // being logged.
-            Throwable t = new Throwable();
-            String format = "The fragment {%s} does not have an activity attached!";
-            Log.e(TAG, String.format(Locale.US, format, fragment), t);
-            return null;
-        }
+        String format = "The fragment {%s} does not have an activity attached!";
+        if (activity == null) return logError(format, fragment);
 
-        // Determine if the attached fragment has a view.  If so return the view, otherwise null.
+        // Determine if the attached fragment has a view.  Abort if not and log an error.
         Fragment envelopeFragment = activity.getSupportFragmentManager().findFragmentByTag(mTag);
-        if (envelopeFragment == null || envelopeFragment.getView() == null) {
-            // The envelope fragment or it's layout view is not accessible.  This is generally
-            // caused by a software error, in this case, it is likely that an app event subscribed
-            // handler has invoked this call inappropriately.  To that end, a stack trace is being
-            // appended to the error message being logged.
-            Throwable t = new Throwable();
-            String format = "The envelope fragment {%s} does not have a layout view!";
-            Log.e(TAG, String.format(Locale.US, format, envelopeFragment), t);
-            return null;
-        }
+        format = "The envelope fragment {%s} does not have a layout view!";
+        if (envelopeFragment == null || envelopeFragment.getView() == null)
+            logError(format, envelopeFragment);
 
         // There is a layout view to return.
         return envelopeFragment.getView();
+    }
+
+    /** Log an error and return a null view. */
+    private View logError(final String format, final Fragment fragment) {
+        // The activity is not accessible.  This is probably caused by a software error, in this
+        // case, it is likely that an app event subscribed handler has invoked this call
+        // inappropriately.  To that end, a stack trace is being appended to the error message
+        // being logged.
+        Throwable stack = new Throwable();
+        Log.e(TAG, String.format(Locale.US, format, fragment), stack);
+        return null;
     }
 
 }
