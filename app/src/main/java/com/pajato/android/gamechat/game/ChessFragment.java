@@ -55,7 +55,7 @@ public class ChessFragment extends BaseGameFragment {
         onNewGame();
 
         // Return the FAB to Visibility
-        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);

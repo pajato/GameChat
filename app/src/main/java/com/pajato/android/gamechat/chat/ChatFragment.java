@@ -117,7 +117,7 @@ public class ChatFragment extends BaseChatFragment {
     @Override public void onInitialize() {
         // Declare the use of the options menu and intialize the FAB and it's menu.
         super.onInitialize();
-        FabManager.chat.init(mLayout, this.getTag());
+        FabManager.chat.setTag(this.getTag());
     }
 
     /** Deal with a change in the joined rooms state. */

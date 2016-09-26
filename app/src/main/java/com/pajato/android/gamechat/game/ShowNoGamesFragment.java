@@ -23,6 +23,8 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.game.GameFragment.GAME_HOME_FAM_KEY;
+
 public class ShowNoGamesFragment extends BaseGameFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
@@ -41,4 +43,9 @@ public class ShowNoGamesFragment extends BaseGameFragment {
         FabManager.game.init(this);
     }
 
+    /** Reset the FAM to use the game home menu. */
+    @Override public void onResume() {
+        super.onResume();
+        FabManager.game.setMenu(this, GAME_HOME_FAM_KEY);
+    }
 }

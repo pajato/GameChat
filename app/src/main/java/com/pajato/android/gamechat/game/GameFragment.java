@@ -25,11 +25,16 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.TileClickEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.pajato.android.gamechat.game.Game.checkers;
 import static com.pajato.android.gamechat.game.Game.chess;
@@ -44,48 +49,53 @@ import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
  */
 public class GameFragment extends BaseGameFragment {
 
+    // Public constants.
+
+    /** The lookup key for the FAB game home memu. */
+    public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
+
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void buttonClickHandler(final ClickEvent event) {
         // Grab the View ID and the floating action button and dimmer views.
         View view = event.view;
+        String title = null;
+        Game game = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
-            case R.id.init_ttt:
-            case R.id.init_ttt_button:
+            case R.mipmap.ic_tictactoe_red:
                 // When a button is clicked, send a new game and reset the fab menu and background
                 // dimmer.
-                String title = getString(R.string.new_game_ttt);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, ttt);
-                FabManager.game.dismissMenu(this);
+                title = getString(R.string.new_game_ttt);
+                game = ttt;
                 break;
             case R.id.IconCheckers:
-            case R.id.init_checkers:
-            case R.id.init_checkers_button:
+            case R.mipmap.ic_checkers:
                 // Do it for checkers.
                 title = getString(R.string.new_game_checkers);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, checkers);
-                FabManager.game.dismissMenu(this);
+                game = checkers;
                 break;
             case R.id.IconChess:
-            case R.id.init_chess:
-            case R.id.init_chess_button:
+            case R.mipmap.ic_chess:
                 // Do it for chess.
                 title = getString(R.string.new_game_chess);
-                GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, chess);
-                FabManager.game.dismissMenu(this);
+                game = chess;
                 break;
-            case R.id.init_rooms:
-            case R.id.init_rooms_button:
+            case R.drawable.ic_casino_black_24dp:
                 // And do it for the rooms option buttons.
-                GameManager.instance.sendNewGame(NO_GAMES_INDEX, getActivity());
+                showFutureFeatureMessage(R.string.FutureSelectRooms);
                 FabManager.game.dismissMenu(this);
                 break;
-            case R.id.games_fab:
+            case R.id.gameFab:
                 // If the click is on the fab, we have to handle if it's open or closed.
                 FabManager.game.toggle(this);
                 break;
             default:
                 break;
+        }
+
+        if (title != null && game != null) {
+            GameManager.instance.sendNewGame(SETTINGS_INDEX, getActivity(), title, game);
+            FabManager.game.dismissMenu(this);
         }
     }
 
@@ -93,7 +103,7 @@ public class GameFragment extends BaseGameFragment {
     @Override public int getLayout() {return R.layout.fragment_game;}
 
     /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
-    @Subscribe public void onClick(final TileClickEvent event) {
+    @Subscribe public void onClick(final TagClickEvent event) {
         int index = GameManager.instance.getCurrent();
         if (index == GameManager.TTT_LOCAL_INDEX || index == GameManager.TTT_ONLINE_INDEX) {
             String msg = GameManager.instance.getTurn() + "\n" + event.view.getTag().toString();
@@ -113,7 +123,8 @@ public class GameFragment extends BaseGameFragment {
         super.onInitialize();
         mGame = null;
         GameManager.instance.init(getActivity());
-        FabManager.game.init(mLayout, this.getTag());
+        FabManager.game.setTag(this.getTag());
+        FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
     }
 
     /** Handle a menu item selection. */
@@ -139,4 +150,17 @@ public class GameFragment extends BaseGameFragment {
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
+    // Private instance methods.
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getHomeMenu() {
+        List<MenuEntry> menu = new ArrayList<>();
+        final int tttIconResId = R.mipmap.ic_tictactoe_red;
+        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayTicTacToe, tttIconResId)));
+        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayCheckers, R.mipmap.ic_checkers)));
+        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayChess, R.mipmap.ic_chess)));
+        final int gotoRoomsIconResId = R.drawable.ic_casino_black_24dp;
+        menu.add(new MenuEntry(new MenuItemEntry(R.string.GoToRooms, gotoRoomsIconResId)));
+        return menu;
+    }
 }

@@ -31,7 +31,7 @@ public class GameTest extends BaseTest {
                 .check(matches(isDisplayed()));
         onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.games_fab))
+        onView(withId(R.id.gameFab))
                 .check(matches(isDisplayed()))
                 .perform(click());
     }
@@ -114,7 +114,7 @@ public class GameTest extends BaseTest {
         // Ensure the init panel is present and open the FAB
         onView(withId(R.id.init_panel))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.games_fab))
+        onView(withId(R.id.gameFab))
                 .check(matches(isDisplayed()))
                 .perform(click());
     }

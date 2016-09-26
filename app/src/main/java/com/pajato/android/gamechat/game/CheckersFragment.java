@@ -50,7 +50,7 @@ public class CheckersFragment extends BaseGameFragment {
         mTurn = true;
         onNewGame();
 
-        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);

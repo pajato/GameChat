@@ -411,7 +411,7 @@ public class TTTTest extends BaseTest {
     /** A helper method that creates a new game using the Floating Action Button */
     private void getNewGame(final boolean onStart) {
         // Open the options menu and initiate a new game.
-        onView(withId(R.id.games_fab))
+        onView(withId(R.id.gameFab))
                 .perform(click());
         onView(withId(R.id.init_ttt_button))
                 .perform(click());

@@ -20,11 +20,11 @@ package com.pajato.android.gamechat.event;
 import android.view.View;
 
 /**
- * Provides a button click data model class for the tic-tac-toe game..
+ * Provides a button click data model class where the payload is in the view tag field.
  *
  * @author Paul Michael Reilly
  */
-public class TileClickEvent {
+public class TagClickEvent {
 
     // Private instance variables.
 
@@ -34,7 +34,7 @@ public class TileClickEvent {
     // Public constructors.
 
     /** Build the event with the given view. */
-    public TileClickEvent(final View view) {
+    public TagClickEvent(final View view) {
         this.view = view;
     }
 

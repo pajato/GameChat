@@ -14,21 +14,21 @@ Public License for more details.
 
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
-
-Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
 -->
-<LinearLayout style="@style/HeaderTheme"
+<LinearLayout style="@style/FabMenuItem"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-    <TextView
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        tools:text="Header Title"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_gravity="end"
+    android:orientation="horizontal">
+    <View
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1.0" />
+    <Button style="@style/FabMenuButton"
+        android:id="@+id/menuItemTitle"
+        tools:text="Play Chess"/>
+    <ImageView style="@style/GameMenuIcon"
+        android:id="@+id/menuItemIcon"
+        android:contentDescription="@string/MenuIconDesc"
+        tools:src="@mipmap/ic_chess" />
 </LinearLayout>

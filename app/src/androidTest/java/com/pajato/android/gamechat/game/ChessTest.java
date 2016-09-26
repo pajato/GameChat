@@ -36,7 +36,7 @@ public class ChessTest extends BaseTest {
                 .perform(click());
 
         // Begin the process of starting a local checkers game
-        onView(withId(R.id.games_fab))
+        onView(withId(R.id.gameFab))
                 .check(matches(isDisplayed()))
                 .perform(click());
 

@@ -80,7 +80,7 @@ public class SettingsFragment extends BaseGameFragment {
     @Override public void onResume() {
         // Hide the FAB and set the title string and the icon source.
         super.onResume();
-        getActivity().findViewById(R.id.games_fab).setVisibility(View.GONE);
+        getActivity().findViewById(R.id.gameFab).setVisibility(View.GONE);
         TextView title = (TextView) mLayout.findViewById(R.id.settings_title);
         title.setText(mGame != null ? mGame.titleResId : R.string.GameError);
         ImageButton icon = (ImageButton) mLayout.findViewById(R.id.settings_icon);

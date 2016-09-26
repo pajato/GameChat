@@ -78,7 +78,7 @@ public class TTTFragment extends BaseGameFragment {
         mSpace = getString(R.string.spaceValue);
         mTurn = true;
 
-        getActivity().findViewById(R.id.games_fab).setVisibility(View.VISIBLE);
+        getActivity().findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
 
         // Setup our Firebase database reference and a listener to keep track of the board.
         Firebase.setAndroidContext(getContext());
