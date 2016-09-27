@@ -40,7 +40,6 @@ import static com.pajato.android.gamechat.game.Game.checkers;
 import static com.pajato.android.gamechat.game.Game.chess;
 import static com.pajato.android.gamechat.game.Game.ttt;
 import static com.pajato.android.gamechat.game.GameManager.NO_GAMES_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.SETTINGS_INDEX;
 
 /**
  * A Fragment that contains and controls the current game being played.
@@ -105,7 +104,7 @@ public class GameFragment extends BaseGameFragment {
     /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
     @Subscribe public void onClick(final TagClickEvent event) {
         int index = GameManager.instance.getCurrent();
-        if (index == GameManager.TTT_LOCAL_INDEX || index == GameManager.TTT_ONLINE_INDEX) {
+        if (index == GameManager.TTT_INDEX) {
             String msg = GameManager.instance.getTurn() + "\n" + event.view.getTag().toString();
             GameManager.instance.sendMessage(msg, index);
         }

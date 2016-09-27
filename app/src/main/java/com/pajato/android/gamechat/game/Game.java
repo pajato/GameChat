@@ -21,8 +21,7 @@ import com.pajato.android.gamechat.R;
 
 import static com.pajato.android.gamechat.game.GameManager.CHECKERS_INDEX;
 import static com.pajato.android.gamechat.game.GameManager.CHESS_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.TTT_LOCAL_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.TTT_ONLINE_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.TTT_INDEX;
 
 /**
  * The games enum values associate games, modes, fragments and resources in a very flexible, concise
@@ -31,23 +30,17 @@ import static com.pajato.android.gamechat.game.GameManager.TTT_ONLINE_INDEX;
  * @author Paul Michael Reilly
  */
 enum Game {
-    checkers (-1, CHECKERS_INDEX, -1, R.mipmap.ic_checkers, R.string.PlayCheckers,
-              R.string.player_primary, R.string.player_secondary, R.string.FutureCheckers),
-    chess (-1, CHESS_INDEX, -1, R.mipmap.ic_chess, R.string.PlayChess, R.string.player_primary,
+    checkers (CHECKERS_INDEX, R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player_primary,
+              R.string.player_secondary, R.string.FutureCheckers),
+    chess (CHESS_INDEX, R.mipmap.ic_chess, R.string.PlayChess, R.string.player_primary,
            R.string.player_secondary, R.string.FutureChess),
-    ttt (TTT_ONLINE_INDEX, TTT_LOCAL_INDEX, -1, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe,
-         R.string.xValue, R.string.oValue, R.string.FutureTTT);
+    ttt (TTT_INDEX, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue,
+         R.string.oValue, R.string.FutureTTT);
 
     // Instance variables.
 
-    /** The online fragment index. */
-    int onlineFragmentIndex;
-
     /** The local fragment index. */
-    int localFragmentIndex;
-
-    /** The computer fragment index. */
-    int computerFragmentIndex;
+    int fragmentIndex;
 
     /** The primary player index. */
     int primaryIndex;
@@ -67,11 +60,9 @@ enum Game {
     // Constructor.
 
     /** Build an instance given the online, local and computer opponent fragment indexes. */
-    Game(final int online, final int local, final int computer, final int iconId, final int titleId,
-         final int primary, final int secondary, final int futureId) {
-        onlineFragmentIndex = online;
-        localFragmentIndex = local;
-        computerFragmentIndex = computer;
+    Game(final int index, final int iconId, final int titleId, final int primary,
+         final int secondary, final int futureId) {
+        fragmentIndex = index;
         iconResId = iconId;
         titleResId = titleId;
         primaryIndex = primary;

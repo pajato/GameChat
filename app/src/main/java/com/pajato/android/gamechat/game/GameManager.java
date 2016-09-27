@@ -40,12 +40,10 @@ enum GameManager {
 
     // Fragment array index constants.
     public static final int NO_GAMES_INDEX = 0;
-    public static final int SETTINGS_INDEX = 1;
-    public static final int TTT_LOCAL_INDEX = 2;
-    public static final int TTT_ONLINE_INDEX = 3;
-    public static final int CHECKERS_INDEX = 4;
-    public static final int CHESS_INDEX = 5;
-    public static final int TOTAL_FRAGMENTS = 6;
+    public static final int TTT_INDEX = 1;
+    public static final int CHECKERS_INDEX = 2;
+    public static final int CHESS_INDEX = 3;
+    public static final int TOTAL_FRAGMENTS = 4;
 
     /** A key value for some funky stuff going on with parsing strings, aka messages. */
     public static final String GAME_KEY = "gameInit";
@@ -98,10 +96,8 @@ enum GameManager {
             default:
                 // These two cases should never be called in an impactful way.
             case NO_GAMES_INDEX:
-            case SETTINGS_INDEX:
                 return null;
-            case TTT_LOCAL_INDEX:
-            case TTT_ONLINE_INDEX:
+            case TTT_INDEX:
                 // For Tic-Tac-Toe, we need X or O.
                 return getTurn(index, context, R.string.xValue, R.string.oValue);
             case CHECKERS_INDEX:
@@ -144,8 +140,7 @@ enum GameManager {
         switch (fragmentIndex) {
             default:
                 break;
-            case TTT_LOCAL_INDEX:
-            case TTT_ONLINE_INDEX:
+            case TTT_INDEX:
             case CHECKERS_INDEX:
             case CHESS_INDEX:
                 getFragment(fragmentIndex).messageHandler(msg);
@@ -155,7 +150,7 @@ enum GameManager {
 
     /** Return TRUE iff the given fragment is running in the experience panel. */
     public boolean sendNewGame(final Game game, final FragmentActivity context, final String msg) {
-        int index = game.localFragmentIndex;
+        int index = game.fragmentIndex;
         return sendNewGame(index, context, msg, game);
     }
 
@@ -179,11 +174,8 @@ enum GameManager {
             // If our fragment doesn't exist yet, construct it.
             if (mFragmentList[index] == null) {
                 switch (index) {
-                    case TTT_LOCAL_INDEX:
-                        mFragmentList[TTT_LOCAL_INDEX] = new LocalTTTFragment();
-                        break;
-                    case TTT_ONLINE_INDEX:
-                        mFragmentList[TTT_ONLINE_INDEX] = new TTTFragment();
+                    case TTT_INDEX:
+                        mFragmentList[TTT_INDEX] = new TTTFragment();
                         break;
                     case CHECKERS_INDEX:
                         mFragmentList[CHECKERS_INDEX] = new CheckersFragment();
