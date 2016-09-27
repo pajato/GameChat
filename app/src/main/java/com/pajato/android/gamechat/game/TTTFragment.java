@@ -41,34 +41,51 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import static com.pajato.android.gamechat.game.Game.ttt;
-import static com.pajato.android.gamechat.game.GameManager.TTT_LOCAL_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.TTT_ONLINE_INDEX;
+import static com.pajato.android.gamechat.game.GameManager.TTT_INDEX;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
+ *
+ * TODO: Abstract out a player: name, win count, association (X/O/black/white/etc.), type (creator,
+ * online, offline, gamechat, other?)
  *
  * @author Bryan Scott
  */
 public class TTTFragment extends BaseGameFragment {
 
+    // Private class constants.
+
+    /** The logcat tag. */
     private static final String TAG = TTTFragment.class.getSimpleName();
+
+    // TODO: move this to database manager in the near future.
     private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";
+
+    // TODO: figure out how to deal with this.
     private static final String TURN_INDICATOR = "turnIndicator";
+
+    // Private instance methods.
 
     // Player Piece Strings
     private String mXValue;
     private String mOValue;
     private String mSpace;
 
-    // Board management objects
+    /** A map used to help manage the board... */
     private HashMap<String, Integer> mLayoutMap;
+
+    // TODO: This goes when database manager is handling the Firebase interactions.
     private Firebase mRef;
+
+    // Public instance methods.
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
+    /** Provide an event manager placeholder for dealing with click events. */
     @Subscribe public void onClick(final ClickEvent event) {}
 
+    /** Initialize TicTacToe by ... */
     @Override public void onInitialize() {
         // Initialize Member Variables
         super.onInitialize();
@@ -78,16 +95,14 @@ public class TTTFragment extends BaseGameFragment {
         mSpace = getString(R.string.spaceValue);
         mTurn = true;
 
-        getActivity().findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
-
+        // TODO: Move this to the database manager.
         // Setup our Firebase database reference and a listener to keep track of the board.
         Firebase.setAndroidContext(getContext());
         mRef = new Firebase(FIREBASE_URL);
         mRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            // If the data changes on Firebase, we want to capture the new board and replicate it
-            // locally.
-            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            /** Capture and replicate the board locally. */
+            @Override public void onDataChange(DataSnapshot dataSnapshot) {
                 GenericTypeIndicator<HashMap<String, Integer>> t =
                         new GenericTypeIndicator<HashMap<String, Integer>>() {};
                 mLayoutMap = dataSnapshot.getValue(t);
@@ -101,9 +116,9 @@ public class TTTFragment extends BaseGameFragment {
                     mLayoutMap = new HashMap<>();
                 }
             }
-            // In the event that the request to listen is canceled, we need to
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+
+            /** Deal with a canceled game. */
+            @Override public void onCancelled(FirebaseError firebaseError) {
                 Log.e(TAG, "Error reading Firebase board data: " + firebaseError.toString());
             }
         });
@@ -118,30 +133,25 @@ public class TTTFragment extends BaseGameFragment {
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.options_menu_new_ttt) {
             String message = GameManager.instance.getTurn() + "\n" + "New Game";
-            GameManager.instance.sendNewGame(TTT_LOCAL_INDEX, getActivity(), message, ttt);
+            GameManager.instance.sendNewGame(TTT_INDEX, getActivity(), message, ttt);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Translates the messages sent by the event system and handles the individual clicks
-     * based on messages sent.
-     *
-     * @param msg the message to be handled.
-     */
+    /** Handle the given message by either starting a new game or dealing with a tile click. */
     @Override public void messageHandler(final String msg) {
-        //TODO: Modify this when an implemented event handling system is implemented.
+        // Parse the message to obtain the button tag, skipping over the player indicator.
         Scanner input = new Scanner(msg);
+        input.nextLine();
         String buttonTag = input.nextLine();
         input.close();
 
         // Call appropriate methods for each button.
-        if(buttonTag.equals(getString(R.string.NewGame))) {
+        if (buttonTag.equals(getString(R.string.NewGame))) {
             handleNewGame();
         } else {
             handleTileClick(buttonTag);
         }
-
     }
 
     /**
@@ -172,7 +182,7 @@ public class TTTFragment extends BaseGameFragment {
                 || centerCol == 6 || endCol == 6 || leftDiag == 6 || rightDiag == 6);
 
         // If we have a win condition, reveal the winning messages.
-        if(xWins || oWins || mLayoutMap.size() == 10) {
+        if (xWins || oWins || mLayoutMap.size() == 10) {
             // Setup the winner TextView and snackbar messages.
             TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
             Winner.setText(getText(R.string.spaceValue));
@@ -209,10 +219,10 @@ public class TTTFragment extends BaseGameFragment {
      */
     private int[][] evaluateBoard() {
         int[][] boardValues = new int[3][3];
-        if(mLayoutMap == null) mLayoutMap = new HashMap<>();
+        if (mLayoutMap == null) mLayoutMap = new HashMap<>();
         // Go through all the buttons.
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
                 Button currTile = (Button) mLayout.findViewWithTag("button" + Integer.toString(i) + Integer.toString(j));
                 String tileValue = currTile.getText().toString();
 
@@ -222,7 +232,7 @@ public class TTTFragment extends BaseGameFragment {
                 // value of 6 without getting 3 Os.
 
                 // If there's an X in this button, store a 1
-                if(tileValue.equals(mXValue)) {
+                if (tileValue.equals(mXValue)) {
                     boardValues[i][j] = 1;
                     if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 1);
                     // If there's an O in this button, store a 2
@@ -245,7 +255,7 @@ public class TTTFragment extends BaseGameFragment {
      * @return R.string.xValue or R.string.oValue, depending on whose turn it is.
      */
     private String getTurn(final boolean turnIndicator) {
-        if(turnIndicator) {
+        if (turnIndicator) {
             return mXValue;
         } else {
             return mOValue;
@@ -274,7 +284,7 @@ public class TTTFragment extends BaseGameFragment {
         TextView p2left = (TextView) getActivity().findViewById(R.id.player_2_left_indicator);
         TextView p2right = (TextView) getActivity().findViewById(R.id.player_2_right_indicator);
 
-        if(turn) {
+        if (turn) {
             // If it's player 1's turn, make their icon bigger and accented...
             p1.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
             p1.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
@@ -362,7 +372,7 @@ public class TTTFragment extends BaseGameFragment {
         // new game out.
         if(mLayoutMap.size() == 1) {
             String message = getTurn(mTurn) + "\n" + getString(R.string.NewGame);
-            GameManager.instance.sendNewGame(TTT_ONLINE_INDEX, getActivity(), message, ttt);
+            GameManager.instance.sendNewGame(TTT_INDEX, getActivity(), message, ttt);
         } else {
             // Comb through the board and replace the remaining pieces.
             for(int i = 0; i < 3; i++) {
