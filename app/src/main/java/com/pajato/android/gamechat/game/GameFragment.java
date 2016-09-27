@@ -92,7 +92,7 @@ public class GameFragment extends BaseGameFragment {
                 break;
         }
 
-        if (title != null && game != null) {
+        if (title != null) {
             GameManager.instance.sendNewGame(game, getActivity(), title);
             FabManager.game.dismissMenu(this);
         }

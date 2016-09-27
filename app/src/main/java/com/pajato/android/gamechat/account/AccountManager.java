@@ -91,6 +91,22 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return mCurrentAccountKey;
     }
 
+    /** Return the first part (token) of the current display name, if available, null otherwise. */
+    public String getFirstName(final String meName) {
+        // Ensure that a User is signed in.  Return null if not.
+        Account account = getCurrentAccount();
+        if (account == null) return null;
+
+        // There is a User signed in. Ensure that the display name is non null.  Return the default
+        // if it is null.
+        String name = account.displayName;
+        if (name == null) return meName;
+
+        // Return the first part of the non-null display name.
+        String[] names = name.split(" ");
+        return names[0];
+    }
+
     /** Return a joined room entry, well formed (space separated) group key and room key pair. */
     public String getJoinedRoomEntry(final String groupKey, final String roomKey) {
         return String.format(Locale.US, "%s %s", groupKey, roomKey);
