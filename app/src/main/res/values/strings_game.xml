@@ -29,4 +29,8 @@
     <string name="winner_tie">Tie!</string>
     <string name="winner_x">X Wins!</string>
     <string name="xValue">X</string>
+    <string name="vs">vs</string>
+    <string name="wins">wins</string>
+    <string name="turn">turn</string>
+    <string name="friend">Friend</string>
 </resources>

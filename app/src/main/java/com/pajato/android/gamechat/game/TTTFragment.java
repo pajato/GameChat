@@ -33,6 +33,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -94,6 +95,15 @@ public class TTTFragment extends BaseGameFragment {
         mOValue = getString(R.string.oValue);
         mSpace = getString(R.string.spaceValue);
         mTurn = true;
+
+        // The fragment is alive and well. Set up the mode fields (players, wins and turn).
+        TextView user = (TextView) mLayout.findViewById(R.id.userName);
+        String meName = this.getString(R.string.me);
+        if (user != null) user.setText(AccountManager.instance.getFirstName(meName));
+        TextView userWinCount = (TextView) mLayout.findViewById(R.id.userWinCount);
+        if (userWinCount != null) userWinCount.setText("0");
+        TextView opponentWinCount = (TextView) mLayout.findViewById(R.id.opponentWinCount);
+        if (opponentWinCount != null) opponentWinCount.setText("0");
 
         // TODO: Move this to the database manager.
         // Setup our Firebase database reference and a listener to keep track of the board.
@@ -313,6 +323,9 @@ public class TTTFragment extends BaseGameFragment {
      * Empties the instructions, board tiles, and outputs a new game message.
      */
     private void handleNewGame() {
+        // Ensure that the fragment is in a healthy state.  Abort if not.
+        if (mLayout == null) return;
+
         // Reset the board map and update the Firebase database's copy.
         if(mLayoutMap != null) {
             mLayoutMap.clear();

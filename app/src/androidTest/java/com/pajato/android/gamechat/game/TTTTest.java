@@ -128,7 +128,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText(xValue)));
 
         // Ensure game has ended
-        onView(withId(R.id.winner))
+        onView(withId(R.id.turn))
                 .check(matches(withText("X Wins!")));
 
         // Attempt to click Bottom Center (to get 3 in a row for O).
@@ -257,7 +257,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText(oValue)));
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.winner))
+        onView(withId(R.id.turn))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("O Wins!")));
 
@@ -317,7 +317,7 @@ public class TTTTest extends BaseTest {
                 .perform(click());
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.winner))
+        onView(withId(R.id.turn))
                 .check(matches(withText("Tie!")));
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))
@@ -375,7 +375,7 @@ public class TTTTest extends BaseTest {
                 .check(matches(withText(xValue)));
 
         // Ensure that the endgame messages appear.
-        onView(withId(R.id.winner))
+        onView(withId(R.id.turn))
                 .check(matches(withText("X Wins!")));
         onView((withId(android.support.design.R.id.snackbar_text)))
                 .check(matches(isDisplayed()))
