@@ -67,10 +67,9 @@ http://www.gnu.org/licenses
     <style name="FabMenuButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:onClick">onClick</item>
     </style>
 
     <style name="FabMenuIcon">

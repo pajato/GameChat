@@ -151,15 +151,18 @@ public class GameFragment extends BaseGameFragment {
 
     // Private instance methods.
 
+    /** Return a menu entry for with given title and icon resource items. */
+    private MenuEntry getEntry(final int titleId, final int iconId) {
+        return new MenuEntry(new MenuItemEntry(titleId, iconId));
+    }
+
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {
         List<MenuEntry> menu = new ArrayList<>();
-        final int tttIconResId = R.mipmap.ic_tictactoe_red;
-        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayTicTacToe, tttIconResId)));
-        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayCheckers, R.mipmap.ic_checkers)));
-        menu.add(new MenuEntry(new MenuItemEntry(R.string.PlayChess, R.mipmap.ic_chess)));
-        final int gotoRoomsIconResId = R.drawable.ic_casino_black_24dp;
-        menu.add(new MenuEntry(new MenuItemEntry(R.string.GoToRooms, gotoRoomsIconResId)));
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red));
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess));
+        menu.add(getEntry(R.string.Home, R.drawable.ic_casino_black_24dp));
         return menu;
     }
 }

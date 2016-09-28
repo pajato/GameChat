@@ -9,7 +9,7 @@
         android:orderInCategory="0"/>
     <item
         android:id="@+id/options_menu_new_game"
-        android:title="@string/GoToRooms"
+        android:title="@string/Home"
         app:showAsAction="never"
         android:orderInCategory="10" />
 </menu>
