@@ -119,7 +119,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn off the FAB and force a recycler view update.
-        setTitles(null, mItem.roomKey);
+        setTitles(mItem.groupKey, mItem.roomKey);
         FabManager.chat.setState(this, View.GONE);
         mUpdateOnResume = true;
         super.onResume();
