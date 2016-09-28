@@ -83,7 +83,7 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
     }
 
     /** Post any item clicks to the app. */
-    public void onClick(final View view) {
+    @Override public void onClick(final View view) {
         view.setId((Integer) view.getTag());
         AppEventManager.instance.post(new ClickEvent(view));
     }
@@ -119,8 +119,12 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
 
     /** Obtain a view by inflating the given resource id. */
     private View getView(final ViewGroup parent, final int resourceId) {
+        // Inflate the entry view and set the click handlers for the fields.
         View result = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
-        result.setOnClickListener(this);
+        View view = result.findViewById(R.id.menuItemTitle);
+        if (view != null) view.setOnClickListener(this);
+        view = result.findViewById(R.id.menuItemIcon);
+        if (view != null) view.setOnClickListener(this);
 
         return result;
     }
@@ -144,11 +148,14 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
 
     /** Update the given view holder using the data from the given entry. */
     private void updateMenuItemHolder(final MenuItemViewHolder holder, final MenuEntry entry) {
-        // Set the text on the holder and put the entry on the item view tag..
+        // Set the text on the holder and put the entry on the item layout, title and icon view
+        // tags.
         Context context = holder.title.getContext();
         String text = context.getString(entry.titleResId);
         holder.title.setText(Html.fromHtml(text));
         holder.itemView.setTag(entry.iconResId);
+        holder.title.setTag(entry.iconResId);
+        holder.icon.setTag(entry.iconResId);
 
         // Set the icon on the holder.
         if (loadUrl(holder, entry)) return;

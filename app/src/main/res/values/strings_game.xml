@@ -5,7 +5,7 @@
     <string name="FutureChess">Chess online and against the computer </string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="FutureTTT">TicTacToe vs the computer </string>
-    <string name="GoToRooms">Go to My Games</string>
+    <string name="Home">Go to My Games</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="NewGame">New Game</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
