@@ -36,33 +36,27 @@ public abstract class BaseGameFragment extends BaseFragment {
 
     // Private class constants.
 
-    /**
-     * The logcat tag.
-     */
+    /** The logcat tag. */
     private static final String TAG = BaseGameFragment.class.getSimpleName();
 
-    /**
-     * The lifecycle event format string with no bundle.
-     */
+    /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
             "Event: %s; Fragment: %s; Fragment Manager: %s.";
 
-    /**
-     * The lifecycle event format string with a bundle provided.
-     */
+    /** The lifecycle event format string with a bundle provided. */
     private static final String FORMAT_WITH_BUNDLE =
             "Event: %s; Fragment: %s; Fragment Manager: %s; Bundle: %s.";
 
     // Package private instance variables.
 
-    /**
-     * The game type (enum), set at fragment view creation time.
-     */
-    Game mGame;
 
-    /**
-     * The current turn indicator: True = Player 1, False = Player 2.
-     */
+    /** The experience being enjoyed. */
+    Experience mExperience;
+
+    /** The fragment type. */
+    FragmentType mFragmentType;
+
+    /** The current turn indicator: True = Player 1, False = Player 2. */
     boolean mTurn;
 
     // Public constructors.
@@ -115,6 +109,11 @@ public abstract class BaseGameFragment extends BaseFragment {
         String manager = getFragmentManager().toString();
         String format = FORMAT_WITH_BUNDLE;
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, bundle));
+    }
+
+    /** Provide a default implementation for setting up an experience. */
+    protected void setupExperience() {
+        mExperience = null;
     }
 
 }

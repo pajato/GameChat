@@ -33,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.AccountStateChangeHandled;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.signin.SignInActivity;
@@ -138,6 +140,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             if (DatabaseManager.instance.isRegistered(name)) {
                 DatabaseManager.instance.unregisterHandler(name);
                 AppEventManager.instance.post(new AccountStateChangeEvent(null));
+                AppEventManager.instance.post(new AccountStateChangeHandled(null));
             }
         }
     }
@@ -152,6 +155,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Handle the button click if it is either a sign-in or a sign-out.
         switch (view.getId()) {
             case R.id.signIn:
+            case R.id.expSignIn:
                 // Invoke the sign in activity to kick off a Firebase auth event.
                 Context context = view.getContext();
                 Intent intent = new Intent(context, SignInActivity.class);
@@ -211,6 +215,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 if (user != null) DatabaseManager.instance.createAccount(user, STANDARD);
             }
             AppEventManager.instance.post(new AccountStateChangeEvent(account));
+            AppEventManager.instance.post(new AccountStateChangeHandled(account));
         }
 
         /** ... */

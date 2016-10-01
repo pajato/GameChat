@@ -83,6 +83,9 @@ public enum DatabaseManager {
     /** The path format for a message. */
     private static final String MESSAGE_FORMAT = MESSAGES_FORMAT + "%s/";
 
+    /** The path format for experiences. */
+    private static final String EXPERIENCES_FORMAT = ROOMS_FORMAT + "%s/exps";
+
     /** The default group name (the "me" group) key. */
     private static final String ME_GROUP_KEY = "meGroupKey";
 
@@ -407,6 +410,37 @@ public enum DatabaseManager {
                 Log.e(TAG, String.format(Locale.getDefault(), format, name, type));
             }
         }
+    }
+
+    private void hideAndFixMe() {
+        // TODO: Fix this to handle experiences.
+        // Setup our Firebase database reference and a listener to keep track of the board.
+        //Firebase.setAndroidContext(getContext());
+        //Firebase mRef = new Firebase(FIREBASE_URL);
+        //mRef.addValueEventListener(new ValueEventListener() {
+
+            /** Capture and replicate the board locally. */
+            //@Override public void onDataChange(DataSnapshot dataSnapshot) {
+                //GenericTypeIndicator<HashMap<String, Integer>> t =
+                //        new GenericTypeIndicator<HashMap<String, Integer>>() {};
+                //GenericTypeInicator<HashMap<String, Integer>> mLayoutMap = dataSnapshot.getValue(t);
+                // If there is a board to be had, fill our board out with it and adjust the turn.
+                //if (mLayoutMap != null) {
+                    //recreateExistingBoard();
+                    //checkNotFinished();
+                    //mTurn = (mLayoutMap.get(TURN_INDICATOR) == 1);
+                    //handlePlayerIcons(mTurn);
+                //} else {
+                //    mLayoutMap = new HashMap<>();
+                //}
+            //}
+
+            /** Deal with a canceled game. */
+            //@Override public void onCancelled(FirebaseError firebaseError) {
+            //    Log.e(TAG, "Error reading Firebase board data: " + firebaseError.toString());
+            //}
+        //});
+
     }
 
 }

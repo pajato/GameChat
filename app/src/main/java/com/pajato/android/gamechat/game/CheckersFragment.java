@@ -6,7 +6,6 @@ import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
@@ -21,9 +20,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
-
-import static com.pajato.android.gamechat.game.Game.checkers;
-import static com.pajato.android.gamechat.game.GameManager.CHECKERS_INDEX;
 
 /**
  * A simple Checkers game for use in GameChat.
@@ -54,7 +50,6 @@ public class CheckersFragment extends BaseGameFragment {
     @Override public void onInitialize() {
         super.onInitialize();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
-        mGame = checkers;
         mTurn = true;
         onNewGame();
 
@@ -75,14 +70,6 @@ public class CheckersFragment extends BaseGameFragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.options_menu_new_checkers) {
-            String message = GameManager.instance.getTurn() + "\n" + "New Game";
-            GameManager.instance.sendNewGame(CHECKERS_INDEX, getActivity(), message, checkers);
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * A stand-in method that allows for creating a new game via game manager. Translates the
      * messages sent by the event system and handles the individual clicks based on messages sent.
@@ -99,10 +86,10 @@ public class CheckersFragment extends BaseGameFragment {
         if(buttonTag.equals(getString(R.string.NewGame))) {
             onNewGame();
             int color;
-            if (player.equals(getString(R.string.player_secondary))) {
+            if (player.equals(getString(R.string.player2))) {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
             } else {
-                player = getString(R.string.player_primary);
+                player = getString(R.string.player1);
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
             String newGame = getString(R.string.NewGame);
@@ -455,10 +442,10 @@ public class CheckersFragment extends BaseGameFragment {
         }
 
         // Handle the textviews that serve as our turn indicator.
-        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.player_1_left_indicator);
-        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.player_1_right_indicator);
-        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.player_2_left_indicator);
-        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.player_2_right_indicator);
+        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
+        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.rightIndicator1);
+        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
+        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
 
         if(mTurn) {
             playerOneLeft.setVisibility(View.VISIBLE);

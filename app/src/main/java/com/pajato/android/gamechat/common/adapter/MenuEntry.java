@@ -35,6 +35,9 @@ public class MenuEntry {
     /** A description of the item. */
     public String desc;
 
+    /** The fragment type associated with the menu item, if any. */
+    int fragmentTypeIndex;
+
     /** The menu item icon resource id. */
     int iconResId;
 
@@ -54,6 +57,7 @@ public class MenuEntry {
         type = MENU_ITEM_TYPE;
         iconResId = entry.iconResId;
         titleResId = entry.titleResId;
+        fragmentTypeIndex = entry.fragmentTypeIndex;
         url = entry.url;
         String format = "Menu item with title resource id {%s} and url {%s}.";
         desc = String.format(Locale.US, format, titleResId, url);

@@ -31,7 +31,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -39,6 +39,7 @@ import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -246,6 +247,7 @@ public class MainActivity extends BaseActivity
         DatabaseManager.instance.init(this);
         NavigationManager.instance.init(this, toolbar);
         PaneManager.instance.init(this);
+        GameManager.instance.init();
     }
 
 }

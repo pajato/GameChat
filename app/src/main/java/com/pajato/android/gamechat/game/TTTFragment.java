@@ -17,32 +17,28 @@
 
 package com.pajato.android.gamechat.game;
 
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.GenericTypeIndicator;
-import com.firebase.client.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.game.model.Player;
+import com.pajato.android.gamechat.game.model.TicTacToe;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Scanner;
-
-import static com.pajato.android.gamechat.game.Game.ttt;
-import static com.pajato.android.gamechat.game.GameManager.TTT_INDEX;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -54,124 +50,50 @@ import static com.pajato.android.gamechat.game.GameManager.TTT_INDEX;
  */
 public class TTTFragment extends BaseGameFragment {
 
-    // Private class constants.
-
-    /** The logcat tag. */
-    private static final String TAG = TTTFragment.class.getSimpleName();
-
-    // TODO: move this to database manager in the near future.
-    private static final String FIREBASE_URL = "https://gamechat-1271.firebaseio.com/boards/ticTacToe";
-
-    // TODO: figure out how to deal with this.
-    private static final String TURN_INDICATOR = "turnIndicator";
-
-    // Private instance methods.
-
-    // Player Piece Strings
-    private String mXValue;
-    private String mOValue;
-    private String mSpace;
+    // Private instance variables.
 
     /** A map used to help manage the board... */
     private HashMap<String, Integer> mLayoutMap;
-
-    // TODO: This goes when database manager is handling the Firebase interactions.
-    private Firebase mRef;
 
     // Public instance methods.
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_ttt;}
 
-    /** Provide an event manager placeholder for dealing with click events. */
-    @Subscribe public void onClick(final ClickEvent event) {}
+    /** Placeholder while message handler stays relevant for chess and checkers. */
+    @Override public void messageHandler(final String msg) {}
 
-    /** Initialize TicTacToe by ... */
-    @Override public void onInitialize() {
-        // Initialize Member Variables
-        super.onInitialize();
-        mGame = ttt;
-        mXValue = getString(R.string.xValue);
-        mOValue = getString(R.string.oValue);
-        mSpace = getString(R.string.spaceValue);
-        mTurn = true;
-
-        // The fragment is alive and well. Set up the mode fields (players, wins and turn).
-        TextView user = (TextView) mLayout.findViewById(R.id.userName);
-        String meName = this.getString(R.string.me);
-        if (user != null) user.setText(AccountManager.instance.getFirstName(meName));
-        TextView userWinCount = (TextView) mLayout.findViewById(R.id.userWinCount);
-        if (userWinCount != null) userWinCount.setText("0");
-        TextView opponentWinCount = (TextView) mLayout.findViewById(R.id.opponentWinCount);
-        if (opponentWinCount != null) opponentWinCount.setText("0");
-
-        // TODO: Move this to the database manager.
-        // Setup our Firebase database reference and a listener to keep track of the board.
-        Firebase.setAndroidContext(getContext());
-        mRef = new Firebase(FIREBASE_URL);
-        mRef.addValueEventListener(new ValueEventListener() {
-
-            /** Capture and replicate the board locally. */
-            @Override public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<HashMap<String, Integer>> t =
-                        new GenericTypeIndicator<HashMap<String, Integer>>() {};
-                mLayoutMap = dataSnapshot.getValue(t);
-                // If there is a board to be had, fill our board out with it and adjust the turn.
-                if(mLayoutMap != null) {
-                    recreateExistingBoard();
-                    checkNotFinished();
-                    mTurn = (mLayoutMap.get(TURN_INDICATOR) == 1);
-                    handlePlayerIcons(mTurn);
-                } else {
-                    mLayoutMap = new HashMap<>();
-                }
-            }
-
-            /** Deal with a canceled game. */
-            @Override public void onCancelled(FirebaseError firebaseError) {
-                Log.e(TAG, "Error reading Firebase board data: " + firebaseError.toString());
-            }
-        });
-
+    /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Determine if the payload exists and is a string. Abort if not.  Handle it as a tile click
+        // if it does.
+        Object payload = event.view.getTag();
+        if (!(payload instanceof String)) return;
+        handleTileClick((String) payload);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.ttt_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.ttt_menu, menu);
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.options_menu_new_ttt) {
-            String message = GameManager.instance.getTurn() + "\n" + "New Game";
-            GameManager.instance.sendNewGame(TTT_INDEX, getActivity(), message, ttt);
-        }
-        return super.onOptionsItemSelected(item);
+    /** Handle taking the foreground by updating the UI based on the current expeience. */
+    @Override public void onResume() {
+        // Determine if there is an experience ready to be enjoyed.  If not, set one up.
+        super.onResume();
+        updateExperience();
     }
 
-    /** Handle the given message by either starting a new game or dealing with a tile click. */
-    @Override public void messageHandler(final String msg) {
-        // Parse the message to obtain the button tag, skipping over the player indicator.
-        Scanner input = new Scanner(msg);
-        input.nextLine();
-        String buttonTag = input.nextLine();
-        input.close();
-
-        // Call appropriate methods for each button.
-        if (buttonTag.equals(getString(R.string.NewGame))) {
-            handleNewGame();
-        } else {
-            handleTileClick(buttonTag);
-        }
-    }
+    // Private instance methods.
 
     /**
      * Evaluates the state of the board, determining if there are three in a row of either X or O.
      *
      * @return false if a player has won or if the full number of turns has occurred, true otherwise.
      */
-    private boolean checkNotFinished() {
+    private boolean checkNotFinished(@NonNull final TicTacToe model) {
         // First, we need to check on the buttons' states.
-        int[][] boardValues = evaluateBoard();
+        int[][] boardValues = evaluateBoard(model);
 
         // Evaluate all possible lines of 3.
         int topRow = boardValues[0][0] + boardValues[0][1] + boardValues[0][2];
@@ -195,21 +117,19 @@ public class TTTFragment extends BaseGameFragment {
         if (xWins || oWins || mLayoutMap.size() == 10) {
             // Setup the winner TextView and snackbar messages.
             TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
-            Winner.setText(getText(R.string.spaceValue));
+            Winner.setText("");
             Winner.setVisibility(View.VISIBLE);
 
             // If there is a winner, output winning messages and ensure that the appropriate
             // player's icon has been highlighted.
-            if(xWins) {
+            if (xWins) {
+                updateWinCount(0, R.id.player1WinCount);
                 Winner.setText(R.string.winner_x);
                 handlePlayerIcons(true);
-                GameManager.instance.notify(mLayout, "Player 1 (" + mXValue + ") Wins!",
-                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
             } else if (oWins) {
+                updateWinCount(1, R.id.player2WinCount);
                 Winner.setText(R.string.winner_o);
                 handlePlayerIcons(false);
-                GameManager.instance.notify(mLayout, "Player 2 (" + mOValue + ") Wins!",
-                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
 
             // If no one has won, the turn timer has run out. End the game.
             } else {
@@ -227,7 +147,7 @@ public class TTTFragment extends BaseGameFragment {
      * Evaluates the current state of the individual tiles of the board and stores them as a HashMap
      * in the Firebase Database.
      */
-    private int[][] evaluateBoard() {
+    private int[][] evaluateBoard(@NonNull final TicTacToe model) {
         int[][] boardValues = new int[3][3];
         if (mLayoutMap == null) mLayoutMap = new HashMap<>();
         // Go through all the buttons.
@@ -242,11 +162,11 @@ public class TTTFragment extends BaseGameFragment {
                 // value of 6 without getting 3 Os.
 
                 // If there's an X in this button, store a 1
-                if (tileValue.equals(mXValue)) {
+                if (tileValue.equals(model.getSigilValue(getContext(), 0))) {
                     boardValues[i][j] = 1;
                     if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 1);
                     // If there's an O in this button, store a 2
-                } else if (tileValue.equals(mOValue)) {
+                } else if (tileValue.equals(model.getSigilValue(getContext(), 1))) {
                     boardValues[i][j] = 2;
                     if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 2);
                     // Otherwise, there's a space. -5 was chosen arbitrarily to keep row values unique.
@@ -255,157 +175,223 @@ public class TTTFragment extends BaseGameFragment {
                 }
             }
         }
-        mRef.setValue(mLayoutMap);
+        //mRef.setValue(mLayoutMap);
         return boardValues;
     }
 
-    /**
-     * Returns a string enumerating the player, depending on the current turn.
-     *
-     * @return R.string.xValue or R.string.oValue, depending on whose turn it is.
-     */
-    private String getTurn(final boolean turnIndicator) {
-        if (turnIndicator) {
-            return mXValue;
+    /** Return the TicTacToe model class, null if it does not exist. */
+    private TicTacToe getModel() {
+        if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
+        return (TicTacToe) mExperience;
+    }
+
+    /** Return an empty, default TicTacToe experience. */
+    private Experience getDefaultExperience() {
+        TicTacToe model = new TicTacToe();
+        model.players = getDefaultPlayers();
+        String name1 = model.players.get(0).name;
+        String name2 = model.players.get(1).name;
+        long tstamp = new Date().getTime();
+        model.name = String.format(Locale.US, "%s, vs %s on %s", name1, name2, tstamp);
+        model.createTime = tstamp;
+        model.turn = true;
+        model.type = ExpType.ttt.ordinal();
+
+        return model;
+    }
+
+    /** Return a list of default TicTacToe players. */
+    private List<Player> getDefaultPlayers() {
+        List<Player> result = new ArrayList<>();
+        result.add(new Player("Player1", R.string.xValue, 0));
+        result.add(new Player("Player2", R.string.oValue, 0));
+        return result;
+    }
+
+    /** Return the experience from the database. */
+    private Experience getExperienceFromDatabase() {
+        // TODO: replace teh placeholder with real code.
+        return getDefaultExperience();
+    }
+
+    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
+    private void handlePlayerIcons(final boolean turn) {
+        // Alternate the decorations on each player sigil/symbol.
+        if (turn) {
+            // Make player1's decorations the more prominent.
+            handlePlayerIcons(R.id.player1Sigil, R.id.leftIndicator1, R.id.rightIndicator1,
+                              R.id.player2Sigil, R.id.leftIndicator2, R.id.rightIndicator2);
         } else {
-            return mOValue;
+            // Make player2's decorations the more prominent.
+            handlePlayerIcons(R.id.player2Sigil, R.id.leftIndicator2, R.id.rightIndicator2,
+                              R.id.player1Sigil, R.id.leftIndicator1, R.id.rightIndicator1);
         }
     }
 
-    /**
-     * A method that handles the management of a the turn indicators. If it is a player's turn,
-     * their icon is increased in size, changed to the accented color, and emphasized with auxiliary
-     * text views. The other player's icon decreases in size, is turned a dark color, and is no
-     * longer emphasized.
-     *
-     * @param turn differentiates between the turn. true = Player 1's turn, false = Player 2's turn.
-     */
-    private void handlePlayerIcons(final boolean turn) {
+    /** Manage a particular player's sigil decorations. */
+    private void handlePlayerIcons(final int large, final int largeLeft, final int largeRight,
+                                   final int small, final int smallLeft, final int smallRight) {
         final float LARGE = 60.0f;
         final float SMALL = 45.0f;
 
         // Collect all the pertinent textViews.
-        TextView p1 = (TextView) getActivity().findViewById(R.id.player_1_icon);
-        TextView p2 = (TextView) getActivity().findViewById(R.id.player_2_icon);
+        TextView tvLarge = (TextView) getActivity().findViewById(large);
+        TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
+        TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
+        TextView tvSmall = (TextView) getActivity().findViewById(small);
+        TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
+        TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
 
-        TextView p1left = (TextView) getActivity().findViewById(R.id.player_1_left_indicator);
-        TextView p1right = (TextView) getActivity().findViewById(R.id.player_1_right_indicator);
+        // Deal with the tvLarger symbol's decorations.
+        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
+        tvLarge.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+        tvLargeLeft.setVisibility(View.VISIBLE);
+        tvLargeRight.setVisibility(View.VISIBLE);
 
-        TextView p2left = (TextView) getActivity().findViewById(R.id.player_2_left_indicator);
-        TextView p2right = (TextView) getActivity().findViewById(R.id.player_2_right_indicator);
+        // Deal with the tvSmall symbol's decorations.
+        tvSmall.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
+        tvSmall.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+        tvSmallLeft.setVisibility(View.INVISIBLE);
+        tvSmallRight.setVisibility(View.INVISIBLE);
+    }
 
-        if (turn) {
-            // If it's player 1's turn, make their icon bigger and accented...
-            p1.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
-            p1.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-            p1left.setVisibility(View.VISIBLE);
-            p1right.setVisibility(View.VISIBLE);
-            // and de-emphasize player 2's icon.
-            p2.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
-            p2.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-            p2left.setVisibility(View.INVISIBLE);
-            p2right.setVisibility(View.INVISIBLE);
-        } else {
-            // If it's player 2's turn, make their icon bigger and accented...
-            p1.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
-            p1.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-            p1left.setVisibility(View.INVISIBLE);
-            p1right.setVisibility(View.INVISIBLE);
-            // and de-emphasize player 1's icon.
-            p2.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
-            p2.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-            p2left.setVisibility(View.VISIBLE);
-            p2right.setVisibility(View.VISIBLE);
+    /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
+    private void handleTileClick(final String buttonTag) {
+        // Ensure that a model object exists, the given button exists, is empty and the game is
+        // still in progress.  Abort otherwise.
+        Button button = (Button) mLayout.findViewWithTag(buttonTag);
+        boolean invalidButton = button == null || button.getText().length() > 0;
+        TicTacToe model = getModel();
+        if (model == null || invalidButton || !(checkNotFinished(model))) return;
+
+        // The move is valid. Update the board and toggle the turn.
+        button.setText(model.getSigilValue(getContext()));
+        handlePlayerIcons(model.toggleTurn());
+        checkNotFinished(model);
+    }
+
+    /** Handle the recreation of the board based on the values stored in the BoardMap. */
+    private void recreateExistingBoard(@NonNull final TicTacToe model) {
+        // If the board map is size 1, we know that there is only the turn stored in it, and send a
+        // new game out.
+        if(mLayoutMap.size() == 1) {
+            GameManager.instance.startNextFragment(getActivity(), mFragmentType);
+            return;
         }
+
+        // Comb through the board and replace the remaining pieces.
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                // If our keys are present, then put their corresponding piece onto the board.
+                String currKey = i + "-" + j;
+                Button currButton = (Button) mLayout.findViewWithTag("button" + i + j);
+                if(mLayoutMap.containsKey(currKey)) {
+                    if(mLayoutMap.get(currKey) == 1) {
+                        currButton.setText(model.getSigilValue(getContext(), 0));
+                    } else {
+                        currButton.setText(model.getSigilValue(getContext(), 1));
+                    }
+                } else {
+                    currButton.setText("");
+                }
+            }
+        }
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerName(final int resId, final int index, final TicTacToe model) {
+        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
+        // does.
+        TextView name = (TextView) mLayout.findViewById(resId);
+        if (name == null) return;
+        name.setText(model.players.get(index).name);
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerWinCount(final int resId, final int index, final TicTacToe model) {
+        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
+        // if it does.
+        TextView winCount = (TextView) mLayout.findViewById(resId);
+        if (winCount == null) return;
+        winCount.setText(String.valueOf(model.players.get(index).winCount));
+    }
+
+    /** Set the sigil (X or O) for a given player. */
+    private void setPlayerSigil(final int resId, final int index, final TicTacToe model) {
+        // Ensure that the sigil text view exists.  Abort if not, set the value from the data
+        // model if it does.
+        TextView sigil = (TextView) mLayout.findViewById(resId);
+        if (sigil == null) return;
+        sigil.setText(getString(model.players.get(index).sigilId));
     }
 
     /**
      * Empties the instructions, board tiles, and outputs a new game message.
      */
-    private void handleNewGame() {
-        // Ensure that the fragment is in a healthy state.  Abort if not.
-        if (mLayout == null) return;
-
+    private void setupGameBoard(@NonNull final TicTacToe model) {
         // Reset the board map and update the Firebase database's copy.
-        if(mLayoutMap != null) {
-            mLayoutMap.clear();
-        } else {
-            mLayoutMap = new HashMap<>();
-        }
-        mLayoutMap.put(TURN_INDICATOR, (mTurn ? 1 : 2));
-        mRef.setValue(mLayoutMap);
+        if (mLayoutMap == null) mLayoutMap = new HashMap<>();
+        //mRef.setValue(mLayoutMap);
 
         // Hide our winning messages and ensure the turn display is working properly.
         TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
         Winner.setVisibility(View.INVISIBLE);
-        handlePlayerIcons(mTurn);
+        handlePlayerIcons(model.turn);
 
         // Set values for each tile to empty.
-        ((Button) mLayout.findViewWithTag("button00")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button01")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button02")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button10")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button11")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button12")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button20")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button21")).setText(mSpace);
-        ((Button) mLayout.findViewWithTag("button22")).setText(mSpace);
+        ((Button) mLayout.findViewWithTag("button00")).setText("");
+        ((Button) mLayout.findViewWithTag("button01")).setText("");
+        ((Button) mLayout.findViewWithTag("button02")).setText("");
+        ((Button) mLayout.findViewWithTag("button10")).setText("");
+        ((Button) mLayout.findViewWithTag("button11")).setText("");
+        ((Button) mLayout.findViewWithTag("button12")).setText("");
+        ((Button) mLayout.findViewWithTag("button20")).setText("");
+        ((Button) mLayout.findViewWithTag("button21")).setText("");
+        ((Button) mLayout.findViewWithTag("button22")).setText("");
 
         // Output New Game Messages
-        String newTurn = "New Game! Player " + (mTurn
-                ? "1 (" + mXValue + ")"
-                : "2 (" + mOValue + ")") + "'s Turn";
+        String newTurn = "New Game! Player " + (model.turn
+                ? "1 (" + model.getSigilValue(getContext(), 0) + ")"
+                : "2 (" + model.getSigilValue(getContext(), 1) + ")") + "'s Turn";
         GameManager.instance.notify(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
 
-        checkNotFinished();
+        checkNotFinished(model);
     }
 
-    /**
-     * Assigns a value to a button without text, either X or O,
-     * depending on the player whose turn it is.
-     *
-     * @param buttonTag the tag of the button clicked.
-     */
-    private void handleTileClick(final String buttonTag) {
-        Button b = (Button) mLayout.findViewWithTag(buttonTag);
-        // Only updates the tile if the current value is empty and the game has not finished yet.
-        if (b.getText().toString().equals(getString(R.string.spaceValue)) && checkNotFinished()) {
-            b.setText(getTurn(mTurn));
-            mLayoutMap.put(TURN_INDICATOR, mTurn ? 2 : 1);
-            checkNotFinished();
-        }
+    /** Setup the TicTacToe experience based on the signin state. */
+    @Override public void setupExperience() {
+        boolean signedIn = AccountManager.instance.getCurrentAccount() == null;
+        mExperience = signedIn ? getExperienceFromDatabase() : getDefaultExperience();
     }
 
-    /**
-     * Handles the recreation of the board based on the values stored in the BoardMap.
-     */
-    private void recreateExistingBoard() {
-        // If the board map is size 1, we know that there is only the turn stored in it, and send a
-        // new game out.
-        if(mLayoutMap.size() == 1) {
-            String message = getTurn(mTurn) + "\n" + getString(R.string.NewGame);
-            GameManager.instance.sendNewGame(TTT_INDEX, getActivity(), message, ttt);
-        } else {
-            // Comb through the board and replace the remaining pieces.
-            for(int i = 0; i < 3; i++) {
-                for(int j = 0; j < 3; j++) {
-                    // If our keys are present, then put their corresponding piece onto the board.
-                    String currKey = i + "-" + j;
-                    Button currButton = (Button) mLayout.findViewWithTag("button" + i + j);
-                    if(mLayoutMap.containsKey(currKey)) {
-                        if(mLayoutMap.get(currKey) == 1) {
-                            currButton.setText(mXValue);
-                        } else {
-                            currButton.setText(mOValue);
-                        }
-                    // Otherwise, empty the tile.
-                    } else {
-                        currButton.setText(mSpace);
-                    }
-                }
-            }
-        }
+    /** Update the UI with either a default or a persisted experience. */
+    private void updateExperience() {
+        // Ensure that a valid experience exists.  Abort if not.
+        //if (mExperience == null) setupTicTacToeExperience();
+        if (mExperience == null || !(mExperience instanceof TicTacToe)) return;
+
+        // A valid experience is available. Use the data model to populate the UI.
+        TicTacToe model = (TicTacToe) mExperience;
+        setPlayerName(R.id.player1Name, 0, model);
+        setPlayerName(R.id.player2Name, 1, model);
+        setPlayerWinCount(R.id.player1WinCount, 0, model);
+        setPlayerWinCount(R.id.player2WinCount, 1, model);
+        setPlayerSigil(R.id.player1Sigil, 0, model);
+        setPlayerSigil(R.id.player2Sigil, 1, model);
+
+        setupGameBoard(model);
+    }
+
+    /** Update the win count model and UI. */
+    private void updateWinCount(final int index, final int resId) {
+        TicTacToe model = getModel();
+        if (model == null) return;
+
+        // Update the data model and the UI.
+        getModel().players.get(index).winCount++;
+        TextView view = (TextView) mLayout.findViewById(resId);
+        view.setText(String.valueOf(getModel().players.get(index).winCount));
     }
 
 }

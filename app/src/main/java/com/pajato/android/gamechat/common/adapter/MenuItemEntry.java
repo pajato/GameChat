@@ -26,6 +26,9 @@ public class MenuItemEntry {
 
     // Public instance variables.
 
+    /** The fragment type associated with the menu item, if any. */
+    int fragmentTypeIndex;
+
     /** The menu item icon resource id. */
     int iconResId;
 
@@ -38,15 +41,17 @@ public class MenuItemEntry {
     // Public constructors.
 
     /** Build an instance for the given title and icon. */
-    public MenuItemEntry(final int titleResId, final String url) {
+    public MenuItemEntry(final int titleResId, final String url, int fragmentTypeIndex) {
         this.titleResId = titleResId;
         this.url = url;
+        this.fragmentTypeIndex = fragmentTypeIndex;
     }
 
     /** Build an instance for the given title and icon resource id. */
-    public MenuItemEntry(final int titleResId, final int iconResId) {
+    public MenuItemEntry(final int titleResId, final int iconResId, int fragmentTypeIndex) {
         this.titleResId = titleResId;
         this.iconResId = iconResId;
+        this.fragmentTypeIndex = fragmentTypeIndex;
     }
 
 }

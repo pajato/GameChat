@@ -209,23 +209,23 @@ public class CheckersTest extends BaseTest {
     private void checkTurnDisplay(final boolean turn) {
         if(turn) {
             // Ensure the player one indicators are visible and the player two indicators are not.
-            onView(withId(R.id.player_1_left_indicator))
+            onView(withId(R.id.leftIndicator1))
                     .check(matches(isDisplayed()));
-            onView(withId(R.id.player_1_right_indicator))
+            onView(withId(R.id.rightIndicator2))
                     .check(matches(isDisplayed()));
-            onView(withId(R.id.player_2_left_indicator))
+            onView(withId(R.id.leftIndicator2))
                     .check(matches(not(isDisplayed())));
-            onView(withId(R.id.player_2_right_indicator))
+            onView(withId(R.id.rightIndicator2))
                     .check(matches(not(isDisplayed())));
         } else {
             // Ensure the player two indicators are visible and the player one indicators are not.
-            onView(withId(R.id.player_2_left_indicator))
+            onView(withId(R.id.leftIndicator2))
                     .check(matches(isDisplayed()));
-            onView(withId(R.id.player_2_right_indicator))
+            onView(withId(R.id.rightIndicator2))
                     .check(matches(isDisplayed()));
-            onView(withId(R.id.player_1_left_indicator))
+            onView(withId(R.id.leftIndicator1))
                     .check(matches(not(isDisplayed())));
-            onView(withId(R.id.player_1_right_indicator))
+            onView(withId(R.id.rightIndicator2))
                     .check(matches(not(isDisplayed())));
         }
     }

@@ -18,7 +18,10 @@
 package com.pajato.android.gamechat.chat;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.ProgressManager;
+
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Provide a fragment to deal with no account or a signed out account.
@@ -30,6 +33,9 @@ import com.pajato.android.gamechat.main.ProgressManager;
 public class ShowNoAccountFragment extends BaseChatFragment {
 
     // Public instance methods.
+
+    /** A placeholder event handler to pacify the event manager. */
+    @Subscribe public void onClick(final ClickEvent event) {}
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_no_account;}

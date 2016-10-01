@@ -34,14 +34,14 @@
 
         android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@id/board"
-        app:layout_constraintLeft_toRightOf="@+id/player_1_left_indicator"
+        app:layout_constraintLeft_toRightOf="@+id/leftIndicator1"
         app:layout_constraintTop_toTopOf="@id/checkers_panel"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_right"
-        android:id="@+id/player_1_left_indicator"
+        android:id="@+id/leftIndicator1"
         android:textColor="@color/colorPrimary"
         android:textSize="36sp"
         android:visibility="invisible"
@@ -57,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_left"
-        android:id="@+id/player_1_right_indicator"
+        android:id="@+id/rightIndicator1"
         android:textColor="@color/colorPrimary"
         android:textSize="36sp"
         android:visibility="invisible"
@@ -77,14 +77,14 @@
 
         android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@id/board"
-        app:layout_constraintRight_toLeftOf="@+id/player_2_right_indicator"
+        app:layout_constraintRight_toLeftOf="@+id/rightIndicator2"
         app:layout_constraintTop_toTopOf="@id/checkers_panel" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_right"
-        android:id="@+id/player_2_left_indicator"
+        android:id="@+id/leftIndicator2"
         android:textColor="@color/colorAccent"
         android:textSize="36sp"
         android:visibility="invisible"
@@ -99,7 +99,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_left"
-        android:id="@+id/player_2_right_indicator"
+        android:id="@+id/rightIndicator2"
         android:textColor="@color/colorAccent"
         android:textSize="36sp"
         android:visibility="invisible"
