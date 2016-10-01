@@ -258,24 +258,24 @@ public class ChessTest extends BaseTest {
     /** Ensure the turn is preserved on a new game. */
     @Test public void testNewGame() {
         // Ensure the turn is blue's.
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
 
         // Change turn and ensure the turn is purple's.
         tryToMovePiece(48, 40, true, ChessPiece.getDrawableFor(ChessPiece.PAWN));
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
 
         openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
@@ -284,13 +284,13 @@ public class ChessTest extends BaseTest {
                 .perform(click());
 
         // Ensure the turn is still purple's.
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
 
         // Check that the piece we moved before is not there.

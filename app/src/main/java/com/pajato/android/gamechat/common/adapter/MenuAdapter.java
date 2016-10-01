@@ -32,7 +32,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +84,7 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
 
     /** Post any item clicks to the app. */
     @Override public void onClick(final View view) {
-        view.setId((Integer) view.getTag());
-        AppEventManager.instance.post(new ClickEvent(view));
+        AppEventManager.instance.post(new TagClickEvent(view));
     }
 
     /** Create the recycler view holder using the given adapter adapter item type. */
@@ -153,9 +152,9 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
         Context context = holder.title.getContext();
         String text = context.getString(entry.titleResId);
         holder.title.setText(Html.fromHtml(text));
-        holder.itemView.setTag(entry.iconResId);
-        holder.title.setTag(entry.iconResId);
-        holder.icon.setTag(entry.iconResId);
+        holder.itemView.setTag(entry.fragmentTypeIndex);
+        holder.title.setTag(entry.fragmentTypeIndex);
+        holder.icon.setTag(entry.fragmentTypeIndex);
 
         // Set the icon on the holder.
         if (loadUrl(holder, entry)) return;

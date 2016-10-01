@@ -25,7 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.pajato.android.gamechat.account.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;

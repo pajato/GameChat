@@ -19,28 +19,18 @@ package com.pajato.android.gamechat.game;
 
 import com.pajato.android.gamechat.R;
 
-import static com.pajato.android.gamechat.game.GameManager.CHECKERS_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.CHESS_INDEX;
-import static com.pajato.android.gamechat.game.GameManager.TTT_INDEX;
-
 /**
  * The games enum values associate games, modes, fragments and resources in a very flexible, concise
  * fashion.
  *
  * @author Paul Michael Reilly
  */
-enum Game {
-    checkers (CHECKERS_INDEX, R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player_primary,
-              R.string.player_secondary, R.string.FutureCheckers),
-    chess (CHESS_INDEX, R.mipmap.ic_chess, R.string.PlayChess, R.string.player_primary,
-           R.string.player_secondary, R.string.FutureChess),
-    ttt (TTT_INDEX, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue,
-         R.string.oValue, R.string.FutureTTT);
+enum ExpType {
+    checkers (R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
+    chess (R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
+    ttt (R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
 
     // Instance variables.
-
-    /** The local fragment index. */
-    int fragmentIndex;
 
     /** The primary player index. */
     int primaryIndex;
@@ -54,19 +44,13 @@ enum Game {
     /** The game title resource id. */
     int titleResId;
 
-    /** The game future feature prefix resource id. */
-    int futureResId;
-
     // Constructor.
 
     /** Build an instance given the online, local and computer opponent fragment indexes. */
-    Game(final int index, final int iconId, final int titleId, final int primary,
-         final int secondary, final int futureId) {
-        fragmentIndex = index;
+    ExpType(final int iconId, final int titleId, final int primary, final int secondary) {
         iconResId = iconId;
         titleResId = titleId;
         primaryIndex = primary;
         secondaryIndex = secondary;
-        futureResId = futureId;
     }
 }

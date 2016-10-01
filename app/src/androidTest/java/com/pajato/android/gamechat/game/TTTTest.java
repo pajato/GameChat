@@ -86,13 +86,13 @@ public class TTTTest extends BaseTest {
                 .perform(click())
                 .check(matches(withText(xValue)));
         // Confirm that the turn does not change from O's turn.
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
         // Then confirm that the next item played is the other player's icon.
         onView(withTagValue(is((Object) "button01")))
@@ -195,13 +195,13 @@ public class TTTTest extends BaseTest {
                 .perform(click())
                 .check(matches(withText(xValue)));
         // Check that the turn has switches to player 2.
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
 
         // Initiate a new game via the overflow options menu.
@@ -216,13 +216,13 @@ public class TTTTest extends BaseTest {
                 .perform(click())
                 .check(matches(withText(oValue)));
         // Check that the turn goes back to X.
-        onView(withId(R.id.player_1_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_1_left_indicator))
+        onView(withId(R.id.leftIndicator1))
                 .check(matches(isDisplayed()));
-        onView(withId(R.id.player_2_left_indicator))
+        onView(withId(R.id.leftIndicator2))
                 .check(matches(not(isDisplayed())));
-        onView(withId(R.id.player_2_right_indicator))
+        onView(withId(R.id.rightIndicator2))
                 .check(matches(not(isDisplayed())));
     }
 

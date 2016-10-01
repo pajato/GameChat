@@ -1,18 +1,17 @@
 <resources>
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessImageDesc">Chess image.</string>
-    <string name="FutureCheckers">Checkers online and against the computer </string>
-    <string name="FutureChess">Chess online and against the computer </string>
     <string name="FutureSelectRooms">Select rooms</string>
-    <string name="FutureTTT">TicTacToe vs the computer </string>
     <string name="Home">Go to My Games</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="NewGame">New Game</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
-    <string name="PlayAgain">Play Again!</string>
+    <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
+    <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
+    <string name="SignIn">Sign In</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>
     <string name="chess_promotion_bishop">Bishop</string>
     <string name="chess_promotion_knight">Knight</string>
@@ -23,8 +22,8 @@
     <string name="new_game_chess">New Game (Chess)</string>
     <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="oValue">O</string>
-    <string name="player_primary">Player 1</string>
-    <string name="player_secondary">Player 2</string>
+    <string name="player1">Player 1</string>
+    <string name="player2">Player 2</string>
     <string name="winner_o">O Wins!</string>
     <string name="winner_tie">Tie!</string>
     <string name="winner_x">X Wins!</string>
