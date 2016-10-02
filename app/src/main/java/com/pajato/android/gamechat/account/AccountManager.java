@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AccountStateChangeHandled;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -41,6 +42,7 @@ import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -93,22 +95,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return mCurrentAccountKey;
     }
 
-    /** Return the first part (token) of the current display name, if available, null otherwise. */
-    public String getFirstName(final String meName) {
-        // Ensure that a User is signed in.  Return null if not.
-        Account account = getCurrentAccount();
-        if (account == null) return null;
-
-        // There is a User signed in. Ensure that the display name is non null.  Return the default
-        // if it is null.
-        String name = account.displayName;
-        if (name == null) return meName;
-
-        // Return the first part of the non-null display name.
-        String[] names = name.split(" ");
-        return names[0];
-    }
-
     /** Return a joined room entry, well formed (space separated) group key and room key pair. */
     public String getJoinedRoomEntry(final String groupKey, final String roomKey) {
         return String.format(Locale.US, "%s %s", groupKey, roomKey);
@@ -130,15 +116,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // A User has signed in. Set up a database listener for the associated account.  That
             // listener will post an account change event with the account information to the app.
             String path = String.format("/accounts/%s", user.getUid());
-            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
             if (handler == null) handler = new AccountChangeHandler(name, path);
-            DatabaseManager.instance.registerHandler(handler);
+            DatabaseRegistrar.instance.registerHandler(handler);
         } else {
             // The User is signed out.  Clear the current account key and notify the app of the sign
             // out event.
             mCurrentAccountKey = null;
-            if (DatabaseManager.instance.isRegistered(name)) {
-                DatabaseManager.instance.unregisterHandler(name);
+            if (DatabaseRegistrar.instance.isRegistered(name)) {
+                DatabaseRegistrar.instance.unregisterHandler(name);
                 AppEventManager.instance.post(new AccountStateChangeEvent(null));
                 AppEventManager.instance.post(new AccountStateChangeHandled(null));
             }
@@ -212,7 +198,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             } else {
                 // The account does not exist.  Create it now, ensuring there really is a User.
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user != null) DatabaseManager.instance.createAccount(user, STANDARD);
+                if (user != null) DatabaseManager.instance.createAccount(getAccount(user));
             }
             AppEventManager.instance.post(new AccountStateChangeEvent(account));
             AppEventManager.instance.post(new AccountStateChangeHandled(account));
@@ -225,6 +211,21 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
 
         // Private instance methods.
+
+        /** Return a partially populated account. The database manager will finish the job. */
+        private Account getAccount(final FirebaseUser user) {
+            long tstamp = new Date().getTime();
+            Account account = new Account();
+            account.id = user.getUid();
+            account.email = user.getEmail();
+            account.displayName = user.getDisplayName();
+            account.url = getPhotoUrl(user);
+            account.providerId = user.getProviderId();
+            account.type = STANDARD;
+            account.createTime = tstamp;
+
+            return account;
+        }
     }
 
 }

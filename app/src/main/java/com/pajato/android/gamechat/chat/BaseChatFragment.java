@@ -36,7 +36,7 @@ import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.BaseFragment;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
@@ -252,7 +252,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         groupList.add("-KS3fObxrr04gpLoCIno");      // Pajato Support Group
         for (String groupKey : groupList) {
             // Extend an invitation to the group and est that this group has been joined.
-            DatabaseManager.instance.extendGroupInvite(account, groupKey);
+            InvitationManager.instance.extendGroupInvite(account, groupKey);
             if (!account.groupIdList.contains(groupKey)) {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
@@ -260,7 +260,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 if (group != null)
                     // The group is available.  Accept any open invitations ... and there should be
                     // at least one!
-                    DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);
+                    InvitationManager.instance.acceptGroupInvite(account, group, groupKey);
             }
         }
     }

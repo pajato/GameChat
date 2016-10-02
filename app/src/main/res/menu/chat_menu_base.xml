@@ -22,7 +22,7 @@ more. -->
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:title="@string/spaceValue"
+        android:title=""
         android:icon="@drawable/ic_search_white"
         android:id="@+id/search"
         android:orderInCategory="20"
