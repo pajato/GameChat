@@ -25,7 +25,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
@@ -38,6 +37,8 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
@@ -133,9 +134,9 @@ public enum ChatListManager {
         // registered.)
         String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
         String name = "profileChangeHandler" + groupKey;
-        DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
         if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
-        DatabaseManager.instance.registerHandler(handler);
+        DatabaseRegistrar.instance.registerHandler(handler);
 
         return null;
     }
@@ -180,9 +181,9 @@ public enum ChatListManager {
             // There is an active account.  Register a joined room list change handler.
             String path = DatabaseManager.instance.getJoinedRoomListPath(event.account);
             String name = "joinedRoomListChangeHandler";
-            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
             if (handler == null) handler = new JoinedRoomListChangeHandler(name, path);
-            DatabaseManager.instance.registerHandler(handler);
+            DatabaseRegistrar.instance.registerHandler(handler);
         } else {
             // Deal with either a logout or no valid user by clearing the various state.
             mDateHeaderTypeToGroupListMap.clear();
@@ -209,16 +210,16 @@ public enum ChatListManager {
             String roomKey = split[1];
             String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
             String name = "profileChangeHandler" + groupKey;
-            DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
             if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
-            DatabaseManager.instance.registerHandler(handler);
+            DatabaseRegistrar.instance.registerHandler(handler);
 
             // Kick off a value event listener for the room profile.  Tag each listener with the
             // room key to ensure only one listener per room is ever active at any one time.
             path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
             name = "profileChangeHandler" + roomKey;
             handler = new ProfileRoomChangeHandler(name, path, roomKey);
-            DatabaseManager.instance.registerHandler(handler);
+            DatabaseRegistrar.instance.registerHandler(handler);
         }
     }
 
@@ -249,9 +250,9 @@ public enum ChatListManager {
     public void setMessageWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
         String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
-        DatabaseEventHandler handler = DatabaseManager.instance.getHandler(name);
+        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
         if (handler == null) handler = new MessagesChangeHandler(name, groupKey, roomKey);
-        DatabaseManager.instance.registerHandler(handler);
+        DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     // Private instance methods.

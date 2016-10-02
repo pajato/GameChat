@@ -31,6 +31,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
@@ -222,7 +223,7 @@ public class MainActivity extends BaseActivity
 
         // If and how this should be ordered is ill understood. :-()
         AccountManager.instance.unregister();
-        DatabaseManager.instance.unregisterAll();
+        DatabaseRegistrar.instance.unregisterAll();
     }
 
     /** Respect the lifecycle and ensure that the event bus spins up. */

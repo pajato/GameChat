@@ -26,10 +26,10 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
@@ -110,7 +110,7 @@ public class ChatFragment extends BaseChatFragment {
         Group group = event.group;
         if (groupKey != null && group != null)
             // The group and key are available.  Accept any open invitations.
-            DatabaseManager.instance.acceptGroupInvite(account, group, groupKey);
+            InvitationManager.instance.acceptGroupInvite(account, group, groupKey);
     }
 
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */

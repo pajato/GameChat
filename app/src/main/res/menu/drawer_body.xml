@@ -66,16 +66,16 @@
         <group
         android:orderInCategory="100">
         <item
-            android:title="@string/spaceValue">
+            android:title="">
         </item>
         <item
-            android:title="@string/spaceValue">
+            android:title="">
         </item>
         <item
-            android:title="@string/spaceValue">
+            android:title="">
         </item>
         <item
-            android:title="@string/spaceValue">
+            android:title="">
         </item>
     </group>
 </menu>

@@ -20,7 +20,6 @@
     <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
-    <string name="spaceValue" />
     <string name="switch_account">\u25bc Switch account</string>
     <string name="me">me</string>
     <string name="anonymous">Anonymous</string>
