@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.database;
+package com.pajato.android.gamechat.database.handler;
 
 /**
  * Provide a base class to encapsulate a name and Firebase path.  Subclasses will implement a
@@ -31,7 +31,7 @@ public abstract class  DatabaseEventHandler {
     public String name;
 
     /** The relevant Firebase path. */
-    String path;
+    public String path;
 
     /** The push key. */
     public String key;

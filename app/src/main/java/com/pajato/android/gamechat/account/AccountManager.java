@@ -31,7 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.database.DatabaseEventHandler;
+import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
