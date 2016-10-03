@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
+import com.pajato.android.gamechat.database.handler.ExpProfileChangeHandler;
 import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
 import com.pajato.android.gamechat.database.handler.MessagesChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
@@ -42,6 +43,7 @@ import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
+import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -55,6 +57,7 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.room;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -71,6 +74,11 @@ public enum DatabaseListManager {
     }
 
     // Public class constants.
+
+    // Public instance variables.
+
+    /** The map associating experience profile keys and values. */
+    public Map<String, ExpProfile> expProfileMap = new HashMap<>();
 
     // Private instance variables.
 
@@ -134,22 +142,6 @@ public enum DatabaseListManager {
         return null;
     }
 
-    /** Return a set of potential group members. */
-    private List<ChatListItem> getMemberListData(final ChatListItem item) {
-        // Determine if there are any frequent members to add.  If so, add them and then add the
-        // members from the User's device contacts.
-        List<ChatListItem> result = new ArrayList<>();
-        if (item != null) {
-            // TODO: extract the list of frequent members from the item, somehow and add it to the
-            // result.
-            result.add(new ChatListItem(new ContactHeaderItem(frequent)));
-        }
-        result.add(new ChatListItem(new ContactHeaderItem(contacts)));
-        result.addAll(ContactManager.instance.getDeviceContactList());
-
-        return result;
-    }
-
     /** Get a map of messages by room in a given group. */
     public Map<String, List<Message>> getGroupMessages(final String groupKey) {
         return mGroupMessageMap.get(groupKey);
@@ -196,23 +188,18 @@ public enum DatabaseListManager {
     @Subscribe public void onJoinedRoomsChange(@NonNull final JoinedRoomListChangeEvent event) {
         // Set up group and room profile value event listeners for the joined rooms.
         for (String entry : event.joinedRoomList) {
-            // Kick off a value event listener for the group profile.  Tag each listener with the
-            // room key to ensure only one listener per group is ever active at any one time.
+            // Deal with an invalid entry by continuing with the next entry.
             String[] split = entry.split(" ");
+            if (split.length != 2) continue;
+
+            // Setup listeners on the group and room profiles, the message, and the experience
+            // profile changes, in that order.
             String groupKey = split[0];
             String roomKey = split[1];
-            String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
-            String name = "profileChangeHandler" + groupKey;
-            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-            if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
-            DatabaseRegistrar.instance.registerHandler(handler);
-
-            // Kick off a value event listener for the room profile.  Tag each listener with the
-            // room key to ensure only one listener per room is ever active at any one time.
-            path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
-            name = "profileChangeHandler" + roomKey;
-            handler = new ProfileRoomChangeHandler(name, path, roomKey);
-            DatabaseRegistrar.instance.registerHandler(handler);
+            setGroupProfileWatcher(groupKey);
+            setRoomProfileWatcher(groupKey, roomKey);
+            setMessageWatcher(groupKey, roomKey);
+            setExpProfileWatcher(groupKey, roomKey);
         }
     }
 
@@ -237,15 +224,6 @@ public enum DatabaseListManager {
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
         mRoomProfileMap.put(event.key, event.room);
-    }
-
-    /** Setup a Firebase child event listener for the messages in the given joined room. */
-    public void setMessageWatcher(final String groupKey, final String roomKey) {
-        // There is an active account.  Register it.
-        String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
-        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new MessagesChangeHandler(name, groupKey, roomKey);
-        DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     // Private instance methods.
@@ -306,6 +284,22 @@ public enum DatabaseListManager {
         return result;
     }
 
+    /** Return a set of potential group members. */
+    private List<ChatListItem> getMemberListData(final ChatListItem item) {
+        // Determine if there are any frequent members to add.  If so, add them and then add the
+        // members from the User's device contacts.
+        List<ChatListItem> result = new ArrayList<>();
+        if (item != null) {
+            // TODO: extract the list of frequent members from the item, somehow and add it to the
+            // result.
+            result.add(new ChatListItem(new ContactHeaderItem(frequent)));
+        }
+        result.add(new ChatListItem(new ContactHeaderItem(contacts)));
+        result.addAll(ContactManager.instance.getDeviceContactList());
+
+        return result;
+    }
+
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
     private List<ChatListItem> getMessageListData(final ChatListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
@@ -352,6 +346,44 @@ public enum DatabaseListManager {
         }
 
         return result;
+    }
+
+    /** Setup a listener for experience changes in the given room. */
+    private void setExpProfileWatcher(final String groupKey, final String roomKey) {
+        // Obtain a room and set watchers on all the experience profiles in that room.
+        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        String name = String.format(Locale.US, "expProfilelChangeHandler{%s}", room);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ExpProfileChangeHandler(name, groupKey, roomKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    /** Setup a database listener for the group profile. */
+    private void setGroupProfileWatcher(final String groupKey) {
+        // Kick off a value event listener for the group profile..
+        String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
+        String name = "profileChangeHandler" + groupKey;
+        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
+        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    /** Setup a Firebase child event listener for the messages in the given joined room. */
+    private void setMessageWatcher(final String groupKey, final String roomKey) {
+        // There is an active account.  Register it.
+        String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
+        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
+        if (handler == null) handler = new MessagesChangeHandler(name, groupKey, roomKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    /** Setup a database listener for the room profile. */
+    private void setRoomProfileWatcher(final String groupKey, final String roomKey) {
+        // Kick off a value event listener for the room profile.
+        String path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
+        String name = "profileChangeHandler" + roomKey;
+        DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     /** Update the headers used to bracket the messages in the main list. */

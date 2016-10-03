@@ -57,7 +57,7 @@ public enum DatabaseManager {
     private static final String JOINED_ROOM_LIST_PATH = ACCOUNT_PATH + "joinedRoomList";
     private static final String ROOMS_PATH = GROUPS_PATH + "%s/rooms/";
     private static final String ROOM_PROFILE_PATH = ROOMS_PATH + "%s/profile/";
-    //private static final String EXPERIENCES_PATH = ROOMS_PATH + "%s/exps";
+    private static final String EXP_PROFILE_PATH = ROOMS_PATH + "/exp/profiles/";
     private static final String MESSAGES_PATH = ROOMS_PATH + "%s/messages/";
     private static final String MESSAGE_PATH = MESSAGES_PATH + "%s/";
     private static final String UNREAD_LIST_PATH = MESSAGES_PATH + "%s/unreadList";
@@ -152,6 +152,11 @@ public enum DatabaseManager {
         String profilePath = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
         room.createTime = new Date().getTime();
         updateChildren(profilePath, room.toMap());
+    }
+
+    /** Return the database path to a experience profile for a given room and profile key. */
+    public String getExpProfilePath(final String groupKey, final String roomKey) {
+        return String.format(Locale.US, EXP_PROFILE_PATH, groupKey, roomKey);
     }
 
     /** Return a room push key to use with a subsequent room object persistence. */
