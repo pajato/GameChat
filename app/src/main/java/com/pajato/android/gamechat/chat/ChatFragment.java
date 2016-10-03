@@ -29,7 +29,6 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
@@ -128,16 +127,6 @@ public class ChatFragment extends BaseChatFragment {
         if (event.joinedRoomList.size() == 0) {
             // Handle the case where there are no joined rooms by enabling the no rooms message.
             ChatManager.instance.replaceFragment(showNoJoinedRooms, this.getActivity());
-        } else {
-            // Handle a joined rooms change by setting up database watchers on the messages in each
-            // room.
-            for (String joinedRoom : event.joinedRoomList) {
-                // Set up the database watcher on this list.
-                String[] split = joinedRoom.split(" ");
-                String groupKey = split[0];
-                String roomKey = split[1];
-                DatabaseListManager.instance.setMessageWatcher(groupKey, roomKey);
-            }
         }
     }
 
