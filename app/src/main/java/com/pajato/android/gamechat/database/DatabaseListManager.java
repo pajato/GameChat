@@ -18,13 +18,7 @@
 package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
@@ -36,9 +30,11 @@ import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseEventHandler;
-import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
+import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
+import com.pajato.android.gamechat.database.handler.MessagesChangeHandler;
+import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
+import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
@@ -59,10 +55,6 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
-import static com.pajato.android.gamechat.event.MessageChangeEvent.CHANGED;
-import static com.pajato.android.gamechat.event.MessageChangeEvent.MOVED;
-import static com.pajato.android.gamechat.event.MessageChangeEvent.NEW;
-import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -387,206 +379,6 @@ public enum DatabaseListManager {
                     break;
                 }
             }
-        }
-    }
-
-    // Private inner classes.
-
-    /** Provide a class to handle structural changes to a User's set of joined rooms. */
-    private class JoinedRoomListChangeHandler extends DatabaseEventHandler
-            implements ValueEventListener {
-
-        // Private instance constants.
-
-        /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
-
-        // Public constructors.
-
-        /** Build a handler with the given name and path. */
-        JoinedRoomListChangeHandler(final String name, final String path) {
-            super(name, path);
-        }
-
-        /** Get the current set of active rooms using a list of room identifiers. */
-        @Override public void onDataChange(final DataSnapshot dataSnapshot) {
-            // Determine if any active rooms exist.
-            List<String> list = new ArrayList<>();
-            GenericTypeIndicator<List<String>> t;
-            if (dataSnapshot.exists()) {
-                t = new GenericTypeIndicator<List<String>>() {};
-                list.addAll(dataSnapshot.getValue(t));
-            }
-            AppEventManager.instance.post(new JoinedRoomListChangeEvent(list));
-        }
-
-        /** ... */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-    }
-
-    /** Provide a class to handle new and changed messages inside a given room. */
-    private static class MessagesChangeHandler extends DatabaseEventHandler
-            implements ChildEventListener {
-
-        /** The logcat format string. */
-        private static final String LOG_FORMAT = "%s: {%s, %s}.";
-
-        /** The logcat TAG. */
-        private static final String TAG = MessagesChangeHandler.class.getSimpleName();
-
-        // Private instance variables.
-
-        /** The group and room data. */
-        private String mGroupKey;
-
-        /** The room key. */
-        private String mRoomKey;
-
-        /** A list of received messages used to filter out activity lifecycle event dupes. */
-        private List<String> mMessageList = new ArrayList<>();
-
-        // Public constructors.
-
-        /** Build a handler with the given name and path. */
-        MessagesChangeHandler(final String name, final String groupKey, final String roomKey) {
-            super(name, DatabaseManager.instance.getMessagesPath(groupKey, roomKey));
-            mGroupKey = groupKey;
-            mRoomKey = roomKey;
-        }
-
-        /** Deal with a new message. */
-        @Override public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            // Log the event and determine if the data snapshot exists, aborting if it does not.
-            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildAdded", dataSnapshot, s));
-            process(dataSnapshot, true, NEW);
-        }
-
-        /** Deal with a change in an existing message. */
-        @Override public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildChanged", dataSnapshot, s));
-            process(dataSnapshot, false, CHANGED);
-        }
-
-        @Override public void onChildRemoved(DataSnapshot dataSnapshot) {
-            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildRemoved", dataSnapshot, null));
-            process(dataSnapshot, false, REMOVED);
-        }
-
-        @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildMoved", dataSnapshot, s));
-            if (!dataSnapshot.exists()) return;
-            process(dataSnapshot, false, MOVED);
-        }
-
-        /** ... */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-
-        // Private instance methods.
-
-        /** Determine if the given message is a duplicate. */
-        private boolean isDupe(final Message message) {
-            // Determine if the message has already been received.  The message name is the push key
-            // value, hence unique.
-            String key = message.key;
-            if (mMessageList.contains(key))
-                // It has been received.  Flag it.
-                return true;
-
-            // The message has not been received.  Add it to the list for subsequent filtering.
-            mMessageList.add(key);
-            return false;
-        }
-
-        /** Process the change by determining if an app event should be posted. */
-        private void process(final DataSnapshot snapshot, final boolean filter, final int type) {
-            // Abort if the data snapshot does not exist.
-            if (!snapshot.exists()) return;
-
-            // Build the message and process the filter flag by checking for a duplicated message.
-            // Duplicate messages have been detected by GameChat and is mentioned on StackOverflow:
-            // http://stackoverflow.com/questions/38206413/firebase-childeventlistener-onchildadded-adding-duplicate-objects
-            Message message = snapshot.getValue(Message.class);
-            if (filter && isDupe(message)) return;
-
-            // The event should be propagated to the app.
-            AppEventManager.instance.post(new MessageChangeEvent(mGroupKey, mRoomKey, message, type));
-        }
-
-    }
-
-    /** Provide a class to handle changes to a group profile. */
-    private class ProfileGroupChangeHandler extends DatabaseEventHandler
-            implements ValueEventListener {
-
-        // Private instance constants.
-
-        /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
-
-        // Public constructors.
-
-        /** Build a handler with the given name, path and key. */
-        ProfileGroupChangeHandler(final String name, final String path, final String key) {
-            super(name, path, key);
-        }
-
-        /** Get the current generic profile. */
-        @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-            // Ensure that some data exists.
-            if (dataSnapshot.exists()) {
-                // There is data.  Publish the group profile to the app.
-                Group group = dataSnapshot.getValue(Group.class);
-                AppEventManager.instance.post(new ProfileGroupChangeEvent(key, group));
-            } else {
-                Log.e(TAG, "Invalid key.  No value returned.");
-            }
-        }
-
-        /** Deal with a canceled event by logging it. */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-    }
-
-    /** Provide a class to handle changes to a room profile. */
-    private class ProfileRoomChangeHandler extends DatabaseEventHandler
-            implements ValueEventListener {
-
-        // Private instance constants.
-
-        /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
-
-        // Public constructors.
-
-        /** Build a handler with the given name, path and key. */
-        ProfileRoomChangeHandler(final String name, final String path, final String key) {
-            super(name, path, key);
-        }
-
-        /** Get the current generic profile. */
-        @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-            // Ensure that some data exists.
-            if (dataSnapshot.exists()) {
-                // There is data.  Publish the group profile to the app.
-                Room room = dataSnapshot.getValue(Room.class);
-                AppEventManager.instance.post(new ProfileRoomChangeEvent(key, room));
-            } else {
-                Log.e(TAG, "Invalid key.  No value returned.");
-            }
-        }
-
-        /** ... */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
         }
     }
 
