@@ -47,7 +47,7 @@ import static android.provider.ContactsContract.Contacts.Photo.CONTENT_DIRECTORY
  *
  * @author Paul Michael Reilly
  */
-enum ContactManager {
+public enum ContactManager {
     instance;
 
     // Public enums.
