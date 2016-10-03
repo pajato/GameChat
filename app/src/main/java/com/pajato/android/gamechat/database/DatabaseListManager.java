@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -25,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
@@ -69,7 +70,7 @@ import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
  *
  * @author Paul Michael Reilly
  */
-public enum ChatListManager {
+public enum DatabaseListManager {
     instance;
 
     /** The chat list type. */

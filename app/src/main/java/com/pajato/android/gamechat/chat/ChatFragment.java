@@ -29,6 +29,7 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
@@ -135,7 +136,7 @@ public class ChatFragment extends BaseChatFragment {
                 String[] split = joinedRoom.split(" ");
                 String groupKey = split[0];
                 String roomKey = split[1];
-                ChatListManager.instance.setMessageWatcher(groupKey, roomKey);
+                DatabaseListManager.instance.setMessageWatcher(groupKey, roomKey);
             }
         }
     }

@@ -31,9 +31,9 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
-import com.pajato.android.gamechat.chat.ChatListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
@@ -232,7 +232,7 @@ public class MainActivity extends BaseActivity
         // database managers.
         super.onResume();
         AppEventManager.instance.register(this);
-        AppEventManager.instance.register(ChatListManager.instance);
+        AppEventManager.instance.register(DatabaseListManager.instance);
         AccountManager.instance.register();
     }
 

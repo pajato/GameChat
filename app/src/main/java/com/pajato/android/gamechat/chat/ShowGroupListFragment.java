@@ -23,6 +23,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -55,9 +56,9 @@ public class ShowGroupListFragment extends BaseChatFragment {
         // view and the listeners for backend data changes.
         super.onInitialize();
         setTitles(null, null);
-        mItemListType = ChatListManager.ChatListType.group;
+        mItemListType = DatabaseListManager.ChatListType.group;
         initAdView(mLayout);
-        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), false);
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
         FabManager.chat.init(this);
     }
 

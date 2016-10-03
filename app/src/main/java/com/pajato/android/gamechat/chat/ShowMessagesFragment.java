@@ -34,6 +34,7 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
@@ -103,9 +104,9 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         // setting up the list of messages, and by setting up the edit text field.
         super.onInitialize();
         setTitles(null, mItem.roomKey);
-        mItemListType = ChatListManager.ChatListType.message;
+        mItemListType = DatabaseListManager.ChatListType.message;
         FabManager.chat.setState(this, View.GONE);
-        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), true);
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);
         initEditText(mLayout);
     }
 
@@ -167,7 +168,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         int type = STANDARD;
         String groupKey = mItem.groupKey;
         String roomKey = mItem.roomKey;
-        Room room = ChatListManager.instance.getRoomProfile(roomKey);
+        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
         DatabaseManager.instance.createMessage(text, type, account, groupKey, roomKey, room);
         editText.setText("");
         Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);

@@ -32,7 +32,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatListManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
@@ -194,12 +194,12 @@ public abstract class BaseFragment extends Fragment {
             if (groupKey == null && roomKey == null) {
                 title = getResources().getString(R.string.app_name);
             } else if (groupKey != null && roomKey == null) {
-                title = ChatListManager.instance.getGroupName(groupKey);
+                title = DatabaseListManager.instance.getGroupName(groupKey);
             } else if (groupKey == null) {
-                title = ChatListManager.instance.getRoomName(roomKey);
+                title = DatabaseListManager.instance.getRoomName(roomKey);
             } else {
-                title = ChatListManager.instance.getRoomName(roomKey);
-                subtitle = ChatListManager.instance.getGroupName(groupKey);
+                title = DatabaseListManager.instance.getRoomName(roomKey);
+                subtitle = DatabaseListManager.instance.getGroupName(groupKey);
             }
 
             // Apply the title and subtitle to the action bar.

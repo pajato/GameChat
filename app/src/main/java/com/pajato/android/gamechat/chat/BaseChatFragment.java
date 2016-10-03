@@ -37,6 +37,7 @@ import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
-import static com.pajato.android.gamechat.chat.ChatListManager.ChatListType.message;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
 import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showRoomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
@@ -82,7 +83,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     protected ChatListItem mItem;
 
     /** The list type for this fragment. */
-    protected ChatListManager.ChatListType mItemListType;
+    protected DatabaseListManager.ChatListType mItemListType;
 
     /** A flag used to queue adapter list updates during the onResume lifecycle event. */
     protected boolean mUpdateOnResume;
@@ -164,7 +165,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         // list when showing messages.
         ChatListAdapter listAdapter = (ChatListAdapter) adapter;
         listAdapter.clearItems();
-        listAdapter.addItems(ChatListManager.instance.getList(mItemListType, mItem));
+        listAdapter.addItems(DatabaseListManager.instance.getList(mItemListType, mItem));
         if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
         return true;
     }
@@ -256,7 +257,7 @@ public abstract class BaseChatFragment extends BaseFragment {
             if (!account.groupIdList.contains(groupKey)) {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
-                Group group = ChatListManager.instance.getGroupProfile(groupKey);
+                Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
                 if (group != null)
                     // The group is available.  Accept any open invitations ... and there should be
                     // at least one!

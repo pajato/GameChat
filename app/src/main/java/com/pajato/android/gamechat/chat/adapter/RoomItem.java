@@ -18,7 +18,7 @@
 package com.pajato.android.gamechat.chat.adapter;
 
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.ChatListManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 
@@ -63,9 +63,9 @@ public class RoomItem {
         String accountId = AccountManager.instance.getCurrentAccountId();
         StringBuilder textBuilder = new StringBuilder();
         Map<String, Boolean> memberNameMap = new HashMap<>();
-        Room room = ChatListManager.instance.getRoomProfile(roomKey);
+        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
         name = room.name;
-        Map<String, List<Message>> rooms = ChatListManager.instance.getGroupMessages(groupKey);
+        Map<String, List<Message>> rooms = DatabaseListManager.instance.getGroupMessages(groupKey);
         for (Message message : rooms.get(roomKey)) {
             // Ensure that the member who posted the message is in the member display name map.
             String displayName = message.owner.equals(accountId) ? "me" : message.name;

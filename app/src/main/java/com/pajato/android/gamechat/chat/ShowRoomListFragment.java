@@ -23,6 +23,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
@@ -62,9 +63,9 @@ public class ShowRoomListFragment extends BaseChatFragment {
         // use of the options menu, setting up the ad view and initializing the rooms handling.
         super.onInitialize();
         setTitles(mItem.groupKey, null);
-        mItemListType = ChatListManager.ChatListType.room;
+        mItemListType = DatabaseListManager.ChatListType.room;
         initAdView(mLayout);
-        initList(mLayout, ChatListManager.instance.getList(mItemListType, mItem), false);
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
         FabManager.chat.init(this);
     }
 

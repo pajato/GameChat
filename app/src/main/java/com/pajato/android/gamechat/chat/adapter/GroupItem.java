@@ -20,7 +20,7 @@ package com.pajato.android.gamechat.chat.adapter;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.ChatListManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -60,10 +60,10 @@ public class GroupItem {
         this.groupKey = groupKey;
         count = 0;
         StringBuilder textBuilder = new StringBuilder();
-        Group group = ChatListManager.instance.getGroupProfile(groupKey);
+        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         name = group.name;
         Map<String, Integer> roomMap = new HashMap<>();
-        Map<String, List<Message>> roomMessageListMap = ChatListManager.instance.getGroupMessages(groupKey);
+        Map<String, List<Message>> roomMessageListMap = DatabaseListManager.instance.getGroupMessages(groupKey);
         for (String roomKey : roomMessageListMap.keySet()) {
             int roomNewCount = 0;
             for (Message message : roomMessageListMap.get(roomKey)) {
@@ -77,7 +77,7 @@ public class GroupItem {
 
         // Update the list of rooms
         for (String roomKey : roomMap.keySet()) {
-            Room room = ChatListManager.instance.getRoomProfile(roomKey);
+            Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
             update(textBuilder, room, roomMap.get(roomKey) > 0);
         }
     }
