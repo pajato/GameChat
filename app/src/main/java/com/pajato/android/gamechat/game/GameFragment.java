@@ -108,6 +108,7 @@ public class GameFragment extends BaseGameFragment {
                 break;
         }
 
+        // TODO: figure out how to get the experience into the db.
         if (type != null) GameManager.instance.startNextFragment(getActivity(), type);
     }
 
@@ -143,7 +144,7 @@ public class GameFragment extends BaseGameFragment {
 
     /** Dispatch to a more suitable fragment. */
     @Override public void onResume() {
-        // The experience manager will load a fragemnt to view into this envelope fragment.
+        // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
         GameManager.instance.startNextFragment(getActivity());
     }

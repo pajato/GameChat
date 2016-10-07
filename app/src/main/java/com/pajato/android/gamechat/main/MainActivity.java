@@ -247,6 +247,7 @@ public class MainActivity extends BaseActivity
         setSupportActionBar(toolbar);
         DatabaseManager.instance.init(this);
         NavigationManager.instance.init(this, toolbar);
+        NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         GameManager.instance.init();
     }

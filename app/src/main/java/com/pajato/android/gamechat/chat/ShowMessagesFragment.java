@@ -166,10 +166,9 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         // inform the User that the message has been sent.
         String text = editText.getText().toString();
         int type = STANDARD;
-        String groupKey = mItem.groupKey;
         String roomKey = mItem.roomKey;
         Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
-        DatabaseManager.instance.createMessage(text, type, account, groupKey, roomKey, room);
+        DatabaseManager.instance.createMessage(text, type, account, room);
         editText.setText("");
         Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
         hideSoftKeyBoard(view);

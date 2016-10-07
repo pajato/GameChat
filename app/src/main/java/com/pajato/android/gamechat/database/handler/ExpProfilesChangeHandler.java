@@ -22,40 +22,40 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.game.event.ExpProfileChangeEvent;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.room;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.MOVED;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.NEW;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
 
 /**
- * Provide a class to handle new and changed experiences inside a group and room.
+ * Provide a class to handle new and changed experience profiles inside a room.
  *
  * @author Paul Michael Reilly
  */
-public class ExpProfileChangeHandler extends DatabaseEventHandler implements ChildEventListener {
+public class ExpProfilesChangeHandler extends DatabaseEventHandler implements ChildEventListener {
+
+    // Public constants.
 
     /** The logcat format string. */
     private static final String LOG_FORMAT = "%s: {%s, %s}.";
 
     /** The logcat TAG. */
-    private static final String TAG = ExpProfileChangeHandler.class.getSimpleName();
+    private static final String TAG = ExpProfilesChangeHandler.class.getSimpleName();
 
     // Public constructors.
 
     /** Build a handler with the given name and path. */
-    public ExpProfileChangeHandler(final String name, final String groupKey, final String roomKey) {
-        super(name, DatabaseManager.instance.getExpProfilePath(groupKey, roomKey));
+    public ExpProfilesChangeHandler(final String name, final String groupKey, final String roomKey) {
+        super(name, DatabaseManager.instance.getExpProfilesPath(groupKey, roomKey));
     }
+
+    // Public instance methods.
 
     /** Deal with a new message. */
     @Override public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -81,7 +81,7 @@ public class ExpProfileChangeHandler extends DatabaseEventHandler implements Chi
         process(dataSnapshot, MOVED);
     }
 
-    /** ... */
+    /** TODO: get a grip on these... */
     @Override public void onCancelled(DatabaseError error) {
         // Failed to read value
         Log.w(TAG, "Failed to read value.", error.toException());
@@ -105,13 +105,13 @@ public class ExpProfileChangeHandler extends DatabaseEventHandler implements Chi
                 break;
             case REMOVED:
                 // Update the database list experience profile map by removing the entry (key).
-                DatabaseListManager.instance.expProfileMap.put(expProfile.key, expProfile);
+                DatabaseListManager.instance.expProfileMap.remove(expProfile.key);
                 break;
             case MOVED:
             default:
                 // Not sure what a moved change means or what to do about it, so do nothing.
                 break;
         }
-        AppEventManager.instance.post(new ExpProfileChangeEvent(expProfile, type));
     }
+
 }

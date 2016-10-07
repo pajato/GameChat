@@ -27,9 +27,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.game.model.Player;
 import com.pajato.android.gamechat.game.model.TicTacToe;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -82,6 +83,23 @@ public class TTTFragment extends BaseGameFragment {
         // Determine if there is an experience ready to be enjoyed.  If not, set one up.
         super.onResume();
         updateExperience();
+    }
+
+    /** Return an empty, default TicTacToe experience. */
+    @Override public Experience getDefaultExperience(final List<Account> players) {
+        TicTacToe model = new TicTacToe();
+        model.players = getDefaultPlayers(players);
+        String name1 = model.players.get(0).get("name");
+        String name2 = model.players.get(1).get("name");
+        long tstamp = new Date().getTime();
+        model.name = String.format(Locale.US, "%s, vs %s on %s", name1, name2, tstamp);
+        model.createTime = tstamp;
+        model.turn = true;
+        model.type = ExpType.ttt.ordinal();
+        model.groupKey = DatabaseListManager.instance.getGroupKey();
+        model.roomKey = DatabaseListManager.instance.getRoomKey();
+
+        return model;
     }
 
     // Private instance methods.
@@ -162,11 +180,11 @@ public class TTTFragment extends BaseGameFragment {
                 // value of 6 without getting 3 Os.
 
                 // If there's an X in this button, store a 1
-                if (tileValue.equals(model.getSigilValue(getContext(), 0))) {
+                if (tileValue.equals(model.getSigilValue(0))) {
                     boardValues[i][j] = 1;
                     if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 1);
                     // If there's an O in this button, store a 2
-                } else if (tileValue.equals(model.getSigilValue(getContext(), 1))) {
+                } else if (tileValue.equals(model.getSigilValue(1))) {
                     boardValues[i][j] = 2;
                     if(!(mLayoutMap.containsKey(i + "-" + j))) mLayoutMap.put(i + "-" + j, 2);
                     // Otherwise, there's a space. -5 was chosen arbitrarily to keep row values unique.
@@ -185,33 +203,39 @@ public class TTTFragment extends BaseGameFragment {
         return (TicTacToe) mExperience;
     }
 
-    /** Return an empty, default TicTacToe experience. */
-    private Experience getDefaultExperience() {
-        TicTacToe model = new TicTacToe();
-        model.players = getDefaultPlayers();
-        String name1 = model.players.get(0).name;
-        String name2 = model.players.get(1).name;
-        long tstamp = new Date().getTime();
-        model.name = String.format(Locale.US, "%s, vs %s on %s", name1, name2, tstamp);
-        model.createTime = tstamp;
-        model.turn = true;
-        model.type = ExpType.ttt.ordinal();
-
-        return model;
-    }
-
     /** Return a list of default TicTacToe players. */
-    private List<Player> getDefaultPlayers() {
-        List<Player> result = new ArrayList<>();
-        result.add(new Player("Player1", R.string.xValue, 0));
-        result.add(new Player("Player2", R.string.oValue, 0));
+    private List<Map<String, String>> getDefaultPlayers(final List<Account> players) {
+        List<Map<String, String>> result = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        map.put("name", getPlayerName(getPlayer(players, 0), "Player1"));
+        map.put("sigil", "X");
+        map.put("winCount", "0");
+        result.add(map);
+        map = new HashMap<>();
+        map.put("name", getPlayerName(getPlayer(players, 1), "Player2"));
+        map.put("sigil", "O");
+        map.put("winCount", "0");
+        result.add(map);
+
         return result;
     }
 
-    /** Return the experience from the database. */
-    private Experience getExperienceFromDatabase() {
-        // TODO: replace teh placeholder with real code.
-        return getDefaultExperience();
+    /** Return the account associated with the given index, null if there is no such account. */
+    private Account getPlayer(final List<Account> players, final int index) {
+        // Determine if there is such an account, returning null if not.
+        if (players == null || index < 0 || index >= players.size()) return null;
+
+        // There is an account so return it.
+        return players.get(index);
+    }
+
+    /** Return a name for the player by using the given account or a default. */
+    private String getPlayerName(final Account player, final String defaultName) {
+        // Determine if there is an account to use.  Return the default name if not.
+        if (player == null) return defaultName;
+
+        // There is an account.  Use the first name for the game.
+        return player.getFirstName(defaultName);
     }
 
     /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
@@ -265,7 +289,7 @@ public class TTTFragment extends BaseGameFragment {
         if (model == null || invalidButton || !(checkNotFinished(model))) return;
 
         // The move is valid. Update the board and toggle the turn.
-        button.setText(model.getSigilValue(getContext()));
+        button.setText(model.getSigilValue());
         handlePlayerIcons(model.toggleTurn());
         checkNotFinished(model);
     }
@@ -287,9 +311,9 @@ public class TTTFragment extends BaseGameFragment {
                 Button currButton = (Button) mLayout.findViewWithTag("button" + i + j);
                 if(mLayoutMap.containsKey(currKey)) {
                     if(mLayoutMap.get(currKey) == 1) {
-                        currButton.setText(model.getSigilValue(getContext(), 0));
+                        currButton.setText(model.getSigilValue(0));
                     } else {
-                        currButton.setText(model.getSigilValue(getContext(), 1));
+                        currButton.setText(model.getSigilValue(1));
                     }
                 } else {
                     currButton.setText("");
@@ -304,7 +328,7 @@ public class TTTFragment extends BaseGameFragment {
         // does.
         TextView name = (TextView) mLayout.findViewById(resId);
         if (name == null) return;
-        name.setText(model.players.get(index).name);
+        name.setText(model.players.get(index).get("name"));
     }
 
     /** Set the name for a given player index. */
@@ -313,7 +337,7 @@ public class TTTFragment extends BaseGameFragment {
         // if it does.
         TextView winCount = (TextView) mLayout.findViewById(resId);
         if (winCount == null) return;
-        winCount.setText(String.valueOf(model.players.get(index).winCount));
+        winCount.setText(model.players.get(index).get("winCount"));
     }
 
     /** Set the sigil (X or O) for a given player. */
@@ -322,7 +346,7 @@ public class TTTFragment extends BaseGameFragment {
         // model if it does.
         TextView sigil = (TextView) mLayout.findViewById(resId);
         if (sigil == null) return;
-        sigil.setText(getString(model.players.get(index).sigilId));
+        sigil.setText(model.players.get(index).get("sigil"));
     }
 
     /**
@@ -351,18 +375,12 @@ public class TTTFragment extends BaseGameFragment {
 
         // Output New Game Messages
         String newTurn = "New Game! Player " + (model.turn
-                ? "1 (" + model.getSigilValue(getContext(), 0) + ")"
-                : "2 (" + model.getSigilValue(getContext(), 1) + ")") + "'s Turn";
+                ? "1 (" + model.getSigilValue(0) + ")"
+                : "2 (" + model.getSigilValue(1) + ")") + "'s Turn";
         GameManager.instance.notify(mLayout, newTurn, ContextCompat.getColor(getActivity(),
                 R.color.colorPrimaryDark), false);
 
         checkNotFinished(model);
-    }
-
-    /** Setup the TicTacToe experience based on the signin state. */
-    @Override public void setupExperience() {
-        boolean signedIn = AccountManager.instance.getCurrentAccount() == null;
-        mExperience = signedIn ? getExperienceFromDatabase() : getDefaultExperience();
     }
 
     /** Update the UI with either a default or a persisted experience. */
@@ -389,9 +407,11 @@ public class TTTFragment extends BaseGameFragment {
         if (model == null) return;
 
         // Update the data model and the UI.
-        getModel().players.get(index).winCount++;
+        int winCount = Integer.parseInt(getModel().players.get(index).get("winCount"));
+        winCount++;
+        getModel().players.get(index).put("winCount", String.valueOf(winCount));
         TextView view = (TextView) mLayout.findViewById(resId);
-        view.setText(String.valueOf(getModel().players.get(index).winCount));
+        view.setText(getModel().players.get(index).get("winCount"));
     }
 
 }

@@ -84,6 +84,16 @@ import java.util.Map;
         return defaultName;
     }
 
+    /** Return the first (and possibly only) part of the display name or the given default. */
+    @Exclude public String getFirstName(final String defaultName) {
+        // Determine if there is a display name.  Use the default if not.
+        if (displayName == null) return defaultName;
+
+        // Use the first part of the display name.
+        String[] split = displayName.split(" ");
+        return split[0];
+    }
+
     /** Generate the map of data to persist into Firebase. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();

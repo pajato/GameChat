@@ -33,11 +33,17 @@ import java.util.Map;
 @IgnoreExtraProperties
 public class ExpProfile {
 
+    /** The group key. */
+    public String groupKey;
+
     /** The experience key. */
     public String key;
 
     /** The experience's display name. */
     public String name;
+
+    /** The room key. */
+    public String roomKey;
 
     /** The experience type value. */
     public int type;
@@ -47,18 +53,23 @@ public class ExpProfile {
     /** Build an empty args constructor for the database. */
     public ExpProfile() {}
 
-    /** Build a default TicTacToe using all the parameters. */
-    public ExpProfile(final String key, final String name, final int type) {
+    /** Build a experience profile with a full set of values. */
+    public ExpProfile(final String key, final String name, final int type, final String groupKey,
+                      final String roomKey) {
         this.key = key;
         this.name = name;
         this.type = type;
+        this.groupKey = groupKey;
+        this.roomKey = roomKey;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
+        result.put("groupKey", groupKey);
         result.put("key", key);
         result.put("name", name);
+        result.put("roomKey", roomKey);
         result.put("type", type);
 
         return result;

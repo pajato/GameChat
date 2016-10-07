@@ -25,23 +25,21 @@ import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.game.GameFragment.GAME_HOME_FAM_KEY;
 
-public class ShowNoGamesFragment extends BaseGameFragment {
+public class ShowOfflineFragment extends BaseGameFragment {
 
+    // Public instance methods.
+
+    /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // todo add some code here.
-        logEvent("onClick (showNoGames)");
+        // Use a logging placeholder.
+        logEvent("onClick (showOffline)");
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game_no_games;}
+    /** Establish the layout file to show that the app is offline due to network loss. */
+    @Override public int getLayout() {return R.layout.fragment_game_offline;}
 
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
-
-    /** Initialize the fragment by setting in the FAB. */
-    @Override public void onInitialize() {
-        FabManager.game.init(this);
-    }
 
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {

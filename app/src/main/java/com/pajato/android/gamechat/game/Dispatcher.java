@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.game;
 
+import com.pajato.android.gamechat.chat.model.Room;
+
 import java.util.List;
 import java.util.Map;
 
@@ -31,14 +33,14 @@ import static com.pajato.android.gamechat.game.FragmentType.roomList;
  *
  * @author Paul Michael Reilly
  */
-class Dispatcher {
+public class Dispatcher {
 
     // Public instance variables.
 
     /** The experience key. */
     public String expKey;
 
-    /** A list of experiences. */
+    /** A list of experience keys. */
     public List<String> list;
 
     /** The map of experiences: associates a group key with a map of rooms in the group. */
@@ -53,7 +55,7 @@ class Dispatcher {
     /** The map associating a room key with experiences in the room. */
     public Map<String, List<String>> roomMap;
 
-    /** The experience type. */
+    /** The fragment type denoting the fragment index and the experience type. */
     public FragmentType type;
 
     // Public Constructors.
@@ -92,4 +94,29 @@ class Dispatcher {
         expKey = exp;
     }
 
+    /** Build an instance given a fragment type and a room. */
+    public Dispatcher(FragmentType type, Room room) {
+        this.type = type;
+        this.groupKey = room != null ? room.groupKey : null;
+        this.roomKey = room != null ? room.key : null;
+    }
+
+    /** Build an instance given a fragment type and a list of experience keys. */
+    public Dispatcher(final FragmentType type, List<String> expKeyList) {
+        this.type = type;
+        list = expKeyList;
+    }
+
+    /** Build an instance given a fragment type and an experiene key. */
+    public Dispatcher(final FragmentType type, String expKey) {
+        this.type = type;
+        this.expKey = expKey;
+    }
+
+    /** Build an instance given a fragment type and an experience map (to show off vs on line.) */
+    public Dispatcher(final FragmentType type,
+                      final Map<String, Map<String, List<String>>> mExpMap) {
+        this.type = type;
+        this.expMap = expMap;
+    }
 }

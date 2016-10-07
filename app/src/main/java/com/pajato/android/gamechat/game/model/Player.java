@@ -41,11 +41,11 @@ public class Player {
     /** Build an empty args constructor for the database. */
     public Player() {}
 
-    /** Build a default TicTacToe using all the parameters. */
-    public Player(final String name, final int sigilId, final int winCount) {
+    /** Build a default game player using all the parameters. */
+    public Player(final String name, final int sigilId) {
         this.name = name;
         this.sigilId = sigilId;
-        this.winCount = winCount;
+        this.winCount = 0;
     }
 
     /** Provide a default map for a Firebase create/update. */

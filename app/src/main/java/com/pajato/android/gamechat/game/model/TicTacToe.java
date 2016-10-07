@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.game.model;
 
-import android.content.Context;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.game.Experience;
@@ -45,7 +43,7 @@ import java.util.Map;
     public long createTime;
 
     /** The experience push key. */
-    public String expKey;
+    public String experienceKey;
 
     /** The group push key. */
     public String groupKey;
@@ -62,7 +60,7 @@ import java.util.Map;
     /** The member account identifer who created the experience. */
     public String owner;
 
-    public List<Player> players;
+    public List<Map<String, String>> players;
 
     /** The room push key. */
     public String roomKey;
@@ -85,10 +83,10 @@ import java.util.Map;
     public TicTacToe(final String key, final String owner, final String name, final String url,
                      final long createTime, final long modTime, final boolean turn, final int type,
                      final String groupKey, final String roomKey, final List<String> board,
-                     final List<Player> players) {
+                     final List<Map<String, String>> players) {
         this.board = board;
         this.createTime = createTime;
-        this.expKey = key;
+        this.experienceKey = key;
         this.groupKey = groupKey;
         this.modTime = modTime;
         this.name = name;
@@ -101,11 +99,11 @@ import java.util.Map;
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude public Map<String, Object> toMap() {
+    @Exclude @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("board", board);
         result.put("createTime", createTime);
-        result.put("expKey", expKey);
+        result.put("expKey", experienceKey);
         result.put("groupKey", groupKey);
         result.put("modTime", modTime);
         result.put("name", name);
@@ -120,20 +118,25 @@ import java.util.Map;
     }
 
     /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude @Override public FragmentType getFragType() {
+    @Exclude @Override public FragmentType getFragmentType() {
         if (type < 0 || type >= FragmentType.values().length) return null;
 
         return FragmentType.values()[type];
     }
 
     /** Return the experience push key. */
-    @Exclude @Override public String getExpKey() {
-        return expKey;
+    @Exclude @Override public String getExperienceKey() {
+        return experienceKey;
     }
 
     /** Return the group push key. */
     @Exclude @Override public String getGroupKey() {
         return groupKey;
+    }
+
+    /** Return the experience name. */
+    @Exclude @Override public String getName() {
+        return name;
     }
 
     /** Return the room push key. */
@@ -142,19 +145,27 @@ import java.util.Map;
     }
 
     /** Return the sigil text value for the given player. */
-    @Exclude public String getSigilValue(final Context context, final int index) {
+    @Exclude public String getSigilValue(final int index) {
         // Ensure that the index is valid. Return the sentinal value "?" if not.
         if (index < 0 || index > 1) return "?";
 
         // The index is valid. Return the sigil value.
-        int resId = players.get(index).sigilId;
-        return context.getString(resId);
+        return players.get(index).get("sigil");
     }
 
     /** Return the sigil text value for the player whose turn is current. */
-    @Exclude public String getSigilValue(final Context context) {
-        int resId = turn ? players.get(0).sigilId : players.get(1).sigilId;
-        return context.getString(resId);
+    @Exclude public String getSigilValue() {
+        return turn ? getSigilValue(0) : getSigilValue(1);
+    }
+
+    /** Return the type to satisfy the Experience contract. */
+    @Exclude @Override public int getType() {
+        return type;
+    }
+
+    /** Set the experience key to satisfy the Experience contract. */
+    @Exclude @Override public void setExperienceKey(final String key) {
+        experienceKey = key;
     }
 
     /** Toggle the turn state. */
@@ -162,5 +173,4 @@ import java.util.Map;
         turn = !turn;
         return turn;
     }
-
 }
