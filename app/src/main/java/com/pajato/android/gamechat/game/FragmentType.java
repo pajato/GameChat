@@ -24,13 +24,17 @@ package com.pajato.android.gamechat.game;
  */
 public enum FragmentType {
     signedOut (ShowSignedOutFragment.class),
-    noExp (ShowNoGamesFragment.class),
+    offline (ShowOfflineFragment.class),
+    noExp (ShowNoExperiencesFragment.class),
     groupList (ShowExpGroupListFragment.class),
     roomList (ShowExpRoomListFragment.class),
     expList (ShowExpListFragment.class),
-    tictactoe (TTTFragment.class, ExpType.ttt),
-    checkers (CheckersFragment.class, ExpType.checkers),
-    chess (ChessFragment.class, ExpType.chess);
+    tictactoeList (ShowExpTypeListFragment.class),
+    tictactoe (TTTFragment.class, ExpType.ttt, tictactoeList),
+    checkersList (ShowExpTypeListFragment.class),
+    checkers (CheckersFragment.class, ExpType.checkers, checkersList),
+    chessList(ShowExpTypeListFragment.class),
+    chess (ChessFragment.class, ExpType.chess, chessList);
 
     // Private instance variables.
 
@@ -40,15 +44,20 @@ public enum FragmentType {
     /** The experience type for this value. */
     public ExpType expType;
 
+    /** The show list fragment type for a particular game. */
+    public FragmentType showType;
+
     /** Build an instance with only a given fragment class. */
     FragmentType(final Class<? extends BaseGameFragment> fragmentClass) {
         this.fragmentClass = fragmentClass;
     }
 
     /** Build an instance with both a given fragment class and an experience type. */
-    FragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType) {
+    FragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType,
+                 final FragmentType showType) {
         this.fragmentClass = fragmentClass;
         this.expType = expType;
+        this.showType = showType;
     }
 
 }

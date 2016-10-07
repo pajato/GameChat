@@ -28,10 +28,19 @@ import java.util.Map;
 /** Provide a Firebase model class for representing a chat room. */
 @IgnoreExtraProperties public class Room {
 
-    /** The room types. */
+    // The room types.
+
+    /** A room no one can join. */
     public final static int ME = 0;
+
+    /** A room in which only invited members may join. */
     public final static int PRIVATE = 1;
+
+    /** A room in which any User can join. */
     public final static int PUBLIC = 2;
+
+    /** A room in which only two members can exist (a direct room in Slack). */
+    public final static int USER = 3;
 
     /** The creation timestamp. */
     public long createTime;
@@ -61,7 +70,7 @@ import java.util.Map;
     public Room() {}
 
     /** Build a default room. */
-    public Room(final String key, final String owner, final String name, final String groupkey,
+    public Room(final String key, final String owner, final String name, final String groupKey,
                 final long createTime, final long modTime, final int type,
                 final List<String> members) {
         this.createTime = createTime;

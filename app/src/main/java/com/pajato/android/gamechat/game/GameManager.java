@@ -23,10 +23,9 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
-import com.pajato.android.gamechat.event.AppEventManager;
-
-import org.greenrobot.eventbus.Subscribe;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.game.FragmentType.noExp;
+import static com.pajato.android.gamechat.game.FragmentType.offline;
 import static com.pajato.android.gamechat.game.FragmentType.signedOut;
 
 /**
@@ -59,10 +59,16 @@ public enum GameManager {
     private int mCurrentFragment;
 
     /** The map associating groups, rooms, and experiences. */
-    private Map<String, Map<String, List<String>>> mExpMap;
+    private Map<String, Map<String, List<String>>> mExpMap = new HashMap<>();
 
     /** A map associating an experience key with a the database model class. */
-    private Map<String, Experience> mExperienceMap;
+    private Map<String, Experience> mExperienceMap = new HashMap<>();
+
+    /** The current group key as determined the last selected group. */
+    public String currentGroupKey;
+
+    /** The current room key as determined by the last selected room. */
+    public String currentRoomKey;
 
     // Public instance methods.
 
@@ -103,7 +109,6 @@ public enum GameManager {
         // to show that there are no games to list.
         mCurrentFragment = -1;
         instructions.clear();
-        AppEventManager.instance.register(this);
     }
 
     /** Create and show a Snackbar notification based on the given parameters. */
@@ -124,66 +129,32 @@ public enum GameManager {
         if (color != -1) notification.getView().setBackgroundColor(color);
         notification.show();
     }
-    /** Handle a authentication change event by dealing with the fragment to display. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // Log the event and determine if there is an active account.
-        if (event.account == null) {
-            // There is no active account.  Reset the data maps and show the signed out fragment.
-            mExpMap = null;
-            mExperienceMap = null;
-        } else {
-            // There is an active account.  Initialize the maps to an empty state.
-            mExpMap = new HashMap<>();
-            mExperienceMap = new HashMap<>();
-        }
-    }
 
-    /** Return true iff the next fragment has been started. */
+    /** Return true iff a fragment for the given experience is started. */
     public boolean startNextFragment(final FragmentActivity context) {
-        return startNextFragment(context, null);
+        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
+        // dispatcher if so.
+        Dispatcher dispatcher = getDispatcher();
+        return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
-    /** Return true iff a fragment for the given experience has been started. */
+    /** Return true iff a fragment for the given experience is started. */
     public boolean startNextFragment(final FragmentActivity context, final FragmentType type) {
-        // Ensure that the dispatcher has a valid type.  Abort if not.
+        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
+        // dispatcher if so.
         Dispatcher dispatcher = getDispatcher(type);
-        if (dispatcher.type == null) return false;
-
-        // Ensure that the fragment exists.  Create it if not.
-        int index = dispatcher.type.ordinal();
-        if (mFragmentList[index] == null) {
-            try {
-                mFragmentList[index] = dispatcher.type.fragmentClass.newInstance();
-                mFragmentList[index].mFragmentType = dispatcher.type;
-                mFragmentList[index].setupExperience();
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-
-        // Make this the current fragment.
-        mCurrentFragment = index;
-        context.getSupportFragmentManager().beginTransaction()
-                .replace(R.id.game_pane_fragment_container, mFragmentList[index])
-                .commit();
-        return true;
+        return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
     // Private instance methods.
 
     /** Return a dispatcher object based on the current experience state. */
-    private Dispatcher getDispatcher(final FragmentType type) {
-        // Handle the various cases: first a specified type.
-        if (type != null) return new Dispatcher(type);
-
-        // A signed out User with no specified game to play.
-        if (mExpMap == null) return new Dispatcher(signedOut);
-
-        // A signed in user but no experiences yet.
+    private Dispatcher getDispatcher() {
+        // Deal with an off line user, a signe out user, no experiences and a single group, in that
+        // order.
+        if (!NetworkManager.instance.isConnected()) return new Dispatcher(offline);
+        if (!AccountManager.instance.hasAccount()) return new Dispatcher(signedOut);
         if (mExpMap.size() == 0) return new Dispatcher(noExp);
-
-        // A signed in user with experiences in more than one group.
         if (mExpMap.size() > 1) return new Dispatcher(mExpMap);
 
         // A signed in user with experiences in more than one room but only one group.
@@ -201,14 +172,60 @@ public enum GameManager {
         return new Dispatcher(fragmentType, groupKey, roomKey, expList.get(0));
     }
 
+    /** Return a dispatcher object for a given fragment type. */
+    private Dispatcher getDispatcher(final FragmentType type) {
+        // A signed out User or the app is in an offline state..
+        List<String> list = getExperiences(type);
+        if (list == null || list.size() == 0) return new Dispatcher(type, mExpMap);
+
+        // A signed in user but no experiences yet.
+        if (list.size() == 1) return new Dispatcher(type, list.get(0));
+
+        // A signed in user with more than one experience of the given type.
+        return new Dispatcher(type.showType, list);
+    }
+
+    /** Return cached experiences of a given type. */
+    private List<String> getExperiences(final FragmentType type) {
+        List<String> result = new ArrayList<>();
+        for (String expKey : DatabaseListManager.instance.experienceMap.keySet()) {
+            Experience experience = DatabaseListManager.instance.experienceMap.get(expKey);
+            if (experience.getFragmentType() == type) result.add(expKey);
+        }
+
+        return result;
+    }
+
     /** Return the fragment type associated with the experience given by the experience key. */
     private FragmentType getFragmentType(final String expKey) {
-        return mExperienceMap.get(expKey).getFragType();
+        return mExperienceMap.get(expKey).getFragmentType();
     }
 
     /** Return the string value associated with the two players based on the current turn. */
     private String getTurn(int index, Fragment context, int first, int second) {
         return getFragment(index).getTurn() ? context.getString(first) : context.getString(second);
+    }
+
+    /** Return true iff a fragment for the given experience is started. */
+    private boolean startNextFragment(final FragmentActivity context, final Dispatcher dispatcher) {
+        // Ensure that the fragment exists.  Create it if not.
+        int index = dispatcher.type.ordinal();
+        if (mFragmentList[index] == null) {
+            try {
+                mFragmentList[index] = dispatcher.type.fragmentClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        // Make the disppatched fragment current and initialize it.
+        mCurrentFragment = index;
+        mFragmentList[index].setupExperience(dispatcher);
+        context.getSupportFragmentManager().beginTransaction()
+            .replace(R.id.game_pane_fragment_container, mFragmentList[index])
+            .commit();
+        return true;
     }
 
     // Inner classes.

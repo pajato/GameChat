@@ -31,7 +31,8 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
-import com.pajato.android.gamechat.database.handler.ExpProfileChangeHandler;
+import com.pajato.android.gamechat.database.handler.ExpProfilesChangeHandler;
+import com.pajato.android.gamechat.database.handler.ExperienceChangeHandler;
 import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
 import com.pajato.android.gamechat.database.handler.MessagesChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
@@ -43,6 +44,7 @@ import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.MessageListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
+import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -57,7 +59,6 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.room;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -80,6 +81,18 @@ public enum DatabaseListManager {
     /** The map associating experience profile keys and values. */
     public Map<String, ExpProfile> expProfileMap = new HashMap<>();
 
+    /** The map associating experience keys with experiences. */
+    public Map<String, Experience> experienceMap = new HashMap<>();
+
+    /** The collection of profiles for the joined groups, keyed by the group push key. */
+    private Map<String, Group> groupMap = new HashMap<>();
+
+    /** The collection of profiles for the joined rooms, keyed by the room push key. */
+    public Map<String, Room> roomMap = new HashMap<>();
+
+    /** The current room (the one most previously selected or used.) */
+    public Room currentRoom;
+
     // Private instance variables.
 
     /** A map associating date header type values with lists of group push keys. */
@@ -88,16 +101,44 @@ public enum DatabaseListManager {
     /** The collection of messages in the rooms in a group, keyed by the group push key. */
     private Map<String, Map<String, List<Message>>> mGroupMessageMap = new HashMap<>();
 
-    /** The collection of profiles for the joined groups, keyed by the group push key. */
-    private Map<String, Group> mGroupProfileMap = new HashMap<>();
-
     /** A map associating a group push key with it's most recent message. */
     private Map<String, Message> mGroupToLastNewMessageMap = new HashMap<>();
 
-    /** The collection of profiles for the joined rooms, keyed by the room push key. */
-    private Map<String, Room> mRoomProfileMap = new HashMap<>();
-
     // Public instance methods.
+
+    /** Return null, the current group key value or the me group. */
+    public String getGroupKey() {
+        Room room = currentRoom != null ? currentRoom : getMeRoom();
+        return room != null ? room.groupKey : null;
+    }
+
+    /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
+    public String getGroupName(final String groupKey) {
+        Group group = groupMap.get(groupKey);
+        return group != null ? group.name : "Anonymous";
+    }
+
+    /** Get the profile for a given group, queueing it up to be loaded if necessary. */
+    public Group getGroupProfile(final String groupKey) {
+        // Return the group if it has been loaded.
+        Group result = groupMap.get(groupKey);
+        if (result != null) return result;
+
+        // The given group needs to be loaded.  Do so now (checking that it has not already been
+        // registered.)
+        String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
+        String name = "profileChangeHandler" + groupKey;
+        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
+        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+
+        return null;
+    }
+
+    /** Get a map of messages by room in a given group. */
+    public Map<String, List<Message>> getGroupMessages(final String groupKey) {
+        return mGroupMessageMap.get(groupKey);
+    }
 
     /** Get the list data given a list type. */
     public List<ChatListItem> getList(final ChatListType type, final ChatListItem item) {
@@ -119,43 +160,36 @@ public enum DatabaseListManager {
         return new ArrayList<>();
     }
 
-    /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
-    public String getGroupName(final String groupKey) {
-        Group group = mGroupProfileMap.get(groupKey);
-        return group != null ? group.name : "Anonymous";
-    }
+    /** Return the "Me" room or null if there is no such room for one reason or another. */
+    public Room getMeRoom() {
+        // Ensure that a search is viable.  Return null if not.
+        if (roomMap == null || roomMap.size() == 0) return null;
 
-    /** Get the profile for a given group, queueing it up to be loaded if necessary. */
-    public Group getGroupProfile(final String groupKey) {
-        // Return the group if it has been loaded.
-        Group result = mGroupProfileMap.get(groupKey);
-        if (result != null) return result;
-
-        // The given group needs to be loaded.  Do so now (checking that it has not already been
-        // registered.)
-        String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
-        String name = "profileChangeHandler" + groupKey;
-        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
-        DatabaseRegistrar.instance.registerHandler(handler);
+        // Walk the list of rooms to find one (and there should only be one) with a Me room type.
+        for (String key : roomMap.keySet()) {
+            // Determine if this is a "me" room.
+            Room room = roomMap.get(key);
+            if (room.type == Room.ME) return room;
+        }
 
         return null;
     }
 
-    /** Get a map of messages by room in a given group. */
-    public Map<String, List<Message>> getGroupMessages(final String groupKey) {
-        return mGroupMessageMap.get(groupKey);
+    /** Return null, the current room key or the me room key. */
+    public String getRoomKey() {
+        Room room = currentRoom != null ? currentRoom : getMeRoom();
+        return room != null ? room.key : null;
     }
 
     /** Obtain a name for the room with the given key, "Anonymous" if a name is not available. */
     public String getRoomName(final String roomKey) {
-        Room room = mRoomProfileMap.get(roomKey);
+        Room room = roomMap.get(roomKey);
         return room != null ? room.name : "Anonymous";
     }
 
     /** Get the profile for a given room. */
     public Room getRoomProfile(final String roomKey) {
-        return mRoomProfileMap.get(roomKey);
+        return roomMap.get(roomKey);
     }
 
     /** Handle a authentication event. */
@@ -173,15 +207,15 @@ public enum DatabaseListManager {
             // Deal with either a logout or no valid user by clearing the various state.
             mDateHeaderTypeToGroupListMap.clear();
             mGroupMessageMap.clear();
-            mGroupProfileMap.clear();
+            groupMap.clear();
             mGroupToLastNewMessageMap.clear();
-            mRoomProfileMap.clear();
+            roomMap.clear();
         }
     }
 
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        mGroupProfileMap.put(event.key, event.group);
+        groupMap.put(event.key, event.group);
     }
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
@@ -223,7 +257,7 @@ public enum DatabaseListManager {
 
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
-        mRoomProfileMap.put(event.key, event.room);
+        roomMap.put(event.key, event.room);
     }
 
     // Private instance methods.
@@ -352,9 +386,19 @@ public enum DatabaseListManager {
     private void setExpProfileWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "expProfilelChangeHandler{%s}", room);
+        String name = String.format(Locale.US, "expProfilesChangeHandler{%s}", roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExpProfileChangeHandler(name, groupKey, roomKey);
+        DatabaseEventHandler handler = new ExpProfilesChangeHandler(name, groupKey, roomKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    /** Setup a listener for experience changes in the given room. */
+    private void setExperienceWatcher(final ExpProfile profile) {
+        // Set up a watcher in the given room for experiences changes.
+        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.key);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 

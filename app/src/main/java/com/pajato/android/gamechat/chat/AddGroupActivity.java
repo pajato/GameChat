@@ -233,20 +233,20 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Obtain the default room name, create the default room, update the group's room map and
         // add the group key to the account's group id list.
         String name = getString(R.string.DefaultRoomName);
-        Room room = new Room(null, mGroup.owner, name, groupKey, 0, 0, PUBLIC, null);
+        Room room = new Room(roomKey, mGroup.owner, name, groupKey, 0, 0, PUBLIC, null);
         mGroup.roomMap.put(name, roomKey);
         account.groupIdList.add(groupKey);
 
         // Persist the group and room to the database and update the account with the new joined
         // list entry.
-        DatabaseManager.instance.createGroupProfile(groupKey, mGroup);
-        DatabaseManager.instance.createRoomProfile(groupKey, roomKey, room);
+        DatabaseManager.instance.createGroupProfile(mGroup);
+        DatabaseManager.instance.createRoomProfile(room);
         DatabaseManager.instance.appendDefaultJoinedRoomEntry(account, mGroup);
         DatabaseManager.instance.updateAccount(account);
 
         // Post a welcome message to the default room from the owner.
         String text = "Welcome to my new group!";
-        DatabaseManager.instance.createMessage(text, STANDARD, account, groupKey, roomKey, room);
+        DatabaseManager.instance.createMessage(text, STANDARD, account, room);
     }
 
     /** Send email to the support address. */

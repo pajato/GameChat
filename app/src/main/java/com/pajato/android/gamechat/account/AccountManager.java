@@ -107,6 +107,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return icon != null ? icon.toString() : null;
     }
 
+    /** Return TRUE iff there is a signed in User. */
+    public boolean hasAccount() {
+        return getCurrentAccount() != null;
+    }
+
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
         // Determine if this state represents a User signing in or signing out.
@@ -116,9 +121,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // A User has signed in. Set up a database listener for the associated account.  That
             // listener will post an account change event with the account information to the app.
             String path = String.format("/accounts/%s", user.getUid());
-            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-            if (handler == null) handler = new AccountChangeHandler(name, path);
-            DatabaseRegistrar.instance.registerHandler(handler);
+            if (!(DatabaseRegistrar.instance.isRegistered(name))) {
+                DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
+            }
         } else {
             // The User is signed out.  Clear the current account key and notify the app of the sign
             // out event.
@@ -198,7 +203,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             } else {
                 // The account does not exist.  Create it now, ensuring there really is a User.
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user != null) DatabaseManager.instance.createAccount(getAccount(user));
+                account = getAccount(user);
+                if (user != null) DatabaseManager.instance.createAccount(account);
             }
             AppEventManager.instance.post(new AccountStateChangeEvent(account));
             AppEventManager.instance.post(new AccountStateChangeHandled(account));

@@ -21,9 +21,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -66,14 +69,19 @@ public abstract class BaseGameFragment extends BaseFragment {
 
     // Public instance methods.
 
+    /** Provide a default experience via the subclass providing a list of player accounts. */
+    public Experience getDefaultExperience(final List<Account> players) {
+        // TODO: By default, log that the subclass does not provide a default experience, generate a
+        // Toast or Snackbar for the User and let the User bail via default controls.
+        return null;
+    }
+
     /** Return the current turn indicator. */
     public boolean getTurn() {
         return mTurn;
     }
 
-    /**
-     * not sure yet what this is all about.
-     */
+    /** Remove this after dealing with the chess and checkers fragments. */
     abstract public void messageHandler(final String message);
 
     @Override public void onAttach(Context context) {
@@ -112,8 +120,14 @@ public abstract class BaseGameFragment extends BaseFragment {
     }
 
     /** Provide a default implementation for setting up an experience. */
-    protected void setupExperience() {
+    protected void setupExperience(final Dispatcher dispatcher) {
+        // Ensure that the dispatcher is valid.  Abort if not.
+        // TODO: might be better to show a toast or snackbar on error.
         mExperience = null;
+        if (dispatcher == null) return;
+
+        // Use the dispatcher data to set up the default experience.
+        mExperience = DatabaseManager.instance.getExperience(this, dispatcher);
     }
 
 }
