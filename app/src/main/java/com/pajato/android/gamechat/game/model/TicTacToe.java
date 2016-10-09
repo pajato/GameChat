@@ -19,9 +19,11 @@ package com.pajato.android.gamechat.game.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.FragmentType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +62,11 @@ import java.util.Map;
     /** The member account identifer who created the experience. */
     public String owner;
 
-    public List<Map<String, String>> players;
+    /** The list of players, for tictactoe, two of them. */
+    public List<Player> players;
+
+    /** The list of players in a form the Firebase updateChildren() can grok. */
+    public List<Map<String, Object>> playerList;
 
     /** The room push key. */
     public String roomKey;
@@ -79,23 +85,20 @@ import java.util.Map;
     /** Build an empty args constructor for the database. */
     public TicTacToe() {}
 
-    /** Build a default TicTacToe using all the parameters. */
-    public TicTacToe(final String key, final String owner, final String name, final String url,
-                     final long createTime, final long modTime, final boolean turn, final int type,
-                     final String groupKey, final String roomKey, final List<String> board,
-                     final List<Map<String, String>> players) {
-        this.board = board;
+    /** Build a default TicTacToe using the given parameters and defaulting the rest. */
+    public TicTacToe(final String key, final String id, final String name, final long createTime,
+                     final String groupKey, final String roomKey, final List<Player> players) {
         this.createTime = createTime;
         this.experienceKey = key;
         this.groupKey = groupKey;
-        this.modTime = modTime;
+        this.modTime = 0;
         this.name = name;
-        this.owner = owner;
+        this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
-        this.turn = turn;
-        this.type = type;
-        this.url = url;
+        turn = true;
+        type = ExpType.ttt.ordinal();
+        url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -108,7 +111,7 @@ import java.util.Map;
         result.put("modTime", modTime);
         result.put("name", name);
         result.put("owner", owner);
-        result.put("players", players);
+        result.put("players", getPlayerList());
         result.put("roomKey", roomKey);
         result.put("turn", turn);
         result.put("type", type);
@@ -139,23 +142,38 @@ import java.util.Map;
         return name;
     }
 
+    /** Convert the list of players to a list of maps to pacify the Firebase parser. */
+    @Exclude public List<Map<String, Object>> getPlayerList() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Player player : players) {
+            // Determine if the player needs to be added.  Just continue if it does not.
+            if (player == null) continue;
+
+            // Add the player as a map to the list to keep the firebase parser content.
+            result.add(player.toMap());
+        }
+
+        return result;
+    }
+
+    /** Provide a getter for the players to satisfy the Firebase contract. */
+    @Exclude public List<Player> getPlayers() {
+        return players;
+    }
+
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() {
         return roomKey;
     }
 
-    /** Return the sigil text value for the given player. */
-    @Exclude public String getSigilValue(final int index) {
-        // Ensure that the index is valid. Return the sentinal value "?" if not.
-        if (index < 0 || index > 1) return "?";
-
-        // The index is valid. Return the sigil value.
-        return players.get(index).get("sigil");
+    /** Return the symbol text value for the player at the given index. */
+    @Exclude public String getSymbolValue(final int index) {
+        return players.get(index).symbol;
     }
 
-    /** Return the sigil text value for the player whose turn is current. */
-    @Exclude public String getSigilValue() {
-        return turn ? getSigilValue(0) : getSigilValue(1);
+    /** Return the symbol text value for the player whose turn is current. */
+    @Exclude public String getSymbolValue() {
+        return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
     /** Return the type to satisfy the Experience contract. */
@@ -168,9 +186,20 @@ import java.util.Map;
         experienceKey = key;
     }
 
+    /** Set the player map. */
+    public void setPlayers(final List<Map<String, Object>> list) {
+        players = new ArrayList<>();
+        for (int index = 0; index < list.size(); index++) {
+            Map<String, Object> map = list.get(index);
+            Player player = new Player(map.get("name"), map.get("symbol"), map.get("winCount"));
+            players.add(player);
+        }
+    }
+
     /** Toggle the turn state. */
     @Exclude public boolean toggleTurn() {
         turn = !turn;
         return turn;
     }
+
 }

@@ -28,13 +28,8 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.game.BaseGameFragment;
-import com.pajato.android.gamechat.game.Dispatcher;
-import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.model.ExpProfile;
-import com.pajato.android.gamechat.game.model.TicTacToe;
-import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,7 +95,6 @@ public enum DatabaseManager {
 
     /** Create and persist an account to the database. */
     public void createAccount(@NonNull Account account) {
-        //public void createAccount(@NonNull FirebaseUser user, final int accountType) {
         // Set up the push keys for the account, default "me" group and room.
         String groupKey = mDatabase.child(GROUPS_PATH).push().getKey();
         String path = String.format(Locale.US, ROOMS_PATH, groupKey);
@@ -133,16 +127,16 @@ public enum DatabaseManager {
     }
 
     /** Persist the given experience to the database. */
-    public Experience createExperience(final Experience experience) {
+    public void createExperience(final Experience experience) {
         // Ensure that the requisite keys exist.  Abort if either key does not exist.
         String groupKey = experience.getGroupKey();
         String roomKey = experience.getRoomKey();
-        if (groupKey == null || roomKey == null) return null;
+        if (groupKey == null || roomKey == null) return;
 
         // Get the name and type for the given experience.  Abort if either does not exist.
         String name = experience.getName();
         int type = experience.getType();
-        if (name == null || type == -1) return null;
+        if (name == null || type == -1) return;
 
         // Setup the keys to persist the experience profile and the experience.
         String experiencesPath = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
@@ -156,12 +150,11 @@ public enum DatabaseManager {
         updateChildren(path, profile.toMap());
         path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, experienceKey);
         experience.setExperienceKey(experienceKey);
-        updateExperience(path, experience);
+        updateChildren(path, experience.toMap());
 
         // Cache both the profile and the experience then return the experience.
         DatabaseListManager.instance.expProfileMap.put(profileKey, profile);
         DatabaseListManager.instance.experienceMap.put(experienceKey, experience);
-        return experience;
     }
 
     /** Persist a given group object using the given key. */
@@ -207,33 +200,6 @@ public enum DatabaseManager {
         String profilePath = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
         room.createTime = new Date().getTime();
         updateChildren(profilePath, room.toMap());
-    }
-
-    /** Return an experience for a given dispatcher instance. */
-    public Experience getExperience(@NonNull final BaseGameFragment fragment,
-                                    @NonNull final Dispatcher dispatcher) {
-        // Use a cached, online experience if one is available.
-        String key = dispatcher.expKey;
-        if (key != null) return DatabaseListManager.instance.experienceMap.get(key);
-
-        // Use a cached, offline experience if one is available.
-        key = dispatcher.type.expType != null ? dispatcher.type.expType.name() : null;
-        Experience exp = key != null ? DatabaseListManager.instance.experienceMap.get(key) : null;
-        boolean offline = !NetworkManager.instance.isConnected();
-        if (offline && exp != null) return exp;
-
-        // Handle the case of a signed in User wanting to create a new game.
-        List<Account> players = getPlayers(dispatcher);
-        exp = fragment.getDefaultExperience(players);
-        boolean hasAccount = AccountManager.instance.hasAccount();
-        if (hasAccount && exp != null) return createExperience(exp);
-
-        // Lastly, if there is a valid key, use it to cache an offline experience.  Abort if no
-        // such key is available.
-        if (key == null  || exp == null) return null;
-        exp.setExperienceKey(key);
-        DatabaseListManager.instance.experienceMap.put(key, exp);
-        return exp;
     }
 
     /** Return the database path to an experience for a given experience profile. */
@@ -319,54 +285,6 @@ public enum DatabaseManager {
         Map<String, Object> unreadMap = new HashMap<>();
         unreadMap.put("unreadList", message.unreadList);
         DatabaseManager.instance.updateChildren(path, unreadMap);
-    }
-
-    // Private instance methods.
-
-    /** Return a possibly null list of player information for a two participant experience. */
-    private List<Account> getPlayers(final Dispatcher dispatcher) {
-        // Determine if this is an offline experience in which no accounts are provided.
-        Account player1 = AccountManager.instance.getCurrentAccount();
-        if (player1 == null) return null;
-
-        // This is an online experience.  Use the current signed in User as the first player.
-        List<Account> players = new ArrayList<>();
-        players.add(player1);
-
-        // Determine the second account, if any, based on the room.
-        String key = dispatcher.roomKey;
-        Room room = key != null ? DatabaseListManager.instance.roomMap.get(key) : null;
-        int type = room != null ? room.type : -1;
-        switch (type) {
-            //case USER:
-                // Handle another User by providing their account.
-            //    break;
-            default:
-                // Only one online player.  Just return.
-                break;
-        }
-
-        return players;
-    }
-
-    /** Update a given experience to the database by converting it to a concrete type. */
-    private void updateExperience(final String path, final Experience experience) {
-        // Case on the experience type to actually do the database update as the experience must be
-        // converted (cast) to a concreate class instead of an interface since Firebase uses
-        // reflection.
-        ExpType type = ExpType.values()[experience.getType()];
-        switch (type) {
-            case ttt:
-                // Update the database using the actual concreate experience class.
-                if (!(experience instanceof TicTacToe)) return;
-
-                // Update the database.
-                TicTacToe tictactoe = (TicTacToe) experience;
-                updateChildren(path, tictactoe.toMap());
-                break;
-            default:
-                break;
-        }
     }
 
 }

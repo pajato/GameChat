@@ -30,8 +30,18 @@ import android.net.NetworkInfo;
 public enum NetworkManager {
     instance;
 
+    // Public constants.
+
+    /** The sentinel value used to indicate an offline, cached database object. */
+    public static final String OFFLINE_OWNER_ID = "offlineOwnerId";
+
+    /** The sentinel value used to indicate an offline, cached experience key. */
+    public static final String OFFLINE_EXPERIENCE_KEY = "offlineExperienceKey";
+
     // Private instance variables.
 
+
+    /** The network state. */
     private boolean online;
 
     // Public instance methods

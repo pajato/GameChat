@@ -150,38 +150,47 @@ public enum GameManager {
 
     /** Return a dispatcher object based on the current experience state. */
     private Dispatcher getDispatcher() {
-        // Deal with an off line user, a signe out user, no experiences and a single group, in that
-        // order.
+        // Deal with an off line user, a signed out user, or no experiences at all, in that order.
+        // In each case, return an empty dispatcher but for the fragment type of the next screen to
+        // show.
         if (!NetworkManager.instance.isConnected()) return new Dispatcher(offline);
         if (!AccountManager.instance.hasAccount()) return new Dispatcher(signedOut);
         if (mExpMap.size() == 0) return new Dispatcher(noExp);
+
+        // Deal with a signed in User with multiple experiences across more than one group.  Return
+        // a dispatcher with a map of experience keys.
         if (mExpMap.size() > 1) return new Dispatcher(mExpMap);
 
-        // A signed in user with experiences in more than one room but only one group.
+        // A signed in user with experiences in more than one room but only one group. Return a
+        // dispatcher identifying the group and room.
         String groupKey = mExpMap.keySet().iterator().next();
         Map<String, List<String>> roomMap = mExpMap.get(groupKey);
         if (roomMap.size() > 1) return new Dispatcher(groupKey, roomMap);
 
-        // A signed in user with multiple experiences in a single room.
+        // A signed in user with multiple experiences in a single room.  Return a dispatcher that
+        // identifies the group, room and the list of experiences, possibly filtered.
         String roomKey = roomMap.keySet().iterator().next();
         List<String> expList = roomMap.get(roomKey);
         if (expList.size() > 1) return new Dispatcher(groupKey, roomKey, expList);
 
-        // A signed in User with one experience. */
+        // A signed in User with one experience. Return a dispatcher to show the single experience.
         FragmentType fragmentType = getFragmentType(expList.get(0));
         return new Dispatcher(fragmentType, groupKey, roomKey, expList.get(0));
     }
 
     /** Return a dispatcher object for a given fragment type. */
     private Dispatcher getDispatcher(final FragmentType type) {
-        // A signed out User or the app is in an offline state..
+        // Case: there are no experiences of the given type. Return an empty dispatcher but for the
+        // fragment type.
         List<String> list = getExperiences(type);
-        if (list == null || list.size() == 0) return new Dispatcher(type, mExpMap);
+        if (list == null || list.size() == 0) return new Dispatcher(type);
 
-        // A signed in user but no experiences yet.
+        // Case: a signed in user with a single experience. Return a dispatcher with the experience
+        // key.
         if (list.size() == 1) return new Dispatcher(type, list.get(0));
 
-        // A signed in user with more than one experience of the given type.
+        // A signed in user with more than one experience of the given type. Return a dispatcher
+        // with the list of relevant experience keys.
         return new Dispatcher(type.showType, list);
     }
 
@@ -219,9 +228,10 @@ public enum GameManager {
             }
         }
 
-        // Make the disppatched fragment current and initialize it.
+        // Make the next fragment current and initialize it using the context of the fragment
+        // currently in the foreground.
         mCurrentFragment = index;
-        mFragmentList[index].setupExperience(dispatcher);
+        mFragmentList[index].setupExperience(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.game_pane_fragment_container, mFragmentList[index])
             .commit();

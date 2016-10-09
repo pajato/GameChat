@@ -64,6 +64,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** A key used to access account available data. */
     public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
 
+    /** The sentinel value to use for indicating an offline cached database object owner. */
+    public static final String SIGNED_OUT_OWNER_ID = "signedOutOwnerId";
+
+    /** The sentinel value to use for indicating a signed out experience key. */
+    public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
+
     // Private instance variables
 
     /** The current account key, null if there is no current account. */
@@ -194,7 +200,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         /** Get the current account using a list of account identifiers. */
         @Override public void onDataChange(final DataSnapshot dataSnapshot) {
             // Determine if the account exists.
-            Account account = null;
+            Account account;
             if (dataSnapshot.exists()) {
                 // It does.  Register it and notify the app that this is the new account of record.
                 account = dataSnapshot.getValue(Account.class);

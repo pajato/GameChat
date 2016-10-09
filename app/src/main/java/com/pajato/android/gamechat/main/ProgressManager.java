@@ -43,17 +43,22 @@ public enum ProgressManager {
 
     /** Show the initial loading dialog. */
     public void show(@NonNull final Context context) {
-        if (mProgressDialog != null) {
-            // A progress dialog already exists!  Generate a stack trace to help debug this.
-            Log.e(TAG, "A progress dialog already exists.  Generate a stack trace!");
-            Thread.dumpStack();
-        }
-
         // Create and display the progress dialog.
         Log.d(TAG, "Turning on progress spinner now.");
         mProgressDialog = new ProgressDialog(context);
         mProgressDialog.setTitle("Starting...");
         mProgressDialog.setMessage("Please wait while the app starts up...");
+        mProgressDialog.show();
+        mIsShowing = true;
+    }
+
+    /** Show a loading dialog with a given message. */
+    public void show(@NonNull final Context context, final String title, final String message) {
+        // Create and display the progress dialog.
+        Log.d(TAG, "Turning on progress spinner now.");
+        mProgressDialog = new ProgressDialog(context);
+        mProgressDialog.setTitle(title);
+        mProgressDialog.setMessage(message);
         mProgressDialog.show();
         mIsShowing = true;
     }

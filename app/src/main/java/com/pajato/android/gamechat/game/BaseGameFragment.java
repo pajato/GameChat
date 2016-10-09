@@ -21,12 +21,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.common.BaseFragment;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -69,13 +67,6 @@ public abstract class BaseGameFragment extends BaseFragment {
 
     // Public instance methods.
 
-    /** Provide a default experience via the subclass providing a list of player accounts. */
-    public Experience getDefaultExperience(final List<Account> players) {
-        // TODO: By default, log that the subclass does not provide a default experience, generate a
-        // Toast or Snackbar for the User and let the User bail via default controls.
-        return null;
-    }
-
     /** Return the current turn indicator. */
     public boolean getTurn() {
         return mTurn;
@@ -105,6 +96,11 @@ public abstract class BaseGameFragment extends BaseFragment {
 
     // Protected instance methods.
 
+    /** Create a new experience to be displayed in this fragment. */
+    protected void createExperience(final Context context, final Dispatcher dispatcher) {
+        // nop; the subclass should handle this.
+    }
+
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
         String manager = getFragmentManager().toString();
@@ -120,14 +116,22 @@ public abstract class BaseGameFragment extends BaseFragment {
     }
 
     /** Provide a default implementation for setting up an experience. */
-    protected void setupExperience(final Dispatcher dispatcher) {
+    protected void setupExperience(final Context context, final Dispatcher dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
-        mExperience = null;
-        if (dispatcher == null) return;
+        if (dispatcher == null || dispatcher.type == null) return;
 
-        // Use the dispatcher data to set up the default experience.
-        mExperience = DatabaseManager.instance.getExperience(this, dispatcher);
+        // Determine if the fragment type does not require an experience. Abort if not.
+        ExpType expType = dispatcher.type.expType;
+        if (expType == null) return;
+
+        // Determine if an experience is available via the dispatcher and fetch it.
+        mExperience = dispatcher.expKey != null
+            ? DatabaseListManager.instance.experienceMap.get(dispatcher.expKey) : null;
+
+        // Determine if an experience should be created.  If so use the passed in context in setting
+        // up the experience as the current context for this fragment may not exist yet.
+        if (dispatcher.expKey == null) createExperience(context, dispatcher);
     }
 
 }
