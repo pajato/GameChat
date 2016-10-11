@@ -382,6 +382,20 @@ public enum DatabaseListManager {
         return result;
     }
 
+    // Package private instance methods.
+
+    /** Setup a listener for experience changes in the given room. */
+    void setExperienceWatcher(final ExpProfile profile) {
+        // Set up a watcher in the given room for experiences changes.
+        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.key);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    // Private instance methods.
+
     /** Setup a listener for experience changes in the given room. */
     private void setExpProfileWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
@@ -389,16 +403,6 @@ public enum DatabaseListManager {
         String name = String.format(Locale.US, "expProfilesChangeHandler{%s}", roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ExpProfilesChangeHandler(name, groupKey, roomKey);
-        DatabaseRegistrar.instance.registerHandler(handler);
-    }
-
-    /** Setup a listener for experience changes in the given room. */
-    private void setExperienceWatcher(final ExpProfile profile) {
-        // Set up a watcher in the given room for experiences changes.
-        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.key);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 

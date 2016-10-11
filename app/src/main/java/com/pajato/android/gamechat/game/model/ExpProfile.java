@@ -33,10 +33,13 @@ import java.util.Map;
 @IgnoreExtraProperties
 public class ExpProfile {
 
+    /** The experience key. */
+    public String expKey;
+
     /** The group key. */
     public String groupKey;
 
-    /** The experience key. */
+    /** The profile key (self reference). */
     public String key;
 
     /** The experience's display name. */
@@ -55,17 +58,19 @@ public class ExpProfile {
 
     /** Build a experience profile with a full set of values. */
     public ExpProfile(final String key, final String name, final int type, final String groupKey,
-                      final String roomKey) {
+                      final String roomKey, final String expKey) {
         this.key = key;
         this.name = name;
         this.type = type;
         this.groupKey = groupKey;
         this.roomKey = roomKey;
+        this.expKey = expKey;
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
+        result.put("expKey", expKey);
         result.put("groupKey", groupKey);
         result.put("key", key);
         result.put("name", name);

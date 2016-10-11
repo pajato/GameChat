@@ -59,9 +59,8 @@ public enum DatabaseManager {
     private static final String JOINED_ROOM_LIST_PATH = ACCOUNT_PATH + "joinedRoomList";
     private static final String ROOMS_PATH = GROUPS_PATH + "%s/rooms/";
     private static final String ROOM_PROFILE_PATH = ROOMS_PATH + "%s/profile/";
-    private static final String EXP_PROFILES_PATH = ROOMS_PATH + "%s/exp/profiles/";
-    private static final String EXP_PROFILE_PATH = EXP_PROFILES_PATH + "%s/";
-    private static final String EXPERIENCES_PATH = ROOMS_PATH + "%s/exp/experiences/";
+    private static final String EXP_PROFILE_LIST_PATH = ROOMS_PATH + "%s/profile/expProfileList";
+    private static final String EXPERIENCES_PATH = ROOMS_PATH + "%s/experiences/";
     private static final String EXPERIENCE_PATH = EXPERIENCES_PATH + "%s/";
     private static final String MESSAGES_PATH = ROOMS_PATH + "%s/messages/";
     private static final String MESSAGE_PATH = MESSAGES_PATH + "%s/";
@@ -138,23 +137,22 @@ public enum DatabaseManager {
         int type = experience.getType();
         if (name == null || type == -1) return;
 
-        // Setup the keys to persist the experience profile and the experience.
-        String experiencesPath = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
-        String experienceKey = mDatabase.child(experiencesPath).push().getKey();
-        ExpProfile profile = new ExpProfile(experienceKey, name, type, groupKey, roomKey);
-        String expProfilesPath = String.format(Locale.US, EXP_PROFILES_PATH, groupKey, roomKey);
-        String profileKey = mDatabase.child(expProfilesPath).push().getKey();
+        // Persist the experience.
+        String path = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
+        DatabaseReference ref = mDatabase.child(path).push();
+        experience.setExperienceKey(ref.getKey());
+        ref.setValue(experience.toMap());
 
-        // Create and persist first the experience profile object and then the experience object.
-        String path = String.format(Locale.US, EXP_PROFILE_PATH, groupKey, roomKey, profileKey);
-        updateChildren(path, profile.toMap());
-        path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, experienceKey);
-        experience.setExperienceKey(experienceKey);
-        updateChildren(path, experience.toMap());
-
-        // Cache both the profile and the experience then return the experience.
-        DatabaseListManager.instance.expProfileMap.put(profileKey, profile);
-        DatabaseListManager.instance.experienceMap.put(experienceKey, experience);
+        // Persist the experience profile so that the room's experience profile list watcher will
+        // append it.  Finally set the experience watcher as, presumbably, the User is creating the
+        // experience to enjoy it asap.
+        path = String.format(Locale.US, EXP_PROFILE_LIST_PATH, groupKey, roomKey);
+        ref = mDatabase.child(path).push();
+        String key = ref.getKey();
+        String expKey = experience.getExperienceKey();
+        ExpProfile profile = new ExpProfile(key, name, type, groupKey, roomKey, expKey);
+        ref.setValue(profile.toMap());
+        DatabaseListManager.instance.setExperienceWatcher(profile);
     }
 
     /** Persist a given group object using the given key. */
@@ -211,7 +209,7 @@ public enum DatabaseManager {
 
     /** Return the database path to a experience profile for a given room and profile key. */
     public String getExpProfilesPath(final String groupKey, final String roomKey) {
-        return String.format(Locale.US, EXP_PROFILES_PATH, groupKey, roomKey);
+        return String.format(Locale.US, EXP_PROFILE_LIST_PATH, groupKey, roomKey);
     }
 
     /** Return a room push key to use with a subsequent room object persistence. */

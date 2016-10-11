@@ -22,10 +22,13 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.event.MessageChangeEvent.CHANGED;
@@ -97,11 +100,14 @@ public class ExpProfilesChangeHandler extends DatabaseEventHandler implements Ch
         // A snapshot exists.  Extract the experience profile from it and handle it based on the
         // change type. Finally notify the app of the change.
         ExpProfile expProfile = snapshot.getValue(ExpProfile.class);
+        Room roomProfile = DatabaseListManager.instance.getRoomProfile(expProfile.roomKey);
         switch (type) {
             case NEW:
             case CHANGED:
-                // Update the database list experience profile map by adding or replacing the entry.
-                DatabaseListManager.instance.expProfileMap.put(expProfile.key, expProfile);
+                // Update the room's experience profile list by adding or replacing the profile.
+                List<ExpProfile> list = roomProfile.expProfileList;
+                if (list == null) list = new ArrayList<>();
+                list.add(expProfile);
                 break;
             case REMOVED:
                 // Update the database list experience profile map by removing the entry (key).

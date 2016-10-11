@@ -279,7 +279,7 @@ public class TTTFragment extends BaseGameFragment {
         Room room = key != null ? DatabaseListManager.instance.roomMap.get(key) : null;
         int type = room != null ? room.type : -1;
         switch (type) {
-            //case USER:
+            //case MEMBER:
                 // Handle another User by providing their account.
             //    break;
             default:

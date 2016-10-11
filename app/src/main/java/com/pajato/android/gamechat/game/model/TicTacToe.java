@@ -23,7 +23,6 @@ import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.FragmentType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,7 @@ import java.util.Map;
     public long createTime;
 
     /** The experience push key. */
-    public String experienceKey;
+    public String key;
 
     /** The group push key. */
     public String groupKey;
@@ -64,9 +63,6 @@ import java.util.Map;
 
     /** The list of players, for tictactoe, two of them. */
     public List<Player> players;
-
-    /** The list of players in a form the Firebase updateChildren() can grok. */
-    public List<Map<String, Object>> playerList;
 
     /** The room push key. */
     public String roomKey;
@@ -89,7 +85,7 @@ import java.util.Map;
     public TicTacToe(final String key, final String id, final String name, final long createTime,
                      final String groupKey, final String roomKey, final List<Player> players) {
         this.createTime = createTime;
-        this.experienceKey = key;
+        this.key = key;
         this.groupKey = groupKey;
         this.modTime = 0;
         this.name = name;
@@ -106,12 +102,12 @@ import java.util.Map;
         Map<String, Object> result = new HashMap<>();
         result.put("board", board);
         result.put("createTime", createTime);
-        result.put("expKey", experienceKey);
+        result.put("key", key);
         result.put("groupKey", groupKey);
         result.put("modTime", modTime);
         result.put("name", name);
         result.put("owner", owner);
-        result.put("players", getPlayerList());
+        result.put("players", players);
         result.put("roomKey", roomKey);
         result.put("turn", turn);
         result.put("type", type);
@@ -129,7 +125,7 @@ import java.util.Map;
 
     /** Return the experience push key. */
     @Exclude @Override public String getExperienceKey() {
-        return experienceKey;
+        return key;
     }
 
     /** Return the group push key. */
@@ -140,25 +136,6 @@ import java.util.Map;
     /** Return the experience name. */
     @Exclude @Override public String getName() {
         return name;
-    }
-
-    /** Convert the list of players to a list of maps to pacify the Firebase parser. */
-    @Exclude public List<Map<String, Object>> getPlayerList() {
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Player player : players) {
-            // Determine if the player needs to be added.  Just continue if it does not.
-            if (player == null) continue;
-
-            // Add the player as a map to the list to keep the firebase parser content.
-            result.add(player.toMap());
-        }
-
-        return result;
-    }
-
-    /** Provide a getter for the players to satisfy the Firebase contract. */
-    @Exclude public List<Player> getPlayers() {
-        return players;
     }
 
     /** Return the room push key. */
@@ -183,17 +160,7 @@ import java.util.Map;
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
-        experienceKey = key;
-    }
-
-    /** Set the player map. */
-    public void setPlayers(final List<Map<String, Object>> list) {
-        players = new ArrayList<>();
-        for (int index = 0; index < list.size(); index++) {
-            Map<String, Object> map = list.get(index);
-            Player player = new Player(map.get("name"), map.get("symbol"), map.get("winCount"));
-            players.add(player);
-        }
+        this.key = key;
     }
 
     /** Toggle the turn state. */
