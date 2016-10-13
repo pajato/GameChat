@@ -41,6 +41,21 @@ public enum ProgressManager {
 
     // Public instance methods
 
+    /** Dismiss the initial loading dialog if one is showing. */
+    public void hide() {
+        Log.d(TAG, "Attempting to hide the progress dialog.");
+        if (mIsShowing && mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+            mIsShowing = false;
+        }
+    }
+
+    /** Return TRUE iff the progress spinner is being shown. */
+    public boolean isShowing() {
+        return mIsShowing;
+    }
+
     /** Show the initial loading dialog. */
     public void show(@NonNull final Context context) {
         // Create and display the progress dialog.
@@ -63,13 +78,4 @@ public enum ProgressManager {
         mIsShowing = true;
     }
 
-    /** Dismiss the initial loading dialog if one is showing. */
-    public void hide() {
-        Log.d(TAG, "Attempting to hide the progress dialog.");
-        if (mIsShowing && mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-            mIsShowing = false;
-        }
-    }
 }

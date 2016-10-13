@@ -31,7 +31,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
-import com.pajato.android.gamechat.database.handler.ExpProfilesChangeHandler;
+import com.pajato.android.gamechat.database.handler.ExpProfileListChangeHandler;
 import com.pajato.android.gamechat.database.handler.ExperienceChangeHandler;
 import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
 import com.pajato.android.gamechat.database.handler.MessagesChangeHandler;
@@ -69,23 +69,23 @@ import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeader
 public enum DatabaseListManager {
     instance;
 
+    // Public enums.
+
     /** The chat list type. */
     public enum ChatListType {
         group, message, room, member
     }
 
-    // Public class constants.
-
     // Public instance variables.
 
-    /** The map associating experience profile keys and values. */
-    public Map<String, ExpProfile> expProfileMap = new HashMap<>();
+    /** The map associating group and room push keys with a map of experience profiles. */
+    public Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap = new HashMap<>();
 
-    /** The map associating experience keys with experiences. */
+    /** The experience map. */
     public Map<String, Experience> experienceMap = new HashMap<>();
 
     /** The collection of profiles for the joined groups, keyed by the group push key. */
-    private Map<String, Group> groupMap = new HashMap<>();
+    public Map<String, Group> groupMap = new HashMap<>();
 
     /** The collection of profiles for the joined rooms, keyed by the room push key. */
     public Map<String, Room> roomMap = new HashMap<>();
@@ -233,7 +233,6 @@ public enum DatabaseListManager {
             setGroupProfileWatcher(groupKey);
             setRoomProfileWatcher(groupKey, roomKey);
             setMessageWatcher(groupKey, roomKey);
-            setExpProfileWatcher(groupKey, roomKey);
         }
     }
 
@@ -388,7 +387,7 @@ public enum DatabaseListManager {
     void setExperienceWatcher(final ExpProfile profile) {
         // Set up a watcher in the given room for experiences changes.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.key);
+        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.expKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
         DatabaseRegistrar.instance.registerHandler(handler);
@@ -397,12 +396,12 @@ public enum DatabaseListManager {
     // Private instance methods.
 
     /** Setup a listener for experience changes in the given room. */
-    private void setExpProfileWatcher(final String groupKey, final String roomKey) {
+    private void setExpProfileListWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "expProfilesChangeHandler{%s}", roomKey);
+        String name = String.format(Locale.US, "expProfileListChangeHandler{%s}", roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExpProfilesChangeHandler(name, groupKey, roomKey);
+        DatabaseEventHandler handler = new ExpProfileListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
@@ -425,13 +424,14 @@ public enum DatabaseListManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
-    /** Setup a database listener for the room profile. */
+    /** Setup database listeners for the room profile and the experience profiles in the room. */
     private void setRoomProfileWatcher(final String groupKey, final String roomKey) {
         // Kick off a value event listener for the room profile.
         String path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
         String name = "profileChangeHandler" + roomKey;
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
+        setExpProfileListWatcher(groupKey, roomKey);
     }
 
     /** Update the headers used to bracket the messages in the main list. */

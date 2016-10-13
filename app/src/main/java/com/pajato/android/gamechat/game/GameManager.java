@@ -25,10 +25,10 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.game.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,17 +58,11 @@ public enum GameManager {
     /** The current fragment. */
     private int mCurrentFragment;
 
-    /** The map associating groups, rooms, and experiences. */
-    private Map<String, Map<String, List<String>>> mExpMap = new HashMap<>();
-
-    /** A map associating an experience key with a the database model class. */
-    private Map<String, Experience> mExperienceMap = new HashMap<>();
-
     /** The current group key as determined the last selected group. */
-    public String currentGroupKey;
+    //public String currentGroupKey;
 
     /** The current room key as determined by the last selected room. */
-    public String currentRoomKey;
+    //public String currentRoomKey;
 
     // Public instance methods.
 
@@ -153,61 +147,72 @@ public enum GameManager {
         // Deal with an off line user, a signed out user, or no experiences at all, in that order.
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
         // show.
+        Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap =
+                DatabaseListManager.instance.expProfileMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher(offline);
         if (!AccountManager.instance.hasAccount()) return new Dispatcher(signedOut);
-        if (mExpMap.size() == 0) return new Dispatcher(noExp);
+        if (expProfileMap.size() == 0) return new Dispatcher(noExp);
 
         // Deal with a signed in User with multiple experiences across more than one group.  Return
         // a dispatcher with a map of experience keys.
-        if (mExpMap.size() > 1) return new Dispatcher(mExpMap);
+        if (expProfileMap.size() > 1) return new Dispatcher(expProfileMap);
 
         // A signed in user with experiences in more than one room but only one group. Return a
         // dispatcher identifying the group and room.
-        String groupKey = mExpMap.keySet().iterator().next();
-        Map<String, List<String>> roomMap = mExpMap.get(groupKey);
+        String groupKey = expProfileMap.keySet().iterator().next();
+        Map<String, Map<String, ExpProfile>> roomMap = expProfileMap.get(groupKey);
         if (roomMap.size() > 1) return new Dispatcher(groupKey, roomMap);
 
         // A signed in user with multiple experiences in a single room.  Return a dispatcher that
-        // identifies the group, room and the list of experiences, possibly filtered.
+        // identifies the group, room and the list of experience profiles.
         String roomKey = roomMap.keySet().iterator().next();
-        List<String> expList = roomMap.get(roomKey);
-        if (expList.size() > 1) return new Dispatcher(groupKey, roomKey, expList);
+        List<ExpProfile> expProfileList = new ArrayList<>(roomMap.get(roomKey).values());
+        if (expProfileList.size() > 1) return new Dispatcher(groupKey, roomKey, expProfileList);
 
         // A signed in User with one experience. Return a dispatcher to show the single experience.
-        FragmentType fragmentType = getFragmentType(expList.get(0));
-        return new Dispatcher(fragmentType, groupKey, roomKey, expList.get(0));
+        FragmentType fragmentType = getFragmentType(expProfileList.get(0));
+        return new Dispatcher(fragmentType, groupKey, roomKey, expProfileList.get(0).expKey);
     }
 
     /** Return a dispatcher object for a given fragment type. */
     private Dispatcher getDispatcher(final FragmentType type) {
         // Case: there are no experiences of the given type. Return an empty dispatcher but for the
         // fragment type.
-        List<String> list = getExperiences(type);
+        List<ExpProfile> list = getExpProfileList(type);
         if (list == null || list.size() == 0) return new Dispatcher(type);
 
         // Case: a signed in user with a single experience. Return a dispatcher with the experience
         // key.
-        if (list.size() == 1) return new Dispatcher(type, list.get(0));
+        if (list.size() == 1) return new Dispatcher(type, list.get(0).expKey);
 
         // A signed in user with more than one experience of the given type. Return a dispatcher
         // with the list of relevant experience keys.
         return new Dispatcher(type.showType, list);
     }
 
-    /** Return cached experiences of a given type. */
-    private List<String> getExperiences(final FragmentType type) {
-        List<String> result = new ArrayList<>();
-        for (String expKey : DatabaseListManager.instance.experienceMap.keySet()) {
-            Experience experience = DatabaseListManager.instance.experienceMap.get(expKey);
-            if (experience.getFragmentType() == type) result.add(expKey);
+    /** Return cached experience profiles of a given type. */
+    private List<ExpProfile> getExpProfileList(final FragmentType fragmentType) {
+        Map<String, Map<String, Map<String, ExpProfile>>> groupMap =
+                DatabaseListManager.instance.expProfileMap;
+        List<ExpProfile> result = new ArrayList<>();
+        for (String groupKey : groupMap.keySet()) {
+            Map<String, Map<String, ExpProfile>> roomMap = groupMap.get(groupKey);
+            for (String roomKey : roomMap.keySet()) {
+                Map<String, ExpProfile> expProfileMap = roomMap.get(roomKey);
+                for (String expProfileKey : expProfileMap.keySet()) {
+                    ExpProfile expProfile = expProfileMap.get(expProfileKey);
+                    FragmentType type = getFragmentType(expProfile);
+                    if (type == fragmentType) result.add(expProfile);
+                }
+            }
         }
 
         return result;
     }
 
     /** Return the fragment type associated with the experience given by the experience key. */
-    private FragmentType getFragmentType(final String expKey) {
-        return mExperienceMap.get(expKey).getFragmentType();
+    private FragmentType getFragmentType(final ExpProfile expProfile) {
+        return ExpType.values()[expProfile.type].mFragmentType;
     }
 
     /** Return the string value associated with the two players based on the current turn. */

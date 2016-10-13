@@ -17,36 +17,27 @@
 
 package com.pajato.android.gamechat.event;
 
-import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.game.model.ExpProfile;
 
 /**
  * Provides a event class to encapsulate a message class along with the parent group and room keys.
  *
  * @author Paul Michael Reilly
  */
-public class MessageChangeEvent extends BaseChangeEvent {
+public class ExpProfileListChangeEvent extends BaseChangeEvent {
 
     // Public instance variables.
 
-    /** The push key for the group containing the message. */
-    public final String groupKey;
-
-    /** The push key for the room containing the message. */
-    public final String roomKey;
-
-    /** The value associated with the click event, either a tag value of the reoource id. */
-    public Message message;
+    /** The experience profile subject to the change. */
+    public ExpProfile expProfile;
 
     /** The change type. */
-    public int type;
+    public int changeType;
 
-    /** Build the event with the given list. */
-    public MessageChangeEvent(final String groupKey, final String roomKey, final Message message,
-                              final int type) {
-        this.groupKey = groupKey;
-        this.roomKey =  roomKey;
-        this.message = message;
-        this.type = type;
+    /** Build the event with the given experience profile and the change type. */
+    public ExpProfileListChangeEvent(final ExpProfile expProfile, final int changeType) {
+        this.expProfile = expProfile;
+        this.changeType = changeType;
     }
 
 }

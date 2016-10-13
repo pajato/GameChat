@@ -21,11 +21,12 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
-import com.pajato.android.gamechat.game.FragmentType;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.game.ExpType.ttt;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
 @IgnoreExtraProperties public class TicTacToe implements Experience {
@@ -33,9 +34,9 @@ import java.util.Map;
     // Public class constants.
 
     /** The level types. */
-    public final static int EASY = 0;
-    public final static int INTERMEDIATE = 1;
-    public final static int IMPOSSIBLE = 2;
+    //public final static int EASY = 0;
+    //public final static int INTERMEDIATE = 1;
+    //public final static int IMPOSSIBLE = 2;
 
     /** A list of board positions that have been filled by either an X or an O. */
     public List<String> board;
@@ -50,7 +51,7 @@ import java.util.Map;
     public String groupKey;
 
     /** The game level. */
-    public int level;
+    //public int level;
 
     /** The last modification timestamp. */
     public long modTime;
@@ -73,13 +74,13 @@ import java.util.Map;
     /** The current turn. */
     public boolean turn;
 
-    /** The experience type. */
+    /** The experience type ordinal value. */
     public int type = -1;
 
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    public TicTacToe() {}
+    @SuppressWarnings("unused") public TicTacToe() {}
 
     /** Build a default TicTacToe using the given parameters and defaulting the rest. */
     public TicTacToe(final String key, final String id, final String name, final long createTime,
@@ -93,7 +94,7 @@ import java.util.Map;
         this.players = players;
         this.roomKey = roomKey;
         turn = true;
-        type = ExpType.ttt.ordinal();
+        type = ttt.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 
@@ -116,16 +117,16 @@ import java.util.Map;
         return result;
     }
 
-    /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude @Override public FragmentType getFragmentType() {
-        if (type < 0 || type >= FragmentType.values().length) return null;
-
-        return FragmentType.values()[type];
-    }
-
     /** Return the experience push key. */
     @Exclude @Override public String getExperienceKey() {
         return key;
+    }
+
+    /** Return the fragment type value or null if no such fragment type exists. */
+    @Exclude @Override public ExpType getExperienceType() {
+        if (type < 0 || type >= ExpType.values().length) return null;
+
+        return ExpType.values()[type];
     }
 
     /** Return the group push key. */
@@ -151,11 +152,6 @@ import java.util.Map;
     /** Return the symbol text value for the player whose turn is current. */
     @Exclude public String getSymbolValue() {
         return turn ? players.get(0).symbol : players.get(1).symbol;
-    }
-
-    /** Return the type to satisfy the Experience contract. */
-    @Exclude @Override public int getType() {
-        return type;
     }
 
     /** Set the experience key to satisfy the Experience contract. */

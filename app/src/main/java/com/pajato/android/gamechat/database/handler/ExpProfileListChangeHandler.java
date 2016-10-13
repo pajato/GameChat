@@ -22,14 +22,13 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.pajato.android.gamechat.event.MessageChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.MOVED;
@@ -41,7 +40,8 @@ import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
  *
  * @author Paul Michael Reilly
  */
-public class ExpProfilesChangeHandler extends DatabaseEventHandler implements ChildEventListener {
+public class ExpProfileListChangeHandler extends DatabaseEventHandler
+        implements ChildEventListener {
 
     // Public constants.
 
@@ -49,12 +49,13 @@ public class ExpProfilesChangeHandler extends DatabaseEventHandler implements Ch
     private static final String LOG_FORMAT = "%s: {%s, %s}.";
 
     /** The logcat TAG. */
-    private static final String TAG = ExpProfilesChangeHandler.class.getSimpleName();
+    private static final String TAG = ExpProfileListChangeHandler.class.getSimpleName();
 
     // Public constructors.
 
     /** Build a handler with the given name and path. */
-    public ExpProfilesChangeHandler(final String name, final String groupKey, final String roomKey) {
+    public ExpProfileListChangeHandler(final String name, final String groupKey,
+                                       final String roomKey) {
         super(name, DatabaseManager.instance.getExpProfilesPath(groupKey, roomKey));
     }
 
@@ -80,7 +81,6 @@ public class ExpProfilesChangeHandler extends DatabaseEventHandler implements Ch
 
     @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {
         Log.d(TAG, String.format(Locale.US, LOG_FORMAT, "onChildMoved", dataSnapshot, s));
-        if (!dataSnapshot.exists()) return;
         process(dataSnapshot, MOVED);
     }
 
@@ -97,27 +97,59 @@ public class ExpProfilesChangeHandler extends DatabaseEventHandler implements Ch
         // Abort if the data snapshot does not exist.
         if (!snapshot.exists()) return;
 
-        // A snapshot exists.  Extract the experience profile from it and handle it based on the
-        // change type. Finally notify the app of the change.
+        // A snapshot exists.  Extract the experience profile from it and determine if the profile
+        // has been handled already.  If not, then case on the change type and notify the app.
         ExpProfile expProfile = snapshot.getValue(ExpProfile.class);
-        Room roomProfile = DatabaseListManager.instance.getRoomProfile(expProfile.roomKey);
+        Map<String, ExpProfile> expProfileMap = getExpProfileMap(expProfile);
         switch (type) {
             case NEW:
             case CHANGED:
-                // Update the room's experience profile list by adding or replacing the profile.
-                List<ExpProfile> list = roomProfile.expProfileList;
-                if (list == null) list = new ArrayList<>();
-                list.add(expProfile);
+                // Add the profile to the list manager (or replace it if it already exists.)
+                expProfileMap.put(expProfile.key, expProfile);
                 break;
             case REMOVED:
                 // Update the database list experience profile map by removing the entry (key).
-                DatabaseListManager.instance.expProfileMap.remove(expProfile.key);
+                expProfileMap.remove(expProfile.key);
                 break;
             case MOVED:
             default:
                 // Not sure what a moved change means or what to do about it, so do nothing.
                 break;
         }
+        //AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
     }
 
+    /** Return a map of experience profiles for the room in the given experience profile. */
+    private Map<String, ExpProfile> getExpProfileMap(final ExpProfile expProfile) {
+        // Ensure that the room map exists for the group in the master map, creating it if need be.
+        Map<String, ExpProfile> expProfileMap;
+        Map<String, Map<String, ExpProfile>> roomMap;
+        if (!DatabaseListManager.instance.expProfileMap.containsKey(expProfile.groupKey)) {
+            // This would be the first entry for the group.  Create an empty room map and associate
+            // it with the group key.
+            roomMap = new HashMap<>();
+            DatabaseListManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
+        } else {
+            // This would be an additional profile for the group.  Determine if it is the first for
+            // the room.
+            roomMap = DatabaseListManager.instance.expProfileMap.get(expProfile.groupKey);
+            if (roomMap == null) {
+                // It is the first profile for the room.  Create a map for the room and associate it
+                // with the group.
+                roomMap = new HashMap<>();
+                DatabaseListManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
+            }
+        }
+
+        // The room map now exists if it did not before.  Determine if the profile map needs to be
+        // created.
+        expProfileMap = roomMap.get(expProfile.roomKey);
+        if (expProfileMap == null) {
+            // The profile map needs to be created.  Do it now and associate it with the room.
+            expProfileMap = new HashMap<>();
+            roomMap.put(expProfile.roomKey, expProfileMap);
+        }
+
+        return expProfileMap;
+    }
 }

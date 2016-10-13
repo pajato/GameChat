@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.R.attr.type;
 import static com.pajato.android.gamechat.R.string.me;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.ME;
@@ -134,7 +136,7 @@ public enum DatabaseManager {
 
         // Get the name and type for the given experience.  Abort if either does not exist.
         String name = experience.getName();
-        int type = experience.getType();
+        ExpType expType = experience.getExperienceType();
         if (name == null || type == -1) return;
 
         // Persist the experience.
@@ -150,7 +152,7 @@ public enum DatabaseManager {
         ref = mDatabase.child(path).push();
         String key = ref.getKey();
         String expKey = experience.getExperienceKey();
-        ExpProfile profile = new ExpProfile(key, name, type, groupKey, roomKey, expKey);
+        ExpProfile profile = new ExpProfile(key, name, expType, groupKey, roomKey, expKey);
         ref.setValue(profile.toMap());
         DatabaseListManager.instance.setExperienceWatcher(profile);
     }
@@ -183,7 +185,7 @@ public enum DatabaseManager {
         String url = type == SYSTEM ? systemUrl : account.url;
         long tstamp = new Date().getTime();
         List<String> members = room.memberIdList;
-        Message message = new Message(key, account.id, name, url, tstamp, 0, text, type, members);
+        Message message = new Message(key, account.id, name, url, tstamp, text, type, members);
 
         // Persist the message.
         path = String.format(Locale.US, MESSAGE_PATH, room.groupKey, room.key, key);
@@ -202,9 +204,8 @@ public enum DatabaseManager {
 
     /** Return the database path to an experience for a given experience profile. */
     public String getExperiencePath(final ExpProfile profile) {
-        String groupKey = profile.groupKey;
-        String roomKey = profile.roomKey;
-        return String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, profile.key);
+        String key = profile.expKey;
+        return String.format(Locale.US, EXPERIENCE_PATH, profile.groupKey, profile.roomKey, key);
     }
 
     /** Return the database path to a experience profile for a given room and profile key. */

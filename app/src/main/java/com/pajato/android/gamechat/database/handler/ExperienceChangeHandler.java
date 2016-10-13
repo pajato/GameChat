@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
 import com.pajato.android.gamechat.game.model.ExpProfile;
@@ -65,9 +67,10 @@ public class ExperienceChangeHandler extends DatabaseEventHandler implements Val
             Experience experience = getExperience(dataSnapshot);
             if (experience == null) return;
 
-            // Update the experience on the database list manager.
-            String key = experience.getExperienceKey();
-            DatabaseListManager.instance.experienceMap.put(key, experience);
+            // Update the experience on the database list manager and post the change event to the
+            // app.
+            DatabaseListManager.instance.experienceMap.put(mProfile.expKey, experience);
+            AppEventManager.instance.post(new ExperienceChangeEvent(experience));
         } else {
             // TODO: should we remove the key here?
             Log.e(TAG, "Invalid key.  No value returned.");

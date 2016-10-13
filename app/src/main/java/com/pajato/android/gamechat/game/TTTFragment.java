@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.game.model.Player;
 import com.pajato.android.gamechat.game.model.TicTacToe;
@@ -47,10 +48,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.R.id.player1WinCount;
-import static com.pajato.android.gamechat.R.id.player2WinCount;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_OWNER_ID;
+import static com.pajato.android.gamechat.game.ExpType.ttt;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
@@ -91,18 +91,37 @@ public class TTTFragment extends BaseGameFragment {
         inflater.inflate(R.menu.ttt_menu, menu);
     }
 
+    /** Handle an experience posting event to see if this is one for us. */
+    @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
+        // Check the payload to see if this is an experience event we are waiting for.  If so, stop
+        // the spinner and show the game.
+        if (event.experience.getExperienceType() == ttt) mExperience = event.experience;
+
+        // The experience is a tictactoe experience.  Start the game.
+        if (ProgressManager.instance.isShowing() && mExperience != null) resume();
+    }
+
     /** Handle taking the foreground by updating the UI based on the current expeience. */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
+        resume();
+    }
+
+    /** Process a resumption by testing and waiting for the experience. */
+    private void resume() {
         if (mExperience == null) {
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
             String title = "TicTacToe";
             String message = "Waiting for the database to provide the game...";
             ProgressManager.instance.show(getContext(), title, message);
+        } else {
+            // Hide the spinner and start the game.
+            ProgressManager.instance.hide();
+            mLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -375,113 +394,6 @@ public class TTTFragment extends BaseGameFragment {
         button.setText(model.getSymbolValue());
         handlePlayerIcons(model.toggleTurn());
         checkNotFinished(model);
-    }
-
-    /** Handle the recreation of the board based on the values stored in the BoardMap. */
-    private void recreateExistingBoard(@NonNull final TicTacToe model) {
-        // If the board map is size 1, we know that there is only the turn stored in it, and send a
-        // new game out.
-        if(mLayoutMap.size() == 1) {
-            GameManager.instance.startNextFragment(getActivity(), mFragmentType);
-            return;
-        }
-
-        // Comb through the board and replace the remaining pieces.
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
-                // If our keys are present, then put their corresponding piece onto the board.
-                String currKey = i + "-" + j;
-                Button currButton = (Button) mLayout.findViewWithTag("button" + i + j);
-                if(mLayoutMap.containsKey(currKey)) {
-                    if(mLayoutMap.get(currKey) == 1) {
-                        currButton.setText(model.getSymbolValue(0));
-                    } else {
-                        currButton.setText(model.getSymbolValue(1));
-                    }
-                } else {
-                    currButton.setText("");
-                }
-            }
-        }
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerName(final int resId, final int index, final TicTacToe model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
-        TextView name = (TextView) mLayout.findViewById(resId);
-        if (name == null) return;
-        name.setText(model.players.get(index).name);
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerWinCount(final int resId, final int index, final TicTacToe model) {
-        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
-        // if it does.
-        TextView winCount = (TextView) mLayout.findViewById(resId);
-        if (winCount == null) return;
-        winCount.setText(model.players.get(index).winCount);
-    }
-
-    /** Set the sigil (X or O) for a given player. */
-    private void setPlayerSigil(final int resId, final int index, final TicTacToe model) {
-        // Ensure that the sigil text view exists.  Abort if not, set the value from the data
-        // model if it does.
-        TextView sigil = (TextView) mLayout.findViewById(resId);
-        if (sigil == null) return;
-        sigil.setText(model.players.get(index).symbol);
-    }
-
-    /**
-     * Empties the instructions, board tiles, and outputs a new game message.
-     */
-    private void setupGameBoard(@NonNull final TicTacToe model) {
-        // Reset the board map and update the Firebase database's copy.
-        if (mLayoutMap == null) mLayoutMap = new HashMap<>();
-        //mRef.setValue(mLayoutMap);
-
-        // Hide our winning messages and ensure the turn display is working properly.
-        TextView Winner = (TextView) super.getActivity().findViewById(R.id.winner);
-        Winner.setVisibility(View.INVISIBLE);
-        handlePlayerIcons(model.turn);
-
-        // Set values for each tile to empty.
-        ((Button) mLayout.findViewWithTag("button00")).setText("");
-        ((Button) mLayout.findViewWithTag("button01")).setText("");
-        ((Button) mLayout.findViewWithTag("button02")).setText("");
-        ((Button) mLayout.findViewWithTag("button10")).setText("");
-        ((Button) mLayout.findViewWithTag("button11")).setText("");
-        ((Button) mLayout.findViewWithTag("button12")).setText("");
-        ((Button) mLayout.findViewWithTag("button20")).setText("");
-        ((Button) mLayout.findViewWithTag("button21")).setText("");
-        ((Button) mLayout.findViewWithTag("button22")).setText("");
-
-        // Output New Game Messages
-        String newTurn = "New Game! Player " + (model.turn
-                ? "1 (" + model.getSymbolValue(0) + ")"
-                : "2 (" + model.getSymbolValue(1) + ")") + "'s Turn";
-        GameManager.instance.notify(mLayout, newTurn, ContextCompat.getColor(getActivity(),
-                R.color.colorPrimaryDark), false);
-
-        checkNotFinished(model);
-    }
-
-    /** Update the UI with either a default or a persisted experience. */
-    private void updateExperience() {
-        // Ensure that a valid experience exists.  Abort if not.
-        //if (mExperience == null) setupTicTacToeExperience();
-        if (mExperience == null || !(mExperience instanceof TicTacToe)) return;
-
-        // A valid experience is available. Use the data model to populate the UI.
-        TicTacToe model = (TicTacToe) mExperience;
-        setPlayerName(R.id.player1Name, 0, model);
-        setPlayerName(R.id.player2Name, 1, model);
-        setPlayerWinCount(player1WinCount, 0, model);
-        setPlayerWinCount(player2WinCount, 1, model);
-        setPlayerSigil(R.id.player1Sigil, 0, model);
-        setPlayerSigil(R.id.player2Sigil, 1, model);
-
-        setupGameBoard(model);
     }
 
     /** Update the win count model. */

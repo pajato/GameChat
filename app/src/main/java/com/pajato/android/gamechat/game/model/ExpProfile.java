@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.game.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.game.ExpType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,20 +49,20 @@ public class ExpProfile {
     /** The room key. */
     public String roomKey;
 
-    /** The experience type value. */
+    /** The experience type ordinal value. */
     public int type;
 
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    public ExpProfile() {}
+    @SuppressWarnings("unused") public ExpProfile() {}
 
     /** Build a experience profile with a full set of values. */
-    public ExpProfile(final String key, final String name, final int type, final String groupKey,
-                      final String roomKey, final String expKey) {
+    public ExpProfile(final String key, final String name, final ExpType expType,
+                      final String groupKey, final String roomKey, final String expKey) {
         this.key = key;
         this.name = name;
-        this.type = type;
+        this.type = expType.ordinal();
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         this.expKey = expKey;

@@ -126,12 +126,23 @@ public abstract class BaseGameFragment extends BaseFragment {
         if (expType == null) return;
 
         // Determine if an experience is available via the dispatcher and fetch it.
-        mExperience = dispatcher.expKey != null
-            ? DatabaseListManager.instance.experienceMap.get(dispatcher.expKey) : null;
+        mExperience = dispatcher.expKey != null ? getExperience(dispatcher) : null;
 
         // Determine if an experience should be created.  If so use the passed in context in setting
         // up the experience as the current context for this fragment may not exist yet.
         if (dispatcher.expKey == null) createExperience(context, dispatcher);
+    }
+
+    // Private instance methods.
+
+    /** Return the experience using the given dispatcher, null if there is no experience. */
+    private Experience getExperience(Dispatcher dispatcher) {
+        // Ensure there is a room key to use.  Abort if not.
+        String key = dispatcher.expKey;
+        if (key == null) return null;
+
+        // There is a key. Use it to get the experience map.
+        return DatabaseListManager.instance.experienceMap.get(key);
     }
 
 }

@@ -27,8 +27,6 @@ import java.util.Map;
  */
 public interface Experience {
 
-    FragmentType getFragmentType();
-
     String getGroupKey();
 
     String getRoomKey();
@@ -37,7 +35,7 @@ public interface Experience {
 
     String getName();
 
-    int getType();
+    ExpType getExperienceType();
 
     void setExperienceKey(String key);
 
