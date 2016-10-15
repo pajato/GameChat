@@ -20,41 +20,54 @@ http://www.gnu.org/licenses
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/gamePaneLayout">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/game_pane_fragment_container">
-    </FrameLayout>
+        android:id="@+id/game_pane_fragment_container"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <View style="@style/DimmerTheme"
         android:id="@+id/gameDimmer"
-        tools:visibility="visible"/>
-
-    <FrameLayout style="@style/FabMenu"
-        android:layout_marginBottom="8dp"
-        android:id="@+id/gameFabMenu"
+        tools:visibility="visible"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/gameFab">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/gameList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </FrameLayout>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <android.support.design.widget.FloatingActionButton
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:gravity="bottom|start"
-        android:id="@+id/gameFab"
-        android:src="@drawable/ic_add_white_24dp"
-        android:onClick="onClick"
+        android:id="@+id/clayout"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:fabSize="normal"
-        tools:visibility="visible"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <FrameLayout style="@style/FabMenu"
+            android:layout_marginBottom="88dp"
+            android:id="@+id/gameFabMenu"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/gameFab">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/gameList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_gravity="bottom|end"
+            android:id="@+id/gameFab"
+            android:src="@drawable/ic_add_white_24dp"
+            android:onClick="onClick"
+            app:fabSize="normal"
+            tools:visibility="visible"/>
+
+    </android.support.design.widget.CoordinatorLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -286,4 +286,14 @@ public enum DatabaseManager {
         DatabaseManager.instance.updateChildren(path, unreadMap);
     }
 
+    /** Perist the given experience. */
+    public void updateExperience(final Experience experience) {
+        // Persist the experience.
+        experience.setModTime(new Date().getTime());
+        String groupKey = experience.getGroupKey();
+        String roomKey = experience.getRoomKey();
+        String expKey = experience.getExperienceKey();
+        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
+        mDatabase.child(path).setValue(experience.toMap());
+    }
 }

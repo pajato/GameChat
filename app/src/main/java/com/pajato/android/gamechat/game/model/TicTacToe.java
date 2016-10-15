@@ -38,11 +38,27 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     //public final static int INTERMEDIATE = 1;
     //public final static int IMPOSSIBLE = 2;
 
-    /** A list of board positions that have been filled by either an X or an O. */
-    public List<String> board;
+    // The game state values.
+
+    /** The game is still active. */
+    public final static int ACTIVE = 0;
+
+    /** The game has been won by player using X. */
+    public final static int X_WINS = 1;
+
+    /** The game has been won by player using O. */
+    public final static int O_WINS = 2;
+
+    /** The game has ended in a tie. */
+    public final static int TIE = 3;
+
+    // Public instance variables.
+
+    /** The board positions that have been filled by either an X or an O. */
+    public Map<String, String> board;
 
     /** The creation timestamp. */
-    public long createTime;
+    private long createTime;
 
     /** The experience push key. */
     public String key;
@@ -54,7 +70,7 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     //public int level;
 
     /** The last modification timestamp. */
-    public long modTime;
+    private long modTime;
 
     /** The experience display name. */
     public String name;
@@ -68,14 +84,17 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     /** The room push key. */
     public String roomKey;
 
-    /** The experience icon url. */
-    public String url;
+    /** The game state. */
+    public int state;
 
     /** The current turn. */
     public boolean turn;
 
     /** The experience type ordinal value. */
     public int type = -1;
+
+    /** The experience icon url. */
+    public String url;
 
     // Public constructors.
 
@@ -93,6 +112,7 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
+        state = ACTIVE;
         turn = true;
         type = ttt.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
@@ -110,6 +130,7 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
         result.put("owner", owner);
         result.put("players", players);
         result.put("roomKey", roomKey);
+        result.put("state", state);
         result.put("turn", turn);
         result.put("type", type);
         result.put("url", url);
@@ -144,13 +165,14 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
         return roomKey;
     }
 
-    /** Return the symbol text value for the player at the given index. */
-    @Exclude public String getSymbolValue(final int index) {
-        return players.get(index).symbol;
+    /** Return the value associated with the current player: 1 == X, 2 == O. */
+    @Exclude public int getSymbolValue() {
+        // This implies that player 1 is always X and player 2 is always O.
+        return turn ? 1 : 2;
     }
 
     /** Return the symbol text value for the player whose turn is current. */
-    @Exclude public String getSymbolValue() {
+    @Exclude public String getSymbolText() {
         return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
@@ -159,10 +181,43 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
         this.key = key;
     }
 
+    /** Set the modification timestamp. */
+    @Exclude @Override public void setModTime(final long value) {
+        modTime = value;
+    }
+
+    /** Update the win count based on the current state. */
+    @Exclude @Override public void setWinCount() {
+        switch (state) {
+            case X_WINS:
+                players.get(0).winCount++;
+                break;
+            case O_WINS:
+                players.get(1).winCount++;
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Toggle the turn state. */
     @Exclude public boolean toggleTurn() {
         turn = !turn;
         return turn;
+    }
+
+    /** Return the winning player's name or null if the game is active or ended in a tie. */
+    @Exclude public String getWiningPlayerName() {
+        switch (state) {
+            case X_WINS:
+                return players.get(0).name;
+            case O_WINS:
+                return players.get(1).name;
+            case ACTIVE:
+            case TIE:
+            default:
+                return null;
+        }
     }
 
 }

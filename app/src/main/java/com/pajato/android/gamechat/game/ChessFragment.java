@@ -94,14 +94,12 @@ public class ChessFragment extends BaseGameFragment {
 
             int color;
             if(player.equals(getString(R.string.player2))) {
-                color = ContextCompat.getColor(getContext(), R.color.colorAccent);
             } else {
                 player = getString(R.string.player1);
-                color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             }
             handleTurnChange();
-            GameManager.instance.notify(mLayout, getString(R.string.NewGame) + " "
-                    + player + "'s Turn!", color, false);
+            GameManager.instance.notify(this, getString(R.string.NewGame) + " "
+                    + player + "'s Turn!", false);
         }
 
     }
@@ -279,12 +277,10 @@ public class ChessFragment extends BaseGameFragment {
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
         if(secondaryKing == 0) {
-            GameManager.instance.notify(mBoard, "Game Over! Player 1 Wins!",
-                    ContextCompat.getColor(getContext(), R.color.colorPrimary), true);
+            GameManager.instance.notify(this, "Game Over! Player 1 Wins!", true);
             return true;
         } else if (primaryKing == 0) {
-            GameManager.instance.notify(mBoard, "Game Over! Player 2 Wins!",
-                    ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), true);
+            GameManager.instance.notify(this, "Game Over! Player 2 Wins!", true);
             return true;
         } else {
             return false;

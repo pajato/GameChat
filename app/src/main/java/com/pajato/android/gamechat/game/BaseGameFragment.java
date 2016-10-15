@@ -54,9 +54,6 @@ public abstract class BaseGameFragment extends BaseFragment {
     /** The experience being enjoyed. */
     Experience mExperience;
 
-    /** The fragment type. */
-    FragmentType mFragmentType;
-
     /** The current turn indicator: True = Player 1, False = Player 2. */
     boolean mTurn;
 
