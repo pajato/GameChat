@@ -17,18 +17,25 @@
 
 package com.pajato.android.gamechat.game;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.game.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,17 +65,11 @@ public enum GameManager {
     /** The current fragment. */
     private int mCurrentFragment;
 
-    /** The map associating groups, rooms, and experiences. */
-    private Map<String, Map<String, List<String>>> mExpMap = new HashMap<>();
-
-    /** A map associating an experience key with a the database model class. */
-    private Map<String, Experience> mExperienceMap = new HashMap<>();
-
     /** The current group key as determined the last selected group. */
-    public String currentGroupKey;
+    //public String currentGroupKey;
 
     /** The current room key as determined by the last selected room. */
-    public String currentRoomKey;
+    //public String currentRoomKey;
 
     // Public instance methods.
 
@@ -112,22 +113,29 @@ public enum GameManager {
     }
 
     /** Create and show a Snackbar notification based on the given parameters. */
-    public void notify(final View view, final String output, final int color, final boolean done) {
+    public void notify(@NonNull final Fragment fragment, final String text, final boolean done) {
+        // Ensure that the fragment is attached and has a view.  Abort if it does not.
         Snackbar notification;
+        if (fragment.getView() == null) return;
+
+        // Determine if the experience is finished.
         if (done) {
             // The game is ended so generate a notification that could start a new game.
-            notification = Snackbar.make(view, output, Snackbar.LENGTH_LONG);
+            notification = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_INDEFINITE);
             final String playAgain = getFragment(getCurrent()).getString(R.string.PlayAgain);
-            notification.setAction(playAgain, new NotificationActionHandler());
+            notification.setAction(playAgain, new SnackbarActionHandler(fragment));
         } else {
             // The game hasn't ended so generate a notification without an action.
-            notification = Snackbar.make(view, output, Snackbar.LENGTH_SHORT);
+            notification = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_SHORT);
         }
 
-        // Determine if a color has been specified. If so, set it, otherwise display the
-        // notification to the User.
-        if (color != -1) notification.getView().setBackgroundColor(color);
-        notification.show();
+        // Use a primary color background with white text for the snackbar and hide the FAB button
+        // while the snackbar is presenting.
+        int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
+        notification.getView().setBackgroundColor(color);
+        notification.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
+                .setCallback(new SnackbarChangeHandler(fragment))
+                .show();
     }
 
     /** Return true iff a fragment for the given experience is started. */
@@ -150,55 +158,75 @@ public enum GameManager {
 
     /** Return a dispatcher object based on the current experience state. */
     private Dispatcher getDispatcher() {
-        // Deal with an off line user, a signe out user, no experiences and a single group, in that
-        // order.
+        // Deal with an off line user, a signed out user, or no experiences at all, in that order.
+        // In each case, return an empty dispatcher but for the fragment type of the next screen to
+        // show.
+        Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap =
+                DatabaseListManager.instance.expProfileMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher(offline);
         if (!AccountManager.instance.hasAccount()) return new Dispatcher(signedOut);
-        if (mExpMap.size() == 0) return new Dispatcher(noExp);
-        if (mExpMap.size() > 1) return new Dispatcher(mExpMap);
+        if (expProfileMap.size() == 0) return new Dispatcher(noExp);
 
-        // A signed in user with experiences in more than one room but only one group.
-        String groupKey = mExpMap.keySet().iterator().next();
-        Map<String, List<String>> roomMap = mExpMap.get(groupKey);
+        // Deal with a signed in User with multiple experiences across more than one group.  Return
+        // a dispatcher with a map of experience keys.
+        if (expProfileMap.size() > 1) return new Dispatcher(expProfileMap);
+
+        // A signed in user with experiences in more than one room but only one group. Return a
+        // dispatcher identifying the group and room.
+        String groupKey = expProfileMap.keySet().iterator().next();
+        Map<String, Map<String, ExpProfile>> roomMap = expProfileMap.get(groupKey);
         if (roomMap.size() > 1) return new Dispatcher(groupKey, roomMap);
 
-        // A signed in user with multiple experiences in a single room.
+        // A signed in user with multiple experiences in a single room.  Return a dispatcher that
+        // identifies the group, room and the list of experience profiles.
         String roomKey = roomMap.keySet().iterator().next();
-        List<String> expList = roomMap.get(roomKey);
-        if (expList.size() > 1) return new Dispatcher(groupKey, roomKey, expList);
+        List<ExpProfile> expProfileList = new ArrayList<>(roomMap.get(roomKey).values());
+        if (expProfileList.size() > 1) return new Dispatcher(groupKey, roomKey, expProfileList);
 
-        // A signed in User with one experience. */
-        FragmentType fragmentType = getFragmentType(expList.get(0));
-        return new Dispatcher(fragmentType, groupKey, roomKey, expList.get(0));
+        // A signed in User with one experience. Return a dispatcher to show the single experience.
+        FragmentType fragmentType = getFragmentType(expProfileList.get(0));
+        return new Dispatcher(fragmentType, groupKey, roomKey, expProfileList.get(0).expKey);
     }
 
     /** Return a dispatcher object for a given fragment type. */
     private Dispatcher getDispatcher(final FragmentType type) {
-        // A signed out User or the app is in an offline state..
-        List<String> list = getExperiences(type);
-        if (list == null || list.size() == 0) return new Dispatcher(type, mExpMap);
+        // Case: there are no experiences of the given type. Return an empty dispatcher but for the
+        // fragment type.
+        List<ExpProfile> list = getExpProfileList(type);
+        if (list == null || list.size() == 0) return new Dispatcher(type);
 
-        // A signed in user but no experiences yet.
-        if (list.size() == 1) return new Dispatcher(type, list.get(0));
+        // Case: a signed in user with a single experience. Return a dispatcher with the experience
+        // key.
+        if (list.size() == 1) return new Dispatcher(type, list.get(0).expKey);
 
-        // A signed in user with more than one experience of the given type.
+        // A signed in user with more than one experience of the given type. Return a dispatcher
+        // with the list of relevant experience keys.
         return new Dispatcher(type.showType, list);
     }
 
-    /** Return cached experiences of a given type. */
-    private List<String> getExperiences(final FragmentType type) {
-        List<String> result = new ArrayList<>();
-        for (String expKey : DatabaseListManager.instance.experienceMap.keySet()) {
-            Experience experience = DatabaseListManager.instance.experienceMap.get(expKey);
-            if (experience.getFragmentType() == type) result.add(expKey);
+    /** Return cached experience profiles of a given type. */
+    private List<ExpProfile> getExpProfileList(final FragmentType fragmentType) {
+        Map<String, Map<String, Map<String, ExpProfile>>> groupMap =
+                DatabaseListManager.instance.expProfileMap;
+        List<ExpProfile> result = new ArrayList<>();
+        for (String groupKey : groupMap.keySet()) {
+            Map<String, Map<String, ExpProfile>> roomMap = groupMap.get(groupKey);
+            for (String roomKey : roomMap.keySet()) {
+                Map<String, ExpProfile> expProfileMap = roomMap.get(roomKey);
+                for (String expProfileKey : expProfileMap.keySet()) {
+                    ExpProfile expProfile = expProfileMap.get(expProfileKey);
+                    FragmentType type = getFragmentType(expProfile);
+                    if (type == fragmentType) result.add(expProfile);
+                }
+            }
         }
 
         return result;
     }
 
     /** Return the fragment type associated with the experience given by the experience key. */
-    private FragmentType getFragmentType(final String expKey) {
-        return mExperienceMap.get(expKey).getFragmentType();
+    private FragmentType getFragmentType(final ExpProfile expProfile) {
+        return ExpType.values()[expProfile.type].mFragmentType;
     }
 
     /** Return the string value associated with the two players based on the current turn. */
@@ -219,9 +247,10 @@ public enum GameManager {
             }
         }
 
-        // Make the disppatched fragment current and initialize it.
+        // Make the next fragment current and initialize it using the context of the fragment
+        // currently in the foreground.
         mCurrentFragment = index;
-        mFragmentList[index].setupExperience(dispatcher);
+        mFragmentList[index].setupExperience(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.game_pane_fragment_container, mFragmentList[index])
             .commit();
@@ -230,11 +259,51 @@ public enum GameManager {
 
     // Inner classes.
 
-    /** Provide an inner class to handle a notification action click. */
-    private class NotificationActionHandler implements View.OnClickListener {
-        @Override public void onClick(final View v) {
-            // TODO: figure out what we really want done here.
+    /** Provide a handler to show/hide the FAB for snackbar messaging. */
+    private class SnackbarChangeHandler extends Snackbar.Callback {
+
+        // Instance variables.
+
+        /** The calling fragment. */
+        Fragment mFragment;
+
+        // Constructors
+
+        /** Build an instance with a given fragment. */
+        SnackbarChangeHandler(final Fragment fragment) {
+            mFragment = fragment;
+        }
+
+        @Override public void onDismissed(final Snackbar snackbar, final int event) {
+            FabManager.game.show(mFragment);
+        }
+
+        @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
+            FabManager.game.hide(mFragment);
         }
     }
 
+    /** Handle a snackbar action click. */
+    private class SnackbarActionHandler implements View.OnClickListener {
+
+        // Instance variables.
+
+        /** The tag value to post with the event to the app. */
+        String mClassName;
+
+        // Constructor.
+
+        /** Build an instance with a given tag value. */
+        SnackbarActionHandler(final Fragment fragment) {
+            mClassName = fragment.getClass().getSimpleName();;
+        }
+
+        /** Handle an action click from the snackbar by posting the tag to the app. */
+        @Override public void onClick(final View view) {
+            // Post the saved tag (the originating fragment's tag) to the app.
+            view.setTag(mClassName);
+            AppEventManager.instance.post(new TagClickEvent(view));
+        }
+
+    }
 }

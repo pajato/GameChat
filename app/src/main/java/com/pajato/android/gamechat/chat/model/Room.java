@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ import java.util.Map;
     public final static int PUBLIC = 2;
 
     /** A room in which only two members can exist (a direct room in Slack). */
-    public final static int USER = 3;
+    public final static int MEMBER = 3;
 
     /** The creation timestamp. */
     public long createTime;
@@ -63,7 +64,10 @@ import java.util.Map;
     /** The room owner/creator, an account identifier. */
     public String owner;
 
-    /** The room type, one of "public", "private" or "me". */
+    /** The list of experience profiles.  One exists for each experience. */
+    @Exclude public List<ExpProfile> expProfileList;
+
+    /** The room type, one of "public", "private", "member" or "me". */
     public int type;
 
     /** Build an empty args constructor for the database. */

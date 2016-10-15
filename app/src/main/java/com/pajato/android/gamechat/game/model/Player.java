@@ -17,21 +17,17 @@
 
 package com.pajato.android.gamechat.game.model;
 
-import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
-
 import java.util.HashMap;
 import java.util.Map;
 
-/** Provide a Firebase model class repesenting a tictactoe game experience, an icon, a name and text. */
-@IgnoreExtraProperties
+/** Provide a pojo repesenting a tictactoe player: a name, a symbol (sigil), and a count. */
 public class Player {
 
     /** The player's display name. */
     public String name;
 
-    /** The player's sigil (for lack of a better term). */
-    public int sigilId;
+    /** The player's symbol (either X or O). */
+    public String symbol;
 
     /** The player's win count. */
     public int winCount;
@@ -42,17 +38,24 @@ public class Player {
     public Player() {}
 
     /** Build a default game player using all the parameters. */
-    public Player(final String name, final int sigilId) {
+    public Player(final String name, final String symbol) {
         this.name = name;
-        this.sigilId = sigilId;
+        this.symbol = symbol;
         this.winCount = 0;
     }
 
+    /** Build an instance accepting Object values for all fields. */
+    public Player(final Object name, final Object symbol, final Object winCount) {
+        this.name = name instanceof String ? (String) name : "anonymous";
+        this.symbol = symbol instanceof String ? (String) symbol : "?";
+        this.winCount = winCount instanceof Integer ? (Integer) winCount : 0;
+    }
+
     /** Provide a default map for a Firebase create/update. */
-    @Exclude public Map<String, Object> toMap() {
+    public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("name", name);
-        result.put("sigilId", sigilId);
+        result.put("symbol", symbol);
         result.put("winCount", winCount);
 
         return result;

@@ -32,7 +32,7 @@ import java.util.Map;
     /** The message types. */
     public final static int SYSTEM = 0;
     public final static int STANDARD = 1;
-    public final static int PROTECTED = 2;
+    // TODO: add this real soon: public final static int PROTECTED = 2;
 
     /** The member account identifer who posted the message. */
     public String owner;
@@ -50,7 +50,7 @@ import java.util.Map;
     public long createTime;
 
     /** The last modification timestamp. */
-    public long modTime;
+    private long modTime;
 
     /** The message text. */
     public String text;
@@ -68,11 +68,11 @@ import java.util.Map;
 
     /** Build a default Message using all the parameters. */
     public Message(final String key, final String owner, final String name, final String url,
-                   final long createTime, final long modTime, final String text, final int type,
+                   final long createTime, final String text, final int type,
                    final List<String> unreadList) {
         this.createTime = createTime;
         this.key = key;
-        this.modTime = modTime;
+        this.modTime = 0;
         this.name = name;
         this.owner = owner;
         this.text = text;

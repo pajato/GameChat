@@ -89,6 +89,14 @@ public enum FabManager {
         if (layout != null) dismissMenu(layout);
     }
 
+    /** Ensure that the FAb is not being shown. */
+    public void hide(@NonNull final Fragment fragment) {
+        View layout = getGameFragmentLayout(fragment);
+        if (layout == null) return;
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        fab.setVisibility(View.GONE);
+    }
+
     /** Initialize the fab state. */
     public void init(final Fragment fragment) {
         // Ensure that the layout exists. Abort if it does not.  Set the FAB state to closed if it
@@ -146,6 +154,14 @@ public enum FabManager {
     public void setTag(final String fragmentTag) {
         // Use the fragment tag string to find the main fragment and then in turn, the FAB.
         mTag = fragmentTag;
+    }
+
+    /** Ensure that the FAb is being shown. */
+    public void show(@NonNull final Fragment fragment) {
+        View layout = getGameFragmentLayout(fragment);
+        if (layout == null) return;
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        fab.setVisibility(View.VISIBLE);
     }
 
     /** Toggle the state of the FAB button using a given fragment to obtain the layout view. */

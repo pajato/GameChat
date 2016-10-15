@@ -41,23 +41,6 @@ public enum ProgressManager {
 
     // Public instance methods
 
-    /** Show the initial loading dialog. */
-    public void show(@NonNull final Context context) {
-        if (mProgressDialog != null) {
-            // A progress dialog already exists!  Generate a stack trace to help debug this.
-            Log.e(TAG, "A progress dialog already exists.  Generate a stack trace!");
-            Thread.dumpStack();
-        }
-
-        // Create and display the progress dialog.
-        Log.d(TAG, "Turning on progress spinner now.");
-        mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setTitle("Starting...");
-        mProgressDialog.setMessage("Please wait while the app starts up...");
-        mProgressDialog.show();
-        mIsShowing = true;
-    }
-
     /** Dismiss the initial loading dialog if one is showing. */
     public void hide() {
         Log.d(TAG, "Attempting to hide the progress dialog.");
@@ -67,4 +50,32 @@ public enum ProgressManager {
             mIsShowing = false;
         }
     }
+
+    /** Return TRUE iff the progress spinner is being shown. */
+    public boolean isShowing() {
+        return mIsShowing;
+    }
+
+    /** Show the initial loading dialog. */
+    public void show(@NonNull final Context context) {
+        // Create and display the progress dialog.
+        Log.d(TAG, "Turning on progress spinner now.");
+        mProgressDialog = new ProgressDialog(context);
+        mProgressDialog.setTitle("Starting...");
+        mProgressDialog.setMessage("Please wait while the app starts up...");
+        mProgressDialog.show();
+        mIsShowing = true;
+    }
+
+    /** Show a loading dialog with a given message. */
+    public void show(@NonNull final Context context, final String title, final String message) {
+        // Create and display the progress dialog.
+        Log.d(TAG, "Turning on progress spinner now.");
+        mProgressDialog = new ProgressDialog(context);
+        mProgressDialog.setTitle(title);
+        mProgressDialog.setMessage(message);
+        mProgressDialog.show();
+        mIsShowing = true;
+    }
+
 }

@@ -20,27 +20,38 @@ package com.pajato.android.gamechat.game;
 import java.util.Map;
 
 /**
- * Each experience is expected to provide the associated fragment type, group push key, room push
- * key and experience push key as well as a map of the experience properties.
+ * Each experience is expected to provide a name, the associated experience type, group push key,
+ * room push key and experience push key as well as a map of the experience properties. And
+ * experience must also be able to set the modification timestamp and the win count.
  *
  * @author Paul Michael Reilly
  */
 public interface Experience {
 
-    FragmentType getFragmentType();
-
+    /** Return the experience group push key. */
     String getGroupKey();
 
+    /** Return the experience room push key. */
     String getRoomKey();
 
+    /** Return the experience push key. */
     String getExperienceKey();
 
+    /** Return the experience name. */
     String getName();
 
-    int getType();
+    /** Return the experience type. */
+    ExpType getExperienceType();
 
+    /** Set the experience push key. */
     void setExperienceKey(String key);
 
-    Map<String, Object> toMap();
+    /** Set the modification timestamp. */
+    void setModTime(long value);
 
+    /** Set the win count. */
+    void setWinCount();
+
+    /** Provide a map of experience properties. */
+    Map<String, Object> toMap();
 }

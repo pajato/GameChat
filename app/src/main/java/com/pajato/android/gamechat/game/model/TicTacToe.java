@@ -19,12 +19,14 @@ package com.pajato.android.gamechat.game.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.game.ExpType;
 import com.pajato.android.gamechat.game.Experience;
-import com.pajato.android.gamechat.game.FragmentType;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.game.ExpType.ttt;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
 @IgnoreExtraProperties public class TicTacToe implements Experience {
@@ -32,27 +34,43 @@ import java.util.Map;
     // Public class constants.
 
     /** The level types. */
-    public final static int EASY = 0;
-    public final static int INTERMEDIATE = 1;
-    public final static int IMPOSSIBLE = 2;
+    //public final static int EASY = 0;
+    //public final static int INTERMEDIATE = 1;
+    //public final static int IMPOSSIBLE = 2;
 
-    /** A list of board positions that have been filled by either an X or an O. */
-    public List<String> board;
+    // The game state values.
+
+    /** The game is still active. */
+    public final static int ACTIVE = 0;
+
+    /** The game has been won by player using X. */
+    public final static int X_WINS = 1;
+
+    /** The game has been won by player using O. */
+    public final static int O_WINS = 2;
+
+    /** The game has ended in a tie. */
+    public final static int TIE = 3;
+
+    // Public instance variables.
+
+    /** The board positions that have been filled by either an X or an O. */
+    public Map<String, String> board;
 
     /** The creation timestamp. */
-    public long createTime;
+    private long createTime;
 
     /** The experience push key. */
-    public String experienceKey;
+    public String key;
 
     /** The group push key. */
     public String groupKey;
 
     /** The game level. */
-    public int level;
+    //public int level;
 
     /** The last modification timestamp. */
-    public long modTime;
+    private long modTime;
 
     /** The experience display name. */
     public String name;
@@ -60,42 +78,44 @@ import java.util.Map;
     /** The member account identifer who created the experience. */
     public String owner;
 
-    public List<Map<String, String>> players;
+    /** The list of players, for tictactoe, two of them. */
+    public List<Player> players;
 
     /** The room push key. */
     public String roomKey;
 
-    /** The experience icon url. */
-    public String url;
+    /** The game state. */
+    public int state;
 
     /** The current turn. */
     public boolean turn;
 
-    /** The experience type. */
+    /** The experience type ordinal value. */
     public int type = -1;
+
+    /** The experience icon url. */
+    public String url;
 
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    public TicTacToe() {}
+    @SuppressWarnings("unused") public TicTacToe() {}
 
-    /** Build a default TicTacToe using all the parameters. */
-    public TicTacToe(final String key, final String owner, final String name, final String url,
-                     final long createTime, final long modTime, final boolean turn, final int type,
-                     final String groupKey, final String roomKey, final List<String> board,
-                     final List<Map<String, String>> players) {
-        this.board = board;
+    /** Build a default TicTacToe using the given parameters and defaulting the rest. */
+    public TicTacToe(final String key, final String id, final String name, final long createTime,
+                     final String groupKey, final String roomKey, final List<Player> players) {
         this.createTime = createTime;
-        this.experienceKey = key;
+        this.key = key;
         this.groupKey = groupKey;
-        this.modTime = modTime;
+        this.modTime = 0;
         this.name = name;
-        this.owner = owner;
+        this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
-        this.turn = turn;
-        this.type = type;
-        this.url = url;
+        state = ACTIVE;
+        turn = true;
+        type = ttt.ordinal();
+        url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -103,13 +123,14 @@ import java.util.Map;
         Map<String, Object> result = new HashMap<>();
         result.put("board", board);
         result.put("createTime", createTime);
-        result.put("expKey", experienceKey);
+        result.put("key", key);
         result.put("groupKey", groupKey);
         result.put("modTime", modTime);
         result.put("name", name);
         result.put("owner", owner);
         result.put("players", players);
         result.put("roomKey", roomKey);
+        result.put("state", state);
         result.put("turn", turn);
         result.put("type", type);
         result.put("url", url);
@@ -117,16 +138,16 @@ import java.util.Map;
         return result;
     }
 
-    /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude @Override public FragmentType getFragmentType() {
-        if (type < 0 || type >= FragmentType.values().length) return null;
-
-        return FragmentType.values()[type];
-    }
-
     /** Return the experience push key. */
     @Exclude @Override public String getExperienceKey() {
-        return experienceKey;
+        return key;
+    }
+
+    /** Return the fragment type value or null if no such fragment type exists. */
+    @Exclude @Override public ExpType getExperienceType() {
+        if (type < 0 || type >= ExpType.values().length) return null;
+
+        return ExpType.values()[type];
     }
 
     /** Return the group push key. */
@@ -144,28 +165,39 @@ import java.util.Map;
         return roomKey;
     }
 
-    /** Return the sigil text value for the given player. */
-    @Exclude public String getSigilValue(final int index) {
-        // Ensure that the index is valid. Return the sentinal value "?" if not.
-        if (index < 0 || index > 1) return "?";
-
-        // The index is valid. Return the sigil value.
-        return players.get(index).get("sigil");
+    /** Return the value associated with the current player: 1 == X, 2 == O. */
+    @Exclude public int getSymbolValue() {
+        // This implies that player 1 is always X and player 2 is always O.
+        return turn ? 1 : 2;
     }
 
-    /** Return the sigil text value for the player whose turn is current. */
-    @Exclude public String getSigilValue() {
-        return turn ? getSigilValue(0) : getSigilValue(1);
-    }
-
-    /** Return the type to satisfy the Experience contract. */
-    @Exclude @Override public int getType() {
-        return type;
+    /** Return the symbol text value for the player whose turn is current. */
+    @Exclude public String getSymbolText() {
+        return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
-        experienceKey = key;
+        this.key = key;
+    }
+
+    /** Set the modification timestamp. */
+    @Exclude @Override public void setModTime(final long value) {
+        modTime = value;
+    }
+
+    /** Update the win count based on the current state. */
+    @Exclude @Override public void setWinCount() {
+        switch (state) {
+            case X_WINS:
+                players.get(0).winCount++;
+                break;
+            case O_WINS:
+                players.get(1).winCount++;
+                break;
+            default:
+                break;
+        }
     }
 
     /** Toggle the turn state. */
@@ -173,4 +205,19 @@ import java.util.Map;
         turn = !turn;
         return turn;
     }
+
+    /** Return the winning player's name or null if the game is active or ended in a tie. */
+    @Exclude public String getWiningPlayerName() {
+        switch (state) {
+            case X_WINS:
+                return players.get(0).name;
+            case O_WINS:
+                return players.get(1).name;
+            case ACTIVE:
+            case TIE:
+            default:
+                return null;
+        }
+    }
+
 }
