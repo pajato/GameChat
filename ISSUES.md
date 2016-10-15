@@ -1,9 +1,9 @@
 Short Term Issues needing resolution.  Longer term itesm should be logged on GitHub.
 
-- Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
-- Determine if DatabaseManager#updateExperience() is needed or if the updateChildren() will work directly.
-- Do SVG homework in preparation to start replacing all PNG icons.
 - Automate bug reporting process as on overflow menu item.  Send reports to Pajato Support and to GitHub issues for GameChat.
+- Do Play Store alpha release.
+- Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
+- Do SVG homework in preparation to start replacing all PNG icons.
 - Add member rooms to the room list screens.
 - Replace Chat FAM model with the new Experience one.
 - Move Chat fragments to a resume/pause registration model.

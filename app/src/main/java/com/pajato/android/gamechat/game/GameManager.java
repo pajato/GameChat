@@ -295,7 +295,7 @@ public enum GameManager {
 
         /** Build an instance with a given tag value. */
         SnackbarActionHandler(final Fragment fragment) {
-            mClassName = fragment.getClass().getSimpleName();;
+            mClassName = fragment.getClass().getSimpleName();
         }
 
         /** Handle an action click from the snackbar by posting the tag to the app. */

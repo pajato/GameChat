@@ -225,7 +225,7 @@ public enum FabManager {
         Fragment envelopeFragment = activity.getSupportFragmentManager().findFragmentByTag(mTag);
         format = "The envelope fragment {%s} does not have a layout view!";
         if (envelopeFragment == null || envelopeFragment.getView() == null)
-            logError(format, envelopeFragment);
+            return logError(format, envelopeFragment);
 
         // There is a layout view to return.
         return envelopeFragment.getView();
