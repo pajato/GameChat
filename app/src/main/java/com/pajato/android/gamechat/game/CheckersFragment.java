@@ -92,7 +92,7 @@ public class CheckersFragment extends BaseGameFragment {
             }
             String newGame = getString(R.string.NewGame);
             String message = String.format(Locale.US, "%s! %s's Turn!", newGame, player);
-            GameManager.instance.notify(this, message, false);
+            NotificationManager.instance.notify(this, message, false);
         }
 
     }
@@ -258,10 +258,10 @@ public class CheckersFragment extends BaseGameFragment {
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
         if(yCount == 0) {
-            GameManager.instance.notify(this, "Game Over, Player 1 wins", true);
+            NotificationManager.instance.notify(this, "Game Over, Player 1 wins", true);
             return true;
         } else if (bCount == 0) {
-            GameManager.instance.notify(this, "Game Over, Player 2 wins", true);
+            NotificationManager.instance.notify(this, "Game Over, Player 2 wins", true);
             return true;
         } else {
             return false;
