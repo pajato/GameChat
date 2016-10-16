@@ -24,6 +24,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import java.util.HashMap;
@@ -116,7 +118,7 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
                 // Not sure what a moved change means or what to do about it, so do nothing.
                 break;
         }
-        //AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
+        AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
     }
 
     /** Return a map of experience profiles for the room in the given experience profile. */

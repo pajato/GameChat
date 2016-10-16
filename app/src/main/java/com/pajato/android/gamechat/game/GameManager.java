@@ -17,21 +17,12 @@
 
 package com.pajato.android.gamechat.game;
 
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
@@ -112,32 +103,6 @@ public enum GameManager {
         instructions.clear();
     }
 
-    /** Create and show a Snackbar notification based on the given parameters. */
-    public void notify(@NonNull final Fragment fragment, final String text, final boolean done) {
-        // Ensure that the fragment is attached and has a view.  Abort if it does not.
-        Snackbar notification;
-        if (fragment.getView() == null) return;
-
-        // Determine if the experience is finished.
-        if (done) {
-            // The game is ended so generate a notification that could start a new game.
-            notification = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_INDEFINITE);
-            final String playAgain = getFragment(getCurrent()).getString(R.string.PlayAgain);
-            notification.setAction(playAgain, new SnackbarActionHandler(fragment));
-        } else {
-            // The game hasn't ended so generate a notification without an action.
-            notification = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_SHORT);
-        }
-
-        // Use a primary color background with white text for the snackbar and hide the FAB button
-        // while the snackbar is presenting.
-        int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
-        notification.getView().setBackgroundColor(color);
-        notification.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
-                .setCallback(new SnackbarChangeHandler(fragment))
-                .show();
-    }
-
     /** Return true iff a fragment for the given experience is started. */
     public boolean startNextFragment(final FragmentActivity context) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
@@ -172,7 +137,7 @@ public enum GameManager {
         if (expProfileMap.size() > 1) return new Dispatcher(expProfileMap);
 
         // A signed in user with experiences in more than one room but only one group. Return a
-        // dispatcher identifying the group and room.
+        // dispatcher identifying the group and room map.
         String groupKey = expProfileMap.keySet().iterator().next();
         Map<String, Map<String, ExpProfile>> roomMap = expProfileMap.get(groupKey);
         if (roomMap.size() > 1) return new Dispatcher(groupKey, roomMap);
@@ -185,7 +150,7 @@ public enum GameManager {
 
         // A signed in User with one experience. Return a dispatcher to show the single experience.
         FragmentType fragmentType = getFragmentType(expProfileList.get(0));
-        return new Dispatcher(fragmentType, groupKey, roomKey, expProfileList.get(0).expKey);
+        return new Dispatcher(fragmentType, expProfileList.get(0));
     }
 
     /** Return a dispatcher object for a given fragment type. */
@@ -197,7 +162,7 @@ public enum GameManager {
 
         // Case: a signed in user with a single experience. Return a dispatcher with the experience
         // key.
-        if (list.size() == 1) return new Dispatcher(type, list.get(0).expKey);
+        if (list.size() == 1) return new Dispatcher(type, list.get(0));
 
         // A signed in user with more than one experience of the given type. Return a dispatcher
         // with the list of relevant experience keys.
@@ -226,7 +191,12 @@ public enum GameManager {
 
     /** Return the fragment type associated with the experience given by the experience key. */
     private FragmentType getFragmentType(final ExpProfile expProfile) {
-        return ExpType.values()[expProfile.type].mFragmentType;
+        ExpType expType = ExpType.values()[expProfile.type];
+        for (FragmentType fragmentType : FragmentType.values()) {
+            if (expType == fragmentType.expType) return fragmentType;
+        }
+
+        return null;
     }
 
     /** Return the string value associated with the two players based on the current turn. */
@@ -257,53 +227,4 @@ public enum GameManager {
         return true;
     }
 
-    // Inner classes.
-
-    /** Provide a handler to show/hide the FAB for snackbar messaging. */
-    private class SnackbarChangeHandler extends Snackbar.Callback {
-
-        // Instance variables.
-
-        /** The calling fragment. */
-        Fragment mFragment;
-
-        // Constructors
-
-        /** Build an instance with a given fragment. */
-        SnackbarChangeHandler(final Fragment fragment) {
-            mFragment = fragment;
-        }
-
-        @Override public void onDismissed(final Snackbar snackbar, final int event) {
-            FabManager.game.show(mFragment);
-        }
-
-        @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
-            FabManager.game.hide(mFragment);
-        }
-    }
-
-    /** Handle a snackbar action click. */
-    private class SnackbarActionHandler implements View.OnClickListener {
-
-        // Instance variables.
-
-        /** The tag value to post with the event to the app. */
-        String mClassName;
-
-        // Constructor.
-
-        /** Build an instance with a given tag value. */
-        SnackbarActionHandler(final Fragment fragment) {
-            mClassName = fragment.getClass().getSimpleName();
-        }
-
-        /** Handle an action click from the snackbar by posting the tag to the app. */
-        @Override public void onClick(final View view) {
-            // Post the saved tag (the originating fragment's tag) to the app.
-            view.setTag(mClassName);
-            AppEventManager.instance.post(new TagClickEvent(view));
-        }
-
-    }
 }

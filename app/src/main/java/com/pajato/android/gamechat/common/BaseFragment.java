@@ -185,31 +185,35 @@ public abstract class BaseFragment extends Fragment {
 
     /** Set the title in the toolbar using the group name. */
     protected void setTitles(final String groupKey, final String roomKey) {
-        // Ensure that the action bar exists.
+        // Ensure that the activity is attached, aborting if not, which is entirely reasonable.
         String title;
         String subtitle = null;
-        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (bar != null) {
-            // The action bar does exist, as expected.  Set the title and subtitle accordingly.
-            if (groupKey == null && roomKey == null) {
-                title = getResources().getString(R.string.app_name);
-            } else if (groupKey != null && roomKey == null) {
-                title = DatabaseListManager.instance.getGroupName(groupKey);
-            } else if (groupKey == null) {
-                title = DatabaseListManager.instance.getRoomName(roomKey);
-            } else {
-                title = DatabaseListManager.instance.getRoomName(roomKey);
-                subtitle = DatabaseListManager.instance.getGroupName(groupKey);
-            }
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity == null) return;
 
-            // Apply the title and subtitle to the action bar.
-            bar.setTitle(title);
-            bar.setSubtitle(subtitle);
+        // The activity exists.  Ensure that the action bar does as well.  It should.
+        ActionBar bar = activity.getSupportActionBar();
+        if (bar == null) {
+            // The action bar does not exist!  Log this as an error.
+            Log.e(TAG, "The action bar does not exist to set the titles!", new Throwable());
             return;
         }
 
-        // The action bar does not exist!  Log the error.
-        Log.e(TAG, "The action bar is not accessible in order to set the titles!");
+        // The action bar does exist, as expected.  Set the title and subtitle accordingly.
+        if (groupKey == null && roomKey == null) {
+            title = getResources().getString(R.string.app_name);
+        } else if (groupKey != null && roomKey == null) {
+            title = DatabaseListManager.instance.getGroupName(groupKey);
+        } else if (groupKey == null) {
+            title = DatabaseListManager.instance.getRoomName(roomKey);
+        } else {
+            title = DatabaseListManager.instance.getRoomName(roomKey);
+            subtitle = DatabaseListManager.instance.getGroupName(groupKey);
+        }
+
+        // Apply the title and subtitle to the action bar.
+        bar.setTitle(title);
+        bar.setSubtitle(subtitle);
     }
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */

@@ -122,12 +122,17 @@ public abstract class BaseGameFragment extends BaseFragment {
         ExpType expType = dispatcher.type.expType;
         if (expType == null) return;
 
-        // Determine if an experience is available via the dispatcher and fetch it.
-        mExperience = dispatcher.expKey != null ? getExperience(dispatcher) : null;
-
-        // Determine if an experience should be created.  If so use the passed in context in setting
-        // up the experience as the current context for this fragment may not exist yet.
-        if (dispatcher.expKey == null) createExperience(context, dispatcher);
+        // Determine if the dispatcher has a single experience profile.
+        if (dispatcher.expProfile != null) {
+            // It does.  Either get the cached experience or fetch it from the database.
+            Experience exp = DatabaseListManager.instance.experienceMap.get(dispatcher.expKey);
+            if (exp == null) {
+                // Fetch the experience from the database.
+                DatabaseListManager.instance.setExperienceWatcher(dispatcher.expProfile);
+            }
+        } else
+            // Create a new experience.
+            createExperience(context, dispatcher);
     }
 
     // Private instance methods.

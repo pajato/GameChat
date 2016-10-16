@@ -321,14 +321,9 @@ public class TTTFragment extends BaseGameFragment {
         }
 
         // Reset the data model and update the database.
-        initBoard();
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        if (winner != null) winner.setText("");
         model.board = null;
         model.state = TicTacToe.ACTIVE;
         DatabaseManager.instance.updateExperience(mExperience);
-
-
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
@@ -348,7 +343,7 @@ public class TTTFragment extends BaseGameFragment {
         if (model.state != TicTacToe.ACTIVE) {
             // Use the coordinator view to manage the FAB button movement and notify the User via a
             // snackbar that the game is over.
-            GameManager.instance.notify(this, getDoneMessage(model), true);
+            NotificationManager.instance.notify(this, getDoneMessage(model), true);
             return;
         }
 
@@ -361,8 +356,17 @@ public class TTTFragment extends BaseGameFragment {
         DatabaseManager.instance.updateExperience(mExperience);
     }
 
-    /** Initialize the board values array to all -5 values. */
+    /** Initialize the board values and clear the winner text. */
     private void initBoard() {
+        // Ensure that the layout has been established. Abort if not.
+        if (mLayout == null) return;
+
+        // Clear the winner text and the notification snackbar message.
+        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        if (winner != null) winner.setText("");
+        NotificationManager.instance.dismiss();
+
+        // Clear the board evaluation support and all the X's and O's from the button grid.
         mBoardValues = new int[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -394,6 +398,7 @@ public class TTTFragment extends BaseGameFragment {
             // experience.
             ProgressManager.instance.hide();
             mLayout.setVisibility(View.VISIBLE);
+            setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             updateExperience();
         }
     }
@@ -454,7 +459,6 @@ public class TTTFragment extends BaseGameFragment {
 
     /** Update the game state. */
     private void setState(final TicTacToe model) {
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         String value = null;
         switch (model.state) {
             case TicTacToe.X_WINS:
@@ -478,15 +482,20 @@ public class TTTFragment extends BaseGameFragment {
         if (value == null) return;
 
         // Update the winner text view.
+        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         winner.setText(value);
         winner.setVisibility(View.VISIBLE);
-        GameManager.instance.notify(this, getDoneMessage(model), true);
+        NotificationManager.instance.notify(this, getDoneMessage(model), true);
     }
 
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final TicTacToe model) {
-        // Determine if the board has any pieces to put on the board.  If not reset the board.
-        if (model.board != null)
+        // Determine if the model has any pieces to put on the board.  If not reset the board.
+        if (model.board == null)
+            // Initialize the board state.
+            initBoard();
+        else
+            // Place the X and O symbols on the grid.
             for (String tag : model.board.keySet()) {
                 // Determine if the position denoted by the suffix is valid and has mot yet been
                 // updated.  If so, then update the position.

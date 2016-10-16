@@ -26,12 +26,9 @@ import com.pajato.android.gamechat.R;
  * @author Paul Michael Reilly
  */
 public enum ExpType {
-    checkers (R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2,
-            FragmentType.checkers),
-    chess (R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2,
-            FragmentType.chess),
-    ttt (R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue,
-            FragmentType.tictactoe);
+    checkers (R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
+    chess (R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
+    ttt (R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
 
     // Instance variables.
 
@@ -53,12 +50,10 @@ public enum ExpType {
     // Constructor.
 
     /** Build an instance given the online, local and computer opponent fragment indexes. */
-    ExpType(final int iconId, final int titleId, final int primary, final int secondary,
-            final FragmentType fragmentType) {
+    ExpType(final int iconId, final int titleId, final int primary, final int secondary) {
         mIconResId = iconId;
         mTitleResId = titleId;
         mPrimaryIndex = primary;
         mSecondaryIndex = secondary;
-        mFragmentType = fragmentType;
     }
 }

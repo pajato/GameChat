@@ -259,6 +259,16 @@ public enum DatabaseListManager {
         roomMap.put(event.key, event.room);
     }
 
+    /** Setup a listener for experience changes in the given room. */
+    public void setExperienceWatcher(final ExpProfile profile) {
+        // Set up a watcher in the given room for experiences changes.
+        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.expKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
     // Private instance methods.
 
     /** Return the date header type most closely associated with the given message timestamp. */
@@ -382,16 +392,6 @@ public enum DatabaseListManager {
     }
 
     // Package private instance methods.
-
-    /** Setup a listener for experience changes in the given room. */
-    void setExperienceWatcher(final ExpProfile profile) {
-        // Set up a watcher in the given room for experiences changes.
-        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.expKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
-        DatabaseRegistrar.instance.registerHandler(handler);
-    }
 
     // Private instance methods.
 

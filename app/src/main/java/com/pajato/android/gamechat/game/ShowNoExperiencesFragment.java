@@ -19,27 +19,35 @@ package com.pajato.android.gamechat.game;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
+import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 import static com.pajato.android.gamechat.game.GameFragment.GAME_HOME_FAM_KEY;
 
 public class ShowNoExperiencesFragment extends BaseGameFragment {
 
     // Public instance methods.
 
-    /** A nop subscriber to satisfy the EventBus contract. */
-    @Subscribe public void onClick(final ClickEvent event) {
-        // Provide a logging placeholder.
-        logEvent("onClick (showNoGames)");
-    }
-
     /** Establish the layout file to indicate that no experiences are available. */
     @Override public int getLayout() {return R.layout.fragment_game_no_games;}
 
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
+
+    /** Handle an experience profile list change event. */
+    @Subscribe public void onExpProfileListChangeEvent(ExpProfileListChangeEvent event) {
+        switch (event.changeType) {
+            case CHANGED:
+            case NEW:
+                GameManager.instance.startNextFragment(getActivity());
+                break;
+            default:
+                break;
+        }
+    }
 
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {

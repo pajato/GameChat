@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.game;
 
+import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.game.model.ExpProfile;
 
 import java.util.List;
@@ -39,6 +41,9 @@ public class Dispatcher {
 
     /** The experience key. */
     public String expKey;
+
+    /** The one and only experience profile. */
+    public ExpProfile expProfile;
 
     /** A list of experience profiles. */
     public List<ExpProfile> profileList;
@@ -63,6 +68,11 @@ public class Dispatcher {
     /** Build an instance given an experience type. */
     Dispatcher(final FragmentType type) {
         this.type = type;
+        Room room = DatabaseListManager.instance.getMeRoom();
+        if (room != null) {
+            groupKey = room.groupKey;
+            roomKey = room.key;
+        }
     }
 
     /** Build an instance given an experience map. */
@@ -100,10 +110,10 @@ public class Dispatcher {
         this.profileList = profileList;
     }
 
-    /** Build an instance given a fragment type and an experiene key. */
-    Dispatcher(final FragmentType type, String expKey) {
+    /** Build an instance given a fragment type and an experiene profile. */
+    Dispatcher(final FragmentType type, ExpProfile expProfile) {
         this.type = type;
-        this.expKey = expKey;
+        this.expProfile = expProfile;
     }
 
 }
