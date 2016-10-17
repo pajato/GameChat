@@ -24,4 +24,5 @@
     <string name="me">me</string>
     <string name="anonymous">Anonymous</string>
     <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
+    <string name="MenuFileBugReport">File Bug Report</string>
 </resources>

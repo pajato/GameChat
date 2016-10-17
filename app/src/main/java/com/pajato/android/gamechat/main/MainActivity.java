@@ -25,6 +25,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -32,14 +34,13 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
-import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -149,14 +150,11 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    /**
-     * An OnClick Listener for the tic-tac-toe tiles.
-     *
-     * @param view the tile clicked
-     */
-    public void onTileClick(final View view) {
-        // Post this event to the game fragment via the app event manager.
-        AppEventManager.instance.post(new TagClickEvent(view));
+    /** Setup the standard set of activty menu items. */
+    @Override public boolean onCreateOptionsMenu(final Menu menu) {
+        final MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
     }
 
     // Protected instance methods

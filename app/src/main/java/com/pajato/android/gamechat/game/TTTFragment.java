@@ -22,8 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -100,11 +98,6 @@ public class TTTFragment extends BaseGameFragment {
 
         // Determine if the tag is this fragment's classname, in which case we play another game.
         if (this.getClass().getSimpleName().equals(tag)) handleNewGame();
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.ttt_menu, menu);
     }
 
     /** Handle an experience posting event to see if this is a tictactoe experience. */
