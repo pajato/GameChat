@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="learnMore">1</integer>
+    <!-- Miscellaneous keys -->
     <integer name="fabStateKey">0</integer>
+
+    <!-- Menu discriminants -->
+    <integer name="fileBugReport">1</integer>
+    <integer name="learnMore">2</integer>
 
     <!-- Chat list type constants -->
     <integer name="groupList">0</integer>
-    <integer name="messagesList">3</integer>
-    <integer name="roomList">1</integer>
+    <integer name="messagesList">1</integer>
+    <integer name="roomList">2</integer>
 </resources>

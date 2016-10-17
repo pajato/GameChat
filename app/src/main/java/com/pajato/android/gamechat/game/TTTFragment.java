@@ -22,8 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -63,7 +61,7 @@ import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
  *
  * @author Bryan Scott
  */
-public class TTTFragment extends BaseGameFragment {
+public class TTTFragment extends BaseGameFragment implements View.OnClickListener {
 
     // Private constants.
 
@@ -85,26 +83,16 @@ public class TTTFragment extends BaseGameFragment {
 
     /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
     @Subscribe public void onClick(final TagClickEvent event) {
-        // Determine if the payload exists and is not a string, in which case, abort as the event is
-        // of no interest here.
+        // Determine if a new game should be started: the payload is the name of this class.
         Object payload = event.view.getTag();
-        if (!(payload instanceof String)) return;
-
-        // Determine if the payload is a board position encoding.
-        String tag = (String) payload;
-        if (tag.startsWith("button")) {
-            // It is an encoded button position.  Deal with it.
-            handleTileClick(tag);
-            return;
-        }
-
-        // Determine if the tag is this fragment's classname, in which case we play another game.
-        if (this.getClass().getSimpleName().equals(tag)) handleNewGame();
+        if (payload instanceof String && TAG.equals(payload)) handleNewGame();
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.ttt_menu, menu);
+    /** Handle a click on the tictactoe board by verifying the click and handing it off. */
+    @Override public void onClick(final View view) {
+        Object tag = view.getTag();
+        if (tag instanceof String && ((String) tag).startsWith("button"))
+            handleTileClick((String) tag);
     }
 
     /** Handle an experience posting event to see if this is a tictactoe experience. */
@@ -115,6 +103,23 @@ public class TTTFragment extends BaseGameFragment {
         // The experience is a tictactoe experience.  Start the game.
         mExperience = event.experience;
         resume();
+    }
+
+    /** Initialie by setting up tile click handlers on the board. */
+    @Override public void onInitialize() {
+        // Place an click listener on all nine buttons by iterating over all nine buttons.
+        super.onInitialize();
+        final String format = "Invalid tag found on button with tag {%s}";
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                String tag = String.format(Locale.US, "button%s%s", i, j);
+                View view = mLayout.findViewWithTag(tag);
+                if (view != null)
+                    view.setOnClickListener(this);
+                else
+                    Log.e(TAG, String.format(Locale.US, format, tag));
+            }
+        }
     }
 
     /** Handle taking the foreground by updating the UI based on the current expeience. */
