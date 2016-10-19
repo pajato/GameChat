@@ -1,11 +1,14 @@
 <resources>
+    <string name="MenuItemFileBugReport">File Bug Report</string>
+    <string name="MenuItemHelpAndFeedback">Feedback</string>
+    <string name="MenuItemLearnMore">Learn More</string>
+    <string name="MenuItemSearch">Search</string>
+    <string name="MenuItemSettings">Settings</string>
     <string name="action_save">SAVE</string>
     <string name="app_name">GameChat</string>
     <string name="arrow_left"><![CDATA[<]]></string>
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="menuItemTitleLearnMore">Learn More</string>
-    <string name="menuItemTitleFeedback">Feedback</string>
     <string name="manage_accounts">Manage Accounts</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
@@ -24,5 +27,4 @@
     <string name="me">me</string>
     <string name="anonymous">Anonymous</string>
     <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
-    <string name="MenuFileBugReport">File Bug Report</string>
 </resources>

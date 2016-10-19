@@ -22,33 +22,27 @@ more. -->
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:title=""
-        android:icon="@drawable/ic_search_white_24px"
         android:id="@+id/search"
         android:orderInCategory="20"
+        android:title="@string/MenuItemSearch"
+        android:icon="@drawable/ic_search_white_24px"
         android:visible="false"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/nav_settings"
-        android:icon="@drawable/ic_settings_black"
-        android:title="@string/navigation_drawer_label_problems_settings" />
+        android:id="@+id/settings"
+        android:title="@string/MenuItemSettings" />
     <item
-        android:id="@+id/nav_feedback"
-        android:icon="@drawable/ic_help_black"
-        android:title="@string/navigation_drawer_label_problems_feedback" />
+        android:id="@+id/helpAndFeedback"
+        android:title="@string/MenuItemHelpAndFeedback" />
     <item
-        android:id="@+id/nav_learn"
-        android:tag="@integer/learnMore"
-        android:icon="@drawable/ic_info_black"
-        android:title="@string/navigation_drawer_label_problems_learn" />
+        android:id="@+id/learnMore"
+        android:title="@string/MenuItemLearnMore" />
     <item
-        android:id="@+id/MenuFileBugReport"
+        android:id="@+id/fileBugReport"
         android:orderInCategory="80"
-        android:tag="@integer/fileBugReport"
-        android:icon="@drawable/ic_bug_report_white_24px"
-        android:title="@string/MenuFileBugReport"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/MenuItemFileBugReport" />
     <item
         android:id="@+id/joinDeveloperGroups"
+        android:orderInCategory="100"
         android:title="@string/joinDeveloperGroups" />
 </menu>

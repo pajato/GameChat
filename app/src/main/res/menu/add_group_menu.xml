@@ -2,12 +2,12 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/addGroupLearnMore"
-        android:title="@string/menuItemTitleLearnMore"
+        android:title="@string/MenuItemLearnMore"
         app:showAsAction="never"
         android:orderInCategory="0"/>
     <item
         android:id="@+id/addGroupFeedback"
-        android:title="@string/menuItemTitleFeedback"
+        android:title="@string/MenuItemHelpAndFeedback"
         app:showAsAction="never"
         android:orderInCategory="55" />
     <item

@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -40,12 +41,18 @@ import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILABLE_KEY;
@@ -139,10 +146,7 @@ public class MainActivity extends BaseActivity
     @Override public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
         switch (item.getItemId()) {
-            case R.id.nav_manage_accounts:
-            case R.id.nav_settings:
-            case R.id.nav_feedback:
-            case R.id.nav_learn:
+            default:
                 // Todo: add menu button handling as a future feature.
                 break;
         }
@@ -154,6 +158,31 @@ public class MainActivity extends BaseActivity
     @Override public boolean onCreateOptionsMenu(final Menu menu) {
         final MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    /** Handle a menu item click by providing a last ditch chance to do something. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        // Case on the menu id to handle the item.
+        switch (event.item.getItemId()) {
+            case R.id.helpAndFeedback:
+                SupportManager.instance.sendFeedback(this, "GameChat Feedback");
+                AppEventManager.instance.cancel(event);
+                break;
+            case R.id.fileBugReport:
+                handleBugReport(event);
+                break;
+            default:
+                // Handle all other events by logging a message for now.
+                final String format = "Default handling for menu item with title: {%s}";
+                Log.d(TAG, String.format(Locale.US, format, event.item.getTitle()));
+                break;
+        }
+    }
+
+    /** Post the menu item click to the app. */
+    @Override public boolean onOptionsItemSelected(final MenuItem item) {
+        AppEventManager.instance.post(new MenuItemEvent(item));
         return true;
     }
 
@@ -235,6 +264,46 @@ public class MainActivity extends BaseActivity
     }
 
     // Private instance methods.
+
+    /** Return null if the given bitmap cannot be saved or the file path it has been saved to. */
+    private String getBitmapPath(final Bitmap bitmap) {
+        // Create the image file on internal storage.  Abort if the subdirectories cannot be
+        // created.
+        FileOutputStream outputStream;
+        File dir = new File(getFilesDir(), "images");
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        // Flush the bitmap to the image file as a stream and return the result.
+        File imageFile = new File(dir, "screenshot.png");
+        Log.d(TAG, String.format(Locale.US, "Image file path is {%s}", imageFile.getPath()));
+        try {
+            outputStream = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException exc) {
+            Log.e(TAG, exc.getMessage(), exc);
+            return null;
+        }
+
+        Log.d(TAG, String.format("File size is %d.", imageFile.length()));
+        Log.d(TAG, String.format("File path is {%s}.", imageFile.getPath()));
+
+        return imageFile.getPath();
+    }
+
+    /** Handle a bug report by performing a screen capture, grabbing logcat and sending email. */
+    private void handleBugReport(final MenuItemEvent event) {
+        // Capture the screen (with any luck, sans menu.), send the message and cancel event
+        // propagation.
+        View rootView = getWindow().getDecorView().getRootView();
+        rootView.setDrawingCacheEnabled(true);
+        List<String> attachments = new ArrayList<>();
+        String path = getBitmapPath(rootView.getDrawingCache());
+        if (path != null) attachments.add(path);
+        SupportManager.instance.sendFeedback(this, "GameChat Bug Report", attachments);
+        AppEventManager.instance.cancel(event);
+    }
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
