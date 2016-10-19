@@ -61,16 +61,23 @@ enum SupportManager {
     /** Send email with a given subject and body text to the support address. */
     public void sendFeedback(final Activity activity, final String subject, final String body,
                              final List<String> attachments) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
+        // Set up the intent with the main extras.
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.setType("message/rfc822");
         intent.putExtra(Intent.EXTRA_EMAIL  , new String[] {"support@pajato.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT   , body != null ? body : "no message");
+
+        // Add the attachment extras.
+        ArrayList<Uri> uriList = new ArrayList<>();
         for (String path : attachments) {
             Uri uri = getUriForFile(activity, "com.pajato.fileprovider", new File(path));
+            uriList.add(uri);
             Log.d(TAG, String.format(Locale.US, "Attaching file with URI {%s}.", uri));
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
         }
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
+
+        // Start the mailer activity of choice.
         try {
             activity.startActivity(Intent.createChooser(intent, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
