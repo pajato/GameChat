@@ -31,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
@@ -265,6 +266,14 @@ public class MainActivity extends BaseActivity
 
     // Private instance methods.
 
+    /** Return "about" information: a string describing the app and it's version information. */
+    private String getAbout() {
+        final String format = "GameChat %s-%d Bug Report";
+        final String name = BuildConfig.VERSION_NAME;
+        final int code = BuildConfig.VERSION_CODE;
+        return String.format(Locale.US, format, name, code);
+    }
+
     /** Return null if the given bitmap cannot be saved or the file path it has been saved to. */
     private String getBitmapPath(final Bitmap bitmap) {
         // Create the image file on internal storage.  Abort if the subdirectories cannot be
@@ -286,9 +295,6 @@ public class MainActivity extends BaseActivity
             return null;
         }
 
-        Log.d(TAG, String.format("File size is %d.", imageFile.length()));
-        Log.d(TAG, String.format("File path is {%s}.", imageFile.getPath()));
-
         return imageFile.getPath();
     }
 
@@ -301,7 +307,9 @@ public class MainActivity extends BaseActivity
         List<String> attachments = new ArrayList<>();
         String path = getBitmapPath(rootView.getDrawingCache());
         if (path != null) attachments.add(path);
-        SupportManager.instance.sendFeedback(this, "GameChat Bug Report", attachments);
+        path = getLogcatPath();
+        if (path != null) attachments.add(path);
+        SupportManager.instance.sendFeedback(this, getAbout(), "Extra information: ", attachments);
         AppEventManager.instance.cancel(event);
     }
 
@@ -319,4 +327,23 @@ public class MainActivity extends BaseActivity
         GameManager.instance.init();
     }
 
+    /** Return the file where logcat data has been placed, null if no data is available. */
+    private String getLogcatPath() {
+        // Capture the current state of the logcat file.
+        File dir = new File(getFilesDir(), "logcat");
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        File outputFile = new File(dir, "logcat.txt");
+        try {
+            Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
+        } catch (IOException exc) {
+            Log.e(TAG, exc.getMessage(), exc);
+            return null;
+        }
+
+        Log.d(TAG, String.format("File size is %d.", outputFile.length()));
+        Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
+
+        return outputFile.getPath();
+    }
 }
