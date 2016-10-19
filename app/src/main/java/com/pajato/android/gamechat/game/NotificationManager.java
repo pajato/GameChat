@@ -36,7 +36,7 @@ import com.pajato.android.gamechat.event.TagClickEvent;
  *
  * @author Bryan Scott
  */
-public enum NotificationManager {
+enum NotificationManager {
     instance;
 
     // Private instance variables.
@@ -50,6 +50,10 @@ public enum NotificationManager {
     public void dismiss() {
         // Ensure that the snackbar exists and is being shown.
         if (mNotifier != null && mNotifier.isShownOrQueued()) mNotifier.dismiss();
+        if (mNotifier != null) {
+            mNotifier.setCallback(null);
+            mNotifier = null;
+        }
     }
 
     /** Create and show a Snackbar notification based on the given parameters. */
