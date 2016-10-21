@@ -52,10 +52,13 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     /** The game has ended in a tie. */
     public final static int TIE = 3;
 
+    /** The game has ended, been celebrated and is pending a new game. */
+    public final static int PENDING = 4;
+
     // Public instance variables.
 
-    /** The board positions that have been filled by either an X or an O. */
-    public Map<String, String> board;
+    /** A POJO encapsulating the board moves and wining tallies. */
+    public Board board;
 
     /** The creation timestamp. */
     private long createTime;
@@ -168,7 +171,7 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     /** Return the value associated with the current player: 1 == X, 2 == O. */
     @Exclude public int getSymbolValue() {
         // This implies that player 1 is always X and player 2 is always O.
-        return turn ? 1 : 2;
+        return turn ? 1 : 4;
     }
 
     /** Return the symbol text value for the player whose turn is current. */

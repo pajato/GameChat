@@ -30,10 +30,13 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.game.model.Board;
 import com.pajato.android.gamechat.game.model.Player;
 import com.pajato.android.gamechat.game.model.TicTacToe;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -50,6 +53,18 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.game.ExpType.ttt;
+import static com.pajato.android.gamechat.game.FragmentType.checkers;
+import static com.pajato.android.gamechat.game.FragmentType.chess;
+import static com.pajato.android.gamechat.game.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.game.model.Board.BEG_COL;
+import static com.pajato.android.gamechat.game.model.Board.BOT_ROW;
+import static com.pajato.android.gamechat.game.model.Board.END_COL;
+import static com.pajato.android.gamechat.game.model.Board.LEFT_DIAG;
+import static com.pajato.android.gamechat.game.model.Board.MID_COL;
+import static com.pajato.android.gamechat.game.model.Board.MID_ROW;
+import static com.pajato.android.gamechat.game.model.Board.RIGHT_DIAG;
+import static com.pajato.android.gamechat.game.model.Board.TOP_ROW;
+import static com.pajato.android.gamechat.game.model.TicTacToe.ACTIVE;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
@@ -63,15 +78,15 @@ import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
  */
 public class TTTFragment extends BaseGameFragment implements View.OnClickListener {
 
+    // Public constants.
+
+    /** The lookup key for the FAB tictactoe memu. */
+    public static final String TIC_TAC_TOE_FAM_KEY = "TicTacToeFamKey";
+
     // Private constants.
 
     /** The logcat TAG. */
     private static final String TAG = TTTFragment.class.getSimpleName();
-
-    // Private instance variables.
-
-    /* A convenience array that simplifies win determination. */
-    private int[][] mBoardValues = new int[3][3];
 
     // Public instance methods.
 
@@ -81,11 +96,20 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Placeholder while message handler stays relevant for chess and checkers. */
     @Override public void messageHandler(final String msg) {}
 
-    /** Handle a tile click event by sending a message to the current tic-tac-toe fragment. */
+    /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
-        // Determine if a new game should be started: the payload is the name of this class.
-        Object payload = event.view.getTag();
-        if (payload instanceof String && TAG.equals(payload)) handleNewGame();
+        // Determine if this event is for this fragment.  Abort if not.
+        if (GameManager.instance.getCurrent() != tictactoe.ordinal()) return;
+
+        // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
+        // handle a snackbar action first.
+        Object tag = event.view.getTag();
+        if (isPlayAgain(tag, TAG)) {
+            // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
+            // setup a new game.
+            FabManager.game.dismissMenu(this);
+            handleNewGame();
+        }
     }
 
     /** Handle a click on the tictactoe board by verifying the click and handing it off. */
@@ -97,7 +121,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     /** Handle an experience posting event to see if this is a tictactoe experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
-        // Check the payload to see if this is not a tictactoe.  Abort if not.
+        // Check the payload to see if this is not tictactoe.  Abort if not.
         if (event.experience == null || event.experience.getExperienceType() != ttt) return;
 
         // The experience is a tictactoe experience.  Start the game.
@@ -109,6 +133,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     @Override public void onInitialize() {
         // Place an click listener on all nine buttons by iterating over all nine buttons.
         super.onInitialize();
+        FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         final String format = "Invalid tag found on button with tag {%s}";
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -128,6 +153,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
+        FabManager.game.setMenu(this, TIC_TAC_TOE_FAM_KEY);
         resume();
     }
 
@@ -139,12 +165,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // Set up the players and persist the game.
         List<Account> players = getPlayers(dispatcher);
         createExperience(context, players);
-    }
-
-    /** Handle a requrest to setup the experience by initializing the convenience board values. */
-    @Override protected void setupExperience(final Context context, final Dispatcher dispatcher) {
-        super.setupExperience(context, dispatcher);
-        initBoard();
     }
 
     // Private instance methods.
@@ -277,43 +297,54 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
                            R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
     }
 
-    /**
-     * Evaluates the state of the board, determining if there are three in a row of either X or O.
-     *
-     * @return false if a player has won or if the full number of turns has occurred, true otherwise.
-     */
+    /** Return the game state after applying the given button move to the data model. */
     private int getState(@NonNull final TicTacToe model, String buttonTag) {
-        // Update the array of moves with the value of button tag from the model.  The button tag
-        // has been vetted and will cause no exceptions.
+        // Check to see if the game is a tie, with all moves exhausted.
+        if (model.state == ACTIVE && model.board.grid.size() == 9) return TicTacToe.TIE;
+
+        // Not a tie.  Determine the winner state based on the current play given by the button tag.
         int value = model.getSymbolValue();
-        int i = Integer.parseInt(buttonTag.substring(6, 7));
-        int j = Integer.parseInt(buttonTag.substring(7, 8));
-        mBoardValues[i][j] = value;
+        if (model.state == ACTIVE) model.state = getState(model, value, buttonTag);
 
-        // Evaluate all possible lines of 3.
-        int topRow = mBoardValues[0][0] + mBoardValues[0][1] + mBoardValues[0][2];
-        int midRow = mBoardValues[1][0] + mBoardValues[1][1] + mBoardValues[1][2];
-        int botRow = mBoardValues[2][0] + mBoardValues[2][1] + mBoardValues[2][2];
-        int startCol = mBoardValues[0][0] + mBoardValues[1][0] + mBoardValues[2][0];
-        int centerCol = mBoardValues[0][1] + mBoardValues[1][1] + mBoardValues[2][1];
-        int endCol = mBoardValues[0][2] + mBoardValues[1][2] + mBoardValues[2][2];
-        int leftDiag = mBoardValues[0][0] + mBoardValues[1][1] + mBoardValues[2][2];
-        int rightDiag = mBoardValues[2][0] + mBoardValues[1][1] + mBoardValues[0][2];
+        return model.state;
+    }
 
-        // If any lines of 3 are equal to 3, X wins.
-        boolean xWins = (topRow == 3 || midRow == 3 || botRow == 3 || startCol == 3
-                || centerCol == 3 || endCol == 3 || leftDiag == 3 || rightDiag == 3);
-        if (xWins) return TicTacToe.X_WINS;
+    /** Return the game state after applying the given button move to the data model. */
+    private int getState(@NonNull final TicTacToe model, final int value, final String buttonTag) {
+        // Case on the button tag to update the appropriate tallies.
+        switch (buttonTag) {
+            case "button00": return getState(model, value, TOP_ROW, BEG_COL, LEFT_DIAG);
+            case "button01": return getState(model, value, TOP_ROW, MID_COL);
+            case "button02": return getState(model, value, TOP_ROW, END_COL, RIGHT_DIAG);
+            case "button10": return getState(model, value, MID_ROW, BEG_COL);
+            case "button11": return getState(model, value, MID_ROW, MID_COL, LEFT_DIAG, RIGHT_DIAG);
+            case "button12": return getState(model, value, MID_ROW, END_COL);
+            case "button20": return getState(model, value, BOT_ROW, BEG_COL, RIGHT_DIAG);
+            case "button21": return getState(model, value, BOT_ROW, MID_COL);
+            case "button22": return getState(model, value, BOT_ROW, END_COL, LEFT_DIAG);
+            default: break;
+        }
 
-        // If any lines of 3 are equal to 6, O wins.
-        boolean oWins = (topRow == 6 || midRow == 6 || botRow == 6 || startCol == 6
-                || centerCol == 6 || endCol == 6 || leftDiag == 6 || rightDiag == 6);
-        if (oWins) return TicTacToe.O_WINS;
+        return model.state;
+    }
 
-        // Determine if there is a tie.
-        if (model.board.size() == 9) return TicTacToe.TIE;
+    /** Return the game state after updating the given tallies. */
+    private int getState(@NonNull final TicTacToe model, final int value, final String... tallyKeys) {
+        // Ensure that the tallies map exists, crearing it if it doesn't and apply the value to each
+        // of the keys and return the state.
+        final int X_WIN_VALUE = 3;
+        final int O_WIN_VALUE = 12;
+        if (model.board.tallies == null) model.board.tallies = new HashMap<>();
+        for (String key : tallyKeys) {
+            // Ensure that the entry exists.
+            int tally = model.board.tallies.containsKey(key) ? model.board.tallies.get(key) : 0;
+            tally += value;
+            model.board.tallies.put(key, tally);
+            if (tally == X_WIN_VALUE) return TicTacToe.X_WINS;
+            if (tally == O_WIN_VALUE) return TicTacToe.O_WINS;
+        }
 
-        return TicTacToe.ACTIVE;
+        return ACTIVE;
     }
 
     /** Handle a new game by resetting the data model. */
@@ -325,64 +356,61 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
             return;
         }
 
-        // Reset the data model and update the database.
+        // Reset the data model, update the database and clear the notification manager one-shot.
         model.board = null;
-        model.state = TicTacToe.ACTIVE;
+        model.state = ACTIVE;
         DatabaseManager.instance.updateExperience(mExperience);
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
     private void handleTileClick(final String buttonTag) {
-        // Ensure that the click occurred on a grid button.  Abort if not.
+        // Ensure that the click occurred on a grid button and that the data model is not empty.
+        // Abort if not.
         View view = mLayout.findViewWithTag(buttonTag);
-        if (view == null || !(view instanceof Button)) return;
-
-        // The click occurred on a grid button.  Ensure that the data model exists, aborting if not.
         TicTacToe model = getModel();
-        if (model == null) {
-            Log.e(TAG, "Null experience model detected", new Throwable());
-            return;
-        }
+        if (view == null || !(view instanceof Button) || model == null) return;
 
-        // Ensure that the game is still active, providing a "Play again?" snackbar message if not.
-        if (model.state != TicTacToe.ACTIVE) {
-            // Use the coordinator view to manage the FAB button movement and notify the User via a
-            // snackbar that the game is over.
-            NotificationManager.instance.notify(this, getDoneMessage(model), true);
-            return;
+        // Handle the button click based on the current state.
+        Button button = (Button) view;
+        switch (model.state) {
+            case ACTIVE:
+                // Ensure that the click occurred on an empty button.
+                if (button.getText().length() != 0) {
+                    // The click occurred on a played button.  Warn the User and ignore the play.
+                    NotificationManager.instance.notify(this, R.string.InvalidButton);
+                    return;
+                }
+                break;
+            default:
+                // In all other cases, clear the board to start a new game.
+                initBoard(model);
+                NotificationManager.instance.notify(this, R.string.StartNewGame);
+                break;
         }
 
         // Update the database with the collected changes.
-        if (model.board == null) model.board = new HashMap<>();
-        model.board.put(buttonTag, model.getSymbolText());
+        if (model.board == null) model.board = new Board();
+        model.board.grid.put(buttonTag, model.getSymbolText());
         model.state = getState(model, buttonTag);
         model.setWinCount();
         model.toggleTurn();
         DatabaseManager.instance.updateExperience(mExperience);
     }
 
-    /** Initialize the board values and clear the winner text. */
-    private void initBoard() {
+    /** Initialize the board model and values and clear the winner text. */
+    private void initBoard(@NonNull final TicTacToe model) {
         // Ensure that the layout has been established. Abort if not.
         if (mLayout == null) return;
 
-        // Clear the winner text and the notification snackbar message.
+        // Clear the board, the winner text, the board evaluation support and all current X's and
+        // O's.
+        if (model.board != null) model.board.clear();
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         if (winner != null) winner.setText("");
-        NotificationManager.instance.dismiss();
-
-        // Clear the board evaluation support and all the X's and O's from the button grid.
-        mBoardValues = new int[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 // Seed the array with a value that will guarantee the X vs O win and a tie will be
-                // calculated correctly.
-                mBoardValues[i][j] = -5;
-
-                // Determine if the grid button needs to be reset.  Continue if not.
-                if (mLayout == null) continue;
-
-                // Reset the grid button.
+                // calculated correctly; clear the grid button.
                 String tag = String.format(Locale.US, "button%d%d", i, j);
                 TextView button = (TextView) mLayout.findViewWithTag(tag);
                 if (button != null) button.setText("");
@@ -479,18 +507,21 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
                 value = getString(R.string.winner_tie);
                 break;
             default:
-                // keeep playing.
+                // keeep playing or waiting for a new game.
                 break;
         }
 
         // Determine if the game has ended (winner or tie).  Abort if not.
         if (value == null) return;
 
-        // Update the winner text view.
+        // Update the UI to celebrate the winner or a tie and update the database game state to
+        // pending.
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         winner.setText(value);
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notify(this, getDoneMessage(model), true);
+        model.state = TicTacToe.PENDING;
+        DatabaseManager.instance.updateExperience(mExperience);
     }
 
     /** Set up the game board based on the data model state. */
@@ -498,13 +529,13 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // Determine if the model has any pieces to put on the board.  If not reset the board.
         if (model.board == null)
             // Initialize the board state.
-            initBoard();
+            initBoard(model);
         else
             // Place the X and O symbols on the grid.
-            for (String tag : model.board.keySet()) {
+            for (String tag : model.board.grid.keySet()) {
                 // Determine if the position denoted by the suffix is valid and has mot yet been
                 // updated.  If so, then update the position.
-                String value = model.board.get(tag);
+                String value = model.board.grid.get(tag);
                 Button button = (Button) mLayout.findViewWithTag(tag);
                 if (button != null && button.getText().equals("")) button.setText(value);
             }
@@ -527,6 +558,16 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         setPlayerIcons(model.turn);
         setGameBoard(model);
         setState(model);
+    }
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getTTTMenu() {
+        List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers.ordinal()));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess.ordinal()));
+        menu.add(getEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
+        menu.add(getEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
+        return menu;
     }
 
 }

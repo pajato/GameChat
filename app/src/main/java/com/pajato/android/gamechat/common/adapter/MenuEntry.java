@@ -30,19 +30,19 @@ public class MenuEntry {
     final static int MENU_ITEM_TYPE = 0;
     final static int MENU_HEADER_TYPE = 1;
 
-    // Public instance variables.
+    // Public and package private instance variables.
 
     /** A description of the item. */
-    public String desc;
+    String desc;
 
     /** The fragment type associated with the menu item, if any. */
-    int fragmentTypeIndex;
+    public int fragmentTypeIndex;
 
     /** The menu item icon resource id. */
     int iconResId;
 
     /** The list of rooms or groups with messages to show, or the text of a message. */
-    int titleResId;
+    public int titleResId;
 
     /** The entry type, provided by the item. */
     public int type;

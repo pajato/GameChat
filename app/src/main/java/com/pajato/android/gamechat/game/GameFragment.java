@@ -26,7 +26,6 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.event.AccountStateChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -68,10 +67,10 @@ public class GameFragment extends BaseGameFragment {
     /** Process a button click event with a tag value. */
     @Subscribe public void onClick(final TagClickEvent event) {
         Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof Integer)) return;
+        if (payload == null || !(payload instanceof MenuEntry)) return;
 
-        // Process the payload assuming it is a fragment type index.
-        int index = (Integer) payload;
+        // Process the payload assuming it is a valid fragment type index.  Abort on a bad assumption.
+        int index = ((MenuEntry) payload).fragmentTypeIndex;
         if (index < 0 || index > FragmentType.values().length) return;
 
         // The index represents an experience type.  Start the appropriate fragment after
@@ -150,11 +149,6 @@ public class GameFragment extends BaseGameFragment {
     }
 
     // Private instance methods.
-
-    /** Return a menu entry for with given title and icon resource items. */
-    private MenuEntry getEntry(final int titleId, final int iconId, final int index) {
-        return new MenuEntry(new MenuItemEntry(titleId, iconId, index));
-    }
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {

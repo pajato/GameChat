@@ -1,8 +1,5 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
-- Fix menu breakage (they no longer show up).
-- Automate bug reporting process as on overflow menu item.  Send reports to Pajato Support and to GitHub issues for GameChat.
-- Update TTT FAM to show Play Again, Goto My Groups/Room/Experiences, Play Chess, Play Checkers as a first stab.  If it is not currently implemented make the item show "Future Feature".
 - Do Play Store alpha release.
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
 - Do SVG homework in preparation to start replacing all PNG icons.
