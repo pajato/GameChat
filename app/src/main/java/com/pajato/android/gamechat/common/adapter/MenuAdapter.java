@@ -152,9 +152,9 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
         Context context = holder.title.getContext();
         String text = context.getString(entry.titleResId);
         holder.title.setText(Html.fromHtml(text));
-        holder.itemView.setTag(entry.fragmentTypeIndex);
-        holder.title.setTag(entry.fragmentTypeIndex);
-        holder.icon.setTag(entry.fragmentTypeIndex);
+        holder.itemView.setTag(entry);
+        holder.title.setTag(entry);
+        holder.icon.setTag(entry);
 
         // Set the icon on the holder.
         if (loadUrl(holder, entry)) return;

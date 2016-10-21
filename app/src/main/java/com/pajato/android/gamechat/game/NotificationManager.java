@@ -39,22 +39,7 @@ import com.pajato.android.gamechat.event.TagClickEvent;
 enum NotificationManager {
     instance;
 
-    // Private instance variables.
-
-    /** The notifcation snackbar. */
-    private Snackbar mNotifier;
-
     // Public instance methods.
-
-    /** Dismiss the snackbar. */
-    public void dismiss() {
-        // Ensure that the snackbar exists and is being shown.
-        if (mNotifier != null && mNotifier.isShownOrQueued()) mNotifier.dismiss();
-        if (mNotifier != null) {
-            mNotifier.setCallback(null);
-            mNotifier = null;
-        }
-    }
 
     /** Create and show a Snackbar notification based on the given parameters. */
     public void notify(@NonNull final Fragment fragment, final String text, final boolean done) {
@@ -62,23 +47,31 @@ enum NotificationManager {
         if (fragment.getView() == null) return;
 
         // Determine if the experience is finished.
+        /* The notifcation snackbar. */
+        Snackbar snackbar;
         if (done) {
             // The game is ended so generate a notification that could start a new game.
-            mNotifier = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_LONG);
+            snackbar = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_LONG);
             final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
-            mNotifier.setAction(playAgain, new SnackbarActionHandler(fragment));
+            snackbar.setAction(playAgain, new SnackbarActionHandler(fragment));
         } else {
             // The game hasn't ended so generate a notification without an action.
-            mNotifier = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_SHORT);
+            snackbar = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_SHORT);
         }
 
         // Use a primary color background with white text for the snackbar and hide the FAB button
         // while the snackbar is presenting.
         int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
-        mNotifier.getView().setBackgroundColor(color);
-        mNotifier.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
+        snackbar.getView().setBackgroundColor(color);
+        snackbar.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
             .setCallback(new SnackbarChangeHandler(fragment))
             .show();
+    }
+
+    /** Put up a snackbar for the given fragment and resource string. */
+    public void notify(final Fragment fragment, final int resId) {
+        String message = fragment.getContext().getString(resId);
+        notify(fragment, message, false);
     }
 
     // Inner classes.

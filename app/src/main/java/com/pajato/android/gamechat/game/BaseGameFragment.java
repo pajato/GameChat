@@ -21,7 +21,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
@@ -96,6 +99,24 @@ public abstract class BaseGameFragment extends BaseFragment {
     /** Create a new experience to be displayed in this fragment. */
     protected void createExperience(final Context context, final Dispatcher dispatcher) {
         // nop; the subclass should handle this.
+    }
+
+    /** Return a menu entry for with given title, icon resource items and fragment type. */
+    protected MenuEntry getEntry(final int titleId, final int iconId, final int fragmentIndex) {
+        return new MenuEntry(new MenuItemEntry(titleId, iconId, fragmentIndex));
+    }
+
+    /** Return a menu entry for with given title and icon resource items. */
+    protected MenuEntry getEntry(final int titleId, final int iconId) {
+        return new MenuEntry(new MenuItemEntry(titleId, iconId));
+    }
+
+    /** Return TRUE iff the User has requested to play again. */
+    protected boolean isPlayAgain(final Object tag, final String className) {
+        // Determine if the given tag is the class name, i.e. a snackbar action request to play
+        // again.
+        return ((tag instanceof String && className.equals(tag)) ||
+                (tag instanceof MenuEntry && ((MenuEntry) tag).titleResId == R.string.PlayAgain));
     }
 
     /** Log a lifecycle event that has no bundle. */

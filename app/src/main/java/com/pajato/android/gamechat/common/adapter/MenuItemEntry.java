@@ -24,7 +24,7 @@ package com.pajato.android.gamechat.common.adapter;
  */
 public class MenuItemEntry {
 
-    // Public instance variables.
+    // Package private instance variables.
 
     /** The fragment type associated with the menu item, if any. */
     int fragmentTypeIndex;
@@ -54,4 +54,9 @@ public class MenuItemEntry {
         this.fragmentTypeIndex = fragmentTypeIndex;
     }
 
+    public MenuItemEntry(final int titleResId, final int iconResId) {
+        this.titleResId = titleResId;
+        this.iconResId = iconResId;
+        fragmentTypeIndex = -1;
+    }
 }
