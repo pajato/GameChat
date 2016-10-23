@@ -27,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuth.AuthStateListener;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.Locale;
+
 public class SignInActivity extends AppCompatActivity
     implements OnConnectionFailedListener, OnClickListener, AuthStateListener,
         OnCompleteListener<AuthResult> {
@@ -103,7 +105,9 @@ public class SignInActivity extends AppCompatActivity
                 firebaseAuthWithGoogle(account);
             } else {
                 // Deal with a sign in failure by logging a message and updating the UI.
-                Log.e(TAG, "Google Sign In failed.");
+                final String format = "Google sign in failed with result code/message: {%s/%s}.";
+                String message = result.getStatus().toString();
+                Log.e(TAG, String.format(Locale.US, format, resultCode, message));
                 updateUI(null);
             }
         }
