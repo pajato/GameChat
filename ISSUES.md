@@ -1,6 +1,8 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
-- Get sign-in working on installs done from ginger.
+- Remove the "Register" button from the intro screen layout; change the text accordingly.
+- Make sure that a click on the button, the icon and layout in the FAM generate an appropriate action.
+- Use the name when reporting a TTT win rather than X or O.
 - Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
 - Add connected checks for tablets.

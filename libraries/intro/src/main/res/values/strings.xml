@@ -10,6 +10,6 @@
     <string name="intro_levels_title">Levels</string>
     <string name="intro_page_circle">\u25CF</string>
     <string name="register">Register</string>
-    <string name="register_button_text">Sign in or register a new account to have fun with friends and family.</string>
+    <string name="signInButtonText">Sign in to teach, learn and have fun with friends and family.</string>
     <string name="sign_in">Sign in</string>
 </resources>

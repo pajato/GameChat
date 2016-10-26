@@ -53,7 +53,7 @@ http://www.gnu.org/licenses
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="312dp"
-        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:orientation="vertical">
@@ -62,7 +62,7 @@ http://www.gnu.org/licenses
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:text="@string/register_button_text"
+            android:text="@string/signInButtonText"
             android:gravity="center"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
@@ -70,27 +70,13 @@ http://www.gnu.org/licenses
             android:paddingBottom="10dp"
             android:id="@+id/register_button"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            style="@style/IntroTheme.Button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
-            android:gravity="center">
-            <Button
-                style="@style/IntroTheme.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:onClick="doSignIn"
-                android:text="@string/sign_in"/>
-            <Button
-                style="@style/IntroTheme.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:onClick="doRegister"
-                android:text="@string/register"/>
-        </LinearLayout>
+            android:onClick="doSignIn"
+            android:text="@string/sign_in"/>
+
     </LinearLayout>
 
     <LinearLayout
