@@ -40,13 +40,6 @@ public class MenuItemEntry {
 
     // Public constructors.
 
-    /** Build an instance for the given title and icon. */
-    public MenuItemEntry(final int titleResId, final String url, int fragmentTypeIndex) {
-        this.titleResId = titleResId;
-        this.url = url;
-        this.fragmentTypeIndex = fragmentTypeIndex;
-    }
-
     /** Build an instance for the given title and icon resource id. */
     public MenuItemEntry(final int titleResId, final int iconResId, int fragmentTypeIndex) {
         this.titleResId = titleResId;

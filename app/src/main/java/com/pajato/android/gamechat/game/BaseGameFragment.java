@@ -155,17 +155,4 @@ public abstract class BaseGameFragment extends BaseFragment {
             // Create a new experience.
             createExperience(context, dispatcher);
     }
-
-    // Private instance methods.
-
-    /** Return the experience using the given dispatcher, null if there is no experience. */
-    private Experience getExperience(Dispatcher dispatcher) {
-        // Ensure there is a room key to use.  Abort if not.
-        String key = dispatcher.expKey;
-        if (key == null) return null;
-
-        // There is a key. Use it to get the experience map.
-        return DatabaseListManager.instance.experienceMap.get(key);
-    }
-
 }

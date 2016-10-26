@@ -1,8 +1,11 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
-- Do Play Store alpha release.
+- Get sign-in working on installs done from ginger.
+- Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
-- Do SVG homework in preparation to start replacing all PNG icons.
+- Add connected checks for tablets.
+- Set up real web site for GameChat using Google Sites.
+- Add privacy policy to app ala Inbox (options menu Help and Feedback).
 - Add member rooms to the room list screens.
 - Replace Chat FAM model with the new Experience one.
 - Move Chat fragments to a resume/pause registration model.
@@ -15,3 +18,5 @@ Short Term Issues needing resolution.  Longer term items should be logged on Git
 - Overhaul "Winner" notifications/animations starting with TicTacToe.
 - Add an icon (preferable SVG) to the sign in button on the signed out screen.
 - Provide complete entry in TAG for FAM.
+- Do Play Store Beta release.
+- Do Production release.
