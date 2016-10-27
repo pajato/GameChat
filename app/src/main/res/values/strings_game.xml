@@ -15,8 +15,10 @@
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>
-    <string name="TieMessage">It\'s a tie, nice game</string>
-    <string name="WinMessage">Congratulations %s, you win</string>
+    <string name="TieMessage">Tie game!</string>
+    <string name="TieMessageNotification">Well done players</string>
+    <string name="WinMessageFormat">%1$s Wins!</string>
+    <string name="WinMessageNotificationFormat">Congratulations %s, you win</string>
     <string name="chess_promotion_bishop">Bishop</string>
     <string name="chess_promotion_knight">Knight</string>
     <string name="chess_promotion_queen">Queen</string>
@@ -31,9 +33,6 @@
     <string name="player2">Player 2</string>
     <string name="turn">turn</string>
     <string name="vs">vs</string>
-    <string name="winner_o">O Wins!</string>
-    <string name="winner_tie">Tie!</string>
-    <string name="winner_x">X Wins!</string>
     <string name="wins">wins</string>
     <string name="xValue">X</string>
 </resources>

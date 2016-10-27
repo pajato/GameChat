@@ -53,7 +53,7 @@ public class CheckersFragment extends BaseGameFragment {
         mTurn = true;
         onNewGame();
 
-        getActivity().findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
+        mLayout.findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -112,8 +112,7 @@ public class CheckersFragment extends BaseGameFragment {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = getActivity().findViewById(R.id.game_pane_fragment_container)
-                    .getWidth();
+            int screenWidth = mLayout.findViewById(R.id.gameFragmentContainer).getWidth();
             int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = pieceSideLength;

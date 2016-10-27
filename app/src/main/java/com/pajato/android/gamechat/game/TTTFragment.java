@@ -190,11 +190,11 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
     private String getDoneMessage(final TicTacToe model) {
         // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWiningPlayerName();
-        if (name == null) return getString(R.string.TieMessage);
+        String name = model.getWinningPlayerName();
+        if (name == null) return getString(R.string.TieMessageNotification);
 
         // There was a winner.  Return a congratulatory message.
-        String format = getString(R.string.WinMessage);
+        String format = getString(R.string.WinMessageNotificationFormat);
         return String.format(Locale.getDefault(), format, name);
     }
 
@@ -284,19 +284,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         return player.getFirstName(defaultName);
     }
 
-    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
-    private void setPlayerIcons(final boolean turn) {
-        // Alternate the decorations on each player symbol.
-        if (turn)
-            // Make player1's decorations the more prominent.
-            setPlayerIcons(R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1,
-                           R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2);
-        else
-            // Make player2's decorations the more prominent.
-            setPlayerIcons(R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2,
-                           R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
     /** Return the game state after applying the given button move to the data model. */
     private int getState(@NonNull final TicTacToe model, String buttonTag) {
         // Check to see if the game is a tie, with all moves exhausted.
@@ -304,7 +291,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
         // Not a tie.  Determine the winner state based on the current play given by the button tag.
         int value = model.getSymbolValue();
-        if (model.state == ACTIVE) model.state = getState(model, value, buttonTag);
+        if (model.state == ACTIVE) return getState(model, value, buttonTag);
 
         return model.state;
     }
@@ -384,6 +371,8 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
             default:
                 // In all other cases, clear the board to start a new game.
                 initBoard(model);
+                model.board = null;
+                model.state = ACTIVE;
                 NotificationManager.instance.notify(this, R.string.StartNewGame);
                 break;
         }
@@ -436,7 +425,20 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         }
     }
 
-    /** Manage a particular player's sigil decorations. */
+    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
+    private void setPlayerIcons(final boolean turn) {
+        // Alternate the decorations on each player symbol.
+        if (turn)
+            // Make player1's decorations the more prominent.
+            setPlayerIcons(R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1,
+                           R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2);
+        else
+            // Make player2's decorations the more prominent.
+            setPlayerIcons(R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2,
+                           R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
+    }
+
+    /** Manage a particular player's symbol decorations. */
     private void setPlayerIcons(final int large, final int largeLeft, final int largeRight,
                                 final int small, final int smallLeft, final int smallRight) {
         final float LARGE = 60.0f;
@@ -492,19 +494,19 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     /** Update the game state. */
     private void setState(final TicTacToe model) {
-        String value = null;
+        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
+        String message = null;
         switch (model.state) {
             case TicTacToe.X_WINS:
-                // do some stuff.
-                value = getString(R.string.winner_x);
-                break;
             case TicTacToe.O_WINS:
                 // do other stuff.
-                value = getString(R.string.winner_o);
+                String name = model.getWinningPlayerName();
+                String format = getString(R.string.WinMessageFormat);
+                message = String.format(Locale.getDefault(), format, name);
                 break;
             case TicTacToe.TIE:
-                // Reveal Tie Messages
-                value = getString(R.string.winner_tie);
+                // Reveal a tie game.
+                message = getString(R.string.TieMessage);
                 break;
             default:
                 // keeep playing or waiting for a new game.
@@ -512,12 +514,12 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         }
 
         // Determine if the game has ended (winner or tie).  Abort if not.
-        if (value == null) return;
+        if (message == null) return;
 
         // Update the UI to celebrate the winner or a tie and update the database game state to
         // pending.
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        winner.setText(value);
+        winner.setText(message);
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notify(this, getDoneMessage(model), true);
         model.state = TicTacToe.PENDING;
@@ -562,11 +564,11 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getTTTMenu() {
-        List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers.ordinal()));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess.ordinal()));
-        menu.add(getEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
-        menu.add(getEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
         return menu;
     }
 

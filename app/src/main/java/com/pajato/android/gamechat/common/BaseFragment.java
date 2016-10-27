@@ -32,10 +32,16 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.game.FragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
+
+import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
+import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
 
 /**
  * Provide a base class to support common artifacts shared between chat and game fragments, and to
@@ -170,6 +176,24 @@ public abstract class BaseFragment extends Fragment {
 
     /** Obtain a layout file from the subclass. */
     protected abstract int getLayout();
+
+    /** Return a menu entry for a given title and icon id, and a given fragment type. */
+    protected MenuEntry getEntry(final int titleId, final int iconId, final FragmentType type) {
+        final int itemType = MENU_ITEM_NO_TINT_TYPE;
+        return new MenuEntry(new MenuItemEntry(itemType, titleId, iconId, type.ordinal()));
+    }
+
+    /** Return a menu entry for with given title and icon resource items. */
+    protected MenuEntry getNoTintEntry(final int titleId, final int iconId) {
+        final int type = MENU_ITEM_NO_TINT_TYPE;
+        return new MenuEntry(new MenuItemEntry(type, titleId, iconId));
+    }
+
+    /** Return a menu entry for with given title and icon resource items. */
+    protected MenuEntry getTintEntry(final int titleId, final int iconId) {
+        final int type = MENU_ITEM_TINT_TYPE;
+        return new MenuEntry(new MenuItemEntry(type, titleId, iconId));
+    }
 
     /** Provide a logger to show the given message and the given bundle. */
     protected abstract void logEvent(String message, Bundle bundle);

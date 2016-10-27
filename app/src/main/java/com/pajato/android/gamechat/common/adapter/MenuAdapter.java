@@ -38,7 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_HEADER_TYPE;
-import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TYPE;
+import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
+import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
 
 /**
  * Provide a recycler view adapter to show zero or more menu entries.  A menu entry is either a
@@ -74,7 +75,8 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
         MenuEntry menuEntry = mList.get(position);
         if (menuEntry != null) {
             switch (menuEntry.type) {
-                case MENU_ITEM_TYPE:
+                case MENU_ITEM_TINT_TYPE:
+                case MENU_ITEM_NO_TINT_TYPE:
                     // Update the menu item holder by setting up the title and icon.
                     updateMenuItemHolder((MenuItemViewHolder) holder, menuEntry);
                     break;
@@ -90,9 +92,12 @@ public class MenuAdapter extends RecyclerView.Adapter<ViewHolder> implements Vie
     /** Create the recycler view holder using the given adapter adapter item type. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int type) {
         switch (type) {
-            case MENU_ITEM_TYPE:
-                // Normal case: deal with a standard menu item.
-                return new MenuItemViewHolder(getView(parent, R.layout.item_menu));
+            case MENU_ITEM_NO_TINT_TYPE:
+                // Normal case: deal with a standard menu item without a tinted icon.
+                return new MenuItemViewHolder(getView(parent, R.layout.item_menu_no_tint));
+            case MENU_ITEM_TINT_TYPE:
+                return new MenuItemViewHolder(getView(parent, R.layout.item_menu_tint));
+                // Normal case: deal with a standard menu item with the icon tinted.
             case MENU_HEADER_TYPE:
                 // Rare case: deal with menu header (group label).
                 return new MenuHeaderViewHolder(getView(parent, R.layout.item_header));

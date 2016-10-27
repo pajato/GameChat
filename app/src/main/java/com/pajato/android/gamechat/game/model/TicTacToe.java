@@ -210,7 +210,7 @@ import static com.pajato.android.gamechat.game.ExpType.ttt;
     }
 
     /** Return the winning player's name or null if the game is active or ended in a tie. */
-    @Exclude public String getWiningPlayerName() {
+    @Exclude public String getWinningPlayerName() {
         switch (state) {
             case X_WINS:
                 return players.get(0).name;

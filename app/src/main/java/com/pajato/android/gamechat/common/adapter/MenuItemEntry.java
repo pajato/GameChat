@@ -35,19 +35,25 @@ public class MenuItemEntry {
     /** The menu item title resource id. */
     int titleResId;
 
+    /** The menu item type, either with or without a color tint applied to the icon. */
+    int type;
+
     /** The menu item icon url. */
     String url;
 
     // Public constructors.
 
-    /** Build an instance for the given title and icon resource id. */
-    public MenuItemEntry(final int titleResId, final int iconResId, int fragmentTypeIndex) {
+    /** Build an instance for the given type, title, icon resource ids and fragment type index. */
+    public MenuItemEntry(final int type, final int titleResId, final int iconResId,
+                         final int fragmentTypeIndex) {
+        this.type = type;
         this.titleResId = titleResId;
         this.iconResId = iconResId;
         this.fragmentTypeIndex = fragmentTypeIndex;
     }
 
-    public MenuItemEntry(final int titleResId, final int iconResId) {
+    public MenuItemEntry(final int type, final int titleResId, final int iconResId) {
+        this.type = type;
         this.titleResId = titleResId;
         this.iconResId = iconResId;
         fragmentTypeIndex = -1;

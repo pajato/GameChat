@@ -1,15 +1,20 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
+Fixed for version 2:
+
 - Remove the "Register" button from the intro screen layout; change the text accordingly.
-- Make sure that a click on the button, the icon and layout in the FAM generate an appropriate action.
+- Make sure that a click on the button, the icon and layout in the chat FAM generate an appropriate action.
+- Make sure that standard material icons use a tint and that non-standard do mot.
 - Use the name when reporting a TTT win rather than X or O.
+- Make an implicit restart after a win or tie work correctly.
+
+Not fixed:
 - Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
 - Add connected checks for tablets.
 - Set up real web site for GameChat using Google Sites.
 - Add privacy policy to app ala Inbox (options menu Help and Feedback).
 - Add member rooms to the room list screens.
-- Replace Chat FAM model with the new Experience one.
 - Move Chat fragments to a resume/pause registration model.
 - Make <experience> back press navigate to the optimal screen on the experience page.
 - Add long press context menus to player controls for experiences to provide alternative choices (computer, another user, a friend, change name, etc.)
@@ -19,6 +24,5 @@ Short Term Issues needing resolution.  Longer term items should be logged on Git
 - Fix Chat sign out crock:  Signing out works OK but signing back in does not display the correct result in either the chat or experience pages.
 - Overhaul "Winner" notifications/animations starting with TicTacToe.
 - Add an icon (preferable SVG) to the sign in button on the signed out screen.
-- Provide complete entry in TAG for FAM.
 - Do Play Store Beta release.
 - Do Production release.
