@@ -30,6 +30,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
  * the top level view in the chat hierarchy.  It shows all the joined groups and allows for drilling
@@ -75,6 +77,7 @@ public class ShowGroupListFragment extends BaseChatFragment {
         // update.
         setTitles(null, null);
         FabManager.chat.setState(this, View.VISIBLE);
+        FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
         mUpdateOnResume = true;
         super.onResume();
     }

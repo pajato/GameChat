@@ -27,8 +27,9 @@ import java.util.Locale;
 public class MenuEntry {
 
     // Type constants.
-    final static int MENU_ITEM_TYPE = 0;
-    final static int MENU_HEADER_TYPE = 1;
+    public final static int MENU_ITEM_NO_TINT_TYPE = 0;
+    public final static int MENU_ITEM_TINT_TYPE = 1;
+    final static int MENU_HEADER_TYPE = 2;
 
     // Public and package private instance variables.
 
@@ -54,7 +55,7 @@ public class MenuEntry {
 
     /** Build an instance for a given menu item. */
     public MenuEntry(final MenuItemEntry entry) {
-        type = MENU_ITEM_TYPE;
+        type = entry.type;
         iconResId = entry.iconResId;
         titleResId = entry.titleResId;
         fragmentTypeIndex = entry.fragmentTypeIndex;

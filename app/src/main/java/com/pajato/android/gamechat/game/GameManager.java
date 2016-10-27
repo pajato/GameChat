@@ -222,7 +222,7 @@ public enum GameManager {
         mCurrentFragment = index;
         mFragmentList[index].setupExperience(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
-            .replace(R.id.game_pane_fragment_container, mFragmentList[index])
+            .replace(R.id.gameFragmentContainer, mFragmentList[index])
             .commit();
         return true;
     }

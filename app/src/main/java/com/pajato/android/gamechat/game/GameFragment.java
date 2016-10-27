@@ -58,7 +58,7 @@ public class GameFragment extends BaseGameFragment {
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
-    /** There has been a handled authentication change event.  Now start the by dealing with the fragment to display. */
+    /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAccountStateChange(final AccountStateChangeHandled event) {
         // Simply start the next logical fragment.
         GameManager.instance.startNextFragment(this.getActivity());
@@ -69,7 +69,7 @@ public class GameFragment extends BaseGameFragment {
         Object payload = event.view.getTag();
         if (payload == null || !(payload instanceof MenuEntry)) return;
 
-        // Process the payload assuming it is a valid fragment type index.  Abort on a bad assumption.
+        // Process the payload assuming it is a valid fragment type index.  Abort if wrong.
         int index = ((MenuEntry) payload).fragmentTypeIndex;
         if (index < 0 || index > FragmentType.values().length) return;
 
@@ -152,10 +152,10 @@ public class GameFragment extends BaseGameFragment {
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {
-        List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe.ordinal()));
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers.ordinal()));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess.ordinal()));
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         return menu;
     }
 }

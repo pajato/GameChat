@@ -101,16 +101,6 @@ public abstract class BaseGameFragment extends BaseFragment {
         // nop; the subclass should handle this.
     }
 
-    /** Return a menu entry for with given title, icon resource items and fragment type. */
-    protected MenuEntry getEntry(final int titleId, final int iconId, final int fragmentIndex) {
-        return new MenuEntry(new MenuItemEntry(titleId, iconId, fragmentIndex));
-    }
-
-    /** Return a menu entry for with given title and icon resource items. */
-    protected MenuEntry getEntry(final int titleId, final int iconId) {
-        return new MenuEntry(new MenuItemEntry(titleId, iconId));
-    }
-
     /** Return TRUE iff the User has requested to play again. */
     protected boolean isPlayAgain(final Object tag, final String className) {
         // Determine if the given tag is the class name, i.e. a snackbar action request to play

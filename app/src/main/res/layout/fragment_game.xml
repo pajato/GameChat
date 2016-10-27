@@ -26,7 +26,7 @@ http://www.gnu.org/licenses
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/game_pane_fragment_container"
+        android:id="@+id/gameFragmentContainer"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -38,20 +38,20 @@ http://www.gnu.org/licenses
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.design.widget.CoordinatorLayout style="@style/FamTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/clayout"
+        android:id="@+id/gameFamLayout"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <FrameLayout style="@style/FabMenu"
             android:layout_marginBottom="88dp"
-            android:id="@+id/gameFabMenu"
+            android:id="@+id/gameFam"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/gameFab">
+            app:layout_constraintBottom_toTopOf="@+id/Fab">
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/gameList"
+                android:id="@+id/MenuList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </FrameLayout>
