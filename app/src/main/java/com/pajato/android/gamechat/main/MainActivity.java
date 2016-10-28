@@ -35,15 +35,15 @@ import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
+import com.pajato.android.gamechat.game.GameFragment;
 import com.pajato.android.gamechat.game.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -237,33 +237,6 @@ public class MainActivity extends BaseActivity
         init();
     }
 
-    /** Handle the imminent destruction of the app by shutting down the app event manager. */
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        AppEventManager.instance.unregisterAll();
-    }
-
-    /** Respect the lifecycle and ensure that the event bus shuts down. */
-    @Override protected void onPause() {
-        // Unregister the components directly used by the main activity which will unregister
-        // sub-components in turn.
-        super.onPause();
-
-        // If and how this should be ordered is ill understood. :-()
-        AccountManager.instance.unregister();
-        DatabaseRegistrar.instance.unregisterAll();
-    }
-
-    /** Respect the lifecycle and ensure that the event bus spins up. */
-    @Override protected void onResume() {
-        // Register the components carefully as there are order sensitivities betwee the account and
-        // database managers.
-        super.onResume();
-        AppEventManager.instance.register(this);
-        AppEventManager.instance.register(DatabaseListManager.instance);
-        AccountManager.instance.register();
-    }
-
     // Private instance methods.
 
     /** Return "about" information: a string describing the app and it's version information. */
@@ -315,11 +288,21 @@ public class MainActivity extends BaseActivity
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
-        // Set up the toolbar and the app managers: navigation, chat and game panes, accounts and
-        // database, chat and chat list.
+        // Set up the toolbar.
         ProgressManager.instance.show(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Set up the account manager with a list of class names.  These classes must be registered
+        // with the app event manager before Firebase can be enabled.  And when any of them are
+        // unregistered, Firebase will be turned off.
+        List<String> list = new ArrayList<>();
+        list.add(this.getClass().getName());
+        list.add(ChatFragment.class.getName());
+        list.add(GameFragment.class.getName());
+        AccountManager.instance.init(list);
+
+        // Finish initializing the important manager modules.
         DatabaseManager.instance.init(this);
         NavigationManager.instance.init(this, toolbar);
         NetworkManager.instance.init(this);

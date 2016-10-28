@@ -1,5 +1,10 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
+Fixed for version 3:
+
+- Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
+- Move Chat fragments to a resume/pause registration model.
+
 Fixed for version 2:
 
 - Remove the "Register" button from the intro screen layout; change the text accordingly.
@@ -9,13 +14,11 @@ Fixed for version 2:
 - Make an implicit restart after a win or tie work correctly.
 
 Not fixed:
-- Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
 - Add connected checks for tablets.
 - Set up real web site for GameChat using Google Sites.
 - Add privacy policy to app ala Inbox (options menu Help and Feedback).
 - Add member rooms to the room list screens.
-- Move Chat fragments to a resume/pause registration model.
 - Make <experience> back press navigate to the optimal screen on the experience page.
 - Add long press context menus to player controls for experiences to provide alternative choices (computer, another user, a friend, change name, etc.)
 - Add a dynamic "goto" FAM option to quickly navigate to the optimal screen on the experience page.
