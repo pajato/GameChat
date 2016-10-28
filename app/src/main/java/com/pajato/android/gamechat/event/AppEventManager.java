@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
+import static com.pajato.android.gamechat.event.RegistrationChangeEvent.UNREGISTERED;
+
 /**
  * Provide a thin veneer over the GreenRobot EventBus facility.
  *
@@ -63,9 +66,11 @@ public enum AppEventManager {
         // Determine if there is already a listener registered with this name.
         String name = handler.getClass().getName();
         if (!mHandlerMap.containsKey(name)) {
-            // Register the new listener both with the handler map and with Firebase.
+            // Register the new listener both with the handler map and with Firebase.  Also post the
+            // registration to anyone who cares.
             mHandlerMap.put(name, handler);
             EventBus.getDefault().register(handler);
+            post(new RegistrationChangeEvent(name, REGISTERED));
             Log.d(TAG, String.format(Locale.US, "Registered app event listener {%s}.", name));
         }
     }
@@ -78,13 +83,16 @@ public enum AppEventManager {
             // There is.  Remove it both from the map and as a listener.
             EventBus.getDefault().unregister(handler);
             mHandlerMap.remove(name);
+            post(new RegistrationChangeEvent(name, UNREGISTERED));
             Log.d(TAG, String.format(Locale.US, "Unregistered app event listener {%s}.", name));
         }
     }
     /** Unregister all named listeners. */
     public void unregisterAll() {
         // Remove all registered listeners and clear the map.
-        for (Object handler : mHandlerMap.values()) {
+        for (String name : mHandlerMap.keySet()) {
+            Object handler = mHandlerMap.get(name);
+            post(new RegistrationChangeEvent(name, UNREGISTERED));
             EventBus.getDefault().unregister(handler);
         }
         mHandlerMap.clear();

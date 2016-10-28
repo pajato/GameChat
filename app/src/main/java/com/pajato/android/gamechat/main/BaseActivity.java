@@ -21,6 +21,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.event.AppEventManager;
+
 import java.util.Locale;
 
 /**
@@ -73,6 +78,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override protected void onPause() {
         super.onPause();
         logEvent("onPause");
+        AppEventManager.instance.unregister(this);
+        AppEventManager.instance.unregisterAll();
+        DatabaseRegistrar.instance.unregisterAll();
     }
 
     /** Log the onRestart() state. */
@@ -85,6 +93,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override protected void onResume() {
         super.onResume();
         logEvent("onResume");
+        AppEventManager.instance.register(AccountManager.instance);
+        AppEventManager.instance.register(DatabaseListManager.instance);
+        AppEventManager.instance.register(NavigationManager.instance);
+        AppEventManager.instance.register(this);
     }
 
     /** Log the lifecycle event. */

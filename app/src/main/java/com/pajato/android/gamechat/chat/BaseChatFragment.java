@@ -95,20 +95,10 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     // Public instance methods.
 
-    @Override public void onAttach(Context context) {
-        super.onAttach(context);
-        AppEventManager.instance.register(this);
-    }
-
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
         super.onDestroy();
         if (mAdView != null) mAdView.destroy();
-    }
-
-    @Override public void onDetach() {
-        super.onDetach();
-        AppEventManager.instance.unregister(this);
     }
 
     /** Handle an options menu choice. */

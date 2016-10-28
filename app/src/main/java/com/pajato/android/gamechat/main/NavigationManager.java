@@ -72,7 +72,6 @@ public enum NavigationManager {
         // event manager.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(activity);
-        AppEventManager.instance.register(this);
     }
 
     /** Handle a back press event. */

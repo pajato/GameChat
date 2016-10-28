@@ -75,25 +75,6 @@ public abstract class BaseGameFragment extends BaseFragment {
     /** Remove this after dealing with the chess and checkers fragments. */
     abstract public void messageHandler(final String message);
 
-    @Override public void onAttach(Context context) {
-        super.onAttach(context);
-        logEvent("onAttach");
-    }
-
-    /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
-    @Override public void onPause() {
-        // Log the event and stop listening for app events.
-        super.onPause();
-        AppEventManager.instance.unregister(this);
-    }
-
-    /** Log the lifecycle event and resume showing ads. */
-    @Override public void onResume() {
-        // Log the event and start listening for app events.
-        super.onResume();
-        AppEventManager.instance.register(this);
-    }
-
     // Protected instance methods.
 
     /** Create a new experience to be displayed in this fragment. */

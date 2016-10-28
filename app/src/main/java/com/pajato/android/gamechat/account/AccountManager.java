@@ -38,16 +38,19 @@ import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AccountStateChangeHandled;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.account.Account.STANDARD;
+import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
  * Manages the account related aspects of the GameChat application.  These include setting up the
@@ -70,13 +73,24 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The sentinel value to use for indicating a signed out experience key. */
     public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
 
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = AccountManager.class.getSimpleName();
+
     // Private instance variables
+
+    /** The account repository associating mulitple account id strings with the cloud account. */
+    private Map<String, Account> mAccountMap = new HashMap<>();
 
     /** The current account key, null if there is no current account. */
     private String mCurrentAccountKey;
 
-    /** The account repository associating mulitple account id strings with the cloud account. */
-    private Map<String, Account> mAccountMap = new HashMap<>();
+    /** A flag indicating that Firebase is enabled (registered) or not. */
+    private boolean mIsFirebaseEnabled;
+
+    /** A map tracking registrations from the key classed that are needed to enable Firebase. */
+    private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
 
     // Public instance methods
 
@@ -116,6 +130,16 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Return TRUE iff there is a signed in User. */
     public boolean hasAccount() {
         return getCurrentAccount() != null;
+    }
+
+    /** Handle initialization by setting up the Firebase required list of registered classes. */
+    public void init(final List<String> classNameList) {
+        // Setup the class map that drives enabling and disabling Firebase. Each of these classes
+        // must be registered with the app event manager before Firebase can be enabled.  If any are
+        // deregistered, Firebase will be disabled.
+        for (String name : classNameList) {
+            mRegistrationClassNameMap.put(name, false);
+        }
     }
 
     /** Deal with authentication backend changes: sign in and sign out */
@@ -168,16 +192,46 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Register the account manager with the database and app event bus listeners. */
-    public void register() {
-        AppEventManager.instance.register(this);
-        FirebaseAuth.getInstance().addAuthStateListener(this);
+    /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
+    @Subscribe public void onRegistrationChange(final RegistrationChangeEvent event) {
+        // Determin if this is a relevant registration event.
+        if (!mRegistrationClassNameMap.containsKey(event.name)) return;
+
+        // The event is of interest. Update the map and determine if Firebase needs to be enabled or disabled.
+        mRegistrationClassNameMap.put(event.name, event.changeType == REGISTERED);
+        boolean enable = true;
+        for (Boolean value : mRegistrationClassNameMap.values()) {
+            if (!value) {
+                enable = false;
+                break;
+            }
+        }
+
+        // Determine if Firebase should be disabled or enabled.
+        if (enable)
+            register();
+        else
+            unregister();
+    }
+
+    // Private instance methods.
+
+    /** Register the account manager with the database. */
+    private void register() {
+        if (!mIsFirebaseEnabled) {
+            Log.d(TAG, "Registering the account manager with Firebase.");
+            FirebaseAuth.getInstance().addAuthStateListener(this);
+            mIsFirebaseEnabled = true;
+        }
     }
 
     /** Unregister the component during lifecycle pause events. */
-    public void unregister() {
-        FirebaseAuth.getInstance().removeAuthStateListener(this);
-        AppEventManager.instance.unregister(this);
+    private void unregister() {
+        if (mIsFirebaseEnabled) {
+            Log.d(TAG, "Unregistering the AccountManager from Firebase.");
+            FirebaseAuth.getInstance().removeAuthStateListener(this);
+            mIsFirebaseEnabled = false;
+        }
     }
 
     // Private classes

@@ -35,6 +35,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.game.FragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -144,6 +145,7 @@ public abstract class BaseFragment extends Fragment {
     @Override public void onPause() {
         super.onPause();
         logEvent("onPause");
+        AppEventManager.instance.unregister(this);
     }
 
     /** Log the lifecycle event and resume showing ads. */
@@ -152,6 +154,7 @@ public abstract class BaseFragment extends Fragment {
         // attempted.
         super.onResume();
         logEvent("onResume");
+        AppEventManager.instance.register(this);
     }
 
     /** Log the lifecycle event. */
