@@ -81,6 +81,9 @@ public enum DatabaseListManager {
     /** The map associating group and room push keys with a map of experience profiles. */
     public Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap = new HashMap<>();
 
+    /** The map associating group and room push keys with a map of experience profiles. */
+    public Map<String, Map<String, Map<String, Message>>> messageMap = new HashMap<>();
+
     /** The experience map. */
     public Map<String, Experience> experienceMap = new HashMap<>();
 
@@ -98,10 +101,7 @@ public enum DatabaseListManager {
     /** A map associating date header type values with lists of group push keys. */
     private Map<DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap = new HashMap<>();
 
-    /** The collection of messages in the rooms in a group, keyed by the group push key. */
-    private Map<String, Map<String, List<Message>>> mGroupMessageMap = new HashMap<>();
-
-    /** A map associating a group push key with it's most recent message. */
+    /** A map associating a group push key with it's most recent new message. */
     private Map<String, Message> mGroupToLastNewMessageMap = new HashMap<>();
 
     // Public instance methods.
@@ -136,8 +136,8 @@ public enum DatabaseListManager {
     }
 
     /** Get a map of messages by room in a given group. */
-    public Map<String, List<Message>> getGroupMessages(final String groupKey) {
-        return mGroupMessageMap.get(groupKey);
+    public Map<String, Map<String, Message>> getGroupMessages(final String groupKey) {
+        return messageMap.get(groupKey);
     }
 
     /** Get the list data given a list type. */
@@ -206,7 +206,7 @@ public enum DatabaseListManager {
         } else {
             // Deal with either a logout or no valid user by clearing the various state.
             mDateHeaderTypeToGroupListMap.clear();
-            mGroupMessageMap.clear();
+            messageMap.clear();
             groupMap.clear();
             mGroupToLastNewMessageMap.clear();
             roomMap.clear();
@@ -238,17 +238,6 @@ public enum DatabaseListManager {
 
     /** Handle a message change event by adding the message into the correct room list.  */
     @Subscribe public void onMessageChange(@NonNull final MessageChangeEvent event) {
-        // Collect the message found in the event payload.
-        Map<String, List<Message>> roomMap = mGroupMessageMap.get(event.groupKey);
-        if (roomMap == null) {
-            // Initialize the map of room messages for this group.
-            roomMap = new HashMap<>();
-            roomMap.put(event.roomKey, new ArrayList<Message>());
-            mGroupMessageMap.put(event.groupKey, roomMap);
-        }
-        List<Message> messageList = roomMap.get(event.roomKey);
-        messageList.add(event.message);
-
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.groupKey, event.message);
         AppEventManager.instance.post(new MessageListChangeEvent());
@@ -353,10 +342,10 @@ public enum DatabaseListManager {
     }
 
     /** Return a map of the given messages, sorted into chronological buckets. */
-    private Map<DateHeaderType, List<Message>> getMessageMap(final List<Message> messageList) {
+    private Map<DateHeaderType, List<Message>> getMessageMap(final Map<String, Message> messageList) {
         // Stick the messages into a message map keyed by date header type.
         Map<DateHeaderType, List<Message>> result = new HashMap<>();
-        for (Message message : messageList) {
+        for (Message message : messageList.values()) {
             // Append the message to the list keyed by the date header type value associated with
             // the message creation date.
             DateHeaderType type = getDateHeaderType(message);
@@ -379,9 +368,9 @@ public enum DatabaseListManager {
         for (DateHeaderType dht : DateHeaderType.values()) {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {
-                // Add the header item followed by all the room itemss in the given group.
+                // Add the header item followed by all the room items in the given group.
                 result.add(new ChatListItem(new DateHeaderItem(dht)));
-                Map<String, List<Message>> roomMap = mGroupMessageMap.get(groupKey);
+                Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
                     result.add(new ChatListItem(new RoomItem(groupKey, key)));
                 }

@@ -63,10 +63,11 @@ public class GroupItem {
         Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         name = group.name;
         Map<String, Integer> roomMap = new HashMap<>();
-        Map<String, List<Message>> roomMessageListMap = DatabaseListManager.instance.getGroupMessages(groupKey);
-        for (String roomKey : roomMessageListMap.keySet()) {
+        Map<String, Map<String, Message>> roomMessageMap;
+        roomMessageMap = DatabaseListManager.instance.getGroupMessages(groupKey);
+        for (String roomKey : roomMessageMap.keySet()) {
             int roomNewCount = 0;
-            for (Message message : roomMessageListMap.get(roomKey)) {
+            for (Message message : roomMessageMap.get(roomKey).values()) {
                 if (isUnseen(message)) {
                     roomNewCount++;
                     count++;
