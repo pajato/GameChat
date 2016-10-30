@@ -94,33 +94,6 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
 
     // Private instance methods.
 
-    /** Process the change by updating the database list and notifying the app. */
-    private void process(final DataSnapshot snapshot, final int type) {
-        // Abort if the data snapshot does not exist.
-        if (!snapshot.exists()) return;
-
-        // A snapshot exists.  Extract the experience profile from it and determine if the profile
-        // has been handled already.  If not, then case on the change type and notify the app.
-        ExpProfile expProfile = snapshot.getValue(ExpProfile.class);
-        Map<String, ExpProfile> expProfileMap = getExpProfileMap(expProfile);
-        switch (type) {
-            case NEW:
-            case CHANGED:
-                // Add the profile to the list manager (or replace it if it already exists.)
-                expProfileMap.put(expProfile.key, expProfile);
-                break;
-            case REMOVED:
-                // Update the database list experience profile map by removing the entry (key).
-                expProfileMap.remove(expProfile.key);
-                break;
-            case MOVED:
-            default:
-                // Not sure what a moved change means or what to do about it, so do nothing.
-                break;
-        }
-        AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
-    }
-
     /** Return a map of experience profiles for the room in the given experience profile. */
     private Map<String, ExpProfile> getExpProfileMap(final ExpProfile expProfile) {
         // Ensure that the room map exists for the group in the master map, creating it if need be.
@@ -153,5 +126,32 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
         }
 
         return expProfileMap;
+    }
+
+    /** Process the change by updating the database list and notifying the app. */
+    private void process(final DataSnapshot snapshot, final int type) {
+        // Abort if the data snapshot does not exist.
+        if (!snapshot.exists()) return;
+
+        // A snapshot exists.  Extract the experience profile from it and determine if the profile
+        // has been handled already.  If not, then case on the change type and notify the app.
+        ExpProfile expProfile = snapshot.getValue(ExpProfile.class);
+        Map<String, ExpProfile> expProfileMap = getExpProfileMap(expProfile);
+        switch (type) {
+            case NEW:
+            case CHANGED:
+                // Add the profile to the list manager (or replace it if it already exists.)
+                expProfileMap.put(expProfile.key, expProfile);
+                break;
+            case REMOVED:
+                // Update the database list experience profile map by removing the entry (key).
+                expProfileMap.remove(expProfile.key);
+                break;
+            case MOVED:
+            default:
+                // Not sure what a moved change means or what to do about it, so do nothing.
+                break;
+        }
+        AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
     }
 }
