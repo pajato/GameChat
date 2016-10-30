@@ -1,5 +1,9 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
+Fixed for version 4:
+
+- Resolve duplicate messages being shown in the message list view.
+
 Fixed for version 3:
 
 - Resolve Lifecycle bug whereby database handler are not being re-registered (apparently).
@@ -27,5 +31,9 @@ Not fixed:
 - Fix Chat sign out crock:  Signing out works OK but signing back in does not display the correct result in either the chat or experience pages.
 - Overhaul "Winner" notifications/animations starting with TicTacToe.
 - Add an icon (preferable SVG) to the sign in button on the signed out screen.
+- Implement join a room.
+- Implement add a room.
+- Setup daily jenkins releases, i.e. release an update every day at a prescribed time when a new feature or fix is in master.
 - Do Play Store Beta release.
 - Do Production release.
+- Optimize message fetching to start from the last message read in a room.
