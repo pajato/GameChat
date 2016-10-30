@@ -18,12 +18,11 @@
 package com.pajato.android.gamechat.chat.adapter;
 
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
