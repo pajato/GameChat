@@ -41,8 +41,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.chat.ChatFragmentType.groupList;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoAccount;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoJoinedRooms;
 
 /**

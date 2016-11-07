@@ -343,7 +343,10 @@ public class MainActivity extends BaseActivity
     private void setupTestUser(final Intent intent) {
         String login = intent.getStringExtra(TEST_USER_KEY);
         String pass = intent.getStringExtra(TEST_PASS_KEY);
+        if (login == null || pass == null) return;
+
+        // Perform the sign in.
         FirebaseAuth.getInstance().signOut();
-        //AccountManager.instance.signIn(this, login, pass);
+        AccountManager.instance.signIn(this, login, pass);
     }
 }
