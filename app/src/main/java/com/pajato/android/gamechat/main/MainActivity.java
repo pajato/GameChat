@@ -227,11 +227,9 @@ public class MainActivity extends BaseActivity
 
         // Determine if the calling intent is an integration (connected) test.
         Intent intent = getIntent();
-        if (intent.hasExtra(TEST_USER_KEY))
-            // It is a connected test.  Set up the test user.
-            setupTestUser(intent);
-        else {
+        if (!intent.hasExtra(TEST_USER_KEY)) {
             // It is not a connected test.  Determine if the intro activity needs to be run.
+            ProgressManager.instance.show(this);
             SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             if (!prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false)) {
                 // This is a fresh installation of the app.  Present the intro activity to get
@@ -301,7 +299,6 @@ public class MainActivity extends BaseActivity
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
         // Set up the toolbar.
-        ProgressManager.instance.show(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
