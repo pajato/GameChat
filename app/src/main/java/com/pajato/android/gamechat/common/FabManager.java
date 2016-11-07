@@ -47,7 +47,7 @@ public enum FabManager {
     game(R.id.gameFab, R.id.gameFam, R.id.gameDimmer);
 
     /** Provide FAB state constants. */
-    enum State {opened, closed}
+    public enum State {opened, closed}
 
     // Private class constants.
 
@@ -178,6 +178,8 @@ public enum FabManager {
         if (payload instanceof State) {
             // It does.  Toggle it by casing on the value to show and hide the relevant views.
             State value = (State) payload;
+            String format = "Toggle the FAB/FAM state: {%s}.";
+            Log.d(TAG, String.format(Locale.US, format, value));
             switch (value) {
                 case opened:
                     // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close

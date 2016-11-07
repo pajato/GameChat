@@ -22,7 +22,7 @@ package com.pajato.android.gamechat.game;
  *
  * @author Paul Michael Reilly
  */
-public enum FragmentType {
+public enum ExpFragmentType {
     signedOut (ShowSignedOutFragment.class),
     offline (ShowOfflineFragment.class),
     noExp (ShowNoExperiencesFragment.class),
@@ -45,16 +45,16 @@ public enum FragmentType {
     public ExpType expType;
 
     /** The show list fragment type for a particular game. */
-    public FragmentType showType;
+    public ExpFragmentType showType;
 
     /** Build an instance with only a given fragment class. */
-    FragmentType(final Class<? extends BaseGameFragment> fragmentClass) {
+    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass) {
         this.fragmentClass = fragmentClass;
     }
 
     /** Build an instance with both a given fragment class and an experience type. */
-    FragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType,
-                 final FragmentType showType) {
+    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType,
+                    final ExpFragmentType showType) {
         this.fragmentClass = fragmentClass;
         this.expType = expType;
         this.showType = showType;

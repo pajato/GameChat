@@ -72,10 +72,7 @@ public class SignInActivity extends AppCompatActivity
     /** Deal with the button clicks. */
     @Override public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.google_provider_button) {
-            googleSignIn();
-
-        }
+        if (id == R.id.google_provider_button) googleSignIn();
     }
 
     /** Implement the FirebaseAuth AuthStatelistener to update the UI. */
@@ -122,10 +119,9 @@ public class SignInActivity extends AppCompatActivity
         // signed in user can be handled in the listener.
         if (!task.isSuccessful()) {
             Log.w(TAG, "signInWithCredential", task.getException());
-            Toast.makeText(SignInActivity.this, "Authentication failed.",
-                           Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignInActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
         } else {
-            // Deal with a completed and successful sign in by hiding the progress diealog and
+            // Deal with a completed and successful sign in by hiding the progress dialog and
             // passing back the User uid to the calling intent.
             hideProgressDialog();
             Intent intent = new Intent();
@@ -147,7 +143,8 @@ public class SignInActivity extends AppCompatActivity
 
     /** Main activity setup code. */
     @Override protected void onCreate(Bundle savedInstanceState) {
-        // Establish the main layout, status and detail views and setup the click listeners on the buttons.
+        // Establish the main layout, status and detail views and setup the click listeners on the
+        // buttons.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         findViewById(R.id.google_provider_button).setOnClickListener(this);

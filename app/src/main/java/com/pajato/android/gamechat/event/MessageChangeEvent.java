@@ -38,15 +38,15 @@ public class MessageChangeEvent extends BaseChangeEvent {
     public Message message;
 
     /** The change type. */
-    public int type;
+    public int changeType;
 
     /** Build the event with the given list. */
     public MessageChangeEvent(final String groupKey, final String roomKey, final Message message,
-                              final int type) {
+                              final int changeType) {
         this.groupKey = groupKey;
         this.roomKey =  roomKey;
         this.message = message;
-        this.type = type;
+        this.changeType = changeType;
     }
 
 }

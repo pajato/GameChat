@@ -33,7 +33,7 @@ public enum ExpType {
     // Instance variables.
 
     /** The fragment type handling this experience type. */
-    FragmentType mFragmentType;
+    ExpFragmentType mFragmentType;
 
     /** The primary player index. */
     int mPrimaryIndex;

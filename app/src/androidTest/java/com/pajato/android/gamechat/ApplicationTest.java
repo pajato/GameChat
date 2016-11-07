@@ -9,8 +9,6 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.swipeLeft;
 import static android.support.test.espresso.action.ViewActions.swipeUp;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -23,39 +21,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
  */
 @RunWith(AndroidJUnit4.class)
 public class ApplicationTest extends BaseTest {
-    /** Ensure that the rooms panel is being displayed. */
-    @Test public void testChatPaneIsVisible() {
-        onView(withId(R.id.chatPane))
-                .check(matches(isDisplayed()));
-    }
-
-    /** Ensure that the chat panel is being displayed. */
-    @Test public void testGamePaneIsVisible() {
-        onView(withId(R.id.chatPane))
-                .check(matches(isDisplayed()))
-                .perform(swipeLeft());
-        onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(isDisplayed()));
-    }
-
-    /** Ensure that the toolbar buttons are displayed and function. */
-    @Test public void testActionButtons() {
-        // Ensure the search button is there
-        onView(withId(R.id.search))
-                .check(matches(isDisplayed()));
-        // Ensure the game button is there. Click on it, and ensure it navigates to the game pane.
-        onView(withId(R.id.toolbar_game_icon))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        onView(withId(R.id.game_pane_fragment_container))
-                .check(matches(isDisplayed()));
-        // Ensure the chat button is present. Click on it, and ensure it navigates back to the chat.
-        onView(withId(R.id.toolbar_chat_icon))
-                .check(matches(isDisplayed()))
-                .perform(click());
-        onView(withId(R.id.chatPane))
-                .check(matches(isDisplayed()));
-    }
 
     /** Ensure that the hamburger menu is dismissed on a back press. */
     @Test public void testHamburgerMenuWithBack() {

@@ -1,7 +1,16 @@
 package com.pajato.android.gamechat;
 
+import android.app.Instrumentation;
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.pajato.android.gamechat.event.AppEventManager;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,8 +25,9 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
  * All tests are based on the the following documentation:
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-@RunWith(AndroidJUnit4.class)
-public class FABTest extends BaseTest {
+@RunWith(AndroidJUnit4.class) public class FABTest extends BaseTest {
+
+    // Private instance variables.
 
     //TODO: Write more tests when the other features are implemented.
     // For example, ensuring that opening up new games works as intended.
@@ -29,10 +39,9 @@ public class FABTest extends BaseTest {
                 .check(matches(isDisplayed()))
                 .perform(click());
         // Ensure that the speed dial Indicators are all visible.
-        onView(withText(R.string.addRoom))
+        onView(withId(R.id.chatFam))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.addGroup))
+        onView(withText(R.string.AddGroupTitle))
                 .check(matches(isDisplayed()));
     }
-
 }

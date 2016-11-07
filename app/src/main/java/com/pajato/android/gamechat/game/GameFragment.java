@@ -36,14 +36,15 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.game.FragmentType.checkers;
-import static com.pajato.android.gamechat.game.FragmentType.chess;
-import static com.pajato.android.gamechat.game.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.game.ExpFragmentType.checkers;
+import static com.pajato.android.gamechat.game.ExpFragmentType.chess;
+import static com.pajato.android.gamechat.game.ExpFragmentType.tictactoe;
 
 /**
- * A Fragment that contains and controls the current game being played.
+ * A Fragment that contains and controls the current experience shown to the User.
  *
  * @author Bryan Scott
+ * @author Paul Reilly
  */
 public class GameFragment extends BaseGameFragment {
 
@@ -51,6 +52,8 @@ public class GameFragment extends BaseGameFragment {
 
     /** The lookup key for the FAB game home memu. */
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
+
+    // Public instance methods.
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game;}
@@ -71,19 +74,19 @@ public class GameFragment extends BaseGameFragment {
 
         // Process the payload assuming it is a valid fragment type index.  Abort if wrong.
         int index = ((MenuEntry) payload).fragmentTypeIndex;
-        if (index < 0 || index > FragmentType.values().length) return;
+        if (index < 0 || index > ExpFragmentType.values().length) return;
 
         // The index represents an experience type.  Start the appropriate fragment after
         // dismissing the FAM.
         FabManager.game.dismissMenu(this);
-        GameManager.instance.startNextFragment(getActivity(), FragmentType.values()[index]);
+        GameManager.instance.startNextFragment(getActivity(), ExpFragmentType.values()[index]);
     }
 
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Grab the View ID and the floating action button and dimmer views.
         View view = event.view;
-        FragmentType type = null;
+        ExpFragmentType type = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
                 type = tictactoe;

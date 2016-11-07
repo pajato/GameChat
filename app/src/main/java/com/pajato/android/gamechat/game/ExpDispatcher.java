@@ -24,9 +24,9 @@ import com.pajato.android.gamechat.game.model.ExpProfile;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.game.FragmentType.expList;
-import static com.pajato.android.gamechat.game.FragmentType.groupList;
-import static com.pajato.android.gamechat.game.FragmentType.roomList;
+import static com.pajato.android.gamechat.game.ExpFragmentType.expList;
+import static com.pajato.android.gamechat.game.ExpFragmentType.groupList;
+import static com.pajato.android.gamechat.game.ExpFragmentType.roomList;
 
 /**
  * The experience dispatcher provides mediation between the experience (game) manager and the main
@@ -35,7 +35,7 @@ import static com.pajato.android.gamechat.game.FragmentType.roomList;
  *
  * @author Paul Michael Reilly
  */
-public class Dispatcher {
+public class ExpDispatcher {
 
     // Public instance variables.
 
@@ -61,12 +61,12 @@ public class Dispatcher {
     public Map<String, Map<String, ExpProfile>> roomMap;
 
     /** The fragment type denoting the fragment index and the experience type. */
-    public FragmentType type;
+    public ExpFragmentType type;
 
     // Public Constructors.
 
     /** Build an instance given an experience type. */
-    Dispatcher(final FragmentType type) {
+    ExpDispatcher(final ExpFragmentType type) {
         this.type = type;
         Room room = DatabaseListManager.instance.getMeRoom();
         if (room != null) {
@@ -76,20 +76,20 @@ public class Dispatcher {
     }
 
     /** Build an instance given an experience map. */
-    Dispatcher(final Map<String, Map<String, Map<String, ExpProfile>>> groupMap) {
+    ExpDispatcher(final Map<String, Map<String, Map<String, ExpProfile>>> groupMap) {
         this.type = groupList;
         this.groupMap = groupMap;
     }
 
     /** Build an instance given a group key and room map. */
-    Dispatcher(final String groupKey, final Map<String, Map<String, ExpProfile>> roomMap) {
+    ExpDispatcher(final String groupKey, final Map<String, Map<String, ExpProfile>> roomMap) {
         this.type = roomList;
         this.groupKey = groupKey;
         this.roomMap = roomMap;
     }
 
     /** Build an instance given a group key, room key, and an experience list. */
-    Dispatcher(final String groupKey, final String roomKey, final List<ExpProfile> profileList) {
+    ExpDispatcher(final String groupKey, final String roomKey, final List<ExpProfile> profileList) {
         this.type = expList;
         this.groupKey = groupKey;
         this.roomKey = roomKey;
@@ -97,7 +97,7 @@ public class Dispatcher {
     }
 
     /** Build an instance given a fragment type, a group key, a room key and an experience key. */
-    Dispatcher(final FragmentType type, final String group, final String room, final String key) {
+    ExpDispatcher(final ExpFragmentType type, final String group, final String room, final String key) {
         this.type = type;
         groupKey = group;
         roomKey = room;
@@ -105,13 +105,13 @@ public class Dispatcher {
     }
 
     /** Build an instance given a fragment type and a list of experience keys. */
-    Dispatcher(final FragmentType type, List<ExpProfile> profileList) {
+    ExpDispatcher(final ExpFragmentType type, List<ExpProfile> profileList) {
         this.type = type;
         this.profileList = profileList;
     }
 
     /** Build an instance given a fragment type and an experiene profile. */
-    Dispatcher(final FragmentType type, ExpProfile expProfile) {
+    ExpDispatcher(final ExpFragmentType type, ExpProfile expProfile) {
         this.type = type;
         this.expProfile = expProfile;
     }

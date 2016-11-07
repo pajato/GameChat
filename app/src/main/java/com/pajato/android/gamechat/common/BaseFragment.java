@@ -36,7 +36,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.game.FragmentType;
+import com.pajato.android.gamechat.game.ExpFragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
@@ -181,7 +181,7 @@ public abstract class BaseFragment extends Fragment {
     protected abstract int getLayout();
 
     /** Return a menu entry for a given title and icon id, and a given fragment type. */
-    protected MenuEntry getEntry(final int titleId, final int iconId, final FragmentType type) {
+    protected MenuEntry getEntry(final int titleId, final int iconId, final ExpFragmentType type) {
         final int itemType = MENU_ITEM_NO_TINT_TYPE;
         return new MenuEntry(new MenuItemEntry(itemType, titleId, iconId, type.ordinal()));
     }

@@ -50,7 +50,7 @@ import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
  *
  * @author Paul Michael Reilly
  */
-public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
+public class ShowMessageListFragment extends BaseChatFragment implements View.OnClickListener {
 
     // Public instance methods.
 

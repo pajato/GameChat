@@ -53,9 +53,9 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.game.ExpType.ttt;
-import static com.pajato.android.gamechat.game.FragmentType.checkers;
-import static com.pajato.android.gamechat.game.FragmentType.chess;
-import static com.pajato.android.gamechat.game.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.game.ExpFragmentType.checkers;
+import static com.pajato.android.gamechat.game.ExpFragmentType.chess;
+import static com.pajato.android.gamechat.game.ExpFragmentType.tictactoe;
 import static com.pajato.android.gamechat.game.model.Board.BEG_COL;
 import static com.pajato.android.gamechat.game.model.Board.BOT_ROW;
 import static com.pajato.android.gamechat.game.model.Board.END_COL;
@@ -161,7 +161,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     /** Return an experience for a given dispatcher instance. */
     @Override protected void createExperience(@NonNull final Context context,
-                                              @NonNull final Dispatcher dispatcher) {
+                                              @NonNull final ExpDispatcher dispatcher) {
         // Set up the players and persist the game.
         List<Account> players = getPlayers(dispatcher);
         createExperience(context, players);
@@ -228,7 +228,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    private List<Account> getPlayers(final Dispatcher dispatcher) {
+    private List<Account> getPlayers(final ExpDispatcher dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -416,9 +416,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
             String message = "Waiting for the database to provide the game...";
             ProgressManager.instance.show(getContext(), title, message);
         } else {
-            // Hide the spinner, start the game and update the views using the current state of the
-            // experience.
-            ProgressManager.instance.hide();
+            // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             updateExperience();

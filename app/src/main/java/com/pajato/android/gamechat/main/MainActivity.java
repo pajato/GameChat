@@ -31,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
@@ -68,8 +69,14 @@ public class MainActivity extends BaseActivity
 
     // Public class constants.
 
-    /** The intent extras key conveying the desire to skip the intro activity. */
+    /** ... */
     public static final String SKIP_INTRO_ACTIVITY_KEY = "skipIntroActivityKey";
+
+    /** The test user name key. */
+    public static final String TEST_USER_KEY = "testUserKey";
+
+    /** The test password key. */
+    public static final String TEST_PASS_KEY = "testPassKey";
 
     // Private class constants.
 
@@ -96,7 +103,9 @@ public class MainActivity extends BaseActivity
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
 
-        // If there is an account, set up the navigation drawer header accordingly.
+        // Ensure that the splash screen and progress manager spinner get turned off and if there is
+        // an account, set up the navigation drawer header accordingly.
+        ProgressManager.instance.hide();
         if (account != null) {
             // There is an account.  Set it up in the header.
             NavigationManager.instance.setAccount(account, header);
@@ -216,15 +225,16 @@ public class MainActivity extends BaseActivity
         // fresh install on this device and proceed accordingly.
         super.onCreate(savedInstanceState);
 
-        // Determine if the calling intent wants to skip the intro activity.
+        // Determine if the calling intent is an integration (connected) test.
         Intent intent = getIntent();
-        if (!intent.getBooleanExtra(SKIP_INTRO_ACTIVITY_KEY, false)) {
-            // Do not skip running the intro screen activity.
+        if (!intent.hasExtra(TEST_USER_KEY)) {
+            // It is not a connected test.  Determine if the intro activity needs to be run.
+            ProgressManager.instance.show(this);
             SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             if (!prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false)) {
-                // This is a fresh installation of the app.  Present the intro activity to get things
-                // started, which will introduce the user to the app and provide a chnance to sign in or
-                // register an account.
+                // This is a fresh installation of the app.  Present the intro activity to get
+                // things started, which will introduce the user to the app and provide a chnance to
+                // sign in.
                 Intent introIntent = new Intent(this, IntroActivity.class);
                 startActivityForResult(introIntent, RC_INTRO);
             }
@@ -289,7 +299,6 @@ public class MainActivity extends BaseActivity
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
         // Set up the toolbar.
-        ProgressManager.instance.show(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -328,5 +337,16 @@ public class MainActivity extends BaseActivity
         Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
 
         return outputFile.getPath();
+    }
+
+    /** Setup the test user to run connected tests. */
+    private void setupTestUser(final Intent intent) {
+        String login = intent.getStringExtra(TEST_USER_KEY);
+        String pass = intent.getStringExtra(TEST_PASS_KEY);
+        if (login == null || pass == null) return;
+
+        // Perform the sign in.
+        FirebaseAuth.getInstance().signOut();
+        AccountManager.instance.signIn(this, login, pass);
     }
 }
