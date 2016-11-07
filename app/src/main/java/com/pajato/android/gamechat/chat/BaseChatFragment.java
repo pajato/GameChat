@@ -36,9 +36,9 @@ import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import java.util.ArrayList;
@@ -46,11 +46,11 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showMessages;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showRoomList;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -125,7 +125,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         // Log the event, handle ads and apply any queued adapter updates.  Only one try is
         // attempted.
         super.onResume();
-        ProgressManager.instance.hide();
+        FabManager.chat.init(this);
         if (mAdView != null) mAdView.resume();
         if (!mUpdateOnResume) return;
         updateAdapterList();
@@ -214,11 +214,11 @@ public abstract class BaseChatFragment extends BaseFragment {
         switch (item.type) {
             case GROUP_ITEM_TYPE:
                 // Drill into the rooms in group.
-                ChatManager.instance.chainFragment(showRoomList, getActivity(), item);
+                ChatManager.instance.chainFragment(roomList, getActivity(), item);
                 break;
             case ROOM_ITEM_TYPE:
                 // Show the messages in a room.
-                ChatManager.instance.chainFragment(showMessages, getActivity(), item);
+                ChatManager.instance.chainFragment(messageList, getActivity(), item);
                 break;
             default:
                 break;

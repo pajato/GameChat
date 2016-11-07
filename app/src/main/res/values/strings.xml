@@ -27,4 +27,5 @@
     <string name="me">me</string>
     <string name="anonymous">Anonymous</string>
     <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
+    <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
 </resources>

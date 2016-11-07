@@ -1,6 +1,7 @@
 Short Term Issues needing resolution.  Longer term items should be logged on GitHub.
 
 - Revive the connected tests towards an end of having broken tests fixed and a > 90% coverage level, an ongoing task.
+- Change the FAM for signed out and offline screens to allow for sign in, switch accounts and connecting to the network; fix tests accordingly.
 - Add connected checks for tablets.
 - Set up real web site for GameChat using Google Sites.
 - Add privacy policy to app ala Inbox (options menu Help and Feedback).
@@ -17,5 +18,9 @@ Short Term Issues needing resolution.  Longer term items should be logged on Git
 - Implement add a room.
 - Setup daily jenkins releases, i.e. release an update every day at a prescribed time when a new feature or fix is in master.
 - Do Play Store Beta release.
-- Do Production release.
 - Optimize message fetching to start from the last message read in a room.
+- Consolidate ExpDispatcher and ChatDispatcher into a single class using generics.
+- Consolidate the offline, no account/signed out, and no experiences/messages layout files into a single layout file.
+- Consoldiate ExpFragmentType and ChatFragmentType.
+- Rename the "game" package to "exp".
+- Do Production release.

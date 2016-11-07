@@ -18,19 +18,20 @@
 package com.pajato.android.gamechat.chat;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+
 /**
  * Provide a fragment to deal with no account or a signed out account.
  *
- * TODO: Change the FAB button menu to show "Sign In", "Add Account" or "Switch Account".
- *
  * @author Paul Michael Reilly
  */
-public class ShowNoAccountFragment extends BaseChatFragment {
+public class ShowSignedOutFragment extends BaseChatFragment {
 
     // Public instance methods.
 
@@ -44,9 +45,15 @@ public class ShowNoAccountFragment extends BaseChatFragment {
     @Override public void onInitialize() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
-        //ProgressManager.instance.show(this.getContext());
         super.onInitialize();
-        ProgressManager.instance.hide();
+        FabManager.game.init(this);
+    }
+
+    /** Reset the FAM to use the game home menu. */
+    @Override public void onResume() {
+        // TODO: Change the FAB button menu to show "Sign In", "Add Account" or "Switch Account".
+        super.onResume();
+        FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
     }
 
 }

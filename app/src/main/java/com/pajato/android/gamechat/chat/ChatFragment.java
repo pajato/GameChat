@@ -41,13 +41,12 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showGroupList;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoAccount;
-import static com.pajato.android.gamechat.chat.ChatManager.ChatFragmentType.showNoJoinedRooms;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.groupList;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoAccount;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoJoinedRooms;
 
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
- * Indecision will result in a default "flummoxed" message being displayed.
  *
  * @author Paul Michael Reilly (based on GameFragment written by Bryan Scott)
  */
@@ -59,6 +58,15 @@ public class ChatFragment extends BaseChatFragment {
     public static final String CHAT_HOME_FAM_KEY = "chatHomeFamKey";
 
     // Public instance methods.
+
+    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
+    @Override public int getLayout() {return R.layout.fragment_chat;}
+
+    /** Handle a authentication change event by dealing with the fragment to display. */
+    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
+        // Simply start the next logical fragment.
+        ChatManager.instance.startNextFragment(this.getActivity());
+    }
 
     /** Process a given button click event looking for the chat FAB. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -104,25 +112,6 @@ public class ChatFragment extends BaseChatFragment {
         }
     }
 
-    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
-    @Override public int getLayout() {return R.layout.fragment_chat;}
-
-    /** Handle a authentication change event by dealing with the fragment to display. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
-        // Log the event and determine if there is an active account.
-        logEvent("onAccountStateChange");
-        if (event.account == null) {
-            // There is no active account.  Show the no account fragment.
-            ChatManager.instance.replaceFragment(showNoAccount, this.getActivity());
-        } else {
-            // There is an active account.  Determine if a default fragment needs to be set up and,
-            // if so, show the group list, otherwise just let whatever fragment is running stay
-            // running.
-            ChatManager.ChatFragmentType type = ChatManager.instance.lastTypeShown;
-            if (type == null) ChatManager.instance.replaceFragment(showGroupList, getActivity());
-        }
-    }
-
     /** Post the chat options menu on demand. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.chat_menu_base, menu);
@@ -158,6 +147,13 @@ public class ChatFragment extends BaseChatFragment {
             // Handle the case where there are no joined rooms by enabling the no rooms message.
             ChatManager.instance.replaceFragment(showNoJoinedRooms, this.getActivity());
         }
+    }
+
+    /** Dispatch to a more suitable fragment. */
+    @Override public void onResume() {
+        // The experience manager will load a fragment to view into this envelope fragment.
+        super.onResume();
+        ChatManager.instance.startNextFragment(getActivity());
     }
 
     // Private instance methods.

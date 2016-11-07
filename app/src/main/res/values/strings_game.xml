@@ -27,7 +27,6 @@
     <string name="game">Game</string>
     <string name="new_game_checkers">New Game (Checkers)</string>
     <string name="new_game_chess">New Game (Chess)</string>
-    <string name="new_game_ttt">New Game (Tic-Tac-Toe)</string>
     <string name="oValue">O</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>

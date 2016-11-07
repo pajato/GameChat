@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.account;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,6 +26,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -225,6 +229,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
+    /** Handle a sign in with the given credentials. */
+    public void signIn(final Activity activity, final String login, final String pass) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        SignInCompletionHandler handler = new SignInCompletionHandler(activity, login);
+        auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
+    }
+
     /** Unregister the component during lifecycle pause events. */
     private void unregister() {
         if (mIsFirebaseEnabled) {
@@ -294,4 +305,24 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
+    private class SignInCompletionHandler implements OnCompleteListener<AuthResult> {
+
+        Activity mActivity;
+        String mLogin;
+
+        SignInCompletionHandler(final Activity activity, final String login) {
+            mActivity = activity;
+            mLogin = login;
+        }
+
+        @Override public void onComplete(@NonNull Task<AuthResult> task) {
+            if (!task.isSuccessful()) {
+                // Log and report a signin error.
+                String format = mActivity.getString(R.string.SignInFailedFormat);
+                String message = String.format(Locale.US, format, mLogin);
+                Log.d(TAG, message);
+                Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }

@@ -44,6 +44,7 @@ public abstract class BaseTest {
     @Before public void setup() {
         Intent intent = new Intent();
         intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
+        intent.putExtra(MainActivity.TEST_USER_KEY, "nobody@gamechat.com");
         mRule.launchActivity(intent);
     }
 

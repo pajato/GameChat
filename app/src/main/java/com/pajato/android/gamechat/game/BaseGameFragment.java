@@ -24,9 +24,7 @@ import android.util.Log;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.AppEventManager;
 
 import java.util.Locale;
 
@@ -78,7 +76,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     // Protected instance methods.
 
     /** Create a new experience to be displayed in this fragment. */
-    protected void createExperience(final Context context, final Dispatcher dispatcher) {
+    protected void createExperience(final Context context, final ExpDispatcher dispatcher) {
         // nop; the subclass should handle this.
     }
 
@@ -105,7 +103,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     }
 
     /** Provide a default implementation for setting up an experience. */
-    protected void setupExperience(final Context context, final Dispatcher dispatcher) {
+    protected void setupExperience(final Context context, final ExpDispatcher dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
         if (dispatcher == null || dispatcher.type == null) return;

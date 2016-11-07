@@ -24,9 +24,20 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.main.NetworkManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.pajato.android.gamechat.chat.ChatFragmentType.noMessages;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.offline;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.signedOut;
 
 /**
  * Provides the interface to the database/back end, primarily Firebase.
@@ -36,43 +47,60 @@ import java.util.Locale;
 enum ChatManager {
     instance;
 
-    /** Provide a set of enum constants to identify the chat related fragments. */
-    public enum ChatFragmentType {
-        showGroupList (ShowGroupListFragment.class),
-        showRoomList (ShowRoomListFragment.class),
-        showMessages (ShowMessagesFragment.class),
-        //showNewGroup (ShowNewGroupFragment.class),
-        //showNewRoom (ShowNewRoomFragment.class),
-        //showJoinRoom (ShowJoinRoomFragment.class),
-        showNoJoinedRooms (ShowNoJoinedRoomsFragment.class),
-        showNoAccount (ShowNoAccountFragment.class);
-
-        // Private instance variables.
-
-        /** The fragment class associated with this type. */
-        Class<? extends Fragment> fragmentClass;
-
-        /** Build in instance of the type with a given fragment class. */
-        ChatFragmentType(final Class<? extends Fragment> fragmentClass) {
-            this.fragmentClass = fragmentClass;
-        }
-
-    }
 
     // Private class constants.
 
     /** The logcat tag. */
     private static final String TAG = ChatManager.class.getSimpleName();
 
-
+    /** ... */
     public ChatFragmentType lastTypeShown;
-
-    // Public instance methods.
 
     /** The repository for fragments created on demand. */
     private SparseArray<Fragment> mFragmentMap = new SparseArray<>();
 
+    // Public instance methods.
+
+    /** Return true iff a fragment for the given experience is started. */
+    public boolean startNextFragment(final FragmentActivity context) {
+        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
+        // dispatcher if so.
+        ChatDispatcher dispatcher = getDispatcher();
+        return dispatcher.type != null && startNextFragment(context, dispatcher);
+    }
+
     // Private instance methods.
+
+    /** Return a dispatcher object based on the current experience state. */
+    private ChatDispatcher getDispatcher() {
+        // Deal with an off line user, a signed out user, or no messages at all, in that order.
+        // In each case, return an empty dispatcher but for the fragment type of the next screen to
+        // show.
+        Map<String, Map<String, Map<String, Message>>> messageMap;
+        messageMap = DatabaseListManager.instance.messageMap;
+        if (!NetworkManager.instance.isConnected()) return new ChatDispatcher(offline);
+        if (!AccountManager.instance.hasAccount()) return new ChatDispatcher(signedOut);
+        if (messageMap.size() == 0) return new ChatDispatcher(noMessages);
+
+        // Deal with a signed in User with multiple messages across more than one group.  Return
+        // a dispatcher with a map of experience keys.
+        if (messageMap.size() > 1) return new ChatDispatcher(messageMap);
+
+        // A signed in user with messages in more than one room but only one group. Return a
+        // dispatcher identifying the group and room map.
+        String groupKey = messageMap.keySet().iterator().next();
+        Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
+        if (roomMap.size() > 1) return new ChatDispatcher(groupKey, roomMap);
+
+        // A signed in user with multiple messages in a single room.  Return a dispatcher that
+        // identifies the group, room and the list of message profiles.
+        String roomKey = roomMap.keySet().iterator().next();
+        List<Message> messageList = new ArrayList<>(roomMap.get(roomKey).values());
+        if (messageList.size() > 1) return new ChatDispatcher(groupKey, roomKey, messageList);
+
+        // A signed in User with one message. Return a dispatcher to show the single message.
+        return new ChatDispatcher(ChatFragmentType.messageList, messageList.get(0));
+    }
 
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */
     public void chainFragment(final ChatFragmentType type, final FragmentActivity context,
@@ -141,4 +169,37 @@ enum ChatManager {
         }
     }
 
+    /** Return true iff a fragment for the given experience is started. */
+    private boolean startNextFragment(final FragmentActivity context,
+                                      final ChatDispatcher dispatcher) {
+        // Ensure that the fragment exists, creating it as necessary.  Abort if the fragment cannot
+        // be created.
+        if (!fragmentExists(dispatcher)) return false;
+
+        // Make the next fragment current and initialize it using the context of the fragment
+        // currently in the foreground.
+        int index = dispatcher.type.ordinal();
+        //mFragmentList[index].setupExperience(context, dispatcher);
+        context.getSupportFragmentManager().beginTransaction()
+            .replace(R.id.gameFragmentContainer, mFragmentMap.get(index))
+            .commit();
+        return true;
+    }
+
+    /** Return TRUE iff the fragment denoted by the given dispactcher exists. */
+    private boolean fragmentExists(final ChatDispatcher dispatcher) {
+        // Determine if the fragment needs to be created, returning true if not.
+        int index = dispatcher.type.ordinal();
+
+        // The fragment needs to be created. Make the attempt, leaving debug information if the
+        // fragment cannot be created.
+        try {
+
+            mFragmentMap.put(index, dispatcher.type.fragmentClass.newInstance());
+            return true;
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
