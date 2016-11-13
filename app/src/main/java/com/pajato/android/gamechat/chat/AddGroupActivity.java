@@ -174,7 +174,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
     private String getDefaultAccountName() {
         // Ensure that the account exists.
         Account account = AccountManager.instance.getCurrentAccount();
-        if (account == null) return null;
+        if (account == null) return "";
 
         // Obtain a sane default group name.
         String group = getResources().getString(R.string.Group);

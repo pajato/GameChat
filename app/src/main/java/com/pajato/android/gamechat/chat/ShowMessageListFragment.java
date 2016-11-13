@@ -99,11 +99,11 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
 
     /** Handle the setup of the list of messages. */
     @Override public void onInitialize() {
-        // Inflate the layout for this fragment and initialize by setting the titles, declaring the
-        // use of the options menu, removing the FAB button, fetching any remote configurations,
-        // setting up the list of messages, and by setting up the edit text field.
+        // Inflate the layout for this fragment and initialize by setting the app bar title text,
+        // declaring the use of the options menu, removing the FAB button, fetching any remote
+        // configurations, setting up the list of messages, and by setting up the edit text field.
         super.onInitialize();
-        setTitles(null, mItem.roomKey);
+        setTitles(null, mItem != null ? mItem.roomKey : null);
         mItemListType = DatabaseListManager.ChatListType.message;
         FabManager.chat.setState(this, View.GONE);
         initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);
