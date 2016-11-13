@@ -181,7 +181,7 @@ enum ChatManager {
         int index = dispatcher.type.ordinal();
         //mFragmentList[index].setupExperience(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
-            .replace(R.id.gameFragmentContainer, mFragmentMap.get(index))
+            .replace(R.id.chatFragmentContainer, mFragmentMap.get(index))
             .commit();
         return true;
     }

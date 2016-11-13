@@ -34,23 +34,26 @@ import java.util.Map;
     public final static int STANDARD = 1;
     // TODO: add this real soon: public final static int PROTECTED = 2;
 
-    /** The member account identifer who posted the message. */
-    public String owner;
+    /** The creation timestamp. */
+    public long createTime;
+
+    /** The push key of the group to which the message belongs. */
+    public String groupKey;
 
     /** The message push key. */
     public String key;
 
+    /** The last modification timestamp. */
+    private long modTime;
+
     /** The poster's display name. */
     public String name;
 
-    /** The poster's url. */
-    public String url;
+    /** The member account identifer who posted the message. */
+    public String owner;
 
-    /** The creation timestamp. */
-    public long createTime;
-
-    /** The last modification timestamp. */
-    private long modTime;
+    /** The push key for the room in which the message was created. */
+    public String roomKey;
 
     /** The message text. */
     public String text;
@@ -60,6 +63,9 @@ import java.util.Map;
 
     /** A list of users (by account identifier) in the room, that have not yet read the message. */
     public List<String> unreadList;
+
+    /** The poster's url. */
+    public String url;
 
     // Public constructors.
 
