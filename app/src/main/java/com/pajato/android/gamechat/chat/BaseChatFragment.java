@@ -24,7 +24,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.google.android.gms.ads.AdRequest;
@@ -39,7 +38,10 @@ import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.main.ProgressManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.MenuItemEvent;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,17 +103,22 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (mAdView != null) mAdView.destroy();
     }
 
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
+    /** Handle a menu item click by processing the join developer group menu item. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        // Case on the menu id to handle the item.
+        switch (event.item.getItemId()) {
             case R.id.joinDeveloperGroups:
+                // Handle a request to join the developer groups by adding this User to the
+                // developer groups as necessary.  Do not propagate the event any further.
                 joinDeveloperGroups();
+                AppEventManager.instance.cancel(event);
                 break;
             default:
-                return super.onOptionsItemSelected(item);
+                // Handle all other events by logging a message for now.
+                final String format = "Default handling for menu item with title: {%s}";
+                Log.d(TAG, String.format(Locale.US, format, event.item.getTitle()));
+                break;
         }
-
-        return true;
     }
 
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
@@ -242,15 +249,15 @@ public abstract class BaseChatFragment extends BaseFragment {
         groupList.add("-KUpHLkxb9c1nM2O8Ocs");      // Pajato Technologies LLC
         groupList.add("-KUpHWgtdLSnFwMiMp0k");      // Pajato Support Group
         for (String groupKey : groupList) {
-            // Extend an invitation to the group and est that this group has been joined.
+            // Extend an invitation to the group and verify that this group has been joined.
             InvitationManager.instance.extendGroupInvite(account, groupKey);
             if (!account.groupIdList.contains(groupKey)) {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
                 Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
                 if (group != null)
-                    // The group is available.  Accept any open invitations ... and there should be
-                    // at least one!
+                    // The group is available.  Accept any open invitations. There should be at
+                    // least one!
                     InvitationManager.instance.acceptGroupInvite(account, group, groupKey);
             }
         }

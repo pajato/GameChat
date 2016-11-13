@@ -19,14 +19,13 @@ package com.pajato.android.gamechat.chat;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
-import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
 
 public class ShowNoMessagesFragment extends BaseChatFragment {
 

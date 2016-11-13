@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
@@ -103,7 +104,8 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         // declaring the use of the options menu, removing the FAB button, fetching any remote
         // configurations, setting up the list of messages, and by setting up the edit text field.
         super.onInitialize();
-        setTitles(null, mItem != null ? mItem.roomKey : null);
+        if (BuildConfig.DEBUG && mItem == null) throw new AssertionError("mitem is null!");
+        setTitles(mItem.groupKey, mItem.roomKey);
         mItemListType = DatabaseListManager.ChatListType.message;
         FabManager.chat.setState(this, View.GONE);
         initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);

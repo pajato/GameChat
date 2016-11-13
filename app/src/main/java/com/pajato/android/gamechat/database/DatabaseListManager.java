@@ -141,7 +141,8 @@ public enum DatabaseListManager {
     }
 
     /** Get the list data given a list type. */
-    public List<ChatListItem> getList(final ChatListType type, final ChatListItem item) {
+    public List<ChatListItem> getList(@NonNull final ChatListType type,
+                                      @NonNull final ChatListItem item) {
         switch (type) {
             case group:
                 return getGroupListData();
@@ -333,7 +334,7 @@ public enum DatabaseListManager {
     }
 
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
-    private List<ChatListItem> getMessageListData(final ChatListItem item) {
+    private List<ChatListItem> getMessageListData(@NonNull final ChatListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         String groupKey = item.groupKey;
