@@ -27,6 +27,7 @@ import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.Locale;
 
@@ -78,7 +79,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     // Protected instance methods.
 
     /** Create a new experience to be displayed in this fragment. */
-    protected void createExperience(final Context context, final ExpDispatcher dispatcher) {
+    protected void createExperience(final Context context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // nop; the subclass should handle this.
     }
 
@@ -111,7 +112,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     }
 
     /** Provide a default implementation for setting up an experience. */
-    protected void setupExperience(final Context context, final ExpDispatcher dispatcher) {
+    protected void setupExperience(final Context context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
         if (dispatcher == null || dispatcher.type == null) return;
@@ -121,12 +122,12 @@ public abstract class BaseGameFragment extends BaseFragment {
         if (expType == null) return;
 
         // Determine if the dispatcher has a single experience profile.
-        if (dispatcher.expProfile != null) {
+        if (dispatcher.payload != null) {
             // It does.  Either get the cached experience or fetch it from the database.
-            Experience exp = DatabaseListManager.instance.experienceMap.get(dispatcher.expKey);
+            Experience exp = DatabaseListManager.instance.experienceMap.get(dispatcher.key);
             if (exp == null) {
                 // Fetch the experience from the database.
-                DatabaseListManager.instance.setExperienceWatcher(dispatcher.expProfile);
+                DatabaseListManager.instance.setExperienceWatcher(dispatcher.payload);
             }
         } else
             // Create a new experience.

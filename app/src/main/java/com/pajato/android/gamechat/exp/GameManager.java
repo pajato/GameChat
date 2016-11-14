@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -30,8 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.exp.ExpFragmentType.expList;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.groupList;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.noExp;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.offline;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.roomList;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.signedOut;
 
 /**
@@ -107,7 +111,7 @@ public enum GameManager {
     public boolean startNextFragment(final FragmentActivity context) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
         // dispatcher if so.
-        ExpDispatcher dispatcher = getDispatcher();
+        Dispatcher<ExpFragmentType, ExpProfile> dispatcher = getDispatcher();
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
@@ -115,58 +119,59 @@ public enum GameManager {
     public boolean startNextFragment(final FragmentActivity context, final ExpFragmentType type) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
         // dispatcher if so.
-        ExpDispatcher dispatcher = getDispatcher(type);
+        Dispatcher<ExpFragmentType, ExpProfile> dispatcher = getDispatcher(type);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
     // Private instance methods.
 
     /** Return a dispatcher object based on the current experience state. */
-    private ExpDispatcher getDispatcher() {
+    private Dispatcher<ExpFragmentType, ExpProfile> getDispatcher() {
         // Deal with an off line user, a signed out user, or no experiences at all, in that order.
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
         // show.
         Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap =
                 DatabaseListManager.instance.expProfileMap;
-        if (!NetworkManager.instance.isConnected()) return new ExpDispatcher(offline);
-        if (!AccountManager.instance.hasAccount()) return new ExpDispatcher(signedOut);
-        if (expProfileMap.size() == 0) return new ExpDispatcher(noExp);
+        if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
+        if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
+        if (expProfileMap.size() == 0) return new Dispatcher<>(noExp);
 
         // Deal with a signed in User with multiple experiences across more than one group.  Return
         // a dispatcher with a map of experience keys.
-        if (expProfileMap.size() > 1) return new ExpDispatcher(expProfileMap);
+        if (expProfileMap.size() > 1) return new Dispatcher<>(groupList, expProfileMap);
 
         // A signed in user with experiences in more than one room but only one group. Return a
         // dispatcher identifying the group and room map.
         String groupKey = expProfileMap.keySet().iterator().next();
         Map<String, Map<String, ExpProfile>> roomMap = expProfileMap.get(groupKey);
-        if (roomMap.size() > 1) return new ExpDispatcher(groupKey, roomMap);
+        if (roomMap.size() > 1) return new Dispatcher<>(roomList, groupKey, roomMap);
 
         // A signed in user with multiple experiences in a single room.  Return a dispatcher that
         // identifies the group, room and the list of experience profiles.
         String roomKey = roomMap.keySet().iterator().next();
         List<ExpProfile> expProfileList = new ArrayList<>(roomMap.get(roomKey).values());
-        if (expProfileList.size() > 1) return new ExpDispatcher(groupKey, roomKey, expProfileList);
+        if (expProfileList.size() > 1)
+            return new Dispatcher<>(expList, groupKey, roomKey, expProfileList);
 
         // A signed in User with one experience. Return a dispatcher to show the single experience.
         ExpFragmentType fragmentType = getFragmentType(expProfileList.get(0));
-        return new ExpDispatcher(fragmentType, expProfileList.get(0));
+        return new Dispatcher<>(fragmentType, expProfileList.get(0));
     }
 
     /** Return a dispatcher object for a given fragment type. */
-    private ExpDispatcher getDispatcher(final ExpFragmentType type) {
+    private Dispatcher<ExpFragmentType, ExpProfile> getDispatcher(final ExpFragmentType type) {
         // Case: there are no experiences of the given type. Return an empty dispatcher but for the
         // fragment type.
         List<ExpProfile> list = getExpProfileList(type);
-        if (list == null || list.size() == 0) return new ExpDispatcher(type);
+        if (list == null || list.size() == 0) return new Dispatcher<>(type);
 
         // Case: a signed in user with a single experience. Return a dispatcher with the experience
         // key.
-        if (list.size() == 1) return new ExpDispatcher(type, list.get(0));
+        if (list.size() == 1) return new Dispatcher<>(type, list.get(0));
 
         // A signed in user with more than one experience of the given type. Return a dispatcher
         // with the list of relevant experience keys.
-        return new ExpDispatcher(type.showType, list);
+        return new Dispatcher<>(type.showType, list);
     }
 
     /** Return cached experience profiles of a given type. */
@@ -205,7 +210,7 @@ public enum GameManager {
     }
 
     /** Return true iff a fragment for the given experience is started. */
-    private boolean startNextFragment(final FragmentActivity context, final ExpDispatcher dispatcher) {
+    private boolean startNextFragment(final FragmentActivity context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Ensure that the fragment exists, creating it as necessary.  Abort if the fragment cannot
         // be created.
         if (!fragmentExists(dispatcher)) return false;
@@ -222,7 +227,7 @@ public enum GameManager {
     }
 
     /** Return TRUE iff the fragment denoted by the given dispactcher exists. */
-    private boolean fragmentExists(final ExpDispatcher dispatcher) {
+    private boolean fragmentExists(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Determine if the fragment needs to be created, returning true if not.
         int index = dispatcher.type.ordinal();
         if (index >= 0 && mFragmentList[index] != null) return true;
