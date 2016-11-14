@@ -30,6 +30,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
@@ -37,6 +38,7 @@ import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Board;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -160,8 +162,9 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     // Protected instance methods.
 
     /** Return an experience for a given dispatcher instance. */
-    @Override protected void createExperience(@NonNull final Context context,
-                                              @NonNull final ExpDispatcher dispatcher) {
+    @Override
+    protected void createExperience(@NonNull final Context context,
+                                    @NonNull final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Set up the players and persist the game.
         List<Account> players = getPlayers(dispatcher);
         createExperience(context, players);
@@ -228,7 +231,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    private List<Account> getPlayers(final ExpDispatcher dispatcher) {
+    private List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
