@@ -15,18 +15,18 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game.model;
+package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.pajato.android.gamechat.game.ExpType;
-import com.pajato.android.gamechat.game.Experience;
+import com.pajato.android.gamechat.exp.ExpType;
+import com.pajato.android.gamechat.exp.Experience;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.game.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
 @IgnoreExtraProperties public class TicTacToe implements Experience {

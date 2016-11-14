@@ -36,7 +36,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.game.ExpFragmentType;
+import com.pajato.android.gamechat.exp.ExpFragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;

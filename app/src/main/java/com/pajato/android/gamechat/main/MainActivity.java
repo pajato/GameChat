@@ -44,8 +44,8 @@ import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.game.GameFragment;
-import com.pajato.android.gamechat.game.GameManager;
+import com.pajato.android.gamechat.exp.GameFragment;
+import com.pajato.android.gamechat.exp.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;

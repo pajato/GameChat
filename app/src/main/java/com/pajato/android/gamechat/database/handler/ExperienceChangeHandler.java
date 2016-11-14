@@ -26,10 +26,10 @@ import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
-import com.pajato.android.gamechat.game.ExpType;
-import com.pajato.android.gamechat.game.Experience;
-import com.pajato.android.gamechat.game.model.ExpProfile;
-import com.pajato.android.gamechat.game.model.TicTacToe;
+import com.pajato.android.gamechat.exp.ExpType;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.TicTacToe;
 
 /**
  * Provide a class to handle new and changed experiences inside a group and room.

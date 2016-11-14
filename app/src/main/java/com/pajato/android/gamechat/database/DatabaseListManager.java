@@ -44,8 +44,8 @@ import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
-import com.pajato.android.gamechat.game.Experience;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import org.greenrobot.eventbus.Subscribe;
 

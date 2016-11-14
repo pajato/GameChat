@@ -26,7 +26,7 @@ import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.HashMap;
 import java.util.Locale;

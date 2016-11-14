@@ -15,9 +15,9 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game.event;
+package com.pajato.android.gamechat.exp.event;
 
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 /**
  * Provides a class to model an experience profile change.

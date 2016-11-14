@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -23,16 +23,16 @@ import android.support.v4.app.FragmentActivity;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.game.ExpFragmentType.noExp;
-import static com.pajato.android.gamechat.game.ExpFragmentType.offline;
-import static com.pajato.android.gamechat.game.ExpFragmentType.signedOut;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.noExp;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.offline;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.signedOut;
 
 /**
  * Manages the game related aspects of the GameChat application. These include the creation of new

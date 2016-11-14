@@ -17,7 +17,7 @@
 
 package com.pajato.android.gamechat.event;
 
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 /**
  * Provides a event class to encapsulate a message class along with the parent group and room keys.

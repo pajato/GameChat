@@ -1,4 +1,4 @@
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import android.graphics.PorterDuff;
 import android.support.v4.content.ContextCompat;

@@ -19,7 +19,7 @@ package com.pajato.android.gamechat.chat.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 /**
  * Show a list of experiences of a particular type.

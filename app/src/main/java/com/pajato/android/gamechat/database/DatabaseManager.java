@@ -28,9 +28,9 @@ import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.game.ExpType;
-import com.pajato.android.gamechat.game.Experience;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.ExpType;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.ArrayList;
 import java.util.Date;

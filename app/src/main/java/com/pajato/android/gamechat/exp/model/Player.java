@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game.model;
+package com.pajato.android.gamechat.exp.model;
 
 import java.util.HashMap;
 import java.util.Map;

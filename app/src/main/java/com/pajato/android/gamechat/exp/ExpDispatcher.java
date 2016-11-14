@@ -15,18 +15,18 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.game.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.game.ExpFragmentType.expList;
-import static com.pajato.android.gamechat.game.ExpFragmentType.groupList;
-import static com.pajato.android.gamechat.game.ExpFragmentType.roomList;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.expList;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.groupList;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.roomList;
 
 /**
  * The experience dispatcher provides mediation between the experience (game) manager and the main

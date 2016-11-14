@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -36,9 +36,9 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.game.ExpFragmentType.checkers;
-import static com.pajato.android.gamechat.game.ExpFragmentType.chess;
-import static com.pajato.android.gamechat.game.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
 
 /**
  * A Fragment that contains and controls the current experience shown to the User.

@@ -24,13 +24,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.ChatFragment;
-import com.pajato.android.gamechat.game.GameFragment;
+import com.pajato.android.gamechat.exp.GameFragment;
 
 import java.util.ArrayList;
 import java.util.List;

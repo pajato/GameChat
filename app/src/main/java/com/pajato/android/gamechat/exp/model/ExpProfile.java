@@ -15,11 +15,11 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game.model;
+package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.pajato.android.gamechat.game.ExpType;
+import com.pajato.android.gamechat.exp.ExpType;
 
 import java.util.HashMap;
 import java.util.Map;

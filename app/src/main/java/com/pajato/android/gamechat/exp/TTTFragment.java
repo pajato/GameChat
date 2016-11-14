@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -36,9 +36,9 @@ import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.game.model.Board;
-import com.pajato.android.gamechat.game.model.Player;
-import com.pajato.android.gamechat.game.model.TicTacToe;
+import com.pajato.android.gamechat.exp.model.Board;
+import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
@@ -52,19 +52,19 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_OWNER_ID;
-import static com.pajato.android.gamechat.game.ExpType.ttt;
-import static com.pajato.android.gamechat.game.ExpFragmentType.checkers;
-import static com.pajato.android.gamechat.game.ExpFragmentType.chess;
-import static com.pajato.android.gamechat.game.ExpFragmentType.tictactoe;
-import static com.pajato.android.gamechat.game.model.Board.BEG_COL;
-import static com.pajato.android.gamechat.game.model.Board.BOT_ROW;
-import static com.pajato.android.gamechat.game.model.Board.END_COL;
-import static com.pajato.android.gamechat.game.model.Board.LEFT_DIAG;
-import static com.pajato.android.gamechat.game.model.Board.MID_COL;
-import static com.pajato.android.gamechat.game.model.Board.MID_ROW;
-import static com.pajato.android.gamechat.game.model.Board.RIGHT_DIAG;
-import static com.pajato.android.gamechat.game.model.Board.TOP_ROW;
-import static com.pajato.android.gamechat.game.model.TicTacToe.ACTIVE;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.exp.model.Board.BEG_COL;
+import static com.pajato.android.gamechat.exp.model.Board.BOT_ROW;
+import static com.pajato.android.gamechat.exp.model.Board.END_COL;
+import static com.pajato.android.gamechat.exp.model.Board.LEFT_DIAG;
+import static com.pajato.android.gamechat.exp.model.Board.MID_COL;
+import static com.pajato.android.gamechat.exp.model.Board.MID_ROW;
+import static com.pajato.android.gamechat.exp.model.Board.RIGHT_DIAG;
+import static com.pajato.android.gamechat.exp.model.Board.TOP_ROW;
+import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 

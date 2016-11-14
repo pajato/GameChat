@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 /**
  * Defines the fragments that can be shown in the experience (aka "games") panel.

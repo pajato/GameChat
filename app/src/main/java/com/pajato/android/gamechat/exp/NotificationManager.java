@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;

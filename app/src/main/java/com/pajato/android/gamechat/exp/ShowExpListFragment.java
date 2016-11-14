@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.game;
+package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
@@ -23,24 +23,23 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.game.GameFragment.GAME_HOME_FAM_KEY;
+import static com.pajato.android.gamechat.exp.GameFragment.GAME_HOME_FAM_KEY;
 
-public class ShowSignedOutFragment extends BaseGameFragment {
+public class ShowExpListFragment extends BaseGameFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
-        logEvent("onClick (showSignedOut)");
+        logEvent("onClick (showExp)");
     }
 
     /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_exp_signed_out;}
+    @Override public int getLayout() {return R.layout.fragment_game_no_games;}
 
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
     /** Initialize the fragment by setting in the FAB. */
     @Override public void onInitialize() {
-        // Set up the FAB.
         FabManager.game.init(this);
     }
 
