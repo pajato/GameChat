@@ -18,10 +18,12 @@
 package com.pajato.android.gamechat.event;
 
 /**
- * Provides an empty event class to mark a message list change.  No data is necessary.
+ * Provides an empty event class to mark a chat list change.  No data is necessary.  When these
+ * events occur, the various chat list fragments should update their lists.  For example on a new
+ * message from the database, the group, room and message lists should be updated.
  *
  * @author Paul Michael Reilly
  */
-public class MessageListChangeEvent {
+public class ChatListChangeEvent {
     // No data is needed as it is all contained in the DatabaseListManager class.
 }

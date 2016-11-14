@@ -24,7 +24,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.MessageListChangeEvent;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -65,7 +65,7 @@ public class ShowGroupListFragment extends BaseChatFragment {
     }
 
     /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onMessageListChange(final MessageListChangeEvent event) {
+    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
         mUpdateOnResume = !updateAdapterList();

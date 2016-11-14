@@ -157,6 +157,14 @@ public abstract class BaseFragment extends Fragment {
         AppEventManager.instance.register(this);
     }
 
+    /** Provide a means to setup the fragment once it has been created. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        if (!onDispatch(context, dispatcher)) {
+            // The dispatch failed. Log it, toast it or some such.
+            Log.d(TAG, "onDispatch failed ...");
+        }
+    }
+
     /** Log the lifecycle event. */
     @Override public void onStart() {
         super.onStart();
@@ -203,6 +211,9 @@ public abstract class BaseFragment extends Fragment {
 
     /** Provide a logger to show the given message. */
     protected abstract void logEvent(String message);
+
+    /** Delegate the setup to the subclasses. */
+    protected abstract boolean onDispatch(Context context, Dispatcher dispatcher);
 
     /** Make the given menu item either visible or invisible. */
     protected void setItemState(final Menu menu, final int itemId, final boolean state) {

@@ -34,14 +34,14 @@ import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ExpProfileListChangeHandler;
 import com.pajato.android.gamechat.database.handler.ExperienceChangeHandler;
 import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
-import com.pajato.android.gamechat.database.handler.MessagesChangeHandler;
+import com.pajato.android.gamechat.database.handler.MessageListChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
-import com.pajato.android.gamechat.event.MessageListChangeEvent;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.game.Experience;
@@ -238,10 +238,10 @@ public enum DatabaseListManager {
     }
 
     /** Handle a message change event by adding the message into the correct room list.  */
-    @Subscribe public void onMessageChange(@NonNull final MessageChangeEvent event) {
+    @Subscribe public void onMessageListChange(@NonNull final MessageChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
-        updateGroupHeaders(event.groupKey, event.message);
-        AppEventManager.instance.post(new MessageListChangeEvent());
+        updateGroupHeaders(event.message);
+        AppEventManager.instance.post(new ChatListChangeEvent());
     }
 
     /** Handle a room profile change by updating the map. */
@@ -410,7 +410,7 @@ public enum DatabaseListManager {
         // There is an active account.  Register it.
         String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
         DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new MessagesChangeHandler(name, groupKey, roomKey);
+        if (handler == null) handler = new MessageListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
@@ -425,10 +425,10 @@ public enum DatabaseListManager {
     }
 
     /** Update the headers used to bracket the messages in the main list. */
-    private void updateGroupHeaders(final String groupKey, final Message message) {
+    private void updateGroupHeaders(final Message message) {
         // Add the new message to be the last message eminating from
         // the given group.  The rebuild the lists of date header type to group list associations.
-        mGroupToLastNewMessageMap.put(groupKey, message);
+        mGroupToLastNewMessageMap.put(message.groupKey, message);
         mDateHeaderTypeToGroupListMap.clear();
         long nowTimestamp = new Date().getTime();
         for (String key : mGroupToLastNewMessageMap.keySet()) {

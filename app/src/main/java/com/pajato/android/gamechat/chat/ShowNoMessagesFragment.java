@@ -35,7 +35,7 @@ public class ShowNoMessagesFragment extends BaseChatFragment {
     @Override public int getLayout() {return R.layout.fragment_chat_no_messages;}
 
     /** Handle a message list change event by starting the next fragment, as necessary. */
-    @Subscribe public void onMessageListChangeEvent(MessageChangeEvent event) {
+    @Subscribe public void onMessageListChange(MessageChangeEvent event) {
         switch (event.changeType) {
             case CHANGED:
             case NEW:

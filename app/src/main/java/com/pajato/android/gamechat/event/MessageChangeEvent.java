@@ -28,12 +28,6 @@ public class MessageChangeEvent extends BaseChangeEvent {
 
     // Public instance variables.
 
-    /** The push key for the group containing the message. */
-    public final String groupKey;
-
-    /** The push key for the room containing the message. */
-    public final String roomKey;
-
     /** The value associated with the click event, either a tag value of the reoource id. */
     public Message message;
 
@@ -41,10 +35,7 @@ public class MessageChangeEvent extends BaseChangeEvent {
     public int changeType;
 
     /** Build the event with the given list. */
-    public MessageChangeEvent(final String groupKey, final String roomKey, final Message message,
-                              final int changeType) {
-        this.groupKey = groupKey;
-        this.roomKey =  roomKey;
+    public MessageChangeEvent(final Message message, final int changeType) {
         this.message = message;
         this.changeType = changeType;
     }
