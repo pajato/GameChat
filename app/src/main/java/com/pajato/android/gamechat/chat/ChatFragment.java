@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
@@ -152,6 +154,11 @@ public class ChatFragment extends BaseChatFragment {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
         ChatManager.instance.startNextFragment(getActivity());
+    }
+
+    /** Setup the fragment with what would otherwise be constructor arguments. */
+    @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
+
     }
 
     // Private instance methods.

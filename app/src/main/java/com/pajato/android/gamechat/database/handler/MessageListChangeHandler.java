@@ -42,7 +42,7 @@ import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
  *
  * @author Paul Michael Reilly
  */
-public class MessagesChangeHandler extends DatabaseEventHandler implements ChildEventListener {
+public class MessageListChangeHandler extends DatabaseEventHandler implements ChildEventListener {
 
     // Private instance constants.
 
@@ -50,7 +50,7 @@ public class MessagesChangeHandler extends DatabaseEventHandler implements Child
     private static final String LOG_FORMAT = "%s: {%s, %s}.";
 
     /** The logcat tag. */
-    private static final String TAG = MessagesChangeHandler.class.getSimpleName();
+    private static final String TAG = MessageListChangeHandler.class.getSimpleName();
 
     // Private instance variables.
 
@@ -63,7 +63,7 @@ public class MessagesChangeHandler extends DatabaseEventHandler implements Child
     // Public constructors.
 
     /** Build a handler with the given name and path. */
-    public MessagesChangeHandler(final String name, final String groupKey, final String roomKey) {
+    public MessageListChangeHandler(final String name, final String groupKey, final String roomKey) {
         super(name, DatabaseManager.instance.getMessagesPath(groupKey, roomKey));
         mGroupKey = groupKey;
         mRoomKey = roomKey;
@@ -141,6 +141,8 @@ public class MessagesChangeHandler extends DatabaseEventHandler implements Child
         // A snapshot exists.  Extract the message and determine if it has been handled already.  If
         // not, then case on the change type and notify the app.
         Message message = snapshot.getValue(Message.class);
+        message.groupKey = mGroupKey;
+        message.roomKey = mRoomKey;
         Map<String, Message> messageMap = getMessageMap();
         switch (type) {
             case NEW:
@@ -154,7 +156,7 @@ public class MessagesChangeHandler extends DatabaseEventHandler implements Child
                 break;
             case MOVED:
             default:
-                // Not sure what a moved change means or what to do about it, so do nothing.
+                // Not sure what a moved change means or what to do about it, so do nothing for now.
                 break;
         }
         AppEventManager.instance.post(new MessageChangeEvent(message, type));

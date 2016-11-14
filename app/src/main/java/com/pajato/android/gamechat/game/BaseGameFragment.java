@@ -19,10 +19,12 @@ package com.pajato.android.gamechat.game;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 
@@ -100,6 +102,12 @@ public abstract class BaseGameFragment extends BaseFragment {
         String manager = getFragmentManager().toString();
         String format = FORMAT_WITH_BUNDLE;
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, bundle));
+    }
+
+    /** Process the dispatcher to set up the experience fragment. */
+    @Override protected boolean onDispatch(@NonNull final Context context,
+                                           @NonNull final Dispatcher dispatcher) {
+        return true;
     }
 
     /** Provide a default implementation for setting up an experience. */

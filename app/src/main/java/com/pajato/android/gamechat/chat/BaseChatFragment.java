@@ -33,8 +33,11 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
@@ -89,11 +92,6 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** A flag used to queue adapter list updates during the onResume lifecycle event. */
     protected boolean mUpdateOnResume;
-
-    // Public constructors.
-
-    /** Provide a default, no args constructor. */
-    public BaseChatFragment() {}
 
     // Public instance methods.
 
@@ -209,6 +207,14 @@ public abstract class BaseChatFragment extends BaseFragment {
         Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType, bundle));
     }
 
+    /** Return TRUE iff the fragment setup is handled successfully. */
+    @Override protected boolean onDispatch(final Context context, final Dispatcher dispatcher) {
+        // Ensure that the type and payload both are consistent with a chat dispatch.
+        return dispatcher.type instanceof ChatFragmentType && dispatcher.payload instanceof Message
+                && doDispatch((ChatFragmentType) dispatcher.type, (Message) dispatcher.payload);
+
+    }
+
     /** Proces a button click that may be a chat list item click. */
     protected void processPayload(final View view) {
         // Determine if some action needs to be taken, i.e if the button click is coming
@@ -233,6 +239,19 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     // Private instance methods.
+
+    private boolean doDispatch(@NonNull ChatFragmentType type, @NonNull Message payload) {
+        // Switch on the type to handle the callback.
+        switch (type) {
+            case messageList:
+                MessageItem item = new MessageItem(payload.groupKey, payload.roomKey, payload);
+                mItem = new ChatListItem(item);
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
 
     /** Development hack: poor man's invite handler to join one or more developer groups. */
     private void joinDeveloperGroups() {

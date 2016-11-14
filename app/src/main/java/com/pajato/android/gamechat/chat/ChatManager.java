@@ -27,6 +27,8 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
@@ -35,8 +37,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.ChatFragmentType.groupList;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.noMessages;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.offline;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.signedOut;
 
 /**
@@ -57,7 +62,7 @@ enum ChatManager {
     public ChatFragmentType lastTypeShown;
 
     /** The repository for fragments created on demand. */
-    private SparseArray<Fragment> mFragmentMap = new SparseArray<>();
+    private SparseArray<BaseFragment> mFragmentMap = new SparseArray<>();
 
     // Public instance methods.
 
@@ -65,41 +70,41 @@ enum ChatManager {
     public boolean startNextFragment(final FragmentActivity context) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
         // dispatcher if so.
-        ChatDispatcher dispatcher = getDispatcher();
+        Dispatcher<ChatFragmentType, Message> dispatcher = getDispatcher();
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
     // Private instance methods.
 
     /** Return a dispatcher object based on the current experience state. */
-    private ChatDispatcher getDispatcher() {
+    private Dispatcher<ChatFragmentType, Message> getDispatcher() {
         // Deal with an off line user, a signed out user, or no messages at all, in that order.
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
         // show.
         Map<String, Map<String, Map<String, Message>>> messageMap;
         messageMap = DatabaseListManager.instance.messageMap;
-        if (!NetworkManager.instance.isConnected()) return new ChatDispatcher(offline);
-        if (!AccountManager.instance.hasAccount()) return new ChatDispatcher(signedOut);
-        if (messageMap.size() == 0) return new ChatDispatcher(noMessages);
+        if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
+        if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
+        if (messageMap.size() == 0) return new Dispatcher<>(noMessages);
 
         // Deal with a signed in User with multiple messages across more than one group.  Return
         // a dispatcher with a map of experience keys.
-        if (messageMap.size() > 1) return new ChatDispatcher(messageMap);
+        if (messageMap.size() > 1) return new Dispatcher<>(groupList, messageMap);
 
         // A signed in user with messages in more than one room but only one group. Return a
         // dispatcher identifying the group and room map.
         String groupKey = messageMap.keySet().iterator().next();
         Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
-        if (roomMap.size() > 1) return new ChatDispatcher(groupKey, roomMap);
+        if (roomMap.size() > 1) return new Dispatcher<>(roomList, groupKey, roomMap);
 
         // A signed in user with multiple messages in a single room.  Return a dispatcher that
-        // identifies the group, room and the list of message profiles.
+        // identifies the group, room and the list of messages.
         String roomKey = roomMap.keySet().iterator().next();
-        List<Message> messageList = new ArrayList<>(roomMap.get(roomKey).values());
-        if (messageList.size() > 1) return new ChatDispatcher(groupKey, roomKey, messageList);
+        List<Message> list = new ArrayList<>(roomMap.get(roomKey).values());
+        if (list.size() > 1) return new Dispatcher<>(messageList, groupKey, roomKey, list);
 
         // A signed in User with one message. Return a dispatcher to show the single message.
-        return new ChatDispatcher(ChatFragmentType.messageList, messageList.get(0));
+        return new Dispatcher<>(messageList, list.get(0));
     }
 
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */
@@ -151,7 +156,7 @@ enum ChatManager {
     private Fragment getFragmentInstance(final ChatFragmentType type) {
         // Create the fragment instance. Log any exceptions.
         try {
-            Fragment result = type.fragmentClass.newInstance();
+            BaseFragment result = type.fragmentClass.newInstance();
             mFragmentMap.put(type.ordinal(), result);
             return result;
         } catch (InstantiationException | IllegalAccessException exc) {
@@ -171,7 +176,7 @@ enum ChatManager {
 
     /** Return true iff a fragment for the given experience is started. */
     private boolean startNextFragment(final FragmentActivity context,
-                                      final ChatDispatcher dispatcher) {
+                                      final Dispatcher<ChatFragmentType, Message> dispatcher) {
         // Ensure that the fragment exists, creating it as necessary.  Abort if the fragment cannot
         // be created.
         if (!fragmentExists(dispatcher)) return false;
@@ -179,7 +184,7 @@ enum ChatManager {
         // Make the next fragment current and initialize it using the context of the fragment
         // currently in the foreground.
         int index = dispatcher.type.ordinal();
-        //mFragmentList[index].setupExperience(context, dispatcher);
+        mFragmentMap.get(index).onSetup(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
             .replace(R.id.chatFragmentContainer, mFragmentMap.get(index))
             .commit();
@@ -187,7 +192,7 @@ enum ChatManager {
     }
 
     /** Return TRUE iff the fragment denoted by the given dispactcher exists. */
-    private boolean fragmentExists(final ChatDispatcher dispatcher) {
+    private boolean fragmentExists(final Dispatcher<ChatFragmentType, Message> dispatcher) {
         // Determine if the fragment needs to be created, returning true if not.
         int index = dispatcher.type.ordinal();
 
