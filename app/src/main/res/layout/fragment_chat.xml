@@ -21,22 +21,22 @@ http://www.gnu.org/licenses
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/PaneLayout">
+    android:id="@+id/chatPaneLayout">
 
     <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/chatFragmentContainer"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <View style="@style/DimmerTheme"
         android:id="@+id/chatDimmer"
-        tools:visibility="visible"
         android:layout_height="0dp"
         android:layout_width="0dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible" />
 
     <android.support.design.widget.CoordinatorLayout style="@style/FamTheme"
         android:layout_width="wrap_content"
