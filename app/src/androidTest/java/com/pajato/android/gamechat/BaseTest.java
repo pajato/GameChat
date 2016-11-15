@@ -11,6 +11,8 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
 import org.hamcrest.Description;
@@ -21,6 +23,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static com.pajato.android.gamechat.main.MainActivity.TEST_USER_KEY;
+
 /**
  * Provide a base class that includes setting up all tests to exclude the intro activity and perform
  * a do nothing test.
@@ -29,6 +33,9 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public abstract class BaseTest {
+
+    /** The test password key. */
+    public static final String TEST_PASS_KEY = "testPassKey";
 
     // Private class constants.
 
@@ -44,13 +51,26 @@ public abstract class BaseTest {
     @Before public void setup() {
         Intent intent = new Intent();
         intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
-        intent.putExtra(MainActivity.TEST_USER_KEY, "nobody@gamechat.com");
+        intent.putExtra(TEST_USER_KEY, "nobody@gamechat.com");
         mRule.launchActivity(intent);
     }
 
     /** Ensure that doing nothing breaks nothing but generates some code coverage results. */
     @Test public void testDoNothing() {
         // Do nothing initially.
+    }
+
+    // Protected methods.
+
+    /** Setup the test user to run connected tests. */
+    protected void setupTestUser(final Intent intent) {
+        String login = intent.getStringExtra(TEST_USER_KEY);
+        String pass = intent.getStringExtra(TEST_PASS_KEY);
+        if (login == null || pass == null) return;
+
+        // Perform the sign in.
+        FirebaseAuth.getInstance().signOut();
+        AccountManager.instance.signIn(mRule.getActivity(), login, pass);
     }
 
     /** Provide access to our custom withDrawable matcher, that matches a view's drawable. */

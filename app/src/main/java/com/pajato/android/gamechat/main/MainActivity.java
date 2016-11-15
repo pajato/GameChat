@@ -31,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
@@ -75,9 +74,6 @@ public class MainActivity extends BaseActivity
     /** The test user name key. */
     public static final String TEST_USER_KEY = "testUserKey";
 
-    /** The test password key. */
-    public static final String TEST_PASS_KEY = "testPassKey";
-
     // Private class constants.
 
     /** The logcat tag constant. */
@@ -103,9 +99,7 @@ public class MainActivity extends BaseActivity
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
 
-        // Ensure that the splash screen and progress manager spinner get turned off and if there is
-        // an account, set up the navigation drawer header accordingly.
-        ProgressManager.instance.hide();
+        // Set up the navigation drawer header based on the account being present or absent.
         if (account != null) {
             // There is an account.  Set it up in the header.
             NavigationManager.instance.setAccount(account, header);
@@ -166,8 +160,13 @@ public class MainActivity extends BaseActivity
 
     /** Setup the standard set of activty menu items. */
     @Override public boolean onCreateOptionsMenu(final Menu menu) {
+        // Inflate the main options menu and enable the join developer groups item in debug builds.
         final MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        if (BuildConfig.DEBUG) {
+            MenuItem item = menu.findItem(R.id.joinDeveloperGroups);
+            if (item != null) item.setVisible(true);
+        }
         return true;
     }
 
@@ -229,7 +228,6 @@ public class MainActivity extends BaseActivity
         Intent intent = getIntent();
         if (!intent.hasExtra(TEST_USER_KEY)) {
             // It is not a connected test.  Determine if the intro activity needs to be run.
-            ProgressManager.instance.show(this);
             SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             if (!prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false)) {
                 // This is a fresh installation of the app.  Present the intro activity to get
@@ -337,16 +335,5 @@ public class MainActivity extends BaseActivity
         Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
 
         return outputFile.getPath();
-    }
-
-    /** Setup the test user to run connected tests. */
-    private void setupTestUser(final Intent intent) {
-        String login = intent.getStringExtra(TEST_USER_KEY);
-        String pass = intent.getStringExtra(TEST_PASS_KEY);
-        if (login == null || pass == null) return;
-
-        // Perform the sign in.
-        FirebaseAuth.getInstance().signOut();
-        AccountManager.instance.signIn(this, login, pass);
     }
 }
