@@ -44,5 +44,6 @@ more. -->
     <item
         android:id="@+id/joinDeveloperGroups"
         android:orderInCategory="100"
+        android:visible="false"
         android:title="@string/joinDeveloperGroups" />
 </menu>

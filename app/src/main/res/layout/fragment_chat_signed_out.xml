@@ -23,12 +23,13 @@ http://www.gnu.org/licenses
     android:layout_height="wrap_content"
     android:layout_marginTop="48dp"
     android:id="@+id/emptyListContent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:useDefaultMargins="true"
         android:columnOrderPreserved="true"
         android:columnCount="2"
@@ -44,9 +45,15 @@ http://www.gnu.org/licenses
         android:layout_height="wrap_content"
         android:id="@+id/emptyListMessage"
         android:padding="24dp"
-        android:text="@string/NoAccountMessageText"
+        android:text="@string/ChatSignedOutMessageText"
         android:textAlignment="center"
         android:textSize="24sp"
         tools:text="Placeholder message ... updated at runtime." />
+
+    <Button style="@style/CenteredButton"
+        android:id="@+id/chatSignIn"
+        android:textSize="20sp"
+        android:text="@string/SignIn"
+        android:onClick="onClick"/>
 
 </LinearLayout>

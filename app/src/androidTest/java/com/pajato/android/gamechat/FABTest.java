@@ -32,7 +32,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
         // Ensure that the speed dial Indicators are all visible.
         onView(withId(R.id.chatFam))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.AddGroupTitle))
+        onView(withText(R.string.SwitchAccountMenuTitle))
                 .check(matches(isDisplayed()));
     }
 }

@@ -35,14 +35,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AccountStateChangeHandled;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -170,7 +172,26 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Handle a sign in or sign out button click. */
+    /** Handle a FAM item click. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Ensure that the event has a menu entry payload.  Abort if not.
+        Object payload = event.view.getTag();
+        if (payload == null || !(payload instanceof MenuEntry)) return;
+
+        // The event represents a menu entry.  Handle the sign in meny entry.
+        MenuEntry entry = (MenuEntry) payload;
+        switch (entry.titleResId) {
+            case R.string.SignInLastAccountMenuTitle:
+                // Dismiss the FAB menu, and sign in using the saved User account.
+                signIn(event.view.getContext());
+                break;
+            default:
+                // Ignore any other items.
+                break;
+        }
+    }
+
+    /** Handle a sign in or sign out button click coming from a non menu item. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Determine if there was a button click on a view.  If not, abort (since it is a menu item
         // that is not interesting here.)
@@ -180,12 +201,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Handle the button click if it is either a sign-in or a sign-out.
         switch (view.getId()) {
             case R.id.signIn:
-            case R.id.expSignIn:
-                // Invoke the sign in activity to kick off a Firebase auth event.
-                Context context = view.getContext();
-                Intent intent = new Intent(context, SignInActivity.class);
-                intent.putExtra("signin", true);
-                context.startActivity(intent);
+                signIn(view.getContext());
                 break;
             case R.id.signOut:
                 // Have Firebase log out the user.
@@ -227,6 +243,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             FirebaseAuth.getInstance().addAuthStateListener(this);
             mIsFirebaseEnabled = true;
         }
+    }
+
+    /** Sign in using the saved User account. */
+    private void signIn(final Context context) {
+        // Invoke the sign in activity to kick off a Firebase auth event.
+        Intent intent = new Intent(context, SignInActivity.class);
+        intent.putExtra("signin", true);
+        context.startActivity(intent);
     }
 
     /** Handle a sign in with the given credentials. */

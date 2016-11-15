@@ -422,6 +422,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
+            ProgressManager.instance.hide();
             updateExperience();
         }
     }
