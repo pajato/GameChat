@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -18,6 +17,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -41,14 +42,17 @@ public class SignInActivity extends AppCompatActivity
     /** Show progress during sign in. */
     private ProgressDialog mProgressDialog;
 
-    // Firebase instance variables
-    private FirebaseAuth mFirebaseAuth;
-
-    // UI Status fields
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
+    // The Google API client.
+    private GoogleApiClient mGoogleApiClient;
 
     // Public instance methods.
+
+    /** Stop showing the progress dialog. */
+    public void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+    }
 
     /** On a destroy Activity lifecycle event lose the progress dialog. */
     @Override public void onDestroy() {
@@ -81,11 +85,12 @@ public class SignInActivity extends AppCompatActivity
         if (user != null) {
             // User is signed in
             Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+            updateUI();
         } else {
             // User is signed out
             Log.d(TAG, "onAuthStateChanged:signed_out");
+            signOut();
         }
-        updateUI(user);
     }
 
     /** Process the result returned from the Google sign in activity. */
@@ -105,7 +110,7 @@ public class SignInActivity extends AppCompatActivity
                 final String format = "Google sign in failed with result code/message: {%s/%s}.";
                 String message = result.getStatus().toString();
                 Log.e(TAG, String.format(Locale.US, format, resultCode, message));
-                updateUI(null);
+                updateUI();
             }
         }
     }
@@ -160,11 +165,11 @@ public class SignInActivity extends AppCompatActivity
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build();
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
             .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
             .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
             .build();
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
@@ -178,7 +183,7 @@ public class SignInActivity extends AppCompatActivity
     }
 
     /** Update the UI with authentication data. */
-    private void updateUI(FirebaseUser user) {
+    private void updateUI() {
         hideProgressDialog();
     }
 
@@ -193,11 +198,18 @@ public class SignInActivity extends AppCompatActivity
         mProgressDialog.show();
     }
 
-    /** Stop showing the progress dialog. */
-    public void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
-        }
+    /** Sign the User out such that they need to choose another account. */
+    private void signOut() {
+        // Ensure that there is client to use in the sign out operation.  Abort if none.
+        if (mGoogleApiClient == null) return;
+
+        // There is an API client.  Sign out.
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+            new ResultCallback<Status>() {
+                @Override public void onResult(@NonNull Status status) {
+                    updateUI();
+                }
+            });
     }
 
 }
