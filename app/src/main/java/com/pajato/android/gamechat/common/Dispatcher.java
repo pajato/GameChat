@@ -89,6 +89,7 @@ public class Dispatcher<T, O> {
         this.groupKey = gKey;
         this.roomKey = rKey;
         this.list = list;
+        payload = list.size() > 0 ? list.get(0) : null;
     }
 
     /** Build an instance given a type, a group key, a room key and a message or experience key. */
@@ -103,6 +104,7 @@ public class Dispatcher<T, O> {
     public Dispatcher(final T type, List<O> list) {
         this.type = type;
         this.list = list;
+        payload = list.size() > 0 ? list.get(0) : null;
     }
 
     /** Build an instance given a fragment type and a message or experience profile. */
