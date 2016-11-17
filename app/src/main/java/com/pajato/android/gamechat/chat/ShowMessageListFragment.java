@@ -98,20 +98,6 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         setItemState(menu, R.id.search, true);
     }
 
-    /** Handle the setup of the list of messages. */
-    @Override public void onInitialize() {
-        // Inflate the layout for this fragment and initialize by setting the app bar title text,
-        // declaring the use of the options menu, removing the FAB button, fetching any remote
-        // configurations, setting up the list of messages, and by setting up the edit text field.
-        super.onInitialize();
-        if (BuildConfig.DEBUG && mItem == null) throw new AssertionError("mitem is null!");
-        setTitles(mItem.groupKey, mItem.roomKey);
-        mItemListType = DatabaseListManager.ChatListType.message;
-        FabManager.chat.setState(this, View.GONE);
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);
-        initEditText(mLayout);
-    }
-
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
@@ -122,6 +108,10 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Turn off the FAB and force a recycler view update.
+        if (BuildConfig.DEBUG && mItem == null) throw new AssertionError("mitem is null!");
+        mItemListType = DatabaseListManager.ChatListType.message;
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);
+        initEditText(mLayout);
         setTitles(mItem.groupKey, mItem.roomKey);
         FabManager.chat.setState(this, View.GONE);
         mUpdateOnResume = true;
