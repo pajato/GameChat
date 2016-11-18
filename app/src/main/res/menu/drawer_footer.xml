@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_manage_accounts"
-        android:title="@string/manage_accounts" />
+        android:id="@+id/manageAccounts"
+        android:title="@string/manage_accounts"
+        android:icon="@drawable/vd_login_2" />
     <item
-        android:id="@+id/nav_settings"
-        android:title="@string/navigation_drawer_label_problems_settings" />
+        android:id="@+id/manageGroups"
+        android:title="@string/MenuItemManageGroups"
+        android:icon="@drawable/vd_group_black_24px"/>
     <item
-        android:id="@+id/nav_feedback"
-        android:title="@string/navigation_drawer_label_problems_feedback" />
+        android:id="@+id/manageRooms"
+        android:title="@string/MenuItemManageRooms"
+        android:icon="@drawable/vd_casino_black_24px"/>
     <item
-        android:id="@+id/nav_learn"
-        android:title="@string/navigation_drawer_label_problems_learn" />
+        android:id="@+id/settings"
+        android:title="@string/MenuItemSettings"
+        android:icon="@drawable/vd_settings_applications_black_24px"/>
+    <item
+        android:id="@+id/helpAndFeedback"
+        android:title="@string/MenuItemHelpAndFeedback"
+        android:icon="@drawable/vd_help_black_24px"/>
 </menu>

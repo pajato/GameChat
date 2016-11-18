@@ -10,33 +10,6 @@
                 <item
                     android:icon="@drawable/ic_chat_bubble_outline_black"
                     android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
             </group>
 
         </menu>
@@ -45,15 +18,6 @@
         android:id="@+id/nav_recent_chats">
         <menu>
             <group>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_recent_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_recent_chat"/>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
-                    android:title="@string/navigation_drawer_label_recent_chat"/>
                 <item
                     android:icon="@drawable/ic_chat_bubble_outline_black"
                     android:title="@string/navigation_drawer_label_recent_chat"/>

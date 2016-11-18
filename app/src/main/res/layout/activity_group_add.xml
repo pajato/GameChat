@@ -53,7 +53,7 @@ http://www.gnu.org/licenses
             android:onClick="onClick"
             android:background="@color/colorLightGray"
             android:contentDescription="@string/SetGroupIconDesc"
-            android:src="@drawable/ic_group_black_24dp" />
+            app:srcCompat="@drawable/vd_group_black_24px" />
         <EditText
             android:layout_width="0dp"
             android:layout_weight="1.0"
