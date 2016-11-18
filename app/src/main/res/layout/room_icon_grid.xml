@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato Technologies LLC.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+-->
+<!-- The main content for the no sign in fragment is a message imploring the User to sign in. -->
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:useDefaultMargins="true"
+    android:columnOrderPreserved="true"
+    android:columnCount="2">
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:tint="@color/colorRed"
+        android:contentDescription="@string/GridRoomIconRed"
+        app:srcCompat="@drawable/vd_casino_black_24px" />
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:tint="@color/colorBlue"
+        android:contentDescription="@string/GridRoomIconBlue"
+        app:srcCompat="@drawable/vd_casino_black_24px" />
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:tint="@color/colorGray"
+        android:contentDescription="@string/GridRoomIconGray"
+        app:srcCompat="@drawable/vd_casino_black_24px" />
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:tint="@color/colorGreen"
+        android:contentDescription="@string/GridRoomIconGreen"
+        app:srcCompat="@drawable/vd_casino_black_24px" />
+</GridLayout>

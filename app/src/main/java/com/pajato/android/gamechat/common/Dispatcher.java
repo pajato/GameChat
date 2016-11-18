@@ -92,14 +92,6 @@ public class Dispatcher<T, O> {
         payload = list.size() > 0 ? list.get(0) : null;
     }
 
-    /** Build an instance given a type, a group key, a room key and a message or experience key. */
-    public Dispatcher(final T type, final String group, final String room, final String key) {
-        this.type = type;
-        groupKey = group;
-        roomKey = room;
-        this.key = key;
-    }
-
     /** Build an instance given a type and a list of message or experience profiles. */
     public Dispatcher(final T type, List<O> list) {
         this.type = type;

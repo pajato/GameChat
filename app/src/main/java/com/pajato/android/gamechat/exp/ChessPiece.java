@@ -52,9 +52,9 @@ class ChessPiece {
                 break;
             case BISHOP: drawable = R.drawable.ic_info_black;
                 break;
-            case KNIGHT: drawable = R.drawable.ic_help_black;
+            case KNIGHT: drawable = R.drawable.vd_help_black_24px;
                 break;
-            case ROOK: drawable = R.drawable.ic_settings_black;
+            case ROOK: drawable = R.drawable.vd_settings_black_24px;
                 break;
             default:
             case PAWN: drawable = R.drawable.ic_account_circle_black_36dp;

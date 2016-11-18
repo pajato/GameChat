@@ -38,8 +38,8 @@ public class ApplicationTest extends BaseTest {
                 .perform(DrawerActions.open())
                 .check(matches(isDisplayed()));
         onView(withId(R.id.nav_footer))
-                .perform(NavigationViewActions.navigateTo(R.id.nav_settings));
-        onView(withText(R.string.navigation_drawer_label_problems_settings))
+                .perform(NavigationViewActions.navigateTo(R.id.settings));
+        onView(withText(R.string.MenuItemSettings))
                 .check(matches(isDisplayed()));
     }
 
@@ -50,20 +50,8 @@ public class ApplicationTest extends BaseTest {
                 .perform(DrawerActions.open())
                 .check(matches(isDisplayed()));
         onView(withId(R.id.nav_footer))
-                .perform(NavigationViewActions.navigateTo(R.id.nav_feedback));
-        onView(withText(R.string.navigation_drawer_label_problems_feedback))
-                .check(matches(isDisplayed()));
-    }
-
-    /** Ensure that the hamburger menu works with the learn more selection. */
-    @Test public void testLearnMoreNavigation() {
-        // Test that the items in the hamburger menu can be exercised.
-        onView(withId(R.id.drawer_layout))
-                .perform(DrawerActions.open())
-                .check(matches(isDisplayed()));
-        onView(withId(R.id.nav_footer))
-                .perform(NavigationViewActions.navigateTo(R.id.nav_learn));
-        onView(withText(R.string.navigation_drawer_label_problems_learn))
+                .perform(NavigationViewActions.navigateTo(R.id.helpAndFeedback));
+        onView(withText(R.string.MenuItemHelpAndFeedback))
                 .check(matches(isDisplayed()));
     }
 
@@ -93,11 +81,9 @@ public class ApplicationTest extends BaseTest {
         // menu items are present.
         onView(withId(R.id.nav_footer))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_settings))
+        onView(withText(R.string.MenuItemSettings))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_feedback))
-                .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_learn))
+        onView(withText(R.string.MenuItemHelpAndFeedback))
                 .check(matches(isDisplayed()));
 
         // Swipe up, then ensure that all the items are still there.
@@ -106,11 +92,9 @@ public class ApplicationTest extends BaseTest {
 
         onView(withId(R.id.nav_footer))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_settings))
+        onView(withText(R.string.MenuItemSettings))
                 .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_feedback))
-                .check(matches(isDisplayed()));
-        onView(withText(R.string.navigation_drawer_label_problems_learn))
+        onView(withText(R.string.MenuItemHelpAndFeedback))
                 .check(matches(isDisplayed()));
     }
 

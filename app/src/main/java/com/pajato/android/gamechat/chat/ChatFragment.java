@@ -166,8 +166,8 @@ public class ChatFragment extends BaseChatFragment {
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getTintEntry(R.string.JoinRoomMenuTitle, R.drawable.ic_casino_black_24dp));
-        menu.add(getTintEntry(R.string.AddRoomMenuTitle, R.drawable.ic_casino_black_24dp));
+        menu.add(getTintEntry(R.string.JoinRoomMenuTitle, R.drawable.vd_casino_black_24px));
+        menu.add(getTintEntry(R.string.AddRoomMenuTitle, R.drawable.vd_casino_black_24px));
         menu.add(getTintEntry(R.string.AddGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         return menu;
     }

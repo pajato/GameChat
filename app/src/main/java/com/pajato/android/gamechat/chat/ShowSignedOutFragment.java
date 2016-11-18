@@ -99,7 +99,7 @@ public class ShowSignedOutFragment extends BaseChatFragment {
     private List<MenuEntry> getSignInMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.SwitchAccountMenuTitle, R.drawable.ic_user_refresh));
-        menu.add(getTintEntry(R.string.SignInLastAccountMenuTitle, R.drawable.ic_login_2));
+        menu.add(getTintEntry(R.string.SignInLastAccountMenuTitle, R.drawable.vd_login_2));
         return menu;
     }
 }

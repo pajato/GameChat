@@ -35,6 +35,9 @@ more. -->
         android:id="@+id/helpAndFeedback"
         android:title="@string/MenuItemHelpAndFeedback" />
     <item
+        android:id="@+id/staleHelpAndFeedback"
+        android:title="@string/MenuItemFeedback" />
+    <item
         android:id="@+id/learnMore"
         android:title="@string/MenuItemLearnMore" />
     <item

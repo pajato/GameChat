@@ -26,19 +26,7 @@ http://www.gnu.org/licenses
     android:gravity="center"
     android:orientation="vertical">
 
-    <GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:useDefaultMargins="true"
-        android:columnOrderPreserved="true"
-        android:columnCount="2"
-        tools:ignore="ContentDescription">
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorRed" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorBlue" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorGray" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorGreen" />
-    </GridLayout>
+    <include layout="@layout/room_icon_grid"/>
 
     <TextView
         android:layout_width="match_parent"

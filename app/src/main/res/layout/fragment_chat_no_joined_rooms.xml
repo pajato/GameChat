@@ -17,6 +17,7 @@ http://www.gnu.org/licenses
 -->
 <!-- The main content for the no sign in fragment is a message imploring the User to sign in. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -25,18 +26,7 @@ http://www.gnu.org/licenses
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
-    <GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:useDefaultMargins="true"
-        android:columnOrderPreserved="true"
-        android:columnCount="2"
-        tools:ignore="ContentDescription">
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorRed" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorBlue" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorGray" />
-        <ImageView style="@style/RoomsIcon" android:tint="@color/colorGreen" />
-    </GridLayout>
+    <include layout="@layout/room_icon_grid"/>
 
     <TextView
         android:layout_width="match_parent"
