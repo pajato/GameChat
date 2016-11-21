@@ -134,7 +134,7 @@ public enum NavigationManager {
     private void loadAccountIcon(final Account account, final View header) {
         // Determine if there is an image to be loaded.
         ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-        Uri imageUri = Uri.parse(account.url);
+        Uri imageUri = account.url != null ? Uri.parse(account.url) : null;
         if (imageUri != null) {
             // There is an image to load.  Use Glide to do the heavy lifting.
             icon.setImageURI(imageUri);

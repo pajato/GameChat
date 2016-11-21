@@ -33,7 +33,9 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
+import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
@@ -208,11 +210,31 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     /** Return TRUE iff the fragment setup is handled successfully. */
-    @Override protected boolean onDispatch(final Context context, final Dispatcher dispatcher) {
+    @Override protected boolean onDispatch(@NonNull final Context context,
+                                           @NonNull final Dispatcher dispatcher) {
         // Ensure that the type and payload both are consistent with a chat dispatch.
-        return dispatcher.type instanceof ChatFragmentType && dispatcher.payload instanceof Message
-                && doDispatch((ChatFragmentType) dispatcher.type, (Message) dispatcher.payload);
+        if (!(dispatcher.type instanceof ChatFragmentType)) return false;
 
+        // Case on the fragment type to set up the fragment item.
+        ChatFragmentType type = (ChatFragmentType) dispatcher.type;
+        switch (type) {
+            case groupList:
+                GroupItem groupItem = new GroupItem(dispatcher.groupKey);
+                mItem = new ChatListItem(groupItem);
+                return true;
+            case messageList:
+                Message payload = (Message) dispatcher.payload;
+                MessageItem messageItem = new MessageItem(payload);
+                mItem = new ChatListItem(messageItem);
+                return true;
+            case roomList:
+                String roomKey = dispatcher.roomMap.keySet().iterator().next().toString();
+                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey);
+                mItem = new ChatListItem(roomItem);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /** Proces a button click that may be a chat list item click. */
@@ -239,19 +261,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     // Private instance methods.
-
-    private boolean doDispatch(@NonNull ChatFragmentType type, @NonNull Message payload) {
-        // Switch on the type to handle the callback.
-        switch (type) {
-            case messageList:
-                MessageItem item = new MessageItem(payload.groupKey, payload.roomKey, payload);
-                mItem = new ChatListItem(item);
-                break;
-            default:
-                break;
-        }
-        return false;
-    }
 
     /** Development hack: poor man's invite handler to join one or more developer groups. */
     private void joinDeveloperGroups() {

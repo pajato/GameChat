@@ -32,6 +32,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
  * the top level view in the chat hierarchy.  It shows all the joined groups and allows for drilling
@@ -57,18 +59,6 @@ public class ShowRoomListFragment extends BaseChatFragment {
         setItemState(menu, R.id.search, true);
     }
 
-    /** Handle the setup for the groups panel. */
-    @Override public void onInitialize() {
-        // Inflate the layout for this fragment and initialize by setting the titles, declaring the
-        // use of the options menu, setting up the ad view and initializing the rooms handling.
-        super.onInitialize();
-        setTitles(mItem.groupKey, null);
-        mItemListType = DatabaseListManager.ChatListType.room;
-        initAdView(mLayout);
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
-        FabManager.chat.init(this);
-    }
-
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
@@ -79,9 +69,14 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // Turn on the FAB and force a recycler view  update.
+        // Set the titles in the toolbar to the group name only; ensure that the FAB is visible, the
+        // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
+        // the group list display.
+        FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
         setTitles(mItem.groupKey, null);
-        FabManager.chat.setState(this, View.VISIBLE);
+        initAdView(mLayout);
+        mItemListType = DatabaseListManager.ChatListType.room;
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
         mUpdateOnResume = true;
         super.onResume();
     }
