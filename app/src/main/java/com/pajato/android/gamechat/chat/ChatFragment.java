@@ -42,6 +42,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoJoinedRooms;
 
@@ -139,14 +140,9 @@ public class ChatFragment extends BaseChatFragment {
         FabManager.chat.setMenu(CHAT_HOME_FAM_KEY, getHomeMenu());
     }
 
-    /** Deal with a change in the joined rooms state. */
+    /** Deal with a change in the joined rooms state by logging it. */
     @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
-        // Turn off the loading progress dialog and handle a signed in account with some joined
-        // rooms by rendering the list.
-        if (event.joinedRoomList.size() == 0) {
-            // Handle the case where there are no joined rooms by enabling the no rooms message.
-            ChatManager.instance.replaceFragment(showNoJoinedRooms, this.getActivity());
-        }
+        logEvent(String.format(Locale.US, "onJoinedRoomListChange with event: {%s}", event));
     }
 
     /** Dispatch to a more suitable fragment. */

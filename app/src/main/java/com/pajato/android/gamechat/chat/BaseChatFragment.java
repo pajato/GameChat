@@ -33,7 +33,6 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -219,8 +218,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         ChatFragmentType type = (ChatFragmentType) dispatcher.type;
         switch (type) {
             case groupList:
-                GroupItem groupItem = new GroupItem(dispatcher.groupKey);
-                mItem = new ChatListItem(groupItem);
+                // A group list does not need an item.
                 return true;
             case messageList:
                 Message payload = (Message) dispatcher.payload;

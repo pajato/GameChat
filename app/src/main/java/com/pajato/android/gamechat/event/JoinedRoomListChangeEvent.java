@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.event;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,4 +38,8 @@ public class JoinedRoomListChangeEvent {
         joinedRoomList = list;
     }
 
+    /** Return the joined room list as an array of String objecs. */
+    @Override public String toString() {
+        return Arrays.toString(joinedRoomList.toArray());
+    }
 }

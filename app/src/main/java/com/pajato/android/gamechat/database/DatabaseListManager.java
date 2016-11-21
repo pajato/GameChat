@@ -119,7 +119,7 @@ public enum DatabaseListManager {
     }
 
     /** Get the profile for a given group, queueing it up to be loaded if necessary. */
-    public Group getGroupProfile(final String groupKey) {
+    public Group getGroupProfile(@NonNull final String groupKey) {
         // Return the group if it has been loaded.
         Group result = groupMap.get(groupKey);
         if (result != null) return result;
@@ -141,8 +141,7 @@ public enum DatabaseListManager {
     }
 
     /** Get the list data given a list type. */
-    public List<ChatListItem> getList(@NonNull final ChatListType type,
-                                      @NonNull final ChatListItem item) {
+    public List<ChatListItem> getList(@NonNull final ChatListType type, final ChatListItem item) {
         switch (type) {
             case group:
                 return getGroupListData();

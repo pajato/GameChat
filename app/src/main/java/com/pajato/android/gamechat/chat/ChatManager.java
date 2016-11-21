@@ -21,7 +21,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.AccountManager;
@@ -32,6 +31,7 @@ import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -59,7 +59,7 @@ enum ChatManager {
     public ChatFragmentType lastTypeShown;
 
     /** The repository for fragments created on demand. */
-    private SparseArray<BaseFragment> mFragmentMap = new SparseArray<>();
+    private Map<ChatFragmentType, BaseFragment> mFragmentMap = new HashMap<>();
 
     // Public instance methods.
 
@@ -114,23 +114,11 @@ enum ChatManager {
             .commit();
     }
 
-    /** Attach a fragment identified by a type, creating that fragment as necessary. */
-    public void replaceFragment(final ChatFragmentType type, final FragmentActivity context) {
-        // Determine if the replacement fragment has been attached yet.
-        Fragment fragment = getFragment(type);
-        if (fragment == null) return;
-
-        // Run the transaction to attach the fragment to the activity.
-        context.getSupportFragmentManager().beginTransaction()
-            .replace(R.id.chatFragmentContainer, fragment)
-            .commit();
-    }
-
     // Private instance methods.
 
     /** Obtain a fragment, if possible. */
     private Fragment getFragment(final ChatFragmentType type) {
-        Fragment result = mFragmentMap.get(type.ordinal());
+        Fragment result = mFragmentMap.get(type);
         if (result == null) {
             // The fragment has not been created yet.  Do so now, aborting if the fragment can not
             // be created.
@@ -145,7 +133,7 @@ enum ChatManager {
         // Create the fragment instance. Log any exceptions.
         try {
             BaseFragment result = type.fragmentClass.newInstance();
-            mFragmentMap.put(type.ordinal(), result);
+            mFragmentMap.put(type, result);
             return result;
         } catch (InstantiationException | IllegalAccessException exc) {
             String format = "Failed to create a fragment for the class: %s";
@@ -171,10 +159,9 @@ enum ChatManager {
 
         // Make the next fragment current and initialize it using the context of the fragment
         // currently in the foreground.
-        int index = dispatcher.type.ordinal();
-        mFragmentMap.get(index).onSetup(context, dispatcher);
+        mFragmentMap.get(dispatcher.type).onSetup(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
-            .replace(R.id.chatFragmentContainer, mFragmentMap.get(index))
+            .replace(R.id.chatFragmentContainer, mFragmentMap.get(dispatcher.type))
             .commit();
         return true;
     }
@@ -182,13 +169,12 @@ enum ChatManager {
     /** Return TRUE iff the fragment denoted by the given dispactcher exists. */
     private boolean fragmentExists(final Dispatcher<ChatFragmentType, Message> dispatcher) {
         // Determine if the fragment needs to be created, returning true if not.
-        int index = dispatcher.type.ordinal();
+        if (mFragmentMap.containsKey(dispatcher.type)) return true;
 
         // The fragment needs to be created. Make the attempt, leaving debug information if the
         // fragment cannot be created.
         try {
-
-            mFragmentMap.put(index, dispatcher.type.fragmentClass.newInstance());
+            mFragmentMap.put(dispatcher.type, dispatcher.type.fragmentClass.newInstance());
             return true;
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
