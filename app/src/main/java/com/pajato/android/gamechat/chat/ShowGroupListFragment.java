@@ -68,7 +68,7 @@ public class ShowGroupListFragment extends BaseChatFragment {
         FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
         initAdView(mLayout);
         mItemListType = DatabaseListManager.ChatListType.group;
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, null), false);
         mUpdateOnResume = true;
         super.onResume();
     }
