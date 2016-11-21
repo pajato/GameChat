@@ -56,12 +56,12 @@ public class MessageItem {
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public MessageItem(final String groupKey, final String roomKey, final Message message) {
+    public MessageItem(final Message message) {
         // Update the group and room keys, the message text and url fields, and set the count to 0
         // to flag that it is not relevant for a message item.  Set the name field to the poster's
         // display name concatenated with the creation date.
-        this.groupKey = groupKey;
-        this.roomKey = roomKey;
+        groupKey = message.groupKey;
+        roomKey = message.roomKey;
         text = message.text;
         url = message.url;
         DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();

@@ -294,12 +294,9 @@ public enum DatabaseListManager {
     }
 
     /** Return a list of ordered chat items from a map of chronologically ordered messages. */
-    private List<ChatListItem> getItems(final ChatListItem item,
-                                        final Map<DateHeaderType, List<Message>> messageMap) {
+    private List<ChatListItem> getItems(final Map<DateHeaderType, List<Message>> messageMap) {
         // Build the list of display items, in reverse order (oldest to newest).
         List<ChatListItem> result = new ArrayList<>();
-        String groupKey = item.groupKey;
-        String roomKey = item.roomKey;
         DateHeaderType[] types = DateHeaderType.values();
         int size = types.length;
         for (int index = size - 1; index >= 0; index--) {
@@ -309,7 +306,7 @@ public enum DatabaseListManager {
             if (list != null) {
                 result.add(new ChatListItem(new DateHeaderItem(dht)));
                 for (Message message : list) {
-                    result.add(new ChatListItem(new MessageItem(groupKey, roomKey, message)));
+                    result.add(new ChatListItem(new MessageItem(message)));
                 }
             }
         }
@@ -339,7 +336,7 @@ public enum DatabaseListManager {
         // of the messages.
         String groupKey = item.groupKey;
         String roomKey = item.roomKey;
-        return getItems(item, getMessageMap(getGroupMessages(groupKey).get(roomKey)));
+        return getItems(getMessageMap(getGroupMessages(groupKey).get(roomKey)));
     }
 
     /** Return a map of the given messages, sorted into chronological buckets. */

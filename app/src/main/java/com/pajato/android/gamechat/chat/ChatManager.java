@@ -32,13 +32,10 @@ import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.ChatFragmentType.groupList;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.noMessages;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.offline;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
@@ -76,7 +73,7 @@ enum ChatManager {
 
     // Private instance methods.
 
-    /** Return a dispatcher object based on the current experience state. */
+    /** Return a dispatcher object based on the current message list state. */
     private Dispatcher<ChatFragmentType, Message> getDispatcher() {
         // Deal with an off line user, a signed out user, or no messages at all, in that order.
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
@@ -95,16 +92,7 @@ enum ChatManager {
         // dispatcher identifying the group and room map.
         String groupKey = messageMap.keySet().iterator().next();
         Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
-        if (roomMap.size() > 1) return new Dispatcher<>(roomList, groupKey, roomMap);
-
-        // A signed in user with multiple messages in a single room.  Return a dispatcher that
-        // identifies the group, room and the list of messages.
-        String roomKey = roomMap.keySet().iterator().next();
-        List<Message> list = new ArrayList<>(roomMap.get(roomKey).values());
-        if (list.size() > 1) return new Dispatcher<>(messageList, groupKey, roomKey, list);
-
-        // A signed in User with one message. Return a dispatcher to show the single message.
-        return new Dispatcher<>(messageList, list.get(0));
+        return new Dispatcher<>(roomList, groupKey, roomMap);
     }
 
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */

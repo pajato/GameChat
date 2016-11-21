@@ -97,6 +97,15 @@ public enum FabManager {
         fab.setVisibility(View.GONE);
     }
 
+    /** Initialize the fab state to show the FAB, hide the FAM and preset the FAM. */
+    public void init(final Fragment fragment, final int visibility, final String key) {
+        // Provide a convenience init function to initialize the FAB state and visibility, and to
+        // attach a particular menu.
+        init(fragment);
+        setState(fragment, visibility);
+        setMenu(fragment, key);
+    }
+
     /** Initialize the fab state. */
     public void init(final Fragment fragment) {
         // Ensure that the layout exists. Abort if it does not.  Set the FAB state to closed if it

@@ -60,7 +60,7 @@ public class Dispatcher<T, O> {
 
     // Public Constructors.
 
-    /** Build an instance given an experience type. */
+    /** Build an instance given a type. */
     public Dispatcher(final T type) {
         this.type = type;
         Room room = DatabaseListManager.instance.getMeRoom();

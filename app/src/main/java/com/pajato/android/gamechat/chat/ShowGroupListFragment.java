@@ -52,18 +52,6 @@ public class ShowGroupListFragment extends BaseChatFragment {
         setItemState(menu, R.id.search, true);
     }
 
-    /** Handle the setup for the groups panel. */
-    @Override public void onInitialize() {
-        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
-        // view and the listeners for backend data changes.
-        super.onInitialize();
-        setTitles(null, null);
-        mItemListType = DatabaseListManager.ChatListType.group;
-        initAdView(mLayout);
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
-        FabManager.chat.init(this);
-    }
-
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
@@ -73,11 +61,14 @@ public class ShowGroupListFragment extends BaseChatFragment {
 
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
-        // Turn on the FAB, shut down the progress bar (if it is showing), and force a recycle view
-        // update.
+        // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
+        // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
+        // the group list display.
         setTitles(null, null);
-        FabManager.chat.setState(this, View.VISIBLE);
-        FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
+        FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
+        initAdView(mLayout);
+        mItemListType = DatabaseListManager.ChatListType.group;
+        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
         mUpdateOnResume = true;
         super.onResume();
     }
