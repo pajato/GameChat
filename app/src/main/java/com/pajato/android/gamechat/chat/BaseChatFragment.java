@@ -43,6 +43,7 @@ import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -91,15 +92,26 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** The list type for this fragment. */
     protected DatabaseListManager.ChatListType mItemListType;
 
-    /** A flag used to queue adapter list updates during the onResume lifecycle event. */
-    protected boolean mUpdateOnResume;
-
     // Public instance methods.
+
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
+        // Log the event and update the list saving the result for a retry later.
+        String format = "onMessageListChange (showRoomList) with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
+        ChatManager.instance.startNextFragment(getActivity());
+    }
 
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
         super.onDestroy();
         if (mAdView != null) mAdView.destroy();
+    }
+
+    /** Initialize chat list fragments by dealing with ads. */
+    @Override public void onInitialize() {
+        super.onInitialize();
+        initAdView(mLayout);
     }
 
     /** Handle a menu item click by processing the join developer group menu item. */
@@ -128,14 +140,11 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
-        // Log the event, handle ads and apply any queued adapter updates.  Only one try is
-        // attempted.
+        // Log the event, put the FAB into the start state and update the list, if any.
         super.onResume();
         FabManager.chat.init(this);
         if (mAdView != null) mAdView.resume();
-        if (!mUpdateOnResume) return;
-        updateAdapterList();
-        mUpdateOnResume = false;
+        if (mItemListType != null) updateAdapterList();
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
@@ -143,47 +152,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         mItem = item;
     }
 
-    /** Return TRUE iff the list can be considered up to date. */
-    public boolean updateAdapterList() {
-        // Determine if the fragment has a view and that it has a list type.
-        View layout = getView();
-        if (layout == null || mItemListType == null) return false;
-
-        // It has both.  Ensure that the list view (recycler) exists.
-        RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
-        if (view == null) return false;
-
-        // The recycler view exists.  Show the chat list, either groups, messages or rooms.
-        RecyclerView.Adapter adapter = view.getAdapter();
-        if (!(adapter instanceof ChatListAdapter)) return true;
-
-        // Inject the list items into the recycler view making sure to scroll to the end of the
-        // list when showing messages.
-        ChatListAdapter listAdapter = (ChatListAdapter) adapter;
-        listAdapter.clearItems();
-        listAdapter.addItems(DatabaseListManager.instance.getList(mItemListType, mItem));
-        if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
-        return true;
-    }
-
     // Protected instance methods.
-
-    /** Initialize the fragment's chat list. */
-    protected void initList(@NonNull final View layout, final List<ChatListItem> items,
-                            final boolean stackFromEnd) {
-        // Initialize the recycler view.
-        Context context = layout.getContext();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.chatList);
-        if (stackFromEnd) layoutManager.setStackFromEnd(true);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        // Set up the adapter on the recycler view with a set of default messages.
-        ChatListAdapter adapter = new ChatListAdapter();
-        adapter.addItems(items);
-        recyclerView.setAdapter(adapter);
-    }
 
     /** Initialize the ad view by building and loading an ad request. */
     protected void initAdView(@NonNull final View layout) {
@@ -289,4 +258,34 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
+    /** Return TRUE iff the list can be considered up to date. */
+    private boolean updateAdapterList() {
+        // Determine if the fragment has a view and that it has a list type.
+        View layout = getView();
+        if (layout == null || mItemListType == null) return false;
+
+        // It has both.  Ensure that the list view (recycler) exists.
+        RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
+        if (view == null) return false;
+
+        // The recycler view exists.  Show the chat list, either groups, messages or rooms.
+        RecyclerView.Adapter adapter = view.getAdapter();
+        if (adapter == null) {
+            // Initialize the recycler view.
+            adapter = new ChatListAdapter();
+            view.setAdapter(adapter);
+            Context context = layout.getContext();
+            LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
+            view.setLayoutManager(layoutManager);
+            view.setItemAnimator(new DefaultItemAnimator());
+        }
+
+        // Inject the list items into the recycler view making sure to scroll to the end of the
+        // list when showing messages.
+        ChatListAdapter listAdapter = (ChatListAdapter) adapter;
+        listAdapter.clearItems();
+        listAdapter.addItems(DatabaseListManager.instance.getList(mItemListType, mItem));
+        if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
+        return true;
+    }
 }

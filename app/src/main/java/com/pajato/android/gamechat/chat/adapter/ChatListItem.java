@@ -34,8 +34,11 @@ public class ChatListItem {
     static final int CONTACT_ITEM_TYPE = 1;
     static final int DATE_ITEM_TYPE = 2;
     public static final int GROUP_ITEM_TYPE= 3;
-    static final int MESSAGE_ITEM_TYPE = 4;
-    public static final int ROOM_ITEM_TYPE = 5;
+    public static final int MEMBER_ITEM_TYPE = 4;
+    static final int MESSAGE_ITEM_TYPE = 5;
+    public static final int ROOM_ITEM_TYPE = 6;
+    public static final int ROOMS_HEADER_ITEM_TYPE = 7;
+    public static final int SELECTION_ITEM_TYPE = 8;
 
     // Public enums
 
@@ -94,6 +97,16 @@ public class ChatListItem {
         desc = String.format(Locale.US, format, name, email, phone, url);
     }
 
+    /** Build an instance for a given contact list item. */
+    public ChatListItem(final MemberItem item) {
+        type = MEMBER_ITEM_TYPE;
+        name = item.name;
+        email = item.email;
+        url = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
+        desc = String.format(Locale.US, format, name, email, url);
+    }
+
     /** Build an instance for a given group list item. */
     public ChatListItem(final GroupItem item) {
         type = GROUP_ITEM_TYPE;
@@ -135,6 +148,13 @@ public class ChatListItem {
         text = item.text;
         String format = "Room item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
         desc = String.format(Locale.US, format, name, key, count, text);
+    }
+
+    /** Build an instance for a given available rooms header item. */
+    public ChatListItem(final RoomsHeaderItem item) {
+        type = ROOMS_HEADER_ITEM_TYPE;
+        nameResourceId = item.getNameResourceId();
+        desc = String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
     }
 
 }

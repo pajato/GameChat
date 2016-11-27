@@ -56,7 +56,12 @@ public class ShowGroupListFragment extends BaseChatFragment {
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
-        mUpdateOnResume = !updateAdapterList();
+    }
+
+    /** Initialize ... */
+    @Override public void onInitialize() {
+        super.onInitialize();
+        mItemListType = DatabaseListManager.ChatListType.group;
     }
 
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
@@ -64,13 +69,9 @@ public class ShowGroupListFragment extends BaseChatFragment {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
+        super.onResume();
         setTitles(null, null);
         FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
-        initAdView(mLayout);
-        mItemListType = DatabaseListManager.ChatListType.group;
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, null), false);
-        mUpdateOnResume = true;
-        super.onResume();
     }
 
 }

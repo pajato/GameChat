@@ -17,20 +17,25 @@
 
 package com.pajato.android.gamechat.chat;
 
+import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
+import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
+
 /**
  * Defines the fragments that can be shown in the chat pane.
  *
  * @author Paul Michael Reilly
  */
 public enum ChatFragmentType {
-    signedOut (ShowSignedOutFragment.class),
-    offline (ShowOfflineFragment.class),
-    noMessages (ShowNoMessagesFragment.class),
+    createRoom (CreateRoomFragment.class),
     groupList (ShowGroupListFragment.class),
-    roomList (ShowRoomListFragment.class),
+    joinRoom (JoinRoomsFragment.class),
     messageList (ShowMessageListFragment.class),
+    noMessages (ShowNoMessagesFragment.class),
+    offline (ShowOfflineFragment.class),
+    roomList (ShowRoomListFragment.class),
+    showNoAccount (ShowSignedOutFragment.class),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class),
-    showNoAccount (ShowSignedOutFragment.class);
+    signedOut (ShowSignedOutFragment.class);
 
     // Private instance variables.
 

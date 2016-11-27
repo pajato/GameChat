@@ -63,11 +63,17 @@ enum ChatManager {
 
     // Public instance methods.
 
-    /** Return true iff a fragment for the given experience is started. */
+    /** Return true iff an appropriate fragment is started. */
     public boolean startNextFragment(final FragmentActivity context) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
         // dispatcher if so.
         Dispatcher<ChatFragmentType, Message> dispatcher = getDispatcher();
+        return dispatcher.type != null && startNextFragment(context, dispatcher);
+    }
+
+    /** Return true iff a fragment of the fiven type is started. */
+    public boolean startNextFragment(FragmentActivity context, ChatFragmentType type) {
+        Dispatcher<ChatFragmentType, Message> dispatcher = new Dispatcher<>(type);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 

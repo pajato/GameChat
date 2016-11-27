@@ -4,9 +4,10 @@
     <string name="AddGroupMenuTitle">Add Group</string>
     <string name="AddGroupNameHint">Type group name</string>Title">
     <string name="AddGroupTitle">Add Group</string>
-    <string name="AddRoomDesc">Add Room menu button</string>
-    <string name="AddRoomMenuTitle">Add Room</string>
+    <string name="ChatSignedOutMessageText">GameChat is much more fun when you can chat with your family and friends.</string>
     <string name="ChatTitle">Chat</string>
+    <string name="CreateRoomDesc">Create Room menu button</string>
+    <string name="CreateRoomMenuTitle">Create Room</string>
     <string name="DefaultPrivateGroupName">Me Group</string>
     <string name="DefaultPrivateRoomName">Me Room</string>
     <string name="DefaultRoomName">Common</string>
@@ -21,15 +22,22 @@
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
     <string name="InstallDebugUsers">Install developer users</string>
     <string name="InviteGroupMembersFeature">Inviting group members</string>
-    <string name="JoinRoomDesc">Join Room menu button</string>
-    <string name="JoinRoomMenuTitle">Join Room</string>
+    <string name="JoinRoomsMenuTitle">Join Rooms</string>
+    <string name="JoinRoomsEditTextDefault">Select rooms or members</string>
     <string name="LearnMoreFeature">Providing context help</string>
-    <string name="ChatSignedOutMessageText">GameChat is much more fun when you can chat with your family and friends.</string>
+    <string name="MembersAvailableHeader">Available Members</string>
+    <string name="MembersNotAvailableHeader">No Members Available</string>
     <string name="NoMessagesText">There are no messages to show in this room. That\'s weird.</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="RoomListIcon">The room list icon.</string>
+    <string name="RoomsAvailableHeader">Available Rooms</string>
+    <string name="RoomsNotAvailableHeader">No Rooms Available</string>
     <string name="SetAddGroupIconFeature">Setting the add group icon</string>
     <string name="SetGroupIconDesc">Set the group icon</string>
+    <string name="SetRoomIconDesc">Set the room icon</string>
+    <string name="SignInLastAccountMenuTitle">Use Current Account</string>
+    <string name="SwitchAccountDesc">Switch account menu item.</string>
+    <string name="SwitchAccountMenuTitle">Switch Account</string>
     <string name="TakePicture">Inserting a picture using your camera</string>
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
@@ -38,7 +46,4 @@
     <string name="editMessageHint">Type a message</string>
     <string name="frequent">Frequent</string>
     <string name="joinDeveloperGroups">Join Developer Groups</string>
-    <string name="SwitchAccountMenuTitle">Switch Account</string>
-    <string name="SwitchAccountDesc">Switch account menu item.</string>
-    <string name="SignInLastAccountMenuTitle">Use Current Account</string>
 </resources>

@@ -102,20 +102,20 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Log the event and update the list saving the result for a retry later.
         logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
-        mUpdateOnResume = !updateAdapterList();
+    }
+
+    /** Establish the create time state. */
+    @Override public void onInitialize() {
+        // Establish the list type and setup the toolbar.
+        mItemListType = DatabaseListManager.ChatListType.message;
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // Turn off the FAB and force a recycler view update.
-        if (BuildConfig.DEBUG && mItem == null) throw new AssertionError("mitem is null!");
-        mItemListType = DatabaseListManager.ChatListType.message;
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), true);
+        super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
         setTitles(mItem.groupKey, mItem.roomKey);
         FabManager.chat.setState(this, View.GONE);
-        mUpdateOnResume = true;
-        super.onResume();
     }
 
     // Private instance methods.

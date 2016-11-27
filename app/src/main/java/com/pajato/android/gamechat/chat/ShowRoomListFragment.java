@@ -59,12 +59,10 @@ public class ShowRoomListFragment extends BaseChatFragment {
         setItemState(menu, R.id.search, true);
     }
 
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Log the event and update the list saving the result for a retry later.
-        String format = "onMessageListChange (showRoomList) with event {%s}";
-        logEvent(String.format(Locale.US, format, event));
-        mUpdateOnResume = !updateAdapterList();
+    /** Initialize ... */
+    @Override public void onInitialize() {
+        super.onInitialize();
+        mItemListType = DatabaseListManager.ChatListType.room;
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -72,13 +70,9 @@ public class ShowRoomListFragment extends BaseChatFragment {
         // Set the titles in the toolbar to the group name only; ensure that the FAB is visible, the
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
+        super.onResume();
         FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
         setTitles(mItem.groupKey, null);
-        initAdView(mLayout);
-        mItemListType = DatabaseListManager.ChatListType.room;
-        initList(mLayout, DatabaseListManager.instance.getList(mItemListType, mItem), false);
-        mUpdateOnResume = true;
-        super.onResume();
     }
 
 }
