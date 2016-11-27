@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoJoinedRooms;
 
 /**
@@ -101,11 +102,12 @@ public class ChatFragment extends BaseChatFragment {
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
                 break;
-            case R.string.JoinRoomMenuTitle:
-                showFutureFeatureMessage(R.string.JoinRoomDesc);
+            case R.string.JoinRoomsMenuTitle:
+                // Switch to the join room fragment.
+                ChatManager.instance.startNextFragment(getActivity(), joinRoom);
                 break;
-            case R.string.AddRoomMenuTitle:
-                showFutureFeatureMessage(R.string.AddRoomDesc);
+            case R.string.CreateRoomMenuTitle:
+                showFutureFeatureMessage(R.string.CreateRoomDesc);
                 break;
             default:
                 // ...
@@ -162,8 +164,8 @@ public class ChatFragment extends BaseChatFragment {
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getTintEntry(R.string.JoinRoomMenuTitle, R.drawable.vd_casino_black_24px));
-        menu.add(getTintEntry(R.string.AddRoomMenuTitle, R.drawable.vd_casino_black_24px));
+        menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.vd_casino_black_24px));
+        menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.vd_casino_black_24px));
         menu.add(getTintEntry(R.string.AddGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         return menu;
     }

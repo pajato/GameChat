@@ -54,7 +54,7 @@ http://www.gnu.org/licenses
     <style name="HeaderTheme">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@color/colorLightGray</item>
+        <item name="android:background">@color/colorLightBlue</item>
         <item name="android:orientation">horizontal</item>
     </style>
 

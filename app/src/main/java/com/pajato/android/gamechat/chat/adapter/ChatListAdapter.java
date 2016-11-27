@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,11 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEAD
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MEMBER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTION_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -54,6 +58,15 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TY
 public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     implements View.OnClickListener {
 
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = ChatListAdapter.class.getSimpleName();
+
+    /** A format string for displaying unhandled cases. */
+    private static final String UNHANDLED_FORMAT = "Unhandled item entry type: {%s}.";
+
+    /** The list displayed by the owning list view. */
     private List<ChatListItem> mList = new ArrayList<>();
 
     // Public instance methods.
@@ -70,7 +83,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         mList.clear();
     }
 
-    /** Manage the recycler view holder thingy. */
+    /** Manage the recycler view holder. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {
         switch (entryType) {
             case CONTACT_HEADER_ITEM_TYPE:
@@ -83,9 +96,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ChatListViewHolder(getView(parent, R.layout.item_group));
             case ROOM_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_room));
+            case ROOMS_HEADER_ITEM_TYPE:
+                return new HeaderViewHolder(getView(parent, R.layout.item_header));
+            case MEMBER_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_message));
             case MESSAGE_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_message));
+            case SELECTION_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_message));
             default:
+                Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, entryType));
                 break;
         }
 
@@ -98,17 +118,23 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         if (item != null) {
             switch (item.type) {
                 case DATE_ITEM_TYPE:
-                    // The date header simply updates the section title.
+                case ROOMS_HEADER_ITEM_TYPE:
+                    // The header item types simply update the section title.
                     int id = item.nameResourceId;
                     String name = holder.itemView.getContext().getResources().getString(id);
                     ((HeaderViewHolder) holder).title.setText(name);
                     break;
                 case GROUP_ITEM_TYPE:
+                case MEMBER_ITEM_TYPE:
                 case MESSAGE_ITEM_TYPE:
                 case ROOM_ITEM_TYPE:
+                case SELECTION_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateChatHolder((ChatListViewHolder) holder, item);
+                    break;
+                default:
+                    Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
                     break;
             }
         }
@@ -191,14 +217,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     // Inner classes.
 
-    /** ... */
+    /** Provide a view holder for a chat list item. */
     private class ChatListViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         TextView count;
         TextView text;
         ImageView icon;
 
-        /** ... */
+        /** Build an instance given the item view. */
         ChatListViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.chatName);
@@ -208,7 +234,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    /** Provide a class to include a contact header in the list. */
+    /** Provide a class to include a header in the list. */
     private class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         // Private instance variables.
@@ -223,7 +249,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    /** Provide a class to include a contact header in the list. */
+    /** Provide a class to include a contact view in the list. */
     private class ContactViewHolder extends RecyclerView.ViewHolder {
 
         // Private instance variables.
@@ -232,7 +258,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView email;
         ImageView icon;
 
-        /** ... */
+        /** Build a contact view holder for the given item. */
         ContactViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.contactName);
@@ -241,4 +267,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
+    /** Provide a class to include a contact view in the list. */
+    private class SelectionViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        TextView name;
+        //TextView discriminant;
+        ImageView icon;
+
+        /** Build a selection item holder for the given item. */
+        SelectionViewHolder(View itemView) {
+            super(itemView);
+            name = (TextView) itemView.findViewById(R.id.contactName);
+            //discriminant = (TextView) itemView.findViewById(???);
+            icon = (ImageView) itemView.findViewById(R.id.contactIcon);
+        }
+    }
 }

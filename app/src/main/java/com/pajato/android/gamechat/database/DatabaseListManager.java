@@ -19,17 +19,23 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupItem;
+import com.pajato.android.gamechat.chat.adapter.MemberItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
+import com.pajato.android.gamechat.chat.adapter.RoomsHeaderItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ExpProfileListChangeHandler;
 import com.pajato.android.gamechat.database.handler.ExperienceChangeHandler;
@@ -37,6 +43,7 @@ import com.pajato.android.gamechat.database.handler.JoinedRoomListChangeHandler;
 import com.pajato.android.gamechat.database.handler.MessageListChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
 import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
+import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AccountStateChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
@@ -59,6 +66,8 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
 import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.joinMemberRoom;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.joinRoom;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -73,10 +82,36 @@ public enum DatabaseListManager {
 
     /** The chat list type. */
     public enum ChatListType {
-        group, message, room, member
+        group, message, room, joinMemberRoom, joinRoom,
     }
 
+    // Private class constants.
+
+    /** The account change handler base name. */
+    private static final String ACCOUNT_CHANGE_HANDLER = "accountListChangeHandler";
+
+    /** The experience profile change handler base name. */
+    private static final String EXP_PROFILE_LIST_CHANGE_HANDLER = "expProfileListChangeHandler";
+
+    /** The experience change handler base name. */
+    private static final String EXPERIENCES_CHANGE_HANDLER = "experiencesChangeHandler";
+
+    /** The group profile change handler base name. */
+    private static final String GROUP_PROFILE_LIST_CHANGE_HANDLER = "groupProfileListChangeHandler";
+
+    /** The joined room list change handler base name. */
+    private static final String JOINED_ROOM_LIST_CHANGE_HANDLER = "joinedRoomListChangeHandler";
+
+    /** The message list change handler base name. */
+    private static final String MESSAGE_LIST_CHANGE_HANDLER = "messageListChangeHandler";
+
+    /** The group profile change handler base name. */
+    private static final String ROOM_PROFILE_LIST_CHANGE_HANDLER = "roomProfileListChangeHandler";
+
     // Public instance variables.
+
+    /** The master list of all User accounts in the groups which the current User can access. */
+    public Map<String, Map<String, Account>> accountMap = new HashMap<>();
 
     /** The map associating group and room push keys with a map of experience profiles. */
     public Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap = new HashMap<>();
@@ -120,18 +155,10 @@ public enum DatabaseListManager {
 
     /** Get the profile for a given group, queueing it up to be loaded if necessary. */
     public Group getGroupProfile(@NonNull final String groupKey) {
-        // Return the group if it has been loaded.
+        // Return the group if it has been loaded.  Set a watcher to load it if not.
         Group result = groupMap.get(groupKey);
         if (result != null) return result;
-
-        // The given group needs to be loaded.  Do so now (checking that it has not already been
-        // registered.)
-        String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
-        String name = "profileChangeHandler" + groupKey;
-        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
-        DatabaseRegistrar.instance.registerHandler(handler);
-
+        setGroupProfileWatcher(groupKey);
         return null;
     }
 
@@ -143,14 +170,11 @@ public enum DatabaseListManager {
     /** Get the list data given a list type. */
     public List<ChatListItem> getList(@NonNull final ChatListType type, final ChatListItem item) {
         switch (type) {
-            case group:
-                return getGroupListData();
-            case message:
-                return getMessageListData(item);
-            case room:
-                return getRoomListData(item.groupKey);
-            case member:
-                return getMemberListData(item);
+            case group: return getGroupListData();
+            case message: return getMessageListData(item);
+            case room: return getRoomListData(item.groupKey);
+            case joinMemberRoom: return getMemberListData(item);
+            case joinRoom: return getJoinRoomsListData(item);
             default:
                 // TODO: log a message here.
                 break;
@@ -192,16 +216,34 @@ public enum DatabaseListManager {
         return roomMap.get(roomKey);
     }
 
+    /** Handle an account change event by updating the account cache. */
+    @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
+        // Update the account cache for the payload account.
+        Map<String, Account> map = accountMap.get(event.groupKey);
+        if (map == null) {
+            map = new HashMap<>();
+            accountMap.put(event.groupKey, map);
+        }
+        map.put(event.key, event.account);
+    }
+
     /** Handle a authentication event. */
     @Subscribe public void onAccountStateChange(@NonNull final AccountStateChangeEvent event) {
         // Register an active rooms change handler on the account, if there is an account,
         // preferring a cached handler, if one is available.
         if (event.account != null) {
-            // There is an active account.  Register a joined room list change handler.
+            // There is an active account.  Watch for changes to the profiles for each group in the
+            // account.
+            for (String key : event.account.groupIdList) {
+                // Set a watcher for this group.
+                setGroupProfileWatcher(key);
+            }
+
+            // Register a joined room list change handler.
             String path = DatabaseManager.instance.getJoinedRoomListPath(event.account);
-            String name = "joinedRoomListChangeHandler";
-            DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-            if (handler == null) handler = new JoinedRoomListChangeHandler(name, path);
+            String name = getHandlerName(JOINED_ROOM_LIST_CHANGE_HANDLER, event.account.id);
+            if (DatabaseRegistrar.instance.isRegistered(name)) return;
+            DatabaseEventHandler handler = new JoinedRoomListChangeHandler(name, path);
             DatabaseRegistrar.instance.registerHandler(handler);
         } else {
             // Deal with either a logout or no valid user by clearing the various state.
@@ -210,12 +252,17 @@ public enum DatabaseListManager {
             groupMap.clear();
             mGroupToLastNewMessageMap.clear();
             roomMap.clear();
+            // ???? accountMap.clear();
         }
     }
 
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
+        // Ensure that the group profile is cached and set up watchers for each account and room in
+        // the group.
         groupMap.put(event.key, event.group);
+        for (String key : event.group.memberIdList) setAccountWatcher(event.group.key, key);
+        for (String key : event.group.roomMap.values()) setRoomProfileWatcher(event.group.key, key);
     }
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
@@ -252,13 +299,71 @@ public enum DatabaseListManager {
     public void setExperienceWatcher(final ExpProfile profile) {
         // Set up a watcher in the given room for experiences changes.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "experiencesChangeHandler{%s}", profile.expKey);
+        String name = getHandlerName(EXPERIENCES_CHANGE_HANDLER, profile.expKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     // Private instance methods.
+
+    /** Return a possibly empty list of items of a given type. */
+    private void addAll(final List<ChatListItem> result, final ChatListItem item,
+                        final ChatListType type, final int availableId, final int notAvailableId) {
+        List<ChatListItem> items = new ArrayList<>();
+        if (item == null) items.addAll(getAvailable(type, null));
+        if (item != null && item.groupKey != null) items.addAll(getAvailable(type, item));
+        if (items.size() == 0) {
+            // There are no available rooms to join.  Provide a header to that effect.
+            result.add(new ChatListItem(new RoomsHeaderItem(notAvailableId)));
+        } else {
+            // There are available rooms to join.  Add them to the list view adapter.
+            result.add(new ChatListItem(new RoomsHeaderItem(availableId)));
+            result.addAll(items);
+        }
+    }
+
+    /** Return a list of available items of a given type. */
+    private List<ChatListItem> getAvailable(final ChatListType type, final ChatListItem item) {
+        List<ChatListItem> result = new ArrayList<>();
+        switch (type) {
+            case joinRoom:
+                result.addAll(getAvailableRooms(item));
+                break;
+            case joinMemberRoom:
+                result.addAll(getAvailableMemberRooms(item));
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
+    /** Return a list of available room entries from the given group excluding joined ones. */
+    private List<ChatListItem> getAvailableRooms(final ChatListItem item) {
+        List<ChatListItem> result = new ArrayList<>();
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (item != null && item.groupKey != null) result.addAll(getRoomListData(item.groupKey));
+        if ((item == null || item.groupKey == null) && account != null)
+            for (String key : account.groupIdList) result.addAll(getRoomListData(key));
+        pruneJoinedRooms(result);
+
+        return result;
+    }
+
+    /** Return a list of available room entries from the given group excluding joined ones. */
+    private List<ChatListItem> getAvailableMemberRooms(final ChatListItem item) {
+        List<ChatListItem> result = new ArrayList<>();
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (item != null && item.groupKey != null)
+            result.addAll(getGroupMemberListData(item.groupKey));
+        if ((item == null || item.groupKey == null) && account != null)
+            for (String key : account.groupIdList) result.addAll(getGroupMemberListData(key));
+        pruneJoinedRooms(result);
+
+        return result;
+    }
 
     /** Return the date header type most closely associated with the given message timestamp. */
     private DateHeaderType getDateHeaderType(final Message message) {
@@ -292,6 +397,27 @@ public enum DatabaseListManager {
         return result;
     }
 
+    /** Return a list of potential group member room names for a given group. */
+    private List<ChatListItem> getGroupMemberListData(@NonNull final String groupKey) {
+        // Generate a list of all possible member room items for a given group.
+        List<ChatListItem> result = new ArrayList<>();
+        Group group = groupMap.get(groupKey);
+        for (String key : group.memberIdList) {
+            Account account = accountMap.get(groupKey).get(key);
+            if (account != null) {
+                // Add the header item followed by all the group items.
+                result.add(new ChatListItem(new MemberItem(groupKey, account)));
+            }
+        }
+
+        return result;
+    }
+
+    /** Return a canonical change handler name for a given database model name. */
+    private String getHandlerName(@NonNull final String base, @NonNull final String modelName) {
+        return String.format(Locale.US, "%s{%s}", base, modelName);
+    }
+
     /** Return a list of ordered chat items from a map of chronologically ordered messages. */
     private List<ChatListItem> getItems(final Map<DateHeaderType, List<Message>> messageMap) {
         // Build the list of display items, in reverse order (oldest to newest).
@@ -310,6 +436,17 @@ public enum DatabaseListManager {
             }
         }
 
+        return result;
+    }
+
+    /** Return a set of potential group members. */
+    private List<ChatListItem> getJoinRoomsListData(final ChatListItem item) {
+        // Determine if there are any rooms to present (currently joined rooms are excluded).
+        List<ChatListItem> result = new ArrayList<>();
+        addAll(result, item, joinRoom, R.string.RoomsAvailableHeader,
+                R.string.RoomsNotAvailableHeader);
+        addAll(result, item, joinMemberRoom, R.string.MembersAvailableHeader,
+                R.string.MembersNotAvailableHeader);
         return result;
     }
 
@@ -377,15 +514,36 @@ public enum DatabaseListManager {
         return result;
     }
 
-    // Package private instance methods.
+    /** Remove the entries in the given list that are also in the joined rooms list. */
+    private void pruneJoinedRooms(@NonNull final List<ChatListItem> list) {
+        // Build a list of items to remove.
+        List<ChatListItem> removalList = new ArrayList<>();
+        for (ChatListItem item : list) {
+            if (roomMap.containsKey(item.groupKey)) removalList.add(item);
+        }
 
-    // Private instance methods.
+        // Use the generated list to remove the joined rooms.  The list is now pruned.
+        for (ChatListItem item : removalList) {
+            list.remove(item);
+        }
+    }
+
+    /** Setup a listener for experience changes in the given room. */
+    private void setAccountWatcher(final String groupKey, final String accountKey) {
+        // Obtain a room and set watchers on all the experience profiles in that room.
+        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        String name = getHandlerName(ACCOUNT_CHANGE_HANDLER, accountKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        String path = DatabaseManager.instance.getAccountPath(accountKey);
+        DatabaseEventHandler handler = new AccountChangeHandler(name, path, accountKey, groupKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
+    }
 
     /** Setup a listener for experience changes in the given room. */
     private void setExpProfileListWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = String.format(Locale.US, "expProfileListChangeHandler{%s}", roomKey);
+        String name = getHandlerName(EXP_PROFILE_LIST_CHANGE_HANDLER, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ExpProfileListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
@@ -393,28 +551,29 @@ public enum DatabaseListManager {
 
     /** Setup a database listener for the group profile. */
     private void setGroupProfileWatcher(final String groupKey) {
-        // Kick off a value event listener for the group profile..
+        // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
         String path = DatabaseManager.instance.getGroupProfilePath(groupKey);
-        String name = "profileChangeHandler" + groupKey;
-        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new ProfileGroupChangeHandler(name, path, groupKey);
+        String name = getHandlerName(GROUP_PROFILE_LIST_CHANGE_HANDLER, groupKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     /** Setup a Firebase child event listener for the messages in the given joined room. */
     private void setMessageWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
-        String name = String.format(Locale.US, "messagesChangeHandler%s|%s", groupKey, roomKey);
-        DatabaseEventHandler handler = DatabaseRegistrar.instance.getHandler(name);
-        if (handler == null) handler = new MessageListChangeHandler(name, groupKey, roomKey);
+        String name = getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new MessageListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     /** Setup database listeners for the room profile and the experience profiles in the room. */
     private void setRoomProfileWatcher(final String groupKey, final String roomKey) {
-        // Kick off a value event listener for the room profile.
+        // Determine if the room has a profile change watcher.  If so, abort, if not, then set one.
         String path = DatabaseManager.instance.getRoomProfilePath(groupKey, roomKey);
-        String name = "profileChangeHandler" + roomKey;
+        String name = getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
         setExpProfileListWatcher(groupKey, roomKey);

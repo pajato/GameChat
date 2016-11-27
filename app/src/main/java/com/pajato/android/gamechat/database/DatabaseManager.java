@@ -202,6 +202,11 @@ public enum DatabaseManager {
         updateChildren(profilePath, room.toMap());
     }
 
+    /** Return the database path to an account for given User. */
+    public String getAccountPath(final String accountKey) {
+        return String.format(Locale.US, ACCOUNT_PATH, accountKey);
+    }
+
     /** Return the database path to an experience for a given experience profile. */
     public String getExperiencePath(final ExpProfile profile) {
         String key = profile.expKey;
