@@ -63,7 +63,7 @@ http://www.gnu.org/licenses
             android:textSize="18sp"
             android:textStyle="normal"
             android:textColorHint="@color/white"
-            android:hint="@string/AddGroupNameHint"
+            android:hint="@string/CreateGroupNameHint"
             tools:text="Paul Michael Reilly Group"/>
         <ImageButton
             android:layout_width="48dp"

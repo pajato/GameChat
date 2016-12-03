@@ -17,48 +17,52 @@
 
 package com.pajato.android.gamechat.database.handler;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.pajato.android.gamechat.event.MemberChangeEvent;
 
 /**
- * Provide a class to handle structural changes to a User's set of joined rooms.
+ * Provide a class to handle changes to an account by posting an app event.
  *
  * @author Paul Michael Reilly
  */
-public class JoinedRoomListChangeHandler extends DatabaseEventHandler
-        implements ValueEventListener {
+public class MemberChangeHandler extends DatabaseEventHandler implements ValueEventListener {
+
+    // Public instance variables.
+
+    /** The group for which this member is associated. */
+    public String groupKey;
 
     // Private instance constants.
 
     /** The logcat TAG. */
-    private final String TAG = JoinedRoomListChangeHandler.class.getSimpleName();
+    private final String TAG = MemberChangeHandler.class.getSimpleName();
 
     // Public constructors.
 
-    /** Build a handler with the given name and path. */
-    public JoinedRoomListChangeHandler(final String name, final String path) {
-        super(name, path);
+    /** Build a handler with the given name, path and key. */
+    public MemberChangeHandler(final String name, final String path, final String key,
+                               final String groupKey) {
+        super(name, path, key);
+        this.groupKey = groupKey;
     }
 
-    /** Get the current set of active rooms using a list of room identifiers. */
-    @Override public void onDataChange(final DataSnapshot dataSnapshot) {
-        // Determine if any active rooms exist.
-        List<String> list = new ArrayList<>();
-        GenericTypeIndicator<List<String>> t;
+    /** Get the current generic profile. */
+    @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+        // Ensure that some data exists.
         if (dataSnapshot.exists()) {
-            t = new GenericTypeIndicator<List<String>>() {};
-            list.addAll(dataSnapshot.getValue(t));
+            // There is data.  Publish the group profile to the app.
+            Account member = dataSnapshot.getValue(Account.class);
+            AppEventManager.instance.post(new MemberChangeEvent(key, groupKey, member));
+        } else {
+            Log.e(TAG, "Invalid key.  No value returned.");
         }
-        AppEventManager.instance.post(new JoinedRoomListChangeEvent(list));
     }
 
     /** ... */

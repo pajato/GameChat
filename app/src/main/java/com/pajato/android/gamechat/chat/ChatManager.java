@@ -46,7 +46,7 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.signedOut;
  *
  * @author Paul Michael Reilly
  */
-enum ChatManager {
+public enum ChatManager {
     instance;
 
 

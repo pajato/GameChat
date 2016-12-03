@@ -26,20 +26,15 @@ import com.pajato.android.gamechat.account.Account;
  */
 public class AccountChangeEvent {
 
-    // Public instance variables
-
-    /** The group push key associated with the account. */
-    public String groupKey;
-
-    /** The account push key (User id) */
-    public String key;
+    // Public instance variable.
 
     /** The changed, non-null acount. */
     public Account account;
 
+    // Public constructor.
+
     /** Build the instance with the given account; null indicates a sign out occurred. */
-    public AccountChangeEvent(final String key, final String groupKey, final Account account) {
-        this.key = key;
+    public AccountChangeEvent(final Account account) {
         this.account = account;
     }
 }

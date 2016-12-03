@@ -26,7 +26,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.event.AccountStateChangeHandled;
+import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -62,7 +62,7 @@ public class GameFragment extends BaseGameFragment {
     @Override public void messageHandler(final String message) {}
 
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeHandled event) {
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
         GameManager.instance.startNextFragment(this.getActivity());
     }

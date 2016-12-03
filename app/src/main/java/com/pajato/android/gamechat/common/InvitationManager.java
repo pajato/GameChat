@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.common;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.database.DatabaseManager;
 
 import java.util.ArrayList;
@@ -44,21 +43,20 @@ public enum InvitationManager {
     // Public instance methods.
 
     /** Accept a group invite for a given account by updating both the group and the account. */
-    public void acceptGroupInvite(@NonNull final Account account, @NonNull Group group,
-                                  @NonNull final String groupKey) {
-        // Ensure that the account is not already a member of the given group and that there is an
-        // invitation to join extended.
-        boolean isMember = account.groupIdList.contains(groupKey);
+    public void acceptGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Determine if the current account is already a member of the given group or has not been
+        // invited.  In either case, abort.
+        boolean isMember = account.joinList.contains(groupKey);
         boolean isInvited = hasGroupInvite(account, groupKey);
         if (isMember || !isInvited) return;
 
-        // Update the group member list, the account group list, and the joined room list on the
-        // database.
-        group.memberIdList.add(account.id);
-        DatabaseManager.instance.updateGroup(group, groupKey);
-        account.groupIdList.add(groupKey);
-        DatabaseManager.instance.appendDefaultJoinedRoomEntry(account, group);
+        // The account holder has been invited to join the given group.  Do so by adding the group
+        // key the account join list and create a copy of the account as a member of the group.
+        account.joinList.add(groupKey);
         DatabaseManager.instance.updateAccount(account);
+        Account member = new Account(account);
+        String path = DatabaseManager.instance.getGroupMembersPath(groupKey, member.id);
+        DatabaseManager.instance.updateChildren(path, member.toMap());
     }
 
     /** Extend a group invite to a given account by registering both. */

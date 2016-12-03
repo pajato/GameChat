@@ -97,14 +97,11 @@ public class ChatListItem {
         desc = String.format(Locale.US, format, name, email, phone, url);
     }
 
-    /** Build an instance for a given contact list item. */
-    public ChatListItem(final MemberItem item) {
-        type = MEMBER_ITEM_TYPE;
-        name = item.name;
-        email = item.email;
-        url = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
-        desc = String.format(Locale.US, format, name, email, url);
+    /** Build an instance for a given date header item. */
+    public ChatListItem(final DateHeaderItem item) {
+        type = DATE_ITEM_TYPE;
+        nameResourceId = item.getNameResourceId();
+        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given group list item. */
@@ -118,11 +115,15 @@ public class ChatListItem {
         desc = String.format(Locale.US, format, name, key, count, text);
     }
 
-    /** Build an instance for a given date header item. */
-    public ChatListItem(final DateHeaderItem item) {
-        type = DATE_ITEM_TYPE;
-        nameResourceId = item.getNameResourceId();
-        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
+    /** Build an instance for a given contact list item. */
+    public ChatListItem(final MemberItem item) {
+        type = MEMBER_ITEM_TYPE;
+        groupKey = item.groupKey;
+        name = item.name;
+        text = item.text;
+        url = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
+        desc = String.format(Locale.US, format, name, email, url);
     }
 
     /** Build an instance for a given room list item. */

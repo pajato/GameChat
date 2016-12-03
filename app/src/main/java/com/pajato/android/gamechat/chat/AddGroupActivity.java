@@ -48,11 +48,8 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
@@ -62,7 +59,7 @@ import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
  *
  * @author Paul Michael Reilly
  */
-public class AddGroupActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddGroupActivity extends AppCompatActivity {
     // Public class constants.
 
     // Private class constants.
@@ -93,7 +90,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
                 showFutureFeatureMessage(R.string.InviteGroupMembersFeature);
                 break;
             case R.id.setGroupIcon:
-                showFutureFeatureMessage(R.string.SetAddGroupIconFeature);
+                showFutureFeatureMessage(R.string.SetCreateGroupIconFeature);
                 break;
             default:
                 // Ignore everything else.
@@ -192,10 +189,11 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
 
     /** Initialize the main activity. */
     private void init() {
-        // Initialize the group Firebase model class and the toolbar.
-        List<String> memberList = new ArrayList<>();
-        Map<String, String> roomMap = new HashMap<>();
-        mGroup = new Group(null, null, null, 0, 0, memberList, roomMap);
+        // Initialize the group Firebase model class by creating two empty maps and initialize the
+        // toolbar.
+        mGroup = new Group();
+        mGroup.roomMap = new HashMap<>();
+        mGroup.memberMap = new HashMap<>();
         initToolbar();
     }
 
@@ -203,7 +201,7 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_clear_black_24dp);
-        toolbar.setNavigationOnClickListener(this);
+        toolbar.setNavigationOnClickListener(new NavigationExitHandler());
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) {
@@ -225,7 +223,6 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Ensure that the account holder has been added to the group member list and fetch group
         // and room push keys.
         mGroup.owner = account.id;
-        if (!mGroup.memberIdList.contains(mGroup.owner)) mGroup.memberIdList.add(mGroup.owner);
         String groupKey = DatabaseManager.instance.getGroupKey();
         String roomKey = DatabaseManager.instance.getRoomKey(groupKey);
         mGroup.key = groupKey;
@@ -233,15 +230,23 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
         // Obtain the default room name, create the default room, update the group's room map and
         // add the group key to the account's group id list.
         String name = getString(R.string.DefaultRoomName);
-        Room room = new Room(roomKey, mGroup.owner, name, groupKey, 0, 0, PUBLIC, null);
+        Room room = new Room(roomKey, mGroup.owner, name, groupKey, 0, 0, PUBLIC);
         mGroup.roomMap.put(name, roomKey);
-        account.groupIdList.add(groupKey);
+        account.joinList.add(groupKey);
+        mGroup.memberMap.put(account.getDisplayName("Anonymous"), account.id);
+
+        // Update the member entry in the default group.
+        Account member = new Account(account);
+        member.joinList.add(roomKey);
+        member.groupKey = groupKey;
+        String format = DatabaseManager.instance.getGroupMembersPath(groupKey, account.id);
+        String path = String.format(Locale.US, format, groupKey, account.id);
+        DatabaseManager.instance.updateChildren(path, member.toMap());
 
         // Persist the group and room to the database and update the account with the new joined
         // list entry.
         DatabaseManager.instance.createGroupProfile(mGroup);
         DatabaseManager.instance.createRoomProfile(room);
-        DatabaseManager.instance.appendDefaultJoinedRoomEntry(account, mGroup);
         DatabaseManager.instance.updateAccount(account);
 
         // Post a welcome message to the default room from the owner.
@@ -276,6 +281,15 @@ public class AddGroupActivity extends AppCompatActivity implements View.OnClickL
     }
 
     // Private classes.
+
+    /** Provide a handler for aborting via the toolbar navigation icon. */
+    private class NavigationExitHandler implements View.OnClickListener {
+        @Override public void onClick(final View view) {
+            String format = "Got a create group activity abort click on view {%s}.";
+            Log.d(TAG, String.format(Locale.US, format, view));
+            finish();
+        }
+    }
 
     /** Provide a handler to accumulate the group name. */
     private class TextChangeHandler implements TextWatcher {

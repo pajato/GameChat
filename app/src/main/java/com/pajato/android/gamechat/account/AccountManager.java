@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.account;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -31,17 +30,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
-import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
-import com.pajato.android.gamechat.event.AccountStateChangeHandled;
+import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
+import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
+import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -49,13 +46,11 @@ import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.account.Account.STANDARD;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -121,18 +116,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return mCurrentAccountKey;
     }
 
-    /** Return a joined room entry, well formed (space separated) group key and room key pair. */
-    public String getJoinedRoomEntry(final String groupKey, final String roomKey) {
-        return String.format(Locale.US, "%s %s", groupKey, roomKey);
-    }
-
-    /** Obtain a suitable Uri to use for the User's icon. */
-    public String getPhotoUrl(FirebaseUser user) {
-        // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
-        Uri icon = user.getPhotoUrl();
-        return icon != null ? icon.toString() : null;
-    }
-
     /** Return TRUE iff there is a signed in User. */
     public boolean hasAccount() {
         return getCurrentAccount() != null;
@@ -148,26 +131,36 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
+    /** Deal with an account change by providing an authentication change event as necessary. */
+    @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
+        // Persist accounts added during this session; generate authentication change events as
+        // necessary.
+        String id = event.account != null ? event.account.id : null;
+        if (id != null) mAccountMap.put(id, event.account);
+        if (!mCurrentAccountKey.equals(id)) {
+            // An authentication change has taken place.  Let the app know.
+            mCurrentAccountKey = id;
+            AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
+            AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
+        }
+    }
+
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
         // Determine if this state represents a User signing in or signing out.
-        String name = "accountStateChangeHandler";
+        String name = "accountChangeHandler";
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            // A User has signed in. Set up a database listener for the associated account.  That
-            // listener will post an account change event with the account information to the app.
-            String path = String.format("/accounts/%s", user.getUid());
-            if (!(DatabaseRegistrar.instance.isRegistered(name))) {
-                DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
-            }
+            // A User has signed in. Determine if an account change listener is registered.  If so,
+            // abort.  If not, set one up.
+            if (DatabaseRegistrar.instance.isRegistered(name)) return;
+            String path = DatabaseManager.instance.getAccountPath(user.getUid());
+            DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
         } else {
-            // The User is signed out.  Clear the current account key and notify the app of the sign
-            // out event.
-            mCurrentAccountKey = null;
+            // The User is signed out.  Notify the app of the sign out event.
             if (DatabaseRegistrar.instance.isRegistered(name)) {
                 DatabaseRegistrar.instance.unregisterHandler(name);
-                AppEventManager.instance.post(new AccountStateChangeEvent(null));
-                AppEventManager.instance.post(new AccountStateChangeHandled(null));
+                AppEventManager.instance.post(new AccountChangeEvent(null));
             }
         }
     }
@@ -270,64 +263,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     // Private classes
-
-    /** Provide a class to handle account changes. */
-    private class AccountChangeHandler extends DatabaseEventHandler implements ValueEventListener {
-
-        // Private instance constants.
-
-        /** The logcat TAG. */
-        private final String TAG = this.getClass().getSimpleName();
-
-        // Public constructors.
-
-        /** Build a handler with a given top level layout view. */
-        AccountChangeHandler(final String name, final String path) {
-            super(name, path);
-        }
-
-        /** Get the current account using a list of account identifiers. */
-        @Override public void onDataChange(final DataSnapshot dataSnapshot) {
-            // Determine if the account exists.
-            Account account;
-            if (dataSnapshot.exists()) {
-                // It does.  Register it and notify the app that this is the new account of record.
-                account = dataSnapshot.getValue(Account.class);
-                mAccountMap.put(account.id, account);
-                mCurrentAccountKey = account.id;
-            } else {
-                // The account does not exist.  Create it now, ensuring there really is a User.
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                account = getAccount(user);
-                if (user != null) DatabaseManager.instance.createAccount(account);
-            }
-            AppEventManager.instance.post(new AccountStateChangeEvent(account));
-            AppEventManager.instance.post(new AccountStateChangeHandled(account));
-        }
-
-        /** ... */
-        @Override public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-
-        // Private instance methods.
-
-        /** Return a partially populated account. The database manager will finish the job. */
-        private Account getAccount(final FirebaseUser user) {
-            long tstamp = new Date().getTime();
-            Account account = new Account();
-            account.id = user.getUid();
-            account.email = user.getEmail();
-            account.displayName = user.getDisplayName();
-            account.url = getPhotoUrl(user);
-            account.providerId = user.getProviderId();
-            account.type = STANDARD;
-            account.createTime = tstamp;
-
-            return account;
-        }
-    }
 
     private class SignInCompletionHandler implements OnCompleteListener<AuthResult> {
 

@@ -57,7 +57,7 @@ http://www.gnu.org/licenses
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".chat.AddGroupActivity"
-            android:label="@string/AddGroupTitle"
+            android:label="@string/CreateGroupTitle"
             android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <service
