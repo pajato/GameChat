@@ -18,6 +18,8 @@
 package com.pajato.android.gamechat.chat.adapter;
 
 import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 
 /**
  * Provide a POJO to encapsulate a member item to be added to a list view.
@@ -28,26 +30,26 @@ public class MemberItem {
 
     // Public instance variables.
 
-    /** The email address, possibly null. */
-    public String email;
-
     /** The group key. */
-    public String groupName;
-
-    /** The member's icon URL, possibly null. */
-    public String url;
+    public String groupKey;
 
     /** The member's display name. */
     public String name;
 
+    /** The member's nickname. */
+    public String text;
+
+    /** The member's icon URL, possibly null. */
+    public String url;
+
     // Public constructors.
 
     /** Build an instance using the given group name and account. */
-    public MemberItem(final String groupName, final Account account) {
-        this.groupName = groupName;
-        this.name = account.displayName;
-        this.email = account.email;
-        this.url = account.url;
+    public MemberItem(final String groupKey, final Account member) {
+        this.groupKey = groupKey;
+        this.name = member.getNickName("Anonymous");
+        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+        text = group.name;
+        this.url = member.url;
     }
-
 }

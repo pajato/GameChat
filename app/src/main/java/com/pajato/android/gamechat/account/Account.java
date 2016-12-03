@@ -17,26 +17,39 @@
 
 package com.pajato.android.gamechat.account;
 
+import android.support.annotation.NonNull;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Provides an account data model tailored to Firebase.
+ * Provides an account data model tailored to Firebase.  The account is used in two contexts: as a
+ * top level account which provides basic account information and a list of group identifiers (the
+ * groups for which the account holder is a member); and as a group level account which provides
+ * basic account information and a list of room identifers (the rooms which the account holder has
+ * joined).
  *
  * @author Paul Michael Reilly
  */
 @IgnoreExtraProperties public class Account {
 
-    // Public constants
+    // Public constants.
 
-    /** The account types. */
-    public final static int STANDARD = 1;
-    public final static int PROTECTED = 2;
+    // The account types.
+
+    // ? public final static int ADMIN = 1;
+
+    /** A STANDARD account has a real email address and uses encryption on messaging. */
+    public final static int STANDARD = 2;
+
+    /** A PROTECTED account has a fake email address and does not use encrypted messaging. */
+    public final static int PROTECTED = 3;
 
     // Public instance variables
 
@@ -49,49 +62,66 @@ import java.util.Map;
     /** The account email. */
     public String email;
 
-    /** A list of group ids the account can access. */
-    public List<String> groupIdList = new ArrayList<>();
+    /** The associated group push key (for an account uses as a member object). */
+    public String groupKey;
 
     /** The account id, the backend push key. */
     public String id;
 
-    /** The list of joined rooms providing the group and room push keys. */
-    public List<String> joinedRoomList = new ArrayList<>();
+    /** A list of group or room push keys (depends on context) the account can join. */
+    public List<String> joinList = new ArrayList<>();
 
     /** The modification timestamp. */
     public long modTime;
 
+    /** The account nickname.  Defaults to the first name. */
+    public String nickname;
+
     /** The account provider id, a string like "google.com". */
     public String providerId;
-
-    /** The account token, an access key supplied by the provider. */
-    public String token;
 
     /** The account type. */
     public int type;
 
-    /** The account icon, a URL. */
+    /** The account photo URL (icon). */
     public String url;
+
+    // Public constructors.
+
+    /** Build a default no-arg instance. */
+    public Account() {}
+
+    /** Build a copy of an account. */
+    public Account(final Account account) {
+        createTime = new Date().getTime();
+        displayName = account.displayName;
+        nickname = account.nickname;
+        email = account.email;
+        id = account.id;
+        modTime = 0;
+        providerId = account.providerId;
+        type = account.type;
+        url = account.url;
+    }
 
     // Public instance methods.
 
-    /** Get a non-null display name using "Anonymous" if need be. */
-    @Exclude public String getDisplayName(final String defaultName) {
-        // Determine if this account has a display name or should use the given default.
+    /** Return a display name: either the nickname, the display name, the the email name. */
+    @Exclude public String getDisplayName(@NonNull final String defaultName) {
+        // Return the first non-null value, finally using the defaultName.
+        if (nickname != null) return nickname;
         if (displayName != null) return displayName;
-
-        // Otherwise use this default.
+        if (email != null) return getPrefix(email, "@");
         return defaultName;
     }
 
-    /** Return the first (and possibly only) part of the display name or the given default. */
-    @Exclude public String getFirstName(final String defaultName) {
+    /** Return the nickname, the first name, the base email name, or a default, in that order. */
+    @Exclude public String getNickName(@NonNull final String defaultName) {
         // Determine if there is a display name.  Use the default if not.
-        if (displayName == null) return defaultName;
-
-        // Use the first part of the display name.
-        String[] split = displayName.split(" ");
-        return split[0];
+        if (nickname != null) return nickname;
+        if (displayName != null) return getPrefix(displayName, " ");
+        if (email != null) return getPrefix(email, "@");
+        return defaultName;
     }
 
     /** Generate the map of data to persist into Firebase. */
@@ -100,15 +130,23 @@ import java.util.Map;
         result.put("createTime", createTime);
         result.put("displayName", displayName);
         result.put("email", email);
-        result.put("groupIdList", groupIdList);
+        result.put("groupKey", groupKey);
+        result.put("joinList", joinList);
         result.put("id", id);
-        result.put("joinedRoomList", joinedRoomList);
         result.put("modTime", modTime);
+        result.put("nickname", nickname);
         result.put("providerId", providerId);
-        result.put("token", token);
         result.put("type", type);
         result.put("url", url);
 
         return result;
+    }
+
+    /** Return the name part of the email address. */
+    private String getPrefix(@NonNull final String value, final String splitter) {
+        // Split the value using the splitter and return the first part.
+        String[] parts = value != null ? value.split(splitter) : null;
+        if (parts != null && parts.length > 0) return parts[0];
+        return value;
     }
 }

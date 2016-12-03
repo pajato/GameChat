@@ -36,8 +36,8 @@ import java.util.Map;
     /** The group name. */
     public String name;
 
-    /** The group member account identifiers. */
-    public List<String> memberIdList;
+    /** The map associating a member name with the a push key. */
+    public Map<String, String> memberMap;
 
     /** The last modification timestamp. */
     public long modTime;
@@ -53,14 +53,14 @@ import java.util.Map;
 
     /** Build a default Group. */
     public Group(final String key, final String owner, final String name, final long createTime,
-                 final long modTime, final List<String> members, final Map<String, String> map) {
+                 final Map<String, String> members, final Map<String, String> rooms) {
         this.createTime = createTime;
         this.key = key;
         this.name = name;
-        this.modTime = modTime;
+        memberMap = members;
+        modTime = 0;
         this.owner = owner;
-        memberIdList = members;
-        roomMap = map;
+        roomMap = rooms;
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -69,11 +69,10 @@ import java.util.Map;
         result.put("createTime", createTime);
         result.put("key", key);
         result.put("name", name);
-        result.put("memberIdList", memberIdList);
+        result.put("memberMap", memberMap);
         result.put("modTime", modTime);
         result.put("owner", owner);
         result.put("roomMap", roomMap);
-
         return result;
     }
 }

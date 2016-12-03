@@ -20,10 +20,11 @@ package com.pajato.android.gamechat.chat.fragment;
 import android.content.res.Resources;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ContactManager;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
@@ -31,9 +32,14 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-public class JoinRoomsFragment extends BaseChatFragment {
+public class JoinRoomsFragment extends BaseChatFragment implements View.OnClickListener {
 
     // Public instance methods.
+
+    /** Provide a click handler for aborting the fragment. */
+    @Override public void onClick(final View view) {
+        ChatManager.instance.startNextFragment(getActivity());
+    }
 
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -52,6 +58,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
         Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
         toolbar.setTitle(getActivity().getString(R.string.JoinRoomsMenuTitle));
         toolbar.setNavigationIcon(R.drawable.vd_arrow_back_black_24px);
+        toolbar.setNavigationOnClickListener(this);
         toolbar.inflateMenu(R.menu.add_group_menu);
         Resources resources = getResources();
         int id = R.drawable.vd_more_vert_black_24px;

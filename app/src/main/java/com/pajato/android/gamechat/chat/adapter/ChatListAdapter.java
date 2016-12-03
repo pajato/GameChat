@@ -47,7 +47,6 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MEMBER_ITEM_
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTION_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -99,10 +98,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             case ROOMS_HEADER_ITEM_TYPE:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
             case MEMBER_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_message));
+                return new ChatListViewHolder(getView(parent, R.layout.item_room));
             case MESSAGE_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_message));
-            case SELECTION_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_message));
             default:
                 Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, entryType));
@@ -128,7 +125,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case MEMBER_ITEM_TYPE:
                 case MESSAGE_ITEM_TYPE:
                 case ROOM_ITEM_TYPE:
-                case SELECTION_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateChatHolder((ChatListViewHolder) holder, item);
@@ -267,21 +263,4 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    /** Provide a class to include a contact view in the list. */
-    private class SelectionViewHolder extends RecyclerView.ViewHolder {
-
-        // Private instance variables.
-
-        TextView name;
-        //TextView discriminant;
-        ImageView icon;
-
-        /** Build a selection item holder for the given item. */
-        SelectionViewHolder(View itemView) {
-            super(itemView);
-            name = (TextView) itemView.findViewById(R.id.contactName);
-            //discriminant = (TextView) itemView.findViewById(???);
-            icon = (ImageView) itemView.findViewById(R.id.contactIcon);
-        }
-    }
 }

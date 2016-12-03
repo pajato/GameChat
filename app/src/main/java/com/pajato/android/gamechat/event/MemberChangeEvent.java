@@ -17,8 +17,9 @@
 
 package com.pajato.android.gamechat.event;
 
-import java.util.Arrays;
-import java.util.List;
+import com.pajato.android.gamechat.account.Account;
+
+import java.util.Locale;
 
 /**
  * Provides a model class to encapsulate the list of joined rooms to be displayed on the main rooms
@@ -26,20 +27,27 @@ import java.util.List;
  *
  * @author Paul Michael Reilly
  */
-public class JoinedRoomListChangeEvent {
+public class MemberChangeEvent {
 
-    // Private instance variables
+    /** The group push key associated with the account. */
+    public String groupKey;
 
-    /** The list of joined rooms by push key. */
-    public List<String> joinedRoomList;
+    /** The account push key (User id) */
+    public String key;
 
-    /** Build the event with the given list. */
-    public JoinedRoomListChangeEvent(final List<String> list) {
-        joinedRoomList = list;
+    /** The changed, non-null acount. */
+    public Account member;
+
+    /** Build the instance with the given account; null indicates a sign out occurred. */
+    public MemberChangeEvent(final String key, final String groupKey, final Account member) {
+        this.key = key;
+        this.groupKey = groupKey;
+        this.member = member;
     }
 
-    /** Return the joined room list as an array of String objecs. */
-    @Override public String toString() {
-        return Arrays.toString(joinedRoomList.toArray());
+    /** Return the description of the instance. */
+    public String toString() {
+        String format = "Member id: {%s}, group id: {%s}, member: {%s}";
+        return String.format(Locale.US, format, key, groupKey, member.toMap());
     }
 }

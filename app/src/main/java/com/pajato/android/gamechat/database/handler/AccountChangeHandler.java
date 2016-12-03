@@ -17,16 +17,20 @@
 
 package com.pajato.android.gamechat.database.handler;
 
-import android.support.annotation.NonNull;
+import android.net.Uri;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
+import com.pajato.android.gamechat.event.AppEventManager;
+
+import java.util.Date;
 
 /**
  * Provide a class to handle changes to an account by posting an app event.
@@ -35,34 +39,31 @@ import com.pajato.android.gamechat.event.AccountChangeEvent;
  */
 public class AccountChangeHandler extends DatabaseEventHandler implements ValueEventListener {
 
-    // Public instance variables.
-
-    /** The group for which this account is associated. */
-    public String groupKey;
-
-    // Private instance constants.
+    // Private class constants.
 
     /** The logcat TAG. */
-    private final String TAG = AccountChangeHandler.class.getSimpleName();
+    private static final String TAG = AccountChangeHandler.class.getSimpleName();
 
     // Public constructors.
 
     /** Build a handler with the given name, path and key. */
-    public AccountChangeHandler(final String name, final String path, final String key,
-                                final String groupkey) {
-        super(name, path, key);
-        this.groupKey = groupKey;
+    public AccountChangeHandler(final String name, final String path) {
+        super(name, path);
     }
 
-    /** Get the current generic profile. */
-    @Override public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-        // Ensure that some data exists.
+    /** Get the current account using a list of account identifiers. */
+    @Override public void onDataChange(final DataSnapshot dataSnapshot) {
+        // Determine if the account exists.
+        Account account;
         if (dataSnapshot.exists()) {
-            // There is data.  Publish the group profile to the app.
-            Account account = dataSnapshot.getValue(Account.class);
-            AppEventManager.instance.post(new AccountChangeEvent(key, groupKey, account));
+            // It does.  Register it and notify the app that this is the new account of record.
+            account = dataSnapshot.getValue(Account.class);
+            AppEventManager.instance.post(new AccountChangeEvent(account));
         } else {
-            Log.e(TAG, "Invalid key.  No value returned.");
+            // The account does not exist.  Create it now, ensuring there really is a User.
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            account = user != null ? getAccount(user) : null;
+            if (account != null) DatabaseManager.instance.createAccount(account);
         }
     }
 
@@ -71,4 +72,29 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
         // Failed to read value
         Log.w(TAG, "Failed to read value.", error.toException());
     }
+
+    // Private instance methods.
+
+    /** Return a partially populated account. The database manager will finish the job. */
+    private Account getAccount(final FirebaseUser user) {
+        long tstamp = new Date().getTime();
+        Account account = new Account();
+        account.id = user.getUid();
+        account.email = user.getEmail();
+        account.displayName = user.getDisplayName();
+        account.url = getPhotoUrl(user);
+        account.providerId = user.getProviderId();
+        account.type = Account.STANDARD;
+        account.createTime = tstamp;
+
+        return account;
+    }
+
+    /** Obtain a suitable Uri to use for the User's icon. */
+    private String getPhotoUrl(FirebaseUser user) {
+        // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
+        Uri icon = user.getPhotoUrl();
+        return icon != null ? icon.toString() : null;
+    }
+
 }

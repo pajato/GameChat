@@ -32,9 +32,9 @@ import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.JoinedRoomListChangeEvent;
+import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.showNoJoinedRooms;
 
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
@@ -65,8 +64,9 @@ public class ChatFragment extends BaseChatFragment {
     @Override public int getLayout() {return R.layout.fragment_chat;}
 
     /** Handle a authentication change event by dealing with the fragment to display. */
-    @Subscribe public void onAccountStateChange(final AccountStateChangeEvent event) {
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
+        logEvent(String.format("onAccountStateChange: with event {%s};", event));
         ChatManager.instance.startNextFragment(this.getActivity());
     }
 
@@ -97,7 +97,7 @@ public class ChatFragment extends BaseChatFragment {
         FabManager.chat.dismissMenu(this);
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
-            case R.string.AddGroupMenuTitle:
+            case R.string.CreateGroupMenuTitle:
                 // Dismiss the FAB menu, and start up the add group activity.
                 Intent intent = new Intent(this.getActivity(), AddGroupActivity.class);
                 startActivity(intent);
@@ -131,7 +131,7 @@ public class ChatFragment extends BaseChatFragment {
         Group group = event.group;
         if (groupKey != null && group != null)
             // The group and key are available.  Accept any open invitations.
-            InvitationManager.instance.acceptGroupInvite(account, group, groupKey);
+            InvitationManager.instance.acceptGroupInvite(account, groupKey);
     }
 
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
@@ -143,8 +143,8 @@ public class ChatFragment extends BaseChatFragment {
     }
 
     /** Deal with a change in the joined rooms state by logging it. */
-    @Subscribe public void onJoinedRoomListChange(@NonNull final JoinedRoomListChangeEvent event) {
-        logEvent(String.format(Locale.US, "onJoinedRoomListChange with event: {%s}", event));
+    @Subscribe public void onMemberChange(@NonNull final MemberChangeEvent event) {
+        logEvent(String.format(Locale.US, "onGroupMemberChange with event: {%s}", event));
     }
 
     /** Dispatch to a more suitable fragment. */
@@ -166,7 +166,7 @@ public class ChatFragment extends BaseChatFragment {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.vd_casino_black_24px));
         menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.vd_casino_black_24px));
-        menu.add(getTintEntry(R.string.AddGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
+        menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         return menu;
     }
 }

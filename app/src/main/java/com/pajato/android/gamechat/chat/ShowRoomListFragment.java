@@ -24,8 +24,6 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -35,9 +33,9 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
 
 /**
- * Provide a fragment to handle the display of the groups available to the current user.  This is
- * the top level view in the chat hierarchy.  It shows all the joined groups and allows for drilling
- * into rooms and chats within those rooms.
+ * Provide a fragment to handle the display of the rooms available to the current user.  This is the
+ * penultimate view in the chat hierarchy when there is more than one group.  It shows all the
+ * joined rooms and allows for drilling into chats within those rooms.
  *
  * @author Paul Michael Reilly
  */
@@ -47,11 +45,6 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_rooms;}
-
-    /** Provide a general button click handler to post the click for general consumption. */
-    public void onClick(final View view) {
-        AppEventManager.instance.post(new ClickEvent(view));
-    }
 
     /** Deal with the options menu creation by making the search item visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
@@ -71,8 +64,8 @@ public class ShowRoomListFragment extends BaseChatFragment {
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
         super.onResume();
-        FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
         setTitles(mItem.groupKey, null);
+        FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
     }
 
 }

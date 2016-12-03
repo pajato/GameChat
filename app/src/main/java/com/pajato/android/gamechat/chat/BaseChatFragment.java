@@ -57,6 +57,7 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.RoomItem.TextType.countList;
 import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
 
 /**
@@ -196,7 +197,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 return true;
             case roomList:
                 String roomKey = dispatcher.roomMap.keySet().iterator().next().toString();
-                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey);
+                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey, countList);
                 mItem = new ChatListItem(roomItem);
                 return true;
             default:
@@ -239,21 +240,23 @@ public abstract class BaseChatFragment extends BaseFragment {
 
         // Walk the list of developer groups to ensure that all are joined.
         List<String> groupList = new ArrayList<>();
-        groupList.add("-KUpGKrumJPeBi8-dTqH");      // Paul Reilly Group
-        groupList.add("-KUpHCHRnXW0IvIDe4hd");      // GameChat Group
-        groupList.add("-KUpHLkxb9c1nM2O8Ocs");      // Pajato Technologies LLC
-        groupList.add("-KUpHWgtdLSnFwMiMp0k");      // Pajato Support Group
+        groupList.add("-KXvxnOUoXFZr91D3aMR");      // Paul Reilly Group
+        groupList.add("-KXyXYn6WocFLa5F6HmC");      // Heather Music
+        groupList.add("-KXyiDyFqQkDDgTgd4yD");      // Hawthorn
+        groupList.add("-KXyfV6sX5FSkGki5LgK");      // GameChat Group
+        groupList.add("-KXw5ly2OPhgXuVtbNCw");      // Pajato Technologies
+        groupList.add("-KXw5aX1iqSnt3NChdya");      // Pajato Support Group
         for (String groupKey : groupList) {
             // Extend an invitation to the group and verify that this group has been joined.
             InvitationManager.instance.extendGroupInvite(account, groupKey);
-            if (!account.groupIdList.contains(groupKey)) {
+            if (!account.joinList.contains(groupKey)) {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
                 Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
                 if (group != null)
                     // The group is available.  Accept any open invitations. There should be at
                     // least one!
-                    InvitationManager.instance.acceptGroupInvite(account, group, groupKey);
+                    InvitationManager.instance.acceptGroupInvite(account, groupKey);
             }
         }
     }

@@ -34,14 +34,11 @@ import java.util.Map;
     /** A room no one can join. */
     public final static int ME = 0;
 
-    /** A room in which only invited members may join. */
+    /** A room for two or more members by implicit or explicit invitation. */
     public final static int PRIVATE = 1;
 
     /** A room in which any User can join. */
     public final static int PUBLIC = 2;
-
-    /** A room in which only two members can exist (a direct room in Slack). */
-    public final static int MEMBER = 3;
 
     /** The creation timestamp. */
     public long createTime;
@@ -52,7 +49,7 @@ import java.util.Map;
     /** The room push key. */
     public String key;
 
-    /** The room member account identifiers. These are the people currently in the room. */
+    /** The room member identifiers. These are the Users joined to the room. */
     public List<String> memberIdList = new ArrayList<>();
 
     /** The last modification timestamp. */
@@ -75,8 +72,7 @@ import java.util.Map;
 
     /** Build a default room. */
     public Room(final String key, final String owner, final String name, final String groupKey,
-                final long createTime, final long modTime, final int type,
-                final List<String> members) {
+                final long createTime, final long modTime, final int type) {
         this.createTime = createTime;
         this.groupKey = groupKey;
         this.key = key;
@@ -84,7 +80,6 @@ import java.util.Map;
         this.name = name;
         this.owner = owner;
         this.type = type;
-        memberIdList = members;
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -95,10 +90,9 @@ import java.util.Map;
         result.put("key", key);
         result.put("name", name);
         result.put("owner", owner);
+        result.put("memberIdList", memberIdList);
         result.put("modTime", modTime);
         result.put("type", type);
-        result.put("memberIdList", memberIdList);
-
         return result;
     }
 }

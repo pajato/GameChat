@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat.adapter;
 
 import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
@@ -32,6 +33,8 @@ import java.util.Map;
  * @author Paul Michael Reilly
  */
 public class RoomItem {
+
+    public enum TextType {countList, groupName}
 
     // Public instance variables.
 
@@ -53,17 +56,34 @@ public class RoomItem {
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public RoomItem(final String groupKey, final String roomKey) {
-        // Use the group key to unpack a group's messages by walking the set of messages in
-        // each room in the group.
+    public RoomItem(final String groupKey, final String roomKey, TextType type) {
+        // Generate the name value (the room name.
         this.groupKey = groupKey;
         this.roomKey = roomKey;
+        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+        name = room.name;
+
+        // Generate the text value based on the type.
+        switch (type) {
+            case countList:
+                generateCountList();
+                break;
+            case groupName:
+                Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+                text = group.name;
+                break;
+            default:
+                text = null;
+                break;
+        }
+    }
+
+    /** Build a comma separated list of message counts by poster name. */
+    private void generateCountList() {
         count = 0;
         String accountId = AccountManager.instance.getCurrentAccountId();
         StringBuilder textBuilder = new StringBuilder();
         Map<String, Boolean> memberNameMap = new HashMap<>();
-        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
-        name = room.name;
         Map<String, Map<String, Message>> rooms;
         rooms = DatabaseListManager.instance.messageMap.get(groupKey);
         for (Message message : rooms.get(roomKey).values()) {

@@ -20,13 +20,13 @@ package com.pajato.android.gamechat.event;
 import com.pajato.android.gamechat.account.Account;
 
 /**
- * Provides an event type indicating that an account state change has just finished being handled.
+ * Provides an account state change data model class.
  *
  * @author Paul Michael Reilly
  */
-public class AccountStateChangeHandled {
+public class AuthenticationChangeEvent {
 
-    // Public instance variables.
+    // Public instance variables
 
     /** The changed account: if null the User signed out, if non-null the User signed in. */
     public Account account;
@@ -34,7 +34,14 @@ public class AccountStateChangeHandled {
     // Public constructor.
 
     /** Build the instance with the given account; null indicates a sign out occurred. */
-    public AccountStateChangeHandled(final Account account) {
+    public AuthenticationChangeEvent(final Account account) {
         this.account = account;
+    }
+
+    // Public instance methods.
+
+    /** Provide debug support. */
+    @Override public String toString() {
+        return account != null ? account.toMap().toString() : "(null)";
     }
 }

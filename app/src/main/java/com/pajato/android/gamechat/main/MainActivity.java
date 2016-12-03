@@ -37,7 +37,7 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.AccountStateChangeEvent;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -88,7 +88,7 @@ public class MainActivity extends BaseActivity
     // Public instance methods
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe public void accountStateChanged(final AccountStateChangeEvent event) {
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.
         Account account = event != null ? event.account : null;

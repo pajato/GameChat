@@ -24,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -32,7 +31,6 @@ import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +56,7 @@ public enum DatabaseManager {
     private static final String ACCOUNT_PATH = "/accounts/%s/";
     private static final String GROUPS_PATH = "/groups/";
     private static final String GROUP_PROFILE_PATH = GROUPS_PATH + "%s/profile/";
-    private static final String JOINED_ROOM_LIST_PATH = ACCOUNT_PATH + "joinedRoomList";
+    private static final String GROUP_MEMBERS_PATH = GROUPS_PATH + "%s/members/%s";
     private static final String ROOMS_PATH = GROUPS_PATH + "%s/rooms/";
     private static final String ROOM_PROFILE_PATH = ROOMS_PATH + "%s/profile/";
     private static final String EXP_PROFILE_LIST_PATH = ROOMS_PATH + "%s/profile/expProfileList";
@@ -86,14 +84,6 @@ public enum DatabaseManager {
 
     // Public instance methods.
 
-    /** Return the default room name and group key from the given room as a joined list entry. */
-    public void appendDefaultJoinedRoomEntry(final Account account, final Group group) {
-        String name = mResourceMap.get(DEFAULT_ROOM_NAME_KEY);
-        String roomKey = group.roomMap.get(name);
-        String entry = AccountManager.instance.getJoinedRoomEntry(group.key, roomKey);
-        if (roomKey != null) account.joinedRoomList.add(entry);
-    }
-
     /** Create and persist an account to the database. */
     public void createAccount(@NonNull Account account) {
         // Set up the push keys for the account, default "me" group and room.
@@ -103,24 +93,31 @@ public enum DatabaseManager {
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
-        account.groupIdList.add(groupKey);
-        account.joinedRoomList.add(AccountManager.instance.getJoinedRoomEntry(groupKey, roomKey));
+        account.joinList.add(groupKey);
         updateChildren(String.format(Locale.US, ACCOUNT_PATH, account.id), account.toMap());
 
         // Update the group profile on the database.
-        List<String> memberList = new ArrayList<>();
-        memberList.add(account.id);
-        String name = mResourceMap.get(ME_GROUP_KEY);
         Map<String, String> roomMap = new HashMap<>();
+        String name = mResourceMap.get(ME_ROOM_KEY);
         roomMap.put(name, roomKey);
-        Group group = new Group(groupKey, account.id, name, tstamp, 0, memberList, roomMap);
+        Map<String, String> memberMap = new HashMap<>();
+        memberMap.put(account.getDisplayName(mResourceMap.get(ANONYMOUS_NAME_KEY)), account.id);
+        name = mResourceMap.get(ME_GROUP_KEY);
+        Group group = new Group(groupKey, account.id, name, tstamp, memberMap, roomMap);
         updateChildren(String.format(Locale.US, GROUP_PROFILE_PATH, groupKey), group.toMap());
+
+        // Update the member entry in the default group.
+        Account member = new Account(account);
+        member.joinList.add(roomKey);
+        member.groupKey = groupKey;
+        path = String.format(Locale.US, GROUP_MEMBERS_PATH, groupKey, account.id);
+        updateChildren(path, member.toMap());
 
         // Update the "me" room profile on the database.
         name = mResourceMap.get(ME_ROOM_KEY);
-        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME, memberList);
-        String roomProfilePath = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
-        updateChildren(roomProfilePath, room.toMap());
+        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME);
+        path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
+        updateChildren(path, room.toMap());
 
         // Update the "me" room default message on the database.
         String text = "Welcome to your own private group and room.  Enjoy!";
@@ -202,7 +199,7 @@ public enum DatabaseManager {
         updateChildren(profilePath, room.toMap());
     }
 
-    /** Return the database path to an account for given User. */
+    /** Return the database path to an experience for a given experience profile. */
     public String getAccountPath(final String accountKey) {
         return String.format(Locale.US, ACCOUNT_PATH, accountKey);
     }
@@ -228,9 +225,9 @@ public enum DatabaseManager {
         return String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
     }
 
-    /** Return the database path to the joined list in a given account. */
-    public String getJoinedRoomListPath(final Account account) {
-        return String.format(Locale.US, JOINED_ROOM_LIST_PATH, account.id);
+    /** Retrun the path to the group members for the given group and member keys. */
+    public String getGroupMembersPath(final String groupKey, final String memberKey) {
+        return String.format(Locale.US, GROUP_MEMBERS_PATH, groupKey, memberKey);
     }
 
     /** Return the path to the messages for the given group and room keys. */
@@ -272,13 +269,6 @@ public enum DatabaseManager {
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(path, properties);
         mDatabase.updateChildren(childUpdates);
-    }
-
-    /** Update the given group on the database. */
-    public void updateGroup(final Group group, final String groupKey) {
-        String path = String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
-        group.modTime = new Date().getTime();
-        updateChildren(path, group.toMap());
     }
 
     /** Persist the given message to reflect a change to the unread list. */
