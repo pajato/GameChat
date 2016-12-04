@@ -13,7 +13,7 @@
     <string name="DefaultRoomName">Common</string>
     <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
     <string name="Group">Group</string>
-    <string name="GroupListIcon">The group icon.</string>
+    <string name="ListIconDesc">The list icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
     <string name="InsertMap">Inserting a map based on your location</string>

@@ -4,40 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/chatListItem"
-        android:orientation="horizontal">
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/chatIcon"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="16dp"
-            android:layout_gravity="center" />
+    <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
+        <de.hdodenhof.circleimageview.CircleImageView style="@style/ChatListItemImage"
+            android:id="@+id/chatIcon" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/chatName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItem"
+            <TextView style="@style/ChatListItemTitle" android:id="@+id/chatName"
                 tools:text="Fred C. Jones"/>
-            <TextView
-                android:id="@+id/chatText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+            <TextView style="@style/ChatListItemSubtitle" android:id="@+id/chatText"
                 tools:text="The Jones Boys Group" />
         </LinearLayout>
     </LinearLayout>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/darker_gray"/>
+    <View style="@style/ChatListItemFooter" />
 </LinearLayout>
