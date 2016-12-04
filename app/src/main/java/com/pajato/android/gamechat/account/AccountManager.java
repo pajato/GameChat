@@ -81,8 +81,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private instance variables
 
-    /** The account repository associating mulitple account id strings with the cloud account. */
-    private Map<String, Account> mAccountMap = new HashMap<>();
+    /** The current account, null if there is no current account. */
+    private Account mCurrentAccount;
 
     /** The current account key, null if there is no current account. */
     private String mCurrentAccountKey;
@@ -95,15 +95,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Public instance methods
 
-    /** Retrun the account for the current User, null if there is no signed in User. */
+    /** Return the account for the current User, null if there is no signed in User. */
     public Account getCurrentAccount() {
-        return mCurrentAccountKey == null ? null : mAccountMap.get(mCurrentAccountKey);
+        return mCurrentAccount;
     }
 
-    /** Retrun the account for the current User, null if there is no signed in User. */
+    /** Return the account for the current User and post an error message if one does not exist. */
     public Account getCurrentAccount(final Context context) {
         // Determine if there is a logged in account.  If so, return it.
-        if (mCurrentAccountKey != null) return mAccountMap.get(mCurrentAccountKey);
+        if (mCurrentAccount != null) return mCurrentAccount;
 
         // The User is not signed in.  Prompt them to do so now.
         String text = "Not logged in!  Please sign in.";
@@ -136,10 +136,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Persist accounts added during this session; generate authentication change events as
         // necessary.
         String id = event.account != null ? event.account.id : null;
-        if (id != null) mAccountMap.put(id, event.account);
-        if (!mCurrentAccountKey.equals(id)) {
+        String cid = mCurrentAccountKey;
+        if ((cid == null && id != null) || (cid != null && id == null)) {
             // An authentication change has taken place.  Let the app know.
             mCurrentAccountKey = id;
+            mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
         }

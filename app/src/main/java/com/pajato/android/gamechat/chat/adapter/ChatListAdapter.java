@@ -98,7 +98,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             case ROOMS_HEADER_ITEM_TYPE:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
             case MEMBER_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_room));
+                return new ChatListViewHolder(getView(parent, R.layout.item_member));
             case MESSAGE_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_message));
             default:
@@ -170,6 +170,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // The icon and url both exist.  Case on the item type.
         Context context = holder.icon.getContext();
         switch (item.type) {
+            case MEMBER_ITEM_TYPE:
             case MESSAGE_ITEM_TYPE:
                 // For a message, load the icon, if there is one.
                 Uri imageUri = Uri.parse(item.url);
@@ -230,21 +231,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    /** Provide a class to include a header in the list. */
-    private class HeaderViewHolder extends RecyclerView.ViewHolder {
-
-        // Private instance variables.
-
-        /** The text view showing the date or contact header. */
-        TextView title;
-
-        /** ... */
-        HeaderViewHolder(View itemView) {
-            super(itemView);
-            title = (TextView) itemView.findViewById(R.id.header);
-        }
-    }
-
     /** Provide a class to include a contact view in the list. */
     private class ContactViewHolder extends RecyclerView.ViewHolder {
 
@@ -260,6 +246,21 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             name = (TextView) itemView.findViewById(R.id.contactName);
             email = (TextView) itemView.findViewById(R.id.contactEmail);
             icon = (ImageView) itemView.findViewById(R.id.contactIcon);
+        }
+    }
+
+    /** Provide a class to include a header in the list. */
+    private class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        /** The text view showing the date or contact header. */
+        TextView title;
+
+        /** ... */
+        HeaderViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.header);
         }
     }
 

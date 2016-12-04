@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:gravity="center_vertical"
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,12 +34,9 @@
                     android:id="@+id/chatName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceListItem"
                     android:textColor="@color/colorPrimaryDark"
-                    tools:text="Paul &amp; Sandy"/>
+                    tools:text="Paul &amp; Sandy Group"/>
                 <TextView
                     android:id="@+id/newCount"
                     android:layout_width="wrap_content"
@@ -46,8 +44,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="8dp"
                     android:background="@color/colorLightGray"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/colorPrimary"
                     android:paddingStart="4dp"
                     android:paddingEnd="4dp"
@@ -57,6 +54,7 @@
                 android:id="@+id/chatText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 tools:text="group, Sandy Scott, PT General"/>
         </LinearLayout>
     </LinearLayout>
