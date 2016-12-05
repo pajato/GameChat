@@ -34,11 +34,11 @@ public class ChatListItem {
     static final int CONTACT_ITEM_TYPE = 1;
     static final int DATE_ITEM_TYPE = 2;
     public static final int GROUP_ITEM_TYPE= 3;
-    public static final int MEMBER_ITEM_TYPE = 4;
-    static final int MESSAGE_ITEM_TYPE = 5;
-    public static final int ROOM_ITEM_TYPE = 6;
-    public static final int ROOMS_HEADER_ITEM_TYPE = 7;
-    public static final int SELECTION_ITEM_TYPE = 8;
+    static final int MESSAGE_ITEM_TYPE = 4;
+    public static final int ROOM_ITEM_TYPE = 5;
+    static final int ROOMS_HEADER_ITEM_TYPE = 6;
+    static final int SELECTABLE_MEMBER_ITEM_TYPE = 7;
+    static final int SELECTABLE_ROOM_ITEM_TYPE = 8;
 
     // Public enums
 
@@ -46,9 +46,6 @@ public class ChatListItem {
 
     /** The chat list item count of new messages in a group or a room. */
     int count;
-
-    /** A description of the item. */
-    public String desc;
 
     /** The item email address, possibly null, used for contact items. */
     public String email;
@@ -63,7 +60,7 @@ public class ChatListItem {
     int nameResourceId;
 
     /** The item phone number, possibly null, used for contact items. */
-    String phone;
+    // Todo: uncomment when phone numbers are relevant: String phone;
 
     /** The room (push) key, possibly null, used for chat list items. */
     public String roomKey;
@@ -77,13 +74,18 @@ public class ChatListItem {
     /** The list of rooms or groups with messages to show, or the text of a message. */
     public String text;
 
+    // Private instance variables.
+
+    /** A description of the item. */
+    private  String mDesc;
+
     // Public constructors.
 
     /** Build an instance for a given contact header item. */
     public ChatListItem(final ContactHeaderItem item) {
         type = CONTACT_HEADER_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
-        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
+        mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given contact list item. */
@@ -91,17 +93,17 @@ public class ChatListItem {
         type = CONTACT_ITEM_TYPE;
         name = item.name;
         email = item.email;
-        phone = item.phone;
+        // TODO: uncomment when phone numbers are relevant: phone = item.phone;
         url = item.url;
         String format = "Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}.";
-        desc = String.format(Locale.US, format, name, email, phone, url);
+        mDesc = String.format(Locale.US, format, name, email, "todo/tbd", url);
     }
 
     /** Build an instance for a given date header item. */
     public ChatListItem(final DateHeaderItem item) {
         type = DATE_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
-        desc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
+        mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given group list item. */
@@ -112,18 +114,7 @@ public class ChatListItem {
         count = item.count;
         text = item.text;
         String format = "Group item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        desc = String.format(Locale.US, format, name, key, count, text);
-    }
-
-    /** Build an instance for a given contact list item. */
-    public ChatListItem(final MemberItem item) {
-        type = MEMBER_ITEM_TYPE;
-        groupKey = item.groupKey;
-        name = item.name;
-        text = item.text;
-        url = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
-        desc = String.format(Locale.US, format, name, email, url);
+        mDesc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given room list item. */
@@ -136,7 +127,7 @@ public class ChatListItem {
         text = item.text;
         url = item.url;
         String format = "Message item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        desc = String.format(Locale.US, format, name, key, count, text);
+        mDesc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given room list item. */
@@ -148,14 +139,38 @@ public class ChatListItem {
         count = item.count;
         text = item.text;
         String format = "Room item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        desc = String.format(Locale.US, format, name, key, count, text);
+        mDesc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given available rooms header item. */
     public ChatListItem(final RoomsHeaderItem item) {
         type = ROOMS_HEADER_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();
-        desc = String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
+        mDesc = String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
     }
 
+    /** Build an instance for a given contact list item. */
+    public ChatListItem(final SelectableMemberItem item) {
+        type = SELECTABLE_MEMBER_ITEM_TYPE;
+        groupKey = item.groupKey;
+        name = item.name;
+        text = item.text;
+        url = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
+        mDesc = String.format(Locale.US, format, name, email, url);
+    }
+
+    /** Build an instance for a given contact list item. */
+    public ChatListItem(final SelectableRoomItem item) {
+        type = SELECTABLE_ROOM_ITEM_TYPE;
+        groupKey = item.groupKey;
+        name = item.name;
+        text = item.text;
+        String format = "Selectable room item with name {%s} and text: {%s}.";
+        mDesc = String.format(Locale.US, format, name, text);
+    }
+
+    // Public instance methods.
+
+    @Override public String toString() {return mDesc;}
 }

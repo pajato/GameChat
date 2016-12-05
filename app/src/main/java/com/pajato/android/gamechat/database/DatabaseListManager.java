@@ -22,16 +22,15 @@ import android.support.annotation.NonNull;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.ContactHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.chat.adapter.GroupItem;
-import com.pajato.android.gamechat.chat.adapter.MemberItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.adapter.RoomsHeaderItem;
+import com.pajato.android.gamechat.chat.adapter.SelectableMemberItem;
+import com.pajato.android.gamechat.chat.adapter.SelectableRoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -61,11 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.contacts;
-import static com.pajato.android.gamechat.chat.adapter.ContactHeaderItem.ContactHeaderType.frequent;
 import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
-import static com.pajato.android.gamechat.chat.adapter.RoomItem.TextType.countList;
-import static com.pajato.android.gamechat.chat.adapter.RoomItem.TextType.groupName;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of members,
@@ -167,8 +162,7 @@ public enum DatabaseListManager {
         switch (type) {
             case group: return getGroupListData();
             case message: return getMessageListData(item);
-            case room: return getRoomListData(true, item.groupKey, countList);
-            case joinMemberRoom: return getMemberListData(item);
+            case room: return getRoomListData(item.groupKey);
             case joinRoom: return getJoinableRoomsListData(item);
             default:
                 // TODO: log a message here.
@@ -288,7 +282,7 @@ public enum DatabaseListManager {
             Map<String, Account> map = groupMemberMap.get(groupKey);
             for (Account member : map.values()) {
                 if (member.id.equals(AccountManager.instance.getCurrentAccountId())) continue;
-                items.add(new ChatListItem(new MemberItem(groupKey, member)));
+                items.add(new ChatListItem(new SelectableMemberItem(groupKey, member)));
             }
         }
 
@@ -315,7 +309,7 @@ public enum DatabaseListManager {
             result.add(new ChatListItem(new RoomsHeaderItem(R.string.RoomsAvailableHeaderText)));
             for (String roomKey : joinableRoomList) {
                 Room room = roomMap.get(roomKey);
-                result.add(new ChatListItem(new RoomItem(room.groupKey, roomKey, groupName)));
+                result.add(new ChatListItem(new SelectableRoomItem(room.groupKey, roomKey)));
             }
         }
 
@@ -431,22 +425,6 @@ public enum DatabaseListManager {
         return result;
     }
 
-    /** Return a set of potential group members. */
-    private List<ChatListItem> getMemberListData(final ChatListItem item) {
-        // Determine if there are any frequent members to add.  If so, add them and then add the
-        // members from the User's device contacts.
-        List<ChatListItem> result = new ArrayList<>();
-        if (item != null) {
-            // TODO: extract the list of frequent members from the item, somehow and add it to the
-            // result.
-            result.add(new ChatListItem(new ContactHeaderItem(frequent)));
-        }
-        result.add(new ChatListItem(new ContactHeaderItem(contacts)));
-        result.addAll(ContactManager.instance.getDeviceContactList());
-
-        return result;
-    }
-
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
     private List<ChatListItem> getMessageListData(@NonNull final ChatListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
@@ -484,8 +462,7 @@ public enum DatabaseListManager {
     }
 
     /** Get the data as a set of room items for a given group key. */
-    private List<ChatListItem> getRoomListData(final boolean headers, final String groupKey,
-                                               final RoomItem.TextType type) {
+    private List<ChatListItem> getRoomListData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
         List<ChatListItem> result = new ArrayList<>();
@@ -493,10 +470,10 @@ public enum DatabaseListManager {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {
                 // Add the header item followed by all the room items in the given group.
-                if (headers) result.add(new ChatListItem(new DateHeaderItem(dht)));
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
                 Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
-                    result.add(new ChatListItem(new RoomItem(groupKey, key, type)));
+                    result.add(new ChatListItem(new RoomItem(groupKey, key)));
                 }
             }
         }

@@ -57,7 +57,6 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.RoomItem.TextType.countList;
 import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
 
 /**
@@ -197,7 +196,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 return true;
             case roomList:
                 String roomKey = dispatcher.roomMap.keySet().iterator().next().toString();
-                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey, countList);
+                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey);
                 mItem = new ChatListItem(roomItem);
                 return true;
             default:

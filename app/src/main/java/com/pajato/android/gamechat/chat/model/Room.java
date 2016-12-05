@@ -43,6 +43,9 @@ import java.util.Map;
     /** The creation timestamp. */
     public long createTime;
 
+    /** The list of experience profiles.  One exists for each experience. */
+    @Exclude public List<ExpProfile> expProfileList;
+
     /** The parent group push key. */
     public String groupKey;
 
@@ -61,10 +64,7 @@ import java.util.Map;
     /** The room owner/creator, an account identifier. */
     public String owner;
 
-    /** The list of experience profiles.  One exists for each experience. */
-    @Exclude public List<ExpProfile> expProfileList;
-
-    /** The room type, one of "public", "private", "member" or "me". */
+    /** The room type, one of "public", "private" or "me". */
     public int type;
 
     /** Build an empty args constructor for the database. */

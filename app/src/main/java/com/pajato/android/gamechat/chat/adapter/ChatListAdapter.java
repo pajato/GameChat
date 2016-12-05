@@ -43,10 +43,11 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEAD
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MEMBER_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_ROOM_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -97,10 +98,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ChatListViewHolder(getView(parent, R.layout.item_room));
             case ROOMS_HEADER_ITEM_TYPE:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
-            case MEMBER_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_member));
             case MESSAGE_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_message));
+            case SELECTABLE_MEMBER_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_join_member));
+            case SELECTABLE_ROOM_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_join_room));
             default:
                 Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, entryType));
                 break;
@@ -122,9 +125,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                     ((HeaderViewHolder) holder).title.setText(name);
                     break;
                 case GROUP_ITEM_TYPE:
-                case MEMBER_ITEM_TYPE:
                 case MESSAGE_ITEM_TYPE:
                 case ROOM_ITEM_TYPE:
+                case SELECTABLE_MEMBER_ITEM_TYPE:
+                case SELECTABLE_ROOM_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateChatHolder((ChatListViewHolder) holder, item);
@@ -170,7 +174,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // The icon and url both exist.  Case on the item type.
         Context context = holder.icon.getContext();
         switch (item.type) {
-            case MEMBER_ITEM_TYPE:
+            case SELECTABLE_MEMBER_ITEM_TYPE:
             case MESSAGE_ITEM_TYPE:
                 // For a message, load the icon, if there is one.
                 Uri imageUri = Uri.parse(item.url);

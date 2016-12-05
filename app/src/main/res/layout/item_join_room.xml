@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
-        <ImageView style="@style/ChatListItemImage" android:id="@+id/chatIcon"
-            android:tint="@color/colorPrimaryDark"
+        <ImageView style="@style/ChatListItemSelector" android:id="@+id/selectorCheck"
+            android:tint="@color/colorAccent"
             android:contentDescription="@string/ListIconDesc"
+            app:srcCompat="@drawable/vd_check_white_24px" />
+        <ImageView style="@style/ChatListItemSelectorImage" android:id="@+id/chatIcon"
+            android:tint="@color/colorPrimaryDark"
+            android:contentDescription="@string/RoomListIcon"
             app:srcCompat="@drawable/vd_casino_black_24px" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -17,17 +20,10 @@
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView style="@style/ChatListItemTitle" android:id="@+id/chatName"
-                    tools:text="General"/>
-                <TextView style="@style/ChatListItemCount" android:id="@+id/newCount"
-                    tools:text="3 new"/>
-            </LinearLayout>
+            <TextView style="@style/ChatListItemTitle" android:id="@+id/chatName"
+                tools:text="Fred C. Jones"/>
             <TextView style="@style/ChatListItemSubtitle" android:id="@+id/chatText"
-                tools:text="TheShovel, ConorTheWhiz, GrandPop" />
+                tools:text="The Jones Boys Group" />
         </LinearLayout>
     </LinearLayout>
     <View style="@style/ChatListItemFooter" />

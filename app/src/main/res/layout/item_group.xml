@@ -9,6 +9,7 @@
     <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
         <ImageView style="@style/ChatListItemImage" android:id="@+id/chatIcon"
             android:tint="@color/colorPrimaryDark"
+            android:contentDescription="@string/ListIconDesc"
             app:srcCompat="@drawable/vd_group_black_24px"/>
         <LinearLayout
             android:layout_width="match_parent"
