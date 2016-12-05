@@ -34,7 +34,7 @@
     <string name="RoomsAvailableHeaderText">Rooms</string>
     <string name="SetCreateGroupIconFeature">Setting the create group icon</string>
     <string name="SetGroupIconDesc">Set the group icon</string>
-    <string name="SetRoomIconDesc">Set the room icon</string>
+    <!-- <string name="SetRoomIconDesc">Set the room icon</string> -->
     <string name="SignInLastAccountMenuTitle">Use Current Account</string>
     <string name="SwitchAccountDesc">Switch account menu item.</string>
     <string name="SwitchAccountMenuTitle">Switch Account</string>

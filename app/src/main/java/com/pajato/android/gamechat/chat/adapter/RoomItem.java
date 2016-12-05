@@ -34,8 +34,6 @@ import java.util.Map;
  */
 public class RoomItem {
 
-    public enum TextType {countList, groupName}
-
     // Public instance variables.
 
     /** The group key */
@@ -56,26 +54,13 @@ public class RoomItem {
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public RoomItem(final String groupKey, final String roomKey, TextType type) {
+    public RoomItem(final String groupKey, final String roomKey) {
         // Generate the name value (the room name.
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
         name = room.name;
-
-        // Generate the text value based on the type.
-        switch (type) {
-            case countList:
-                generateCountList();
-                break;
-            case groupName:
-                Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
-                text = group.name;
-                break;
-            default:
-                text = null;
-                break;
-        }
+        generateCountList();
     }
 
     /** Build a comma separated list of message counts by poster name. */
@@ -114,5 +99,4 @@ public class RoomItem {
             text = textBuilder.toString();
         }
     }
-
 }

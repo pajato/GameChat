@@ -17,39 +17,47 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Provide a POJO to encapsulate a member item to be added to a list view.
+ * Provide a POJO to encapsulate a recycler view list item: one that allows rooms to be selected for
+ * joining.
  *
  * @author Paul Michael Reilly
  */
-public class MemberItem {
+public class SelectableRoomItem {
 
     // Public instance variables.
 
-    /** The group key. */
+    /** The group key */
     public String groupKey;
 
-    /** The member's display name. */
+    /** The room key. */
+    public String roomKey;
+
+    /** The room name. */
     public String name;
 
-    /** The member's nickname. */
-    public String text;
-
-    /** The member's icon URL, possibly null. */
-    public String url;
+    /** The list of group members with messages.  Bold items are associated with new messages. */
+    String text;
 
     // Public constructors.
 
-    /** Build an instance using the given group name and account. */
-    public MemberItem(final String groupKey, final Account member) {
+    /** Build an instance for the given group. */
+    public SelectableRoomItem(final String groupKey, final String roomKey) {
+        // Generate the name value (the room name) and the text value (the group name).
         this.groupKey = groupKey;
-        this.name = member.getNickName("Anonymous");
+        this.roomKey = roomKey;
+        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+        name = room.name;
         Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         text = group.name;
-        this.url = member.url;
     }
 }
