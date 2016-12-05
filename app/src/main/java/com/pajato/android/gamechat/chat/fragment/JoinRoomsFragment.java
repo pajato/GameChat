@@ -18,9 +18,11 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -43,8 +45,16 @@ public class JoinRoomsFragment extends BaseChatFragment implements View.OnClickL
 
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Use a logging placeholder.
+        // Log the event and determine if the event looks right.
         logEvent(String.format(Locale.US, "onClick (join rooms) event: {%s}.", event));
+        if (event == null || event.view == null || !(event.view instanceof LinearLayout)) return;
+
+        // The event appears to be expected.  Confirm by finding the selector check view.
+        View view = event.view.findViewById(R.id.selectorCheck);
+        if (view != null) {
+            // Toggle the visibility state of the selector check.
+            toggleVisibility(view);
+        }
     }
 
     /** Establish the layout file to show that the app is offline due to network loss. */
@@ -80,5 +90,11 @@ public class JoinRoomsFragment extends BaseChatFragment implements View.OnClickL
         String key = mItem != null ? mItem.groupKey : null;
         String subtitle = key != null ? DatabaseListManager.instance.getGroupName(key) : null;
         if (subtitle != null) toolbar.setSubtitle(subtitle);
+    }
+
+    /** Toggle the visibility of the given view. */
+    private void toggleVisibility(@NonNull final View view) {
+        int newVisibility = view.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE;
+        view.setVisibility(newVisibility);
     }
 }
