@@ -33,6 +33,9 @@ public class SelectableMemberItem {
     /** The group key. */
     public String groupKey;
 
+    /** The possibly empty (null) group member push key. */
+    public String memberKey;
+
     /** The member's display name. */
     public String name;
 
@@ -50,6 +53,7 @@ public class SelectableMemberItem {
     /** Build an instance using the given group name and account. */
     public SelectableMemberItem(final String groupKey, final Account member) {
         this.groupKey = groupKey;
+        this.memberKey = member.id;
         this.name = member.getNickName("Anonymous");
         Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         text = group != null ? group.name : null;

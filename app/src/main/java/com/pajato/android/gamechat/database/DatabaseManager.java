@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -31,6 +33,7 @@ import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,7 @@ import static android.R.attr.type;
 import static com.pajato.android.gamechat.R.string.me;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.ME;
+import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -271,6 +275,26 @@ public enum DatabaseManager {
         mDatabase.updateChildren(childUpdates);
     }
 
+    /** Update a given group member account. */
+    public void updateMemberJoinList(final Account member, final ChatListItem item) {
+        // Update the group member
+        String groupKey = member.groupKey;
+        String path = String.format(Locale.US, GROUP_MEMBERS_PATH, groupKey, item.key);
+        member.modTime = new Date().getTime();
+        updateChildren(path, member.toMap());
+
+        // Create the (private) member room profile on the database.
+        String name = getRoomName(member);
+        path = String.format(Locale.US, ROOMS_PATH, groupKey);
+        String roomKey = mDatabase.child(path).push().getKey();
+        long tstamp = new Date().getTime();
+        Room room = new Room(roomKey, member.id, name, groupKey, tstamp, 0, PRIVATE);
+        room.memberIdList.addAll(getMemberKeys(member));
+        path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
+        updateChildren(path, room.toMap());
+
+    }
+
     /** Persist the given message to reflect a change to the unread list. */
     public void updateUnreadList(final String groupKey, final String roomKey,
                                  final Message message) {
@@ -290,5 +314,21 @@ public enum DatabaseManager {
         String expKey = experience.getExperienceKey();
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
         mDatabase.child(path).setValue(experience.toMap());
+    }
+
+    // Private instance methods.
+
+    /** Return a list of member push key values, one for the User and one for the given member. */
+    private List<String> getMemberKeys(final Account member) {
+        List<String> result = new ArrayList<>();
+        result.add(AccountManager.instance.getCurrentAccountId());
+        result.add(member.id);
+        return result;
+    }
+
+    /** Return a name for a new private room shared between this user and the given member owner. */
+    private String getRoomName(final Account member) {
+        Account account = AccountManager.instance.getCurrentAccount();
+        return String.format(Locale.US, "%s %s", account.id, member.id);
     }
 }

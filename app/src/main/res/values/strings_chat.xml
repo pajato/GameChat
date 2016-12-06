@@ -1,6 +1,7 @@
 <resources>
     <string name="AddGroupDesc">Create Group menu button</string>
     <string name="AddGroupMembers">Invite group members</string>
+    <string name="ClearSelectionsMenuTitle">Clear Selections</string>
     <string name="CreateGroupMenuTitle">Create Group</string>
     <string name="CreateGroupNameHint">Type group name</string>Title">
     <string name="CreateGroupTitle">Create Group</string>
@@ -23,7 +24,7 @@
     <string name="InstallDebugUsers">Install developer users</string>
     <string name="InviteGroupMembersFeature">Inviting group members</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
-    <string name="JoinRoomsEditTextDefault">Select rooms or members</string>
+    <!-- <string name="JoinRoomsFilterTextDefault">Tyoe to filter rooms or members</string> -->
     <string name="LearnMoreFeature">Providing context help</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
@@ -32,6 +33,9 @@
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="RoomListIcon">The room list icon.</string>
     <string name="RoomsAvailableHeaderText">Rooms</string>
+    <string name="SelectAllMenuTitle">Select All</string>
+    <string name="SelectMembersMenuTitle">Select All Members</string>
+    <string name="SelectRoomsMenuTitle">Select All Rooms</string>
     <string name="SetCreateGroupIconFeature">Setting the create group icon</string>
     <string name="SetGroupIconDesc">Set the group icon</string>
     <!-- <string name="SetRoomIconDesc">Set the room icon</string> -->

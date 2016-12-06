@@ -114,7 +114,7 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     @Override public void onResume() {
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
-        setTitles(mItem.groupKey, mItem.roomKey);
+        setTitles(mItem.groupKey, mItem.key);
         FabManager.chat.setState(this, View.GONE);
     }
 
@@ -158,7 +158,7 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         // inform the User that the message has been sent.
         String text = editText.getText().toString();
         int type = STANDARD;
-        String roomKey = mItem.roomKey;
+        String roomKey = mItem.key;
         Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
         DatabaseManager.instance.createMessage(text, type, account, room);
         editText.setText("");

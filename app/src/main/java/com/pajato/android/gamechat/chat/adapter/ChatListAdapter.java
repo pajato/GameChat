@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -82,6 +83,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     public void clearItems() {
         mList.clear();
     }
+
+    /** Get the items being adapted. */
+    public List<ChatListItem> getItems() {return mList;}
 
     /** Manage the recycler view holder. */
     @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {
@@ -214,6 +218,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         } else {
             if (holder.count != null) holder.count.setVisibility(View.GONE);
         }
+
+        // Set the check box using the item selection state.
+        if (holder.checkBox == null) return;
+        holder.checkBox.setChecked(item.selected);
     }
 
     // Inner classes.
@@ -224,6 +232,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView count;
         TextView text;
         ImageView icon;
+        CheckBox checkBox;
 
         /** Build an instance given the item view. */
         ChatListViewHolder(View itemView) {
@@ -232,6 +241,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             count = (TextView) itemView.findViewById(R.id.newCount);
             text = (TextView) itemView.findViewById(R.id.chatText);
             icon = (ImageView) itemView.findViewById(R.id.chatIcon);
+            checkBox = (CheckBox) itemView.findViewById(R.id.selectorCheck);
         }
     }
 
