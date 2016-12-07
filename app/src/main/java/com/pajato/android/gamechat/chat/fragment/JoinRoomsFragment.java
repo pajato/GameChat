@@ -18,22 +18,15 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.res.Resources;
-import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
@@ -78,27 +71,26 @@ public class JoinRoomsFragment extends BaseChatFragment {
     /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public int getLayout() {return R.layout.fragment_chat_join_rooms;}
 
-    /** Provide a click handler for saving the User's selections. */
-    public void onClick(final View view) {
-        // Implement the save operation.
-        for (ChatListItem item : mJoinMap.values()) {
-            String groupKey = item.groupKey;
-            Account member = DatabaseListManager.instance.getGroupMember(groupKey);
-            DatabaseManager.instance.updateMemberJoinList(member, item);
-        }
-    }
-
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Log the event and determine if the event looks right.
+        // Log the event and determine if the event looks right.  Abort if it doesn't.
         logEvent(String.format(Locale.US, "onClick (join rooms) event: {%s}.", event));
-        if (event == null || event.view == null || !(event.view instanceof LinearLayout)) return;
+        if (event == null || event.view == null) return;
 
         // The event appears to be expected.  Confirm by finding the selector check view.
-        CheckBox checkBox = (CheckBox) event.view.findViewById(R.id.selectorCheck);
-        if (checkBox != null) {
-            // Process the selection.
-            processSelection(event, checkBox);
+        switch (event.view.getId()) {
+            case R.id.saveButton:
+                // Implement the save operation.
+                for (ChatListItem item : mJoinMap.values()) DatabaseManager.instance.joinRoom(item);
+                ChatManager.instance.startNextFragment(getActivity());
+                break;
+            default:
+                // Determine if the view might be a click on a list view row.  Abort if not, look
+                // for a checkbox if so and if that is found, process the selection.
+                if (!(event.view instanceof LinearLayout)) return;
+                CheckBox checkBox = (CheckBox) event.view.findViewById(R.id.selectorCheck);
+                if (checkBox != null) processSelection(event, checkBox);
+                break;
         }
     }
 
@@ -142,7 +134,10 @@ public class JoinRoomsFragment extends BaseChatFragment {
     @Override public void onResume() {
         super.onResume();
         setSubtitle();
-        FabManager.chat.init(this, View.VISIBLE, CHAT_SELECTION_FAM_KEY);
+        FabManager.chat.setImage(R.drawable.ic_check_white_24dp);
+        FabManager.chat.init(this);
+        FabManager.chat.setVisibility(this, View.VISIBLE);
+        FabManager.chat.setMenu(this, CHAT_SELECTION_FAM_KEY);
     }
 
     // Private instance methods.
@@ -213,8 +208,8 @@ public class JoinRoomsFragment extends BaseChatFragment {
 
     /** Update the save button state based on the current join map content. */
     private void updateSaveButton() {
-        View saveButton = (View) mLayout.findViewById(R.id.saveButton);
-        saveButton.setEnabled(mJoinMap.size() > 0 ? true : false);
+        View saveButton = mLayout.findViewById(R.id.saveButton);
+        saveButton.setEnabled(mJoinMap.size() > 0);
     }
 
     // Private embedded class.

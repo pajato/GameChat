@@ -71,7 +71,10 @@ public class ShowGroupListFragment extends BaseChatFragment {
         // the group list display.
         super.onResume();
         setTitles(null, null);
-        FabManager.chat.init(this, View.VISIBLE, CHAT_HOME_FAM_KEY);
+        FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
+        FabManager.chat.init(this);
+        FabManager.chat.setVisibility(this, View.VISIBLE);
+        FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
     }
 
 }
