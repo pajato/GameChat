@@ -137,6 +137,19 @@ public enum DatabaseListManager {
         return room != null ? room.groupKey : null;
     }
 
+    /** Return null or a group member using the current account holder's id and given group key. */
+    public Account getGroupMember(@NonNull final String groupKey) {
+        // Determine if there is no curent account (should be impossible.)  Abort if so.
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null) return null;
+
+        // Determine if there is an expected member account in the given group.  Abort if not.
+        // Return the account if so.
+        Map<String, Account> memberMap = groupMemberMap.get(groupKey);
+        if (memberMap == null) return null;
+        return memberMap.get(account.id);
+    }
+
     /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
     public String getGroupName(final String groupKey) {
         Group group = groupMap.get(groupKey);
@@ -430,7 +443,7 @@ public enum DatabaseListManager {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         String groupKey = item.groupKey;
-        String roomKey = item.roomKey;
+        String roomKey = item.key;
         return getItems(getMessageMap(getGroupMessages(groupKey).get(roomKey)));
     }
 

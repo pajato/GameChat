@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -41,6 +43,7 @@ import static android.R.attr.type;
 import static com.pajato.android.gamechat.R.string.me;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.ME;
+import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -257,6 +260,74 @@ public enum DatabaseManager {
         mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));
     }
 
+    /** Join the curernt account holder to a room specified by a given item. */
+    public void joinRoom(@NonNull final ChatListItem item) {
+        // Ensure that the member object exists, aborting if not.
+        String roomKey = null;
+        Account member = DatabaseListManager.instance.getGroupMember(item.groupKey);
+        if (member == null) return;
+
+        // Case on the item type to handle joing an existing public room or a freshly minted private
+        // room.
+        switch (item.type) {
+            case ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE:
+                // Create and persist the private chat room and get it's push key.
+                roomKey = joinMember(item.groupKey, item.key);
+                break;
+            case ChatListItem.SELECTABLE_ROOM_ITEM_TYPE:
+                // Update and persist the room.
+                roomKey = joinRoom(item.groupKey, item.key);
+                break;
+            default:
+                break;
+        }
+
+        // Ensure that the roomKey was returned (abort if not), update and persist the member join
+        // list.
+        if (roomKey == null) return;
+        member.joinList.add(roomKey);
+        String path = String.format(Locale.US, GROUP_MEMBERS_PATH, item.groupKey, member.id);
+        updateChildren(path, member.toMap());
+    }
+
+    /** Join the given member and the curernt User to a private room. */
+    private String joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
+        // Ensure that a current account exists (abort if not) and obtain a push key for the new
+        // room.
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null) return null;
+        String path = String.format(Locale.US, ROOMS_PATH, groupKey);
+        String roomKey = mDatabase.child(path).push().getKey();
+
+        // Build and update a room object adding the two principals as members.
+        String name = getRoomName(memberKey);
+        long tstamp = new Date().getTime();
+        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, PRIVATE);
+        room.memberIdList.add(account.id);
+        room.memberIdList.add(memberKey);
+
+        // Persist the room to the database and return it's push  key.
+        path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
+        updateChildren(path, room.toMap());
+        return roomKey;
+    }
+
+    /** Join the given room in the given group to the current User. */
+    private String joinRoom(@NonNull final String groupKey, @NonNull final String roomKey) {
+        // Ensuure that the signed in User is really signed in and has an id.  Abort if either is
+        // not true.
+        String id = AccountManager.instance.getCurrentAccountId();
+        if (id == null) return null;
+
+        // Update the member id list in the room profile.
+        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+        room.memberIdList.add(id);
+        room.modTime = new Date().getTime();
+        String path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
+        updateChildren(path, room.toMap());
+        return roomKey;
+    }
+
     /** Update the given account on the database. */
     public void updateAccount(final Account account) {
         String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
@@ -290,5 +361,13 @@ public enum DatabaseManager {
         String expKey = experience.getExperienceKey();
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
         mDatabase.child(path).setValue(experience.toMap());
+    }
+
+    // Private instance methods.
+
+    /** Return a name for a new private room shared between this user and the given member owner. */
+    private String getRoomName(final String memberKey) {
+        Account account = AccountManager.instance.getCurrentAccount();
+        return String.format(Locale.US, "%s %s", account.id, memberKey);
     }
 }

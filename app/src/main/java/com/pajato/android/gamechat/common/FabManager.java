@@ -65,6 +65,9 @@ public enum FabManager {
     /** The resource id used to access the dimmer view used to blur the content. */
     private int mFabDimmerId;
 
+    /** The FAB image resource id. */
+    private int mImageResourceId;
+
     /** The cache of menus (FAM) supported by the this manager. */
     private Map<String, List<MenuEntry>> mMenuMap = new HashMap<>();
 
@@ -78,6 +81,7 @@ public enum FabManager {
         mFabId = fabId;
         mFabMenuId = fabMenuId;
         mFabDimmerId = fabDimmerId;
+        mImageResourceId = R.drawable.ic_add_white_24dp;
     }
 
     // Public instance methods
@@ -95,15 +99,6 @@ public enum FabManager {
         if (layout == null) return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(View.GONE);
-    }
-
-    /** Initialize the fab state to show the FAB, hide the FAM and preset the FAM. */
-    public void init(final Fragment fragment, final int visibility, final String key) {
-        // Provide a convenience init function to initialize the FAB state and visibility, and to
-        // attach a particular menu.
-        init(fragment);
-        setState(fragment, visibility);
-        setMenu(fragment, key);
     }
 
     /** Initialize the fab state. */
@@ -147,8 +142,8 @@ public enum FabManager {
         adapter.addEntries(mMenuMap.get(name));
     }
 
-    /** Set the FAB visibility state. */
-    public void setState(@NonNull final Fragment fragment, final int state) {
+    /** Set the FAB state. */
+    public void setVisibility(@NonNull final Fragment fragment, final int state) {
         // Obtain the layout view owning the FAB.  If it is not accessible, just return since an
         // error message will have been generated.  If it is accessible, apply the given visibility
         // state.
@@ -156,6 +151,12 @@ public enum FabManager {
         if (layout == null) return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(state);
+    }
+
+    /** Set the FAB state. */
+    public void setImage(final int resourceId) {
+        // Set the image resource id to be used going forward.
+        mImageResourceId = resourceId;
     }
 
     /** Initialize the tag used to find the main fragment that contains the fab button. */
@@ -216,8 +217,8 @@ public enum FabManager {
         // The fragment is accessible and the layout has been established.  Dismiss the FAM.
         View dimmerView = layout.findViewById(mFabDimmerId);
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        fab.setImageResource(R.drawable.ic_add_white_24dp);
         fab.setTag(R.integer.fabStateKey, State.closed);
+        fab.setImageResource(mImageResourceId);
         View menu = layout.findViewById(mFabMenuId);
         menu.setVisibility(View.GONE);
         dimmerView.setVisibility(View.GONE);

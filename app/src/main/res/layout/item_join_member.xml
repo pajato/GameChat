@@ -6,10 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
-        <ImageView style="@style/ChatListItemSelector" android:id="@+id/selectorCheck"
-            android:tint="@color/colorAccent"
-            android:contentDescription="@string/ListIconDesc"
-            app:srcCompat="@drawable/vd_check_white_24px" />
+        <CheckBox style="@style/ChatListItemSelector" android:id="@+id/selectorCheck" />
         <de.hdodenhof.circleimageview.CircleImageView style="@style/ChatListItemSelectorImage"
             android:id="@+id/chatIcon" />
         <LinearLayout

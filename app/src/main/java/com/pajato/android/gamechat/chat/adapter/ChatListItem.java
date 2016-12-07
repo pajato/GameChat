@@ -19,8 +19,6 @@ package com.pajato.android.gamechat.chat.adapter;
 
 import java.util.Locale;
 
-import static android.R.attr.key;
-
 /**
  * Provide a POJO to encapsulate a recycler view list item: either a date label view or a room list
  * view showing the rooms in a group with messages characterized by a preceding date label view.
@@ -37,8 +35,8 @@ public class ChatListItem {
     static final int MESSAGE_ITEM_TYPE = 4;
     public static final int ROOM_ITEM_TYPE = 5;
     static final int ROOMS_HEADER_ITEM_TYPE = 6;
-    static final int SELECTABLE_MEMBER_ITEM_TYPE = 7;
-    static final int SELECTABLE_ROOM_ITEM_TYPE = 8;
+    public static final int SELECTABLE_MEMBER_ITEM_TYPE = 7;
+    public static final int SELECTABLE_ROOM_ITEM_TYPE = 8;
 
     // Public enums
 
@@ -53,6 +51,9 @@ public class ChatListItem {
     /** The group (push) key, possibly null, used for chat list items (groups, rooms, messages) */
     public String groupKey;
 
+    /** The item (push) key, possibly null, either a room or member key. */
+    public String key;
+
     /** The item name, possibly null, used for all items. */
     public String name;
 
@@ -62,8 +63,8 @@ public class ChatListItem {
     /** The item phone number, possibly null, used for contact items. */
     // Todo: uncomment when phone numbers are relevant: String phone;
 
-    /** The room (push) key, possibly null, used for chat list items. */
-    public String roomKey;
+    /** The item selection state. */
+    public boolean selected;
 
     /** The item type, always non-null. */
     public int type;
@@ -121,7 +122,7 @@ public class ChatListItem {
     public ChatListItem(final MessageItem item) {
         type = MESSAGE_ITEM_TYPE;
         groupKey = item.groupKey;
-        roomKey = item.roomKey;
+        key = item.roomKey;
         name = item.name;
         count = 0;
         text = item.text;
@@ -134,7 +135,7 @@ public class ChatListItem {
     public ChatListItem(final RoomItem item) {
         type = ROOM_ITEM_TYPE;
         groupKey = item.groupKey;
-        roomKey = item.roomKey;
+        key = item.roomKey;
         name = item.name;
         count = item.count;
         text = item.text;
@@ -153,6 +154,7 @@ public class ChatListItem {
     public ChatListItem(final SelectableMemberItem item) {
         type = SELECTABLE_MEMBER_ITEM_TYPE;
         groupKey = item.groupKey;
+        key = item.memberKey;
         name = item.name;
         text = item.text;
         url = item.url;
@@ -164,6 +166,7 @@ public class ChatListItem {
     public ChatListItem(final SelectableRoomItem item) {
         type = SELECTABLE_ROOM_ITEM_TYPE;
         groupKey = item.groupKey;
+        key = item.roomKey;
         name = item.name;
         text = item.text;
         String format = "Selectable room item with name {%s} and text: {%s}.";

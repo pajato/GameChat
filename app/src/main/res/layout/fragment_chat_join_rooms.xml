@@ -16,12 +16,10 @@ You should have received a copy of the GNU General Public License along with Gam
 http://www.gnu.org/licenses
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/joinRoomLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -38,42 +36,11 @@ http://www.gnu.org/licenses
             android:textStyle="bold"
             android:text="@string/action_save"/>
     </android.support.v7.widget.Toolbar>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/colorPrimaryDark">
-        <EditText
-            android:layout_width="0dp"
-            android:layout_weight="1.0"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_gravity="center_vertical"
-            android:background="@android:color/transparent"
-            android:id="@+id/roomNames"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="normal"
-            android:textColorHint="@color/white"
-            android:hint="@string/JoinRoomsEditTextDefault"
-            tools:text="Paul Michael Reilly Group"/>
-        <ImageButton
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:id="@+id/clearGroupName"
-            android:onClick="onClick"
-            android:background="@color/colorLightGray"
-            android:contentDescription="@string/AddGroupDesc"
-            android:src="@drawable/ic_clear_black_24dp"/>
-    </LinearLayout>
-
     <android.support.v7.widget.RecyclerView
             android:id="@+id/chatList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="32dp" />
-
     <TextView
         android:id="@+id/addGroupMembers"
         android:layout_width="wrap_content"
@@ -85,5 +52,4 @@ http://www.gnu.org/licenses
         android:textSize="16sp"
         android:textStyle="normal"
         android:text="@string/AddGroupMembers"/>
-
 </LinearLayout>

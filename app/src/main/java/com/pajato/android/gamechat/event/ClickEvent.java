@@ -19,6 +19,8 @@ package com.pajato.android.gamechat.event;
 
 import android.view.View;
 
+import java.util.Locale;
+
 /**
  * Provides a button click data model class.
  *
@@ -38,4 +40,10 @@ public class ClickEvent {
         this.view = view;
     }
 
+    /** Override to show the payload, if any. */
+    @Override public String toString() {
+        Object tag = view.getTag();
+        String format = "View {%s} has payload {%s}.";
+        return String.format(Locale.US, format, view, tag);
+    }
 }

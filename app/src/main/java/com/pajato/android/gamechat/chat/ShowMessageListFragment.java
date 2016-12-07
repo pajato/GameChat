@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
@@ -37,8 +36,8 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -114,8 +113,8 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     @Override public void onResume() {
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
-        setTitles(mItem.groupKey, mItem.roomKey);
-        FabManager.chat.setState(this, View.GONE);
+        setTitles(mItem.groupKey, mItem.key);
+        FabManager.chat.setVisibility(this, View.GONE);
     }
 
     // Private instance methods.
@@ -158,7 +157,7 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         // inform the User that the message has been sent.
         String text = editText.getText().toString();
         int type = STANDARD;
-        String roomKey = mItem.roomKey;
+        String roomKey = mItem.key;
         Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
         DatabaseManager.instance.createMessage(text, type, account, room);
         editText.setText("");
