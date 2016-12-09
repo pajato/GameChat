@@ -67,7 +67,6 @@ public enum DatabaseManager {
     private static final String EXPERIENCE_PATH = EXPERIENCES_PATH + "%s/";
     private static final String MESSAGES_PATH = ROOMS_PATH + "%s/messages/";
     private static final String MESSAGE_PATH = MESSAGES_PATH + "%s/";
-    private static final String UNREAD_LIST_PATH = MESSAGES_PATH + "%s/unreadList/";
 
     // Lookup keys.
     private static final String DEFAULT_ROOM_NAME_KEY = "defaultRoomNameKey";
