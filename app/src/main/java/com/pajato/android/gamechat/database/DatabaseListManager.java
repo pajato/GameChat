@@ -73,6 +73,12 @@ public enum DatabaseListManager {
 
     // Public enums.
 
+    /** Return null or the group member account given the group key and member key. */
+    public Account getGroupMember(@NonNull final String groupKey, @NonNull final String memberKey) {
+        Map<String, Account> memberMap = groupMemberMap.get(groupKey);
+        return memberMap.get(memberKey);
+    }
+
     /** The chat list type. */
     public enum ChatListType {
         group, message, room, joinMemberRoom, joinRoom,
@@ -188,16 +194,10 @@ public enum DatabaseListManager {
 
     /** Return the "Me" room or null if there is no such room for one reason or another. */
     public Room getMeRoom() {
-        // Ensure that a search is viable.  Return null if not.
+        // Ensure that a search is viable.  Return null if not, otherwise walk the list of rooms to
+        // find one (and only one) with a "Me" room.
         if (roomMap == null || roomMap.size() == 0) return null;
-
-        // Walk the list of rooms to find one (and there should only be one) with a Me room type.
-        for (String key : roomMap.keySet()) {
-            // Determine if this is a "me" room.
-            Room room = roomMap.get(key);
-            if (room.type == Room.ME) return room;
-        }
-
+        for (Room room : roomMap.values()) if (room.type == Room.ME) return room;
         return null;
     }
 
@@ -241,14 +241,13 @@ public enum DatabaseListManager {
         // Ensure that the group profile is cached and set up watchers for each member and room in
         // the group.
         groupMap.put(event.key, event.group);
-        for (String key : event.group.roomMap.values()) setRoomProfileWatcher(event.group.key, key);
-        for (String key : event.group.memberMap.values()) setMemberWatcher(event.group.key, key);
+        for (String key : event.group.roomList) setRoomProfileWatcher(event.group.key, key);
+        for (String key : event.group.memberList) setMemberWatcher(event.group.key, key);
     }
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
     @Subscribe public void onMemberChange(@NonNull final MemberChangeEvent event) {
         // Update the member in the local caches, creating the caches as necessary.
-        //memberMap.put(event.member.id, event.member);
         Map<String, Account> map = groupMemberMap.get(event.member.groupKey);
         if (map == null) map = new HashMap<>();
         map.put(event.member.id, event.member);
@@ -357,6 +356,8 @@ public enum DatabaseListManager {
                 }
             }
         }
+
+        // Add the private rooms.
 
         return result;
     }
@@ -470,7 +471,7 @@ public enum DatabaseListManager {
     private List<String> getRoomList(@NonNull final String groupKey) {
         List<String> result = new ArrayList<>();
         Group group = getGroupProfile(groupKey);
-        if (group != null) result.addAll(group.roomMap.values());
+        if (group != null) result.addAll(group.roomList);
         return result;
     }
 

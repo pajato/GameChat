@@ -100,9 +100,9 @@ public class GroupItem {
 
         // Determine if bolding is needed and update the field.
         if (hasNew) {
-            textBuilder.append("<b>").append(room.name).append("</b>");
+            textBuilder.append("<b>").append(room.getName()).append("</b>");
         } else {
-            textBuilder.append(room.name);
+            textBuilder.append(room.getName());
         }
         text = textBuilder.toString();
     }

@@ -99,6 +99,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         // Log the event and update the list saving the result for a retry later.
         String format = "onMessageListChange (showRoomList) with event {%s}";
         logEvent(String.format(Locale.US, format, event));
+        redisplay();
         ChatManager.instance.startNextFragment(getActivity());
     }
 
@@ -142,9 +143,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     @Override public void onResume() {
         // Log the event, put the FAB into the start state and update the list, if any.
         super.onResume();
-        FabManager.chat.init(this);
-        if (mAdView != null) mAdView.resume();
-        if (mItemListType != null) updateAdapterList();
+        redisplay();
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
@@ -239,12 +238,12 @@ public abstract class BaseChatFragment extends BaseFragment {
 
         // Walk the list of developer groups to ensure that all are joined.
         List<String> groupList = new ArrayList<>();
-        groupList.add("-KXvxnOUoXFZr91D3aMR");      // Paul Reilly Group
-        groupList.add("-KXyXYn6WocFLa5F6HmC");      // Heather Music
-        groupList.add("-KXyiDyFqQkDDgTgd4yD");      // Hawthorn
-        groupList.add("-KXyfV6sX5FSkGki5LgK");      // GameChat Group
-        groupList.add("-KXw5ly2OPhgXuVtbNCw");      // Pajato Technologies
-        groupList.add("-KXw5aX1iqSnt3NChdya");      // Pajato Support Group
+        groupList.add("-KYUYMjr5X4XLPT6XM2P");      // Reilly-Scott Group
+        groupList.add("-KYUPSx4g74wSHKb4pGw");      // Heather Music
+        groupList.add("-KYUPdVXsbWCGmAO4Umd");      // Hawthorn
+        groupList.add("-KYUWj1hk1RAf30u8NDa");      // GameChat Tester Group
+        groupList.add("-KYUV6N3J8UHkL5c5X2V");      // Pajato Technologies
+        groupList.add("-KYUUkaT-v-KMsWXPyae");      // Pajato Support Group
         for (String groupKey : groupList) {
             // Extend an invitation to the group and verify that this group has been joined.
             InvitationManager.instance.extendGroupInvite(account, groupKey);
@@ -258,6 +257,13 @@ public abstract class BaseChatFragment extends BaseFragment {
                     InvitationManager.instance.acceptGroupInvite(account, groupKey);
             }
         }
+    }
+
+    /** Do a redisplay to catch potential changes that should be shown in the current view. */
+    private void redisplay() {
+        FabManager.chat.init(this);
+        if (mAdView != null) mAdView.resume();
+        if (mItemListType != null) updateAdapterList();
     }
 
     /** Return TRUE iff the list can be considered up to date. */

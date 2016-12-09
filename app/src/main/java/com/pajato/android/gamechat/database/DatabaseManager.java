@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static android.R.attr.type;
-import static com.pajato.android.gamechat.R.string.me;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.ME;
 import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
@@ -67,14 +67,11 @@ public enum DatabaseManager {
     private static final String EXPERIENCE_PATH = EXPERIENCES_PATH + "%s/";
     private static final String MESSAGES_PATH = ROOMS_PATH + "%s/messages/";
     private static final String MESSAGE_PATH = MESSAGES_PATH + "%s/";
-    private static final String UNREAD_LIST_PATH = MESSAGES_PATH + "%s/unreadList";
+    private static final String UNREAD_LIST_PATH = MESSAGES_PATH + "%s/unreadList/";
 
     // Lookup keys.
-    private static final String ANONYMOUS_NAME_KEY = "anonymousNameKey";
     private static final String DEFAULT_ROOM_NAME_KEY = "defaultRoomNameKey";
     private static final String ME_GROUP_KEY = "meGroupKey";
-    private static final String ME_NAME_KEY = "meNameKey";
-    private static final String ME_ROOM_KEY = "meRoomKey";
     private static final String SYSTEM_NAME_KEY = "systemNameKey";
 
     // Public instance variables.
@@ -99,14 +96,13 @@ public enum DatabaseManager {
         account.joinList.add(groupKey);
         updateChildren(String.format(Locale.US, ACCOUNT_PATH, account.id), account.toMap());
 
-        // Update the group profile on the database.
-        Map<String, String> roomMap = new HashMap<>();
-        String name = mResourceMap.get(ME_ROOM_KEY);
-        roomMap.put(name, roomKey);
-        Map<String, String> memberMap = new HashMap<>();
-        memberMap.put(account.getDisplayName(mResourceMap.get(ANONYMOUS_NAME_KEY)), account.id);
-        name = mResourceMap.get(ME_GROUP_KEY);
-        Group group = new Group(groupKey, account.id, name, tstamp, memberMap, roomMap);
+        // Update and persist the group profile.
+        List<String> rooms = new ArrayList<>();
+        rooms.add(roomKey);
+        List<String> members = new ArrayList<>();
+        members.add(account.id);
+        String name = mResourceMap.get(ME_GROUP_KEY);
+        Group group = new Group(groupKey, account.id, name, tstamp, members, rooms);
         updateChildren(String.format(Locale.US, GROUP_PROFILE_PATH, groupKey), group.toMap());
 
         // Update the member entry in the default group.
@@ -117,8 +113,7 @@ public enum DatabaseManager {
         updateChildren(path, member.toMap());
 
         // Update the "me" room profile on the database.
-        name = mResourceMap.get(ME_ROOM_KEY);
-        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME);
+        Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, ME);
         path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
         updateChildren(path, room.toMap());
 
@@ -179,12 +174,12 @@ public enum DatabaseManager {
 
         // The room is valid.  Create the message.
         String systemName = mResourceMap.get(SYSTEM_NAME_KEY);
-        String anonymousName = mResourceMap.get(ANONYMOUS_NAME_KEY);
-        String name = type == SYSTEM ? systemName : account.getDisplayName(anonymousName);
+        String name = type == SYSTEM ? systemName : account.getDisplayName();
         String systemUrl = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
         String url = type == SYSTEM ? systemUrl : account.url;
         long tstamp = new Date().getTime();
-        List<String> members = room.memberIdList;
+        List<String> members = new ArrayList<>();
+        members.addAll(room.memberIdList);
         Message message = new Message(key, account.id, name, url, tstamp, text, type, members);
 
         // Persist the message.
@@ -253,10 +248,7 @@ public enum DatabaseManager {
     public void init(final Context context) {
         mResourceMap.clear();
         mResourceMap.put(ME_GROUP_KEY, context.getString(R.string.DefaultPrivateGroupName));
-        mResourceMap.put(ME_ROOM_KEY, context.getString(R.string.DefaultPrivateRoomName));
         mResourceMap.put(SYSTEM_NAME_KEY, context.getString(R.string.app_name));
-        mResourceMap.put(ANONYMOUS_NAME_KEY, context.getString(R.string.anonymous));
-        mResourceMap.put(ME_NAME_KEY, context.getString(me));
         mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));
     }
 
@@ -290,25 +282,69 @@ public enum DatabaseManager {
         updateChildren(path, member.toMap());
     }
 
+    /** Update the given account on the database. */
+    public void updateAccount(final Account account) {
+        String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
+        account.modTime = new Date().getTime();
+        updateChildren(path, account.toMap());
+    }
+
+    /** Store an object on the database using a given path, pushKey, and properties. */
+    public void updateChildren(final String path, final Map<String, Object> properties) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, properties);
+        mDatabase.updateChildren(childUpdates);
+    }
+
+    /** Perist the given experience. */
+    public void updateExperience(final Experience experience) {
+        // Persist the experience.
+        experience.setModTime(new Date().getTime());
+        String groupKey = experience.getGroupKey();
+        String roomKey = experience.getRoomKey();
+        String expKey = experience.getExperienceKey();
+        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
+        mDatabase.child(path).setValue(experience.toMap());
+    }
+
+    /** Persist the given message to reflect a change to the unread list. */
+    public void updateMessage(final String groupKey, final String roomKey, final Message message) {
+        String path = String.format(Locale.US, MESSAGE_PATH, groupKey, roomKey, message.key);
+        DatabaseManager.instance.updateChildren(path, message.toMap());
+    }
+
+    // Private instance methods.
+
     /** Join the given member and the curernt User to a private room. */
     private String joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
-        // Ensure that a current account exists (abort if not) and obtain a push key for the new
-        // room.
+        // Ensure that a current account, member and group profile all exist (abort if not) and
+        // obtain a push key for the new room.
+        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
-        if (account == null) return null;
+        Account member = DatabaseListManager.instance.getGroupMember(groupKey, memberKey);
+        if (account == null || group == null || member == null) return null;
         String path = String.format(Locale.US, ROOMS_PATH, groupKey);
         String roomKey = mDatabase.child(path).push().getKey();
 
-        // Build and update a room object adding the two principals as members.
-        String name = getRoomName(memberKey);
+        // Build, update and persist a room object adding the two principals as members.
         long tstamp = new Date().getTime();
-        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, PRIVATE);
+        Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, PRIVATE);
         room.memberIdList.add(account.id);
         room.memberIdList.add(memberKey);
-
-        // Persist the room to the database and return it's push  key.
         path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
         updateChildren(path, room.toMap());
+
+        // Update and persist the group profile.
+        group.roomList.add(roomKey);
+        updateChildren(String.format(Locale.US, GROUP_PROFILE_PATH, groupKey), group.toMap());
+
+        // Update the "me" room default message on the database.
+        String format = "We have created a room for %s and %s to share private messages.";
+        String accountName = account.getDisplayName();
+        String memberName = member.getDisplayName();
+        String text = String.format(Locale.getDefault(), format, accountName, memberName);
+        createMessage(text, SYSTEM, account, room);
+
         return roomKey;
     }
 
@@ -326,48 +362,5 @@ public enum DatabaseManager {
         String path = String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
         updateChildren(path, room.toMap());
         return roomKey;
-    }
-
-    /** Update the given account on the database. */
-    public void updateAccount(final Account account) {
-        String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
-        account.modTime = new Date().getTime();
-        updateChildren(path, account.toMap());
-    }
-
-    /** Store an object on the database using a given path, pushKey, and properties. */
-    public void updateChildren(final String path, final Map<String, Object> properties) {
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(path, properties);
-        mDatabase.updateChildren(childUpdates);
-    }
-
-    /** Persist the given message to reflect a change to the unread list. */
-    public void updateUnreadList(final String groupKey, final String roomKey,
-                                 final Message message) {
-        String key = message.key;
-        String path = String.format(Locale.US, UNREAD_LIST_PATH, groupKey, roomKey, key);
-        Map<String, Object> unreadMap = new HashMap<>();
-        unreadMap.put("unreadList", message.unreadList);
-        DatabaseManager.instance.updateChildren(path, unreadMap);
-    }
-
-    /** Perist the given experience. */
-    public void updateExperience(final Experience experience) {
-        // Persist the experience.
-        experience.setModTime(new Date().getTime());
-        String groupKey = experience.getGroupKey();
-        String roomKey = experience.getRoomKey();
-        String expKey = experience.getExperienceKey();
-        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
-        mDatabase.child(path).setValue(experience.toMap());
-    }
-
-    // Private instance methods.
-
-    /** Return a name for a new private room shared between this user and the given member owner. */
-    private String getRoomName(final String memberKey) {
-        Account account = AccountManager.instance.getCurrentAccount();
-        return String.format(Locale.US, "%s %s", account.id, memberKey);
     }
 }

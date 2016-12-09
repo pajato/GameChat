@@ -107,21 +107,19 @@ import java.util.Map;
     // Public instance methods.
 
     /** Return a display name: either the nickname, the display name, the the email name. */
-    @Exclude public String getDisplayName(@NonNull final String defaultName) {
-        // Return the first non-null value, finally using the defaultName.
-        if (nickname != null) return nickname;
+    @Exclude public String getDisplayName() {
+        // Return the first non-null value of which the email address must not be null.
         if (displayName != null) return displayName;
-        if (email != null) return getPrefix(email, "@");
-        return defaultName;
+        if (nickname != null) return nickname;
+        return getPrefix(email, "@");
     }
 
     /** Return the nickname, the first name, the base email name, or a default, in that order. */
-    @Exclude public String getNickName(@NonNull final String defaultName) {
-        // Determine if there is a display name.  Use the default if not.
+    @Exclude public String getNickName() {
+        // Return the first non-null value of which the email address must not be null.
         if (nickname != null) return nickname;
         if (displayName != null) return getPrefix(displayName, " ");
-        if (email != null) return getPrefix(email, "@");
-        return defaultName;
+        return getPrefix(email, "@");
     }
 
     /** Generate the map of data to persist into Firebase. */
