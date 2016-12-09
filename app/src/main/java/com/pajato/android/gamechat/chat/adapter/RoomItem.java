@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.adapter;
 
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.DatabaseListManager;
@@ -59,7 +58,7 @@ public class RoomItem {
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
-        name = room.name;
+        name = room.getName();
         generateCountList();
     }
 

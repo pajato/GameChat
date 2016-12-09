@@ -48,7 +48,7 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
@@ -192,8 +192,8 @@ public class AddGroupActivity extends AppCompatActivity {
         // Initialize the group Firebase model class by creating two empty maps and initialize the
         // toolbar.
         mGroup = new Group();
-        mGroup.roomMap = new HashMap<>();
-        mGroup.memberMap = new HashMap<>();
+        mGroup.roomList = new ArrayList<>();
+        mGroup.memberList = new ArrayList<>();
         initToolbar();
     }
 
@@ -227,27 +227,24 @@ public class AddGroupActivity extends AppCompatActivity {
         String roomKey = DatabaseManager.instance.getRoomKey(groupKey);
         mGroup.key = groupKey;
 
-        // Obtain the default room name, create the default room, update the group's room map and
-        // add the group key to the account's group id list.
-        String name = getString(R.string.DefaultRoomName);
-        Room room = new Room(roomKey, mGroup.owner, name, groupKey, 0, 0, PUBLIC);
-        mGroup.roomMap.put(name, roomKey);
+        // Create the default (common) room, update the group's room list, add the group key to the
+        // account's group id list, and update the member in the group.
+        Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, PUBLIC);
+        mGroup.roomList.add(roomKey);
         account.joinList.add(groupKey);
-        mGroup.memberMap.put(account.getDisplayName("Anonymous"), account.id);
-
-        // Update the member entry in the default group.
+        mGroup.memberList.add(account.id);
         Account member = new Account(account);
         member.joinList.add(roomKey);
         member.groupKey = groupKey;
-        String format = DatabaseManager.instance.getGroupMembersPath(groupKey, account.id);
-        String path = String.format(Locale.US, format, groupKey, account.id);
-        DatabaseManager.instance.updateChildren(path, member.toMap());
 
-        // Persist the group and room to the database and update the account with the new joined
-        // list entry.
+        // Persist the group and room profiles to the database, update the account with the new
+        // joined list entry and create the member.
         DatabaseManager.instance.createGroupProfile(mGroup);
         DatabaseManager.instance.createRoomProfile(room);
         DatabaseManager.instance.updateAccount(account);
+        String format = DatabaseManager.instance.getGroupMembersPath(groupKey, account.id);
+        String path = String.format(Locale.US, format, groupKey, account.id);
+        DatabaseManager.instance.updateChildren(path, member.toMap());
 
         // Post a welcome message to the default room from the owner.
         String text = "Welcome to my new group!";

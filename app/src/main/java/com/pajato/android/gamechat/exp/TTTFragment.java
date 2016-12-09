@@ -284,7 +284,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         if (player == null) return defaultName;
 
         // There is an account.  Use the first name for the game.
-        return player.getNickName(defaultName);
+        return player.getNickName();
     }
 
     /** Return the game state after applying the given button move to the data model. */

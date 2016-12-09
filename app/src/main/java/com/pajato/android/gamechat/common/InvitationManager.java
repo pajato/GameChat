@@ -62,8 +62,8 @@ public enum InvitationManager {
         String path = DatabaseManager.instance.getGroupMembersPath(groupKey, member.id);
         DatabaseManager.instance.updateChildren(path, member.toMap());
 
-        // Finally add the invited account to the accepting group's profile member map field.
-        group.memberMap.put(account.getDisplayName("Anonymous"), member.id);
+        // Finally add the invited account to the accepting group's profile member list.
+        group.memberList.add(member.id);
         path = DatabaseManager.instance.getGroupProfilePath(groupKey);
         DatabaseManager.instance.updateChildren(path, group.toMap());
     }

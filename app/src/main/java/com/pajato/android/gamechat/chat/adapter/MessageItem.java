@@ -76,7 +76,7 @@ public class MessageItem {
             // The message is still marked new.  Change it to "seen" by removing this User from the
             // list of Users who have not yet read the message and persist it.
             unreadList.remove(accountId);
-            DatabaseManager.instance.updateUnreadList(groupKey, roomKey, message);
+            DatabaseManager.instance.updateMessage(groupKey, roomKey, message);
         }
     }
 

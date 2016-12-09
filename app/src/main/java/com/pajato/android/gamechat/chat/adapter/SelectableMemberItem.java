@@ -54,7 +54,7 @@ public class SelectableMemberItem {
     public SelectableMemberItem(final String groupKey, final Account member) {
         this.groupKey = groupKey;
         this.memberKey = member.id;
-        this.name = member.getNickName("Anonymous");
+        this.name = member.getNickName();
         Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
         text = group != null ? group.name : null;
         this.url = member.url;

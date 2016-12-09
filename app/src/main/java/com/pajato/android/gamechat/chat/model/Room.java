@@ -17,8 +17,13 @@
 
 package com.pajato.android.gamechat.chat.model;
 
+import android.support.annotation.NonNull;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.DatabaseManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.ArrayList;
@@ -94,5 +99,35 @@ import java.util.Map;
         result.put("modTime", modTime);
         result.put("type", type);
         return result;
+    }
+
+    /** Return a stylized version of the name. */
+    @Exclude public String getName() {
+        // Case on the room type.
+        Account account = AccountManager.instance.getCurrentAccount();
+        switch (type) {
+            case ME:
+                return account.getDisplayName();
+            case PRIVATE:
+                return memberNames(account);
+            default:
+                return name;
+        }
+    }
+
+    // Private instance methods.
+
+    /** Return a list of comma separated member names excluding the account holder's name. */
+    private String memberNames(@NonNull final Account member) {
+        StringBuilder result = new StringBuilder();
+        for (String key : memberIdList) {
+            // Determine if this member is the current User, in which case just continue.
+            if (key.equals(member.id)) continue;
+
+            // Add the member's, display name to the list.
+            if (result.length() > 0) result.append(", ");
+            result.append(member.getDisplayName());
+        }
+        return result.toString();
     }
 }
