@@ -52,12 +52,6 @@ public class ShowGroupListFragment extends BaseChatFragment {
         setItemState(menu, R.id.search, true);
     }
 
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Log the event and update the list saving the result for a retry later.
-        logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
-    }
-
     /** Initialize ... */
     @Override public void onInitialize() {
         super.onInitialize();

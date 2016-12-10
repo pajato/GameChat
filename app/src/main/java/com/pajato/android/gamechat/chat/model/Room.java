@@ -23,8 +23,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.database.DatabaseListManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +48,7 @@ import java.util.Map;
     public long createTime;
 
     /** The list of experience profiles.  One exists for each experience. */
-    @Exclude public List<ExpProfile> expProfileList;
+    //@Exclude public List<ExpProfile> expProfileList;
 
     /** The parent group push key. */
     public String groupKey;
@@ -118,11 +117,12 @@ import java.util.Map;
     // Private instance methods.
 
     /** Return a list of comma separated member names excluding the account holder's name. */
-    private String memberNames(@NonNull final Account member) {
+    private String memberNames(@NonNull final Account account) {
         StringBuilder result = new StringBuilder();
         for (String key : memberIdList) {
             // Determine if this member is the current User, in which case just continue.
-            if (key.equals(member.id)) continue;
+            Account member = DatabaseListManager.instance.getGroupMember(groupKey, key);
+            if (key.equals(account.id) || member == null) continue;
 
             // Add the member's, display name to the list.
             if (result.length() > 0) result.append(", ");

@@ -57,7 +57,9 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.group;
 import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
+import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.room;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -73,13 +75,11 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** The logcat tag. */
     private static final String TAG = BaseChatFragment.class.getSimpleName();
 
-    /** The lifecycle event format string with no bundle. */
-    private static final String FORMAT_NO_BUNDLE =
-        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment List Type: %s.";
+    /** The lifecycle event format string. */
+    private static final String LOG_FORMAT = "Event: %s; Fragment: %s; Fragment Manager: %s.";
 
-    /** The lifecycle event format string with a bundle provided. */
-    private static final String FORMAT_WITH_BUNDLE =
-        "Event: %s; Fragment: %s; Fragment Manager: %s; Fragment List Type: %s; Bundle: %s.";
+    /** Extra information format string. */
+    private static final String SUFFIX_FORMAT = "Fragment List Type: %s; State: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -96,10 +96,10 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Log the event and update the list saving the result for a retry later.
-        String format = "onMessageListChange (showRoomList) with event {%s}";
-        logEvent(String.format(Locale.US, format, event));
-        redisplay();
+        // Determine if this fragment cares about chat list changes:
+        String format = "onChatListChange with event {%s}";
+        logEvent(String.format(Locale.US, format, "no list", event));
+        if (mActive && (mItemListType == group || mItemListType == room)) redisplay();
         ChatManager.instance.startNextFragment(getActivity());
     }
 
@@ -164,16 +164,17 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
-        String manager = getFragmentManager().toString();
-        String format = FORMAT_NO_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType));
+        logEvent(event, null);
     }
 
     /** Log a lifecycle event that has a bundle. */
     @Override protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
-        String format = FORMAT_WITH_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, event, this, manager, mItemListType, bundle));
+        String list = mItemListType == null ? "N/A" : mItemListType.toString();
+        String state = mActive ? "foreground" : "background";
+        String bundleMessage = bundle == null ? "N/A" : bundle.toString();
+        Log.v(TAG, String.format(Locale.US, LOG_FORMAT, event, this, manager));
+        Log.v(TAG, String.format(Locale.US, SUFFIX_FORMAT, list, state, bundleMessage));
     }
 
     /** Return TRUE iff the fragment setup is handled successfully. */
@@ -292,7 +293,9 @@ public abstract class BaseChatFragment extends BaseFragment {
         // list when showing messages.
         ChatListAdapter listAdapter = (ChatListAdapter) adapter;
         listAdapter.clearItems();
-        listAdapter.addItems(DatabaseListManager.instance.getList(mItemListType, mItem));
+        List<ChatListItem> items = DatabaseListManager.instance.getList(mItemListType, mItem);
+        Log.d(TAG, String.format(Locale.US, "Updating with %d items.", items.size()));
+        listAdapter.addItems(items);
         if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
         return true;
     }
