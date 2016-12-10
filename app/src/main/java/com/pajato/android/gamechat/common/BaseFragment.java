@@ -61,6 +61,9 @@ public abstract class BaseFragment extends Fragment {
 
     // Protected instance variables.
 
+    /** The fragment active state; set when entering onResume and cleared in onPause. */
+    protected boolean mActive;
+
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
@@ -146,6 +149,7 @@ public abstract class BaseFragment extends Fragment {
         super.onPause();
         logEvent("onPause");
         AppEventManager.instance.unregister(this);
+        mActive = false;
     }
 
     /** Log the lifecycle event and resume showing ads. */
@@ -155,6 +159,7 @@ public abstract class BaseFragment extends Fragment {
         super.onResume();
         logEvent("onResume");
         AppEventManager.instance.register(this);
+        mActive = true;
     }
 
     /** Provide a means to setup the fragment once it has been created. */

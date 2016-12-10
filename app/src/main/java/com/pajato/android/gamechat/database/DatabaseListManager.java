@@ -73,12 +73,6 @@ public enum DatabaseListManager {
 
     // Public enums.
 
-    /** Return null or the group member account given the group key and member key. */
-    public Account getGroupMember(@NonNull final String groupKey, @NonNull final String memberKey) {
-        Map<String, Account> memberMap = groupMemberMap.get(groupKey);
-        return memberMap.get(memberKey);
-    }
-
     /** The chat list type. */
     public enum ChatListType {
         group, message, room, joinMemberRoom, joinRoom,
@@ -154,6 +148,15 @@ public enum DatabaseListManager {
         Map<String, Account> memberMap = groupMemberMap.get(groupKey);
         if (memberMap == null) return null;
         return memberMap.get(account.id);
+    }
+
+    /** Return null or a group member using the current account holder's id and given group key. */
+    public Account getGroupMember(@NonNull final String groupKey, @NonNull final String memberKey) {
+        // Determine if there is an expected member account in the given group.  Abort if not.
+        // Return the account if so.
+        Map<String, Account> memberMap = groupMemberMap.get(groupKey);
+        if (memberMap == null) return null;
+        return memberMap.get(memberKey);
     }
 
     /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
