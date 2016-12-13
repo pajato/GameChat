@@ -10,7 +10,6 @@
     <string name="CreateRoomDesc">Create Room menu button</string>
     <string name="CreateRoomMenuTitle">Create Room</string>
     <string name="DefaultPrivateGroupName">Me Group</string>
-    <string name="DefaultPrivateRoomName">Me Room</string>
     <string name="DefaultRoomName">Common</string>
     <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
     <string name="Group">Group</string>

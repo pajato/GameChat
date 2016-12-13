@@ -21,8 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,7 +33,6 @@ import android.widget.Toast;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
-import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.exp.ExpFragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -226,38 +224,18 @@ public abstract class BaseFragment extends Fragment {
         if (item != null) item.setVisible(state);
     }
 
-    /** Set the title in the toolbar using the group name. */
-    protected void setTitles(final String groupKey, final String roomKey) {
-        // Ensure that the activity is attached, aborting if not, which is entirely reasonable.
-        String title;
-        String subtitle = null;
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity == null) return;
+    /** Set the title in the toolbar based on the list type. */
+    protected void setTitles() {
+        // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
+        // on the list type to apply the titles.
+        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
+        if (bar == null) return;
 
-        // The activity exists.  Ensure that the action bar does as well.  It should.
-        ActionBar bar = activity.getSupportActionBar();
-        if (bar == null) {
-            // The action bar does not exist!  Log this as an error.
-            Log.e(TAG, "The action bar does not exist to set the titles!", new Throwable());
-            return;
-        }
-
-        // The action bar does exist, as expected.  Set the title and subtitle accordingly.
-        if (groupKey == null && roomKey == null) {
-            title = getResources().getString(R.string.app_name);
-        } else if (groupKey != null && roomKey == null) {
-            title = DatabaseListManager.instance.getGroupName(groupKey);
-        } else if (groupKey == null) {
-            title = DatabaseListManager.instance.getRoomName(roomKey);
-        } else {
-            title = DatabaseListManager.instance.getRoomName(roomKey);
-            subtitle = DatabaseListManager.instance.getGroupName(groupKey);
-        }
-
-        // Apply the title and subtitle to the action bar.
-        bar.setTitle(title);
-        bar.setSubtitle(subtitle);
+        bar.setTitle(getResources().getString(R.string.app_name));
     }
+
+    /** Set the titles in the fragment's toolbar, if one exists. */
+    abstract protected void setTitles(final String groupKey, final String roomKey);
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */
     protected void showFutureFeatureMessage(final int resourceId) {
@@ -268,5 +246,4 @@ public abstract class BaseFragment extends Fragment {
         CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
-
 }

@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.exp;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
@@ -109,6 +110,18 @@ public abstract class BaseGameFragment extends BaseFragment {
     @Override protected boolean onDispatch(@NonNull final Context context,
                                            @NonNull final Dispatcher dispatcher) {
         return true;
+    }
+
+    /** Implement the setTitles() contract. */
+    @Override protected void setTitles(final String groupKey, final String roomKey) {
+        // Ensure that there is an accessible toolbar.  Abort if not, otherwise show the room name
+        // as the title and the group name as the subtitle.
+        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
+        if (bar == null) return;
+        String title = DatabaseListManager.instance.getRoomName(roomKey);
+        String subtitle = DatabaseListManager.instance.getGroupName(groupKey);
+        bar.setTitle(title);
+        bar.setSubtitle(subtitle);
     }
 
     /** Provide a default implementation for setting up an experience. */

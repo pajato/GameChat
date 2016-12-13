@@ -17,11 +17,8 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.content.res.Resources;
 import android.support.annotation.NonNull;
-import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -133,7 +130,6 @@ public class JoinRoomsFragment extends BaseChatFragment {
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {
         super.onResume();
-        setSubtitle();
         FabManager.chat.setImage(R.drawable.ic_check_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
@@ -152,18 +148,6 @@ public class JoinRoomsFragment extends BaseChatFragment {
         return menu;
     }
 
-    /** Initialize the toolbar by ... */
-    private void initToolbar() {
-        Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
-        toolbar.setTitle(getActivity().getString(R.string.JoinRoomsMenuTitle));
-        toolbar.setNavigationIcon(R.drawable.vd_arrow_back_black_24px);
-        toolbar.setNavigationOnClickListener(new ExitHandler());
-        toolbar.inflateMenu(R.menu.add_group_menu);
-        Resources resources = getResources();
-        int id = R.drawable.vd_more_vert_black_24px;
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
-    }
-
     /** Process a selection by toggling the selected state and managing the item map. */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
         // Set the check icon visility and get the item object from the event payload.
@@ -178,14 +162,6 @@ public class JoinRoomsFragment extends BaseChatFragment {
         if (item.selected) mJoinMap.put(item.key, item);
         else mJoinMap.remove(item.key);
         updateSaveButton();
-    }
-
-    /** Set the toolbar subtitle after ensuring that there is a value to use. */
-    private void setSubtitle() {
-        Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
-        String key = mItem != null ? mItem.groupKey : null;
-        String subtitle = key != null ? DatabaseListManager.instance.getGroupName(key) : null;
-        if (subtitle != null) toolbar.setSubtitle(subtitle);
     }
 
     /** ... */
@@ -210,15 +186,6 @@ public class JoinRoomsFragment extends BaseChatFragment {
     private void updateSaveButton() {
         View saveButton = mLayout.findViewById(R.id.saveButton);
         saveButton.setEnabled(mJoinMap.size() > 0);
-    }
-
-    // Private embedded class.
-
-    /** Provide an exit handler to abort the fragment. */
-    private class ExitHandler implements View.OnClickListener {
-        @Override public void onClick(final View view) {
-            ChatManager.instance.startNextFragment(getActivity());
-        }
     }
 
 }

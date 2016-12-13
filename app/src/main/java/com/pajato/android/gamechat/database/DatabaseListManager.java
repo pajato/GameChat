@@ -112,10 +112,10 @@ public enum DatabaseListManager {
     /** The map associating a group with the members in that group. */
     public Map<String, Map<String, Account>> groupMemberMap = new HashMap<>();
 
-    /** The map associating group and room push keys with a map of experience profiles. */
+    /** The map associating group and room push keys with a map of messages. */
     public Map<String, Map<String, Map<String, Message>>> messageMap = new HashMap<>();
 
-    /** The collection of profiles for the joined rooms, keyed by the room push key. */
+    /** The collection of room profiles for the joined rooms, keyed by the room push key. */
     public Map<String, Room> roomMap = new HashMap<>();
 
     /** The current room (the one most previously selected or used.) */
@@ -553,14 +553,14 @@ public enum DatabaseListManager {
 
     /** Update the headers used to bracket the messages in the main list. */
     private void updateGroupHeaders(final Message message) {
-        // Add the new message to be the last message eminating from
-        // the given group.  The rebuild the lists of date header type to group list associations.
+        // Add the new message to be the last message emanating from
+        // the given group.  Then rebuild the lists of date header type to group list associations.
         mGroupToLastNewMessageMap.put(message.groupKey, message);
         mDateHeaderTypeToGroupListMap.clear();
         long nowTimestamp = new Date().getTime();
         for (String key : mGroupToLastNewMessageMap.keySet()) {
             // Determine which date header type the current group should be associated with.
-            long groupTimestamp = message.createTime;
+            long groupTimestamp = mGroupToLastNewMessageMap.get(key).createTime;
             for (DateHeaderType dht : DateHeaderType.values()) {
                 // Determine if the current group fits the constraints of the current date header
                 // type.  The declaration of DateHeaderType is ordered so that this algorithm will

@@ -92,29 +92,19 @@ public enum NavigationManager {
         // Hide the sign in text and show the current profile and the sign
         // out text.
         View view = header.findViewById(R.id.signIn);
-        view.setVisibility(View.GONE);
+        view.setVisibility(account != null ? View.GONE : View.VISIBLE);
         view = header.findViewById(R.id.signOut);
         view.setVisibility(View.VISIBLE);
         view = header.findViewById(R.id.currentProfile);
-        view.setVisibility(View.VISIBLE);
+        view.setVisibility(account != null ? View.VISIBLE : View.GONE);
 
-        // Load the account image, display name and email address.
+        // Determine if there is an account to set up.  Abort if not, otherwise load the account
+        // image, display name and email address.
+        if (account == null) return;
         loadAccountIcon(account, header);
         setDisplayName(account, header);
         TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
         email.setText(account.email);
-    }
-
-    /** Set up the navigation header to show the sign in button. */
-    public void setNoAccount(final View header) {
-        // There is no current user account.  Make the sign in text visible, hide the sign out text
-        // and do not show a current profile.
-        View view = header.findViewById(R.id.signIn);
-        view.setVisibility(View.VISIBLE);
-        view = header.findViewById(R.id.signOut);
-        view.setVisibility(View.GONE);
-        view = header.findViewById(R.id.currentProfile);
-        view.setVisibility(View.GONE);
     }
 
     // Private instance methods.
