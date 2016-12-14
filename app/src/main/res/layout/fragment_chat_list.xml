@@ -15,15 +15,32 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
 -->
-<!-- The main content for the rooms pane is either an ad view
-           followed by a list of expandable groups or an intro screen
-         for Users with no groups. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/roomListContent"
     android:orientation="vertical">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="com.pajato.android.gamechat.main.MainActivity">
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.AppBarLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
@@ -37,5 +54,6 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:tag="@integer/roomList"/>
+        android:tag="@integer/groupList"/>
+
 </LinearLayout>

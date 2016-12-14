@@ -24,7 +24,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,8 +36,8 @@ import com.pajato.android.gamechat.account.Account;
 import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -98,15 +97,7 @@ public class MainActivity extends BaseActivity
             : navView.inflateHeaderView(R.layout.nav_header_main);
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
-
-        // Set up the navigation drawer header based on the account being present or absent.
-        if (account != null) {
-            // There is an account.  Set it up in the header.
-            NavigationManager.instance.setAccount(account, header);
-        } else {
-            // There is no current user yet.  Provide the sign in button in the header.
-            NavigationManager.instance.setNoAccount(header);
-        }
+        NavigationManager.instance.setAccount(account, header);
     }
 
     /** Handle a back button press event posted by the app event manager. */
@@ -296,10 +287,6 @@ public class MainActivity extends BaseActivity
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
-        // Set up the toolbar.
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         // Set up the account manager with a list of class names.  These classes must be registered
         // with the app event manager before Firebase can be enabled.  And when any of them are
         // unregistered, Firebase will be turned off.
@@ -311,7 +298,6 @@ public class MainActivity extends BaseActivity
 
         // Finish initializing the important manager modules.
         DatabaseManager.instance.init(this);
-        NavigationManager.instance.init(this, toolbar);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         GameManager.instance.init();

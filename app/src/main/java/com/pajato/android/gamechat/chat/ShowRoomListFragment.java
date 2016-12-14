@@ -24,11 +24,6 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.event.ChatListChangeEvent;
-
-import org.greenrobot.eventbus.Subscribe;
-
-import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
 
@@ -44,7 +39,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
     // Public instance methods.
 
     /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_chat_rooms;}
+    @Override public int getLayout() {return R.layout.fragment_chat_list;}
 
     /** Deal with the options menu creation by making the search item visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
@@ -56,6 +51,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
     @Override public void onInitialize() {
         super.onInitialize();
         mItemListType = DatabaseListManager.ChatListType.room;
+        initToolbar();
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -64,11 +60,9 @@ public class ShowRoomListFragment extends BaseChatFragment {
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
         super.onResume();
-        setTitles(mItem.groupKey, null);
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
         FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
     }
-
 }

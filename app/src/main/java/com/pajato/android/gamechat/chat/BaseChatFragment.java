@@ -20,9 +20,11 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -45,6 +47,8 @@ import com.pajato.android.gamechat.database.DatabaseListManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.main.MainActivity;
+import com.pajato.android.gamechat.main.NavigationManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -162,6 +166,36 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
+    /** Initialize the toolbar by connecting it up to the navigation drawer. */
+    protected void initToolbar() {
+        // Determine if the fragment supports a toolbar.  Abort if not.
+        Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
+        if (toolbar == null) return;
+
+        // There is a toolbar.  Setup the overflow menu to present standard items.
+        int id = R.drawable.ic_more_vert_white_24dp;
+        toolbar.inflateMenu(R.menu.add_group_menu);
+        toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
+
+        // Case on the list type to set up the navigation icon.
+        switch (mItemListType) {
+            case message:
+            case room:
+                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+                toolbar.setNavigationOnClickListener(new UpHandler());
+                break;
+            case group:
+                NavigationManager.instance.init((MainActivity) getActivity(), toolbar);
+                break;
+            case joinRoom:
+                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+                toolbar.setNavigationOnClickListener(new ExitHandler());
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
         logEvent(event, null);
@@ -227,6 +261,42 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
+    /** Set the title in the toolbar based on the list type. */
+    @Override protected void setTitles() {
+        // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
+        // on the list type to apply the titles.
+        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
+        if (bar == null || mItemListType == null) return;
+        switch (mItemListType) {
+            default:
+            case group:
+                setTitle(bar, getResources().getString(R.string.app_name));
+                break;
+            case room:
+                // Determine if there is an item. If so, use the group name as the title and clearn
+                // the subtitle, otherwise use the app name.
+                setTitle(bar, mItem);
+                break;
+            case message:
+                // Determine if there is an item. If so, use the group name as the title and clearn
+                // the subtitle, otherwise use the app name.
+                setTitleAndSubtitle(bar, mItem);
+                break;
+            case joinRoom:
+                String title = getResources().getString(R.string.JoinRoomsMenuTitle);
+                String key = mItem != null ? mItem.groupKey : null;
+                String subtitle = key != null
+                        ? DatabaseListManager.instance.getGroupName(key) : null;
+                setTitles(bar, title, subtitle);
+                break;
+        }
+    }
+
+    /** Implement the setTitles() contract. */
+    @Override protected void setTitles(final String groupKey, final String roomKey) {
+        setTitles();
+    }
+
     // Private instance methods.
 
     /** Development hack: poor man's invite handler to join one or more developer groups. */
@@ -265,6 +335,39 @@ public abstract class BaseChatFragment extends BaseFragment {
         FabManager.chat.init(this);
         if (mAdView != null) mAdView.resume();
         if (mItemListType != null) updateAdapterList();
+        setTitles();
+    }
+
+    /** Set the titles in the given toolbar using the given (possibly null) titles. */
+    private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
+        // Apply the given titles to the toolbar; nulls will clear the fields.
+        bar.setTitle(title);
+        bar.setSubtitle(subtitle);
+    }
+
+    /** Set the titles in the given toolbar using the given title; reset the subtitle. */
+    private void setTitle(@NonNull final Toolbar bar, final String title) {
+        setTitles(bar, title, null);
+    }
+
+    /** Set the titles in the given toolbar using the given item. */
+    private void setTitle(@NonNull final Toolbar bar, final ChatListItem item) {
+        // Determine if the item is available.  Use the app name if not.
+        String title = item != null && item.groupKey != null
+                ? DatabaseListManager.instance.getGroupName(item.groupKey)
+                : getResources().getString(R.string.app_name);
+        setTitles(bar, title, null);
+    }
+
+    /** Set the titles in the given toolbar using the given item. */
+    private void setTitleAndSubtitle(@NonNull final Toolbar bar, final ChatListItem item) {
+        // Determine if the item is available.  Use the app name if not.
+        String title = item != null && item.key != null
+                ? DatabaseListManager.instance.getRoomName(item.key)
+                : getResources().getString(R.string.app_name);
+        String subtitle = item != null && item.groupKey != null
+                ? DatabaseListManager.instance.getGroupName(item.groupKey) : null;
+        setTitles(bar, title, subtitle);
     }
 
     /** Return TRUE iff the list can be considered up to date. */
@@ -299,4 +402,22 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
         return true;
     }
+
+    // Protected inner classes.
+
+    /** Provide an exit handler to abort the fragment. */
+    protected class ExitHandler implements View.OnClickListener {
+        @Override public void onClick(final View view) {
+            ChatManager.instance.startNextFragment(getActivity());
+        }
+    }
+
+    /** Provide a handler that will generate a backpress event. */
+    protected class UpHandler implements View.OnClickListener {
+        /** Handle a click on the back arrow button by generating a back press. */
+        public void onClick(final View view) {
+            getActivity().onBackPressed();
+        }
+    }
+
 }

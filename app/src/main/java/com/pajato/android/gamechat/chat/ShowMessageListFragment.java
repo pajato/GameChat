@@ -107,13 +107,13 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     @Override public void onInitialize() {
         // Establish the list type and setup the toolbar.
         mItemListType = DatabaseListManager.ChatListType.message;
+        initToolbar();
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
-        setTitles(mItem.groupKey, mItem.key);
         FabManager.chat.setVisibility(this, View.GONE);
     }
 
