@@ -18,7 +18,7 @@
 package com.pajato.android.gamechat.common;
 
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,7 @@ public class Dispatcher<T, O> {
     /** Build an instance given a type. */
     public Dispatcher(final T type) {
         this.type = type;
-        Room room = DatabaseListManager.instance.getMeRoom();
+        Room room = RoomManager.instance.getMeRoom();
         if (room != null) {
             groupKey = room.groupKey;
             roomKey = room.key;

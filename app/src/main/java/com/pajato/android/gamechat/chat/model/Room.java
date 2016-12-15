@@ -21,9 +21,8 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.MemberManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +120,7 @@ import java.util.Map;
         StringBuilder result = new StringBuilder();
         for (String key : memberIdList) {
             // Determine if this member is the current User, in which case just continue.
-            Account member = DatabaseListManager.instance.getGroupMember(groupKey, key);
+            Account member = MemberManager.instance.getMember(groupKey, key);
             if (key.equals(account.id) || member == null) continue;
 
             // Add the member's, display name to the list.

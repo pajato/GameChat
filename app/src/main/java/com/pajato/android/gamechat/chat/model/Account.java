@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.account;
+package com.pajato.android.gamechat.chat.model;
 
 import android.support.annotation.NonNull;
 

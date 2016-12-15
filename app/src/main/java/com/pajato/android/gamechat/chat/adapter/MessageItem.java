@@ -17,9 +17,9 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Message;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.MessageManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -76,7 +76,7 @@ public class MessageItem {
             // The message is still marked new.  Change it to "seen" by removing this User from the
             // list of Users who have not yet read the message and persist it.
             unreadList.remove(accountId);
-            DatabaseManager.instance.updateMessage(groupKey, roomKey, message);
+            MessageManager.instance.updateMessage(groupKey, roomKey, message);
         }
     }
 

@@ -22,8 +22,7 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
@@ -58,7 +57,7 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
     /** Build a handler with the given name and path. */
     public ExpProfileListChangeHandler(final String name, final String groupKey,
                                        final String roomKey) {
-        super(name, DatabaseManager.instance.getExpProfilesPath(groupKey, roomKey));
+        super(name, ExperienceManager.instance.getExpProfilesPath(groupKey, roomKey));
     }
 
     // Public instance methods.
@@ -99,20 +98,20 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
         // Ensure that the room map exists for the group in the master map, creating it if need be.
         Map<String, ExpProfile> expProfileMap;
         Map<String, Map<String, ExpProfile>> roomMap;
-        if (!DatabaseListManager.instance.expProfileMap.containsKey(expProfile.groupKey)) {
+        if (!ExperienceManager.instance.expProfileMap.containsKey(expProfile.groupKey)) {
             // This would be the first entry for the group.  Create an empty room map and associate
             // it with the group key.
             roomMap = new HashMap<>();
-            DatabaseListManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
+            ExperienceManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
         } else {
             // This would be an additional profile for the group.  Determine if it is the first for
             // the room.
-            roomMap = DatabaseListManager.instance.expProfileMap.get(expProfile.groupKey);
+            roomMap = ExperienceManager.instance.expProfileMap.get(expProfile.groupKey);
             if (roomMap == null) {
                 // It is the first profile for the room.  Create a map for the room and associate it
                 // with the group.
                 roomMap = new HashMap<>();
-                DatabaseListManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
+                ExperienceManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
             }
         }
 

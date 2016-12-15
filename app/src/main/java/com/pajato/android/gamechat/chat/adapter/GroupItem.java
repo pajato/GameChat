@@ -19,11 +19,12 @@ package com.pajato.android.gamechat.chat.adapter;
 
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,11 +60,11 @@ public class GroupItem {
         this.groupKey = groupKey;
         count = 0;
         StringBuilder textBuilder = new StringBuilder();
-        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
         name = group != null ? group.name : "";
         Map<String, Integer> roomMap = new HashMap<>();
         Map<String, Map<String, Message>> roomMessageMap;
-        roomMessageMap = DatabaseListManager.instance.getGroupMessages(groupKey);
+        roomMessageMap = GroupManager.instance.getGroupMessages(groupKey);
         for (String roomKey : roomMessageMap.keySet()) {
             int roomNewCount = 0;
             for (Message message : roomMessageMap.get(roomKey).values()) {
@@ -77,7 +78,7 @@ public class GroupItem {
 
         // Update the list of rooms
         for (String roomKey : roomMap.keySet()) {
-            Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+            Room room = RoomManager.instance.getRoomProfile(roomKey);
             update(textBuilder, room, roomMap.get(roomKey) > 0);
         }
     }

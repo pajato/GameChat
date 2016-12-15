@@ -27,7 +27,9 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import java.util.Locale;
@@ -118,8 +120,8 @@ public abstract class BaseGameFragment extends BaseFragment {
         // as the title and the group name as the subtitle.
         Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
         if (bar == null) return;
-        String title = DatabaseListManager.instance.getRoomName(roomKey);
-        String subtitle = DatabaseListManager.instance.getGroupName(groupKey);
+        String title = RoomManager.instance.getRoomName(roomKey);
+        String subtitle = GroupManager.instance.getGroupName(groupKey);
         bar.setTitle(title);
         bar.setSubtitle(subtitle);
     }
@@ -137,10 +139,10 @@ public abstract class BaseGameFragment extends BaseFragment {
         // Determine if the dispatcher has a single experience profile.
         if (dispatcher.payload != null) {
             // It does.  Either get the cached experience or fetch it from the database.
-            Experience exp = DatabaseListManager.instance.experienceMap.get(dispatcher.key);
+            Experience exp = ExperienceManager.instance.experienceMap.get(dispatcher.key);
             if (exp == null) {
                 // Fetch the experience from the database.
-                DatabaseListManager.instance.setExperienceWatcher(dispatcher.payload);
+                ExperienceManager.instance.setExperienceWatcher(dispatcher.payload);
             }
         } else
             // Create a new experience.

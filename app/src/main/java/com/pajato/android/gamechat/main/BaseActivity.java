@@ -21,9 +21,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
 import java.util.Locale;
@@ -94,7 +98,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onResume();
         logEvent("onResume");
         AppEventManager.instance.register(AccountManager.instance);
-        AppEventManager.instance.register(DatabaseListManager.instance);
+        AppEventManager.instance.register(GroupManager.instance);
+        AppEventManager.instance.register(RoomManager.instance);
+        AppEventManager.instance.register(MessageManager.instance);
+        AppEventManager.instance.register(ExperienceManager.instance);
+        AppEventManager.instance.register(MemberManager.instance);
         AppEventManager.instance.register(NavigationManager.instance);
         AppEventManager.instance.register(this);
     }

@@ -32,10 +32,10 @@ import android.view.View;
 
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.ChatFragment;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.BackPressEvent;
@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.account.AccountManager.ACCOUNT_AVAILABLE_KEY;
+import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
 /**
  * Provide a main activity to display the chat and game fragments.
@@ -297,7 +297,7 @@ public class MainActivity extends BaseActivity
         AccountManager.instance.init(list);
 
         // Finish initializing the important manager modules.
-        DatabaseManager.instance.init(this);
+        DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         GameManager.instance.init();
