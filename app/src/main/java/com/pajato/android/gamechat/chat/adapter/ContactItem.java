@@ -17,20 +17,6 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.pajato.android.gamechat.account.AccountManager;
-import com.pajato.android.gamechat.chat.model.Message;
-import com.pajato.android.gamechat.database.DatabaseManager;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 /**
  * Provide a POJO to encapsulate a contact item to be added to a recycler view.
  *

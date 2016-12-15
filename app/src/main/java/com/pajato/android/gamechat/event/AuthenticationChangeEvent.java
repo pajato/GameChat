@@ -17,7 +17,7 @@
 
 package com.pajato.android.gamechat.event;
 
-import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.chat.model.Account;
 
 /**
  * Provides an account state change data model class.

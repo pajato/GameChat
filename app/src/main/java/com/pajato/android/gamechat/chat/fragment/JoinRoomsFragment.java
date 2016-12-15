@@ -30,8 +30,8 @@ import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -78,7 +78,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             case R.id.saveButton:
                 // Implement the save operation.
-                for (ChatListItem item : mJoinMap.values()) DatabaseManager.instance.joinRoom(item);
+                for (ChatListItem item : mJoinMap.values()) JoinManager.instance.joinRoom(item);
                 ChatManager.instance.startNextFragment(getActivity());
                 break;
             default:
@@ -122,7 +122,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
     @Override public void onInitialize() {
         // Establish the list type and setup the toolbar.
         super.onInitialize();
-        mItemListType = DatabaseListManager.ChatListType.joinRoom;
+        mItemListType = DBUtils.ChatListType.joinRoom;
         initToolbar();
         FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
     }

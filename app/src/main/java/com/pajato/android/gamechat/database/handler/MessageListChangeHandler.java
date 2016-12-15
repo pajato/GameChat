@@ -23,8 +23,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.pajato.android.gamechat.chat.model.Message;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
@@ -64,7 +63,7 @@ public class MessageListChangeHandler extends DatabaseEventHandler implements Ch
 
     /** Build a handler with the given name and path. */
     public MessageListChangeHandler(final String name, final String groupKey, final String roomKey) {
-        super(name, DatabaseManager.instance.getMessagesPath(groupKey, roomKey));
+        super(name, MessageManager.instance.getMessagesPath(groupKey, roomKey));
         mGroupKey = groupKey;
         mRoomKey = roomKey;
     }
@@ -105,20 +104,20 @@ public class MessageListChangeHandler extends DatabaseEventHandler implements Ch
         // Ensure that the room map exists for the group in the master map, creating it if need be.
         Map<String, Message> messageMap;
         Map<String, Map<String, Message>> roomMap;
-        if (!DatabaseListManager.instance.messageMap.containsKey(mGroupKey)) {
+        if (!MessageManager.instance.messageMap.containsKey(mGroupKey)) {
             // This would be the first entry for the group.  Create an empty room map and associate
             // it with the group key.
             roomMap = new HashMap<>();
-            DatabaseListManager.instance.messageMap.put(mGroupKey, roomMap);
+            MessageManager.instance.messageMap.put(mGroupKey, roomMap);
         } else {
             // This would be an additional profile for the group.  Determine if it is the first for
             // the room.
-            roomMap = DatabaseListManager.instance.messageMap.get(mGroupKey);
+            roomMap = MessageManager.instance.messageMap.get(mGroupKey);
             if (roomMap == null) {
                 // It is the first profile for the room.  Create a map for the room and associate it
                 // with the group.
                 roomMap = new HashMap<>();
-                DatabaseListManager.instance.messageMap.put(mGroupKey, roomMap);
+                MessageManager.instance.messageMap.put(mGroupKey, roomMap);
             }
         }
 

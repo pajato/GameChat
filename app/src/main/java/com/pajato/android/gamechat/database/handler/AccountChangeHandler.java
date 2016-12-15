@@ -25,8 +25,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
 
@@ -63,7 +63,7 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
             // The account does not exist.  Create it now, ensuring there really is a User.
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             account = user != null ? getAccount(user) : null;
-            if (account != null) DatabaseManager.instance.createAccount(account);
+            if (account != null) AccountManager.instance.createAccount(account);
         }
     }
 

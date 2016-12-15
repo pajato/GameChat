@@ -17,10 +17,11 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class RoomItem {
         // Generate the name value (the room name.
         this.groupKey = groupKey;
         this.roomKey = roomKey;
-        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+        Room room = RoomManager.instance.getRoomProfile(roomKey);
         name = room.getName();
         generateCountList();
     }
@@ -69,7 +70,7 @@ public class RoomItem {
         StringBuilder textBuilder = new StringBuilder();
         Map<String, Boolean> memberNameMap = new HashMap<>();
         Map<String, Map<String, Message>> rooms;
-        rooms = DatabaseListManager.instance.messageMap.get(groupKey);
+        rooms = MessageManager.instance.messageMap.get(groupKey);
         for (Message message : rooms.get(roomKey).values()) {
             // Ensure that the member who posted the message is in the member display name map.
             String displayName = message.owner.equals(accountId) ? "me" : message.name;

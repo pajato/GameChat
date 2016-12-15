@@ -17,9 +17,9 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.GroupManager;
 
 /**
  * Provide a POJO to encapsulate a member item to be added to a list view.
@@ -55,7 +55,7 @@ public class SelectableMemberItem {
         this.groupKey = groupKey;
         this.memberKey = member.id;
         this.name = member.getNickName();
-        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
         text = group != null ? group.name : null;
         this.url = member.url;
     }

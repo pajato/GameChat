@@ -21,9 +21,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.common.Dispatcher;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
@@ -131,7 +131,7 @@ public enum GameManager {
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
         // show.
         Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap =
-                DatabaseListManager.instance.expProfileMap;
+                ExperienceManager.instance.expProfileMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
         if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
         if (expProfileMap.size() == 0) return new Dispatcher<>(noExp);
@@ -177,7 +177,7 @@ public enum GameManager {
     /** Return cached experience profiles of a given type. */
     private List<ExpProfile> getExpProfileList(final ExpFragmentType fragmentType) {
         Map<String, Map<String, Map<String, ExpProfile>>> groupMap =
-                DatabaseListManager.instance.expProfileMap;
+                ExperienceManager.instance.expProfileMap;
         List<ExpProfile> result = new ArrayList<>();
         for (String groupKey : groupMap.keySet()) {
             Map<String, Map<String, ExpProfile>> roomMap = groupMap.get(groupKey);

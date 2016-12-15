@@ -31,8 +31,8 @@ import android.view.View;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
@@ -43,7 +43,9 @@ import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -61,9 +63,9 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.group;
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.message;
-import static com.pajato.android.gamechat.database.DatabaseListManager.ChatListType.room;
+import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
+import static com.pajato.android.gamechat.database.DBUtils.ChatListType.message;
+import static com.pajato.android.gamechat.database.DBUtils.ChatListType.room;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -94,7 +96,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     protected ChatListItem mItem;
 
     /** The list type for this fragment. */
-    protected DatabaseListManager.ChatListType mItemListType;
+    protected DBUtils.ChatListType mItemListType;
 
     // Public instance methods.
 
@@ -285,8 +287,7 @@ public abstract class BaseChatFragment extends BaseFragment {
             case joinRoom:
                 String title = getResources().getString(R.string.JoinRoomsMenuTitle);
                 String key = mItem != null ? mItem.groupKey : null;
-                String subtitle = key != null
-                        ? DatabaseListManager.instance.getGroupName(key) : null;
+                String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;
                 setTitles(bar, title, subtitle);
                 break;
         }
@@ -321,7 +322,7 @@ public abstract class BaseChatFragment extends BaseFragment {
             if (!account.joinList.contains(groupKey)) {
                 // Join the group now if it has been loaded.  It will be queued for joining later if
                 // necessary.
-                Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+                Group group = GroupManager.instance.getGroupProfile(groupKey);
                 if (group != null)
                     // The group is available.  Accept any open invitations. There should be at
                     // least one!
@@ -354,7 +355,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     private void setTitle(@NonNull final Toolbar bar, final ChatListItem item) {
         // Determine if the item is available.  Use the app name if not.
         String title = item != null && item.groupKey != null
-                ? DatabaseListManager.instance.getGroupName(item.groupKey)
+                ? GroupManager.instance.getGroupName(item.groupKey)
                 : getResources().getString(R.string.app_name);
         setTitles(bar, title, null);
     }
@@ -363,10 +364,10 @@ public abstract class BaseChatFragment extends BaseFragment {
     private void setTitleAndSubtitle(@NonNull final Toolbar bar, final ChatListItem item) {
         // Determine if the item is available.  Use the app name if not.
         String title = item != null && item.key != null
-                ? DatabaseListManager.instance.getRoomName(item.key)
+                ? RoomManager.instance.getRoomName(item.key)
                 : getResources().getString(R.string.app_name);
         String subtitle = item != null && item.groupKey != null
-                ? DatabaseListManager.instance.getGroupName(item.groupKey) : null;
+                ? GroupManager.instance.getGroupName(item.groupKey) : null;
         setTitles(bar, title, subtitle);
     }
 
@@ -396,7 +397,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         // list when showing messages.
         ChatListAdapter listAdapter = (ChatListAdapter) adapter;
         listAdapter.clearItems();
-        List<ChatListItem> items = DatabaseListManager.instance.getList(mItemListType, mItem);
+        List<ChatListItem> items = DBUtils.instance.getList(mItemListType, mItem);
         Log.d(TAG, String.format(Locale.US, "Updating with %d items.", items.size()));
         listAdapter.addItems(items);
         if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);

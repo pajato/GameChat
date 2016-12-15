@@ -25,8 +25,8 @@ import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;

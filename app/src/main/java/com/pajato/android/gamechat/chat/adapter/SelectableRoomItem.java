@@ -17,14 +17,10 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.account.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 
 /**
  * Provide a POJO to encapsulate a recycler view list item: one that allows rooms to be selected for
@@ -55,9 +51,9 @@ public class SelectableRoomItem {
         // Generate the name value (the room name) and the text value (the group name).
         this.groupKey = groupKey;
         this.roomKey = roomKey;
-        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
+        Room room = RoomManager.instance.getRoomProfile(roomKey);
         name = room.name;
-        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
-        text = group.name;
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        text = group != null ? group.name : "";
     }
 }

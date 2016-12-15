@@ -17,7 +17,7 @@
 
 package com.pajato.android.gamechat.event;
 
-import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.chat.model.Account;
 
 import java.util.Locale;
 

@@ -19,10 +19,12 @@ package com.pajato.android.gamechat.common;
 
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.account.Account;
+import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MemberManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,22 +52,22 @@ public enum InvitationManager {
         // invited or if there is no group to accept the invitation to. Abort if any are true.
         boolean isMember = account.joinList.contains(groupKey);
         boolean isInvited = hasGroupInvite(account, groupKey);
-        Group group = DatabaseListManager.instance.getGroupProfile(groupKey);
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
         if (isMember || !isInvited || group == null) return;
 
         // The account holder has been invited to join the given group.  Do so by adding the group
         // key the account join list and create a copy of the account as a member of the group.
         account.joinList.add(groupKey);
-        DatabaseManager.instance.updateAccount(account);
+        AccountManager.instance.updateAccount(account);
         Account member = new Account(account);
         member.groupKey = groupKey;
-        String path = DatabaseManager.instance.getGroupMembersPath(groupKey, member.id);
-        DatabaseManager.instance.updateChildren(path, member.toMap());
+        String path = MemberManager.instance.getMembersPath(groupKey, member.id);
+        DBUtils.instance.updateChildren(path, member.toMap());
 
         // Finally add the invited account to the accepting group's profile member list.
         group.memberList.add(member.id);
-        path = DatabaseManager.instance.getGroupProfilePath(groupKey);
-        DatabaseManager.instance.updateChildren(path, group.toMap());
+        path = GroupManager.instance.getGroupProfilePath(groupKey);
+        DBUtils.instance.updateChildren(path, group.toMap());
     }
 
     /** Extend a group invite to a given account by registering both. */

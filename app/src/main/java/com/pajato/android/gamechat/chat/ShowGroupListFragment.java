@@ -23,7 +23,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
+import com.pajato.android.gamechat.database.DBUtils;
 
 import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
 
@@ -50,7 +50,7 @@ public class ShowGroupListFragment extends BaseChatFragment {
     /** Initialize ... */
     @Override public void onInitialize() {
         super.onInitialize();
-        mItemListType = DatabaseListManager.ChatListType.group;
+        mItemListType = DBUtils.ChatListType.group;
         initToolbar();
     }
 

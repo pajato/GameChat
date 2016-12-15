@@ -38,11 +38,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
@@ -223,8 +227,8 @@ public class AddGroupActivity extends AppCompatActivity {
         // Ensure that the account holder has been added to the group member list and fetch group
         // and room push keys.
         mGroup.owner = account.id;
-        String groupKey = DatabaseManager.instance.getGroupKey();
-        String roomKey = DatabaseManager.instance.getRoomKey(groupKey);
+        String groupKey = GroupManager.instance.getGroupKey();
+        String roomKey = RoomManager.instance.getRoomKey(groupKey);
         mGroup.key = groupKey;
 
         // Create the default (common) room, update the group's room list, add the group key to the
@@ -239,16 +243,16 @@ public class AddGroupActivity extends AppCompatActivity {
 
         // Persist the group and room profiles to the database, update the account with the new
         // joined list entry and create the member.
-        DatabaseManager.instance.createGroupProfile(mGroup);
-        DatabaseManager.instance.createRoomProfile(room);
-        DatabaseManager.instance.updateAccount(account);
-        String format = DatabaseManager.instance.getGroupMembersPath(groupKey, account.id);
+        GroupManager.instance.createGroupProfile(mGroup);
+        RoomManager.instance.createRoomProfile(room);
+        AccountManager.instance.updateAccount(account);
+        String format = MemberManager.instance.getMembersPath(groupKey, account.id);
         String path = String.format(Locale.US, format, groupKey, account.id);
-        DatabaseManager.instance.updateChildren(path, member.toMap());
+        DBUtils.instance.updateChildren(path, member.toMap());
 
         // Post a welcome message to the default room from the owner.
         String text = "Welcome to my new group!";
-        DatabaseManager.instance.createMessage(text, STANDARD, account, room);
+        MessageManager.instance.createMessage(text, STANDARD, account, room);
     }
 
     /** Send email to the support address. */

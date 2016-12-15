@@ -27,14 +27,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Board;
@@ -52,8 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
-import static com.pajato.android.gamechat.account.AccountManager.SIGNED_OUT_OWNER_ID;
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
@@ -183,11 +184,11 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, tstamp);
 
         // Set up the default group and room keys, the owner id and return the value.
-        String groupKey = DatabaseListManager.instance.getGroupKey();
-        String roomKey = DatabaseListManager.instance.getRoomKey();
+        String groupKey = GroupManager.instance.getGroupKey();
+        String roomKey = RoomManager.instance.getRoomKey(groupKey);
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
-        DatabaseManager.instance.createExperience(model);
+        ExperienceManager.instance.createExperience(model);
     }
 
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
@@ -242,7 +243,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
         // Determine the second account, if any, based on the room.
         String key = dispatcher.roomKey;
-        Room room = key != null ? DatabaseListManager.instance.roomMap.get(key) : null;
+        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
         int type = room != null ? room.type : -1;
         switch (type) {
             //case MEMBER:
@@ -349,7 +350,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // Reset the data model, update the database and clear the notification manager one-shot.
         model.board = null;
         model.state = ACTIVE;
-        DatabaseManager.instance.updateExperience(mExperience);
+        ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
@@ -386,7 +387,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         model.state = getState(model, buttonTag);
         model.setWinCount();
         model.toggleTurn();
-        DatabaseManager.instance.updateExperience(mExperience);
+        ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Initialize the board model and values and clear the winner text. */
@@ -525,7 +526,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notify(this, getDoneMessage(model), true);
         model.state = TicTacToe.PENDING;
-        DatabaseManager.instance.updateExperience(mExperience);
+        ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Set up the game board based on the data model state. */

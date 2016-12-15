@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.account;
+package com.pajato.android.gamechat.database;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,10 +30,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.database.DatabaseManager;
-import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -46,11 +49,16 @@ import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
+import static com.pajato.android.gamechat.chat.model.Room.ME;
+import static com.pajato.android.gamechat.database.DBUtils.ME_GROUP_KEY;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -76,6 +84,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private class constants.
 
+    /** The database path. */
+    private static final String ACCOUNT_PATH = "/accounts/%s/";
+
     /** The logcat tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
 
@@ -94,6 +105,52 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
 
     // Public instance methods
+
+    /** Create and persist an account to the database. */
+    public void createAccount(@NonNull Account account) {
+        // Set up the push keys for the account, default "me" group and room.
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String groupKey = database.child(GroupManager.GROUPS_PATH).push().getKey();
+        String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
+        String roomKey = database.child(path).push().getKey();
+
+        // Set up and persist the account for the given user.
+        long tstamp = account.createTime;
+        account.joinList.add(groupKey);
+        path = String.format(Locale.US, ACCOUNT_PATH, account.id);
+        DBUtils.instance.updateChildren(path, account.toMap());
+
+        // Update and persist the group profile.
+        List<String> rooms = new ArrayList<>();
+        rooms.add(roomKey);
+        List<String> members = new ArrayList<>();
+        members.add(account.id);
+        String name = DBUtils.instance.getResource(ME_GROUP_KEY);
+        Group group = new Group(groupKey, account.id, name, tstamp, members, rooms);
+        path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
+        DBUtils.instance.updateChildren(path, group.toMap());
+
+        // Update the member entry in the default group.
+        Account member = new Account(account);
+        member.joinList.add(roomKey);
+        member.groupKey = groupKey;
+        path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.id);
+        DBUtils.instance.updateChildren(path, member.toMap());
+
+        // Update the "me" room profile on the database.
+        Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, ME);
+        path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
+        DBUtils.instance.updateChildren(path, room.toMap());
+
+        // Update the "me" room default message on the database.
+        String text = "Welcome to your own private group and room.  Enjoy!";
+        MessageManager.instance.createMessage(text, SYSTEM, account, room);
+    }
+
+    /** Return the database path to an experience for a given experience profile. */
+    public String getAccountPath(final String accountKey) {
+        return String.format(Locale.US, ACCOUNT_PATH, accountKey);
+    }
 
     /** Return the account for the current User, null if there is no signed in User. */
     public Account getCurrentAccount() {
@@ -138,7 +195,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String id = event.account != null ? event.account.id : null;
         String cid = mCurrentAccountKey;
         if ((cid == null && id != null) || (cid != null && id == null)) {
-            // An authentication change has taken place.  Let the app know.
+            // An authentication change has taken place.  Let the app know and finish by kicking off
+            // watchers on group the group profiles this account is privy to.
             mCurrentAccountKey = id;
             mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
@@ -155,7 +213,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             // A User has signed in. Determine if an account change listener is registered.  If so,
             // abort.  If not, set one up.
             if (DatabaseRegistrar.instance.isRegistered(name)) return;
-            String path = DatabaseManager.instance.getAccountPath(user.getUid());
+            String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
         } else {
             // The User is signed out.  Notify the app of the sign out event.
@@ -226,6 +284,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             register();
         else
             unregister();
+    }
+
+    /** Update the given account on the database. */
+    public void updateAccount(final Account account) {
+        String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
+        account.modTime = new Date().getTime();
+        DBUtils.instance.updateChildren(path, account.toMap());
     }
 
     // Private instance methods.

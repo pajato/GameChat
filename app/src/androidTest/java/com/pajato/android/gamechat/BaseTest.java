@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
 import org.hamcrest.Description;

@@ -30,12 +30,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.account.Account;
-import com.pajato.android.gamechat.account.AccountManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.database.DatabaseListManager;
-import com.pajato.android.gamechat.database.DatabaseManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 
@@ -106,7 +107,7 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     /** Establish the create time state. */
     @Override public void onInitialize() {
         // Establish the list type and setup the toolbar.
-        mItemListType = DatabaseListManager.ChatListType.message;
+        mItemListType = DBUtils.ChatListType.message;
         initToolbar();
     }
 
@@ -158,8 +159,8 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         String text = editText.getText().toString();
         int type = STANDARD;
         String roomKey = mItem.key;
-        Room room = DatabaseListManager.instance.getRoomProfile(roomKey);
-        DatabaseManager.instance.createMessage(text, type, account, room);
+        Room room = RoomManager.instance.getRoomProfile(roomKey);
+        MessageManager.instance.createMessage(text, type, account, room);
         editText.setText("");
         Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
         hideSoftKeyBoard(view);
