@@ -27,6 +27,7 @@ import com.pajato.android.gamechat.event.MemberChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -55,6 +56,13 @@ public enum MemberManager {
     public Map<String, Map<String, Account>> memberMap = new HashMap<>();
 
     // Public instance methods.
+
+    /** Persist the given member to the database. */
+    public void createMember(final Account member) {
+        member.createTime = new Date().getTime();
+        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
+        DBUtils.instance.updateChildren(path, member.toMap());
+    }
 
     /** Return null or a group member using the current account holder's id and given group key. */
     public Account getMember(@NonNull final String groupKey) {
@@ -117,5 +125,12 @@ public enum MemberManager {
         DatabaseEventHandler handler;
         handler = new MemberChangeHandler(name, path, memberKey, groupKey);
         DatabaseRegistrar.instance.registerHandler(handler);
+    }
+
+    /** Update the given group profile on the database. */
+    public void updateMember(final Account member) {
+        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
+        member.modTime = new Date().getTime();
+        DBUtils.instance.updateChildren(path, member.toMap());
     }
 }

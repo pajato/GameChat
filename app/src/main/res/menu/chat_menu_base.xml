@@ -22,7 +22,7 @@ more. -->
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:title="@string/game"
+        android:title="@string/ChatTitle"
         android:icon="@drawable/ic_games_white"
         android:id="@+id/toolbar_game_icon"
         android:orderInCategory="10"

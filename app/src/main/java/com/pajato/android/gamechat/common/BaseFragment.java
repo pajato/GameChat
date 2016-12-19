@@ -234,9 +234,6 @@ public abstract class BaseFragment extends Fragment {
         bar.setTitle(getResources().getString(R.string.app_name));
     }
 
-    /** Set the titles in the fragment's toolbar, if one exists. */
-    abstract protected void setTitles(final String groupKey, final String roomKey);
-
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */
     protected void showFutureFeatureMessage(final int resourceId) {
         // Post a toast message.

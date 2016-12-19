@@ -91,10 +91,10 @@ public class AddGroupActivity extends AppCompatActivity {
                 clearGroupName();
                 break;
             case R.id.addGroupMembers:
-                showFutureFeatureMessage(R.string.InviteGroupMembersFeature);
+                showFutureFeatureMessage(R.string.InviteMembersFeature);
                 break;
             case R.id.setGroupIcon:
-                showFutureFeatureMessage(R.string.SetCreateGroupIconFeature);
+                showFutureFeatureMessage(R.string.SetCreateIconFeature);
                 break;
             default:
                 // Ignore everything else.
@@ -115,7 +115,7 @@ public class AddGroupActivity extends AppCompatActivity {
     /** Post the options menu on demand. */
     public boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.add_group_menu, menu);
+        inflater.inflate(R.menu.overflow_main_menu, menu);
         return true;
     }
 

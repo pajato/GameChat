@@ -189,6 +189,13 @@ public enum GroupManager {
         AppEventManager.instance.post(new ChatListChangeEvent());
     }
 
+    /** Update the given group profile on the database. */
+    public void updateGroupProfile(final Group group) {
+        String path = String.format(Locale.US, GROUP_PROFILE_PATH, group.key);
+        group.modTime = new Date().getTime();
+        DBUtils.instance.updateChildren(path, group.toMap());
+    }
+
     // Private instance methods.
 
     /** Setup a database listener for the group profile. */
