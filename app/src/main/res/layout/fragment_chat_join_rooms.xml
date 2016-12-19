@@ -42,7 +42,7 @@ http://www.gnu.org/licenses
             android:layout_height="match_parent"
             android:layout_marginBottom="32dp" />
     <TextView
-        android:id="@+id/addGroupMembers"
+        android:id="@+id/addMembers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="36dp"
@@ -51,5 +51,5 @@ http://www.gnu.org/licenses
         android:textColor="@color/colorBlue"
         android:textSize="16sp"
         android:textStyle="normal"
-        android:text="@string/AddGroupMembers"/>
+        android:text="@string/AddMembers"/>
 </LinearLayout>

@@ -23,7 +23,8 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+import static com.pajato.android.gamechat.chat.ShowGroupListFragment.CHAT_GROUP_FAM_KEY;
+
 
 public class ShowOfflineFragment extends BaseChatFragment {
 
@@ -37,10 +38,4 @@ public class ShowOfflineFragment extends BaseChatFragment {
 
     /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public int getLayout() {return R.layout.fragment_chat_offline;}
-
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        FabManager.game.setMenu(this, CHAT_HOME_FAM_KEY);
-    }
 }

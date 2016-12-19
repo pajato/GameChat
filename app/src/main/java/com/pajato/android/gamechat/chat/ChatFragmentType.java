@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat;
 
+import com.pajato.android.gamechat.chat.fragment.CreateGroupFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
 import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
 
@@ -25,7 +26,8 @@ import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
  *
  * @author Paul Michael Reilly
  */
-public enum ChatFragmentType {
+enum ChatFragmentType {
+    createGroup (CreateGroupFragment.class),
     createRoom (CreateRoomFragment.class),
     groupList (ShowGroupListFragment.class),
     joinRoom (JoinRoomsFragment.class),

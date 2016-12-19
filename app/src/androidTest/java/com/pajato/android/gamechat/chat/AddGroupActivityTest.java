@@ -79,10 +79,10 @@ import static org.junit.Assert.fail;
         }
     }
 
-    /** Test that the learn more overflow menu item does the right thing. */
-    @Test public void testLearnMoreOverflowMenuItem() throws Exception {
+    /** Test that the settings overflow menu item does the right thing. */
+    @Test public void testSettingsOverflowMenuItem() throws Exception {
         Context context = getInstrumentation().getTargetContext();
-        String text = context.getString(R.string.MenuItemLearnMore);
+        String text = context.getString(R.string.MenuItemSettings);
         Espresso.openActionBarOverflowOrOptionsMenu(context);
         onView(withText(text)).check(matches(isDisplayed()));
     }

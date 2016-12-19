@@ -31,18 +31,18 @@ import android.view.View;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
+import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
@@ -168,34 +168,24 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
-    /** Initialize the toolbar by connecting it up to the navigation drawer. */
+    /** Initialize the toolbar for all chat pages. */
     protected void initToolbar() {
-        // Determine if the fragment supports a toolbar.  Abort if not.
+        // Determine if this fragment supports a toolbar.  Abort if not.
         Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
-        if (toolbar == null) return;
+        if (toolbar == null || mItemListType == null) return;
 
-        // There is a toolbar.  Setup the overflow menu to present standard items.
-        int id = R.drawable.ic_more_vert_white_24dp;
-        toolbar.inflateMenu(R.menu.add_group_menu);
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
-
-        // Case on the list type to set up the navigation icon.
-        switch (mItemListType) {
-            case message:
-            case room:
-                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-                toolbar.setNavigationOnClickListener(new UpHandler());
-                break;
-            case group:
-                NavigationManager.instance.init((MainActivity) getActivity(), toolbar);
-                break;
-            case joinRoom:
-                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-                toolbar.setNavigationOnClickListener(new ExitHandler());
-                break;
-            default:
-                break;
+        // Setup the group page (home) toolbar via the navigation manager initialization.
+        if (mItemListType == group) {
+            NavigationManager.instance.init((MainActivity) getActivity(), toolbar);
+            return;
         }
+
+        // Setup the overflow menu on all pages but the group (home) page.
+        int id = mItemListType.overflowMenuIconResourceId;
+        toolbar.inflateMenu(mItemListType.overflowMenuResourceId);
+        toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
+        toolbar.setNavigationIcon(mItemListType.navigationIconResourceId);
+        toolbar.setNavigationOnClickListener(new UpHandler());
     }
 
     /** Log a lifecycle event that has no bundle. */
@@ -270,32 +260,25 @@ public abstract class BaseChatFragment extends BaseFragment {
         Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
         if (bar == null || mItemListType == null) return;
         switch (mItemListType) {
-            default:
-            case group:
-                setTitle(bar, getResources().getString(R.string.app_name));
+            case addGroup:
+                // Simply set the title to the group name, clearing the subtitle.
+                setTitles(bar, getResources().getString(R.string.CreateGroupMenuTitle), null);
                 break;
-            case room:
-                // Determine if there is an item. If so, use the group name as the title and clearn
-                // the subtitle, otherwise use the app name.
-                setTitle(bar, mItem);
-                break;
-            case message:
-                // Determine if there is an item. If so, use the group name as the title and clearn
-                // the subtitle, otherwise use the app name.
-                setTitleAndSubtitle(bar, mItem);
-                break;
+            case addRoom:
             case joinRoom:
-                String title = getResources().getString(R.string.JoinRoomsMenuTitle);
-                String key = mItem != null ? mItem.groupKey : null;
-                String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;
-                setTitles(bar, title, subtitle);
+                // Set the title to the given resource and the subtitle to the group name.
+                setTitles(bar, mItemListType.titleResourceId);
+                break;
+            case group:
+            case message:
+            case room:
+                // Set the title and subtitle based on the item content.
+                setTitles(bar, mItem);
+                break;
+            default:
+                setTitles(bar, getResources().getString(R.string.app_name), null);
                 break;
         }
-    }
-
-    /** Implement the setTitles() contract. */
-    @Override protected void setTitles(final String groupKey, final String roomKey) {
-        setTitles();
     }
 
     // Private instance methods.
@@ -339,36 +322,36 @@ public abstract class BaseChatFragment extends BaseFragment {
         setTitles();
     }
 
+    /** Set the titles in the given toolbar using the given item. */
+    private void setTitles(@NonNull final Toolbar bar, final ChatListItem item) {
+        // Use the item content to set the title and subtitle.
+        if (item == null || (item.groupKey == null && item.key == null)) {
+            setTitles(bar, R.string.app_name);
+            return;
+        }
+
+        // Determine if the group name should be the title.
+        String title = item.key == null
+            ? GroupManager.instance.getGroupName(item.groupKey)
+            : RoomManager.instance.getRoomName(item.key);
+        String subtitle = item.key != null
+            ? GroupManager.instance.getGroupName(item.groupKey) : null;
+        setTitles(bar, title, subtitle);
+    }
+
+    /** Set the title to the given resource and the subtitle to the group name, if available. */
+    private void setTitles(@NonNull final Toolbar bar, final int resourceId) {
+        String title = getResources().getString(resourceId);
+        String key = mItem != null ? mItem.groupKey : null;
+        String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;
+        setTitles(bar, title, subtitle);
+    }
+
     /** Set the titles in the given toolbar using the given (possibly null) titles. */
     private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
         // Apply the given titles to the toolbar; nulls will clear the fields.
         bar.setTitle(title);
         bar.setSubtitle(subtitle);
-    }
-
-    /** Set the titles in the given toolbar using the given title; reset the subtitle. */
-    private void setTitle(@NonNull final Toolbar bar, final String title) {
-        setTitles(bar, title, null);
-    }
-
-    /** Set the titles in the given toolbar using the given item. */
-    private void setTitle(@NonNull final Toolbar bar, final ChatListItem item) {
-        // Determine if the item is available.  Use the app name if not.
-        String title = item != null && item.groupKey != null
-                ? GroupManager.instance.getGroupName(item.groupKey)
-                : getResources().getString(R.string.app_name);
-        setTitles(bar, title, null);
-    }
-
-    /** Set the titles in the given toolbar using the given item. */
-    private void setTitleAndSubtitle(@NonNull final Toolbar bar, final ChatListItem item) {
-        // Determine if the item is available.  Use the app name if not.
-        String title = item != null && item.key != null
-                ? RoomManager.instance.getRoomName(item.key)
-                : getResources().getString(R.string.app_name);
-        String subtitle = item != null && item.groupKey != null
-                ? GroupManager.instance.getGroupName(item.groupKey) : null;
-        setTitles(bar, title, subtitle);
     }
 
     /** Return TRUE iff the list can be considered up to date. */
@@ -405,13 +388,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     // Protected inner classes.
-
-    /** Provide an exit handler to abort the fragment. */
-    protected class ExitHandler implements View.OnClickListener {
-        @Override public void onClick(final View view) {
-            ChatManager.instance.startNextFragment(getActivity());
-        }
-    }
 
     /** Provide a handler that will generate a backpress event. */
     protected class UpHandler implements View.OnClickListener {

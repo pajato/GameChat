@@ -39,7 +39,6 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -59,6 +58,17 @@ public enum NavigationManager {
 
     // Public instance methods
 
+    /** Return true iff the navigation drawer was open and is now closed. */
+    public boolean closeDrawerIfOpen(final Activity activity) {
+        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
+
+        return false;
+    }
+
     /** Initialize the navigation drawer. */
     public void init(final MainActivity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
@@ -72,13 +82,6 @@ public enum NavigationManager {
         // event manager.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(activity);
-    }
-
-    /** Handle a back press event. */
-    @Subscribe(priority = 1)
-    public void onBackPressed(final BackPressEvent event) {
-        // Detect and close an open nav drawer.  Cancel propagation if the drawer is open.
-        if (closeDrawerIfOpen(event.activity)) AppEventManager.instance.cancel(event);
     }
 
     /** Process a given button click event handling the nav drawer closing. */
@@ -108,17 +111,6 @@ public enum NavigationManager {
     }
 
     // Private instance methods.
-
-    /** Check for an open navigation drawer and close it if one is found. */
-    private boolean closeDrawerIfOpen(final Activity activity) {
-        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-            return true;
-        }
-
-        return false;
-    }
 
     /** Load the account icon, if available, using a placeholder otherwise. */
     private void loadAccountIcon(final Account account, final View header) {

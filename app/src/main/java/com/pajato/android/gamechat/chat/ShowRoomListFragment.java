@@ -23,9 +23,18 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.event.TagClickEvent;
 
-import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.pajato.android.gamechat.chat.ChatFragmentType.createGroup;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.createRoom;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.  This is the
@@ -36,10 +45,39 @@ import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
  */
 public class ShowRoomListFragment extends BaseChatFragment {
 
+    // Public class constants.
+
+    /** The lookup key for the FAB game home memu. */
+    public static final String CHAT_ROOM_FAM_KEY = "chatRoomFamKey";
+
     // Public instance methods.
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_chat_list;}
+
+    /** Process a menu click event ... */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        Object payload = event.view.getTag();
+        if (payload == null || !(payload instanceof MenuEntry)) return;
+
+        // The event represents a menu entry.  Close the FAM and case on the title id.
+        FabManager.chat.dismissMenu(this);
+        MenuEntry entry = (MenuEntry) payload;
+        switch (entry.titleResId) {
+            case R.string.CreateGroupMenuTitle:
+                ChatManager.instance.chainFragment(createGroup, getActivity(), mItem);
+                break;
+            case R.string.CreateRoomMenuTitle:
+                ChatManager.instance.chainFragment(createRoom, getActivity(), mItem);
+                break;
+            case R.string.JoinRoomsMenuTitle:
+                ChatManager.instance.chainFragment(joinRoom, getActivity(), mItem);
+                break;
+            default:
+                // ...
+                break;
+        }
+    }
 
     /** Deal with the options menu creation by making the search item visible. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
@@ -52,6 +90,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
         super.onInitialize();
         mItemListType = DBUtils.ChatListType.room;
         initToolbar();
+        FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -63,6 +102,16 @@ public class ShowRoomListFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
-        FabManager.chat.setMenu(this, CHAT_HOME_FAM_KEY);
+        FabManager.chat.setMenu(this, CHAT_ROOM_FAM_KEY);
     }
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getRoomMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.vd_casino_black_24px));
+        menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.vd_casino_black_24px));
+        menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
+        return menu;
+    }
+
 }

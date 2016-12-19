@@ -17,33 +17,116 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.support.annotation.NonNull;
+
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatFragment.CHAT_HOME_FAM_KEY;
+import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
+import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
 
-public class CreateRoomFragment extends BaseChatFragment {
+/**
+ * Create a room ...
+ *
+ * Validate that the associated group and member both exist even as early as possible.
+ */
+public class CreateRoomFragment extends BaseCreateFragment {
+
+    // Private instance variables.
+
+    /** The group containing the new room. */
+    private Group mGroup;
+
+    /** The member associated with teh account creating the new room. */
+    private Account mMember;
+
+    /** The room being created. */
+    private Room mRoom;
 
     // Public instance methods.
 
-    /** Provide a placeholder subscriber to satisfy the event bus contract. */
+    /** Provide a click event handler. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Use a logging placeholder.
+        // Log the event and determine if the event looks right.  Abort if it doesn't.
         logEvent(String.format(Locale.US, "onClick (create room) event: {%s}.", event));
+        if (event == null || event.view == null) return;
+
+        // The event appears to be ok.  Update the room type.
+        switch (event.view.getId()) {
+            case R.id.PublicButton:
+                mRoom.type = PUBLIC;
+                break;
+            case R.id.PrivateButton:
+                mRoom.type = PRIVATE;
+                break;
+            default:
+                // Ignore everything else.
+                break;
+        }
     }
 
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_chat_create_room;}
+    /** Establish the create time state. */
+    @Override public void onInitialize() {
+        // Ensure that there is a group to use in creating the new room.
+        super.onInitialize();
+        mGroup = GroupManager.instance.getGroupProfile(mItem.groupKey);
+        Account account = AccountManager.instance.getCurrentAccount();
+        mMember = MemberManager.instance.getMember(mGroup.key, account.id);
+        if (mGroup == null || mMember == null) {
+            // Return to the previous fragment using a back press.
+            getActivity().onBackPressed();
+            // Probably good to put a toast or snackbar here.
+            return;
+        }
 
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        //FabManager.game.setMenu(this, CHAT_HOME_FAM_KEY);
+        // Establish the list type and setup the toolbar.
+        mCreateType = CreateType.room;
+        mItemListType = DBUtils.ChatListType.addRoom;
+        initToolbar();
+
+        // Set up the room profile.
+        mRoom = new Room();
+        mRoom.owner = account.id;
+        mRoom.name = getDefaultName();
+        mRoom.groupKey = mGroup.key;
+        mRoom.owner = mMember.id;
     }
+
+    // Protected instance methods.
+
+    /** Save the room being created to the Firebase realtime database. */
+    @Override protected void save(@NonNull Account account) {
+        // Persist the configured room.
+        mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
+        RoomManager.instance.createRoomProfile(mRoom);
+
+        // Update and persist the group adding the new room to it's room list.
+        mGroup.roomList.add(mRoom.key);
+        GroupManager.instance.updateGroupProfile(mGroup);
+
+        // Update and persist the member adding the new room to it's join list.
+        mMember.joinList.add(mRoom.key);
+        MemberManager.instance.updateMember(mMember);
+
+        // Post a welcome message to the new room from the owner.
+        String text = "Welcome to my new room!";
+        MessageManager.instance.createMessage(text, STANDARD, account, mRoom);
+    }
+
+    /** Set the room name conditionally to the given value. */
+    @Override protected void setName(final String value) {if (mRoom != null) mRoom.name = value;}
 }

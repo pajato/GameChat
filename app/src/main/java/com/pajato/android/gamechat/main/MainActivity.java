@@ -38,7 +38,6 @@ import com.pajato.android.gamechat.chat.ChatFragment;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
-import com.pajato.android.gamechat.event.BackPressEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
@@ -100,16 +99,10 @@ public class MainActivity extends BaseActivity
         NavigationManager.instance.setAccount(account, header);
     }
 
-    /** Handle a back button press event posted by the app event manager. */
-    @Subscribe public void onBackPressed(final BackPressEvent event) {
-        // No other subscriber has handled the back press.  Let the system deal with it.
-        super.onBackPressed();
-    }
-
     /** Handle a back button press event delivered by the system. */
     @Override public void onBackPressed() {
-        // If the navigation drawer is open, close it, otherwise let the system deal with it.
-        AppEventManager.instance.post(new BackPressEvent(this));
+        if (NavigationManager.instance.closeDrawerIfOpen(this)) return;
+        super.onBackPressed();
     }
 
     /** Process a given button click event handling the nav drawer closing. */

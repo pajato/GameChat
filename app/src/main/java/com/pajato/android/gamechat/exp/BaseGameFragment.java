@@ -115,7 +115,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     }
 
     /** Implement the setTitles() contract. */
-    @Override protected void setTitles(final String groupKey, final String roomKey) {
+    protected void setTitles(final String groupKey, final String roomKey) {
         // Ensure that there is an accessible toolbar.  Abort if not, otherwise show the room name
         // as the title and the group name as the subtitle.
         Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
