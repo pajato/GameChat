@@ -92,11 +92,7 @@ public class ChessFragment extends BaseGameFragment {
         if(buttonTag.equals(getString(R.string.NewGame))) {
             onNewGame();
 
-            int color;
-            if(player.equals(getString(R.string.player2))) {
-            } else {
-                player = getString(R.string.player1);
-            }
+            if(player.equals(getString(R.string.player2))) player = getString(R.string.player1);
             handleTurnChange();
             NotificationManager.instance.notify(this, getString(R.string.NewGame) + " "
                     + player + "'s Turn!", false);

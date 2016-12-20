@@ -1,7 +1,5 @@
 package com.pajato.android.gamechat.event;
 
-import com.pajato.android.gamechat.chat.model.Room;
-
 /**
  * Provides an event class to encapsulate a registration change event for a given class name.
  *

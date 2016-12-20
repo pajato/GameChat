@@ -69,7 +69,7 @@ import java.util.Map;
     public String id;
 
     /** A list of group or room push keys (depends on context) the account can join. */
-    public List<String> joinList = new ArrayList<>();
+    public final List<String> joinList = new ArrayList<>();
 
     /** The modification timestamp. */
     public long modTime;
@@ -141,10 +141,10 @@ import java.util.Map;
     }
 
     /** Return the name part of the email address. */
-    private String getPrefix(@NonNull final String value, final String splitter) {
-        // Split the value using the splitter and return the first part.
-        String[] parts = value != null ? value.split(splitter) : null;
-        if (parts != null && parts.length > 0) return parts[0];
+    private String getPrefix(@NonNull final String value, final String splitterText) {
+        // Split the value and return the first part.
+        String[] parts = value.split(splitterText);
+        if (parts.length > 0) return parts[0];
         return value;
     }
 }

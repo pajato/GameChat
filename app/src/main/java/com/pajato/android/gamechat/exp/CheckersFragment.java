@@ -85,11 +85,7 @@ public class CheckersFragment extends BaseGameFragment {
 
         if(buttonTag.equals(getString(R.string.NewGame))) {
             onNewGame();
-            int color;
-            if (player.equals(getString(R.string.player2))) {
-            } else {
-                player = getString(R.string.player1);
-            }
+            if (!player.equals(getString(R.string.player2))) player = getString(R.string.player1);
             String newGame = getString(R.string.NewGame);
             String message = String.format(Locale.US, "%s! %s's Turn!", newGame, player);
             NotificationManager.instance.notify(this, message, false);

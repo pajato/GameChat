@@ -17,8 +17,6 @@ http://www.gnu.org/licenses
 -->
 <!-- The main content for the no sign in fragment is a message imploring the User to sign in. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="48dp"
