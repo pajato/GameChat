@@ -10,7 +10,7 @@
         <ImageView style="@style/ChatListItemImage" android:id="@+id/chatIcon"
             android:tint="@color/colorPrimaryDark"
             android:contentDescription="@string/ListIconDesc"
-            app:srcCompat="@drawable/vd_casino_black_24px" />
+            app:srcCompat="@drawable/ic_casino_black_24dp" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

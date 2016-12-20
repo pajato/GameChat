@@ -30,5 +30,5 @@ http://www.gnu.org/licenses
     <ImageView style="@style/FabMenuIconWithTint"
         android:id="@+id/menuItemIcon"
         android:contentDescription="@string/MenuIconDesc"
-        tools:src="@drawable/ic_casino_black_24px" />
+        tools:src="@drawable/ic_casino_black_24dp" />
 </LinearLayout>

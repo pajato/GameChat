@@ -64,7 +64,7 @@ enum NotificationManager {
         int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
         snackbar.getView().setBackgroundColor(color);
         snackbar.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
-            .setCallback(new SnackbarChangeHandler(fragment))
+            .addCallback(new SnackbarChangeHandler(fragment))
             .show();
     }
 
