@@ -70,6 +70,7 @@ public enum RoomManager {
         // Ensure that a valid group key exists.  Abort quietly (for now) if not.
         // TODO: do something about a null group key.
         if (room.groupKey == null || room.key == null) return;
+        setRoomProfileWatcher(room.groupKey, room.key);
         String profilePath = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
         room.createTime = new Date().getTime();
         DBUtils.instance.updateChildren(profilePath, room.toMap());

@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -30,15 +29,8 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
-import com.pajato.android.gamechat.event.ClickEvent;
-
-import org.greenrobot.eventbus.Subscribe;
-
-import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
-import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
-import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
 
 /**
  * Create a room ...
@@ -59,26 +51,6 @@ public class CreateRoomFragment extends BaseCreateFragment {
     private Room mRoom;
 
     // Public instance methods.
-
-    /** Provide a click event handler. */
-    @Subscribe public void onClick(final ClickEvent event) {
-        // Log the event and determine if the event looks right.  Abort if it doesn't.
-        logEvent(String.format(Locale.US, "onClick (create room) event: {%s}.", event));
-        if (event == null || event.view == null) return;
-
-        // The event appears to be ok.  Update the room type.
-        switch (event.view.getId()) {
-            case R.id.PublicButton:
-                mRoom.type = PUBLIC;
-                break;
-            case R.id.PrivateButton:
-                mRoom.type = PRIVATE;
-                break;
-            default:
-                // Ignore everything else.
-                break;
-        }
-    }
 
     /** Establish the create time state. */
     @Override public void onInitialize() {
@@ -105,6 +77,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
         mRoom.name = getDefaultName();
         mRoom.groupKey = mGroup.key;
         mRoom.owner = mMember.id;
+        mRoom.type = Room.PUBLIC;
     }
 
     // Protected instance methods.
@@ -113,6 +86,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
     @Override protected void save(@NonNull Account account) {
         // Persist the configured room.
         mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
+        mRoom.memberIdList.add(account.id);
         RoomManager.instance.createRoomProfile(mRoom);
 
         // Update and persist the group adding the new room to it's room list.
@@ -130,4 +104,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
     /** Set the room name conditionally to the given value. */
     @Override protected void setName(final String value) {if (mRoom != null) mRoom.name = value;}
+
+    /** Implement the set type. */
+    @Override protected void setType(final int type) {mRoom.type = type;}
 }

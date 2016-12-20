@@ -88,6 +88,7 @@ public enum GroupManager {
         String profilePath = String.format(Locale.US, GROUP_PROFILE_PATH, group.key);
         group.createTime = new Date().getTime();
         DBUtils.instance.updateChildren(profilePath, group.toMap());
+        setGroupProfileWatcher(group.key);
     }
 
     /** Return a room push key to use with a subsequent room object persistence. */
