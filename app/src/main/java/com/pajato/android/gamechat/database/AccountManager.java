@@ -195,8 +195,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String id = event.account != null ? event.account.id : null;
         String cid = mCurrentAccountKey;
         if ((cid == null && id != null) || (cid != null && id == null)) {
-            // An authentication change has taken place.  Let the app know and finish by kicking off
-            // watchers on group the group profiles this account is privy to.
+            // An authentication change has taken place.  Let the app know.
             mCurrentAccountKey = id;
             mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));

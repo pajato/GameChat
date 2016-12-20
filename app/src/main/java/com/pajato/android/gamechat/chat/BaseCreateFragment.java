@@ -26,9 +26,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -49,6 +48,9 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     /** The current create type. */
     protected CreateType mCreateType;
 
+    /** Set the room or group type. */
+    protected abstract void setType(final int type);
+
     // Public instance methods.
 
     /** Establish the layout file to show that the app is offline due to network loss. */
@@ -62,7 +64,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
         // The event appears to be expected.  Confirm by finding the selector check view.
         switch (event.view.getId()) {
-            case R.id.saveButton:
+            case R.id.SaveButton:
                 // Process the group (validate and persist it) and be done with the activity.
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) save(account);
@@ -74,11 +76,17 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 EditText editText = (EditText) mLayout.findViewById(R.id.NameText);
                 if (editText != null) editText.setText("");
                 break;
-            case R.id.addMembers:
+            case R.id.AddMembers:
                 showFutureFeatureMessage(R.string.InviteMembersFeature);
                 break;
             case R.id.SettableIconButton:
                 showFutureFeatureMessage(R.string.SetCreateIconFeature);
+                break;
+            case R.id.PublicButton:
+                setType(Room.PUBLIC);
+                break;
+            case R.id.PrivateButton:
+                setType(Room.PRIVATE);
                 break;
             default:
                 // Ignore everything else.

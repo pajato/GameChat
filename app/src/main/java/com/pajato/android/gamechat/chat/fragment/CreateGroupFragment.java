@@ -94,10 +94,9 @@ public class CreateGroupFragment extends BaseCreateFragment {
         mGroup.memberList.add(account.id);
         GroupManager.instance.createGroupProfile(mGroup);
 
-        // Create and persist the default (common) room, update the group's room list, add the group
-        // key to the account's group id list, and update the member in the group.
+        // Create and persist the default (common) room.
         Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, PUBLIC);
-        account.joinList.add(groupKey);
+        room.memberIdList.add(account.id);
         RoomManager.instance.createRoomProfile(room);
 
         // Create and persist a member object to the database joined to the default room.
@@ -117,4 +116,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
     /** Set the name of the managed object conditionally to the given value. */
     @Override protected void setName(final String value) {if (mGroup != null) mGroup.name = value;}
+
+    /** Implement the set type as a nop. */
+    @Override protected void setType(final int type) {}
 }

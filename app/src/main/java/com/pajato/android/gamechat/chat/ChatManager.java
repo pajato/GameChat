@@ -87,7 +87,7 @@ public enum ChatManager {
         Map<String, Map<String, Map<String, Message>>> messageMap;
         messageMap = MessageManager.instance.messageMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
-        if (AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
+        if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
         if (messageMap.size() == 0) return new Dispatcher<>(noMessages);
 
         // Deal with a signed in User with multiple messages across more than one group.  Return
