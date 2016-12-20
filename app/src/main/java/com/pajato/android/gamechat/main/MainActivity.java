@@ -34,7 +34,7 @@ import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.chat.ChatFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatFragment;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;

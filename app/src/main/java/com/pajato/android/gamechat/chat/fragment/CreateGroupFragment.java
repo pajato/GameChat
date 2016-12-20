@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.RadioGroup;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;

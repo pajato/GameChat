@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;

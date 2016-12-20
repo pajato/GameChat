@@ -15,9 +15,10 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.fragment;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.ClickEvent;

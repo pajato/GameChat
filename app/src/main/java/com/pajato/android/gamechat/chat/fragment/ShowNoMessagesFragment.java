@@ -15,9 +15,11 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.fragment;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
