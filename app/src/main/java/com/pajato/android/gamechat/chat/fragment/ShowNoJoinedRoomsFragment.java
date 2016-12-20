@@ -15,27 +15,21 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.fragment;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
 
-import org.greenrobot.eventbus.Subscribe;
-
-import static com.pajato.android.gamechat.chat.ShowGroupListFragment.CHAT_GROUP_FAM_KEY;
-
-
-public class ShowOfflineFragment extends BaseChatFragment {
+/**
+ * Provide a fragment to handle the case where there are no joined rooms.
+ *
+ * @author Paul Michael Reilly
+ */
+public class ShowNoJoinedRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Provide a placeholder subscriber to satisfy the event bus contract. */
-    @Subscribe public void onClick(final ClickEvent event) {
-        // Use a logging placeholder.
-        logEvent("onClick (showOffline)");
-    }
+    /** Set the layout file. */
+    @Override public int getLayout() {return R.layout.fragment_chat_no_joined_rooms;}
 
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_chat_offline;}
 }

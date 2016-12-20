@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat;
+package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -24,6 +24,8 @@ import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.Dispatcher;

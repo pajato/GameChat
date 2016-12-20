@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatFragment;
 import com.pajato.android.gamechat.exp.GameFragment;
 
 import java.util.ArrayList;
