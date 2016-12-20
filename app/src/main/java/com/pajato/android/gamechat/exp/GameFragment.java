@@ -97,7 +97,7 @@ public class GameFragment extends BaseGameFragment {
             case R.id.IconChess:
                 type = chess;
                 break;
-            case R.drawable.vd_casino_black_24px:
+            case R.drawable.ic_casino_black_24dp:
                 // And do it for the rooms option buttons.
                 showFutureFeatureMessage(R.string.FutureSelectRooms);
                 FabManager.game.dismissMenu(this);

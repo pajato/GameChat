@@ -21,7 +21,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +31,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.main.CompatUtils;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import java.util.ArrayList;
@@ -44,10 +44,10 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEAD
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_ROOM_ITEM_TYPE;
 
 /**
@@ -206,7 +206,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        holder.text.setText(Html.fromHtml(item.text));
+        holder.text.setText(CompatUtils.fromHtml(item.text));
         setChatIcon(holder, item);
         holder.itemView.setTag(item);
 
