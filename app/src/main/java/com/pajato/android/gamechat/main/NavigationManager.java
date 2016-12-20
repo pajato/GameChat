@@ -38,7 +38,6 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Account;
-import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;

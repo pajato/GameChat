@@ -5,37 +5,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Provide a placeholder for testing the main activity class.
+ *
  * Created by pmr on 7/15/16.
  */
 public class MainActivityTest {
-    @Before
-    public void setUp() throws Exception {
+    @Before public void setUp() throws Exception {}
 
-    }
+    @After public void tearDown() throws Exception {}
 
-    @After
-    public void tearDown() throws Exception {
+    @Test public void onCreate() throws Exception {}
 
-    }
+    @Test public void onBackPressed() throws Exception {}
 
-    @Test
-    public void onCreate() throws Exception {
+    @Test public void onNavigationItemSelected() throws Exception {}
 
-    }
-
-    @Test
-    public void onBackPressed() throws Exception {
-
-    }
-
-    @Test
-    public void onNavigationItemSelected() throws Exception {
-
-    }
-
-    @Test
-    public void tileOnClick() throws Exception {
-
-    }
-
+    @Test public void tileOnClick() throws Exception {}
 }

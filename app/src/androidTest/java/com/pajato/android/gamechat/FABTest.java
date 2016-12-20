@@ -29,10 +29,5 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
         onView(withId(R.id.chatFab))
                 .check(matches(isDisplayed()))
                 .perform(click());
-        // Ensure that the speed dial Indicators are all visible.
-        onView(withId(R.id.chatFam))
-                .check(matches(isDisplayed()));
-        onView(withText(R.string.SwitchAccountMenuTitle))
-                .check(matches(isDisplayed()));
     }
 }

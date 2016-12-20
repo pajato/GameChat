@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.chat.adapter;
 
-import com.pajato.android.gamechat.R;
-
 /**
  * Provide a POJO to encapsulate a list view heading item for a room.
  *

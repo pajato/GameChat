@@ -175,7 +175,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Return TRUE iff there is a signed in User. */
     public boolean hasAccount() {
-        return getCurrentAccount() != null;
+        return mCurrentAccount != null;
     }
 
     /** Handle initialization by setting up the Firebase required list of registered classes. */
