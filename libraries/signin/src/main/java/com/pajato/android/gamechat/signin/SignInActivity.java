@@ -39,11 +39,11 @@ public class SignInActivity extends AppCompatActivity
 
     // Private instance variables.
 
-    /** Show progress during sign in. */
-    private ProgressDialog mProgressDialog;
-
     // The Google API client.
     private GoogleApiClient mGoogleApiClient;
+
+    /** Show progress during sign in. */
+    private ProgressDialog mProgressDialog;
 
     // Public instance methods.
 
@@ -52,25 +52,6 @@ public class SignInActivity extends AppCompatActivity
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
-    }
-
-    /** On a destroy Activity lifecycle event lose the progress dialog. */
-    @Override public void onDestroy() {
-        //hideProgressDialog();
-        mProgressDialog.dismiss();
-        super.onDestroy();
-    }
-
-    /** Use the Activity lifecycle to start the Firebase authentication listener. */
-    @Override public void onStart() {
-        super.onStart();
-        FirebaseAuth.getInstance().addAuthStateListener(this);
-    }
-
-    /** Use the Activity lifecycle to stop the Firebase authentication listener. */
-    @Override public void onStop() {
-        super.onStop();
-        FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
     /** Deal with the button clicks. */
@@ -90,28 +71,6 @@ public class SignInActivity extends AppCompatActivity
             // User is signed out
             Log.d(TAG, "onAuthStateChanged:signed_out");
             signOut();
-        }
-    }
-
-    /** Process the result returned from the Google sign in activity. */
-    @Override protected void onActivityResult(final int requestCode, final int resultCode,
-                                              final Intent intent) {
-        // Determine if the result is valid.
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == RC_SIGN_IN) {
-            // The result is valid.  Determine if the sign in succeeded.
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-            } else {
-                // Deal with a sign in failure by logging a message and updating the UI.
-                final String format = "Google sign in failed with result code/message: {%s/%s}.";
-                String message = result.getStatus().toString();
-                Log.e(TAG, String.format(Locale.US, format, resultCode, message));
-                updateUI();
-            }
         }
     }
 
@@ -146,6 +105,28 @@ public class SignInActivity extends AppCompatActivity
 
     // Protected instance methods.
 
+    /** Process the result returned from the Google sign in activity. */
+    @Override protected void onActivityResult(final int requestCode, final int resultCode,
+                                              final Intent intent) {
+        // Determine if the result is valid.
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == RC_SIGN_IN) {
+            // The result is valid.  Determine if the sign in succeeded.
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
+            if (result.isSuccess()) {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+            } else {
+                // Deal with a sign in failure by logging a message and updating the UI.
+                final String format = "Google sign in failed with result code/message: {%s/%s}.";
+                String message = result.getStatus().toString();
+                Log.e(TAG, String.format(Locale.US, format, resultCode, message));
+                updateUI();
+            }
+        }
+    }
+
     /** Main activity setup code. */
     @Override protected void onCreate(Bundle savedInstanceState) {
         // Establish the main layout, status and detail views and setup the click listeners on the
@@ -155,16 +136,52 @@ public class SignInActivity extends AppCompatActivity
         findViewById(R.id.google_provider_button).setOnClickListener(this);
     }
 
+    /** On a destroy Activity lifecycle event lose the progress dialog. */
+    @Override protected void onDestroy() {
+        //hideProgressDialog();
+        mProgressDialog.dismiss();
+        super.onDestroy();
+    }
+
+    /** Use the Activity lifecycle to start the Firebase authentication listener. */
+    @Override protected void onStart() {
+        super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(this);
+    }
+
+    /** Use the Activity lifecycle to stop the Firebase authentication listener. */
+    @Override protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
+    }
+
     // Private instance methods.
+
+    /** Return a set of google sign in options, possibly including a preferred account. */
+    private GoogleSignInOptions getGoogleSignInOptions(final String accountName) {
+        if (accountName == null)
+            return new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        else
+            return new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .setAccountName(accountName)
+                .build();
+    }
 
     /** Handle a Google sign in by kicking of the Google API sign in activity. */
     private void googleSignIn() {
+        googleSignIn(null);
+    }
+
+    /** Handle a Google sign in with a given account name (possibly null). */
+    private void googleSignIn(final String accountName) {
         // Configure a Google sign in, setup the Google API client and start the Google sign in
         // activity.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build();
+        GoogleSignInOptions gso = getGoogleSignInOptions(accountName);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
             .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
             .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
