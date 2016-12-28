@@ -75,14 +75,6 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.github.bumptech.glide:glide:3.5.2'
 
-    // Project Lombok: https://projectlombok.org used to significantly
-    // reduce boilerplate code.
-    provided 'javax.annotation:jsr250-api:1.0'
-    provided "org.projectlombok:lombok:$rootProject.ext.lombokVersion"
-    apt "org.projectlombok:lombok:$rootProject.ext.lombokVersion"
-
-    //androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
-
     // Android Testing Support Library's runner and rules. In the
     // following, exclude the support annotations library to resolve a
     // transitive dependency issue between test and production
