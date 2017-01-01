@@ -7,7 +7,7 @@ import com.pajato.android.gamechat.R;
 import java.util.ArrayList;
 
 /**
- * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
+ * A simple P.O.J.O. class that keeps track of a chess_exp pieces type and the team it is on.
  */
 class ChessPiece {
     static final int KING = 0;
@@ -67,7 +67,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the King. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. The King's movement is
+     * locations a piece can enter without breaking the rules of chess_exp. The King's movement is
      * limited, and when the King of a side is captured, that side loses the game. A King can move
      * in any direction, but only a single square away. A King may move into the space of another
      * piece only if it is capturing that piece.
@@ -166,7 +166,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the Queen. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. In addition to all four
+     * locations a piece can enter without breaking the rules of chess_exp. In addition to all four
      * diagonals (up/left, up/right, down/right, and down/left), Queens can move in the four
      * cardinal directions (up, down, left, and right), but cannot move past other pieces. A queen
      * may take the place of another piece if they are capturing. They functionally perform as a
@@ -184,7 +184,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the Bishop. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. Bishops can move across
+     * locations a piece can enter without breaking the rules of chess_exp. Bishops can move across
      * the diagonals (up/right, down/right, down/left, and up/right), but cannot move past other
      * pieces. A bishop can take the place of another piece if they are capturing it.
      *
@@ -290,7 +290,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the Pawn. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. Pawns can move forward
+     * locations a piece can enter without breaking the rules of chess_exp. Pawns can move forward
      * if there is no piece ahead of them, and diagonally forward if they are capturing a piece.
      *
      * @param threatRange the ArrayList that contains the threat range of the pawn.
@@ -359,7 +359,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the Knight. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. Knights must move in an
+     * locations a piece can enter without breaking the rules of chess_exp. Knights must move in an
      * L shape: two squares in one direction and one in another. They can jump other pieces.
      *
      * @param threatRange the ArrayList that contains the threat range of the knight piece.
@@ -407,7 +407,7 @@ class ChessPiece {
 
     /**
      * Gets the "threat range" of the Rook. A "threat range" is the full possible amount of
-     * locations a piece can enter without breaking the rules of chess. Rooks can move in the
+     * locations a piece can enter without breaking the rules of chess_exp. Rooks can move in the
      * four cardinal directions (up, down, left, and right), but cannot move past other pieces. A
      * rook can take the place of another piece only if it is capturing that piece.
      *

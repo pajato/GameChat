@@ -23,9 +23,9 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.exp.GameFragment.GAME_HOME_FAM_KEY;
+import static com.pajato.android.gamechat.exp.ExperienceFragment.GAME_HOME_FAM_KEY;
 
-public class ShowOfflineFragment extends BaseGameFragment {
+public class ShowOfflineFragment extends BaseExperienceFragment {
 
     // Public instance methods.
 

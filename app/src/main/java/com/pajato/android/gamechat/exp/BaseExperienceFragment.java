@@ -24,15 +24,25 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.main.NetworkManager;
 
+import java.util.List;
 import java.util.Locale;
+
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All fragment lifecycle events are
@@ -40,12 +50,12 @@ import java.util.Locale;
  *
  * @author Paul Michael Reilly
  */
-public abstract class BaseGameFragment extends BaseFragment {
+public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = BaseGameFragment.class.getSimpleName();
+    private static final String TAG = BaseExperienceFragment.class.getSimpleName();
 
     /** The lifecycle event format string with no bundle. */
     private static final String FORMAT_NO_BUNDLE =
@@ -67,7 +77,7 @@ public abstract class BaseGameFragment extends BaseFragment {
     // Public constructors.
 
     /** Provide a default, no args constructor. */
-    public BaseGameFragment() {}
+    public BaseExperienceFragment() {}
 
     // Public instance methods.
 
@@ -76,14 +86,54 @@ public abstract class BaseGameFragment extends BaseFragment {
         return mTurn;
     }
 
-    /** Remove this after dealing with the chess and checkers fragments. */
+    /** Remove this after dealing with the chess_exp and checkers_exp fragments. */
     abstract public void messageHandler(final String message);
+
+    /** Create a new experience to be displayed in this fragment. */
+//    abstract protected void createExperience(@NonNull final Context context,
+//                                    @NonNull final Dispatcher<ExpFragmentType, ExpProfile> dispatcher);
 
     // Protected instance methods.
 
-    /** Create a new experience to be displayed in this fragment. */
-    protected void createExperience(final Context context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
-        // nop; the subclass should handle this.
+    /** Return either a null placeholder key value or a sentinel value as the experience key. */
+    protected String getExperienceKey() {
+        // Determine if there is a signed in account.  If so use the null placeholder.
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        if (accountId != null) return null;
+
+        // There is no signed in User.  Return one of the two sentinel values associated with being
+        // either signed out or without access to a network.
+        final boolean ONLINE = NetworkManager.instance.isConnected();
+        return ONLINE ? SIGNED_OUT_EXPERIENCE_KEY : OFFLINE_EXPERIENCE_KEY;
+    }
+
+        // Return either a signed in User id or a sentinel value as the owner id. */
+    protected String getOwnerId() {
+        // Determine if there is a signed in account.  If so return it.
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        if (accountId != null) return accountId;
+
+        // There is no signed in User.  Return one of the two sentinel values associated with being
+        // either signed out or without access to a network.
+        return NetworkManager.instance.isConnected() ? SIGNED_OUT_OWNER_ID : OFFLINE_OWNER_ID;
+    }
+
+    /** Return a name for the player by using the given account or a default. */
+    protected String getPlayerName(final Account player, final String defaultName) {
+        // Determine if there is an account to use.  Return the default name if not.
+        if (player == null) return defaultName;
+
+        // There is an account.  Use the first name for the game.
+        return player.getNickName();
+    }
+
+    /** Return the account associated with the given index, null if there is no such account. */
+    protected Account getPlayer(final List<Account> players, final int index) {
+        // Determine if there is such an account, returning null if not.
+        if (players == null || index < 0 || index >= players.size()) return null;
+
+        // There is an account so return it.
+        return players.get(index);
     }
 
     /** Return TRUE iff the User has requested to play again. */
@@ -146,6 +196,8 @@ public abstract class BaseGameFragment extends BaseFragment {
             }
         } else
             // Create a new experience.
-            createExperience(context, dispatcher);
+            if(this instanceof BaseGameExpFragment) {
+                ((BaseGameExpFragment)this).createExperience(context, dispatcher);
+            }
     }
 }

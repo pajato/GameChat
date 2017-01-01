@@ -55,7 +55,7 @@ public enum GameManager {
     // Private instance variables.
 
     /** The list of all fragments. */
-    private BaseGameFragment[] mFragmentList = new BaseGameFragment[ExpFragmentType.values().length];
+    private BaseExperienceFragment[] mFragmentList = new BaseExperienceFragment[ExpFragmentType.values().length];
 
     /** The current fragment. */
     private int mCurrentFragment;
@@ -74,7 +74,7 @@ public enum GameManager {
     }
 
     /** Return the current fragment being shown in the experience panel. */
-    public BaseGameFragment getFragment(final int index) {
+    public BaseExperienceFragment getFragment(final int index) {
         return mFragmentList[index];
     }
 
@@ -93,7 +93,7 @@ public enum GameManager {
                 return getTurn(index, context, R.string.xValue, R.string.oValue);
             case checkers:
             case chess:
-                // For chess and checkers, we need either primary or secondary player strings.
+                // For chess_exp and checkers_exp, we need either primary or secondary player strings.
                 return getTurn(index, context, R.string.player1, R.string.player2);
         }
     }

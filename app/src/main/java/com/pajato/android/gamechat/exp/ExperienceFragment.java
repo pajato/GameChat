@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,11 +26,14 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -46,7 +51,7 @@ import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
  * @author Bryan Scott
  * @author Paul Reilly
  */
-public class GameFragment extends BaseGameFragment {
+public class ExperienceFragment extends BaseExperienceFragment {
 
     // Public constants.
 
@@ -110,7 +115,6 @@ public class GameFragment extends BaseGameFragment {
                 break;
         }
 
-        // TODO: figure out how to get the experience into the db.
         if (type != null) GameManager.instance.startNextFragment(getActivity(), type);
     }
 

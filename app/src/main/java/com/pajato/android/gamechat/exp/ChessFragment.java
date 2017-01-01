@@ -1,32 +1,62 @@
 package com.pajato.android.gamechat.exp;
 
+import android.content.Context;
 import android.graphics.PorterDuff;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.exp.model.Board;
+import com.pajato.android.gamechat.exp.model.Chess;
+import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.exp.model.TicTacToe;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
+import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.exp.ExpType.chess_exp;
+import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
 
 /**
  * A simple Chess game for use in GameChat.
  *
  * @author Bryan Scott
  */
-public class ChessFragment extends BaseGameFragment {
+public class ChessFragment extends BaseGameExpFragment implements View.OnClickListener {
 
     // Board Management Objects
     private GridLayout mBoard;
@@ -43,23 +73,62 @@ public class ChessFragment extends BaseGameFragment {
     private boolean mSecondaryKingSideRookHasMoved;
     private boolean mSecondaryKingHasMoved;
 
+    /** The lookup key for the FAB chess_exp memu. */
+    public static final String CHESS_FAM_KEY = "ChessFamKey";
+
+    /** logcat TAG */
+    private static final String TAG = ChessFragment.class.getSimpleName();
+
     // Public instance methods.
 
-    /** Set the layout file. */
+    /** Set the layout file. Checkers and chess are the same, so we intentionally use fragment_checkers */
     @Override public int getLayout() {return R.layout.fragment_checkers;}
 
-    /** Handle button clicks ... placeholder. */
-    @Subscribe public void onClick(final ClickEvent event) {}
+    /** Placeholder while message handler stays relevant for chess_exp and checkers_exp. */
+    @Override public void messageHandler(final String msg) {}
+
+    /** Handle a FAM or Snackbar Chess click event. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Determine if this event is for this fragment.  Abort if not.
+        if (GameManager.instance.getCurrent() != chess.ordinal()) return;
+
+        // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
+        // handle a snackbar action first.
+        Object tag = event.view.getTag();
+        if (isPlayAgain(tag, TAG)) {
+            // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
+            // setup a new game.
+            FabManager.game.dismissMenu(this);
+            handleNewGame();
+        }
+    }
+
+    /** Handle a click on the chess board by verifying the click and handing it off. */
+    @Override public void onClick(final View view) {
+        Object tag = view.getTag();
+        // TODO: we probably don't have buttons starting with 'button' here
+        if (tag instanceof String && ((String) tag).startsWith("button"))
+            handleTileClick((String) tag);
+    }
+
+    /** Handle an experience posting event to see if this is a chess experience. */
+    @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
+        // Check the payload to see if this is not chess.  Abort if not.
+        if (event.experience == null || event.experience.getExperienceType() != chess_exp) return;
+
+        // The experience is a chess experience.  Start the game.
+        mExperience = event.experience;
+        resume();
+    }
 
     @Override public void onInitialize() {
         // Setup the board and start a new game to create the board.
         super.onInitialize();
+        FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
+
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();
-
-        // Return the FAB to Visibility
-        mLayout.findViewById(R.id.gameFab).setVisibility(View.VISIBLE);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -71,37 +140,329 @@ public class ChessFragment extends BaseGameFragment {
                 PorterDuff.Mode.SRC_ATOP);
     }
 
+    /** Handle taking the foreground by updating the UI based on the current experience. */
+    @Override public void onResume() {
+        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
+        // present a spinner.  When an experience is posted by the app event manager, the game can
+        // be shown
+        super.onResume();
+        FabManager.game.setMenu(this, CHESS_FAM_KEY);
+        resume();
+    }
+
+    /** Return a default, partially populated, Chess experience. */
+    protected void createExperience(final Context context, final List<Account> playerAccounts) {
+        // Setup the default key, players, and name.
+        String key = getExperienceKey();
+        List<Player> players = getDefaultPlayers(context, playerAccounts);
+        String name1 = players.get(0).name;
+        String name2 = players.get(1).name;
+        long tstamp = new Date().getTime();
+        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, tstamp);
+
+        // Set up the default group and room keys, the owner id and return the value.
+        String groupKey = GroupManager.instance.getGroupKey();
+        String roomKey = RoomManager.instance.getRoomKey(groupKey);
+        String id = getOwnerId();
+        // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
+        Chess model = new Chess(key, id, 0, name, tstamp, groupKey, roomKey, players);
+        ExperienceManager.instance.createExperience(model);
+    }
+
+    /** Return a possibly null list of player information for a chess experience (always 2 players) */
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+        // Determine if this is an offline experience in which no accounts are provided.
+        Account player1 = AccountManager.instance.getCurrentAccount();
+        if (player1 == null) return null;
+
+        // This is an online experience.  Use the current signed in User as the first player.
+        List<Account> players = new ArrayList<>();
+        players.add(player1);
+
+        // Determine the second account, if any, based on the room.
+        String key = dispatcher.roomKey;
+        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
+        int type = room != null ? room.type : -1;
+        switch (type) {
+            //case MEMBER:
+            // Handle another User by providing their account.
+            //    break;
+            default:
+                // Only one online player.  Just return.
+                break;
+        }
+
+        return players;
+    }
+
+    /** Return a list of default Chess players. */
+    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+        List<Player> result = new ArrayList<>();
+        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String team = context.getString(R.string.teamRed);
+        result.add(new Player(name, "", team));
+        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        team = context.getString(R.string.teamBlack);
+        result.add(new Player(name, "", team));
+        return result;
+    }
+
+    /** Return a done message text to show in a snackbar.  The given model provides the state. */
+    private String getDoneMessage(final Chess model) {
+        // Determine if there is a winner.  If not, return the "tie" message.
+        String name = model.getWinningPlayerName();
+        if (name == null) return getString(R.string.TieMessageNotification);
+
+        // There was a winner.  Return a congratulatory message.
+        String format = getString(R.string.WinMessageNotificationFormat);
+        return String.format(Locale.getDefault(), format, name);
+    }
+
+    /** Return the Chess model class, null if it does not exist. */
+    private Chess getModel() {
+        if (mExperience == null || !(mExperience instanceof Chess)) return null;
+        return (Chess) mExperience;
+    }
+
+    /** Return the game state after applying the given button move to the data model. */
+    private int getState(@NonNull final Chess model, String buttonTag) {
+       // Check to see if the game is a tie, with all moves exhausted.
+        // TODO: WHAT TO DO HERE
+//        if (model.state == ACTIVE && model.board.grid.size() == 9) return Chess.TIE;
+
+        // Not a tie.  Determine the winner state based on the current play given by the button tag.
+//        int value = model.getSymbolValue();
+//        if (model.state == ACTIVE) return getState(model, value, buttonTag);
+
+    // TODO: Complete this!!!!
+
+        return model.state;
+    }
+
+    /** Return the game state after applying the given button move to the data model. */
+    private int getState(@NonNull final Chess model, final int value, final String buttonTag) {
+        // TODO: IMPLEMENT THIS
+        // Case on the button tag to update the appropriate tallies.
+        switch (buttonTag) {
+            default: break;
+        }
+
+        return model.state;
+    }
+
+    /** Handle a new game by resetting the data model. */
+    private void handleNewGame() {
+        // Ensure that the data model exists and is valid.
+        Chess model = getModel();
+        if (model == null) {
+            Log.e(TAG, "Null Chess data model.", new Throwable());
+            return;
+        }
+
+        // Reset the data model, update the database and clear the notification manager one-shot.
+        // TODO: What should we do here??
+//        model.board = null;
+        model.state = ACTIVE;
+        ExperienceManager.instance.updateExperience(mExperience);
+    }
+
+    /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
+    private void handleTileClick(final String buttonTag) {
+        // Ensure that the click occurred on a grid button and that the data model is not empty.
+        // Abort if not.
+        View view = mLayout.findViewWithTag(buttonTag);
+        Chess model = getModel();
+        // TODO: Implement game playing !!!
+//        if (view == null || !(view instanceof Button) || model == null) return;
+//
+//        // Handle the button click based on the current state.
+//        Button button = (Button) view;
+//        switch (model.state) {
+//            case ACTIVE:
+//                // Ensure that the click occurred on an empty button.
+//                if (button.getText().length() != 0) {
+//                    // The click occurred on a played button.  Warn the User and ignore the play.
+//                    NotificationManager.instance.notify(this, R.string.InvalidButton);
+//                    return;
+//                }
+//                break;
+//            default:
+//                // In all other cases, clear the board to start a new game.
+//                initBoard(model);
+//                model.board = null;
+//                model.state = ACTIVE;
+//                NotificationManager.instance.notify(this, R.string.StartNewGame);
+//                break;
+//        }
+//
+//        // Update the database with the collected changes.
+//        if (model.board == null) model.board = new Board();
+//        model.board.grid.put(buttonTag, model.getSymbolText());
+//        model.state = getState(model, buttonTag);
+//        model.setWinCount();
+        model.toggleTurn();
+        ExperienceManager.instance.updateExperience(mExperience);
+    }
+
+    /** Initialize the board model and values and clear the winner text */
+    private void initBoard(@NonNull final Chess model) {
+        // TODO: IMPLEMENT THIS
+    }
+
+    /** Process a resumption by testing and waiting for the experience. */
+    private void resume() {
+        if (mExperience == null) {
+            // Disable the layout and startup the spinner.
+            mLayout.setVisibility(View.GONE);
+            String title = "Chess";
+            String message = "Waiting for the database to provide the game...";
+            ProgressManager.instance.show(getContext(), title, message);
+        } else {
+            // Start the game and update the views using the current state of the experience.
+            mLayout.setVisibility(View.VISIBLE);
+            setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
+            ProgressManager.instance.hide();
+            updateExperience();
+        }
+    }
+
+    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
+    private void setPlayerIcons(final boolean turn) {
+        // TODO: Determine if we need this & implement
+        // Alternate the decorations on each player symbol.
+        if (turn)
+            // Make player1's decorations the more prominent.
+            setPlayerIcons(R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1,
+                    R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2);
+        else
+            // Make player2's decorations the more prominent.
+            setPlayerIcons(R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2,
+                    R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
+    }
+
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.chess_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    /**
-     * A stand-in method that allows for creating a new game via game manager. Translates the
-     * messages sent by the event system and handles the individual clicks based on messages sent.
-     *
-     * @param msg the message to be handled.
-     */
-    @Override public void messageHandler(final String msg) {
-        //TODO: Replace with the event bus system.
-        Scanner input = new Scanner(msg);
-        String player = input.nextLine();
-        String buttonTag = input.nextLine();
-        input.close();
+    /** Manage a particular player's symbol decorations. */
+    private void setPlayerIcons(final int large, final int largeLeft, final int largeRight,
+                                final int small, final int smallLeft, final int smallRight) {
+        final float LARGE = 60.0f;
+        final float SMALL = 45.0f;
 
-        if(buttonTag.equals(getString(R.string.NewGame))) {
-            onNewGame();
+        // Collect all the pertinent textViews.
+        TextView tvLarge = (TextView) getActivity().findViewById(large);
+        TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
+        TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
+        TextView tvSmall = (TextView) getActivity().findViewById(small);
+        TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
+        TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
 
-            if(player.equals(getString(R.string.player2))) player = getString(R.string.player1);
-            handleTurnChange();
-            NotificationManager.instance.notify(this, getString(R.string.NewGame) + " "
-                    + player + "'s Turn!", false);
+        // Deal with the tvLarger symbol's decorations.
+        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
+        tvLarge.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+        tvLargeLeft.setVisibility(View.VISIBLE);
+        tvLargeRight.setVisibility(View.VISIBLE);
+
+        // Deal with the tvSmall symbol's decorations.
+        tvSmall.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
+        tvSmall.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+        tvSmallLeft.setVisibility(View.INVISIBLE);
+        tvSmallRight.setVisibility(View.INVISIBLE);
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerName(final int resId, final int index, final Chess model) {
+        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
+        // does.
+        TextView name = (TextView) mLayout.findViewById(resId);
+        if (name == null) return;
+        name.setText(model.players.get(index).name);
+    }
+
+    /** Set the team (red or black) for a given player. */
+    // TODO: This probably needs some rework to get the team color figured out...
+    private void setPlayerTeam(final int resId, final int index, final Chess model) {
+        // Ensure that the team text view exists.  Abort if not, set the value from the data
+        // model if it does.
+        TextView symbol = (TextView) mLayout.findViewById(resId);
+        if (symbol == null) return;
+        symbol.setText(model.players.get(index).team);
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerWinCount(final int resId, final int index, final Chess model) {
+        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
+        // if it does.
+        TextView winCount = (TextView) mLayout.findViewById(resId);
+        if (winCount == null) return;
+        winCount.setText(String.valueOf(model.players.get(index).winCount));
+    }
+
+    /** Update the game state. */
+    private void setState(final Chess model) {
+        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
+        String message = null;
+        switch (model.state) {
+            case Chess.RED_WINS:
+            case Chess.BLACK_WINS:
+                String name = model.getWinningPlayerName();
+                String format = "%1$s Wins!";
+                message = String.format(Locale.getDefault(), format, name);
+                break;
+            case Chess.TIE:
+                message = "Stalemate!";
+                break;
+            default:
+                // keep playing or waiting for a new game
+                break;
         }
+        // Determine if the game has ended (winner or time). Abort if not.
+        if (message == null) return;
+
+        // Update the UI to celebrate the winner or a tie and update the database game state to
+        // pending.
+        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        winner.setText(message);
+        winner.setVisibility(View.VISIBLE);
+        NotificationManager.instance.notify(this, getDoneMessage(model), true);
+        model.state = Chess.PENDING;
+        ExperienceManager.instance.updateExperience(mExperience);
+    }
+
+    /** Set up the game board based on the data model state. */
+    private void setGameBoard(@NonNull final Chess model) {
+        // Determine if the model has any pieces to put on the board.  If not reset the board.
+        // TODO: figure this out!
+        // if (model.board == null)
+        //initBoard(model);
+        // else .. TODO: finish this
 
     }
 
+    /** Update the UI using the current experience state from the database. */
+    private void updateExperience() {
+        // Ensure that a valid experience exists.  Abort if not.
+        if (mExperience == null || !(mExperience instanceof Chess)) return;
+
+        // A valid experience is available. Use the data model to populate the UI and check if the
+        // game is finished.
+        Chess model = (Chess) mExperience;
+        setPlayerName(R.id.player1Name, 0, model);
+        setPlayerName(R.id.player2Name, 1, model);
+        setPlayerWinCount(R.id.player1WinCount, 0, model);
+        setPlayerWinCount(R.id.player2WinCount, 1, model);
+//        setPlayerSymbol(R.id.player1Symbol, 0, model);
+//        setPlayerSymbol(R.id.player2Symbol, 1, model);
+        setPlayerIcons(model.turn);
+        setGameBoard(model);
+        setState(model);
+    }
+
+
     /**
-     * Handles a new game of checkers, resetting the board.
+     * Handles a new game of checkers_exp, resetting the board.
      */
     private void onNewGame() {
         mBoard.removeAllViews();
@@ -123,7 +484,7 @@ public class ChessFragment extends BaseGameFragment {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = mLayout.findViewById(R.id.gameFragmentContainer)
+            int screenWidth = mLayout.findViewById(R.id.checkers_panel)
                     .getWidth();
             int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
@@ -608,6 +969,16 @@ public class ChessFragment extends BaseGameFragment {
                 }
             }
         }
+    }
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getChessMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
+        return menu;
     }
 
 }

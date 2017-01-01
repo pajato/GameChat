@@ -42,7 +42,6 @@ import com.pajato.android.gamechat.exp.model.Board;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
-import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -53,9 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
-import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
@@ -68,8 +65,6 @@ import static com.pajato.android.gamechat.exp.model.Board.MID_ROW;
 import static com.pajato.android.gamechat.exp.model.Board.RIGHT_DIAG;
 import static com.pajato.android.gamechat.exp.model.Board.TOP_ROW;
 import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
-import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
-import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -79,7 +74,7 @@ import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
  *
  * @author Bryan Scott
  */
-public class TTTFragment extends BaseGameFragment implements View.OnClickListener {
+public class TTTFragment extends BaseGameExpFragment implements View.OnClickListener {
 
     // Public constants.
 
@@ -96,7 +91,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game_ttt;}
 
-    /** Placeholder while message handler stays relevant for chess and checkers. */
+    /** Placeholder while message handler stays relevant for chess_exp and checkers_exp. */
     @Override public void messageHandler(final String msg) {}
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
@@ -125,14 +120,14 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Handle an experience posting event to see if this is a tictactoe experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != ttt) return;
+        if (event.experience == null || event.experience.getExperienceType() != ttt_exp) return;
 
         // The experience is a tictactoe experience.  Start the game.
         mExperience = event.experience;
         resume();
     }
 
-    /** Initialie by setting up tile click handlers on the board. */
+    /** Initialize by setting up tile click handlers on the board. */
     @Override public void onInitialize() {
         // Place an click listener on all nine buttons by iterating over all nine buttons.
         super.onInitialize();
@@ -162,19 +157,8 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     // Protected instance methods.
 
-    /** Return an experience for a given dispatcher instance. */
-    @Override
-    protected void createExperience(@NonNull final Context context,
-                                    @NonNull final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
-        // Set up the players and persist the game.
-        List<Account> players = getPlayers(dispatcher);
-        createExperience(context, players);
-    }
-
-    // Private instance methods.
-
     /** Return a default, partially populated, TicTacToe experience. */
-    private void createExperience(final Context context, final List<Account> playerAccounts) {
+    protected void createExperience(final Context context, final List<Account> playerAccounts) {
         // Setup the default key, players, and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);
@@ -191,48 +175,8 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         ExperienceManager.instance.createExperience(model);
     }
 
-    /** Return a done message text to show in a snackbar.  The given model provides the state. */
-    private String getDoneMessage(final TicTacToe model) {
-        // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWinningPlayerName();
-        if (name == null) return getString(R.string.TieMessageNotification);
-
-        // There was a winner.  Return a congratulatory message.
-        String format = getString(R.string.WinMessageNotificationFormat);
-        return String.format(Locale.getDefault(), format, name);
-    }
-
-    /** Return either a null placeholder key value or a sentinel value as the experience key. */
-    private String getExperienceKey() {
-        // Determine if there is a signed in account.  If so use the null placeholder.
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (accountId != null) return null;
-
-        // There is no signed in User.  Return one of the two sentinel values associated with being
-        // either signed out or without access to a network.
-        final boolean ONLINE = NetworkManager.instance.isConnected();
-        return ONLINE ? SIGNED_OUT_EXPERIENCE_KEY : OFFLINE_EXPERIENCE_KEY;
-    }
-
-    /** Return the TicTacToe model class, null if it does not exist. */
-    private TicTacToe getModel() {
-        if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
-        return (TicTacToe) mExperience;
-    }
-
-    // Return either a signed in User id or a sentinel value as the owner id. */
-    private String getOwnerId() {
-        // Determine if there is a signed in account.  If so return it.
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (accountId != null) return accountId;
-
-        // There is no signed in User.  Return one of the two sentinel values associated with being
-        // either signed out or without access to a network.
-        return NetworkManager.instance.isConnected() ? SIGNED_OUT_OWNER_ID : OFFLINE_OWNER_ID;
-    }
-
     /** Return a possibly null list of player information for a two participant experience. */
-    private List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -247,7 +191,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         int type = room != null ? room.type : -1;
         switch (type) {
             //case MEMBER:
-                // Handle another User by providing their account.
+            // Handle another User by providing their account.
             //    break;
             default:
                 // Only one online player.  Just return.
@@ -258,34 +202,35 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     }
 
     /** Return a list of default TicTacToe players. */
-    private List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), "Player1");
+        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
         String symbol = context.getString(R.string.xValue);
-        result.add(new Player(name, symbol));
+        result.add(new Player(name, symbol, ""));
         name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
         symbol = context.getString(R.string.oValue);
-        result.add(new Player(name, symbol));
+        result.add(new Player(name, symbol, ""));
 
         return result;
     }
 
-    /** Return the account associated with the given index, null if there is no such account. */
-    private Account getPlayer(final List<Account> players, final int index) {
-        // Determine if there is such an account, returning null if not.
-        if (players == null || index < 0 || index >= players.size()) return null;
+    // Private instance methods.
 
-        // There is an account so return it.
-        return players.get(index);
+    /** Return a done message text to show in a snackbar.  The given model provides the state. */
+    private String getDoneMessage(final TicTacToe model) {
+        // Determine if there is a winner.  If not, return the "tie" message.
+        String name = model.getWinningPlayerName();
+        if (name == null) return getString(R.string.TieMessageNotification);
+
+        // There was a winner.  Return a congratulatory message.
+        String format = getString(R.string.WinMessageNotificationFormat);
+        return String.format(Locale.getDefault(), format, name);
     }
 
-    /** Return a name for the player by using the given account or a default. */
-    private String getPlayerName(final Account player, final String defaultName) {
-        // Determine if there is an account to use.  Return the default name if not.
-        if (player == null) return defaultName;
-
-        // There is an account.  Use the first name for the game.
-        return player.getNickName();
+    /** Return the TicTacToe model class, null if it does not exist. */
+    private TicTacToe getModel() {
+        if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
+        return (TicTacToe) mExperience;
     }
 
     /** Return the game state after applying the given button move to the data model. */

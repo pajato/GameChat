@@ -30,16 +30,16 @@ public enum ExpFragmentType {
     roomList (ShowExpRoomListFragment.class),
     expList (ShowExpListFragment.class),
     tictactoeList (ShowExpTypeListFragment.class),
-    tictactoe (TTTFragment.class, ExpType.ttt, tictactoeList),
+    tictactoe (TTTFragment.class, ExpType.ttt_exp, tictactoeList),
     checkersList (ShowExpTypeListFragment.class),
-    checkers (CheckersFragment.class, ExpType.checkers, checkersList),
+    checkers (CheckersFragment.class, ExpType.checkers_exp, checkersList),
     chessList(ShowExpTypeListFragment.class),
-    chess (ChessFragment.class, ExpType.chess, chessList);
+    chess (ChessFragment.class, ExpType.chess_exp, chessList);
 
     // Private instance variables.
 
     /** The fragment base class for the type. */
-    public  Class<? extends BaseGameFragment> fragmentClass;
+    public  Class<? extends BaseExperienceFragment> fragmentClass;
 
     /** The experience type for this value. */
     public ExpType expType;
@@ -48,12 +48,12 @@ public enum ExpFragmentType {
     public ExpFragmentType showType;
 
     /** Build an instance with only a given fragment class. */
-    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass) {
+    ExpFragmentType(final Class<? extends BaseExperienceFragment> fragmentClass) {
         this.fragmentClass = fragmentClass;
     }
 
     /** Build an instance with both a given fragment class and an experience type. */
-    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType,
+    ExpFragmentType(final Class<? extends BaseExperienceFragment> fragmentClass, final ExpType expType,
                     final ExpFragmentType showType) {
         this.fragmentClass = fragmentClass;
         this.expType = expType;

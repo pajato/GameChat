@@ -26,9 +26,9 @@ import com.pajato.android.gamechat.R;
  * @author Paul Michael Reilly
  */
 public enum ExpType {
-    checkers (R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
-    chess (R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
-    ttt (R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
+    checkers_exp(R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
+    chess_exp(R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
+    ttt_exp(R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
 
     // Instance variables.
 
