@@ -33,6 +33,7 @@ import android.view.View;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.fragment.ChatFragment;
 import com.pajato.android.gamechat.database.DBUtils;
@@ -198,33 +199,11 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    /**
-     * Set up the app per the characteristics of the running device.
-     *
-     * @see android.app.Activity#onCreate(Bundle)
-     */
+    /** Set up the app per the characteristics of the running device. */
     @Override protected void onCreate(Bundle savedInstanceState) {
-        // Allow superclasses to initialize using the saved state and determine if there has been a
-        // fresh install on this device and proceed accordingly.
+        // Deal with signin, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
-
-        // Determine if the calling intent is an integration (connected) test.
-        Intent intent = getIntent();
-        if (!intent.hasExtra(TEST_USER_KEY)) {
-            // It is not a connected test.  Determine if the intro activity needs to be run.
-            SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            if (!prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false)) {
-                // This is a fresh installation of the app.  Present the intro activity to get
-                // things started, which will introduce the user to the app and provide a chnance to
-                // sign in.
-                Intent introIntent = new Intent(this, IntroActivity.class);
-                startActivityForResult(introIntent, RC_INTRO);
-            }
-        }
-
-        // Deal with the main activity creation.  The account manager must be initialized last so
-        // that all other managers are initialized prior to the first authentication event.  If a
-        // manager misses an authentication event then the app will not behave as intended.
+        signIn();
         setContentView(R.layout.activity_main);
         init();
     }
@@ -288,6 +267,7 @@ public class MainActivity extends BaseActivity
         list.add(ChatFragment.class.getName());
         list.add(GameFragment.class.getName());
         AccountManager.instance.init(list);
+        CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 
         // Finish initializing the important manager modules.
         DBUtils.instance.init(this);
@@ -314,5 +294,22 @@ public class MainActivity extends BaseActivity
         Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
 
         return outputFile.getPath();
+    }
+
+    /** Handle sign in by processing the invoking intent and checking for an existing account. */
+    private void signIn() {
+        // Determine if the calling intent prefers not to run the intro activity (for example
+        // during a connected test run) or if there is an available account.  Abort in either case.
+        Intent intent = getIntent();
+        boolean skipIntro = intent.hasExtra(SKIP_INTRO_ACTIVITY_KEY);
+        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        boolean hasAccount = prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false);
+        if (skipIntro || hasAccount) return;
+
+        // This is a fresh installation of the app.  Present the intro activity to get
+        // things started, which will introduce the user to the app and provide a chance to
+        // sign in.
+        Intent introIntent = new Intent(this, IntroActivity.class);
+        startActivityForResult(introIntent, RC_INTRO);
     }
 }

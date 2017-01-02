@@ -265,7 +265,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
     @Subscribe public void onRegistrationChange(final RegistrationChangeEvent event) {
-        // Determin if this is a relevant registration event.
+        // Determine if this is a relevant registration event.
         if (!mRegistrationClassNameMap.containsKey(event.name)) return;
 
         // The event is of interest. Update the map and determine if Firebase needs to be enabled or disabled.
@@ -283,6 +283,23 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             register();
         else
             unregister();
+    }
+
+    /** Handle a sign in with the given credentials. */
+    public void signIn(final Activity activity, final String login, final String pass) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        SignInCompletionHandler handler = new SignInCompletionHandler(activity, login);
+        auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
+    }
+
+    /** Sign in using the given User account. */
+    public void signIn(final Context context, final String provider, final String accountName) {
+        // Invoke the sign in activity to kick off a Firebase auth event.
+        Intent intent = new Intent(context, SignInActivity.class);
+        intent.putExtra("signin", true);
+        intent.putExtra("provider", provider);
+        intent.putExtra("accountName", accountName);
+        context.startActivity(intent);
     }
 
     /** Update the given account on the database. */
@@ -309,13 +326,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         Intent intent = new Intent(context, SignInActivity.class);
         intent.putExtra("signin", true);
         context.startActivity(intent);
-    }
-
-    /** Handle a sign in with the given credentials. */
-    public void signIn(final Activity activity, final String login, final String pass) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        SignInCompletionHandler handler = new SignInCompletionHandler(activity, login);
-        auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
     }
 
     /** Unregister the component during lifecycle pause events. */
