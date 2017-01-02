@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -53,8 +54,10 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_chat_create;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_create);
+    }
 
     /** Provide a click event handler. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -95,8 +98,8 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     }
 
     /** Initialize the create type. */
-    @Override public void onInitialize() {
-        super.onInitialize();
+    @Override public void onStart() {
+        super.onStart();
         EditText text = (EditText) mLayout.findViewById(R.id.NameText);
         TextView button = (TextView) mLayout.findViewById(R.id.SaveButton);
         text.addTextChangedListener(new TextChangeHandler(getContext(), text, button));

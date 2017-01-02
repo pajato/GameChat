@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
+
 /**
  * Show a list of experiences of a particular type.
  *
@@ -27,8 +29,8 @@ public class ShowExpTypeListFragment extends BaseGameFragment {
 
     }
 
-    @Override protected int getLayout() {
+    @Override public void onCreate(Bundle bundle) {
         // TODO: Add a real layout for this class.
-        return 0;
+        super.onCreate(bundle);
     }
 }

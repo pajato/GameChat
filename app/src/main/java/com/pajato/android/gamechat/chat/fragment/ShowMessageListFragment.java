@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -82,8 +83,10 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         }
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_chat_messages;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_messages);
+    }
 
     /** Handle a button click on the FAB button by posting a new message. */
     @Override public void onClick(final View view) {
@@ -106,8 +109,9 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
     }
 
     /** Establish the create time state. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Establish the list type and setup the toolbar.
+        super.onStart();
         mItemListType = DBUtils.ChatListType.message;
         initToolbar();
     }

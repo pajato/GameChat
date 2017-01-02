@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,14 +53,16 @@ public class ChatFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
-    @Override public int getLayout() {return R.layout.fragment_chat;}
-
     /** Handle a authentication change event by dealing with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
         logEvent(String.format("onAccountStateChange: with event {%s};", event));
         ChatManager.instance.startNextFragment(getActivity());
+    }
+
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat);
     }
 
     /** Process a given button click event looking for the chat FAB. */
@@ -100,9 +103,9 @@ public class ChatFragment extends BaseChatFragment {
     }
 
     /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Declare the use of the options menu and intialize the FAB and it's menu.
-        super.onInitialize();
+        super.onStart();
         FabManager.chat.setTag(this.getTag());
     }
 

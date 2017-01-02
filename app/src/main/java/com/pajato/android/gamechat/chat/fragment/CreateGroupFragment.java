@@ -49,10 +49,10 @@ public class CreateGroupFragment extends BaseCreateFragment {
     // Public instance methods.
 
     /** Establish the create time state. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
-        super.onInitialize();
+        super.onStart();
         mCreateType = CreateType.group;
         mItemListType = DBUtils.ChatListType.addGroup;
         initToolbar();

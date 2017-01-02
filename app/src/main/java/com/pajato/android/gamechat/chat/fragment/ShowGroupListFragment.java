@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -52,9 +53,10 @@ public class ShowGroupListFragment extends BaseChatFragment {
     public static final String CHAT_GROUP_FAM_KEY = "chatGroupFamKey";
 
     // Public instance methods.
-
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_chat_list;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_list);
+    }
 
     /** Process a menu click event ... */
     @Subscribe public void onClick(final TagClickEvent event) {
@@ -84,8 +86,8 @@ public class ShowGroupListFragment extends BaseChatFragment {
     }
 
     /** Initialize ... */
-    @Override public void onInitialize() {
-        super.onInitialize();
+    @Override public void onStart() {
+        super.onStart();
         mItemListType = DBUtils.ChatListType.group;
         initToolbar();
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());

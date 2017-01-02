@@ -1,6 +1,7 @@
 package com.pajato.android.gamechat.exp;
 
 import android.graphics.PorterDuff;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.SparseArray;
@@ -45,15 +46,17 @@ public class ChessFragment extends BaseGameFragment {
 
     // Public instance methods.
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_checkers;}
-
     /** Handle button clicks ... placeholder. */
     @Subscribe public void onClick(final ClickEvent event) {}
 
-    @Override public void onInitialize() {
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_checkers);
+    }
+
+    @Override public void onStart() {
         // Setup the board and start a new game to create the board.
-        super.onInitialize();
+        super.onStart();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();

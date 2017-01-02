@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -34,6 +36,8 @@ public class ShowOfflineFragment extends BaseChatFragment {
         logEvent("onClick (showOffline)");
     }
 
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_chat_offline;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_offline);
+    }
 }

@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 
@@ -29,7 +31,9 @@ public class ShowNoJoinedRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_chat_no_joined_rooms;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_no_joined_rooms);
+    }
 
 }

@@ -64,6 +64,8 @@ public abstract class BaseFragment extends Fragment {
 
     /** The persisted layout view for this fragment. */
     protected View mLayout;
+    /** The persistent layout's corresponding resource ID. */
+    protected int mLayoutId;
 
     // Public constructors.
 
@@ -95,8 +97,9 @@ public abstract class BaseFragment extends Fragment {
         if (mLayout != null) return mLayout;
 
         // The layout does not exist.  Create and persist it, and initialize the fragment layout.
-        mLayout = inflater.inflate(getLayout(), container, false);
-        onInitialize();
+        mLayout = inflater.inflate(mLayoutId, container, false);
+        // All chat and game fragments will use the options menu.
+        setHasOptionsMenu(true);
         return mLayout;
     }
 
@@ -114,12 +117,6 @@ public abstract class BaseFragment extends Fragment {
     @Override public void onDetach() {
         super.onDetach();
         logEvent("onDetach");
-    }
-
-    /** Initialize the fragment. */
-    public void onInitialize() {
-        // All chat and game fragments will use the options menu.
-        setHasOptionsMenu(true);
     }
 
     /** Handle an options menu choice. */
@@ -188,9 +185,6 @@ public abstract class BaseFragment extends Fragment {
 
     // Protected instance methods.
 
-    /** Obtain a layout file from the subclass. */
-    protected abstract int getLayout();
-
     /** Return a menu entry for a given title and icon id, and a given fragment type. */
     protected MenuEntry getEntry(final int titleId, final int iconId, final ExpFragmentType type) {
         final int itemType = MENU_ITEM_NO_TINT_TYPE;
@@ -222,6 +216,11 @@ public abstract class BaseFragment extends Fragment {
     protected void setItemState(final Menu menu, final int itemId, final boolean state) {
         MenuItem item = menu.findItem(itemId);
         if (item != null) item.setVisible(state);
+    }
+
+    /** Set the Layout ID. Should be called by child classes in their onCreate methods. */
+    protected void setLayoutId(int id) {
+        this.mLayoutId = id;
     }
 
     /** Set the title in the toolbar based on the list type. */
