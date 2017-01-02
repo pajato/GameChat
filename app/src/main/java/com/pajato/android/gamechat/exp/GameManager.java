@@ -133,7 +133,7 @@ public enum GameManager {
         Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap =
                 ExperienceManager.instance.expProfileMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
-        if (AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
+        if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
         if (expProfileMap.size() == 0) return new Dispatcher<>(noExp);
 
         // Deal with a signed in User with multiple experiences across more than one group.  Return

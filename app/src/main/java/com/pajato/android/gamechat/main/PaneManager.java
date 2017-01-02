@@ -74,16 +74,17 @@ public enum PaneManager {
             viewPager.setAdapter(new GameChatPagerAdapter(context.getSupportFragmentManager(),
                     (ViewGroup) context.findViewById(R.id.page_monitor)));
             context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else {
-            // The app is running on a tablet. Add the fragments to their containers and force
-            // orientation to landscape.
-            context.getSupportFragmentManager().beginTransaction()
-                    .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
-                    .add(R.id.game_container, fragmentList.get(GAME_INDEX))
-                    .commit();
-            context.invalidateOptionsMenu();
-            context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            return;
         }
+
+        // The app is running on a tablet. Add the fragments to their containers and force
+        // orientation to landscape.
+        context.getSupportFragmentManager().beginTransaction()
+                .add(R.id.chat_container, fragmentList.get(CHAT_INDEX), "chat")
+                .add(R.id.game_container, fragmentList.get(GAME_INDEX), "game")
+                .commit();
+        context.invalidateOptionsMenu();
+        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     // Nested classes
