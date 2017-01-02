@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provide a pojo repesenting a tictactoe board: a map associating buttons and player symbols (X's
+ * Provide a pojo representing a tictactoe board: a map associating buttons and player symbols (X's
  * and O's) and a map providing a running tally of the win possibilities.
  *
  * There are eight win possibilities in TicTacToe: three consecutive identical symbols in each row,
@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-public class Board {
+public class TTTBoard {
 
     // Public win state key constants.
 

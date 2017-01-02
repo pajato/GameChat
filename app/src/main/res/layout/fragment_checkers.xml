@@ -1,11 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato Technologies LLC.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+-->
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/checkers_panel">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/vs"
+        android:layout_marginBottom="104dp"
+        android:background="@color/colorLightBlue"
+        android:text="@string/vs"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        tools:text="vs" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:id="@+id/player1Name"
+        android:text="@string/me"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        app:layout_constraintCenterY_toCenterY="@id/vs"
+        app:layout_constraintRight_toLeftOf="@+id/vs"
+        tools:text="theShovel"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:id="@+id/player2Name"
+        android:text="@string/friend"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        app:layout_constraintCenterY_toCenterY="@id/vs"
+        app:layout_constraintLeft_toRightOf="@+id/vs"
+        tools:text="Friend"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wins"
+        android:layout_marginBottom="60dp"
+        android:background="@color/colorLightBlue"
+        android:textSize="14sp"
+        android:text="@string/wins"
+        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        tools:text="wins" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:id="@+id/player1WinCount"
+        app:layout_constraintCenterY_toCenterY="@id/wins"
+        app:layout_constraintRight_toLeftOf="@+id/wins"
+        tools:text="0"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:id="@+id/player2WinCount"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintCenterY_toCenterY="@id/wins"
+        app:layout_constraintLeft_toRightOf="@+id/wins"
+        tools:text="0"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:id="@+id/turn"
+        android:background="@color/colorLightBlue"
+        android:text="@string/turn"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        tools:text="turn" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="52dp"
+        android:layout_margin="8dp"
+        android:id="@+id/player_1_icon"
+        android:src="@drawable/ic_account_circle_black_36dp"
+        app:layout_constraintCenterY_toCenterY="@id/turn"
+        app:layout_constraintRight_toLeftOf="@id/turn"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arrow_right"
+        android:id="@+id/leftIndicator1"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toTopOf="@+id/player_1_icon"
+        app:layout_constraintRight_toLeftOf="@+id/player_1_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arrow_left"
+        android:id="@+id/rightIndicator1"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintTop_toTopOf="@+id/player_1_icon"
+        app:layout_constraintLeft_toRightOf="@+id/player_1_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="52dp"
+        android:id="@+id/player_2_icon"
+        android:src="@drawable/ic_account_circle_black_36dp"
+        android:layout_margin="8dp"
+        app:layout_constraintCenterY_toCenterY="@+id/turn"
+        app:layout_constraintLeft_toRightOf="@+id/turn"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arrow_right"
+        android:id="@+id/leftIndicator2"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:layout_marginEnd="8dp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@+id/player_2_icon"
+        app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arrow_left"
+        android:id="@+id/rightIndicator2"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:layout_marginStart="8dp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@+id/player_2_icon"
+        app:layout_constraintLeft_toRightOf="@+id/player_2_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:id="@+id/winner"
+        android:background="@color/colorLightBlue"
+        android:textSize="24sp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@+id/board"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        tools:text="Winner"
+        tools:visibility="visible"/>
 
     <GridLayout
         android:layout_width="wrap_content"
@@ -24,90 +218,5 @@
         app:layout_constraintBottom_toBottomOf="@id/checkers_panel">
 
     </GridLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/player_1_icon"
-        android:src="@drawable/ic_account_circle_black_36dp"
-        android:contentDescription="@string/PlayCheckers"
-
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toTopOf="@id/board"
-        app:layout_constraintLeft_toRightOf="@+id/leftIndicator1"
-        app:layout_constraintTop_toTopOf="@id/checkers_panel"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_right"
-        android:id="@+id/leftIndicator1"
-        android:textColor="@color/colorPrimary"
-        android:textSize="36sp"
-        android:visibility="invisible"
-
-        android:layout_margin="8dp"
-        android:layout_marginStart="32dp"
-        app:layout_constraintTop_toTopOf="@id/player_1_icon"
-        app:layout_constraintBottom_toBottomOf="@id/player_1_icon"
-        app:layout_constraintLeft_toLeftOf="@id/checkers_panel"/>
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_left"
-        android:id="@+id/rightIndicator1"
-        android:textColor="@color/colorPrimary"
-        android:textSize="36sp"
-        android:visibility="invisible"
-
-        android:layout_margin="8dp"
-        app:layout_constraintTop_toTopOf="@id/player_1_icon"
-        app:layout_constraintBottom_toBottomOf="@id/player_1_icon"
-        app:layout_constraintLeft_toRightOf="@id/player_1_icon"/>
-
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/player_2_icon"
-        android:src="@drawable/ic_account_circle_black_36dp"
-        android:contentDescription="@string/PlayCheckers"
-
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toTopOf="@id/board"
-        app:layout_constraintRight_toLeftOf="@+id/rightIndicator2"
-        app:layout_constraintTop_toTopOf="@id/checkers_panel" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_right"
-        android:id="@+id/leftIndicator2"
-        android:textColor="@color/colorAccent"
-        android:textSize="36sp"
-        android:visibility="invisible"
-
-        android:layout_margin="8dp"
-        app:layout_constraintRight_toLeftOf="@id/player_2_icon"
-        app:layout_constraintTop_toTopOf="@id/player_2_icon"
-        app:layout_constraintBottom_toBottomOf="@id/player_2_icon" />
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_left"
-        android:id="@+id/rightIndicator2"
-        android:textColor="@color/colorAccent"
-        android:textSize="36sp"
-        android:visibility="invisible"
-
-        android:layout_margin="8dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintTop_toTopOf="@id/player_2_icon"
-        app:layout_constraintRight_toRightOf="@id/checkers_panel"
-        app:layout_constraintBottom_toBottomOf="@id/player_2_icon" />
 
 </android.support.constraint.ConstraintLayout>

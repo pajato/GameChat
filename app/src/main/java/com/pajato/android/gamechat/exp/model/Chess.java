@@ -25,9 +25,9 @@ public class Chess implements Experience {
     public final static int TIE = 3;
     public final static int PENDING = 4;
 
-    // TODO: Define a chess_exp / checkers_exp board - the Board class currently is 3x3 for TTT
+    // TODO: Define a chess_exp / checkers_exp board - the TTTBoard class currently is 3x3 for TTT
     /** A POJO encapsulating the board moves and wining tallies. */
-//    public Board board;
+//    public TTTBoard board;
 
     /** The creation timestamp. */
     private long createTime;

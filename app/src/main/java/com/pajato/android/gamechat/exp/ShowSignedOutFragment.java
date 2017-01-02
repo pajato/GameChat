@@ -35,9 +35,6 @@ public class ShowSignedOutFragment extends BaseExperienceFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_exp_signed_out;}
 
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
-
     /** Initialize the fragment by setting in the FAB. */
     @Override public void onInitialize() {
         // Set up the FAB.

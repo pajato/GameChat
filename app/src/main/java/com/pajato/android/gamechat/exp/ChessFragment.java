@@ -12,7 +12,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -28,14 +27,11 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
-import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.exp.model.Board;
 import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
-import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -58,7 +54,7 @@ import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
  */
 public class ChessFragment extends BaseGameExpFragment implements View.OnClickListener {
 
-    // Board Management Objects
+    // TTTBoard Management Objects
     private GridLayout mBoard;
     private SparseArray<ChessPiece> mBoardMap;
     private ImageButton mHighlightedTile;
@@ -84,11 +80,9 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     /** Set the layout file. Checkers and chess are the same, so we intentionally use fragment_checkers */
     @Override public int getLayout() {return R.layout.fragment_checkers;}
 
-    /** Placeholder while message handler stays relevant for chess_exp and checkers_exp. */
-    @Override public void messageHandler(final String msg) {}
-
     /** Handle a FAM or Snackbar Chess click event. */
-    @Subscribe public void onClick(final TagClickEvent event) {
+    @Subscribe
+    public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
         if (GameManager.instance.getCurrent() != chess.ordinal()) return;
 
@@ -296,7 +290,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 //        }
 //
 //        // Update the database with the collected changes.
-//        if (model.board == null) model.board = new Board();
+//        if (model.board == null) model.board = new TTTBoard();
 //        model.board.grid.put(buttonTag, model.getSymbolText());
 //        model.state = getState(model, buttonTag);
 //        model.setWinCount();
@@ -360,7 +354,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
 
         // Deal with the tvLarger symbol's decorations.
-        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
+        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE); // TODO: NPE here!!!
         tvLarge.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         tvLargeLeft.setVisibility(View.VISIBLE);
         tvLargeRight.setVisibility(View.VISIBLE);
@@ -479,7 +473,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         mSecondaryKingSideRookHasMoved = false;
         mSecondaryKingHasMoved = false;
 
-        // Go through and populate the GridLayout / Board.
+        // Go through and populate the GridLayout / TTTBoard.
         for(int i = 0; i < 64; i++) {
             ImageButton currentTile = new ImageButton(getContext());
 

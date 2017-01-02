@@ -63,9 +63,6 @@ public class ExperienceFragment extends BaseExperienceFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game;}
 
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
-
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.

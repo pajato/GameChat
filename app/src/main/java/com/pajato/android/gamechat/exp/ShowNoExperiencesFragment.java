@@ -34,9 +34,6 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
     /** Establish the layout file to indicate that no experiences are available. */
     @Override public int getLayout() {return R.layout.fragment_game_no_games;}
 
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
-
     /** Handle an experience profile list change event. */
     @Subscribe public void onExpProfileListChangeEvent(ExpProfileListChangeEvent event) {
         switch (event.changeType) {

@@ -35,9 +35,6 @@ public class ShowExpListFragment extends BaseExperienceFragment {
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game_no_games;}
 
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
-
     /** Initialize the fragment by setting in the FAB. */
     @Override public void onInitialize() {
         FabManager.game.init(this);

@@ -58,7 +58,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
     // Public instance variables.
 
     /** A POJO encapsulating the board moves and wining tallies. */
-    public Board board;
+    public TTTBoard board;
 
     /** The creation timestamp. */
     private long createTime;

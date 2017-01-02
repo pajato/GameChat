@@ -25,9 +25,8 @@ public class Checkers implements Experience {
     public final static int TIE = 3;
     public final static int PENDING = 4;
 
-    // TODO: Define a chess_exp / checkers_exp board - the Board class currently is 3x3 for TTT
-    /** A POJO encapsulating the board moves and wining tallies. */
-//    public Board board;
+    /** A POJO encapsulating the board moves */
+    public CheckersBoard board;
 
     /** The creation timestamp. */
     private long createTime;
@@ -94,7 +93,7 @@ public class Checkers implements Experience {
     @Exclude
     @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-//        result.put("board", board);
+        result.put("board", board);
         result.put("createTime", createTime);
         result.put("key", key);
         result.put("level", level);
@@ -109,6 +108,19 @@ public class Checkers implements Experience {
         result.put("type", type);
         result.put("url", url);
         return result;
+    }
+
+    // TODO: what to do for Checkers??
+    /** Return the value associated with the current player: 1 == X, 2 == O. */
+    @Exclude public int getSymbolValue() {
+        // This implies that player 1 is always X and player 2 is always O.
+        return turn ? 1 : 4;
+    }
+
+    // TODO: what to do for Checkers??
+    /** Return the symbol text value for the player whose turn is current. */
+    @Exclude public String getSymbolText() {
+        return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
     /** Return the experience push key. */

@@ -29,7 +29,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Checkers;
-import com.pajato.android.gamechat.exp.model.Chess;
+import com.pajato.android.gamechat.exp.model.CheckersBoard;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.ProgressManager;
@@ -40,13 +40,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
 
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
 import static com.pajato.android.gamechat.exp.ExpType.checkers_exp;
-import static com.pajato.android.gamechat.exp.ExpType.chess_exp;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
 
 /**
@@ -55,17 +53,19 @@ import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
  * @author Bryan Scott
  */
 public class CheckersFragment extends BaseGameExpFragment implements View.OnClickListener {
+    // We refer to the two sides as primary and secondary to differentiate between the two players.
+    // (Primary pieces belong to player1, secondary belong to player 2).
     private static final int PRIMARY_PIECE = 1;
     private static final int PRIMARY_KING = 2;
     private static final int SECONDARY_PIECE = 3;
     private static final int SECONDARY_KING = 4;
 
-    // Board Management Objects
-    private GridLayout mBoard;
-    private SparseIntArray mBoardMap;
-    private ImageButton mHighlightedTile;
-    private boolean mIsHighlighted = false;
-    private ArrayList<Integer> mPossibleMoves;
+    // CheckersBoard Management Objects
+    private GridLayout grid;
+//    private SparseIntArray boardMap;
+//    private ImageButton highlightedTile;
+//    private boolean mIsHighlighted = false;
+//    private ArrayList<Integer> possibleMoves;
 
     /** The lookup key for the FAB chess_exp memu. */
     public static final String CHECKERS_FAM_KEY = "CheckersFamKey";
@@ -77,9 +77,6 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_checkers;}
-
-    /** Placeholder while message handler stays relevant for chess_exp and checkers_exp. */
-    @Override public void messageHandler(final String msg) {}
 
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
@@ -119,9 +116,9 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         super.onInitialize();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
 
-        mBoard = (GridLayout) mLayout.findViewById(R.id.board);
+        grid = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = true;
-        onNewGame();
+////////        onNewGame();
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -289,7 +286,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 //        }
 //
 //        // Update the database with the collected changes.
-//        if (model.board == null) model.board = new Board();
+//        if (model.board == null) model.board = new TTTBoard();
 //        model.board.grid.put(buttonTag, model.getSymbolText());
 //        model.state = getState(model, buttonTag);
 //        model.setWinCount();
@@ -300,6 +297,24 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     /** Initialize the board model and values and clear the winner text */
     private void initBoard(@NonNull final Checkers model) {
         // TODO: IMPLEMENT THIS
+        // Ensure that the layout has been established. Abort if not.
+        if (mLayout == null) return;
+
+        // Clear the board, the winner text, the board evaluation support and reset all peices to
+        // starting position.
+
+//        if (model.board != null) model.board.clear();
+//        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+//        if (winner != null) winner.setText("");
+//        for (int i = 0; i < 3; i++) {
+//            for (int j = 0; j < 3; j++) {
+//                // Seed the array with a value that will guarantee the X vs O win and a tie will be
+//                // calculated correctly; clear the grid button.
+//                String tag = String.format(Locale.US, "button%d%d", i, j);
+//                TextView button = (TextView) mLayout.findViewWithTag(tag);
+//                if (button != null) button.setText("");
+//            }
+//        }
     }
 
     /** Process a resumption by testing and waiting for the experience */
@@ -316,6 +331,9 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             ProgressManager.instance.hide();
             updateExperience();
+            if (getModel().board == null) {
+                onNewGame();
+            }
         }
     }
 
@@ -325,12 +343,12 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         // Alternate the decorations on each player symbol.
         if (turn)
             // Make player1's decorations the more prominent.
-            setPlayerIcons(R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1,
-                    R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2);
+            setPlayerIcons(R.id.player_1_icon, R.id.leftIndicator1, R.id.rightIndicator1,
+                    R.id.player_2_icon, R.id.leftIndicator2, R.id.rightIndicator2);
         else
             // Make player2's decorations the more prominent.
-            setPlayerIcons(R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2,
-                    R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
+            setPlayerIcons(R.id.player_2_icon, R.id.leftIndicator2, R.id.rightIndicator2,
+                    R.id.player_1_icon, R.id.leftIndicator1, R.id.rightIndicator1);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -374,6 +392,15 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         name.setText(model.players.get(index).name);
     }
 
+    // TODO: what do do for checkers here???
+    /** Set the sigil for a given player. */
+    private void setPlayerSymbol(final int resId, final int index, final Checkers model) {
+        // Ensure that the sigil text view exists.  Abort if not, set the value from the data
+        // model if it does.
+        TextView symbol = (TextView) mLayout.findViewById(resId);
+        if (symbol == null) return;
+        symbol.setText(model.players.get(index).symbol);
+    }
     /** Set the team (red or black) for a given player. */
     // TODO: This probably needs some rework to get the team color figured out...
     private void setPlayerTeam(final int resId, final int index, final Checkers model) {
@@ -428,8 +455,8 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     private void setGameBoard(@NonNull final Checkers model) {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
         // TODO: figure this out!
-        // if (model.board == null)
-        //initBoard(model);
+        if (model.board == null)
+            initBoard(model);
         // else .. TODO: finish this
 
     }
@@ -446,8 +473,8 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);
         setPlayerWinCount(R.id.player2WinCount, 1, model);
-//        setPlayerSymbol(R.id.player1Symbol, 0, model);
-//        setPlayerSymbol(R.id.player2Symbol, 1, model);
+        setPlayerSymbol(R.id.player_1_icon, 0, model);
+        setPlayerSymbol(R.id.player_2_icon, 1, model);
         setPlayerIcons(model.turn);
         setGameBoard(model);
         setState(model);
@@ -457,13 +484,15 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
      * Handles a new game of checkers_exp, resetting the board.
      */
     private void onNewGame() {
-        mBoard.removeAllViews();
-        mBoardMap = new SparseIntArray();
-        mBoardMap.clear();
-        mPossibleMoves = new ArrayList<>();
-        mPossibleMoves.clear();
+        grid.removeAllViews();
+        CheckersBoard board = getModel().board;
+        if (board == null) getModel().board = new CheckersBoard();
+        board.boardMap = new SparseIntArray();
+        board.boardMap.clear();
+        board.possibleMoves = new ArrayList<>();
+        board.possibleMoves.clear();
 
-        // Go through and populate the GridLayout / Board.
+        // Go through and populate the GridLayout / CheckersBoard.
         for(int i = 0; i < 64; i++) {
             ImageButton currentTile = new ImageButton(getContext());
 
@@ -517,15 +546,15 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
-                mBoardMap.put(i, SECONDARY_PIECE);
+                board.boardMap.put(i, SECONDARY_PIECE);
             } else if (containsPrimaryPiece) {
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-                mBoardMap.put(i, PRIMARY_PIECE);
+                board.boardMap.put(i, PRIMARY_PIECE);
             }
             currentTile.setOnClickListener(new CheckersClick());
-            mBoard.addView(currentTile);
+            grid.addView(currentTile);
         }
 
         handleTurnChange(false);
@@ -543,16 +572,17 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
             return;
         }
 
-        int highlightedIndex = (int) mHighlightedTile.getTag();
-        findPossibleMoves(highlightedIndex, mPossibleMoves);
+        CheckersBoard board = getModel().board;
+        int highlightedIndex = (int) board.highlightedTile.getTag();
+        findPossibleMoves(highlightedIndex, board.possibleMoves);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
-        if(mIsHighlighted) {
-            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
+        if(board.mIsHighlighted) {
+            board.highlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.white));
 
-            for (int possiblePosition : mPossibleMoves) {
-                if(possiblePosition != -1 && mBoardMap.get(possiblePosition, -1) == -1) {
+            for (int possiblePosition : board.possibleMoves) {
+                if(possiblePosition != -1 && board.boardMap.get(possiblePosition, -1) == -1) {
 
                     // If the tile clicked is one of the possible positions, and it's the correct
                     // turn/piece combination, the piece moves there.
@@ -560,42 +590,42 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
                         boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
                                 (indexClicked < highlightedIndex - 9);
 
-                        if(mTurn && (mBoardMap.get(highlightedIndex) == PRIMARY_PIECE ||
-                                mBoardMap.get(highlightedIndex) == PRIMARY_KING)) {
+                        if(mTurn && (board.boardMap.get(highlightedIndex) == PRIMARY_PIECE ||
+                                board.boardMap.get(highlightedIndex) == PRIMARY_KING)) {
 
                             handleMovement(true, indexClicked, capturesPiece);
 
-                        } else if(!mTurn && (mBoardMap.get(highlightedIndex) == SECONDARY_PIECE
-                                || mBoardMap.get(highlightedIndex) == SECONDARY_KING)) {
+                        } else if(!mTurn && (board.boardMap.get(highlightedIndex) == SECONDARY_PIECE
+                                || board.boardMap.get(highlightedIndex) == SECONDARY_KING)) {
 
                             handleMovement(false, indexClicked, capturesPiece);
                         }
                     }
                     // Clear the highlight off of all possible positions.
-                    mBoard.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
+                    grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
                             .getColor(getContext(), android.R.color.white));
                 }
             }
-            mHighlightedTile = null;
+            board.highlightedTile = null;
 
         // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
         } else {
-            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
+            board.highlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.holo_red_dark));
-            for(int possiblePosition : mPossibleMoves) {
-                if(possiblePosition != -1 && mBoardMap.get(possiblePosition, -1) == -1) {
-                    mBoard.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
+            for(int possiblePosition : board.possibleMoves) {
+                if(possiblePosition != -1 && board.boardMap.get(possiblePosition, -1) == -1) {
+                    grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
                             .getColor(getContext(), android.R.color.holo_red_light));
                 }
             }
         }
 
-        mIsHighlighted = !mIsHighlighted;
+        board.mIsHighlighted = !board.mIsHighlighted;
     }
 
     /**
      * Checks to see if the game is over or not by counting the number of primary / secondary pieces
-     * on the board. If there are zero of one type of pieces, then the other side wins.
+     * on the board. If there are zero of one type of piece, then the other side wins.
      *
      * @return true if the game is over, false otherwise.
      */
@@ -604,7 +634,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         int yCount = 0;
         int bCount = 0;
         for(int i = 0; i < 64; i++) {
-            int tmp = mBoardMap.get(i);
+            int tmp = getModel().board.boardMap.get(i);
             if(tmp == PRIMARY_PIECE || tmp == PRIMARY_KING) {
                 bCount++;
             } else if (tmp == SECONDARY_PIECE || tmp == SECONDARY_KING) {
@@ -633,15 +663,15 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
                                final ArrayList<Integer> movementOptions) {
         // Create the boolean calculations for each of our conditions.
         boolean withinBounds = jumpable < 64 && jumpable > -1;
-        boolean emptySpace = mBoardMap.get(jumpable, -1) == -1;
+        boolean emptySpace = getModel().board.boardMap.get(jumpable, -1) == -1;
         boolean breaksBorders = (highlightedIndex % 8 == 1 && jumpable % 8 == 7)
                 || (highlightedIndex % 8 == 6 && jumpable % 8 == 0);
         boolean jumpsAlly = false;
 
         // Check if the piece being jumped is an ally piece.
-        int highlightedPieceType = mBoardMap.get(highlightedIndex);
+        int highlightedPieceType = getModel().board.boardMap.get(highlightedIndex);
         int jumpedIndex = (highlightedIndex + jumpable) / 2;
-        int jumpedPieceType = mBoardMap.get(jumpedIndex);
+        int jumpedPieceType = getModel().board.boardMap.get(jumpedIndex);
 
         if (highlightedPieceType == PRIMARY_PIECE || highlightedPieceType == PRIMARY_KING) {
             jumpsAlly = jumpedPieceType == PRIMARY_PIECE || jumpedPieceType == PRIMARY_KING;
@@ -668,7 +698,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         }
 
         possibleMoves.clear();
-        int highlightedPieceType = mBoardMap.get(highlightedIndex);
+        int highlightedPieceType = getModel().board.boardMap.get(highlightedIndex);
 
         // Get the possible positions, post-move, for the piece.
         int upLeft = highlightedIndex - 9;
@@ -696,19 +726,19 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
         // Handle tiles that already contain other pieces. You can jump over enemy pieces,
         // but not allied pieces.
-        if(mBoardMap.get(upLeft, -1) != -1) {
+        if(getModel().board.boardMap.get(upLeft, -1) != -1) {
             findJumpables(highlightedIndex, upLeft - 9, possibleMoves);
             upLeft = -1;
         }
-        if(mBoardMap.get(upRight, -1) != -1) {
+        if(getModel().board.boardMap.get(upRight, -1) != -1) {
             findJumpables(highlightedIndex, upRight - 7, possibleMoves);
             upRight = -1;
         }
-        if(mBoardMap.get(downLeft, -1) != -1) {
+        if(getModel().board.boardMap.get(downLeft, -1) != -1) {
             findJumpables(highlightedIndex, downLeft + 7, possibleMoves);
             downLeft = -1;
         }
-        if(mBoardMap.get(downRight, -1) != -1) {
+        if(getModel().board.boardMap.get(downRight, -1) != -1) {
             findJumpables(highlightedIndex, downRight + 9, possibleMoves);
             downRight = -1;
         }
@@ -729,23 +759,23 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     private void handleMovement(final boolean player, final int indexClicked,
                                 final boolean capturesPiece) {
         // Reset the highlighted tile's image.
-        mHighlightedTile.setImageResource(0);
-        int highlightedIndex = (int) mHighlightedTile.getTag();
-        int highlightedPieceType = mBoardMap.get(highlightedIndex);
+        getModel().board.highlightedTile.setImageResource(0);
+        int highlightedIndex = (int) getModel().board.highlightedTile.getTag();
+        int highlightedPieceType = getModel().board.boardMap.get(highlightedIndex);
 
         // Check to see if our piece becomes a king piece and put its value into the board map.
         if(indexClicked < 8 && highlightedPieceType == PRIMARY_PIECE) {
-            mBoardMap.put(indexClicked, PRIMARY_KING);
+            getModel().board.boardMap.put(indexClicked, PRIMARY_KING);
         } else if (indexClicked > 55 && highlightedPieceType == SECONDARY_PIECE) {
-            mBoardMap.put(indexClicked, SECONDARY_KING);
+            getModel().board.boardMap.put(indexClicked, SECONDARY_KING);
         } else {
-            mBoardMap.put(indexClicked, highlightedPieceType);
+            getModel().board.boardMap.put(indexClicked, highlightedPieceType);
         }
 
         // Find the new tile and give it a piece.
-        ImageButton newLocation = (ImageButton) mBoard.getChildAt(indexClicked);
-        if(mBoardMap.get(indexClicked) == PRIMARY_KING ||
-                mBoardMap.get(indexClicked) == SECONDARY_KING) {
+        ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
+        if(getModel().board.boardMap.get(indexClicked) == PRIMARY_KING ||
+                getModel().board.boardMap.get(indexClicked) == SECONDARY_KING) {
             newLocation.setImageResource(R.drawable.ic_stars_black_36dp);
         } else {
             newLocation.setImageResource(R.drawable.ic_account_circle_black_36dp);
@@ -764,9 +794,9 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         boolean finishedJumping = true;
         if(capturesPiece) {
             int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
-            ImageButton capturedTile = (ImageButton) mBoard.getChildAt(pieceCapturedIndex);
+            ImageButton capturedTile = (ImageButton) grid.getChildAt(pieceCapturedIndex);
             capturedTile.setImageResource(0);
-            mBoardMap.delete(pieceCapturedIndex);
+            getModel().board.boardMap.delete(pieceCapturedIndex);
 
             // If there are no more jumps, change turns. If there is at least one jump left, don't.
             ArrayList<Integer> possibleJumps = new ArrayList<>();
@@ -779,7 +809,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
             }
         }
 
-        mBoardMap.delete(highlightedIndex);
+        getModel().board.boardMap.delete(highlightedIndex);
         handleTurnChange(finishedJumping);
         checkFinished();
     }
@@ -817,12 +847,13 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     private class CheckersClick implements View.OnClickListener {
         @Override public void onClick(final View v) {
             int index = (int) v.getTag();
-            if(mHighlightedTile != null) {
+            CheckersBoard board = getModel().board;
+            if(board.highlightedTile != null) {
                 showPossibleMoves(index);
-                mHighlightedTile = null;
+                board.highlightedTile = null;
             } else {
-                if(mBoardMap.get(index, -1) != -1) {
-                    mHighlightedTile = (ImageButton) v;
+                if(board.boardMap.get(index, -1) != -1) {
+                    board.highlightedTile = (ImageButton) v;
                     showPossibleMoves(index);
                 }
             }

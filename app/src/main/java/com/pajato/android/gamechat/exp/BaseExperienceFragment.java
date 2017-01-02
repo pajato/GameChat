@@ -86,13 +86,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return mTurn;
     }
 
-    /** Remove this after dealing with the chess_exp and checkers_exp fragments. */
-    abstract public void messageHandler(final String message);
-
-    /** Create a new experience to be displayed in this fragment. */
-//    abstract protected void createExperience(@NonNull final Context context,
-//                                    @NonNull final Dispatcher<ExpFragmentType, ExpProfile> dispatcher);
-
     // Protected instance methods.
 
     /** Return either a null placeholder key value or a sentinel value as the experience key. */

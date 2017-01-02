@@ -38,8 +38,8 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.exp.model.Board;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.ProgressManager;
@@ -56,14 +56,14 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
-import static com.pajato.android.gamechat.exp.model.Board.BEG_COL;
-import static com.pajato.android.gamechat.exp.model.Board.BOT_ROW;
-import static com.pajato.android.gamechat.exp.model.Board.END_COL;
-import static com.pajato.android.gamechat.exp.model.Board.LEFT_DIAG;
-import static com.pajato.android.gamechat.exp.model.Board.MID_COL;
-import static com.pajato.android.gamechat.exp.model.Board.MID_ROW;
-import static com.pajato.android.gamechat.exp.model.Board.RIGHT_DIAG;
-import static com.pajato.android.gamechat.exp.model.Board.TOP_ROW;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.END_COL;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.LEFT_DIAG;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.MID_COL;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.MID_ROW;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.RIGHT_DIAG;
+import static com.pajato.android.gamechat.exp.model.TTTBoard.TOP_ROW;
 import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
 
 /**
@@ -90,9 +90,6 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
 
     /** Set the layout file. */
     @Override public int getLayout() {return R.layout.fragment_game_ttt;}
-
-    /** Placeholder while message handler stays relevant for chess_exp and checkers_exp. */
-    @Override public void messageHandler(final String msg) {}
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
@@ -127,7 +124,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         resume();
     }
 
-    /** Initialize by setting up tile click handlers on the board. */
+    /** Initialize by setting up tile click handlers on the board. Called by onCreateView. */
     @Override public void onInitialize() {
         // Place an click listener on all nine buttons by iterating over all nine buttons.
         super.onInitialize();
@@ -327,7 +324,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         }
 
         // Update the database with the collected changes.
-        if (model.board == null) model.board = new Board();
+        if (model.board == null) model.board = new TTTBoard();
         model.board.grid.put(buttonTag, model.getSymbolText());
         model.state = getState(model, buttonTag);
         model.setWinCount();

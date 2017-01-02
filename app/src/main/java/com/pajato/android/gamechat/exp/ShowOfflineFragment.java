@@ -38,9 +38,6 @@ public class ShowOfflineFragment extends BaseExperienceFragment {
     /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public int getLayout() {return R.layout.fragment_game_offline;}
 
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
-
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {
         super.onResume();

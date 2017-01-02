@@ -23,9 +23,6 @@ package com.pajato.android.gamechat.exp;
  * Created by pmr on 10/5/16.
  */
 public class ShowExpTypeListFragment extends BaseExperienceFragment {
-    @Override public void messageHandler(String message) {
-
-    }
 
     @Override protected int getLayout() {
         // TODO: Add a real layout for this class.
