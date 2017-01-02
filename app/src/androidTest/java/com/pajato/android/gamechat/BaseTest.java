@@ -34,8 +34,13 @@ import static com.pajato.android.gamechat.main.MainActivity.TEST_USER_KEY;
 @RunWith(AndroidJUnit4.class)
 public abstract class BaseTest {
 
+    // Private class constants.
+
     /** The test password key. */
-    public static final String TEST_PASS_KEY = "testPassKey";
+    private static final String TEST_PASSWORD_KEY = "testPasswordKey";
+
+    /** The test user provider. */
+    private static final String TEST_PROVIDER_KEY = "testProviderKey";
 
     // Private class constants.
 
@@ -51,7 +56,9 @@ public abstract class BaseTest {
     @Before public void setup() {
         Intent intent = new Intent();
         intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
-        intent.putExtra(TEST_USER_KEY, "nobody@gamechat.com");
+        intent.putExtra(TEST_USER_KEY, getProperty("testAccountName", "nobody@gamechat.com"));
+        intent.putExtra(TEST_PROVIDER_KEY, getProperty("testAccountProvider", "email"));
+        intent.putExtra(TEST_PASSWORD_KEY, getProperty("testAccountPassword", null));
         mRule.launchActivity(intent);
     }
 
@@ -65,7 +72,7 @@ public abstract class BaseTest {
     /** Setup the test user to run connected tests. */
     protected void setupTestUser(final Intent intent) {
         String login = intent.getStringExtra(TEST_USER_KEY);
-        String pass = intent.getStringExtra(TEST_PASS_KEY);
+        String pass = intent.getStringExtra(TEST_PASSWORD_KEY);
         if (login == null || pass == null) return;
 
         // Perform the sign in.
@@ -82,6 +89,16 @@ public abstract class BaseTest {
     protected static Matcher<View> noDrawable() {
         return new DrawableMatcher(-1);
     }
+
+    // Private instance methods.
+
+    /** Return a named system property or the given default value if there is no such property. */
+    private String getProperty(final String propName, final String defaultValue) {
+        String result = System.getProperty(propName);
+        return result != null ? result : defaultValue;
+    }
+
+    // Private classes.
 
     /**
      * DrawableMatcher, a custom TypeSafeMatcher that facilitates the scanning of ImageViews to
