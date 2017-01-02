@@ -83,6 +83,7 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         }
     }
 
+    /** Setup a layout akin to the other "show list" fragments, but with the input section. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_messages);

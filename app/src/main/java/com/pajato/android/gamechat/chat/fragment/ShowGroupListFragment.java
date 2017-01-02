@@ -53,6 +53,8 @@ public class ShowGroupListFragment extends BaseChatFragment {
     public static final String CHAT_GROUP_FAM_KEY = "chatGroupFamKey";
 
     // Public instance methods.
+
+    /** Set the layout to a shared layout file for showing a list (of groups, in this case). */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_list);

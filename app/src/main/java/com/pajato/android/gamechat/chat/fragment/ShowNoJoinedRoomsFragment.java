@@ -31,6 +31,7 @@ public class ShowNoJoinedRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Establish the layout file to indicate that no room are available. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_no_joined_rooms);

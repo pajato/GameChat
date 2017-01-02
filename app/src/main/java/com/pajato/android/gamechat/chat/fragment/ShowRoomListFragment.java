@@ -55,6 +55,7 @@ public class ShowRoomListFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Set the layout to a shared layout file for showing a list (of rooms, in this case). */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_list);

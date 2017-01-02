@@ -77,6 +77,7 @@ public class ShowSignedOutFragment extends BaseChatFragment {
         }
     }
 
+    /** Establish the layout file to show that the user is signed out and cannot chat. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_signed_out);

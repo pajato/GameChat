@@ -37,9 +37,10 @@ public class ShowExpRoomListFragment extends BaseGameFragment {
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
-    @Override
-    public void onCreate(Bundle bundle) {
+    /** Set the layout file. */
+    @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        //TODO: Establish better layout for the list of games. Potentially like fragment_chat_list?
         super.setLayoutId(R.layout.fragment_game_no_games);
     }
 

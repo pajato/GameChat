@@ -54,6 +54,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_create);

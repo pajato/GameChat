@@ -40,8 +40,8 @@ public class ShowOfflineFragment extends BaseGameFragment {
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
-    @Override
-    public void onCreate(Bundle bundle) {
+    /** Establish the layout file to show that the app is offline due to network loss. */
+    @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_game_offline);
     }

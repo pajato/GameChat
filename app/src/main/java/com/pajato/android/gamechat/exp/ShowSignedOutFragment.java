@@ -37,6 +37,7 @@ public class ShowSignedOutFragment extends BaseGameFragment {
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
+    /** Establish the layout file to show that the user is signed out and cannot chat. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_exp_signed_out);

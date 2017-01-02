@@ -60,6 +60,7 @@ public class ChatFragment extends BaseChatFragment {
         ChatManager.instance.startNextFragment(getActivity());
     }
 
+    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat);

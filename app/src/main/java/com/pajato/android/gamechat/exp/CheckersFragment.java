@@ -45,6 +45,7 @@ public class CheckersFragment extends BaseGameFragment {
     /** Handle button clicks ... placeholder. */
     @Subscribe public void onClick(final ClickEvent event) {}
 
+    /** Setup the Player Controls. The Board setup will be done later, in onNewGame. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_checkers);

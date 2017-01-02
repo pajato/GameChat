@@ -97,6 +97,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Placeholder while message handler stays relevant for chess and checkers. */
     @Override public void messageHandler(final String msg) {}
 
+    /** Setup the Player Controls and empty board. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_game_ttt);

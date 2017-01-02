@@ -33,6 +33,7 @@ public class ShowNoMessagesFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Establish the layout file to indicate that no experiences are available. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_no_messages);

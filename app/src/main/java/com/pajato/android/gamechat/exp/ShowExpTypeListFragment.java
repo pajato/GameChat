@@ -29,6 +29,7 @@ public class ShowExpTypeListFragment extends BaseGameFragment {
 
     }
 
+    /** Set the layout file. */
     @Override public void onCreate(Bundle bundle) {
         // TODO: Add a real layout for this class.
         super.onCreate(bundle);
