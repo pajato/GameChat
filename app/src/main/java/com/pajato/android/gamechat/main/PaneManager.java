@@ -80,8 +80,8 @@ public enum PaneManager {
         // The app is running on a tablet. Add the fragments to their containers and force
         // orientation to landscape.
         context.getSupportFragmentManager().beginTransaction()
-                .add(R.id.chat_container, fragmentList.get(CHAT_INDEX))
-                .add(R.id.game_container, fragmentList.get(GAME_INDEX))
+                .add(R.id.chat_container, fragmentList.get(CHAT_INDEX), "chat")
+                .add(R.id.game_container, fragmentList.get(GAME_INDEX), "game")
                 .commit();
         context.invalidateOptionsMenu();
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
