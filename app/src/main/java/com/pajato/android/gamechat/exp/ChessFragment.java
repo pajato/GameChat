@@ -42,9 +42,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
-import static com.pajato.android.gamechat.exp.ExpType.chess_exp;
 import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
 
 /**
@@ -55,7 +53,7 @@ import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
 public class ChessFragment extends BaseGameExpFragment implements View.OnClickListener {
 
     // TTTBoard Management Objects
-    private GridLayout mBoard;
+    private GridLayout grid;
     private SparseArray<ChessPiece> mBoardMap;
     private ImageButton mHighlightedTile;
     private boolean mIsHighlighted = false;
@@ -69,7 +67,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     private boolean mSecondaryKingSideRookHasMoved;
     private boolean mSecondaryKingHasMoved;
 
-    /** The lookup key for the FAB chess_exp memu. */
+    /** The lookup key for the FAB chess memu. */
     public static final String CHESS_FAM_KEY = "ChessFamKey";
 
     /** logcat TAG */
@@ -84,7 +82,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     @Subscribe
     public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
-        if (GameManager.instance.getCurrent() != chess.ordinal()) return;
+        if (GameManager.instance.getCurrent() != ExpType.chess.ordinal()) return;
 
         // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
         // handle a snackbar action first.
@@ -108,7 +106,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     /** Handle an experience posting event to see if this is a chess experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not chess.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != chess_exp) return;
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.chess) return;
 
         // The experience is a chess experience.  Start the game.
         mExperience = event.experience;
@@ -120,7 +118,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         super.onInitialize();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
 
-        mBoard = (GridLayout) mLayout.findViewById(R.id.board);
+        grid = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = false;
         onNewGame();
 
@@ -456,10 +454,10 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 
 
     /**
-     * Handles a new game of checkers_exp, resetting the board.
+     * Handles a new game of checkers, resetting the board.
      */
     private void onNewGame() {
-        mBoard.removeAllViews();
+        grid.removeAllViews();
         mBoardMap = new SparseArray<>();
         mBoardMap.clear();
         mPossibleMoves = new ArrayList<>();
@@ -545,7 +543,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
                         PorterDuff.Mode.SRC_ATOP);
             }
             currentTile.setOnClickListener(new ChessClick());
-            mBoard.addView(currentTile);
+            grid.addView(currentTile);
         }
 
         handleTurnChange();
@@ -586,7 +584,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
                         handleMovement(false, indexClicked, capturesPiece);
                     }
                 }
-                handleTileBackground(possiblePosition, (ImageButton) mBoard.getChildAt(possiblePosition));
+                handleTileBackground(possiblePosition, (ImageButton) grid.getChildAt(possiblePosition));
             }
             mHighlightedTile = null;
 
@@ -595,7 +593,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.holo_red_dark));
             for(int possiblePosition : mPossibleMoves) {
-                mBoard.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
+                grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
                         .getColor(getContext(), android.R.color.holo_red_light));
             }
         }
@@ -719,7 +717,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 
         // Handle capturing pieces.
         if(capturesPiece) {
-            ImageButton capturedTile = (ImageButton) mBoard.getChildAt(indexClicked);
+            ImageButton capturedTile = (ImageButton) grid.getChildAt(indexClicked);
             capturedTile.setImageResource(0);
             mBoardMap.delete(indexClicked);
         }
@@ -735,7 +733,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             mBoardMap.put(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
-            ImageButton newLocation = (ImageButton) mBoard.getChildAt(indexClicked);
+            ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
             newLocation.setImageResource(ChessPiece.getDrawableFor(mBoardMap.get(indexClicked)
                     .getPiece()));
 
@@ -778,12 +776,12 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 
             // Put a rook at the new rook position.
             mBoardMap.put(rookFutureIndex, new ChessPiece(ChessPiece.ROOK, team));
-            ImageButton futureRook = (ImageButton) mBoard.getChildAt(rookFutureIndex);
+            ImageButton futureRook = (ImageButton) grid.getChildAt(rookFutureIndex);
             futureRook.setImageResource(ChessPiece.getDrawableFor(ChessPiece.ROOK));
             futureRook.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
 
             // Get rid of the old rook.
-            ImageButton previousRook = (ImageButton) mBoard.getChildAt(rookPrevIndex);
+            ImageButton previousRook = (ImageButton) grid.getChildAt(rookPrevIndex);
             previousRook.setImageResource(0);
             mBoardMap.delete(rookPrevIndex);
         }
@@ -936,7 +934,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             }
 
             mBoardMap.put(position, new ChessPiece(pieceType, team));
-            ImageButton promotedPieceTile = (ImageButton) mBoard.getChildAt(position);
+            ImageButton promotedPieceTile = (ImageButton) grid.getChildAt(position);
             promotedPieceTile.setImageResource(ChessPiece.getDrawableFor(pieceType));
             boolean teamColor = team == ChessPiece.PRIMARY_TEAM;
             int color = teamColor ? R.color.colorPrimary: R.color.colorAccent;

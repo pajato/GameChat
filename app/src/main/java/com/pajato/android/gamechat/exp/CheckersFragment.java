@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,10 +40,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
-import static com.pajato.android.gamechat.exp.ExpType.checkers_exp;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
 
 /**
@@ -62,12 +59,8 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
     // CheckersBoard Management Objects
     private GridLayout grid;
-//    private SparseIntArray boardMap;
-//    private ImageButton highlightedTile;
-//    private boolean mIsHighlighted = false;
-//    private ArrayList<Integer> possibleMoves;
 
-    /** The lookup key for the FAB chess_exp memu. */
+    /** The lookup key for the FAB chess memu. */
     public static final String CHECKERS_FAM_KEY = "CheckersFamKey";
 
     /** logcat TAG */
@@ -81,7 +74,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
-        if (GameManager.instance.getCurrent() != checkers.ordinal()) return;
+        if (GameManager.instance.getCurrent() != ExpType.checkers.ordinal()) return;
 
         // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
         // handle a snackbar action first.
@@ -105,7 +98,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     /** Handle an experience posting event to see if this is a checkers experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not checkers.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != checkers_exp) return;
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.checkers) return;
 
         // The experience is a checkers experience.  Start the game.
         mExperience = event.experience;
@@ -118,7 +111,6 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
         grid = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = true;
-////////        onNewGame();
 
         // Color the turn tiles.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -363,22 +355,16 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         final float SMALL = 45.0f;
 
         // Collect all the pertinent textViews.
-        TextView tvLarge = (TextView) getActivity().findViewById(large);
         TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
         TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
-        TextView tvSmall = (TextView) getActivity().findViewById(small);
         TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
         TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
 
         // Deal with the tvLarger symbol's decorations.
-        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
-        tvLarge.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         tvLargeLeft.setVisibility(View.VISIBLE);
         tvLargeRight.setVisibility(View.VISIBLE);
 
         // Deal with the tvSmall symbol's decorations.
-        tvSmall.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
-        tvSmall.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
         tvSmallLeft.setVisibility(View.INVISIBLE);
         tvSmallRight.setVisibility(View.INVISIBLE);
     }
@@ -390,25 +376,6 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         TextView name = (TextView) mLayout.findViewById(resId);
         if (name == null) return;
         name.setText(model.players.get(index).name);
-    }
-
-    // TODO: what do do for checkers here???
-    /** Set the sigil for a given player. */
-    private void setPlayerSymbol(final int resId, final int index, final Checkers model) {
-        // Ensure that the sigil text view exists.  Abort if not, set the value from the data
-        // model if it does.
-        TextView symbol = (TextView) mLayout.findViewById(resId);
-        if (symbol == null) return;
-        symbol.setText(model.players.get(index).symbol);
-    }
-    /** Set the team (red or black) for a given player. */
-    // TODO: This probably needs some rework to get the team color figured out...
-    private void setPlayerTeam(final int resId, final int index, final Checkers model) {
-        // Ensure that the team text view exists.  Abort if not, set the value from the data
-        // model if it does.
-        TextView symbol = (TextView) mLayout.findViewById(resId);
-        if (symbol == null) return;
-        symbol.setText(model.players.get(index).team);
     }
 
     /** Set the name for a given player index. */
@@ -473,24 +440,24 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);
         setPlayerWinCount(R.id.player2WinCount, 1, model);
-        setPlayerSymbol(R.id.player_1_icon, 0, model);
-        setPlayerSymbol(R.id.player_2_icon, 1, model);
         setPlayerIcons(model.turn);
         setGameBoard(model);
         setState(model);
     }
 
     /**
-     * Handles a new game of checkers_exp, resetting the board.
+     * Handles a new game of checkers, resetting the board.
      */
     private void onNewGame() {
         grid.removeAllViews();
-        CheckersBoard board = getModel().board;
-        if (board == null) getModel().board = new CheckersBoard();
-        board.boardMap = new SparseIntArray();
-        board.boardMap.clear();
-        board.possibleMoves = new ArrayList<>();
-        board.possibleMoves.clear();
+        Checkers model = getModel();
+        if (model.board == null) {
+            model.board = new CheckersBoard();
+        }
+        model.board.boardMap = new SparseIntArray();
+        model.board.boardMap.clear();
+        model.board.possibleMoves = new ArrayList<>();
+        model.board.possibleMoves.clear();
 
         // Go through and populate the GridLayout / CheckersBoard.
         for(int i = 0; i < 64; i++) {
@@ -546,12 +513,12 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
-                board.boardMap.put(i, SECONDARY_PIECE);
+                model.board.boardMap.put(i, SECONDARY_PIECE);
             } else if (containsPrimaryPiece) {
                 currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
                 currentTile.setColorFilter(ContextCompat.getColor(getContext(),
                         R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-                board.boardMap.put(i, PRIMARY_PIECE);
+                model.board.boardMap.put(i, PRIMARY_PIECE);
             }
             currentTile.setOnClickListener(new CheckersClick());
             grid.addView(currentTile);

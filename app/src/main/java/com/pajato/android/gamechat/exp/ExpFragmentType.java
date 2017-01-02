@@ -30,11 +30,11 @@ public enum ExpFragmentType {
     roomList (ShowExpRoomListFragment.class),
     expList (ShowExpListFragment.class),
     tictactoeList (ShowExpTypeListFragment.class),
-    tictactoe (TTTFragment.class, ExpType.ttt_exp, tictactoeList),
+    tictactoe (TTTFragment.class, ExpType.ttt, tictactoeList),
     checkersList (ShowExpTypeListFragment.class),
-    checkers (CheckersFragment.class, ExpType.checkers_exp, checkersList),
+    checkers (CheckersFragment.class, ExpType.checkers, checkersList),
     chessList(ShowExpTypeListFragment.class),
-    chess (ChessFragment.class, ExpType.chess_exp, chessList);
+    chess (ChessFragment.class, ExpType.chess, chessList);
 
     // Private instance variables.
 

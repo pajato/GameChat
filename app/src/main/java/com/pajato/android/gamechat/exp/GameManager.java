@@ -93,7 +93,7 @@ public enum GameManager {
                 return getTurn(index, context, R.string.xValue, R.string.oValue);
             case checkers:
             case chess:
-                // For chess_exp and checkers_exp, we need either primary or secondary player strings.
+                // For chess and checkers, we need either primary or secondary player strings.
                 return getTurn(index, context, R.string.player1, R.string.player2);
         }
     }

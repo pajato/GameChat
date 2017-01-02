@@ -93,9 +93,9 @@ public class ExperienceChangeHandler extends DatabaseEventHandler implements Val
         // Case on the profile type to get the desired class.
         ExpType type = ExpType.values()[mProfile.type];
         switch (type) {
-            case ttt_exp: return snapshot.getValue(TicTacToe.class);
-            case checkers_exp: return snapshot.getValue(Checkers.class);
-            case chess_exp: return snapshot.getValue(Chess.class);
+            case ttt: return snapshot.getValue(TicTacToe.class);
+            case checkers: return snapshot.getValue(Checkers.class);
+            case chess: return snapshot.getValue(Chess.class);
             default:
                 break;
         }

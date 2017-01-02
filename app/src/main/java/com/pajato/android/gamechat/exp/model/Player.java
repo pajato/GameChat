@@ -26,10 +26,10 @@ public class Player {
     /** The player's display name. */
     public String name;
 
-    /** The player's symbol (either X or O for tictactoe - not used for chess_exp or checkers_exp). */
+    /** The player's symbol (either X or O for tictactoe - not used for chess or checkers). */
     public String symbol;
 
-    /** The player's team (e.g., red or black for checkers_exp) */
+    /** The player's team (e.g., red or black for checkers) */
     public String team;
 
     /** The player's win count. */

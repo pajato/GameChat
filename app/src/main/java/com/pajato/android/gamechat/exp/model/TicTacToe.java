@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
 @IgnoreExtraProperties public class TicTacToe implements Experience {
@@ -117,7 +117,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = ttt_exp.ordinal();
+        type = ttt.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 

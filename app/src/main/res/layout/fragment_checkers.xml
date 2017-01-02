@@ -28,11 +28,12 @@ http://www.gnu.org/licenses
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/vs"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="104dp"
         android:background="@color/colorLightBlue"
         android:text="@string/vs"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
         tools:text="vs" />
@@ -68,12 +69,12 @@ http://www.gnu.org/licenses
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:id="@+id/wins"
-        android:layout_marginBottom="60dp"
         android:background="@color/colorLightBlue"
         android:textSize="14sp"
         android:text="@string/wins"
-        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintTop_toBottomOf="@id/vs"
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
         tools:text="wins" />
@@ -81,36 +82,34 @@ http://www.gnu.org/licenses
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
         android:textAlignment="center"
         android:textSize="20sp"
         android:id="@+id/player1WinCount"
         app:layout_constraintCenterY_toCenterY="@id/wins"
-        app:layout_constraintRight_toLeftOf="@+id/wins"
-        tools:text="0"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintCenterX_toCenterX="@+id/player_1_icon"
+        tools:text="0" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
         android:id="@+id/player2WinCount"
         android:textAlignment="center"
         android:textSize="20sp"
         app:layout_constraintCenterY_toCenterY="@id/wins"
-        app:layout_constraintLeft_toRightOf="@+id/wins"
+        app:layout_constraintCenterX_toCenterX="@+id/player_2_icon"
         tools:text="0"
         tools:layout_editor_absoluteY="0dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="24dp"
         android:id="@+id/turn"
         android:background="@color/colorLightBlue"
         android:text="@string/turn"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/board"
+        app:layout_constraintTop_toBottomOf="@id/wins"
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
         tools:text="turn" />
@@ -118,46 +117,48 @@ http://www.gnu.org/licenses
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="52dp"
         android:layout_margin="8dp"
         android:id="@+id/player_1_icon"
         android:src="@drawable/ic_account_circle_black_36dp"
         app:layout_constraintCenterY_toCenterY="@id/turn"
-        app:layout_constraintRight_toLeftOf="@id/turn"/>
+        app:layout_constraintRight_toLeftOf="@+id/rightIndicator1"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_right"
         android:id="@+id/leftIndicator1"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
         android:textSize="20sp"
         android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="@+id/player_1_icon"
         app:layout_constraintRight_toLeftOf="@+id/player_1_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"/>
+        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/arrow_left"
         android:id="@+id/rightIndicator1"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
         android:textSize="20sp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="@+id/player_1_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"
         app:layout_constraintLeft_toRightOf="@+id/player_1_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"/>
+        app:layout_constraintRight_toLeftOf="@id/turn"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
+        android:layout_margin="8dp"
         android:id="@+id/player_2_icon"
         android:src="@drawable/ic_account_circle_black_36dp"
-        android:layout_margin="8dp"
         app:layout_constraintCenterY_toCenterY="@+id/turn"
-        app:layout_constraintLeft_toRightOf="@+id/turn"
+        app:layout_constraintLeft_toRightOf="@+id/leftIndicator2"
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp" />
 
@@ -167,12 +168,15 @@ http://www.gnu.org/licenses
         android:text="@string/arrow_right"
         android:id="@+id/leftIndicator2"
         android:textColor="@color/colorAccent"
+        android:textStyle="bold"
         android:textSize="20sp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:visibility="invisible"
         app:layout_constraintTop_toTopOf="@+id/player_2_icon"
         app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"/>
+        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"
+        app:layout_constraintLeft_toRightOf="@id/turn"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -180,6 +184,7 @@ http://www.gnu.org/licenses
         android:text="@string/arrow_left"
         android:id="@+id/rightIndicator2"
         android:textColor="@color/colorAccent"
+        android:textStyle="bold"
         android:textSize="20sp"
         android:layout_marginStart="8dp"
         android:visibility="invisible"
@@ -204,6 +209,7 @@ http://www.gnu.org/licenses
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:id="@+id/board"
 
         android:rowCount="8"
@@ -212,10 +218,9 @@ http://www.gnu.org/licenses
         android:columnOrderPreserved="true"
         android:orientation="horizontal"
 
+        app:layout_constraintTop_toBottomOf="@id/player_1_icon"
         app:layout_constraintLeft_toLeftOf="@id/checkers_panel"
-        app:layout_constraintRight_toRightOf="@id/checkers_panel"
-        app:layout_constraintTop_toTopOf="@id/checkers_panel"
-        app:layout_constraintBottom_toBottomOf="@id/checkers_panel">
+        app:layout_constraintRight_toRightOf="@id/checkers_panel">
 
     </GridLayout>
 

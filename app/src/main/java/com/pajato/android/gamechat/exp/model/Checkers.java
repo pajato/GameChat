@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.checkers_exp;
+import static com.pajato.android.gamechat.exp.ExpType.checkers;
 
 /**
  * Created by sscott on 12/30/16.
  */
 
-/** Provide a Firebase model class for a checkers_exp game experience. */
+/** Provide a Firebase model class for a checkers game experience. */
 @IgnoreExtraProperties
 public class Checkers implements Experience {
 
@@ -49,7 +49,7 @@ public class Checkers implements Experience {
     /** The member account identifier who created the experience. */
     public String owner;
 
-    /** The list of players, for chess_exp, two of them. */
+    /** The list of players, for chess, two of them. */
     public List<Player> players;
 
     /** The room push key. */
@@ -85,7 +85,7 @@ public class Checkers implements Experience {
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = checkers_exp.ordinal();
+        type = checkers.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_checkers";
     }
 

@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.exp.ExpType.ttt_exp;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
@@ -117,7 +117,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
     /** Handle an experience posting event to see if this is a tictactoe experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != ttt_exp) return;
+        if (event.experience == null || event.experience.getExperienceType() != ttt) return;
 
         // The experience is a tictactoe experience.  Start the game.
         mExperience = event.experience;

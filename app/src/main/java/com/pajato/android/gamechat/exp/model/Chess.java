@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.chess_exp;
+import static com.pajato.android.gamechat.exp.ExpType.chess;
 
 /**
  * Created by sscott on 12/30/16.
  */
 
-/** Provide a Firebase model class for a chess_exp game experience. */
+/** Provide a Firebase model class for a chess game experience. */
 @IgnoreExtraProperties
 public class Chess implements Experience {
 
@@ -25,9 +25,9 @@ public class Chess implements Experience {
     public final static int TIE = 3;
     public final static int PENDING = 4;
 
-    // TODO: Define a chess_exp / checkers_exp board - the TTTBoard class currently is 3x3 for TTT
-    /** A POJO encapsulating the board moves and wining tallies. */
-//    public TTTBoard board;
+    // TODO: Define a chess board ?
+    /** A POJO encapsulating the board moves */
+    public CheckersBoard board;
 
     /** The creation timestamp. */
     private long createTime;
@@ -50,7 +50,7 @@ public class Chess implements Experience {
     /** The member account identifier who created the experience. */
     public String owner;
 
-    /** The list of players, for chess_exp, two of them. */
+    /** The list of players, for chess, two of them. */
     public List<Player> players;
 
     /** The room push key. */
@@ -86,7 +86,7 @@ public class Chess implements Experience {
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = chess_exp.ordinal();
+        type = chess.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
     }
 
