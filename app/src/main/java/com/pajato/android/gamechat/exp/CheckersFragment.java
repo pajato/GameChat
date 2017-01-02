@@ -1,6 +1,7 @@
 package com.pajato.android.gamechat.exp;
 
 import android.graphics.PorterDuff;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseIntArray;
 import android.view.Gravity;
@@ -41,14 +42,17 @@ public class CheckersFragment extends BaseGameFragment {
 
     // Public instance methods.
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_checkers;}
-
     /** Handle button clicks ... placeholder. */
     @Subscribe public void onClick(final ClickEvent event) {}
 
-    @Override public void onInitialize() {
-        super.onInitialize();
+    /** Setup the Player Controls. The Board setup will be done later, in onNewGame. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_checkers);
+    }
+
+    @Override public void onStart() {
+        super.onStart();
         mBoard = (GridLayout) mLayout.findViewById(R.id.board);
         mTurn = true;
         onNewGame();

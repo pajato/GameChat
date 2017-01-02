@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -32,14 +34,19 @@ public class ShowExpListFragment extends BaseGameFragment {
         logEvent("onClick (showExp)");
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game_no_games;}
-
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
+    /** Set the layout file. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        //TODO: Establish better layout for the list of games. Potentially like fragment_chat_list?
+        super.setLayoutId(R.layout.fragment_game_no_games);
+    }
+
     /** Initialize the fragment by setting in the FAB. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
+        super.onStart();
         FabManager.game.init(this);
     }
 

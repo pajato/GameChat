@@ -53,9 +53,9 @@ public class CreateRoomFragment extends BaseCreateFragment {
     // Public instance methods.
 
     /** Establish the create time state. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Ensure that there is a group to use in creating the new room.
-        super.onInitialize();
+        super.onStart();
         mGroup = GroupManager.instance.getGroupProfile(mItem.groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
         mMember = MemberManager.instance.getMember(mGroup.key, account.id);

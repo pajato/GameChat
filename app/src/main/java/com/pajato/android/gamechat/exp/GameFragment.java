@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,9 +55,6 @@ public class GameFragment extends BaseGameFragment {
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
 
     // Public instance methods.
-
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game;}
 
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
@@ -120,10 +118,16 @@ public class GameFragment extends BaseGameFragment {
         menuInflater.inflate(R.menu.game_menu, menu);
     }
 
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game);
+    }
+
     /** Intialize the game fragment envelope. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Inflate the layout, and initialize the various managers.
-        super.onInitialize();
+        super.onStart();
         FabManager.game.setTag(this.getTag());
         FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
     }

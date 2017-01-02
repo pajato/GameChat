@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -35,11 +37,14 @@ public class ShowOfflineFragment extends BaseGameFragment {
         logEvent("onClick (showOffline)");
     }
 
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_game_offline;}
-
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
+
+    /** Establish the layout file to show that the app is offline due to network loss. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game_offline);
+    }
 
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {

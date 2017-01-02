@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -32,14 +34,18 @@ public class ShowSignedOutFragment extends BaseGameFragment {
         logEvent("onClick (showSignedOut)");
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_exp_signed_out;}
-
     /** Satisfy the base game fragment contract with a nop message handler. */
     @Override public void messageHandler(final String message) {}
 
+    /** Establish the layout file to show that the user is signed out and cannot chat. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_exp_signed_out);
+    }
+
     /** Initialize the fragment by setting in the FAB. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
+        super.onStart();
         // Set up the FAB.
         FabManager.game.init(this);
     }

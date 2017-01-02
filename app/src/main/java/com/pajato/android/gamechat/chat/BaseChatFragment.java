@@ -116,8 +116,8 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     /** Initialize chat list fragments by dealing with ads. */
-    @Override public void onInitialize() {
-        super.onInitialize();
+    @Override public void onStart() {
+        super.onStart();
         initAdView(mLayout);
     }
 
