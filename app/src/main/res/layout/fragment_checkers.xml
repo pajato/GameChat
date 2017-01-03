@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (C) 2016 Pajato Technologies LLC.
 
 This file is part of Pajato GameChat.
@@ -15,213 +14,211 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
 -->
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/checkers_panel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/checkers_panel">
+    android:orientation="vertical">
 
     <TextView
+        android:id="@+id/vs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/vs"
-        android:layout_marginTop="16dp"
         android:layout_marginBottom="104dp"
+        android:layout_marginTop="16dp"
         android:background="@color/colorLightBlue"
         android:text="@string/vs"
         android:textSize="14sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="vs" />
 
     <TextView
+        android:id="@+id/player1Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:id="@+id/player1Name"
         android:text="@string/me"
         android:textAlignment="center"
-        android:textStyle="bold"
         android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintCenterY_toCenterY="@id/vs"
         app:layout_constraintRight_toLeftOf="@+id/vs"
-        tools:text="theShovel"
-        tools:layout_editor_absoluteY="0dp" />
+        tools:layout_editor_absoluteY="0dp"
+        tools:text="theShovel" />
 
     <TextView
+        android:id="@+id/player2Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:id="@+id/player2Name"
         android:text="@string/friend"
         android:textAlignment="center"
-        android:textStyle="bold"
         android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintCenterY_toCenterY="@id/vs"
         app:layout_constraintLeft_toRightOf="@+id/vs"
-        tools:text="Friend"
-        tools:layout_editor_absoluteY="0dp" />
+        tools:layout_editor_absoluteY="0dp"
+        tools:text="Friend" />
 
     <TextView
+        android:id="@+id/wins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:id="@+id/wins"
         android:background="@color/colorLightBlue"
-        android:textSize="14sp"
         android:text="@string/wins"
-        app:layout_constraintTop_toBottomOf="@id/vs"
-        app:layout_constraintRight_toLeftOf="parent"
+        android:textSize="14sp"
         app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vs"
         tools:text="wins" />
 
     <TextView
+        android:id="@+id/player1WinCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:textSize="20sp"
-        android:id="@+id/player1WinCount"
-        app:layout_constraintCenterY_toCenterY="@id/wins"
         app:layout_constraintCenterX_toCenterX="@+id/player_1_icon"
+        app:layout_constraintCenterY_toCenterY="@id/wins"
         tools:text="0" />
 
     <TextView
+        android:id="@+id/player2WinCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/player2WinCount"
         android:textAlignment="center"
         android:textSize="20sp"
-        app:layout_constraintCenterY_toCenterY="@id/wins"
         app:layout_constraintCenterX_toCenterX="@+id/player_2_icon"
-        tools:text="0"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintCenterY_toCenterY="@id/wins"
+        tools:layout_editor_absoluteY="0dp"
+        tools:text="0" />
 
     <TextView
+        android:id="@+id/turn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:layout_marginBottom="24dp"
-        android:id="@+id/turn"
+        android:layout_marginTop="12dp"
         android:background="@color/colorLightBlue"
         android:text="@string/turn"
         android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/wins"
-        app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wins"
         tools:text="turn" />
 
     <ImageView
+        android:id="@+id/player_1_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:id="@+id/player_1_icon"
         android:src="@drawable/ic_account_circle_black_36dp"
         app:layout_constraintCenterY_toCenterY="@id/turn"
-        app:layout_constraintRight_toLeftOf="@+id/rightIndicator1"/>
+        app:layout_constraintRight_toLeftOf="@+id/rightIndicator1" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_right"
         android:id="@+id/leftIndicator1"
-        android:textColor="@color/colorPrimary"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toTopOf="@+id/player_1_icon"
-        app:layout_constraintRight_toLeftOf="@+id/player_1_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/arrow_left"
-        android:id="@+id/rightIndicator1"
-        android:textColor="@color/colorPrimary"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toTopOf="@+id/player_1_icon"
+        android:text="@string/arrow_right"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"
+        app:layout_constraintRight_toLeftOf="@+id/player_1_icon"
+        app:layout_constraintTop_toTopOf="@+id/player_1_icon" />
+
+    <TextView
+        android:id="@+id/rightIndicator1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/arrow_left"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"
         app:layout_constraintLeft_toRightOf="@+id/player_1_icon"
-        app:layout_constraintRight_toLeftOf="@id/turn"/>
+        app:layout_constraintRight_toLeftOf="@id/turn"
+        app:layout_constraintTop_toTopOf="@+id/player_1_icon" />
 
     <ImageView
+        android:id="@+id/player_2_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:id="@+id/player_2_icon"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:src="@drawable/ic_account_circle_black_36dp"
         app:layout_constraintCenterY_toCenterY="@+id/turn"
-        app:layout_constraintLeft_toRightOf="@+id/leftIndicator2"
-        android:layout_marginRight="8dp"
-        android:layout_marginEnd="8dp" />
+        app:layout_constraintLeft_toRightOf="@+id/leftIndicator2" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/arrow_right"
         android:id="@+id/leftIndicator2"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:visibility="invisible"
-        app:layout_constraintTop_toTopOf="@+id/player_2_icon"
-        app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"
-        app:layout_constraintLeft_toRightOf="@id/turn"/>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/arrow_left"
-        android:id="@+id/rightIndicator2"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold"
-        android:textSize="20sp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:text="@string/arrow_right"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:textStyle="bold"
         android:visibility="invisible"
-        app:layout_constraintTop_toTopOf="@+id/player_2_icon"
-        app:layout_constraintLeft_toRightOf="@+id/player_2_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"/>
+        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"
+        app:layout_constraintLeft_toRightOf="@id/turn"
+        app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
+        app:layout_constraintTop_toTopOf="@+id/player_2_icon" />
 
     <TextView
+        android:id="@+id/rightIndicator2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/arrow_left"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"
+        app:layout_constraintLeft_toRightOf="@+id/player_2_icon"
+        app:layout_constraintTop_toTopOf="@+id/player_2_icon" />
+
+    <TextView
+        android:id="@+id/winner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:id="@+id/winner"
         android:background="@color/colorLightBlue"
         android:textSize="24sp"
         android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@+id/board"
-        app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/board"
         tools:text="Winner"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
     <GridLayout
+        android:id="@+id/board"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:id="@+id/board"
-
-        android:rowCount="8"
-        android:rowOrderPreserved="true"
         android:columnCount="8"
         android:columnOrderPreserved="true"
         android:orientation="horizontal"
-
-        app:layout_constraintTop_toBottomOf="@id/player_1_icon"
+        android:rowCount="8"
+        android:rowOrderPreserved="true"
         app:layout_constraintLeft_toLeftOf="@id/checkers_panel"
-        app:layout_constraintRight_toRightOf="@id/checkers_panel">
+        app:layout_constraintRight_toRightOf="@id/checkers_panel"
+        app:layout_constraintTop_toBottomOf="@id/player_1_icon">
 
     </GridLayout>
+
 
 </android.support.constraint.ConstraintLayout>

@@ -480,8 +480,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = mLayout.findViewById(R.id.checkers_panel)
-                    .getWidth();
+            int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
             int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = pieceSideLength;

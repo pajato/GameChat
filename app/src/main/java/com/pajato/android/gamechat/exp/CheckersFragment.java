@@ -461,10 +461,9 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         model.board.boardMap = new SparseIntArray();
         model.board.possibleMoves = new ArrayList<>();
 
-        int screenWidth = mLayout.findViewById(R.id.checkers_panel).getWidth();
+        int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
         Log.d(TAG, "screen width=" + screenWidth);
         int pieceSideLength = screenWidth / 8;
-
 
         // Go through and populate the GridLayout / CheckersBoard.
         for(int i = 0; i < 64; i++) {
