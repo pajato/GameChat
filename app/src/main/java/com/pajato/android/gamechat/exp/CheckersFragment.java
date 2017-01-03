@@ -315,7 +315,7 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
     /** Process a resumption by testing and waiting for the experience */
     private void resume() {
-        if (mExperience == null) {
+        if (getModel() == null) {
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
             String title = "Checkers";
@@ -327,9 +327,6 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             ProgressManager.instance.hide();
             updateExperience();
-            if (getModel().board == null) {
-                onNewGame();
-            }
         }
     }
 
@@ -426,10 +423,13 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
     private void setGameBoard(@NonNull final Checkers model) {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
         // TODO: figure this out!
-        if (model.board == null)
-            initBoard(model);
-        // else .. TODO: finish this
-
+        if (model.board == null) {
+            onNewGame();
+        } else {
+            // Place the game symbols on the grid.
+            Log.i(TAG, "setGameBoard - need to handle existing game board here!!!");
+            // TODO: finish this implementation
+        }
     }
 
     /** Update the UI using the current experience state from the database. */
@@ -459,17 +459,18 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
             model.board = new CheckersBoard();
         }
         model.board.boardMap = new SparseIntArray();
-        model.board.boardMap.clear();
         model.board.possibleMoves = new ArrayList<>();
-        model.board.possibleMoves.clear();
+
+        int screenWidth = mLayout.findViewById(R.id.checkers_panel).getWidth();
+        Log.d(TAG, "screen width=" + screenWidth);
+        int pieceSideLength = screenWidth / 8;
+
 
         // Go through and populate the GridLayout / CheckersBoard.
         for(int i = 0; i < 64; i++) {
             ImageButton currentTile = new ImageButton(getContext());
 
             // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = mLayout.findViewById(R.id.checkers_panel).getWidth();
-            int pieceSideLength = screenWidth / 8;
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.height = pieceSideLength;
             param.width = pieceSideLength;

@@ -477,6 +477,8 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
 
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final TicTacToe model) {
+        Log.d(TAG, "setGameBoard() - mLayout width=" + mLayout.getWidth());
+
         // Determine if the model has any pieces to put on the board.  If not reset the board.
         if (model.board == null)
             // Initialize the board state.
