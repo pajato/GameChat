@@ -15,20 +15,35 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.exp;
-
-import android.os.Bundle;
+package com.pajato.android.gamechat.credentials;
 
 /**
- * Show a list of experiences of a particular type.
+ * Provide a POJO to model an a User.
  *
- * Created by pmr on 10/5/16.
+ * @author Paul Michael Reilly
  */
-public class ShowExpTypeListFragment extends BaseExperienceFragment {
+public class Credentials {
 
-    /** Set the layout file. */
-    @Override public void onCreate(Bundle bundle) {
-        // TODO: Add a real layout for this class.
-        super.onCreate(bundle);
+    // Private instance variables.
+
+    /** The User email address. */
+    public String email;
+
+    /** The identity provider. */
+    public String provider;
+
+    /** The identity secret. */
+    public String secret;
+
+    // Public constructors.
+
+    /** Build an empty constructor. */
+    public Credentials() {}
+
+    /** Build an instance given a full set of properties. */
+    public Credentials(final String email, final String provider, final String secret) {
+        this.email = email;
+        this.provider = provider;
+        this.secret = secret;
     }
 }

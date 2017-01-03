@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -32,11 +34,15 @@ public class ShowExpGroupListFragment extends BaseExperienceFragment {
         logEvent("onClick (showExpGroupList)");
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game_no_games;}
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game_no_games);
+    }
 
     /** Initialize the fragment by setting in the FAB. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
+        super.onStart();
         FabManager.game.init(this);
     }
 

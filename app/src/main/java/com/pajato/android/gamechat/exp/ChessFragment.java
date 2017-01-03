@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -75,9 +76,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 
     // Public instance methods.
 
-    /** Set the layout file. Checkers and chess are the same, so we intentionally use fragment_checkers */
-    @Override public int getLayout() {return R.layout.fragment_checkers;}
-
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe
     public void onClick(final TagClickEvent event) {
@@ -113,9 +111,15 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         resume();
     }
 
-    @Override public void onInitialize() {
+    /** Setup the Player Controls. The Board setup will be done later, in onNewGame. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_checkers);
+    }
+
+    @Override public void onStart() {
         // Setup the board and start a new game to create the board.
-        super.onInitialize();
+        super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
 
         grid = (GridLayout) mLayout.findViewById(R.id.board);

@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -68,9 +69,6 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
 
     // Public instance methods.
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_checkers;}
-
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
@@ -105,8 +103,14 @@ public class CheckersFragment extends BaseGameExpFragment implements View.OnClic
         resume();
     }
 
-    @Override public void onInitialize() {
-        super.onInitialize();
+    /** Setup the Player Controls. The Board setup will be done later, in onNewGame. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_checkers);
+    }
+
+    @Override public void onStart() {
+        super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
 
         grid = (GridLayout) mLayout.findViewById(R.id.board);

@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -88,8 +89,11 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
 
     // Public instance methods.
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game_ttt;}
+    /** Setup the Player Controls and empty board. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game_ttt);
+    }
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
@@ -124,10 +128,10 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         resume();
     }
 
-    /** Initialize by setting up tile click handlers on the board. Called by onCreateView. */
-    @Override public void onInitialize() {
+    /** Initialize by setting up tile click handlers on the board. */
+    @Override public void onStart() {
         // Place an click listener on all nine buttons by iterating over all nine buttons.
-        super.onInitialize();
+        super.onStart();
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         final String format = "Invalid tag found on button with tag {%s}";
         for (int i = 0; i < 3; i++) {

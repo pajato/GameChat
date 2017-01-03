@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -66,7 +67,10 @@ public class JoinRoomsFragment extends BaseChatFragment {
     // Public instance methods.
 
     /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public int getLayout() {return R.layout.fragment_chat_join_rooms;}
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_join_rooms);
+    }
 
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -119,9 +123,9 @@ public class JoinRoomsFragment extends BaseChatFragment {
     }
 
     /** Establish the create time state. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Establish the list type and setup the toolbar.
-        super.onInitialize();
+        super.onStart();
         mItemListType = DBUtils.ChatListType.joinRoom;
         initToolbar();
         FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());

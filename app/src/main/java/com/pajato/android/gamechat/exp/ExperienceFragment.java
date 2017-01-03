@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -59,9 +60,6 @@ public class ExperienceFragment extends BaseExperienceFragment {
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
 
     // Public instance methods.
-
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_game;}
 
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
@@ -121,10 +119,16 @@ public class ExperienceFragment extends BaseExperienceFragment {
         menuInflater.inflate(R.menu.game_menu, menu);
     }
 
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game);
+    }
+
     /** Intialize the game fragment envelope. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Inflate the layout, and initialize the various managers.
-        super.onInitialize();
+        super.onStart();
         FabManager.game.setTag(this.getTag());
         FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
     }

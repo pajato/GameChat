@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.os.Bundle;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.FabManager;
@@ -75,14 +77,17 @@ public class ShowSignedOutFragment extends BaseChatFragment {
         }
     }
 
-    /** Set the layout file. */
-    @Override public int getLayout() {return R.layout.fragment_chat_signed_out;}
+    /** Establish the layout file to show that the user is signed out and cannot chat. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_chat_signed_out);
+    }
 
     /** Handle the setup for the groups panel. */
-    @Override public void onInitialize() {
+    @Override public void onStart() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
-        super.onInitialize();
+        super.onStart();
         FabManager.chat.init(this);
         FabManager.chat.setMenu(SIGN_IN_FAM_KEY, getSignInMenu());
     }
