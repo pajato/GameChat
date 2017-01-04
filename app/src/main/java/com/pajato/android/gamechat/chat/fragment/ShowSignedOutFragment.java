@@ -92,13 +92,6 @@ public class ShowSignedOutFragment extends BaseChatFragment {
         FabManager.chat.setMenu(SIGN_IN_FAM_KEY, getSignInMenu());
     }
 
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        // TODO: Change the FAB button menu to show "Sign In", "Add Account" or "Switch Account".
-        super.onResume();
-        FabManager.chat.setMenu(this, SIGN_IN_FAM_KEY);
-    }
-
     // Private instance methods.
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
