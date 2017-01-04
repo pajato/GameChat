@@ -182,6 +182,7 @@ public abstract class BaseChatFragment extends BaseFragment {
 
         // Setup the overflow menu on all pages but the group (home) page.
         int id = mItemListType.overflowMenuIconResourceId;
+        toolbar.getMenu().clear();
         toolbar.inflateMenu(mItemListType.overflowMenuResourceId);
         toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
         toolbar.setNavigationIcon(mItemListType.navigationIconResourceId);
