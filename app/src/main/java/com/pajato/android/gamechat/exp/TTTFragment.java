@@ -97,12 +97,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     /** Placeholder while message handler stays relevant for chess and checkers. */
     @Override public void messageHandler(final String msg) {}
 
-    /** Setup the Player Controls and empty board. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_game_ttt);
-    }
-
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
@@ -132,7 +126,12 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
             default:
                 break;
         }
+    }
 
+    /** Setup the Player Controls and empty board. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_game_ttt);
     }
 
     /** Handle either a TTT board tile click. */
@@ -148,6 +147,15 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
         // The experience is a tictactoe experience.  Start the game.
         mExperience = event.experience;
+        resume();
+    }
+
+    /** Handle taking the foreground by updating the UI based on the current expeience. */
+    @Override public void onResume() {
+        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
+        // present a spinner.  When an experience is posted by the app event manager, the game can
+        // be shown
+        super.onResume();
         resume();
     }
 
@@ -167,15 +175,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
                     Log.e(TAG, String.format(Locale.US, format, tag));
             }
         }
-    }
-
-    /** Handle taking the foreground by updating the UI based on the current expeience. */
-    @Override public void onResume() {
-        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
-        // present a spinner.  When an experience is posted by the app event manager, the game can
-        // be shown
-        super.onResume();
-        resume();
     }
 
     // Protected instance methods.
@@ -207,6 +206,19 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
         ExperienceManager.instance.createExperience(model);
+    }
+
+    /** Return a list of default TicTacToe players. */
+    private List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+        List<Player> result = new ArrayList<>();
+        String name = getPlayerName(getPlayer(players, 0), "Player1");
+        String symbol = context.getString(R.string.xValue);
+        result.add(new Player(name, symbol));
+        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        symbol = context.getString(R.string.oValue);
+        result.add(new Player(name, symbol));
+
+        return result;
     }
 
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
@@ -249,6 +261,24 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         return NetworkManager.instance.isConnected() ? SIGNED_OUT_OWNER_ID : OFFLINE_OWNER_ID;
     }
 
+    /** Return the account associated with the given index, null if there is no such account. */
+    private Account getPlayer(final List<Account> players, final int index) {
+        // Determine if there is such an account, returning null if not.
+        if (players == null || index < 0 || index >= players.size()) return null;
+
+        // There is an account so return it.
+        return players.get(index);
+    }
+
+    /** Return a name for the player by using the given account or a default. */
+    private String getPlayerName(final Account player, final String defaultName) {
+        // Determine if there is an account to use.  Return the default name if not.
+        if (player == null) return defaultName;
+
+        // There is an account.  Use the first name for the game.
+        return player.getNickName();
+    }
+
     /** Return a possibly null list of player information for a two participant experience. */
     private List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
@@ -273,37 +303,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         }
 
         return players;
-    }
-
-    /** Return a list of default TicTacToe players. */
-    private List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
-        List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), "Player1");
-        String symbol = context.getString(R.string.xValue);
-        result.add(new Player(name, symbol));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        symbol = context.getString(R.string.oValue);
-        result.add(new Player(name, symbol));
-
-        return result;
-    }
-
-    /** Return the account associated with the given index, null if there is no such account. */
-    private Account getPlayer(final List<Account> players, final int index) {
-        // Determine if there is such an account, returning null if not.
-        if (players == null || index < 0 || index >= players.size()) return null;
-
-        // There is an account so return it.
-        return players.get(index);
-    }
-
-    /** Return a name for the player by using the given account or a default. */
-    private String getPlayerName(final Account player, final String defaultName) {
-        // Determine if there is an account to use.  Return the default name if not.
-        if (player == null) return defaultName;
-
-        // There is an account.  Use the first name for the game.
-        return player.getNickName();
     }
 
     /** Return the game state after applying the given button move to the data model. */
@@ -356,19 +355,14 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         return ACTIVE;
     }
 
-    /** Handle a new game by resetting the data model. */
-    private void handleNewGame() {
-        // Ensure that the data model exists and is valid.
-        TicTacToe model = getModel();
-        if (model == null) {
-            Log.e(TAG, "Null TTT data model.", new Throwable());
-            return;
-        }
-
-        // Reset the data model, update the database and clear the notification manager one-shot.
-        model.board = null;
-        model.state = ACTIVE;
-        ExperienceManager.instance.updateExperience(mExperience);
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getTTTMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
+        return menu;
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
@@ -405,6 +399,21 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         model.state = getState(model, buttonTag);
         model.setWinCount();
         model.toggleTurn();
+        ExperienceManager.instance.updateExperience(mExperience);
+    }
+
+    /** Handle a new game by resetting the data model. */
+    private void handleNewGame() {
+        // Ensure that the data model exists and is valid.
+        TicTacToe model = getModel();
+        if (model == null) {
+            Log.e(TAG, "Null TTT data model.", new Throwable());
+            return;
+        }
+
+        // Reset the data model, update the database and clear the notification manager one-shot.
+        model.board = null;
+        model.state = ACTIVE;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
@@ -582,15 +591,4 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         setGameBoard(model);
         setState(model);
     }
-
-    /** Return the home FAM used in the top level show games and show no games fragments. */
-    private List<MenuEntry> getTTTMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
-        return menu;
-    }
-
 }
