@@ -29,11 +29,11 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Account;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
@@ -56,10 +56,10 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.model.Board.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.Board.BOT_ROW;
 import static com.pajato.android.gamechat.exp.model.Board.END_COL;
@@ -108,22 +108,37 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // Determine if this event is for this fragment.  Abort if not.
         if (GameManager.instance.getCurrent() != tictactoe.ordinal()) return;
 
-        // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
-        // handle a snackbar action first.
+        // The event is either a snackbar action (start a new game) or a menu (FAM or Player2)
+        // entry.  Detect and handle a snackbar action first.
         Object tag = event.view.getTag();
         if (isPlayAgain(tag, TAG)) {
             // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
             // setup a new game.
             FabManager.game.dismissMenu(this);
             handleNewGame();
+            return;
         }
+
+        // Case on the title resource id to handle a mode selection.
+        int titleResId = tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1;
+        switch (titleResId) {
+            case R.string.PlayModeLocalMenuTitle:
+            case R.string.PlayModeComputerMenuTitle:
+            case R.string.PlayModeUserMenuTitle:
+                // Handle selecting a friend by deferring for now.
+                showFutureFeatureMessage(R.string.FutureSelectModes);
+                FabManager.game.toggle(this, EXP_MODE_FAM_KEY);
+                break;
+            default:
+                break;
+        }
+
     }
 
-    /** Handle a click on the tictactoe board by verifying the click and handing it off. */
+    /** Handle either a TTT board tile click. */
     @Override public void onClick(final View view) {
         Object tag = view.getTag();
-        if (tag instanceof String && ((String) tag).startsWith("button"))
-            handleTileClick((String) tag);
+        if (tag instanceof String && ((String) tag).startsWith("button")) handleClick((String) tag);
     }
 
     /** Handle an experience posting event to see if this is a tictactoe experience. */
@@ -160,7 +175,6 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
-        FabManager.game.setMenu(this, TIC_TAC_TOE_FAM_KEY);
         resume();
     }
 
@@ -168,8 +182,8 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
 
     /** Return an experience for a given dispatcher instance. */
     @Override
-    protected void createExperience(@NonNull final Context context,
-                                    @NonNull final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    protected void createExperience(final Context context,
+                                    final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Set up the players and persist the game.
         List<Account> players = getPlayers(dispatcher);
         createExperience(context, players);
@@ -358,7 +372,7 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
-    private void handleTileClick(final String buttonTag) {
+    private void handleClick(final String buttonTag) {
         // Ensure that the click occurred on a grid button and that the data model is not empty.
         // Abort if not.
         View view = mLayout.findViewWithTag(buttonTag);

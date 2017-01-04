@@ -108,7 +108,6 @@ public class ShowRoomListFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
-        FabManager.chat.setMenu(this, CHAT_ROOM_FAM_KEY);
     }
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
