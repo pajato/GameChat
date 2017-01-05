@@ -19,7 +19,7 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MemberChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
