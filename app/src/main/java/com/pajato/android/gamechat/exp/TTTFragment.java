@@ -102,24 +102,22 @@ public class TTTFragment extends BaseGameFragment implements View.OnClickListene
         // Determine if this event is for this fragment.  Abort if not.
         if (GameManager.instance.getCurrent() != tictactoe.ordinal()) return;
 
-        // The event is either a snackbar action (start a new game) or a menu (FAM or Player2)
-        // entry.  Detect and handle a snackbar action first.
+        // The event has been initiated by a FAM menu item.  It is either a snackbar action (start a
+        // new game) or a menu (FAM or Player2) entry.  Detect and handle a snackbar action first.
         Object tag = event.view.getTag();
-        if (isPlayAgain(tag, TAG)) {
-            // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
-            // setup a new game.
-            FabManager.game.dismissMenu(this);
-            handleNewGame();
-            return;
-        }
+        FabManager.game.dismissMenu(this);
+        if (isPlayAgain(tag, TAG)) handleNewGame();
+        else handleMode(tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1);
+    }
 
+    /** Handle a possible game mode selection by ... */
+    private void handleMode(final int titleResId) {
         // Case on the title resource id to handle a mode selection.
-        int titleResId = tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1;
         switch (titleResId) {
             case R.string.PlayModeLocalMenuTitle:
             case R.string.PlayModeComputerMenuTitle:
             case R.string.PlayModeUserMenuTitle:
-                // Handle selecting a friend by deferring for now.
+                // Handle selecting a friend by deferring for now and restoring the default menu.
                 showFutureFeatureMessage(R.string.FutureSelectModes);
                 FabManager.game.toggle(this, EXP_MODE_FAM_KEY);
                 break;

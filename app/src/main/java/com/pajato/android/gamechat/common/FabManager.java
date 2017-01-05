@@ -97,9 +97,9 @@ public enum FabManager {
 
     /** Dismiss the menu associated with the given FAB button. */
     public void dismissMenu(@NonNull final Fragment fragment) {
-        // Determine if the chat fragment is accessible.  If not, abort.
+        // Determine if the chat fragment is accessible.  If so, dismiss the FAM.
         View layout = getFragmentLayout(fragment);
-        if (layout != null) dismissMenu(layout);
+        if (layout != null) dismissMenu(fragment, layout);
     }
 
     /** Ensure that the FAb is not being shown. */
@@ -127,7 +127,7 @@ public enum FabManager {
         // Set the FAB state to closed by assuming an open FAM and dismissing it.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
-        dismissMenu(layout);
+        dismissMenu(fragment, layout);
     }
 
     /** Set the named floating action menu (FAM) making it the default. */
@@ -188,16 +188,11 @@ public enum FabManager {
 
     /** Toggle the state of the FAB button for the given fragment, use the given menu once. */
     public void toggle(@NonNull final Fragment fragment) {
-        toggle(fragment, mDefaultMenuName, false);
+        toggle(fragment, mDefaultMenuName);
     }
 
-    /** Toggle the state of the FAB/FAM for the given fragment using the given menu once. */
+    /** Toggle the state of the FAB/FAM for the given fragment using the given menu. */
     public void toggle(@NonNull final Fragment fragment, @NonNull final String name) {
-        toggle(fragment, name, true);
-    }
-
-    /** Toggle the state of the FAB button using a given fragment to obtain the layout view. */
-    public void toggle(@NonNull final Fragment fragment, final String name, final boolean restore) {
         // Determine if the fragment layout exists.  Continue if it does.  Return if it does not.
         // An error message with stack trace will have been generated if the view cannot be
         // accessed.
@@ -217,9 +212,7 @@ public enum FabManager {
                 case opened:
                     // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
                     // the menu and undim the frame.
-                    dismissMenu(layout);
-                    if (restore) setMenu(fragment, mDefaultMenuName);
-                    dimmerView.setVisibility(View.GONE);
+                    dismissMenu(fragment, layout);
                     break;
                 case closed:
                     // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
@@ -238,14 +231,17 @@ public enum FabManager {
     // Private instance methods.
 
     /** Dismiss the menu associated with the given layout view. */
-    private void dismissMenu(@NonNull final View layout) {
-        // The fragment is accessible and the layout has been established.  Dismiss the FAM.
-        View dimmerView = layout.findViewById(mFabDimmerId);
+    private void dismissMenu(@NonNull final Fragment fragment, @NonNull final View layout) {
+        // Dismiss the FAM and ensure that the default menu has been setup.
+        View menu = layout.findViewById(mFabMenuId);
+        menu.setVisibility(View.GONE);
+        if (mDefaultMenuName != null) setMenu(fragment, mDefaultMenuName);
+
+        // Restore the FAB to the closed state and dismiss the dimmer view.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, State.closed);
         fab.setImageResource(mImageResourceId);
-        View menu = layout.findViewById(mFabMenuId);
-        menu.setVisibility(View.GONE);
+        View dimmerView = layout.findViewById(mFabDimmerId);
         dimmerView.setVisibility(View.GONE);
     }
 
