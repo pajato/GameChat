@@ -60,11 +60,6 @@ public class IntroActivity extends AppCompatActivity {
         invokeSignIn("signin");
     }
 
-    /** Handle registering a new account by invoking the signin activity. */
-    public void doRegister(final View view) {
-        invokeSignIn("register");
-    }
-
     // Protected instance methods.
 
     /** Handle the sign in activity result, if any. */
@@ -118,7 +113,7 @@ public class IntroActivity extends AppCompatActivity {
                           final float... heights) {
         // Animate the Z property on the given view over the given heights for 200 milliseconds.
         final int DURATION = 200;
-        final String PROP = "animationZ";
+        final String PROP = "z";
         int [] viewState = viewStateId != -1 ? new int[] {viewStateId} : new int[] {};
         ObjectAnimator viewAnimator = ObjectAnimator.ofFloat(view, PROP, heights);
         animator.addState(viewState, viewAnimator.setDuration(DURATION));

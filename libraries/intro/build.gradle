@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'project-report'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -35,6 +36,7 @@ android {
 
     lintOptions {
         disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
+        warning 'RestrictedApi', 'GradleCompatible'
         abortOnError true
     }
 }

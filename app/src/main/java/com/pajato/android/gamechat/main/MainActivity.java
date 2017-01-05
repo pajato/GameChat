@@ -32,7 +32,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.fragment.ChatFragment;

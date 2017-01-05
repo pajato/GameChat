@@ -35,7 +35,7 @@ import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
@@ -171,6 +171,7 @@ public abstract class BaseChatFragment extends BaseFragment {
 
         // Setup the overflow menu on all pages but the group (home) page.
         int id = mItemListType.overflowMenuIconResourceId;
+        toolbar.getMenu().clear();
         toolbar.inflateMenu(mItemListType.overflowMenuResourceId);
         toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
         toolbar.setNavigationIcon(mItemListType.navigationIconResourceId);

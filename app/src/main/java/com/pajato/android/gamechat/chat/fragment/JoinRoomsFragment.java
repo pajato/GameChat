@@ -52,7 +52,7 @@ import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.Select
 
 public class JoinRoomsFragment extends BaseChatFragment {
 
-    public enum SelectionType {all, members, rooms}
+    enum SelectionType {all, members, rooms}
 
     // Public constants.
 
@@ -137,7 +137,6 @@ public class JoinRoomsFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_check_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
-        FabManager.chat.setMenu(this, CHAT_SELECTION_FAM_KEY);
     }
 
     // Private instance methods.

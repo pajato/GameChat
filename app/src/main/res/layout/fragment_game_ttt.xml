@@ -36,11 +36,10 @@ http://www.gnu.org/licenses
         app:layout_constraintLeft_toRightOf="parent"
         tools:text="vs" />
 
-    <TextView
+    <TextView android:id="@+id/player1Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:id="@+id/player1Name"
         android:text="@string/me"
         android:textAlignment="center"
         android:textStyle="bold"
@@ -49,18 +48,27 @@ http://www.gnu.org/licenses
         app:layout_constraintRight_toLeftOf="@+id/vs"
         tools:text="theShovel" />
 
-    <TextView
+    <TextView android:id="@+id/player2Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:id="@+id/player2Name"
         android:text="@string/friend"
         android:textAlignment="center"
         android:textStyle="bold"
         android:textSize="20sp"
+        android:drawableEnd="@drawable/ic_arrow_drop_down_black_24dp"
+        android:onClick="onClick"
         app:layout_constraintCenterY_toCenterY="@id/vs"
         app:layout_constraintLeft_toRightOf="@+id/vs"
-        tools:text="Friend" />
+        tools:text="Friend"/>
+
+    <android.support.v7.widget.RecyclerView android:id="@+id/player2Menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/player2Name"
+        app:layout_constraintStart_toStartOf="@+id/player2Name"
+        tools:visibility="visible" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -84,7 +92,8 @@ http://www.gnu.org/licenses
         android:id="@+id/player1WinCount"
         app:layout_constraintCenterY_toCenterY="@id/wins"
         app:layout_constraintRight_toLeftOf="@+id/wins"
-        tools:text="0" />
+        tools:text="0"
+        tools:layout_editor_absoluteY="108dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -95,7 +104,8 @@ http://www.gnu.org/licenses
         android:textSize="20sp"
         app:layout_constraintCenterY_toCenterY="@id/wins"
         app:layout_constraintLeft_toRightOf="@+id/wins"
-        tools:text="0" />
+        tools:text="0"
+        tools:layout_editor_absoluteY="108dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -119,7 +129,8 @@ http://www.gnu.org/licenses
         android:id="@+id/player1Symbol"
         android:textColor="@color/colorAccent"
         app:layout_constraintCenterY_toCenterY="@id/turn"
-        app:layout_constraintRight_toLeftOf="@+id/turn" />
+        app:layout_constraintRight_toLeftOf="@+id/turn"
+        tools:layout_editor_absoluteY="129dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -154,7 +165,8 @@ http://www.gnu.org/licenses
         android:id="@+id/player2Symbol"
         android:textColor="@color/colorPrimaryDark"
         app:layout_constraintCenterY_toCenterY="@+id/turn"
-        app:layout_constraintLeft_toRightOf="@+id/turn" />
+        app:layout_constraintLeft_toRightOf="@+id/turn"
+        tools:layout_editor_absoluteY="138dp" />
 
     <TextView
         android:layout_width="wrap_content"

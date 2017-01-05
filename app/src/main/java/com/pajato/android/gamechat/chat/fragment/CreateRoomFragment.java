@@ -20,7 +20,7 @@ package com.pajato.android.gamechat.chat.fragment;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.AccountManager;

@@ -33,7 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
@@ -116,7 +116,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
-        account.joinList.add(groupKey);
+        account.groupKey = groupKey;
         path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         DBUtils.instance.updateChildren(path, account.toMap());
 
