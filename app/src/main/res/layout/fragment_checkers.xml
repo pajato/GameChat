@@ -117,6 +117,7 @@ http://www.gnu.org/licenses
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:contentDescription="@string/player1"
         android:src="@drawable/ic_account_circle_black_36dp"
         app:layout_constraintCenterY_toCenterY="@id/turn"
         app:layout_constraintRight_toLeftOf="@+id/rightIndicator1" />
@@ -155,7 +156,7 @@ http://www.gnu.org/licenses
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:contentDescription="@string/player2"
         android:src="@drawable/ic_account_circle_black_36dp"
         app:layout_constraintCenterY_toCenterY="@+id/turn"
         app:layout_constraintLeft_toRightOf="@+id/leftIndicator2" />

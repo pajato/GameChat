@@ -30,6 +30,8 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.exp.model.Checkers;
+import com.pajato.android.gamechat.exp.model.CheckersBoard;
 import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -123,7 +125,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
 
         grid = (GridLayout) mLayout.findViewById(R.id.board);
-        mTurn = false;
         onNewGame();
 
         // Color the Player Icons.
@@ -195,10 +196,10 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         List<Player> result = new ArrayList<>();
         String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
-        String team = context.getString(R.string.teamRed);
+        String team = context.getString(R.string.primaryTeam);
         result.add(new Player(name, "", team));
         name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        team = context.getString(R.string.teamBlack);
+        team = context.getString(R.string.secondaryTeam);
         result.add(new Player(name, "", team));
         return result;
     }
@@ -296,7 +297,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 //        model.board.grid.put(buttonTag, model.getSymbolText());
 //        model.state = getState(model, buttonTag);
 //        model.setWinCount();
-        model.toggleTurn();
+        ((Chess)mExperience).toggleTurn();
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
@@ -404,7 +405,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             case Chess.RED_WINS:
             case Chess.BLACK_WINS:
                 String name = model.getWinningPlayerName();
-                String format = "%1$s Wins!";
+                String format = getString(R.string.WinMessageFormat);
                 message = String.format(Locale.getDefault(), format, name);
                 break;
             case Chess.TIE:
@@ -564,6 +565,10 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             return;
         }
 
+        boolean turn = ((Chess)mExperience).turn;
+
+        CheckersBoard board = ((Chess)mExperience).board;
+
         int highlightedIndex = (int) mHighlightedTile.getTag();
         findPossibleMoves(highlightedIndex, mPossibleMoves);
 
@@ -578,11 +583,11 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
                     boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
                             (indexClicked < highlightedIndex - 9);
 
-                    if(mTurn && (mBoardMap.get(highlightedIndex).getTeam()
+                    if(turn && (mBoardMap.get(highlightedIndex).getTeam()
                             == ChessPiece.PRIMARY_TEAM)) {
                         handleMovement(true, indexClicked, capturesPiece);
 
-                    } else if(!mTurn && (mBoardMap.get(highlightedIndex).getTeam()
+                    } else if(!turn && (mBoardMap.get(highlightedIndex).getTeam()
                             == ChessPiece.SECONDARY_TEAM)) {
                         handleMovement(false, indexClicked, capturesPiece);
                     }
@@ -823,7 +828,9 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
      * Handles changing the turn and turn indicator.
      */
     private void handleTurnChange() {
-        mTurn = !mTurn;
+        boolean turn = ((Checkers) mExperience).toggleTurn();
+        // Update the database with the turn change
+        ExperienceManager.instance.updateExperience(mExperience);
 
         // Handle the TextViews that serve as our turn indicator.
         TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
@@ -831,7 +838,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
         TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
 
-        if(mTurn) {
+        if(turn) {
             playerOneLeft.setVisibility(View.VISIBLE);
             playerOneRight.setVisibility(View.VISIBLE);
             playerTwoLeft.setVisibility(View.INVISIBLE);

@@ -370,7 +370,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
             mLayout.setVisibility(View.VISIBLE);
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             ProgressManager.instance.hide();
-            updateExperience();
+            updateUiFromExperience();
         }
     }
 
@@ -495,7 +495,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
     }
 
     /** Update the UI using the current experience state from the database. */
-    private void updateExperience() {
+    private void updateUiFromExperience() {
         // Ensure that a valid experience exists.  Abort if not.
         if (mExperience == null || !(mExperience instanceof TicTacToe)) return;
 

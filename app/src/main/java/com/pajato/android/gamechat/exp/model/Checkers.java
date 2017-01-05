@@ -11,22 +11,21 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.exp.ExpType.checkers;
 
-/**
- * Created by sscott on 12/30/16.
- */
-
 /** Provide a Firebase model class for a checkers game experience. */
 @IgnoreExtraProperties
 public class Checkers implements Experience {
 
     public final static int ACTIVE = 0;
-    public final static int RED_WINS = 1;
-    public final static int BLACK_WINS = 2;
+    public final static int PRIMARY_WINS = 1;
+    public final static int SECONDARY_WINS = 2;
     public final static int TIE = 3;
     public final static int PENDING = 4;
 
-    /** A POJO encapsulating the board moves */
-    public CheckersBoard board;
+    /**
+     * A map of board position (0->63) to piece type (where piece type can be PRIMARY_PIECE,
+     * PRIMARY_KING, SECONDARY_PIECE or SECONDARY_KING).
+     */
+    public Map<String, String> board;
 
     /** The creation timestamp. */
     private long createTime;
@@ -58,7 +57,7 @@ public class Checkers implements Experience {
     /** The game state. */
     public int state;
 
-    /** The current turn. */
+    /** The current turn indicator: True = Player 1, False = Player 2. */
     public boolean turn;
 
     /** The experience type ordinal value. */
@@ -110,19 +109,6 @@ public class Checkers implements Experience {
         return result;
     }
 
-    // TODO: what to do for Checkers??
-    /** Return the value associated with the current player: 1 == X, 2 == O. */
-    @Exclude public int getSymbolValue() {
-        // This implies that player 1 is always X and player 2 is always O.
-        return turn ? 1 : 4;
-    }
-
-    // TODO: what to do for Checkers??
-    /** Return the symbol text value for the player whose turn is current. */
-    @Exclude public String getSymbolText() {
-        return turn ? players.get(0).symbol : players.get(1).symbol;
-    }
-
     /** Return the experience push key. */
     @Exclude @Override public String getExperienceKey() {
         return key;
@@ -149,13 +135,6 @@ public class Checkers implements Experience {
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
-    /** Return the value associated with the current player: 1 == red, 2 == black. */
-    @Exclude public int getTeamValue() {
-        // This implies that player 1 is always red and player 2 is always black.
-        // TODO: FIX THIS!!!
-        return turn ? 1 : 4;
-    }
-
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
@@ -168,10 +147,19 @@ public class Checkers implements Experience {
 
     /** Update the win count based on the current state. */
     @Exclude @Override public void setWinCount() {
-        // TODO: Implement this!
+        switch (state) {
+            case PRIMARY_WINS:
+                players.get(0).winCount++;
+                break;
+            case SECONDARY_WINS:
+                players.get(1).winCount++;
+                break;
+            default:
+                break;
+        }
     }
 
-    /** Toggle the turn state. */
+    /** Remember the turn state: true means primary's turn; false means secondary's turn */
     @Exclude public boolean toggleTurn() {
         turn = !turn;
         return turn;
@@ -180,10 +168,12 @@ public class Checkers implements Experience {
     /** Return the winning player's name or null if the game is active or ended in a tie. */
     @Exclude public String getWinningPlayerName() {
         switch (state) {
-            case RED_WINS:
-                return players.get(0).name; // TODO: THIS WON'T WORK unless red is 0 index
-            case BLACK_WINS:
-                return players.get(1).name; // TODO: THIS WON'T WORK unless black is 1 index
+            case PRIMARY_WINS:
+                // Assumes 'primary' player is at index 0
+                return players.get(0).name;
+            case SECONDARY_WINS:
+                // Assumes 'primary' player is at index 1
+                return players.get(1).name;
             case ACTIVE:
             case TIE:
             case PENDING:

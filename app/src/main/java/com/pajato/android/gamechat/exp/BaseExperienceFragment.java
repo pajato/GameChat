@@ -71,20 +71,10 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     /** The experience being enjoyed. */
     Experience mExperience;
 
-    /** The current turn indicator: True = Player 1, False = Player 2. */
-    boolean mTurn;
-
     // Public constructors.
 
     /** Provide a default, no args constructor. */
     public BaseExperienceFragment() {}
-
-    // Public instance methods.
-
-    /** Return the current turn indicator. */
-    public boolean getTurn() {
-        return mTurn;
-    }
 
     // Protected instance methods.
 
