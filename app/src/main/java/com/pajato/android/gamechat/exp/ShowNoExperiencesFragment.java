@@ -20,14 +20,12 @@ package com.pajato.android.gamechat.exp;
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
-import static com.pajato.android.gamechat.exp.ExperienceFragment.GAME_HOME_FAM_KEY;
 
 public class ShowNoExperiencesFragment extends BaseExperienceFragment {
 
@@ -49,11 +47,5 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
             default:
                 break;
         }
-    }
-
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        FabManager.game.setMenu(this, GAME_HOME_FAM_KEY);
     }
 }

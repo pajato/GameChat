@@ -56,6 +56,9 @@ public enum FabManager {
 
     // Private instance variables.
 
+    /** The name of the default menu. */
+    private String mDefaultMenuName;
+
     /** The fab resource identifier. */
     private int mFabId;
 
@@ -86,11 +89,17 @@ public enum FabManager {
 
     // Public instance methods
 
+    /** Add the named floating action menu (FAM) to the cache. */
+    public void addMenu(@NonNull final String name, @NonNull final List<MenuEntry> menu) {
+        // Cache the menu, if one is provided.
+        if (name.length() != 0) mMenuMap.put(name, menu);
+    }
+
     /** Dismiss the menu associated with the given FAB button. */
     public void dismissMenu(@NonNull final Fragment fragment) {
-        // Determine if the chat fragment is accessible.  If not, abort.
+        // Determine if the chat fragment is accessible.  If so, dismiss the FAM.
         View layout = getFragmentLayout(fragment);
-        if (layout != null) dismissMenu(layout);
+        if (layout != null) dismissMenu(fragment, layout);
     }
 
     /** Ensure that the FAb is not being shown. */
@@ -103,41 +112,45 @@ public enum FabManager {
 
     /** Initialize the fab state. */
     public void init(final Fragment fragment) {
-        // Ensure that the layout exists. Abort if it does not.  Set the FAB state to closed if it
-        // does.
+        // Ensure that the layout and the recycler views exist. Abort quietly if they do not.
         View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
+        RecyclerView recyclerView;
+        recyclerView = layout != null ? (RecyclerView) layout.findViewById(R.id.MenuList) : null;
+        if (layout == null || recyclerView == null) return;
+
+        // Set up the recycler view by establishing a layout manager, item animator and adapter.
+        Context context = fragment.getContext();
+        recyclerView.setLayoutManager(new LinearLayoutManager(context, VERTICAL, false));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(new MenuAdapter());
+
+        // Set the FAB state to closed by assuming an open FAM and dismissing it.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
-        dismissMenu(layout);
+        dismissMenu(fragment, layout);
     }
 
-    /** Set the floating action menu (FAM) with a given name and menu. */
-    public void setMenu(final String name, final List<MenuEntry> menu) {
-        // Cache the menu, if one is provided.
-        if (menu != null && name != null) mMenuMap.put(name, menu);
+    /** Set the named floating action menu (FAM) making it the default. */
+    public void setMenu(@NonNull final String name, @NonNull final List<MenuEntry> menu) {
+        // Test for a reasonable (non-empty) name.  Abort if not.
+        if (name.length() == 0) return;
+
+        // Cache the menu and make it the default.
+        mMenuMap.put(name, menu);
+        mDefaultMenuName = name;
     }
 
     /** Set the current FAM using the cached item with the given name. */
-    public void setMenu(final Fragment fragment, final String name) {
-        // Ensure that the game fragment layout is accessible.  Abort if not (error is logged).
+    private void setMenu(final Fragment fragment, final String name) {
+        // Ensure that the game fragment layout is accessible and that there is an adapter on the
+        // recycler view.  Abort quietly if not.
         View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
+        RecyclerView recyclerView;
+        recyclerView = layout != null ? (RecyclerView) layout.findViewById(R.id.MenuList) : null;
+        MenuAdapter adapter = recyclerView != null ? (MenuAdapter) recyclerView.getAdapter() : null;
+        if (layout == null || recyclerView == null || adapter == null) return;
 
-        // Add the menu to initialize the recycler view.
-        Context context = fragment.getContext();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.MenuList);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        // Ensure that the recycler view has an adapter installed.  Install one if not.  Set up the
-        // adapter on the recycler view with the given menu.
-        MenuAdapter adapter = (MenuAdapter) recyclerView.getAdapter();
-        if (adapter == null) {
-            adapter = new MenuAdapter();
-            recyclerView.setAdapter(adapter);
-        }
+        // Add the menu to initialize the recycler view's data items.
         adapter.clearEntries();
         adapter.addEntries(mMenuMap.get(name));
     }
@@ -173,8 +186,13 @@ public enum FabManager {
         fab.setVisibility(View.VISIBLE);
     }
 
-    /** Toggle the state of the FAB button using a given fragment to obtain the layout view. */
+    /** Toggle the state of the FAB button for the given fragment, use the given menu once. */
     public void toggle(@NonNull final Fragment fragment) {
+        toggle(fragment, mDefaultMenuName);
+    }
+
+    /** Toggle the state of the FAB/FAM for the given fragment using the given menu. */
+    public void toggle(@NonNull final Fragment fragment, @NonNull final String name) {
         // Determine if the fragment layout exists.  Continue if it does.  Return if it does not.
         // An error message with stack trace will have been generated if the view cannot be
         // accessed.
@@ -194,12 +212,12 @@ public enum FabManager {
                 case opened:
                     // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
                     // the menu and undim the frame.
-                    dismissMenu(layout);
-                    dimmerView.setVisibility(View.GONE);
+                    dismissMenu(fragment, layout);
                     break;
                 case closed:
                     // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
-                    // open the menu.
+                    // open the named menu (if name is set) or the last one used.
+                    if (name != null) setMenu(fragment, name);
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
                     dimmerView.setVisibility(View.VISIBLE);
@@ -213,14 +231,17 @@ public enum FabManager {
     // Private instance methods.
 
     /** Dismiss the menu associated with the given layout view. */
-    private void dismissMenu(@NonNull final View layout) {
-        // The fragment is accessible and the layout has been established.  Dismiss the FAM.
-        View dimmerView = layout.findViewById(mFabDimmerId);
+    private void dismissMenu(@NonNull final Fragment fragment, @NonNull final View layout) {
+        // Dismiss the FAM and ensure that the default menu has been setup.
+        View menu = layout.findViewById(mFabMenuId);
+        menu.setVisibility(View.GONE);
+        if (mDefaultMenuName != null) setMenu(fragment, mDefaultMenuName);
+
+        // Restore the FAB to the closed state and dismiss the dimmer view.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, State.closed);
         fab.setImageResource(mImageResourceId);
-        View menu = layout.findViewById(mFabMenuId);
-        menu.setVisibility(View.GONE);
+        View dimmerView = layout.findViewById(mFabDimmerId);
         dimmerView.setVisibility(View.GONE);
     }
 

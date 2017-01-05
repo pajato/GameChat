@@ -25,8 +25,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.exp.ExperienceFragment.GAME_HOME_FAM_KEY;
-
 public class ShowSignedOutFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
@@ -40,16 +38,10 @@ public class ShowSignedOutFragment extends BaseExperienceFragment {
         super.setLayoutId(R.layout.fragment_exp_signed_out);
     }
 
-    /** Initialize the fragment by setting in the FAB. */
+    /** Initialize the fragment by setting up the FAB/FAM. */
     @Override public void onStart() {
-        super.onStart();
         // Set up the FAB.
+        super.onStart();
         FabManager.game.init(this);
-    }
-
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        FabManager.game.setMenu(this, GAME_HOME_FAM_KEY);
     }
 }

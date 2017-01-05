@@ -1,6 +1,7 @@
 <resources>
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessImageDesc">Chess image.</string>
+    <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
@@ -10,6 +11,9 @@
     <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
+    <string name="PlayModeComputerMenuTitle">Play the computer</string>
+    <string name="PlayModeLocalMenuTitle">Play a friend</string>
+    <string name="PlayModeUserMenuTitle">Play a User</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="SignIn">Sign In</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>

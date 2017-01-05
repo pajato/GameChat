@@ -25,8 +25,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.exp.ExperienceFragment.GAME_HOME_FAM_KEY;
-
 public class ShowExpRoomListFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
@@ -45,11 +43,5 @@ public class ShowExpRoomListFragment extends BaseExperienceFragment {
     @Override public void onStart() {
         super.onStart();
         FabManager.game.init(this);
-    }
-
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        FabManager.game.setMenu(this, GAME_HOME_FAM_KEY);
     }
 }

@@ -24,18 +24,23 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.NetworkManager;
 
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,6 +56,11 @@ import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
  * @author Paul Michael Reilly
  */
 public abstract class BaseExperienceFragment extends BaseFragment {
+
+    // Public class constants.
+
+    /** The mode floating action menu key. */
+    public static final String EXP_MODE_FAM_KEY = "expModeFamKey";
 
     // Private class constants.
 
@@ -75,6 +85,27 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Provide a default, no args constructor. */
     public BaseExperienceFragment() {}
+
+    /** Handle the player 2 control click. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        logEvent("Got a player 2 control click event.");
+        switch (event.view.getId()) {
+            case R.id.player2Name:
+                // Simulate a click on the exp FAB.
+                FabManager.game.toggle(this, EXP_MODE_FAM_KEY);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Handle the setup for the mode control. */
+    @Override public void onStart() {
+        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
+        // view and the listeners for backend data changes.
+        super.onStart();
+        FabManager.game.addMenu(EXP_MODE_FAM_KEY, getExpModeFam());
+    }
 
     // Protected instance methods.
 
@@ -130,15 +161,13 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
         String manager = getFragmentManager().toString();
-        String format = FORMAT_NO_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, event, this, manager));
+        Log.v(TAG, String.format(Locale.US, FORMAT_NO_BUNDLE, event, this, manager));
     }
 
     /** Log a lifecycle event that has a bundle. */
     @Override protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
-        String format = FORMAT_WITH_BUNDLE;
-        Log.v(TAG, String.format(Locale.US, format, event, this, manager, bundle));
+        Log.v(TAG, String.format(Locale.US, FORMAT_WITH_BUNDLE, event, this, manager, bundle));
     }
 
     /** Process the dispatcher to set up the experience fragment. */
@@ -160,7 +189,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Provide a default implementation for setting up an experience. */
-    protected void setupExperience(final Context context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    protected void setupExperience(final Context context,
+                                   final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
         if (dispatcher == null || dispatcher.type == null) return;
@@ -183,4 +213,16 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 ((BaseGameExpFragment)this).createExperience(context, dispatcher);
             }
     }
+
+    // Private instance methods.
+
+    /** Return the experience mode control FAM. */
+    private List<MenuEntry> getExpModeFam() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getTintEntry(R.string.PlayModeLocalMenuTitle, R.drawable.ic_local_play_black_24px));
+        menu.add(getTintEntry(R.string.PlayModeComputerMenuTitle, R.drawable.ic_smartphone_black_24px));
+        menu.add(getTintEntry(R.string.PlayModeUserMenuTitle, R.drawable.ic_person_black_24px));
+        return menu;
+    }
+
 }

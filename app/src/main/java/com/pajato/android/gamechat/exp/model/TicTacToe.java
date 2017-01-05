@@ -33,13 +33,6 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
     // Public class constants.
 
-    /** The level types. */
-    //public final static int EASY = 0;
-    //public final static int INTERMEDIATE = 1;
-    //public final static int IMPOSSIBLE = 2;
-
-    // The game state values.
-
     /** The game is still active. */
     public final static int ACTIVE = 0;
 
@@ -68,9 +61,6 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
     /** The group push key. */
     public String groupKey;
-
-    /** The game level. */
-    //public int level;
 
     /** The last modification timestamp. */
     private long modTime;

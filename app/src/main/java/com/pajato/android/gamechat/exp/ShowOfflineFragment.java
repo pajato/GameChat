@@ -20,12 +20,9 @@ package com.pajato.android.gamechat.exp;
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
-
-import static com.pajato.android.gamechat.exp.ExperienceFragment.GAME_HOME_FAM_KEY;
 
 public class ShowOfflineFragment extends BaseExperienceFragment {
 
@@ -41,11 +38,5 @@ public class ShowOfflineFragment extends BaseExperienceFragment {
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_game_offline);
-    }
-
-    /** Reset the FAM to use the game home menu. */
-    @Override public void onResume() {
-        super.onResume();
-        FabManager.game.setMenu(this, GAME_HOME_FAM_KEY);
     }
 }

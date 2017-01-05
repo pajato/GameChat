@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.chat.model;
+package com.pajato.android.gamechat.common.model;
 
 import android.support.annotation.NonNull;
 
@@ -29,11 +29,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides an account data model tailored to Firebase.  The account is used in two contexts: as a
- * top level account which provides basic account information and a list of group identifiers (the
- * groups for which the account holder is a member); and as a group level account which provides
- * basic account information and a list of room identifers (the rooms which the account holder has
- * joined).
+ * Models a Firebase User (com.google.firebase.auth.FirebaseUser) for two contexts: as a GameChat
+ * account and as a GameChat group member.  The Firebase UserInfo interface (implemented by
+ * FirebaseUser) is the source for the base level information for an Account: identifier, email
+ * address, full name and photo URL.
+ *
+ * In the GameChat account context, the class provides a list (named 'joinList') of group
+ * identifiers for which the account holder is a member.
+ *
+ * In the GameChat group member context, the class provides a list ('joinList') of room identifers
+ * which the member holder has joined.  In this context, the email address and the FirebaseUser
+ * provided identifier are and will remain identical to the the values provided by the FirebaseUser
+ * object they come from.  The full name (display name) and the photo url may be changed at will.
+ *
+ * In the member field declarations a 'final' qualifier is provided in commented form to illustrate
+ * the intent since Firebase uses reflection to update values and a real 'final' qualifier would
+ * have caused an exception when Firebase tried to do an update.
  *
  * @author Paul Michael Reilly
  */
@@ -54,19 +65,24 @@ import java.util.Map;
     // Public instance variables
 
     /** The account creation timestamp. */
-    public long createTime;
+    public /*final*/ long createTime;
 
     /** The account display name, usually something like "Fred C. Jones". */
-    public String displayName;
+    public /*final*/ String displayName;
 
     /** The account email. */
-    public String email;
+    public /*final*/ String email;
 
-    /** The associated group push key (for an account uses as a member object). */
+    /**
+     * In an account context this is the Firebase push key for the unexposed Me Group, that private
+     * group that each User has for notes and enjoying experiences (games) solo.
+     *
+     * In a member context this is the group push key in which the member is found.
+     */
     public String groupKey;
 
-    /** The account id, the backend push key. */
-    public String id;
+    /** The account identifier, the backend push key. */
+    public /*final*/ String id;
 
     /** A list of group or room push keys (depends on context) the account can join. */
     public final List<String> joinList = new ArrayList<>();
@@ -78,10 +94,10 @@ import java.util.Map;
     public String nickname;
 
     /** The account provider id, a string like "google.com". */
-    public String providerId;
+    public /*final*/ String providerId;
 
     /** The account type. */
-    public int type;
+    public /*final*/ int type;
 
     /** The account photo URL (icon). */
     public String url;
