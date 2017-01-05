@@ -28,15 +28,18 @@ import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ChatFragmentType.createGroup;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
+import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -85,6 +88,15 @@ public class ShowGroupListFragment extends BaseChatFragment {
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         // Turn on the search option.
         setItemState(menu, R.id.search, true);
+    }
+
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
+        // Determine if this fragment cares about chat list changes:
+        String format = "onChatListChange with event {%s}";
+        logEvent(String.format(Locale.US, format, "no list", event));
+        if (mActive && (mItemListType == group || mItemListType == DBUtils.ChatListType.room))
+            redisplay();
     }
 
     /** Initialize ... */

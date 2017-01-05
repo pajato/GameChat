@@ -105,8 +105,11 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Log the event and update the list saving the result for a retry later.
-        logEvent(String.format(Locale.US, "onMessageListChange with event {%s}", event));
+        // Determine if this fragment cares about chat list changes:
+        String format = "onChatListChange with event {%s}";
+        logEvent(String.format(Locale.US, format, "no list", event));
+        if (mActive && mItemListType == DBUtils.ChatListType.message) redisplay();
+        //ChatManager.instance.startNextFragment(getActivity());
     }
 
     /** Establish the create time state. */
@@ -163,10 +166,9 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         // The account and the edit text field exist.  Persist the message to the database and
         // inform the User that the message has been sent.
         String text = editText.getText().toString();
-        int type = STANDARD;
         String roomKey = mItem.key;
         Room room = RoomManager.instance.getRoomProfile(roomKey);
-        MessageManager.instance.createMessage(text, type, account, room);
+        MessageManager.instance.createMessage(text, STANDARD, account, room);
         editText.setText("");
         Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
         hideSoftKeyBoard(view);
