@@ -3,9 +3,8 @@ package com.pajato.android.gamechat.exp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.Dispatcher;
-import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 
@@ -14,7 +13,6 @@ import java.util.List;
 /**
  * Created by sscott on 12/31/16.
  */
-
 public abstract class BaseGameExpFragment extends BaseExperienceFragment {
 
     abstract protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher);

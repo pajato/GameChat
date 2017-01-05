@@ -43,6 +43,7 @@ import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
+import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -53,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
+import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
@@ -66,6 +69,8 @@ import static com.pajato.android.gamechat.exp.model.TTTBoard.MID_ROW;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.RIGHT_DIAG;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.TOP_ROW;
 import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -198,33 +203,10 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         return String.format(Locale.getDefault(), format, name);
     }
 
-    /** Return either a null placeholder key value or a sentinel value as the experience key. */
-    private String getExperienceKey() {
-        // Determine if there is a signed in account.  If so use the null placeholder.
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (accountId != null) return null;
-
-        // There is no signed in User.  Return one of the two sentinel values associated with being
-        // either signed out or without access to a network.
-        final boolean ONLINE = NetworkManager.instance.isConnected();
-        return ONLINE ? SIGNED_OUT_EXPERIENCE_KEY : OFFLINE_EXPERIENCE_KEY;
-    }
-
     /** Return the TicTacToe model class, null if it does not exist. */
     private TicTacToe getModel() {
         if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
         return (TicTacToe) mExperience;
-    }
-
-    // Return either a signed in User id or a sentinel value as the owner id. */
-    private String getOwnerId() {
-        // Determine if there is a signed in account.  If so return it.
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (accountId != null) return accountId;
-
-        // There is no signed in User.  Return one of the two sentinel values associated with being
-        // either signed out or without access to a network.
-        return NetworkManager.instance.isConnected() ? SIGNED_OUT_OWNER_ID : OFFLINE_OWNER_ID;
     }
 
     /** Return a possibly null list of player information for a two participant experience. */

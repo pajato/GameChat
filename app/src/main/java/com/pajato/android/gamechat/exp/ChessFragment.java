@@ -19,11 +19,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
@@ -143,7 +143,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
-        FabManager.game.setMenu(this, CHESS_FAM_KEY);
         resume();
     }
 

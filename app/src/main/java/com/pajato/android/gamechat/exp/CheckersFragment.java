@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
@@ -131,7 +131,6 @@ public class CheckersFragment extends BaseGameExpFragment {
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
-        FabManager.game.setMenu(this, CHECKERS_FAM_KEY);
         resume();
     }
 
@@ -705,7 +704,7 @@ public class CheckersFragment extends BaseGameExpFragment {
         // Reset the highlighted tile's image.
         mHighlightedTile.setImageResource(0);
         int highlightedIndex = Integer.parseInt((String)mHighlightedTile.getTag());
-        String highlightedPieceType = board.get((String) mHighlightedTile.getTag());
+        String highlightedPieceType = board.get(mHighlightedTile.getTag());
         String indexClickedStr = String.valueOf(indexClicked);
 
         // Check to see if our piece becomes a king piece and put its value into the board.
