@@ -789,9 +789,6 @@ public class CheckersFragment extends BaseGameExpFragment {
 
     /**
      * A View.OnClickListener that is called whenever a board tile is clicked.
-     *
-     * [SCS] this is equivalent to handleTileClick in TTTFragment...
-     *
      */
     private class CheckersClick implements View.OnClickListener {
         @Override public void onClick(final View v) {
@@ -807,9 +804,6 @@ public class CheckersFragment extends BaseGameExpFragment {
                     showPossibleMoves(index, board);
                 }
             }
-//            model.state = getState(model, buttonTag);
-//            model.setWinCount();
-//            model.toggleTurn();
             // Save any changes that have been made to the database
             ExperienceManager.instance.updateExperience(mExperience);
         }
