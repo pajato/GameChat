@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.RoomsHeaderItem;
 import com.pajato.android.gamechat.chat.adapter.SelectableMemberItem;
