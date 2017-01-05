@@ -116,7 +116,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
-        account.joinList.add(groupKey);
+        account.groupKey = groupKey;
         path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         DBUtils.instance.updateChildren(path, account.toMap());
 
