@@ -43,7 +43,6 @@ import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
-import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -54,8 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
-import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
@@ -69,8 +66,6 @@ import static com.pajato.android.gamechat.exp.model.TTTBoard.MID_ROW;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.RIGHT_DIAG;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.TOP_ROW;
 import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
-import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
-import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
