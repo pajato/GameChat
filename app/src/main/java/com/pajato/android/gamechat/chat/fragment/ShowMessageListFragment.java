@@ -109,7 +109,6 @@ public class ShowMessageListFragment extends BaseChatFragment implements View.On
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
         if (mActive && mItemListType == DBUtils.ChatListType.message) redisplay();
-        //ChatManager.instance.startNextFragment(getActivity());
     }
 
     /** Establish the create time state. */
