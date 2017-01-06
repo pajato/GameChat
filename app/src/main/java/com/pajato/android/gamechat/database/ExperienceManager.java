@@ -132,7 +132,7 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
-    /** Perist the given experience. */
+    /** Persist the given experience. */
     public void updateExperience(final Experience experience) {
         // Persist the experience.
         experience.setModTime(new Date().getTime());

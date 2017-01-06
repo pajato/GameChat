@@ -61,7 +61,6 @@ public class CheckersFragment extends BaseGameExpFragment {
     public static final String SECONDARY_PIECE = "sp";
     public static final String SECONDARY_KING = "sk";
 
-
     public ImageButton mHighlightedTile;
     public boolean mIsHighlighted = false;
     public ArrayList<Integer> mPossibleMoves;
@@ -556,7 +555,7 @@ public class CheckersFragment extends BaseGameExpFragment {
         int yCount = 0;
         int bCount = 0;
         for (int i = 0; i < 64; i++) {
-            String tmp = (String) board.get(String.valueOf(i));
+            String tmp = board.get(String.valueOf(i));
             if(tmp == null) continue;
             if(tmp.equals(PRIMARY_PIECE) || tmp.equals(PRIMARY_KING)) {
                 bCount++;
@@ -795,11 +794,11 @@ public class CheckersFragment extends BaseGameExpFragment {
             String tag = (String) v.getTag();
             int index = Integer.parseInt(tag);
             Map<String, String> board = ((Checkers)mExperience).board;
-            if(mHighlightedTile != null) {
+            if (mHighlightedTile != null) {
                 showPossibleMoves(index, board);
                 mHighlightedTile = null;
             } else {
-                if(board.get(String.valueOf(index)) != null) {
+                if (board.get(String.valueOf(index)) != null) {
                     mHighlightedTile = (ImageButton) v;
                     showPossibleMoves(index, board);
                 }

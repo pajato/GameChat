@@ -1,39 +1,57 @@
 package com.pajato.android.gamechat.exp;
 
-import android.util.SparseArray;
-
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
  */
-class ChessPiece {
-    static final int KING = 0;
-    static final int QUEEN = 1;
-    static final int BISHOP = 2;
-    static final int KNIGHT = 3;
-    static final int ROOK = 4;
-    static final int PAWN = 5;
+@IgnoreExtraProperties
+public class ChessPiece {
+    static final String KING = "king";
+    static final String QUEEN = "queen";
+    static final String BISHOP = "bishop";
+    static final String KNIGHT = "knight";
+    static final String ROOK = "rook";
+    static final String PAWN = "pawn";
 
     static final int PRIMARY_TEAM = 10;
     static final int SECONDARY_TEAM = 20;
 
-    private int pieceId;
-    private int teamId;
+    public String pieceId; // One of the piece types (KING, QUEEN, ... etc)
+
+    public int teamId; // Either PRIMARY_TEAM or SECONDARY_TEAM
+
+    /** Build an empty args constructor for the database. */
+    @SuppressWarnings("unused") public ChessPiece() {}
 
     /** Constructor requires a piece and team specified, provided as constants in the class. */
-    ChessPiece(final int piece, final int team) {
+    ChessPiece(final String piece, final int team) {
         this.pieceId = piece;
         this.teamId = team;
     }
 
-    int getPiece() {
+    /** Provide a default map for a Firebase create/update. */
+    @Exclude
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("peiceId", pieceId);
+        result.put("teamId", teamId);
+        return result;
+    }
+
+    @Exclude
+    public String getPiece() {
         return this.pieceId;
     }
 
-    int getTeam() {
+    @Exclude
+    public int getTeam() {
         return this.teamId;
     }
 
@@ -43,7 +61,8 @@ class ChessPiece {
      * @param pieceType the piece type, all of which are available as public constants in this class
      * @return a drawable ID that corresponds to the parameter.
      */
-    static int getDrawableFor(final int pieceType) {
+    @Exclude
+    static int getDrawableFor(final String pieceType) {
         int drawable;
         switch(pieceType) {
             case KING: drawable = R.drawable.ic_stars_black_36dp;
@@ -74,10 +93,10 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the King.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
-    static void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                      final SparseArray<ChessPiece> boardMap, final boolean[] castlingBooleans) {
+    @Exclude static void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+                                   final Map<String, ChessPiece> board, final boolean[] castlingBooleans) {
         // Grab all the castling booleans and label them properly.
         final boolean primaryQueenSideRookHasMoved = castlingBooleans[0];
         final boolean primaryKingSideRookHasMoved = castlingBooleans[1];
@@ -108,56 +127,56 @@ class ChessPiece {
         int[] possibleMoves = {left, upLeft, up, upRight, right, downRight, down, downLeft};
         for (int possibleMove : possibleMoves) {
             if(possibleMove > -1 && possibleMove < 64) {
-                if(boardMap.get(possibleMove, null) == null) {
+                if(board.get(String.valueOf(possibleMove)) == null) {
                     threatRange.add(possibleMove);
-                } else if (boardMap.get(possibleMove).getTeam()
-                        != boardMap.get(highlightedIndex).getTeam()) {
+                } else if (board.get(String.valueOf(possibleMove)).getTeam()
+                        != board.get(String.valueOf(highlightedIndex)).getTeam()) {
                     threatRange.add(possibleMove);
                 }
             }
         }
 
         // Handle Castling for Blue
-        if(boardMap.get(highlightedIndex).getTeam()
+        if(board.get(String.valueOf(highlightedIndex)).getTeam()
                 == ChessPiece.PRIMARY_TEAM && !primaryKingHasMoved) {
             // The more common Castling variant, "Queen-Side Castling" or "Short Castling"
             boolean canCastleKingSide = highlightedIndex == 60 && !primaryKingSideRookHasMoved &&
-                    boardMap.get(highlightedIndex + 1, null) == null &&
-                    boardMap.get(highlightedIndex + 2, null) == null &&
-                    boardMap.get(highlightedIndex + 3, null) != null &&
-                    boardMap.get(highlightedIndex + 3).getPiece() == ChessPiece.ROOK;
+                    board.get(String.valueOf(highlightedIndex + 1)) == null &&
+                    board.get(String.valueOf(highlightedIndex + 2)) == null &&
+                    board.get(String.valueOf(highlightedIndex + 3)) != null &&
+                    board.get(String.valueOf(highlightedIndex + 3)).getPiece() == ChessPiece.ROOK;
             if(canCastleKingSide) {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
             boolean canCastleQueenSide = highlightedIndex == 60 && !primaryQueenSideRookHasMoved &&
-                    boardMap.get(highlightedIndex - 1, null) == null &&
-                    boardMap.get(highlightedIndex - 2, null) == null &&
-                    boardMap.get(highlightedIndex - 3, null) == null &&
-                    boardMap.get(highlightedIndex - 4, null) != null &&
-                    boardMap.get(highlightedIndex - 4).getPiece() == ChessPiece.ROOK;
+                    board.get(String.valueOf(highlightedIndex - 1)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 2)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 3)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 4)) != null &&
+                    board.get(String.valueOf(highlightedIndex - 4)).getPiece() == ChessPiece.ROOK;
             if(canCastleQueenSide) {
                 threatRange.add(highlightedIndex - 3);
             }
         // Handle Castling for the other team
-        } else if (boardMap.get(highlightedIndex).getTeam()
-                == ChessPiece.SECONDARY_TEAM && !secondaryKingHasMoved) {
+        } else if (board.get(String.valueOf(highlightedIndex)).getTeam() == ChessPiece.SECONDARY_TEAM
+                && !secondaryKingHasMoved) {
             boolean canCastleKingSide = highlightedIndex == 4
                     && !secondaryKingSideRookHasMoved &&
-                    boardMap.get(highlightedIndex + 1, null) == null &&
-                    boardMap.get(highlightedIndex + 2, null) == null &&
-                    boardMap.get(highlightedIndex + 3, null) != null &&
-                    boardMap.get(highlightedIndex + 3).getPiece() == ChessPiece.ROOK;
+                    board.get(String.valueOf(highlightedIndex + 1)) == null &&
+                    board.get(String.valueOf(highlightedIndex + 2)) == null &&
+                    board.get(String.valueOf(highlightedIndex + 3)) != null &&
+                    board.get(String.valueOf(highlightedIndex + 3)).getPiece() == ChessPiece.ROOK;
             if (canCastleKingSide) {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
             boolean canCastleQueenSide = highlightedIndex == 4 && !secondaryQueenSideRookHasMoved &&
-                    boardMap.get(highlightedIndex - 1, null) == null &&
-                    boardMap.get(highlightedIndex - 2, null) == null &&
-                    boardMap.get(highlightedIndex - 3, null) == null &&
-                    boardMap.get(highlightedIndex - 4, null) != null &&
-                    boardMap.get(highlightedIndex - 4).getPiece() == ChessPiece.ROOK;
+                    board.get(String.valueOf(highlightedIndex - 1)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 2)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 3)) == null &&
+                    board.get(String.valueOf(highlightedIndex - 4)) != null &&
+                    board.get(String.valueOf(highlightedIndex - 4)).getPiece() == ChessPiece.ROOK;
             if(canCastleQueenSide) {
                 threatRange.add(highlightedIndex - 3);
             }
@@ -174,12 +193,12 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the Queen.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing the board and the pieces located within.
      */
-    static void getQueenThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final SparseArray<ChessPiece> boardMap) {
-        getRookThreatRange(threatRange, highlightedIndex, boardMap);
-        getBishopThreatRange(threatRange, highlightedIndex, boardMap);
+    @Exclude static void getQueenThreatRange(final ArrayList<Integer> threatRange, final int
+            highlightedIndex, final Map<String, ChessPiece> board) {
+        getRookThreatRange(threatRange, highlightedIndex, board);
+        getBishopThreatRange(threatRange, highlightedIndex, board);
     }
 
     /**
@@ -190,10 +209,10 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the Bishop.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing the board and the pieces located within.
      */
-    static void getBishopThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final SparseArray<ChessPiece> boardMap) {
+    @Exclude static void getBishopThreatRange(final ArrayList<Integer> threatRange, final int
+            highlightedIndex, final Map<String, ChessPiece> board) {
         boolean upLeft = true;
         boolean upRight = true;
         boolean downRight = true;
@@ -205,11 +224,11 @@ class ChessPiece {
                 int upLeftIteration = highlightedIndex - (9 * i);
                 if (upLeftIteration % 8 != 7 && upLeftIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(upLeftIteration, null) == null) {
+                    if (board.get(String.valueOf(upLeftIteration)) == null) {
                         threatRange.add(upLeftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (boardMap.get(upLeftIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(upLeftIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(upLeftIteration);
                         upLeft = false;
                         // Otherwise we're done.
@@ -226,11 +245,11 @@ class ChessPiece {
                 int upRightIteration = highlightedIndex - (7 * i);
                 if (upRightIteration % 8 != 0 && upRightIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(upRightIteration, null) == null) {
+                    if (board.get(String.valueOf(upRightIteration)) == null) {
                         threatRange.add(upRightIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (boardMap.get(upRightIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(upRightIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(upRightIteration);
                         upRight = false;
                         // Otherwise we're done.
@@ -247,11 +266,11 @@ class ChessPiece {
                 int downRightIteration = highlightedIndex + (9 * i);
                 if (downRightIteration % 8 != 0 && downRightIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(downRightIteration, null) == null) {
+                    if (board.get(String.valueOf(downRightIteration)) == null) {
                         threatRange.add(downRightIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (boardMap.get(downRightIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(downRightIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(downRightIteration);
                         downRight = false;
                         // Otherwise we're done.
@@ -268,11 +287,11 @@ class ChessPiece {
                 int downLeftIteration = highlightedIndex + (7 * i);
                 if (downLeftIteration % 8 != 7 && downLeftIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(downLeftIteration, null) == null) {
+                    if (board.get(String.valueOf(downLeftIteration)) == null) {
                         threatRange.add(downLeftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (boardMap.get(downLeftIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(downLeftIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(downLeftIteration);
                         downLeft = false;
                         // Otherwise we're done.
@@ -295,13 +314,13 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the pawn.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing the board and the pieces located within.
      */
-    static void getPawnThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                                   final SparseArray<ChessPiece> boardMap) {
+    @Exclude static void getPawnThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+                                   final Map<String, ChessPiece> board) {
         // Pawns move differently depending on the team they are on. First, handle the pawns that
         // move "up". These pawns are on the primary team.
-        if(boardMap.get(highlightedIndex).getTeam() == ChessPiece.PRIMARY_TEAM) {
+        if(board.get(String.valueOf(highlightedIndex)).getTeam() == ChessPiece.PRIMARY_TEAM) {
             int upLeft = highlightedIndex - 9;
             int upRight = highlightedIndex - 7;
             int up = highlightedIndex - 8;
@@ -309,22 +328,22 @@ class ChessPiece {
             // Pawns can move two squares forward if they are in their starting position.
             if(highlightedIndex > 47 && highlightedIndex < 56) {
                 int upUp = highlightedIndex -  16;
-                if(boardMap.get(upUp, null) == null && boardMap.get(up, null) == null) {
+                if(board.get(String.valueOf(upUp)) == null && board.get(String.valueOf(up)) == null) {
                     threatRange.add(upUp);
                 }
             }
 
             // Pawns can move diagonally forward only if they are capturing a piece.
-            if(boardMap.get(upLeft, null) != null && upLeft % 8 != 7
-                    && boardMap.get(upLeft).getTeam() == ChessPiece.SECONDARY_TEAM) {
+            if(board.get(String.valueOf(upLeft)) != null && upLeft % 8 != 7
+                    && board.get(String.valueOf(upLeft)).getTeam() == ChessPiece.SECONDARY_TEAM) {
                 threatRange.add(upLeft);
             }
-            if(boardMap.get(upRight, null) != null && upRight % 8 != 0
-                    && boardMap.get(upRight).getTeam() == ChessPiece.SECONDARY_TEAM) {
+            if(board.get(String.valueOf(upRight)) != null && upRight % 8 != 0
+                    && board.get(String.valueOf(upRight)).getTeam() == ChessPiece.SECONDARY_TEAM) {
                 threatRange.add(upRight);
             }
             // Pawns can move forward only if they are not being blocked.
-            if(boardMap.get(up, null) == null && up > -1) {
+            if(board.get(String.valueOf(up)) == null && up > -1) {
                 threatRange.add(up);
             }
         // We also need to handle the second team, which moves "downward" on the board.
@@ -336,22 +355,22 @@ class ChessPiece {
             // Pawns can move two squares forward if they are in their starting position.
             if(highlightedIndex > 7 && highlightedIndex < 16) {
                 int downDown = highlightedIndex + 16;
-                if(boardMap.get(downDown, null) == null && boardMap.get(down, null) == null) {
+                if(board.get(String.valueOf(downDown)) == null && board.get(String.valueOf(down)) == null) {
                     threatRange.add(downDown);
                 }
             }
 
             // Pawns can move diagonally forward only if they are capturing a piece.
-            if(boardMap.get(downRight, null) != null && downRight % 8 != 0
-                    && boardMap.get(downRight).getTeam() == ChessPiece.PRIMARY_TEAM) {
+            if(board.get(String.valueOf(downRight)) != null && downRight % 8 != 0
+                    && board.get(String.valueOf(downRight)).getTeam() == ChessPiece.PRIMARY_TEAM) {
                 threatRange.add(downRight);
             }
-            if(boardMap.get(downLeft, null) != null && downRight % 8 != 7
-                    && boardMap.get(downLeft).getTeam() == ChessPiece.PRIMARY_TEAM) {
+            if(board.get(String.valueOf(downLeft)) != null && downRight % 8 != 7
+                    && board.get(String.valueOf(downLeft)).getTeam() == ChessPiece.PRIMARY_TEAM) {
                 threatRange.add(downLeft);
             }
             // Pawns can move forward only if they are not being blocked.
-            if(boardMap.get(down, null) == null && down < 64) {
+            if(board.get(String.valueOf(down)) == null && down < 64) {
                 threatRange.add(down);
             }
         }
@@ -364,10 +383,10 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the knight piece.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing the board and the pieces located within.
      */
-    static void getKnightThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final SparseArray<ChessPiece> boardMap) {
+    @Exclude static void getKnightThreatRange(final ArrayList<Integer> threatRange, final int
+            highlightedIndex, final Map<String, ChessPiece> board) {
         // Establish all possible movement options.
         int upUpLeft = highlightedIndex - 17;
         int upUpRight = highlightedIndex - 15;
@@ -394,10 +413,10 @@ class ChessPiece {
         // Add valid moves to the movement option pool.
         for (int possibleMove : possibleMoves) {
             if (possibleMove > -1 && possibleMove < 64) {
-                if (boardMap.get(possibleMove, null) == null) {
+                if (board.get(String.valueOf(possibleMove)) == null) {
                     threatRange.add(possibleMove);
-                } else if (boardMap.get(possibleMove).getTeam()
-                        != boardMap.get(highlightedIndex).getTeam()) {
+                } else if (board.get(String.valueOf(possibleMove)).getTeam()
+                        != board.get(String.valueOf(highlightedIndex)).getTeam()) {
                     threatRange.add(possibleMove);
                 }
             }
@@ -413,10 +432,10 @@ class ChessPiece {
      *
      * @param threatRange the ArrayList that contains the threat range of the rook piece.
      * @param highlightedIndex the index of the current piece.
-     * @param boardMap a HashMap representing the board and the pieces located within.
+     * @param board a HashMap representing the board and the pieces located within.
      */
-    static void getRookThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                                   final SparseArray<ChessPiece> boardMap) {
+    @Exclude static void getRookThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+                                   final Map<String, ChessPiece> board) {
         // Set up our condition variables.
         boolean left = true;
         boolean right = true;
@@ -430,11 +449,11 @@ class ChessPiece {
                 // Stay within the edges of the board.
                 if (leftIteration % 8 != 7 && leftIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(leftIteration, null) == null) {
+                    if (board.get(String.valueOf(leftIteration)) == null) {
                         threatRange.add(leftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (boardMap.get(leftIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(leftIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(leftIteration);
                         left = false;
                         // Otherwise we're done.
@@ -452,11 +471,11 @@ class ChessPiece {
                 // Stay within the edges of the board.
                 if (rightIteration % 8 != 0 && rightIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if(boardMap.get(rightIteration, null) == null) {
+                    if(board.get(String.valueOf(rightIteration)) == null) {
                         threatRange.add(rightIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (boardMap.get(rightIteration).getTeam() !=
-                            boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(rightIteration)).getTeam() !=
+                            board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(rightIteration);
                         right = false;
                         // Otherwise we're done.
@@ -474,11 +493,11 @@ class ChessPiece {
                 // Stay within the edges of the board.
                 if (upIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(upIteration, null) == null) {
+                    if (board.get(String.valueOf(upIteration)) == null) {
                         threatRange.add(upIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (boardMap.get(upIteration).getTeam()
-                            != boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(upIteration)).getTeam()
+                            != board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(upIteration);
                         up = false;
                         // Otherwise we're done.
@@ -496,11 +515,11 @@ class ChessPiece {
                 // Stay within the edges of the board.
                 if(downIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (boardMap.get(downIteration, null) == null) {
+                    if (board.get(String.valueOf(downIteration)) == null) {
                         threatRange.add(downIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (boardMap.get(downIteration).getTeam()
-                            != boardMap.get(highlightedIndex).getTeam()) {
+                    } else if (board.get(String.valueOf(downIteration)).getTeam()
+                            != board.get(String.valueOf(highlightedIndex)).getTeam()) {
                         threatRange.add(downIteration);
                         down = false;
                         // Otherwise we're done.

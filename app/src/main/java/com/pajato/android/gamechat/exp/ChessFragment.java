@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,14 +22,13 @@ import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.exp.model.Checkers;
-import com.pajato.android.gamechat.exp.model.CheckersBoard;
 import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -41,9 +38,12 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
 import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
@@ -53,22 +53,24 @@ import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
  *
  * @author Bryan Scott
  */
-public class ChessFragment extends BaseGameExpFragment implements View.OnClickListener {
+public class ChessFragment extends BaseGameExpFragment {
 
-    // TTTBoard Management Objects
-    private GridLayout grid;
-    private SparseArray<ChessPiece> mBoardMap;
+    // Chess Management Objects
     private ImageButton mHighlightedTile;
     private boolean mIsHighlighted = false;
     private ArrayList<Integer> mPossibleMoves;
 
     // Castle Management Objects
+    // TODO: these should go into database?
     private boolean mPrimaryQueenSideRookHasMoved;
     private boolean mPrimaryKingSideRookHasMoved;
     private boolean mPrimaryKingHasMoved;
     private boolean mSecondaryQueenSideRookHasMoved;
     private boolean mSecondaryKingSideRookHasMoved;
     private boolean mSecondaryKingHasMoved;
+
+    /** Visual layout of chess board objects */
+    private GridLayout grid;
 
     /** The lookup key for the FAB chess memu. */
     public static final String CHESS_FAM_KEY = "ChessFamKey";
@@ -95,14 +97,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         }
     }
 
-    /** Handle a click on the chess board by verifying the click and handing it off. */
-    @Override public void onClick(final View view) {
-        Object tag = view.getTag();
-        // TODO: we probably don't have buttons starting with 'button' here
-        if (tag instanceof String && ((String) tag).startsWith("button"))
-            handleTileClick((String) tag);
-    }
-
     /** Handle an experience posting event to see if this is a chess experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not chess.  Abort if not.
@@ -113,7 +107,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         resume();
     }
 
-    /** Setup the Player Controls. The Board setup will be done later, in onNewGame. */
+    /** Setup the Player Controls. The Board setup will be done later. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_checkers);
@@ -124,8 +118,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
 
-        grid = (GridLayout) mLayout.findViewById(R.id.board);
-        onNewGame();
+        grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -220,32 +213,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         return (Chess) mExperience;
     }
 
-    /** Return the game state after applying the given button move to the data model. */
-    private int getState(@NonNull final Chess model, String buttonTag) {
-       // Check to see if the game is a tie, with all moves exhausted.
-        // TODO: WHAT TO DO HERE
-//        if (model.state == ACTIVE && model.board.grid.size() == 9) return Chess.TIE;
-
-        // Not a tie.  Determine the winner state based on the current play given by the button tag.
-//        int value = model.getSymbolValue();
-//        if (model.state == ACTIVE) return getState(model, value, buttonTag);
-
-    // TODO: Complete this!!!!
-
-        return model.state;
-    }
-
-    /** Return the game state after applying the given button move to the data model. */
-    private int getState(@NonNull final Chess model, final int value, final String buttonTag) {
-        // TODO: IMPLEMENT THIS
-        // Case on the button tag to update the appropriate tallies.
-        switch (buttonTag) {
-            default: break;
-        }
-
-        return model.state;
-    }
-
     /** Handle a new game by resetting the data model. */
     private void handleNewGame() {
         // Ensure that the data model exists and is valid.
@@ -256,58 +223,14 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         }
 
         // Reset the data model, update the database and clear the notification manager one-shot.
-        // TODO: What should we do here??
-//        model.board = null;
+        model.board = null;
         model.state = ACTIVE;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
-    /** Handle a click on a given tile by updating the value on the tile and start the next turn. */
-    private void handleTileClick(final String buttonTag) {
-        // Ensure that the click occurred on a grid button and that the data model is not empty.
-        // Abort if not.
-        View view = mLayout.findViewWithTag(buttonTag);
-        Chess model = getModel();
-        // TODO: Implement game playing !!!
-//        if (view == null || !(view instanceof Button) || model == null) return;
-//
-//        // Handle the button click based on the current state.
-//        Button button = (Button) view;
-//        switch (model.state) {
-//            case ACTIVE:
-//                // Ensure that the click occurred on an empty button.
-//                if (button.getText().length() != 0) {
-//                    // The click occurred on a played button.  Warn the User and ignore the play.
-//                    NotificationManager.instance.notify(this, R.string.InvalidButton);
-//                    return;
-//                }
-//                break;
-//            default:
-//                // In all other cases, clear the board to start a new game.
-//                initBoard(model);
-//                model.board = null;
-//                model.state = ACTIVE;
-//                NotificationManager.instance.notify(this, R.string.StartNewGame);
-//                break;
-//        }
-//
-//        // Update the database with the collected changes.
-//        if (model.board == null) model.board = new TTTBoard();
-//        model.board.grid.put(buttonTag, model.getSymbolText());
-//        model.state = getState(model, buttonTag);
-//        model.setWinCount();
-        ((Chess)mExperience).toggleTurn();
-        ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /** Initialize the board model and values and clear the winner text */
-    private void initBoard(@NonNull final Chess model) {
-        // TODO: IMPLEMENT THIS
-    }
-
     /** Process a resumption by testing and waiting for the experience. */
     private void resume() {
-        if (mExperience == null) {
+        if (getModel() == null) {
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
             String title = "Chess";
@@ -318,22 +241,21 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             mLayout.setVisibility(View.VISIBLE);
             setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
             ProgressManager.instance.hide();
-            updateExperience();
+            updateUiFromExperience();
         }
     }
 
     /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
     private void setPlayerIcons(final boolean turn) {
-        // TODO: Determine if we need this & implement
         // Alternate the decorations on each player symbol.
         if (turn)
             // Make player1's decorations the more prominent.
-            setPlayerIcons(R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1,
-                    R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2);
+            setPlayerIcons(R.id.leftIndicator1, R.id.rightIndicator1,
+                    R.id.leftIndicator2, R.id.rightIndicator2);
         else
             // Make player2's decorations the more prominent.
-            setPlayerIcons(R.id.player2Symbol, R.id.leftIndicator2, R.id.rightIndicator2,
-                    R.id.player1Symbol, R.id.leftIndicator1, R.id.rightIndicator1);
+            setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
+                    R.id.leftIndicator1, R.id.rightIndicator1);
     }
 
     @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -342,28 +264,20 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     }
 
     /** Manage a particular player's symbol decorations. */
-    private void setPlayerIcons(final int large, final int largeLeft, final int largeRight,
-                                final int small, final int smallLeft, final int smallRight) {
-        final float LARGE = 60.0f;
-        final float SMALL = 45.0f;
+    private void setPlayerIcons(final int largeLeft, final int largeRight,
+                                final int smallLeft, final int smallRight) {
 
         // Collect all the pertinent textViews.
-        TextView tvLarge = (TextView) getActivity().findViewById(large);
         TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
         TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
-        TextView tvSmall = (TextView) getActivity().findViewById(small);
         TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
         TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
 
         // Deal with the tvLarger symbol's decorations.
-        tvLarge.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE); // TODO: NPE here!!!
-        tvLarge.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         tvLargeLeft.setVisibility(View.VISIBLE);
         tvLargeRight.setVisibility(View.VISIBLE);
 
         // Deal with the tvSmall symbol's decorations.
-        tvSmall.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
-        tvSmall.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
         tvSmallLeft.setVisibility(View.INVISIBLE);
         tvSmallRight.setVisibility(View.INVISIBLE);
     }
@@ -375,16 +289,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         TextView name = (TextView) mLayout.findViewById(resId);
         if (name == null) return;
         name.setText(model.players.get(index).name);
-    }
-
-    /** Set the team (red or black) for a given player. */
-    // TODO: This probably needs some rework to get the team color figured out...
-    private void setPlayerTeam(final int resId, final int index, final Chess model) {
-        // Ensure that the team text view exists.  Abort if not, set the value from the data
-        // model if it does.
-        TextView symbol = (TextView) mLayout.findViewById(resId);
-        if (symbol == null) return;
-        symbol.setText(model.players.get(index).team);
     }
 
     /** Set the name for a given player index. */
@@ -401,14 +305,14 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         // Generate a message string appropriate for a win or tie, or nothing if the game is active.
         String message = null;
         switch (model.state) {
-            case Chess.RED_WINS:
-            case Chess.BLACK_WINS:
+            case Chess.PRIMARY_WINS:
+            case Chess.SECONDARY_WINS:
                 String name = model.getWinningPlayerName();
                 String format = getString(R.string.WinMessageFormat);
                 message = String.format(Locale.getDefault(), format, name);
                 break;
             case Chess.TIE:
-                message = "Stalemate!";
+                message = getString(R.string.StalemateMessage);
                 break;
             default:
                 // keep playing or waiting for a new game
@@ -430,15 +334,16 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final Chess model) {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
-        // TODO: figure this out!
-        // if (model.board == null)
-        //initBoard(model);
-        // else .. TODO: finish this
-
-    }
+        if (model.board == null)
+            startGame();
+        else {
+            // TODO: handle a game reloaded from the database - startGame should work here, but it isn't tested
+            // startGame();
+        }
+   }
 
     /** Update the UI using the current experience state from the database. */
-    private void updateExperience() {
+    private void updateUiFromExperience() {
         // Ensure that a valid experience exists.  Abort if not.
         if (mExperience == null || !(mExperience instanceof Chess)) return;
 
@@ -449,23 +354,104 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);
         setPlayerWinCount(R.id.player2WinCount, 1, model);
-//        setPlayerSymbol(R.id.player1Symbol, 0, model);
-//        setPlayerSymbol(R.id.player2Symbol, 1, model);
         setPlayerIcons(model.turn);
         setGameBoard(model);
         setState(model);
     }
 
+    /**
+     * Set up an image button which will be a cell in the game board
+     * @param index
+     * @param sideSize
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
+     * @param pieceType
+     */
+    private ImageButton makeBoardButton(int index, int sideSize, Map<String, ChessPiece> board, String pieceType) {
+        ImageButton currentTile = new ImageButton(getContext());
+
+        // Set up the gridlayout params, so that each cell is functionally identical.
+        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+        param.height = sideSize;
+        param.width = sideSize;
+        param.rightMargin = 0;
+        param.topMargin = 0;
+        param.setGravity(Gravity.CENTER);
+        param.rowSpec = GridLayout.spec(index / 8);
+        param.columnSpec = GridLayout.spec(index % 8);
+
+        // Set up the Tile-specific information.
+        currentTile.setLayoutParams(param);
+        currentTile.setTag(String.valueOf(index));
+        handleTileBackground(index, currentTile); // ??????????????????????? TODO: look into this!
+
+        // Handle the chess starting piece positions.
+        boolean containsSecondaryPlayerPiece = index < 16;
+        boolean containsPrimaryPlayerPiece = index > 47;
+        boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
+        int team;
+        int color;
+
+        // If the tile is meant to contain a board piece at the start of play, give it a piece.
+        if (containsPiece) {
+            if (containsPrimaryPlayerPiece) {
+                team = ChessPiece.PRIMARY_TEAM;
+                color = R.color.colorPrimary;
+            } else {
+                team = ChessPiece.SECONDARY_TEAM;
+                color = R.color.colorAccent;
+            }
+            switch(index) {
+                default:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.PAWN, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.PAWN));
+                    break;
+                case 0: case 7:
+                case 56: case 63:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.ROOK, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.ROOK));
+                    break;
+                case 1: case 6:
+                case 57: case 62:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.KNIGHT, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.KNIGHT));
+                    break;
+                case 2: case 5:
+                case 58: case 61:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.BISHOP, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.BISHOP));
+                    break;
+                case 3:
+                case 59:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.QUEEN, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.QUEEN));
+                    break;
+                case 4:
+                case 60:
+                    board.put(String.valueOf(index), new ChessPiece(ChessPiece.KING, team));
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.KING));
+            }
+            currentTile.setColorFilter(ContextCompat.getColor(getContext(), color),
+                    PorterDuff.Mode.SRC_ATOP);
+        }
+
+        return currentTile;
+    }
 
     /**
-     * Handles a new game of checkers, resetting the board.
+     * Handles starting game of chess, resetting the board either for a new game or a restart
+     * after loading a game board from the database.
      */
-    private void onNewGame() {
+    private void startGame() {
         grid.removeAllViews();
-        mBoardMap = new SparseArray<>();
-        mBoardMap.clear();
-        mPossibleMoves = new ArrayList<>();
-        mPossibleMoves.clear();
+        Chess model = (Chess)mExperience;
+        boolean isNewBoard = false;
+        if (model.board == null) {
+            isNewBoard = true;
+            model.board = new HashMap<>();
+        }
+
+        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        if (winner != null) winner.setText("");
 
         // Reset the castling booleans.
         mPrimaryQueenSideRookHasMoved = false;
@@ -475,81 +461,26 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         mSecondaryKingSideRookHasMoved = false;
         mSecondaryKingHasMoved = false;
 
-        // Go through and populate the GridLayout / TTTBoard.
-        for(int i = 0; i < 64; i++) {
-            ImageButton currentTile = new ImageButton(getContext());
+        mPossibleMoves = new ArrayList<>();
 
-            // Set up the gridlayout params, so that each cell is functionally identical.
-            int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
-            int pieceSideLength = screenWidth / 8;
-            GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-            param.height = pieceSideLength;
-            param.width = pieceSideLength;
-            param.rightMargin = 0;
-            param.topMargin = 0;
-            param.setGravity(Gravity.CENTER);
-            param.rowSpec = GridLayout.spec(i / 8);
-            param.columnSpec = GridLayout.spec(i % 8);
+        int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
+        Log.d(TAG, "screen width=" + screenWidth);
+        int pieceSideLength = screenWidth / 8;
 
-            // Set up the Tile-specific information.
-            currentTile.setLayoutParams(param);
-            currentTile.setTag(i);
-            handleTileBackground(i, currentTile);
-
-            // Handle the starting piece positions.
-            boolean containsSecondaryPlayerPiece = i < 16;
-            boolean containsPrimaryPlayerPiece = i > 47;
-            boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
-            int team;
-            int color;
-
-            // If the tile is meant to contain a board piece at the start of play, give it a piece.
-            if(containsPiece) {
-                if(containsPrimaryPlayerPiece) {
-                    team = ChessPiece.PRIMARY_TEAM;
-                    color = R.color.colorPrimary;
-                } else {
-                    team = ChessPiece.SECONDARY_TEAM;
-                    color = R.color.colorAccent;
-                }
-                switch(i) {
-                    default:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.PAWN, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.PAWN));
-                        break;
-                    case 0: case 7:
-                    case 56: case 63:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.ROOK, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.ROOK));
-                        break;
-                    case 1: case 6:
-                    case 57: case 62:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.KNIGHT, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.KNIGHT));
-                        break;
-                    case 2: case 5:
-                    case 58: case 61:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.BISHOP, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.BISHOP));
-                        break;
-                    case 3:
-                    case 59:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.QUEEN, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.QUEEN));
-                        break;
-                    case 4:
-                    case 60:
-                        mBoardMap.put(i, new ChessPiece(ChessPiece.KING, team));
-                        currentTile.setImageResource(ChessPiece.getDrawableFor(ChessPiece.KING));
-                }
-                currentTile.setColorFilter(ContextCompat.getColor(getContext(), color),
-                        PorterDuff.Mode.SRC_ATOP);
+        // Go through and populate the GridLayout / board.
+        for (int i = 0; i < 64; i++) {
+            String pieceType = "";
+            if(!isNewBoard) {
+                pieceType = model.board.get(String.valueOf(i)).getPiece();
+                if(pieceType == null) pieceType = "";
             }
+            ImageButton currentTile = makeBoardButton(i, pieceSideLength, model.board, pieceType);
             currentTile.setOnClickListener(new ChessClick());
             grid.addView(currentTile);
         }
 
-        handleTurnChange();
+        handleTurnChange(); // ?????????????????????????????????????? pass "false"
+
     }
 
     /**
@@ -557,38 +488,37 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
      * then on a subsequent click it removes those highlights.
      *
      * @param indexClicked the index of the tile clicked.
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
-    private void showPossibleMoves(final int indexClicked) {
+    private void showPossibleMoves(final int indexClicked, Map<String, ChessPiece> board) {
         // If the game is over, we don't need to do anything.
-        if(checkFinished()) {
+        if (checkFinished(board)) {
             return;
         }
 
         boolean turn = ((Chess)mExperience).turn;
 
-        CheckersBoard board = ((Chess)mExperience).board;
-
         int highlightedIndex = (int) mHighlightedTile.getTag();
-        findPossibleMoves(highlightedIndex, mPossibleMoves);
+        findPossibleMoves(highlightedIndex, mPossibleMoves, board);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
-        if(mIsHighlighted) {
+        if (mIsHighlighted) {
             handleTileBackground(highlightedIndex, mHighlightedTile);
 
             for (int possiblePosition : mPossibleMoves) {
                 // If the tile clicked is one of the possible positions, and it's the correct
                 // turn/piece combination, the piece moves there.
-                if(indexClicked == possiblePosition) {
+                if (indexClicked == possiblePosition) {
                     boolean capturesPiece = (indexClicked > 9 + highlightedIndex) ||
                             (indexClicked < highlightedIndex - 9);
 
-                    if(turn && (mBoardMap.get(highlightedIndex).getTeam()
+                    if (turn && (board.get(String.valueOf(highlightedIndex)).getTeam()
                             == ChessPiece.PRIMARY_TEAM)) {
-                        handleMovement(true, indexClicked, capturesPiece);
+                        handleMovement(true, indexClicked, capturesPiece, board);
 
-                    } else if(!turn && (mBoardMap.get(highlightedIndex).getTeam()
+                    } else if (!turn && (board.get(String.valueOf(highlightedIndex)).getTeam()
                             == ChessPiece.SECONDARY_TEAM)) {
-                        handleMovement(false, indexClicked, capturesPiece);
+                        handleMovement(false, indexClicked, capturesPiece, board);
                     }
                 }
                 handleTileBackground(possiblePosition, (ImageButton) grid.getChildAt(possiblePosition));
@@ -611,19 +541,20 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
     /**
      * Checks to see if the game is over or not by counting the number of primary / secondary pieces
      * on the board. If there are zero of one type of pieces, then the other side wins.
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      *
      * @return true if the game is over, false otherwise.
      */
-    private boolean checkFinished() {
+    private boolean checkFinished(Map<String, ChessPiece> board) {
         // Generate win conditions. If one side runs out of pieces, the other side wins.
         int secondaryKing = 0;
         int primaryKing = 0;
 
         for(int i = 0; i < 64; i++) {
-            ChessPiece tmp = mBoardMap.get(i, null);
-            if(tmp != null) {
-                if(tmp.getPiece() == ChessPiece.KING) {
-                    if(tmp.getTeam() == ChessPiece.PRIMARY_TEAM) {
+            ChessPiece tmp = board.get(String.valueOf(i));
+            if (tmp != null) {
+                if (tmp.getPiece().equals(ChessPiece.KING)) {
+                    if (tmp.getTeam() == ChessPiece.PRIMARY_TEAM) {
                         primaryKing++;
                     } else if (tmp.getTeam() == ChessPiece.SECONDARY_TEAM) {
                         secondaryKing++;
@@ -632,7 +563,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             }
         }
         // Verify win conditions. If one passes, return true and generate an endgame snackbar.
-        if(secondaryKing == 0) {
+        if (secondaryKing == 0) {
             NotificationManager.instance.notify(this, "Game Over! Player 1 Wins!", true);
             return true;
         } else if (primaryKing == 0) {
@@ -659,7 +590,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         boolean oddRowOddColumn = ((index / 8) % 2 == 1) && isOdd;
 
         // Create the checkerboard pattern on the button backgrounds.
-        if(evenRowEvenColumn || oddRowOddColumn) {
+        if (evenRowEvenColumn || oddRowOddColumn) {
             currentTile.setBackgroundColor(ContextCompat.getColor(
                     getContext(), android.R.color.white));
         } else {
@@ -672,37 +603,40 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
      * Locates the possible moves of the piece that is about to be highlighted.
      *
      * @param highlightedIndex the index containing the highlighted piece.
+     * @param possibleMoves
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
-    private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves) {
-        if(highlightedIndex < 0 || highlightedIndex > 64) {
+    private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves,
+                                   Map<String, ChessPiece> board) {
+        if (highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
 
         possibleMoves.clear();
-        int highlightedPieceType = mBoardMap.get(highlightedIndex).getPiece();
+        String highlightedPieceType = board.get(String.valueOf(highlightedIndex)).getPiece();
 
         switch(highlightedPieceType) {
             case ChessPiece.PAWN:
-                ChessPiece.getPawnThreatRange(possibleMoves, highlightedIndex, mBoardMap);
+                ChessPiece.getPawnThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessPiece.ROOK:
-                ChessPiece.getRookThreatRange(possibleMoves, highlightedIndex, mBoardMap);
+                ChessPiece.getRookThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessPiece.KNIGHT:
-                ChessPiece.getKnightThreatRange(possibleMoves, highlightedIndex, mBoardMap);
+                ChessPiece.getKnightThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessPiece.BISHOP:
-                ChessPiece.getBishopThreatRange(possibleMoves, highlightedIndex, mBoardMap);
+                ChessPiece.getBishopThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessPiece.QUEEN:
-                ChessPiece.getQueenThreatRange(possibleMoves, highlightedIndex, mBoardMap);
+                ChessPiece.getQueenThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessPiece.KING:
                 boolean[] castlingBooleans = { mPrimaryQueenSideRookHasMoved,
                         mPrimaryKingSideRookHasMoved, mPrimaryKingHasMoved,
                         mSecondaryQueenSideRookHasMoved, mSecondaryKingSideRookHasMoved,
                         mSecondaryKingHasMoved };
-                ChessPiece.getKingThreatRange(possibleMoves, highlightedIndex, mBoardMap,
+                ChessPiece.getKingThreatRange(possibleMoves, highlightedIndex, board,
                         castlingBooleans);
                 break;
         }
@@ -714,39 +648,41 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
      *
      * @param player indicates the current player. True is primary, False is secondary.
      * @param indexClicked the index of the clicked tile and the new position of the piece.
+     * @param capturesPiece
+     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
     private void handleMovement(final boolean player, final int indexClicked,
-                                final boolean capturesPiece) {
+                                final boolean capturesPiece, Map<String, ChessPiece> board) {
         // Reset the highlighted tile's image.
         mHighlightedTile.setImageResource(0);
         int highlightedIndex = (int) mHighlightedTile.getTag();
-        ChessPiece highlightedPiece = mBoardMap.get(highlightedIndex);
+        ChessPiece highlightedPiece = board.get(String.valueOf(highlightedIndex));
 
         // Handle capturing pieces.
-        if(capturesPiece) {
+        if (capturesPiece) {
             ImageButton capturedTile = (ImageButton) grid.getChildAt(indexClicked);
             capturedTile.setImageResource(0);
-            mBoardMap.delete(indexClicked);
+            board.remove(String.valueOf(indexClicked));
         }
 
         // Check to see if our pawn can becomes another piece and put its value into the board map.
-        if(indexClicked < 8 && highlightedPiece.getPiece() == ChessPiece.PAWN &&
+        if (indexClicked < 8 && highlightedPiece.getPiece().equals(ChessPiece.PAWN) &&
                 highlightedPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
             promotePawn(indexClicked, ChessPiece.PRIMARY_TEAM);
-        } else if (indexClicked > 55 && highlightedPiece.getPiece() == ChessPiece.PAWN &&
+        } else if (indexClicked > 55 && highlightedPiece.getPiece().equals(ChessPiece.PAWN) &&
                 highlightedPiece.getTeam() == ChessPiece.SECONDARY_TEAM) {
             promotePawn(indexClicked, ChessPiece.SECONDARY_TEAM);
         } else {
-            mBoardMap.put(indexClicked, highlightedPiece);
+            board.put(String.valueOf(indexClicked), highlightedPiece);
 
             // Find the new tile and give it a piece.
             ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
-            newLocation.setImageResource(ChessPiece.getDrawableFor(mBoardMap.get(indexClicked)
-                    .getPiece()));
+            newLocation.setImageResource(ChessPiece.getDrawableFor(
+                    board.get(String.valueOf(indexClicked)).getPiece()));
 
             // Color the piece according to the player.
             int color;
-            if(player) {
+            if (player) {
                 color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
             } else {
                 color = ContextCompat.getColor(getContext(), R.color.colorAccent);
@@ -757,7 +693,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         // Handle the movement of the Rook for Castling
         boolean castlingKingSide = indexClicked == highlightedIndex + 2;
         boolean castlingQueenSide = indexClicked == highlightedIndex - 3;
-        boolean isCastling = mBoardMap.get(highlightedIndex).getPiece() == ChessPiece.KING &&
+        boolean isCastling = board.get(String.valueOf(highlightedIndex)).getPiece().equals(ChessPiece.KING) &&
                 (castlingKingSide || castlingQueenSide);
         if(isCastling) {
             int color;
@@ -782,7 +718,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             }
 
             // Put a rook at the new rook position.
-            mBoardMap.put(rookFutureIndex, new ChessPiece(ChessPiece.ROOK, team));
+            board.put(String.valueOf(rookFutureIndex), new ChessPiece(ChessPiece.ROOK, team));
             ImageButton futureRook = (ImageButton) grid.getChildAt(rookFutureIndex);
             futureRook.setImageResource(ChessPiece.getDrawableFor(ChessPiece.ROOK));
             futureRook.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
@@ -790,18 +726,18 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
             // Get rid of the old rook.
             ImageButton previousRook = (ImageButton) grid.getChildAt(rookPrevIndex);
             previousRook.setImageResource(0);
-            mBoardMap.delete(rookPrevIndex);
+            board.remove(String.valueOf(rookPrevIndex));
         }
 
         // Handle the Castling Booleans.
-        ChessPiece currentPiece = mBoardMap.get(highlightedIndex);
-        if(currentPiece.getPiece() == ChessPiece.KING) {
+        ChessPiece currentPiece = board.get(String.valueOf(highlightedIndex));
+        if(currentPiece.getPiece().equals(ChessPiece.KING)) {
             if(currentPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
                 mPrimaryKingHasMoved = true;
             } else {
                 mSecondaryKingHasMoved = true;
             }
-        } else if (currentPiece.getPiece() == ChessPiece.ROOK) {
+        } else if (currentPiece.getPiece().equals(ChessPiece.ROOK)) {
             if(currentPiece.getTeam() == ChessPiece.PRIMARY_TEAM) {
                 if(highlightedIndex == 0) {
                     mPrimaryQueenSideRookHasMoved = true;
@@ -818,16 +754,16 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         }
 
         // Delete the piece's previous location and end the turn.
-        mBoardMap.delete(highlightedIndex);
+        board.remove(String.valueOf(highlightedIndex));
         handleTurnChange();
-        checkFinished();
+        checkFinished(board);
     }
 
     /**
      * Handles changing the turn and turn indicator.
      */
     private void handleTurnChange() {
-        boolean turn = ((Checkers) mExperience).toggleTurn();
+        boolean turn = ((Chess) mExperience).toggleTurn();
         // Update the database with the turn change
         ExperienceManager.instance.updateExperience(mExperience);
 
@@ -921,7 +857,7 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
 
         @Override public void onClick(final View v) {
             int id = v.getId();
-            int pieceType;
+            String pieceType;
             switch (id) {
                 default:
                 case R.id.queen_icon:
@@ -942,7 +878,8 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
                     break;
             }
 
-            mBoardMap.put(position, new ChessPiece(pieceType, team));
+            Map<String, ChessPiece> board = ((Chess)mExperience).board;
+            board.put(String.valueOf(position), new ChessPiece(pieceType, team));
             ImageButton promotedPieceTile = (ImageButton) grid.getChildAt(position);
             promotedPieceTile.setImageResource(ChessPiece.getDrawableFor(pieceType));
             boolean teamColor = team == ChessPiece.PRIMARY_TEAM;
@@ -959,16 +896,19 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
      */
     private class ChessClick implements View.OnClickListener {
         @Override public void onClick(final View v) {
-            int index = (int) v.getTag();
-            if(mHighlightedTile != null) {
-                showPossibleMoves(index);
+            int index = Integer.parseInt((String)v.getTag());
+            Map<String, ChessPiece> board = ((Chess) mExperience).board;
+            if (mHighlightedTile != null) {
+                showPossibleMoves(index, board);
                 mHighlightedTile = null;
             } else {
-                if(mBoardMap.get(index, null) != null) {
+                if (board.get(String.valueOf(index)) != null) {
                     mHighlightedTile = (ImageButton) v;
-                    showPossibleMoves(index);
+                    showPossibleMoves(index, board);
                 }
             }
+            // Save any changes that have been made to the database
+            ExperienceManager.instance.updateExperience(mExperience);
         }
     }
 
