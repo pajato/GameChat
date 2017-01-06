@@ -25,15 +25,12 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowExpGroupListFragment extends BaseGameFragment {
+public class ShowExpGroupListFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
         logEvent("onClick (showExpGroupList)");
     }
-
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
 
     @Override
     public void onCreate(Bundle bundle) {

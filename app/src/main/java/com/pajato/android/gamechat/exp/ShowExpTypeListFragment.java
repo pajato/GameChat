@@ -24,10 +24,7 @@ import android.os.Bundle;
  *
  * Created by pmr on 10/5/16.
  */
-public class ShowExpTypeListFragment extends BaseGameFragment {
-    @Override public void messageHandler(String message) {
-
-    }
+public class ShowExpTypeListFragment extends BaseExperienceFragment {
 
     /** Set the layout file. */
     @Override public void onCreate(Bundle bundle) {

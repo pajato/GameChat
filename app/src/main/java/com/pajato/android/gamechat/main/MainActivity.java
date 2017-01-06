@@ -42,7 +42,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.exp.GameFragment;
+import com.pajato.android.gamechat.exp.ExperienceFragment;
 import com.pajato.android.gamechat.exp.GameManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
@@ -265,7 +265,7 @@ public class MainActivity extends BaseActivity
         List<String> list = new ArrayList<>();
         list.add(this.getClass().getName());
         list.add(ChatFragment.class.getName());
-        list.add(GameFragment.class.getName());
+        list.add(ExperienceFragment.class.getName());
         AccountManager.instance.init(list);
         CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 

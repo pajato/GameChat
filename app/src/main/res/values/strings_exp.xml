@@ -38,4 +38,6 @@
     <string name="vs">vs</string>
     <string name="wins">wins</string>
     <string name="xValue">X</string>
+    <string name="primaryTeam">primary</string>
+    <string name="secondaryTeam">secondary</string>
 </resources>

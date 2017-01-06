@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatFragment;
-import com.pajato.android.gamechat.exp.GameFragment;
+import com.pajato.android.gamechat.exp.ExperienceFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,7 @@ public enum PaneManager {
         titleList.add(context.getString(R.string.ChatTitle));
         titleList.add(context.getString(R.string.game));
         fragmentList.add(new ChatFragment());
-        fragmentList.add(new GameFragment());
+        fragmentList.add(new ExperienceFragment());
 
         // Determine if a paging layout is active.
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);

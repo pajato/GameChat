@@ -55,7 +55,7 @@ public enum GameManager {
     // Private instance variables.
 
     /** The list of all fragments. */
-    private BaseGameFragment[] mFragmentList = new BaseGameFragment[ExpFragmentType.values().length];
+    private BaseExperienceFragment[] mFragmentList = new BaseExperienceFragment[ExpFragmentType.values().length];
 
     /** The current fragment. */
     private int mCurrentFragment;
@@ -74,35 +74,13 @@ public enum GameManager {
     }
 
     /** Return the current fragment being shown in the experience panel. */
-    public BaseGameFragment getFragment(final int index) {
+    public BaseExperienceFragment getFragment(final int index) {
         return mFragmentList[index];
     }
 
-    /** Return player 1 or player 2 based on the current turn value. */
-    public String getTurn() {
-        final int index = getCurrent();
-        final ExpFragmentType type = ExpFragmentType.values()[index];
-        final Fragment context = getFragment(index);
-        switch (type) {
-            default:
-                // These two cases should never be called in an impactful way.
-            case noExp:
-                return null;
-            case tictactoe:
-                // For Tic-Tac-Toe, we need X or O.
-                return getTurn(index, context, R.string.xValue, R.string.oValue);
-            case checkers:
-            case chess:
-                // For chess and checkers, we need either primary or secondary player strings.
-                return getTurn(index, context, R.string.player1, R.string.player2);
-        }
-    }
-
-    /** Initialize the game manager fragment. */
+    /** Initialize the game manager's current fragment. */
     public void init() {
-        // Initialize this fragment by using a negative index value; clear the current set of
-        // instructions, establish the fragment tracking array and set the default display fragment
-        // to show that there are no games to list.
+        // Initialize this fragment by using a negative index; clear the current set of instructions
         mCurrentFragment = -1;
         instructions.clear();
     }
@@ -204,11 +182,6 @@ public enum GameManager {
         return null;
     }
 
-    /** Return the string value associated with the two players based on the current turn. */
-    private String getTurn(int index, Fragment context, int first, int second) {
-        return getFragment(index).getTurn() ? context.getString(first) : context.getString(second);
-    }
-
     /** Return true iff a fragment for the given experience is started. */
     private boolean startNextFragment(final FragmentActivity context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Ensure that the fragment exists, creating it as necessary.  Abort if the fragment cannot
@@ -235,7 +208,6 @@ public enum GameManager {
         // The fragment needs to be created. Make the attempt, leaving debug information if the
         // fragment cannot be created.
         try {
-
             mFragmentList[index] = dispatcher.type.fragmentClass.newInstance();
             return true;
         } catch (InstantiationException | IllegalAccessException e) {

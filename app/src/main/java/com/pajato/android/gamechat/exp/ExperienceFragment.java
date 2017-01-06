@@ -17,7 +17,9 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +49,7 @@ import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
  * @author Bryan Scott
  * @author Paul Reilly
  */
-public class GameFragment extends BaseGameFragment {
+public class ExperienceFragment extends BaseExperienceFragment {
 
     // Public constants.
 
@@ -55,9 +57,6 @@ public class GameFragment extends BaseGameFragment {
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
 
     // Public instance methods.
-
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
 
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
@@ -108,7 +107,6 @@ public class GameFragment extends BaseGameFragment {
                 break;
         }
 
-        // TODO: figure out how to get the experience into the db.
         if (type != null) GameManager.instance.startNextFragment(getActivity(), type);
     }
 

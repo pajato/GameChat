@@ -45,7 +45,7 @@ import java.util.Locale;
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
  *
- * @author Paul Michael Reilly (based on GameFragment written by Bryan Scott)
+ * @author Paul Michael Reilly (based on ExperienceFragment written by Bryan Scott)
  */
 public class ChatFragment extends BaseChatFragment {
 
