@@ -31,10 +31,10 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
 /**
- * Manages the game related aspects of the GameChat application. These include the creation of new
- * game instances, notifications, and game settings.
+ * Manages the presentation of UI messages, mainly error messsages.
  *
  * @author Bryan Scott
+ * @author Paul Michael Reilly
  */
 enum NotificationManager {
     instance;

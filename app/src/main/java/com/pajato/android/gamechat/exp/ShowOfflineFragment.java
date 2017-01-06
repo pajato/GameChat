@@ -24,7 +24,7 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowOfflineFragment extends BaseGameFragment {
+public class ShowOfflineFragment extends BaseExperienceFragment {
 
     // Public instance methods.
 
@@ -33,9 +33,6 @@ public class ShowOfflineFragment extends BaseGameFragment {
         // Use a logging placeholder.
         logEvent("onClick (showOffline)");
     }
-
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
 
     /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public void onCreate(Bundle bundle) {

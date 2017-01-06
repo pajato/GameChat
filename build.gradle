@@ -34,7 +34,7 @@ allprojects {
     // mirroring the app structure.
     if (rootProject.hasProperty('baseBuildDir') && baseBuildDir != null) {
         buildDir = baseBuildDir + (parent == null ? "/${project.name}/build"
-                                   : "/${rootProject.name}/${project.name}/build")
+                : "/${rootProject.name}/${project.name}/build")
     }
 }
 

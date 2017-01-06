@@ -39,7 +39,7 @@ public enum ExpFragmentType {
     // Private instance variables.
 
     /** The fragment base class for the type. */
-    public  Class<? extends BaseGameFragment> fragmentClass;
+    public  Class<? extends BaseExperienceFragment> fragmentClass;
 
     /** The experience type for this value. */
     public ExpType expType;
@@ -48,12 +48,12 @@ public enum ExpFragmentType {
     public ExpFragmentType showType;
 
     /** Build an instance with only a given fragment class. */
-    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass) {
+    ExpFragmentType(final Class<? extends BaseExperienceFragment> fragmentClass) {
         this.fragmentClass = fragmentClass;
     }
 
     /** Build an instance with both a given fragment class and an experience type. */
-    ExpFragmentType(final Class<? extends BaseGameFragment> fragmentClass, final ExpType expType,
+    ExpFragmentType(final Class<? extends BaseExperienceFragment> fragmentClass, final ExpType expType,
                     final ExpFragmentType showType) {
         this.fragmentClass = fragmentClass;
         this.expType = expType;

@@ -169,14 +169,26 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Return the current account id, null if there is no curent signed in User. */
-    public String getCurrentAccountId() {
-        return mCurrentAccountKey;
+    public String getCurrentAccountId() { return mCurrentAccountKey; }
+
+    /** Return null or the push key for the "me group" associated with the current account. */
+    public String getMeGroup() { return hasAccount() ? mCurrentAccount.groupKey : null; }
+
+    /** Return null or the push key for the "me room" associated with the current account. */
+    public String getMeRoom() {
+        if (!hasAccount()) return null;
+
+        // There is an account. Ensure that there is one and only one room, the "me room" in the
+        // group.  Abort if not.
+        Group group = GroupManager.instance.getGroupProfile(mCurrentAccount.groupKey);
+        if (group == null || group.roomList == null || group.roomList.size() != 1) return null;
+
+        // The me room is valid.
+        return group.roomList.get(0);
     }
 
     /** Return TRUE iff there is a signed in User. */
-    public boolean hasAccount() {
-        return mCurrentAccount != null;
-    }
+    public boolean hasAccount() { return mCurrentAccount != null; }
 
     /** Handle initialization by setting up the Firebase required list of registered classes. */
     public void init(final List<String> classNameList) {

@@ -27,12 +27,9 @@ import org.greenrobot.eventbus.Subscribe;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 
-public class ShowNoExperiencesFragment extends BaseGameFragment {
+public class ShowNoExperiencesFragment extends BaseExperienceFragment {
 
     // Public instance methods.
-
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
 
     /** Establish the layout file to indicate that no experiences are available. */
     @Override public void onCreate(Bundle bundle) {

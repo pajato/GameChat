@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2016 Pajato Technologies, Inc.
- *
- * This file is part of Pajato GameChat.
-
- * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
- * General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
-
- * You should have received a copy of the GNU General Public License along with GameChat. If not,
- * see <http://www.gnu.org/licenses/>.
- */
-
 package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
@@ -26,41 +9,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.chess;
 
-/** Provide a Firebase model class for a tictactoe game experience. */
-@IgnoreExtraProperties public class TicTacToe implements Experience {
+/**
+ * Created by sscott on 12/30/16.
+ */
 
-    // Public class constants.
+/** Provide a Firebase model class for a chess game experience. */
+@IgnoreExtraProperties
+public class Chess implements Experience {
 
-    /** The game is still active. */
     public final static int ACTIVE = 0;
-
-    /** The game has been won by player using X. */
-    public final static int X_WINS = 1;
-
-    /** The game has been won by player using O. */
-    public final static int O_WINS = 2;
-
-    /** The game has ended in a tie. */
+    public final static int RED_WINS = 1;
+    public final static int BLACK_WINS = 2;
     public final static int TIE = 3;
-
-    /** The game has ended, been celebrated and is pending a new game. */
     public final static int PENDING = 4;
 
-    // Public instance variables.
-
-    /** A POJO encapsulating the board moves and wining tallies. */
-    public TTTBoard board;
+    // TODO: Define a chess board ?
+    /** A POJO encapsulating the board moves */
+    public CheckersBoard board;
 
     /** The creation timestamp. */
     private long createTime;
 
+    /** The group push key. */
+    public String groupKey;
+
     /** The experience push key. */
     public String key;
 
-    /** The group push key. */
-    public String groupKey;
+    /** The game level. */
+    public int level;
 
     /** The last modification timestamp. */
     private long modTime;
@@ -68,10 +47,10 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     /** The experience display name. */
     public String name;
 
-    /** The member account identifer who created the experience. */
+    /** The member account identifier who created the experience. */
     public String owner;
 
-    /** The list of players, for tictactoe, two of them. */
+    /** The list of players, for chess, two of them. */
     public List<Player> players;
 
     /** The room push key. */
@@ -89,34 +68,36 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     /** The experience icon url. */
     public String url;
 
-    // Public constructors.
-
     /** Build an empty args constructor for the database. */
-    @SuppressWarnings("unused") public TicTacToe() {}
+    @SuppressWarnings("unused") public Chess() {}
 
-    /** Build a default TicTacToe using the given parameters and defaulting the rest. */
-    public TicTacToe(final String key, final String id, final String name, final long createTime,
-                     final String groupKey, final String roomKey, final List<Player> players) {
+    /** Build a default Checkers using the given parameters and defaulting the rest. */
+    public Chess(final String key, final String id, final int level, final String name,
+                    final long createTime, final String groupKey, final String roomKey,
+                    final List<Player> players) {
         this.createTime = createTime;
         this.key = key;
         this.groupKey = groupKey;
         this.modTime = 0;
+        this.level = level;
         this.name = name;
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = ttt.ordinal();
-        url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
+        type = chess.ordinal();
+        url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude @Override public Map<String, Object> toMap() {
+    @Exclude
+    @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("board", board);
+//        result.put("board", board);
         result.put("createTime", createTime);
         result.put("key", key);
+        result.put("level", level);
         result.put("groupKey", groupKey);
         result.put("modTime", modTime);
         result.put("name", name);
@@ -127,7 +108,6 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
         result.put("turn", turn);
         result.put("type", type);
         result.put("url", url);
-
         return result;
     }
 
@@ -137,7 +117,8 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     }
 
     /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude @Override public ExpType getExperienceType() {
+    @Exclude
+    @Override public ExpType getExperienceType() {
         if (type < 0 || type >= ExpType.values().length) return null;
 
         return ExpType.values()[type];
@@ -154,19 +135,13 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     }
 
     /** Return the room push key. */
-    @Exclude @Override public String getRoomKey() {
-        return roomKey;
-    }
+    @Exclude @Override public String getRoomKey() { return roomKey; }
 
-    /** Return the value associated with the current player: 1 == X, 2 == O. */
-    @Exclude public int getSymbolValue() {
-        // This implies that player 1 is always X and player 2 is always O.
+    /** Return the value associated with the current player: 1 == red, 2 == black. */
+    @Exclude public int getTeamValue() {
+        // This implies that player 1 is always red and player 2 is always black.
+        // TODO: FIX THIS!!!
         return turn ? 1 : 4;
-    }
-
-    /** Return the symbol text value for the player whose turn is current. */
-    @Exclude public String getSymbolText() {
-        return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
     /** Set the experience key to satisfy the Experience contract. */
@@ -181,16 +156,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
     /** Update the win count based on the current state. */
     @Exclude @Override public void setWinCount() {
-        switch (state) {
-            case X_WINS:
-                players.get(0).winCount++;
-                break;
-            case O_WINS:
-                players.get(1).winCount++;
-                break;
-            default:
-                break;
-        }
+        // TODO: Implement this!
     }
 
     /** Toggle the turn state. */
@@ -202,12 +168,13 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     /** Return the winning player's name or null if the game is active or ended in a tie. */
     @Exclude public String getWinningPlayerName() {
         switch (state) {
-            case X_WINS:
-                return players.get(0).name;
-            case O_WINS:
-                return players.get(1).name;
+            case RED_WINS:
+                return players.get(0).name; // TODO: THIS WON'T WORK unless red is 0 index
+            case BLACK_WINS:
+                return players.get(1).name; // TODO: THIS WON'T WORK unless black is 1 index
             case ACTIVE:
             case TIE:
+            case PENDING:
             default:
                 return null;
         }

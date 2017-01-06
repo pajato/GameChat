@@ -25,15 +25,12 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowSignedOutFragment extends BaseGameFragment {
+public class ShowSignedOutFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
         logEvent("onClick (showSignedOut)");
     }
-
-    /** Satisfy the base game fragment contract with a nop message handler. */
-    @Override public void messageHandler(final String message) {}
 
     /** Establish the layout file to show that the user is signed out and cannot chat. */
     @Override public void onCreate(Bundle bundle) {

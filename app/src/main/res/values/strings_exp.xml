@@ -1,6 +1,7 @@
 <resources>
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessImageDesc">Chess image.</string>
+    <string name="ErrorTTTCreation">Error: cannot create a TicTacToe experience</string>
     <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
@@ -38,4 +39,6 @@
     <string name="vs">vs</string>
     <string name="wins">wins</string>
     <string name="xValue">X</string>
+    <string name="primaryTeam">primary</string>
+    <string name="secondaryTeam">secondary</string>
 </resources>

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provide a Firebase model class repesenting an experience profile: a key to the full experience, a
+ * Provide a Firebase model class representing an experience profile: a key to the full experience, a
  * display name for displaying to the User and an experience type, an integer denoting tictactoe,
  * chess or checkers, for example.
  *

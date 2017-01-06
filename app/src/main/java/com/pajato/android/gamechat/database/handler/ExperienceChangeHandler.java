@@ -27,6 +27,8 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.Checkers;
+import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 
@@ -92,8 +94,8 @@ public class ExperienceChangeHandler extends DatabaseEventHandler implements Val
         ExpType type = ExpType.values()[mProfile.type];
         switch (type) {
             case ttt: return snapshot.getValue(TicTacToe.class);
-            //case checkers: return snapshot.getValue(Checkers.class);
-            //case chess: return snapshot.getValue(Chess.class);
+            case checkers: return snapshot.getValue(Checkers.class);
+            case chess: return snapshot.getValue(Chess.class);
             default:
                 break;
         }
