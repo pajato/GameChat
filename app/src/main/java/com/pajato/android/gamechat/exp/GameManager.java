@@ -17,12 +17,11 @@
 
 package com.pajato.android.gamechat.exp;
 
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -60,22 +59,11 @@ public enum GameManager {
     /** The current fragment. */
     private int mCurrentFragment;
 
-    /** The current group key as determined the last selected group. */
-    //public String currentGroupKey;
-
-    /** The current room key as determined by the last selected room. */
-    //public String currentRoomKey;
-
     // Public instance methods.
 
     /** Return the current fragment's index value. */
     public int getCurrent() {
         return mCurrentFragment;
-    }
-
-    /** Return the current fragment being shown in the experience panel. */
-    public BaseExperienceFragment getFragment(final int index) {
-        return mFragmentList[index];
     }
 
     /** Initialize the game manager's current fragment. */

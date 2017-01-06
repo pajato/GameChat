@@ -153,6 +153,7 @@ public enum GroupManager {
         // message list for the logged out User.
         if (event.account != null) {
             // Set up watchers on the group profile this User has access to.
+            if (event.account.groupKey != null) setGroupProfileWatcher(event.account.groupKey);
             for (String groupKey : event.account.joinList) setGroupProfileWatcher(groupKey);
             return;
         }
