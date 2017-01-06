@@ -24,18 +24,17 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
-import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import org.greenrobot.eventbus.Subscribe;

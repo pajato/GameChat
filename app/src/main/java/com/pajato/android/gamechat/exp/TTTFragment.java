@@ -28,20 +28,19 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
-import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.ProgressManager;
 
@@ -53,10 +52,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.END_COL;
@@ -169,7 +168,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
 
     // Protected instance methods.
 
-    /** Return a default, partially populated, TicTacToe experience. */
+    /** Create a default, partially populated, TicTacToe experience. */
     protected void createExperience(final Context context, final List<Account> playerAccounts) {
         // Setup the default key, players, and name.
         String key = getExperienceKey();
@@ -179,12 +178,32 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         long tstamp = new Date().getTime();
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, tstamp);
 
-        // Set up the default group and room keys, the owner id and return the value.
-        String groupKey = GroupManager.instance.getGroupKey();
-        String roomKey = RoomManager.instance.getRoomKey(groupKey);
+        // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
+        // object on the database.
+        String groupKey = AccountManager.instance.getMeGroup();
+        String roomKey = AccountManager.instance.getMeRoom();
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
-        ExperienceManager.instance.createExperience(model);
+        if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
+        else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
+    }
+
+    /** Notifiy the User about an error and log it. */
+    private void reportError(final Context context, final int messageResId, String... args) {
+        // Let the User know that something is amiss.
+        String message = context.getString(messageResId);
+        NotificationManager.instance.notify(this, message, false);
+
+        // Generate a logcat item casing on the given resource id.
+        String format;
+        switch (messageResId) {
+            case R.string.ErrorTTTCreation:
+                format = "Failed to create a TicTacToe experience with group/room keys: {%s/%s}";
+                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
+                break;
+            default:
+                break;
+        }
     }
 
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
