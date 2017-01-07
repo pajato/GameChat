@@ -42,4 +42,5 @@
     <string name="xValue">X</string>
     <string name="primaryTeam">primary</string>
     <string name="secondaryTeam">secondary</string>
+    <string name="PromotePawnMsg">Promote Your Pawn:</string>
 </resources>
