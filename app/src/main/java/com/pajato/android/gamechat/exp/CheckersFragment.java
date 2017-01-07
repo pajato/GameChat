@@ -483,13 +483,16 @@ public class CheckersFragment extends BaseGameExpFragment {
      * then on a subsequent click it removes those highlights.
      *
      * @param indexClicked the index of the tile clicked.
+     * @param board a HashMap representing a board index (0->63) to the piece type at that location.
+     * @return true if we've made any updates that should be written to the database; false otherwise
      */
-    private void showPossibleMoves(final int indexClicked, final Map<String, String> board) {
+    private boolean showPossibleMoves(final int indexClicked, final Map<String, String> board) {
         // If the game is over, we don't need to do anything.
         if(checkFinished(board)) {
-            return;
+            return false;
         }
 
+        boolean hasChanged = false;
         boolean turn = ((Checkers)mExperience).turn;
         String highlightedIdxTag = (String) mHighlightedTile.getTag();
         int highlightedIndex = Integer.parseInt(highlightedIdxTag);
@@ -515,11 +518,13 @@ public class CheckersFragment extends BaseGameExpFragment {
                                 board.get(highlightedIdxTag).equals(PRIMARY_KING))) {
 
                             handleMovement(board, true, indexClicked, capturesPiece);
+                            hasChanged = true;
 
                         } else if(!turn && (board.get(highlightedIdxTag).equals(SECONDARY_PIECE)
                                 || board.get(highlightedIdxTag).equals(SECONDARY_KING))) {
 
                             handleMovement(board, false, indexClicked, capturesPiece);
+                            hasChanged = true;
                         }
                     }
                     // Clear the highlight off of all possible positions.
@@ -542,6 +547,8 @@ public class CheckersFragment extends BaseGameExpFragment {
         }
 
         mIsHighlighted = !mIsHighlighted;
+
+        return hasChanged;
     }
 
     /**
@@ -759,6 +766,7 @@ public class CheckersFragment extends BaseGameExpFragment {
 
     /**
      * Handles changing the turn and turn indicator.
+     * @param switchPlayer if false, just set up the UI views but don't switch the player turn.
      */
     private void handleTurnChange(final boolean switchPlayer) {
 
@@ -791,20 +799,22 @@ public class CheckersFragment extends BaseGameExpFragment {
      */
     private class CheckersClick implements View.OnClickListener {
         @Override public void onClick(final View v) {
-            String tag = (String) v.getTag();
-            int index = Integer.parseInt(tag);
+            int index = Integer.parseInt((String)v.getTag());
+            boolean changedBoard = false;
             Map<String, String> board = ((Checkers)mExperience).board;
             if (mHighlightedTile != null) {
-                showPossibleMoves(index, board);
+                changedBoard = showPossibleMoves(index, board);
                 mHighlightedTile = null;
             } else {
                 if (board.get(String.valueOf(index)) != null) {
                     mHighlightedTile = (ImageButton) v;
-                    showPossibleMoves(index, board);
+                    changedBoard = showPossibleMoves(index, board);
                 }
             }
-            // Save any changes that have been made to the database
-            ExperienceManager.instance.updateExperience(mExperience);
+            if(changedBoard) {
+                // Save any changes that have been made to the database
+                ExperienceManager.instance.updateExperience(mExperience);
+            }
         }
     }
 
