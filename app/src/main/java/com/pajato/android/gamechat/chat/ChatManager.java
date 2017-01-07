@@ -71,7 +71,7 @@ public enum ChatManager {
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
-    /** Return true iff a fragment of the fiven type is started. */
+    /** Return true iff a fragment of the given type is started. */
     public boolean startNextFragment(FragmentActivity context, ChatFragmentType type) {
         Dispatcher<ChatFragmentType, Message> dispatcher = new Dispatcher<>(type);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
@@ -81,18 +81,19 @@ public enum ChatManager {
 
     /** Return a dispatcher object based on the current message list state. */
     private Dispatcher<ChatFragmentType, Message> getDispatcher() {
-        // Deal with an off line user, a signed out user, or no messages at all, in that order.
+        // Deal with an off line user, a signed out user, or no groups at all, in that order.
         // In each case, return an empty dispatcher but for the fragment type of the next screen to
         // show.
         Map<String, Map<String, Map<String, Message>>> messageMap;
         messageMap = MessageManager.instance.messageMap;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
         if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
-        if (messageMap.size() == 0) return new Dispatcher<>(noMessages);
+        int groupsJoined = AccountManager.instance.getCurrentAccount().joinList.size();
+        if (groupsJoined == 0) return new Dispatcher<>(noMessages);
 
         // Deal with a signed in User with multiple messages across more than one group.  Return
         // a dispatcher with a map of experience keys.
-        if (messageMap.size() > 1) return new Dispatcher<>(groupList, messageMap);
+        if (groupsJoined > 1) return new Dispatcher<>(groupList, messageMap);
 
         // A signed in user with messages in more than one room but only one group. Return a
         // dispatcher identifying the group and room map.

@@ -47,7 +47,6 @@ import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
@@ -65,7 +64,6 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_T
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.message;
-import static com.pajato.android.gamechat.database.DBUtils.ChatListType.room;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -99,15 +97,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     protected DBUtils.ChatListType mItemListType;
 
     // Public instance methods.
-
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes:
-        String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, "no list", event));
-        if (mActive && (mItemListType == group || mItemListType == room)) redisplay();
-        ChatManager.instance.startNextFragment(getActivity());
-    }
 
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
@@ -254,6 +243,14 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
+    /** Do a redisplay to catch potential changes that should be shown in the current view. */
+    protected void redisplay() {
+        FabManager.chat.init(this);
+        if (mAdView != null) mAdView.resume();
+        if (mItemListType != null) updateAdapterList();
+        setTitles();
+    }
+
     /** Set the title in the toolbar based on the list type. */
     @Override protected void setTitles() {
         // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
@@ -313,14 +310,6 @@ public abstract class BaseChatFragment extends BaseFragment {
                     InvitationManager.instance.acceptGroupInvite(account, groupKey);
             }
         }
-    }
-
-    /** Do a redisplay to catch potential changes that should be shown in the current view. */
-    private void redisplay() {
-        FabManager.chat.init(this);
-        if (mAdView != null) mAdView.resume();
-        if (mItemListType != null) updateAdapterList();
-        setTitles();
     }
 
     /** Set the titles in the given toolbar using the given item. */
