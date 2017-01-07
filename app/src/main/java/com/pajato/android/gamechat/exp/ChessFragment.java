@@ -498,7 +498,7 @@ public class ChessFragment extends BaseGameExpFragment {
 
         boolean turn = ((Chess)mExperience).turn;
 
-        int highlightedIndex = (int) mHighlightedTile.getTag();
+        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         findPossibleMoves(highlightedIndex, mPossibleMoves, board);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
@@ -655,7 +655,7 @@ public class ChessFragment extends BaseGameExpFragment {
                                 final boolean capturesPiece, Map<String, ChessPiece> board) {
         // Reset the highlighted tile's image.
         mHighlightedTile.setImageResource(0);
-        int highlightedIndex = (int) mHighlightedTile.getTag();
+        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         ChessPiece highlightedPiece = board.get(String.valueOf(highlightedIndex));
 
         // Handle capturing pieces.
@@ -765,7 +765,7 @@ public class ChessFragment extends BaseGameExpFragment {
     private void handleTurnChange() {
         boolean turn = ((Chess) mExperience).toggleTurn();
         // Update the database with the turn change
-        ExperienceManager.instance.updateExperience(mExperience);
+//        ExperienceManager.instance.updateExperience(mExperience);
 
         // Handle the TextViews that serve as our turn indicator.
         TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
