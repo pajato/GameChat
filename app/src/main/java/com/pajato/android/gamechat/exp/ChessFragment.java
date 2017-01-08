@@ -310,9 +310,6 @@ public class ChessFragment extends BaseGameExpFragment implements View.OnClickLi
         if (mExperience == null) {
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
-            String title = "Chess";
-            String message = "Waiting for the database to provide the game...";
-            ProgressManager.instance.show(getContext(), title, message);
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);

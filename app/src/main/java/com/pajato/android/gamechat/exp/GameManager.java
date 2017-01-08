@@ -104,7 +104,7 @@ public enum GameManager {
 
         // Deal with a signed in User with multiple experiences across more than one group.  Return
         // a dispatcher with a map of experience keys.
-        if (expProfileMap.size() > 1) return new Dispatcher<>(groupList, expProfileMap);
+        if (expProfileMap.size() > 1) return new Dispatcher<>(groupList);
 
         // A signed in user with experiences in more than one room but only one group. Return a
         // dispatcher identifying the group and room map.
@@ -171,7 +171,8 @@ public enum GameManager {
     }
 
     /** Return true iff a fragment for the given experience is started. */
-    private boolean startNextFragment(final FragmentActivity context, final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    private boolean startNextFragment(final FragmentActivity context,
+                                      final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
         // Ensure that the fragment exists, creating it as necessary.  Abort if the fragment cannot
         // be created.
         if (!fragmentExists(dispatcher)) return false;

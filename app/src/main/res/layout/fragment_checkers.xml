@@ -47,7 +47,6 @@ http://www.gnu.org/licenses
         android:textStyle="bold"
         app:layout_constraintCenterY_toCenterY="@id/vs"
         app:layout_constraintRight_toLeftOf="@+id/vs"
-        tools:layout_editor_absoluteY="0dp"
         tools:text="theShovel" />
 
     <TextView
@@ -61,7 +60,6 @@ http://www.gnu.org/licenses
         android:textStyle="bold"
         app:layout_constraintCenterY_toCenterY="@id/vs"
         app:layout_constraintLeft_toRightOf="@+id/vs"
-        tools:layout_editor_absoluteY="0dp"
         tools:text="Friend" />
 
     <TextView

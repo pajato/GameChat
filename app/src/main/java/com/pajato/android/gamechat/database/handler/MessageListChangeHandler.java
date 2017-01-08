@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
 import java.util.HashMap;
@@ -159,5 +160,6 @@ public class MessageListChangeHandler extends DatabaseEventHandler implements Ch
                 break;
         }
         AppEventManager.instance.post(new MessageChangeEvent(message, type));
+        AppEventManager.instance.post(new ChatListChangeEvent());
     }
 }

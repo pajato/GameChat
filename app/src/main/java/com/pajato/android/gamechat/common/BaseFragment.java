@@ -187,20 +187,18 @@ public abstract class BaseFragment extends Fragment {
 
     /** Return a menu entry for a given title and icon id, and a given fragment type. */
     protected MenuEntry getEntry(final int titleId, final int iconId, final ExpFragmentType type) {
-        final int itemType = MENU_ITEM_NO_TINT_TYPE;
-        return new MenuEntry(new MenuItemEntry(itemType, titleId, iconId, type.ordinal()));
+        int ordinal = type.ordinal();
+        return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId, ordinal));
     }
 
     /** Return a menu entry for with given title and icon resource items. */
     protected MenuEntry getNoTintEntry(final int titleId, final int iconId) {
-        final int type = MENU_ITEM_NO_TINT_TYPE;
-        return new MenuEntry(new MenuItemEntry(type, titleId, iconId));
+        return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId));
     }
 
     /** Return a menu entry for with given title and icon resource items. */
     protected MenuEntry getTintEntry(final int titleId, final int iconId) {
-        final int type = MENU_ITEM_TINT_TYPE;
-        return new MenuEntry(new MenuItemEntry(type, titleId, iconId));
+        return new MenuEntry(new MenuItemEntry(MENU_ITEM_TINT_TYPE, titleId, iconId));
     }
 
     /** Provide a logger to show the given message and the given bundle. */

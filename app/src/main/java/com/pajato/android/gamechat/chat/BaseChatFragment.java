@@ -206,13 +206,11 @@ public abstract class BaseChatFragment extends BaseFragment {
                 // A group list does not need an item.
                 return true;
             case messageList:
-                Message payload = (Message) dispatcher.payload;
-                MessageItem messageItem = new MessageItem(payload);
+                MessageItem messageItem = new MessageItem((Message) dispatcher.payload);
                 mItem = new ChatListItem(messageItem);
                 return true;
             case roomList:
-                String roomKey = dispatcher.roomMap.keySet().iterator().next().toString();
-                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey);
+                RoomItem roomItem = new RoomItem(dispatcher.groupKey, dispatcher.roomKey);
                 mItem = new ChatListItem(roomItem);
                 return true;
             default:
@@ -380,7 +378,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     // Protected inner classes.
 
     /** Provide a handler that will generate a backpress event. */
-    protected class UpHandler implements View.OnClickListener {
+    private class UpHandler implements View.OnClickListener {
         /** Handle a click on the back arrow button by generating a back press. */
         public void onClick(final View view) {
             getActivity().onBackPressed();
