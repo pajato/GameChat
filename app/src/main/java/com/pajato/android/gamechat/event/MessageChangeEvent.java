@@ -28,7 +28,7 @@ public class MessageChangeEvent extends BaseChangeEvent {
 
     // Public instance variables.
 
-    /** The value associated with the click event, either a tag value of the reoource id. */
+    /** The value associated with the click event, either a tag value of the resource id. */
     public Message message;
 
     /** The change type. */

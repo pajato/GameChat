@@ -18,13 +18,19 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -42,6 +48,11 @@ public class ShowSignedOutFragment extends BaseChatFragment {
 
     /** The sign in floating action menu (FAM) key. */
     public static final String SIGN_IN_FAM_KEY = "signInFamKey";
+
+    // Public instance variables.
+
+    /** A timer to handle signin initialization. */
+    CountDownTimer mTimer;
 
     // Public instance methods.
 
@@ -77,17 +88,38 @@ public class ShowSignedOutFragment extends BaseChatFragment {
         }
     }
 
+    /** Handle a group profile change by trying again to start a better fragment. */
+    @Subscribe public void onChatListChange(@NonNull final ChatListChangeEvent event) {
+        // On the first chat list change event, dismiss the sign in progress spinner.  In any case
+        // attempt to present another fragment based on the chat list change.
+        if (ProgressManager.instance.isShowing()) {
+            mTimer.cancel();
+            ProgressManager.instance.hide();
+        }
+        ChatManager.instance.startNextFragment(this.getActivity());
+    }
+
     /** Establish the layout file to show that the user is signed out and cannot chat. */
     @Override public void onCreate(Bundle bundle) {
+        // Establish the layout file and set up a countdown timer to shut off the progress spinner
+        // after 10 seconds.
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_signed_out);
+        mTimer = new CountDownTimer(10000, 1000) {
+            @Override public void onTick(long millisUntilFinished) {}
+            @Override public void onFinish() { ProgressManager.instance.hide(); }
+        };
     }
 
     /** Handle the setup for the groups panel. */
     @Override public void onStart() {
-        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
-        // view and the listeners for backend data changes.
+        // Provide an account loading indicator for a brief period before showing the fragment.
+        // This will likely be enough time to load the account and message data.
         super.onStart();
+        mTimer.start();
+        String title = getString(R.string.SignInDialogTitleText);
+        String message = getString(R.string.SignInDialogMessageText);
+        ProgressManager.instance.show(this.getContext(), title, message);
         FabManager.chat.init(this);
         FabManager.chat.setMenu(SIGN_IN_FAM_KEY, getSignInMenu());
     }

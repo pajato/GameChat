@@ -33,10 +33,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -58,7 +58,6 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.ME;
-import static com.pajato.android.gamechat.database.DBUtils.ME_GROUP_KEY;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -125,8 +124,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         rooms.add(roomKey);
         List<String> members = new ArrayList<>();
         members.add(account.id);
-        String name = DBUtils.instance.getResource(ME_GROUP_KEY);
-        Group group = new Group(groupKey, account.id, name, tstamp, members, rooms);
+        Group group = new Group(groupKey, account.id, null, tstamp, members, rooms);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
         DBUtils.instance.updateChildren(path, group.toMap());
 
@@ -138,12 +136,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         DBUtils.instance.updateChildren(path, member.toMap());
 
         // Update the "me" room profile on the database.
-        Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, ME);
+        String name = account.getDisplayName();
+        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.instance.updateChildren(path, room.toMap());
 
         // Update the "me" room default message on the database.
-        String text = "Welcome to your own private group and room.  Enjoy!";
+        String text = DBUtils.instance.getResource(DBUtils.WELCOME_MESSAGE_KEY);
         MessageManager.instance.createMessage(text, SYSTEM, account, room);
     }
 
@@ -180,7 +179,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // There is an account. Ensure that there is one and only one room, the "me room" in the
         // group.  Abort if not.
-        Group group = GroupManager.instance.getGroupProfile(mCurrentAccount.groupKey);
+        Group group = GroupManager.instance.groupMap.get(mCurrentAccount.groupKey);
         if (group == null || group.roomList == null || group.roomList.size() != 1) return null;
 
         // The me room is valid.

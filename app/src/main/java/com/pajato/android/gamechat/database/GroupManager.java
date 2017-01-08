@@ -164,7 +164,7 @@ public enum GroupManager {
         mGroupToLastNewMessageMap.clear();
     }
 
-    /** Handle a room profile change by updating the map. */
+    /** Handle a group profile change by updating the map. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
         // Ensure that the group profile is cached and set up watchers for each member and room in
         // the group.

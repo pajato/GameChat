@@ -47,7 +47,6 @@ import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
@@ -65,7 +64,6 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_T
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.message;
-import static com.pajato.android.gamechat.database.DBUtils.ChatListType.room;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -99,15 +97,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     protected DBUtils.ChatListType mItemListType;
 
     // Public instance methods.
-
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes:
-        String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, "no list", event));
-        if (mActive && (mItemListType == group || mItemListType == room)) redisplay();
-        ChatManager.instance.startNextFragment(getActivity());
-    }
 
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
@@ -217,13 +206,11 @@ public abstract class BaseChatFragment extends BaseFragment {
                 // A group list does not need an item.
                 return true;
             case messageList:
-                Message payload = (Message) dispatcher.payload;
-                MessageItem messageItem = new MessageItem(payload);
+                MessageItem messageItem = new MessageItem((Message) dispatcher.payload);
                 mItem = new ChatListItem(messageItem);
                 return true;
             case roomList:
-                String roomKey = dispatcher.roomMap.keySet().iterator().next().toString();
-                RoomItem roomItem = new RoomItem(dispatcher.groupKey, roomKey);
+                RoomItem roomItem = new RoomItem(dispatcher.groupKey, dispatcher.roomKey);
                 mItem = new ChatListItem(roomItem);
                 return true;
             default:
@@ -252,6 +239,14 @@ public abstract class BaseChatFragment extends BaseFragment {
             default:
                 break;
         }
+    }
+
+    /** Do a redisplay to catch potential changes that should be shown in the current view. */
+    protected void redisplay() {
+        FabManager.chat.init(this);
+        if (mAdView != null) mAdView.resume();
+        if (mItemListType != null) updateAdapterList();
+        setTitles();
     }
 
     /** Set the title in the toolbar based on the list type. */
@@ -313,14 +308,6 @@ public abstract class BaseChatFragment extends BaseFragment {
                     InvitationManager.instance.acceptGroupInvite(account, groupKey);
             }
         }
-    }
-
-    /** Do a redisplay to catch potential changes that should be shown in the current view. */
-    private void redisplay() {
-        FabManager.chat.init(this);
-        if (mAdView != null) mAdView.resume();
-        if (mItemListType != null) updateAdapterList();
-        setTitles();
     }
 
     /** Set the titles in the given toolbar using the given item. */
@@ -391,7 +378,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     // Protected inner classes.
 
     /** Provide a handler that will generate a backpress event. */
-    protected class UpHandler implements View.OnClickListener {
+    private class UpHandler implements View.OnClickListener {
         /** Handle a click on the back arrow button by generating a back press. */
         public void onClick(final View view) {
             getActivity().onBackPressed();

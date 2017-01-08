@@ -33,6 +33,8 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -83,8 +85,6 @@ public enum MessageManager {
     /** The map associating group and room push keys with a map of messages. */
     public Map<String, Map<String, Map<String, Message>>> messageMap = new HashMap<>();
 
-    /** A presentation ready collection of messages. */
-
     // Private instance variables.
 
     // Public instance methods.
@@ -117,6 +117,17 @@ public enum MessageManager {
     /** Get a map of messages keyed by room push key in a given group. */
     public Map<String, Map<String, Message>> getGroupMessages(final String groupKey) {
         return messageMap.get(groupKey);
+    }
+
+    /** Return a possibly empty list of messages for a given group and room. */
+    public List<Message> getMessageList(final String groupKey, final String roomKey) {
+        // Ensure there are some messages to be had in the group.  Return the empty list if none
+        // are found, otherwise return all messages in that room.
+        List<Message> result = new ArrayList<>();
+        Map<String, Map<String, Message>> roomMap = getGroupMessages(groupKey);
+        if (roomMap == null) return result;
+        result.addAll(roomMap.get(roomKey).values());
+        return result;
     }
 
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
@@ -183,6 +194,7 @@ public enum MessageManager {
             List<Message> list = messageMap.get(dht);
             if (list != null) {
                 result.add(new ChatListItem(new DateHeaderItem(dht)));
+                Collections.sort(list, new MessageComparator());
                 for (Message message : list) {
                     result.add(new ChatListItem(new MessageItem(message)));
                 }
@@ -190,6 +202,15 @@ public enum MessageManager {
         }
 
         return result;
+    }
+
+    /** Sort lists of messages after they've been sorted by DateHeaderItem.DateHeaderTypes. */
+    private class MessageComparator implements Comparator<Message> {
+        @Override public int compare(Message m1, Message m2) {
+            Date d1 = new Date(m1.createTime);
+            Date d2 = new Date(m2.createTime);
+            return d1.compareTo(d2);
+        }
     }
 
     /** Return a map of the given messages, sorted into chronological buckets. */
