@@ -56,7 +56,7 @@ public class ChatFragment extends BaseChatFragment {
     /** Handle a authentication change event by dealing with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
-        logEvent(String.format("onAccountStateChange: with event {%s};", event));
+        logEvent(String.format("onAuthenticationChange: with event {%s};", event));
         ChatManager.instance.startNextFragment(getActivity());
     }
 

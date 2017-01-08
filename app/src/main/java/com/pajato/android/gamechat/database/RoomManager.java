@@ -78,11 +78,9 @@ public enum RoomManager {
 
     /** Return the "Me" room or null if there is no such room for one reason or another. */
     public Room getMeRoom() {
-        // Ensure that a search is viable.  Return null if not, otherwise walk the list of rooms to
-        // find one (and only one) with a "Me" room.
-        if (roomMap == null || roomMap.size() == 0) return null;
-        for (Room room : roomMap.values()) if (room.type == Room.ME) return room;
-        return null;
+        // Find the me room via the current account.
+        String roomKey = AccountManager.instance.getMeRoom();
+        return roomKey != null ? roomMap.get(roomKey) : null;
     }
 
     /** Return a room push key to use with a subsequent room object persistence. */

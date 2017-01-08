@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.common;
 
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.List;
 import java.util.Map;
@@ -43,9 +42,6 @@ public class Dispatcher<T, O> {
     /** A list of messages or experience profiles. */
     public List<O> list;
 
-    /** Associates groups, rooms and either messages or experience profiles. */
-    public Map<String, Map<String, Map<String, O>>> groupMap;
-
     /** The group key. */
     public String groupKey;
 
@@ -63,17 +59,15 @@ public class Dispatcher<T, O> {
     /** Build an instance given a type. */
     public Dispatcher(final T type) {
         this.type = type;
-        Room room = RoomManager.instance.getMeRoom();
+    }
+
+    /** Build an instance given a type and a room. */
+    public Dispatcher(final T type, final Room room) {
         if (room != null) {
+            this.type = type;
             groupKey = room.groupKey;
             roomKey = room.key;
         }
-    }
-
-    /** Build an instance given a type and an experience map. */
-    public Dispatcher(final T type, final Map<String, Map<String, Map<String, O>>> groupMap) {
-        this.type = type;
-        this.groupMap = groupMap;
     }
 
     /** Build an instance given a group key and room map. */
@@ -83,7 +77,7 @@ public class Dispatcher<T, O> {
         this.roomMap = roomMap;
     }
 
-    /** Build an instance given a group key, room key, and an experience list. */
+    /** Build an instance given a group key, room key, and an experience or message list. */
     public Dispatcher(final T type, final String gKey, final String rKey, final List<O> list) {
         this.type = type;
         this.groupKey = gKey;
@@ -103,5 +97,12 @@ public class Dispatcher<T, O> {
     public Dispatcher(final T type, O payload) {
         this.type = type;
         this.payload = payload;
+    }
+
+    /** Build an instance given a fragment type, group key and room key. */
+    public Dispatcher(final T type, String groupKey, String roomKey) {
+        this.type = type;
+        this.groupKey = groupKey;
+        this.roomKey = roomKey;
     }
 }

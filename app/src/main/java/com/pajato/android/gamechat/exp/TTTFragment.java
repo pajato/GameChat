@@ -107,10 +107,13 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         switch (titleResId) {
             case R.string.PlayModeLocalMenuTitle:
             case R.string.PlayModeComputerMenuTitle:
-            case R.string.PlayModeUserMenuTitle:
                 // Handle selecting a friend by deferring for now and restoring the default menu.
                 showFutureFeatureMessage(R.string.FutureSelectModes);
-                FabManager.game.toggle(this, EXP_MODE_FAM_KEY);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.string.PlayModeUserMenuTitle:
+                // Handle selecting another User.
+                //selectModeUser();
                 break;
             default:
                 break;
@@ -400,9 +403,6 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         if (mExperience == null) {
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
-            String title = "TicTacToe";
-            String message = "Waiting for the database to provide the game...";
-            ProgressManager.instance.show(getContext(), title, message);
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);

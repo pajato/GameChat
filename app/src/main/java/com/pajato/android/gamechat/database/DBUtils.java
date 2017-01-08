@@ -86,8 +86,8 @@ public enum DBUtils {
 
     // Lookup keys.
     public static final String DEFAULT_ROOM_NAME_KEY = "defaultRoomNameKey";
-    public static final String ME_GROUP_KEY = "meGroupKey";
     public static final String SYSTEM_NAME_KEY = "systemNameKey";
+    public static final String WELCOME_MESSAGE_KEY = "welcomeMessageKey";
 
     // Public instance variables.
 
@@ -127,9 +127,9 @@ public enum DBUtils {
     /** Intialize the database manager by setting up localized resources. */
     public void init(final Context context) {
         mResourceMap.clear();
-        mResourceMap.put(ME_GROUP_KEY, context.getString(R.string.DefaultPrivateGroupName));
-        mResourceMap.put(SYSTEM_NAME_KEY, context.getString(R.string.app_name));
         mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));
+        mResourceMap.put(SYSTEM_NAME_KEY, context.getString(R.string.app_name));
+        mResourceMap.put(WELCOME_MESSAGE_KEY, context.getString(R.string.WelcomeMessageText));
     }
 
     /** Store an object on the database using a given path, pushKey, and properties. */

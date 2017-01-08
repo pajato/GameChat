@@ -23,20 +23,24 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.ChatFragmentType.groupList;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.noMessages;
+import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.offline;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.ChatFragmentType.signedOut;
@@ -48,7 +52,6 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.signedOut;
  */
 public enum ChatManager {
     instance;
-
 
     // Private class constants.
 
@@ -69,37 +72,6 @@ public enum ChatManager {
         // dispatcher if so.
         Dispatcher<ChatFragmentType, Message> dispatcher = getDispatcher();
         return dispatcher.type != null && startNextFragment(context, dispatcher);
-    }
-
-    /** Return true iff a fragment of the given type is started. */
-    public boolean startNextFragment(FragmentActivity context, ChatFragmentType type) {
-        Dispatcher<ChatFragmentType, Message> dispatcher = new Dispatcher<>(type);
-        return dispatcher.type != null && startNextFragment(context, dispatcher);
-    }
-
-    // Private instance methods.
-
-    /** Return a dispatcher object based on the current message list state. */
-    private Dispatcher<ChatFragmentType, Message> getDispatcher() {
-        // Deal with an off line user, a signed out user, or no groups at all, in that order.
-        // In each case, return an empty dispatcher but for the fragment type of the next screen to
-        // show.
-        Map<String, Map<String, Map<String, Message>>> messageMap;
-        messageMap = MessageManager.instance.messageMap;
-        if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
-        if (!AccountManager.instance.hasAccount()) return new Dispatcher<>(signedOut);
-        int groupsJoined = AccountManager.instance.getCurrentAccount().joinList.size();
-        if (groupsJoined == 0) return new Dispatcher<>(noMessages);
-
-        // Deal with a signed in User with multiple messages across more than one group.  Return
-        // a dispatcher with a map of experience keys.
-        if (groupsJoined > 1) return new Dispatcher<>(groupList, messageMap);
-
-        // A signed in user with messages in more than one room but only one group. Return a
-        // dispatcher identifying the group and room map.
-        String groupKey = messageMap.keySet().iterator().next();
-        Map<String, Map<String, Message>> roomMap = messageMap.get(groupKey);
-        return new Dispatcher<>(roomList, groupKey, roomMap);
     }
 
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */
@@ -123,16 +95,44 @@ public enum ChatManager {
 
     // Private instance methods.
 
+    /** Return a dispatcher object based on the current message list state. */
+    private Dispatcher<ChatFragmentType, Message> getDispatcher() {
+        // Deal with an off line user, a signed out user, or no messages at all, in that order.
+        // In each case, return an empty dispatcher but for the fragment type of the next screen to
+        // show.
+        if (!NetworkManager.instance.isConnected()) return new Dispatcher<>(offline);
+        Account account = AccountManager.instance.getCurrentAccount();
+        int groupsJoined = account != null ? account.joinList.size() : -1;
+
+        // Case on the number of joined groups: -1 implies the User is signed out, 0 implies the me
+        // room, 1 will use the rooms in that group, otherwise set up to show a list of groups.
+        switch (groupsJoined) {
+            case -1: return new Dispatcher<>(signedOut);
+            case 0: return getDispatcher(RoomManager.instance.getMeRoom());
+            case 1: return getDispatcher(account.joinList.get(0));
+            default: return new Dispatcher<>(groupList);
+        }
+    }
+
+    /** Return a message list dispatcher to show the rooms in a given group. */
+    private Dispatcher<ChatFragmentType, Message> getDispatcher(final String gKey) {
+        return new Dispatcher<>(roomList, gKey, MessageManager.instance.messageMap.get(gKey));
+    }
+
+    /** Return a message list dispatcher to show the messages in the given room. */
+    private Dispatcher<ChatFragmentType, Message> getDispatcher(final Room room) {
+        // Ensure that there is a room loaded.  Abort if not with a default dispatcher.  Set up and
+        // return a message list dispatcher otherwise.
+        if (room == null) return new Dispatcher<>(null);
+        List<Message> list = MessageManager.instance.getMessageList(room.groupKey, room.key);
+        return new Dispatcher<>(messageList, room.groupKey, room.key, list);
+    }
+
     /** Obtain a fragment, if possible. */
     private Fragment getFragment(final ChatFragmentType type) {
+        // Ensure that a fragment is created and cached.  If not do so, otherwise return it.
         Fragment result = mFragmentMap.get(type);
-        if (result == null) {
-            // The fragment has not been created yet.  Do so now, aborting if the fragment can not
-            // be created.
-            result = getFragmentInstance(type);
-        }
-
-        return result;
+        return result == null ? getFragmentInstance(type) : result;
     }
 
     /** Return an instance for a given class, null if no such instance can be created. */
@@ -152,9 +152,7 @@ public enum ChatManager {
 
     /** Set the item to be relevant for a list of groups, rooms or messages. */
     private void setItem(Fragment fragment, ChatListItem item) {
-        if (fragment instanceof BaseChatFragment) {
-            ((BaseChatFragment) fragment).setItem(item);
-        }
+        if (fragment instanceof BaseChatFragment) ((BaseChatFragment) fragment).setItem(item);
     }
 
     /** Return true iff a fragment for the given experience is started. */

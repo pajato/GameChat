@@ -119,6 +119,17 @@ public enum MessageManager {
         return messageMap.get(groupKey);
     }
 
+    /** Return a possibly empty list of messages for a given group and room. */
+    public List<Message> getMessageList(final String groupKey, final String roomKey) {
+        // Ensure there are some messages to be had in the group.  Return the empty list if none
+        // are found, otherwise return all messages in that room.
+        List<Message> result = new ArrayList<>();
+        Map<String, Map<String, Message>> roomMap = getGroupMessages(groupKey);
+        if (roomMap == null) return result;
+        result.addAll(roomMap.get(roomKey).values());
+        return result;
+    }
+
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
     public List<ChatListItem> getMessageListData(@NonNull final ChatListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering

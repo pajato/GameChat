@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 
 /**
