@@ -32,9 +32,6 @@ import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Provide a class to handle new and changed experiences inside a group and room.
  *
@@ -95,20 +92,12 @@ public class ExperienceChangeHandler extends DatabaseEventHandler implements Val
 
         // Case on the profile type to get the desired class.
         ExpType type = ExpType.values()[mProfile.type];
-        try {
-            switch (type) {
-                case ttt:
-                    return snapshot.getValue(TicTacToe.class);
-                case checkers:
-                    return snapshot.getValue(Checkers.class);
-                case chess:
-                    return snapshot.getValue(Chess.class);
-                default:
-                    break;
-            }
-        } catch (com.google.firebase.database.DatabaseException e) {
-            Log.d(TAG, "******** Caught Firebase DatabaseException while handling snapshot: " + snapshot.toString());
-            throw e;
+        switch (type) {
+            case ttt: return snapshot.getValue(TicTacToe.class);
+            case checkers: return snapshot.getValue(Checkers.class);
+            case chess: return snapshot.getValue(Chess.class);
+            default:
+                break;
         }
 
         return null;

@@ -4,7 +4,6 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.R;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

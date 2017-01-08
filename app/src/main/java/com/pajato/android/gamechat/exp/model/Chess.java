@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.exp.ChessPiece;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -24,7 +25,7 @@ public class Chess implements Experience {
     /**
      * A map of board position (0->63) to piece object.
      */
-    public Map<String, String> board;
+    public Map<String, ChessPiece> board;
 
     /** The creation timestamp. */
     private long createTime;
