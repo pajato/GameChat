@@ -50,7 +50,7 @@ class ChessPiece {
                 break;
             case QUEEN: drawable = R.drawable.ic_games_white;
                 break;
-            case BISHOP: drawable = R.drawable.ic_info_black;
+            case BISHOP: drawable = R.drawable.ic_info_black_24dp;
                 break;
             case KNIGHT: drawable = R.drawable.vd_help_black_24px;
                 break;

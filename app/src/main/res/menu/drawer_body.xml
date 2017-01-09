@@ -5,10 +5,10 @@
         <menu>
             <group>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
+                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
                     android:title="@string/navigation_drawer_label_favorite_chat"/>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
+                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
                     android:title="@string/navigation_drawer_label_favorite_chat"/>
             </group>
 
@@ -19,10 +19,10 @@
         <menu>
             <group>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
+                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
                     android:title="@string/navigation_drawer_label_recent_chat"/>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black"
+                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
                     android:title="@string/navigation_drawer_label_recent_chat"/>
             </group>
         </menu>
