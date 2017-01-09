@@ -66,6 +66,21 @@ public class Chess implements Experience {
     /** The experience icon url. */
     public String url;
 
+    // Castling Management booleans
+
+    /** Remember that the primary team queen side rook has moved */
+    public boolean primaryQueenSideRookHasMoved;
+    /** Remember that the primary team king side rook has moved */
+    public boolean primaryKingSideRookHasMoved;
+    /** Remember that the primary team king has moved */
+    public boolean primaryKingHasMoved;
+    /** Remember that the secondary team queen side rook has moved */
+    public boolean secondaryQueenSideRookHasMoved;
+    /** Remember that the secondary team king side rook has moved */
+    public boolean secondaryKingSideRookHasMoved;
+    /** Remember that the secondary team king has moved */
+    public boolean secondaryKingHasMoved;
+
     /** Build an empty args constructor for the database. */
     @SuppressWarnings("unused") public Chess() {}
 
@@ -86,6 +101,13 @@ public class Chess implements Experience {
         turn = true;
         type = chess.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
+        primaryQueenSideRookHasMoved = false;
+        primaryKingSideRookHasMoved = false;
+        primaryKingHasMoved = false;
+        secondaryQueenSideRookHasMoved = false;
+        secondaryKingSideRookHasMoved = false;
+        secondaryKingHasMoved = false;
+
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -106,6 +128,12 @@ public class Chess implements Experience {
         result.put("turn", turn);
         result.put("type", type);
         result.put("url", url);
+        result.put("primaryQueenSideRookHasMoved", primaryQueenSideRookHasMoved);
+        result.put("primaryKingSideRookHasMoved", primaryKingSideRookHasMoved);
+        result.put("primaryKingHasMoved", primaryKingHasMoved);
+        result.put("secondaryQueenSideRookHasMoved", secondaryQueenSideRookHasMoved);
+        result.put("secondaryKingSideRookHasMoved", secondaryKingSideRookHasMoved);
+        result.put("secondaryKingHasMoved", secondaryKingHasMoved);
         return result;
     }
 

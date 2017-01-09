@@ -59,15 +59,6 @@ public class ChessFragment extends BaseGameExpFragment {
     private boolean mIsHighlighted = false;
     private ArrayList<Integer> mPossibleMoves;
 
-    // Castle Management Objects
-    // TODO: these should go into database?
-    private boolean mPrimaryQueenSideRookHasMoved;
-    private boolean mPrimaryKingSideRookHasMoved;
-    private boolean mPrimaryKingHasMoved;
-    private boolean mSecondaryQueenSideRookHasMoved;
-    private boolean mSecondaryKingSideRookHasMoved;
-    private boolean mSecondaryKingHasMoved;
-
     /** Visual layout of chess board objects */
     private GridLayout grid;
 
@@ -453,12 +444,12 @@ public class ChessFragment extends BaseGameExpFragment {
         if (winner != null) winner.setText("");
 
         // Reset the castling booleans.
-        mPrimaryQueenSideRookHasMoved = false;
-        mPrimaryKingSideRookHasMoved = false;
-        mPrimaryKingHasMoved = false;
-        mSecondaryQueenSideRookHasMoved = false;
-        mSecondaryKingSideRookHasMoved = false;
-        mSecondaryKingHasMoved = false;
+        model.primaryQueenSideRookHasMoved = false;
+        model.primaryKingSideRookHasMoved = false;
+        model.primaryKingHasMoved = false;
+        model.secondaryQueenSideRookHasMoved = false;
+        model.secondaryKingSideRookHasMoved = false;
+        model.secondaryKingHasMoved = false;
 
         mPossibleMoves = new ArrayList<>();
 
@@ -615,6 +606,7 @@ public class ChessFragment extends BaseGameExpFragment {
             return;
         }
 
+        Chess model = (Chess)mExperience;
         possibleMoves.clear();
         String highlightedPieceType = board.get("index" + String.valueOf(highlightedIndex)).getPiece();
 
@@ -635,10 +627,10 @@ public class ChessFragment extends BaseGameExpFragment {
                 ChessHelper.getQueenThreatRange(possibleMoves, highlightedIndex, board);
                 break;
             case ChessHelper.KING:
-                boolean[] castlingBooleans = { mPrimaryQueenSideRookHasMoved,
-                        mPrimaryKingSideRookHasMoved, mPrimaryKingHasMoved,
-                        mSecondaryQueenSideRookHasMoved, mSecondaryKingSideRookHasMoved,
-                        mSecondaryKingHasMoved };
+                boolean[] castlingBooleans = { model.primaryQueenSideRookHasMoved,
+                        model.primaryKingSideRookHasMoved, model.primaryKingHasMoved,
+                        model.secondaryQueenSideRookHasMoved, model.secondaryKingSideRookHasMoved,
+                        model.secondaryKingHasMoved };
                 ChessHelper.getKingThreatRange(possibleMoves, highlightedIndex, board,
                         castlingBooleans);
                 break;
@@ -734,25 +726,26 @@ public class ChessFragment extends BaseGameExpFragment {
 
         // Handle the Castling Booleans.
         ChessPiece currentPiece = board.get("index" + String.valueOf(highlightedIndex));
+        Chess model = (Chess)mExperience;
         if (currentPiece != null) {
             if (currentPiece.getPiece().equals(ChessHelper.KING)) {
                 if (currentPiece.getTeam() == ChessHelper.PRIMARY_TEAM) {
-                    mPrimaryKingHasMoved = true;
+                    model.primaryKingHasMoved = true;
                 } else {
-                    mSecondaryKingHasMoved = true;
+                    model.secondaryKingHasMoved = true;
                 }
             } else if (currentPiece.getPiece().equals(ChessHelper.ROOK)) {
                 if (currentPiece.getTeam() == ChessHelper.PRIMARY_TEAM) {
                     if (highlightedIndex == 0) {
-                        mPrimaryQueenSideRookHasMoved = true;
+                        model.primaryQueenSideRookHasMoved = true;
                     } else if (highlightedIndex == 7) {
-                        mPrimaryKingSideRookHasMoved = true;
+                        model.primaryKingSideRookHasMoved = true;
                     }
                 } else {
                     if (highlightedIndex == 56) {
-                        mSecondaryQueenSideRookHasMoved = true;
+                        model.secondaryQueenSideRookHasMoved = true;
                     } else if (highlightedIndex == 63) {
-                        mSecondaryKingSideRookHasMoved = true;
+                        model.secondaryKingSideRookHasMoved = true;
                     }
                 }
             }
