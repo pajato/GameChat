@@ -148,13 +148,33 @@ public class ChessFragment extends BaseGameExpFragment {
         long tstamp = new Date().getTime();
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, tstamp);
 
-        // Set up the default group and room keys, the owner id and return the value.
-        String groupKey = GroupManager.instance.getGroupKey();
-        String roomKey = RoomManager.instance.getRoomKey(groupKey);
+        // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
+        // object on the database.
+        String groupKey = AccountManager.instance.getMeGroup();
+        String roomKey = AccountManager.instance.getMeRoom();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
         Chess model = new Chess(key, id, 0, name, tstamp, groupKey, roomKey, players);
-        ExperienceManager.instance.createExperience(model);
+        if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
+        else reportError(context, R.string.ErrorChessCreation, groupKey, roomKey);
+    }
+
+    /** Notify the user about an error and log it. */
+    private void reportError(final Context context, final int messageResId, String... args) {
+        // Let the User know that something is amiss.
+        String message = context.getString(messageResId);
+        NotificationManager.instance.notify(this, message, false);
+
+        // Generate a logcat item casing on the given resource id.
+        String format;
+        switch (messageResId) {
+            case R.string.ErrorChessCreation:
+                format = "Failed to create a Chess experience with group/room keys: {%s/%s}";
+                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
+                break;
+            default:
+                break;
+        }
     }
 
     /** Return a possibly null list of player information for a chess experience (always 2 players) */

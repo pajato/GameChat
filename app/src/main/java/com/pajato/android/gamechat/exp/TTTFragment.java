@@ -191,7 +191,7 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
         else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
 
-    /** Notifiy the User about an error and log it. */
+    /** Notify the user about an error and log it. */
     private void reportError(final Context context, final int messageResId, String... args) {
         // Let the User know that something is amiss.
         String message = context.getString(messageResId);

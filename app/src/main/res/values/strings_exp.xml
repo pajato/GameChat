@@ -1,6 +1,8 @@
 <resources>
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessImageDesc">Chess image.</string>
+    <string name="ErrorCheckersCreation">Error: cannot create a Checkers experience</string>
+    <string name="ErrorChessCreation">Error: cannot create a Chess experience</string>
     <string name="ErrorTTTCreation">Error: cannot create a TicTacToe experience</string>
     <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
