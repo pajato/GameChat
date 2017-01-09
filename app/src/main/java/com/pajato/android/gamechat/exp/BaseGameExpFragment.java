@@ -12,8 +12,6 @@ import java.util.List;
 
 /**
  * Provides a base class for experience objects that are also games.
- *
- * Created by sscott on 12/31/16.
  */
 public abstract class BaseGameExpFragment extends BaseExperienceFragment {
 

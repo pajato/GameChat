@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.exp.ChessPiece;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -11,23 +12,20 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.exp.ExpType.chess;
 
-/**
- * Created by sscott on 12/30/16.
- */
-
 /** Provide a Firebase model class for a chess game experience. */
 @IgnoreExtraProperties
 public class Chess implements Experience {
 
     public final static int ACTIVE = 0;
-    public final static int RED_WINS = 1;
-    public final static int BLACK_WINS = 2;
+    public final static int PRIMARY_WINS = 1;
+    public final static int SECONDARY_WINS = 2;
     public final static int TIE = 3;
     public final static int PENDING = 4;
 
-    // TODO: Define a chess board ?
-    /** A POJO encapsulating the board moves */
-    public CheckersBoard board;
+    /**
+     * A map of board position (0->63) to piece object.
+     */
+    public ChessBoard board;
 
     /** The creation timestamp. */
     private long createTime;
@@ -68,6 +66,21 @@ public class Chess implements Experience {
     /** The experience icon url. */
     public String url;
 
+    // Castling Management booleans
+
+    /** Remember that the primary team queen side rook has moved */
+    public boolean primaryQueenSideRookHasMoved;
+    /** Remember that the primary team king side rook has moved */
+    public boolean primaryKingSideRookHasMoved;
+    /** Remember that the primary team king has moved */
+    public boolean primaryKingHasMoved;
+    /** Remember that the secondary team queen side rook has moved */
+    public boolean secondaryQueenSideRookHasMoved;
+    /** Remember that the secondary team king side rook has moved */
+    public boolean secondaryKingSideRookHasMoved;
+    /** Remember that the secondary team king has moved */
+    public boolean secondaryKingHasMoved;
+
     /** Build an empty args constructor for the database. */
     @SuppressWarnings("unused") public Chess() {}
 
@@ -88,13 +101,20 @@ public class Chess implements Experience {
         turn = true;
         type = chess.ordinal();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
+        primaryQueenSideRookHasMoved = false;
+        primaryKingSideRookHasMoved = false;
+        primaryKingHasMoved = false;
+        secondaryQueenSideRookHasMoved = false;
+        secondaryKingSideRookHasMoved = false;
+        secondaryKingHasMoved = false;
+
     }
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude
     @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-//        result.put("board", board);
+        result.put("board", board);
         result.put("createTime", createTime);
         result.put("key", key);
         result.put("level", level);
@@ -108,6 +128,12 @@ public class Chess implements Experience {
         result.put("turn", turn);
         result.put("type", type);
         result.put("url", url);
+        result.put("primaryQueenSideRookHasMoved", primaryQueenSideRookHasMoved);
+        result.put("primaryKingSideRookHasMoved", primaryKingSideRookHasMoved);
+        result.put("primaryKingHasMoved", primaryKingHasMoved);
+        result.put("secondaryQueenSideRookHasMoved", secondaryQueenSideRookHasMoved);
+        result.put("secondaryKingSideRookHasMoved", secondaryKingSideRookHasMoved);
+        result.put("secondaryKingHasMoved", secondaryKingHasMoved);
         return result;
     }
 
@@ -137,13 +163,6 @@ public class Chess implements Experience {
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
-    /** Return the value associated with the current player: 1 == red, 2 == black. */
-    @Exclude public int getTeamValue() {
-        // This implies that player 1 is always red and player 2 is always black.
-        // TODO: FIX THIS!!!
-        return turn ? 1 : 4;
-    }
-
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
@@ -156,7 +175,16 @@ public class Chess implements Experience {
 
     /** Update the win count based on the current state. */
     @Exclude @Override public void setWinCount() {
-        // TODO: Implement this!
+        switch (state) {
+            case PRIMARY_WINS:
+                players.get(0).winCount++;
+                break;
+            case SECONDARY_WINS:
+                players.get(1).winCount++;
+                break;
+            default:
+                break;
+        }
     }
 
     /** Toggle the turn state. */
@@ -168,10 +196,12 @@ public class Chess implements Experience {
     /** Return the winning player's name or null if the game is active or ended in a tie. */
     @Exclude public String getWinningPlayerName() {
         switch (state) {
-            case RED_WINS:
-                return players.get(0).name; // TODO: THIS WON'T WORK unless red is 0 index
-            case BLACK_WINS:
-                return players.get(1).name; // TODO: THIS WON'T WORK unless black is 1 index
+            case PRIMARY_WINS:
+                // Assumes 'primary' player is at index 0
+                return players.get(0).name;
+            case SECONDARY_WINS:
+                // Assumes 'primary' player is at index 1
+                return players.get(1).name;
             case ACTIVE:
             case TIE:
             case PENDING:
