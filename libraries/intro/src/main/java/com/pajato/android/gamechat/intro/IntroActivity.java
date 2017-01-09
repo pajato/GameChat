@@ -37,7 +37,9 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pajato.android.gamechat.signin.SignInActivity;
+import com.firebase.ui.auth.AuthUI;
+
+import java.util.Arrays;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
 
@@ -121,7 +123,16 @@ public class IntroActivity extends AppCompatActivity {
 
     /** Finish the intro screen and handle the given mode in a new activity. */
     private void invokeSignIn(final String mode) {
-        Intent intent = new Intent(this, SignInActivity.class);
+        // Get an instance of AuthUI based on the default app
+        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
+        intentBuilder.setProviders(Arrays.asList(
+                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
+        // Disable Smart Lock for development purposes -- to ensure logging in processes work correctly.
+        intentBuilder.setIsSmartLockEnabled(false);
+
+        Intent intent = intentBuilder.build();
         intent.putExtra(mode, true);
         startActivityForResult(intent, RC_SIGN_IN);
     }
