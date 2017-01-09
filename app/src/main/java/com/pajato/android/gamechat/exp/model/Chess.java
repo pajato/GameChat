@@ -25,7 +25,7 @@ public class Chess implements Experience {
     /**
      * A map of board position (0->63) to piece object.
      */
-    public Map<String, ChessPiece> board;
+    public ChessBoard board;
 
     /** The creation timestamp. */
     private long createTime;

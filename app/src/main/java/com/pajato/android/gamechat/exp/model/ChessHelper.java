@@ -1,26 +1,18 @@
 package com.pajato.android.gamechat.exp.model;
 
-import com.google.firebase.database.Exclude;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.exp.ChessPiece;
+import com.pajato.android.gamechat.exp.ChessPiece.ChessTeam;
 
 import java.util.ArrayList;
-import java.util.Map;
+
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.ROOK;
 
 /**
  * Helper class to determine for chess features.
  */
 
 public class ChessHelper {
-    public static final String KING = "king";
-    public static final String QUEEN = "queen";
-    public static final String BISHOP = "bishop";
-    public static final String KNIGHT = "knight";
-    public static final String ROOK = "rook";
-    public static final String PAWN = "pawn";
-
-    public static final int PRIMARY_TEAM = 10;
-    public static final int SECONDARY_TEAM = 20;
 
     // Threat Range Methods
 
@@ -36,7 +28,7 @@ public class ChessHelper {
      * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
     static public void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                                          final Map<String, ChessPiece> board, final boolean[] castlingBooleans) {
+                                          final ChessBoard board, final boolean[] castlingBooleans) {
         // Grab all the castling booleans and label them properly.
         final boolean primaryQueenSideRookHasMoved = castlingBooleans[0];
         final boolean primaryKingSideRookHasMoved = castlingBooleans[1];
@@ -67,56 +59,52 @@ public class ChessHelper {
         int[] possibleMoves = {left, upLeft, up, upRight, right, downRight, down, downLeft};
         for (int possibleMove : possibleMoves) {
             if(possibleMove > -1 && possibleMove < 64) {
-                if(board.get("index" + String.valueOf(possibleMove)) == null) {
+                if(board.retrieve(possibleMove) == null) {
                     threatRange.add(possibleMove);
-                } else if (board.get("index" + String.valueOf(possibleMove)).getTeam()
-                        != board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                } else if (board.getTeam(possibleMove) != board.getTeam(highlightedIndex)) {
                     threatRange.add(possibleMove);
                 }
             }
         }
 
         // Handle Castling for Blue
-        if(board.get("index" + String.valueOf(highlightedIndex)).getTeam() == PRIMARY_TEAM &&
-                !primaryKingHasMoved) {
+        if(board.getTeam(highlightedIndex).equals(ChessTeam.PRIMARY) && !primaryKingHasMoved) {
             // The more common Castling variant, "Queen-Side Castling" or "Short Castling"
             boolean canCastleKingSide = highlightedIndex == 60 && !primaryKingSideRookHasMoved &&
-                    board.get("index" + String.valueOf(highlightedIndex + 1)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 2)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 3)) != null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 3)).getPiece().equals(ROOK);
+                    board.retrieve(highlightedIndex + 1) == null &&
+                    board.retrieve(highlightedIndex + 2) == null &&
+                    board.retrieve(highlightedIndex + 3) != null &&
+                    board.getPieceType(highlightedIndex + 3).equals(ROOK);
             if(canCastleKingSide) {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
             boolean canCastleQueenSide = highlightedIndex == 60 && !primaryQueenSideRookHasMoved &&
-                    board.get("index" + String.valueOf(highlightedIndex - 1)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 2)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 3)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 4)) != null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 4)).getPiece().equals(ROOK);
+                    board.retrieve(highlightedIndex - 1) == null &&
+                    board.retrieve(highlightedIndex - 2) == null &&
+                    board.retrieve(highlightedIndex - 3) == null &&
+                    board.retrieve(highlightedIndex - 4) != null &&
+                    board.getPieceType(highlightedIndex - 4).equals(ROOK);
             if(canCastleQueenSide) {
                 threatRange.add(highlightedIndex - 3);
             }
             // Handle Castling for the other team
-        } else if (board.get("index" + String.valueOf(highlightedIndex)).getTeam() == SECONDARY_TEAM
-                && !secondaryKingHasMoved) {
-            boolean canCastleKingSide = highlightedIndex == 4
-                    && !secondaryKingSideRookHasMoved &&
-                    board.get("index" + String.valueOf(highlightedIndex + 1)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 2)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 3)) != null &&
-                    board.get("index" + String.valueOf(highlightedIndex + 3)).getPiece().equals(ROOK);
+        } else if (board.getTeam(highlightedIndex).equals(ChessTeam.SECONDARY) && !secondaryKingHasMoved) {
+            boolean canCastleKingSide = highlightedIndex == 4 && !secondaryKingSideRookHasMoved &&
+                    board.retrieve(highlightedIndex + 1) == null &&
+                    board.retrieve(highlightedIndex + 2) == null &&
+                    board.retrieve(highlightedIndex + 3) != null &&
+                    board.getPieceType(highlightedIndex + 3).equals(ROOK);
             if (canCastleKingSide) {
                 threatRange.add(highlightedIndex + 2);
             }
             // The less common Castling variant, "Queen-Side Castling" or "Long Castling"
             boolean canCastleQueenSide = highlightedIndex == 4 && !secondaryQueenSideRookHasMoved &&
-                    board.get("index" + String.valueOf(highlightedIndex - 1)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 2)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 3)) == null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 4)) != null &&
-                    board.get("index" + String.valueOf(highlightedIndex - 4)).getPiece().equals(ROOK);
+                    board.retrieve(highlightedIndex - 1) == null &&
+                    board.retrieve(highlightedIndex - 2) == null &&
+                    board.retrieve(highlightedIndex - 3) == null &&
+                    board.retrieve(highlightedIndex - 4) != null &&
+                    board.getPieceType(highlightedIndex - 4).equals(ROOK);
             if(canCastleQueenSide) {
                 threatRange.add(highlightedIndex - 3);
             }
@@ -136,7 +124,7 @@ public class ChessHelper {
      * @param board a HashMap representing the board and the pieces located within.
      */
     static public void getQueenThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final Map<String, ChessPiece> board) {
+            highlightedIndex, final ChessBoard board) {
         getRookThreatRange(threatRange, highlightedIndex, board);
         getBishopThreatRange(threatRange, highlightedIndex, board);
     }
@@ -152,7 +140,7 @@ public class ChessHelper {
      * @param board a HashMap representing the board and the pieces located within.
      */
     static public void getBishopThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final Map<String, ChessPiece> board) {
+            highlightedIndex, ChessBoard board) {
         boolean upLeft = true;
         boolean upRight = true;
         boolean downRight = true;
@@ -164,11 +152,10 @@ public class ChessHelper {
                 int upLeftIteration = highlightedIndex - (9 * i);
                 if (upLeftIteration % 8 != 7 && upLeftIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(upLeftIteration)) == null) {
+                    if (board.retrieve(upLeftIteration) == null) {
                         threatRange.add(upLeftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (board.get("index" + String.valueOf(upLeftIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(upLeftIteration) !=  board.getTeam(highlightedIndex)) {
                         threatRange.add(upLeftIteration);
                         upLeft = false;
                         // Otherwise we're done.
@@ -185,11 +172,10 @@ public class ChessHelper {
                 int upRightIteration = highlightedIndex - (7 * i);
                 if (upRightIteration % 8 != 0 && upRightIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(upRightIteration)) == null) {
+                    if (board.retrieve(upRightIteration) == null) {
                         threatRange.add(upRightIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (board.get("index" + String.valueOf(upRightIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(upRightIteration) !=  board.getTeam(highlightedIndex)) {
                         threatRange.add(upRightIteration);
                         upRight = false;
                         // Otherwise we're done.
@@ -206,11 +192,10 @@ public class ChessHelper {
                 int downRightIteration = highlightedIndex + (9 * i);
                 if (downRightIteration % 8 != 0 && downRightIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(downRightIteration)) == null) {
+                    if (board.retrieve(downRightIteration) == null) {
                         threatRange.add(downRightIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (board.get("index" + String.valueOf(downRightIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(downRightIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(downRightIteration);
                         downRight = false;
                         // Otherwise we're done.
@@ -227,11 +212,10 @@ public class ChessHelper {
                 int downLeftIteration = highlightedIndex + (7 * i);
                 if (downLeftIteration % 8 != 7 && downLeftIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(downLeftIteration)) == null) {
+                    if (board.retrieve(downLeftIteration) == null) {
                         threatRange.add(downLeftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (board.get("index" + String.valueOf(downLeftIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(downLeftIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(downLeftIteration);
                         downLeft = false;
                         // Otherwise we're done.
@@ -257,34 +241,33 @@ public class ChessHelper {
      * @param board a HashMap representing the board and the pieces located within.
      */
     static public void getPawnThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                                            final Map<String, ChessPiece> board) {
+                                            final ChessBoard board) {
         // Pawns move differently depending on the team they are on. First, handle the pawns that
         // move "up". These pawns are on the primary team.
-        if(board.get("index" + String.valueOf(highlightedIndex)).getTeam() == PRIMARY_TEAM) {
+        if (board.getTeam(highlightedIndex).equals(ChessTeam.PRIMARY)) {
             int upLeft = highlightedIndex - 9;
             int upRight = highlightedIndex - 7;
             int up = highlightedIndex - 8;
 
             // Pawns can move two squares forward if they are in their starting position.
-            if(highlightedIndex > 47 && highlightedIndex < 56) {
+            if (highlightedIndex > 47 && highlightedIndex < 56) {
                 int upUp = highlightedIndex -  16;
-                if(board.get("index" + String.valueOf(upUp)) == null &&
-                        board.get("index" + String.valueOf(up)) == null) {
+                if(board.retrieve(upUp) == null && board.retrieve(up) == null) {
                     threatRange.add(upUp);
                 }
             }
 
             // Pawns can move diagonally forward only if they are capturing a piece.
-            if(board.get("index" + String.valueOf(upLeft)) != null && upLeft % 8 != 7
-                    && board.get("index" + String.valueOf(upLeft)).getTeam() == SECONDARY_TEAM) {
+            if (board.retrieve(upLeft) != null && upLeft % 8 != 7 &&
+                    board.getTeam(upLeft).equals(ChessTeam.SECONDARY)) {
                 threatRange.add(upLeft);
             }
-            if(board.get("index" + String.valueOf(upRight)) != null && upRight % 8 != 0
-                    && board.get("index" + String.valueOf(upRight)).getTeam() == SECONDARY_TEAM) {
+            if (board.retrieve(upRight) != null && upRight % 8 != 0 &&
+                    board.getTeam(upRight).equals(ChessTeam.SECONDARY)) {
                 threatRange.add(upRight);
             }
             // Pawns can move forward only if they are not being blocked.
-            if(board.get("index" + String.valueOf(up)) == null && up > -1) {
+            if (board.retrieve(up) == null && up > -1) {
                 threatRange.add(up);
             }
             // We also need to handle the second team, which moves "downward" on the board.
@@ -296,23 +279,22 @@ public class ChessHelper {
             // Pawns can move two squares forward if they are in their starting position.
             if(highlightedIndex > 7 && highlightedIndex < 16) {
                 int downDown = highlightedIndex + 16;
-                if(board.get("index" + String.valueOf(downDown)) == null &&
-                        board.get("index" + String.valueOf(down)) == null) {
+                if(board.retrieve(downDown) == null && board.retrieve(down) == null) {
                     threatRange.add(downDown);
                 }
             }
 
             // Pawns can move diagonally forward only if they are capturing a piece.
-            if(board.get("index" + String.valueOf(downRight)) != null && downRight % 8 != 0
-                    && board.get("index" + String.valueOf(downRight)).getTeam() == PRIMARY_TEAM) {
+            if (board.retrieve(downRight) !=null && downRight % 8 != 0
+                    && board.getTeam(downRight).equals(ChessTeam.PRIMARY)) {
                 threatRange.add(downRight);
             }
-            if(board.get("index" + String.valueOf(downLeft)) != null && downRight % 8 != 7
-                    && board.get("index" + String.valueOf(downLeft)).getTeam() == PRIMARY_TEAM) {
+            if (board.retrieve(downLeft) != null && downRight % 8 != 7
+                    && board.getTeam(downLeft).equals(ChessTeam.PRIMARY)) {
                 threatRange.add(downLeft);
             }
             // Pawns can move forward only if they are not being blocked.
-            if(board.get("index" + String.valueOf(down)) == null && down < 64) {
+            if (board.retrieve(down) == null && down < 64) {
                 threatRange.add(down);
             }
         }
@@ -328,7 +310,7 @@ public class ChessHelper {
      * @param board a HashMap representing the board and the pieces located within.
      */
     static public void getKnightThreatRange(final ArrayList<Integer> threatRange, final int
-            highlightedIndex, final Map<String, ChessPiece> board) {
+            highlightedIndex, final ChessBoard board) {
         // Establish all possible movement options.
         int upUpLeft = highlightedIndex - 17;
         int upUpRight = highlightedIndex - 15;
@@ -355,10 +337,9 @@ public class ChessHelper {
         // Add valid moves to the movement option pool.
         for (int possibleMove : possibleMoves) {
             if (possibleMove > -1 && possibleMove < 64) {
-                if (board.get("index" + String.valueOf(possibleMove)) == null) {
+                if (board.retrieve(possibleMove) == null) {
                     threatRange.add(possibleMove);
-                } else if (board.get("index" + String.valueOf(possibleMove)).getTeam()
-                        != board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                } else if (board.getTeam(possibleMove) != board.getTeam(highlightedIndex)) {
                     threatRange.add(possibleMove);
                 }
             }
@@ -377,7 +358,7 @@ public class ChessHelper {
      * @param board a HashMap representing the board and the pieces located within.
      */
     static public void getRookThreatRange(final ArrayList<Integer> threatRange,
-                final int highlightedIndex, final Map<String, ChessPiece> board) {
+                final int highlightedIndex, final ChessBoard board) {
         // Set up our condition variables.
         boolean left = true;
         boolean right = true;
@@ -391,11 +372,10 @@ public class ChessHelper {
                 // Stay within the edges of the board.
                 if (leftIteration % 8 != 7 && leftIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(leftIteration)) == null) {
+                    if (board.retrieve(leftIteration) == null) {
                         threatRange.add(leftIteration);
                         // If there's an enemy piece, we can go there but no further.
-                    } else if (board.get("index" + String.valueOf(leftIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(leftIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(leftIteration);
                         left = false;
                         // Otherwise we're done.
@@ -413,11 +393,10 @@ public class ChessHelper {
                 // Stay within the edges of the board.
                 if (rightIteration % 8 != 0 && rightIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if(board.get("index" + String.valueOf(rightIteration)) == null) {
+                    if(board.retrieve(rightIteration) == null) {
                         threatRange.add(rightIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (board.get("index" + String.valueOf(rightIteration)).getTeam() !=
-                            board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(rightIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(rightIteration);
                         right = false;
                         // Otherwise we're done.
@@ -435,11 +414,10 @@ public class ChessHelper {
                 // Stay within the edges of the board.
                 if (upIteration > -1) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(upIteration)) == null) {
+                    if (board.retrieve(upIteration) == null) {
                         threatRange.add(upIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (board.get("index" + String.valueOf(upIteration)).getTeam()
-                            != board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(upIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(upIteration);
                         up = false;
                         // Otherwise we're done.
@@ -457,11 +435,10 @@ public class ChessHelper {
                 // Stay within the edges of the board.
                 if(downIteration < 64) {
                     // If there's no piece, a rook can go there and keep going.
-                    if (board.get("index" + String.valueOf(downIteration)) == null) {
+                    if (board.retrieve(downIteration) == null) {
                         threatRange.add(downIteration);
                         // If there's an enemy piece, a rook can go there but no further.
-                    } else if (board.get("index" + String.valueOf(downIteration)).getTeam()
-                            != board.get("index" + String.valueOf(highlightedIndex)).getTeam()) {
+                    } else if (board.getTeam(downIteration) != board.getTeam(highlightedIndex)) {
                         threatRange.add(downIteration);
                         down = false;
                         // Otherwise we're done.
@@ -474,32 +451,6 @@ public class ChessHelper {
                 }
             }
         }
-    }
-
-    /**
-     * Returns a specific drawable for the piece type specified in the parameter.
-     *
-     * @param pieceType the piece type, all of which are available as public constants in this class
-     * @return a drawable ID that corresponds to the parameter.
-     */
-    static public int getDrawableFor(final String pieceType) {
-        int drawable;
-        switch(pieceType) {
-            case KING: drawable = R.drawable.ic_stars_black_36dp;
-                break;
-            case QUEEN: drawable = R.drawable.ic_games_white;
-                break;
-            case BISHOP: drawable = R.drawable.ic_info_black;
-                break;
-            case KNIGHT: drawable = R.drawable.vd_help_black_24px;
-                break;
-            case ROOK: drawable = R.drawable.vd_settings_black_24px;
-                break;
-            default:
-            case PAWN: drawable = R.drawable.ic_account_circle_black_36dp;
-                break;
-        }
-        return drawable;
     }
 
 }

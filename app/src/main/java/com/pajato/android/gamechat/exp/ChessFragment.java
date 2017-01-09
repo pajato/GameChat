@@ -29,6 +29,9 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Chess;
+import com.pajato.android.gamechat.exp.model.ChessBoard;
+import com.pajato.android.gamechat.exp.ChessPiece.ChessTeam;
+import com.pajato.android.gamechat.exp.ChessPiece.PieceType;
 import com.pajato.android.gamechat.exp.model.ChessHelper;
 import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -38,14 +41,20 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
+import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.PRIMARY;
+import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.SECONDARY;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.KING;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.PAWN;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.ROOK;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
 import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
+import static com.pajato.android.gamechat.exp.model.Chess.PRIMARY_WINS;
+import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -108,7 +117,7 @@ public class ChessFragment extends BaseGameExpFragment {
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
 
-        grid = (GridLayout) mLayout.findViewById(R.id.board);
+        grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -324,7 +333,7 @@ public class ChessFragment extends BaseGameExpFragment {
         if (model.board == null)
             startGame();
         else {
-            // TODO: handle a game reloaded from the database - startGame should work here, but it isn't tested
+            // TODO: handle a game reloaded from the database
             // startGame();
         }
    }
@@ -350,10 +359,9 @@ public class ChessFragment extends BaseGameExpFragment {
      * Set up an image button which will be a cell in the game board
      * @param index index into the board for the cell we want to add
      * @param sideSize size to use for width and height of the new item to add to the board
-     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
-     * @param pieceType type of the piece to put into a cell on the board
+     * @param board a ChessBoard object representing the game board (0->63) the piece type at that location.
      */
-    private ImageButton makeBoardButton(int index, int sideSize, Map<String, ChessPiece> board, String pieceType) {
+    private ImageButton makeBoardButton(int index, int sideSize, ChessBoard board) {
         ImageButton currentTile = new ImageButton(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
@@ -375,50 +383,47 @@ public class ChessFragment extends BaseGameExpFragment {
         boolean containsSecondaryPlayerPiece = index < 16;
         boolean containsPrimaryPlayerPiece = index > 47;
         boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
-        int team;
+        ChessTeam team;
         int color;
-
-        // TODO: use pieceType when reloading a game from the database
 
         // If the tile is meant to contain a board piece at the start of play, give it a piece.
         if (containsPiece) {
             if (containsPrimaryPlayerPiece) {
-                team = ChessHelper.PRIMARY_TEAM;
+                team = PRIMARY;
                 color = R.color.colorPrimary;
             } else {
-                team = ChessHelper.SECONDARY_TEAM;
+                team = ChessTeam.SECONDARY;
                 color = R.color.colorAccent;
             }
-            String indexTag = "index";
             switch(index) {
                 default:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.PAWN, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.PAWN));
+                    board.add(index, PAWN, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(PAWN));
                     break;
                 case 0: case 7:
                 case 56: case 63:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.ROOK, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.ROOK));
+                    board.add(index, ROOK, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(ROOK));
                     break;
                 case 1: case 6:
                 case 57: case 62:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.KNIGHT, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.KNIGHT));
+                    board.add(index, PieceType.KNIGHT, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.KNIGHT));
                     break;
                 case 2: case 5:
                 case 58: case 61:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.BISHOP, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.BISHOP));
+                    board.add(index, PieceType.BISHOP, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.BISHOP));
                     break;
                 case 3:
                 case 59:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.QUEEN, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.QUEEN));
+                    board.add(index, PieceType.QUEEN, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.QUEEN));
                     break;
                 case 4:
                 case 60:
-                    board.put(indexTag + String.valueOf(index), new ChessPiece(ChessHelper.KING, team));
-                    currentTile.setImageResource(ChessHelper.getDrawableFor(ChessHelper.KING));
+                    board.add(index, KING, team);
+                    currentTile.setImageResource(ChessPiece.getDrawableFor(KING));
             }
             currentTile.setColorFilter(ContextCompat.getColor(getContext(), color),
                     PorterDuff.Mode.SRC_ATOP);
@@ -437,7 +442,7 @@ public class ChessFragment extends BaseGameExpFragment {
         boolean isNewBoard = false;
         if (model.board == null) {
             isNewBoard = true;
-            model.board = new HashMap<>();
+            model.board = new ChessBoard();
         }
 
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
@@ -459,12 +464,10 @@ public class ChessFragment extends BaseGameExpFragment {
 
         // Go through and populate the GridLayout / board.
         for (int i = 0; i < 64; i++) {
-            String pieceType = "";
             if(!isNewBoard) {
-                pieceType = model.board.get("index" + String.valueOf(i)).getPiece();
-                if(pieceType == null) pieceType = "";
+                // TODO: What to do to read in board from DB? Maybe write a different method?!!
             }
-            ImageButton currentTile = makeBoardButton(i, pieceSideLength, model.board, pieceType);
+            ImageButton currentTile = makeBoardButton(i, pieceSideLength, model.board);
             currentTile.setOnClickListener(new ChessClick());
             grid.addView(currentTile);
         }
@@ -478,10 +481,10 @@ public class ChessFragment extends BaseGameExpFragment {
      * then on a subsequent click it removes those highlights.
      *
      * @param indexClicked the index of the tile clicked.
-     * @param board a HashMap representing a board index (0->63) to the piece type at that location.
+     * @param board a ChessBoard object
      * @return true if we've made any updates that should be written to the database; false otherwise
      */
-    private boolean showPossibleMoves(final int indexClicked, Map<String, ChessPiece> board) {
+    private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
         // If the game is over, we don't need to do anything.
         if (checkFinished(board)) {
             return false;
@@ -500,18 +503,9 @@ public class ChessFragment extends BaseGameExpFragment {
                 // If the tile clicked is one of the possible positions, and it's the correct
                 // turn/piece combination, the piece moves there.
                 if (indexClicked == possiblePosition) {
-                    boolean capturesPiece = board.containsKey("index" + String.valueOf(indexClicked));
-
-                    if (turn && board.get("index" + String.valueOf(highlightedIndex)).getTeam()
-                            == ChessHelper.PRIMARY_TEAM) {
-                        handleMovement(true, indexClicked, capturesPiece, board);
-                        hasChanged = true;
-
-                    } else if (!turn && board.get("index" + String.valueOf(highlightedIndex)).getTeam()
-                            == ChessHelper.SECONDARY_TEAM) {
-                        handleMovement(false, indexClicked, capturesPiece, board);
-                        hasChanged = true;
-                    }
+                    boolean capturesPiece = board.containsPiece(indexClicked);
+                    handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
+                    hasChanged = true;
                 }
                 handleTileBackground(possiblePosition, (ImageButton) grid.getChildAt(possiblePosition));
             }
@@ -533,39 +527,35 @@ public class ChessFragment extends BaseGameExpFragment {
     }
 
     /**
-     * Checks to see if the game is over or not by counting the number of primary / secondary pieces
-     * on the board. If there are zero of one type of pieces, then the other side wins.
-     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
+     * Checks to see if the game is over or not by counting the primary / secondary kings are
+     * on the board. If one is not on the board, then the other side wins.
+     * @param board a ChessBoard object
      *
      * @return true if the game is over, false otherwise.
      */
-    private boolean checkFinished(Map<String, ChessPiece> board) {
+    private boolean checkFinished(ChessBoard board) {
+        Chess model = getModel();
+        if (model == null) {
+            Log.e(TAG, "Null Chess data model.", new Throwable());
+        }
         // Generate win conditions. If one side runs out of pieces, the other side wins.
-        int secondaryKing = 0;
-        int primaryKing = 0;
-
-        for(int i = 0; i < 64; i++) {
-            ChessPiece tmp = board.get("index" + String.valueOf(i));
-            if (tmp != null) {
-                if (tmp.getPiece().equals(ChessHelper.KING)) {
-                    if (tmp.getTeam() == ChessHelper.PRIMARY_TEAM) {
-                        primaryKing++;
-                    } else if (tmp.getTeam() == ChessHelper.SECONDARY_TEAM) {
-                        secondaryKing++;
-                    }
-                }
-            }
-        }
-        // Verify win conditions. If one passes, return true and generate an endgame snackbar.
-        if (secondaryKing == 0) {
+        if (!board.containsSecondaryKing()) {
             NotificationManager.instance.notify(this, "Game Over! Player 1 Wins!", true);
+            if(model != null) {
+                model.state = PRIMARY_WINS;
+                model.setWinCount();
+            }
             return true;
-        } else if (primaryKing == 0) {
-            NotificationManager.instance.notify(this, "Game Over! Player 2 Wins!", true);
-            return true;
-        } else {
-            return false;
         }
+        if (!board.containsPrimaryKing()) {
+            NotificationManager.instance.notify(this, "Game Over! Player 2 Wins!", true);
+            if(model != null) {
+                model.state = SECONDARY_WINS;
+                model.setWinCount();
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -577,7 +567,7 @@ public class ChessFragment extends BaseGameExpFragment {
      * @param currentTile the tile whose color we are changing.
      */
     private void handleTileBackground(final int index, final ImageButton currentTile) {
-        // Handle the checkerboard positions.
+        // Handle the checkerboard positions (where 'checkerboard' means the background pattern).
         boolean isEven = (index % 2 == 0);
         boolean isOdd = (index % 2 == 1);
         boolean evenRowEvenColumn = ((index / 8) % 2 == 0) && isEven;
@@ -601,32 +591,32 @@ public class ChessFragment extends BaseGameExpFragment {
      * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
     private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves,
-                                   Map<String, ChessPiece> board) {
+                                   ChessBoard board) {
         if (highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
 
         Chess model = (Chess)mExperience;
         possibleMoves.clear();
-        String highlightedPieceType = board.get("index" + String.valueOf(highlightedIndex)).getPiece();
+        PieceType highlightedPieceType = board.getPieceType(highlightedIndex);
 
         switch(highlightedPieceType) {
-            case ChessHelper.PAWN:
+            case PAWN:
                 ChessHelper.getPawnThreatRange(possibleMoves, highlightedIndex, board);
                 break;
-            case ChessHelper.ROOK:
+            case ROOK:
                 ChessHelper.getRookThreatRange(possibleMoves, highlightedIndex, board);
                 break;
-            case ChessHelper.KNIGHT:
+            case KNIGHT:
                 ChessHelper.getKnightThreatRange(possibleMoves, highlightedIndex, board);
                 break;
-            case ChessHelper.BISHOP:
+            case BISHOP:
                 ChessHelper.getBishopThreatRange(possibleMoves, highlightedIndex, board);
                 break;
-            case ChessHelper.QUEEN:
+            case QUEEN:
                 ChessHelper.getQueenThreatRange(possibleMoves, highlightedIndex, board);
                 break;
-            case ChessHelper.KING:
+            case KING:
                 boolean[] castlingBooleans = { model.primaryQueenSideRookHasMoved,
                         model.primaryKingSideRookHasMoved, model.primaryKingHasMoved,
                         model.secondaryQueenSideRookHasMoved, model.secondaryKingSideRookHasMoved,
@@ -641,66 +631,54 @@ public class ChessFragment extends BaseGameExpFragment {
     /**
      * Handles the movement of the pieces.
      *
-     * @param player indicates the current player. True is primary, False is secondary.
+     * @param player indicates the current player (primary, secondary)
      * @param indexClicked the index of the clicked tile and the new position of the piece.
      * @param capturesPiece true if move captures pieces
-     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
+     * @param board a ChessBoard object
      */
-    private void handleMovement(final boolean player, final int indexClicked,
-                                final boolean capturesPiece, Map<String, ChessPiece> board) {
+    private void handleMovement(final ChessTeam player, final int indexClicked,
+                                final boolean capturesPiece, ChessBoard board) {
         // Reset the highlighted tile's image.
         mHighlightedTile.setImageResource(0);
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        ChessPiece highlightedPiece = board.get("index" + String.valueOf(highlightedIndex));
+        ChessPiece highlightedPiece = board.retrieve(highlightedIndex);
 
         // Handle capturing pieces.
         if (capturesPiece) {
             ImageButton capturedTile = (ImageButton) grid.getChildAt(indexClicked);
             capturedTile.setImageResource(0);
-            board.remove("index" + String.valueOf(highlightedIndex));
+            board.delete(highlightedIndex);
         }
 
         // Check to see if our pawn can becomes another piece and put its value into the board map.
-        if (indexClicked < 8 && highlightedPiece.getPiece().equals(ChessHelper.PAWN) &&
-                highlightedPiece.getTeam() == ChessHelper.PRIMARY_TEAM) {
-            promotePawn(indexClicked, ChessHelper.PRIMARY_TEAM);
-        } else if (indexClicked > 55 && highlightedPiece.getPiece().equals(ChessHelper.PAWN) &&
-                highlightedPiece.getTeam() == ChessHelper.SECONDARY_TEAM) {
-            promotePawn(indexClicked, ChessHelper.SECONDARY_TEAM);
+
+        if (indexClicked < 8 && highlightedPiece.isTeamPiece(PAWN, PRIMARY)) {
+            promotePawn(indexClicked, PRIMARY);
+        } else if (indexClicked > 55 && highlightedPiece.isTeamPiece(PAWN, SECONDARY)) {
+            promotePawn(indexClicked, SECONDARY);
         } else {
-            board.put("index" + String.valueOf(indexClicked), highlightedPiece);
+            board.add(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
             ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
-            newLocation.setImageResource(ChessHelper.getDrawableFor(
-                    board.get("index" + String.valueOf(indexClicked)).getPiece()));
+            newLocation.setImageResource(ChessPiece.getDrawableFor(board.getPieceType(indexClicked)));
 
             // Color the piece according to the player.
-            int color;
-            if (player) {
-                color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-            } else {
-                color = ContextCompat.getColor(getContext(), R.color.colorAccent);
+            if (player.equals(ChessTeam.PRIMARY)) {
+                newLocation.setColorFilter(ContextCompat.getColor(getContext(),
+                        R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            } else if (player.equals(ChessTeam.SECONDARY)){
+                newLocation.setColorFilter(ContextCompat.getColor(getContext(),
+                        R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
             }
-            newLocation.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
         }
 
         // Handle the movement of the Rook for Castling
         boolean castlingKingSide = indexClicked == highlightedIndex + 2;
         boolean castlingQueenSide = indexClicked == highlightedIndex - 3;
-        boolean isCastling = highlightedPiece.getPiece().equals(ChessHelper.KING) &&
+        boolean isCastling = highlightedPiece.getPiece().equals(KING) &&
                 (castlingKingSide || castlingQueenSide);
         if(isCastling) {
-            int color;
-            int team;
-            // Handle the player-dependent pieces of the castle.
-            if(player) {
-                color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-                team = ChessHelper.PRIMARY_TEAM;
-            } else {
-                color = ContextCompat.getColor(getContext(), R.color.colorAccent);
-                team = ChessHelper.SECONDARY_TEAM;
-            }
             int rookPrevIndex;
             int rookFutureIndex;
             // Handle the side-dependent pieces of the castle (king-side vs queen-side)
@@ -713,46 +691,50 @@ public class ChessFragment extends BaseGameExpFragment {
             }
 
             // Put a rook at the new rook position.
-            board.put("index" + String.valueOf(rookFutureIndex), new ChessPiece(ChessHelper.ROOK, team));
+            board.add(rookFutureIndex, ROOK, player);
             ImageButton futureRook = (ImageButton) grid.getChildAt(rookFutureIndex);
-            futureRook.setImageResource(ChessHelper.getDrawableFor(ChessHelper.ROOK));
-            futureRook.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+
+            // Handle the player-dependent pieces of the castle (color)
+            futureRook.setImageResource(ChessPiece.getDrawableFor(ROOK));
+            if (player.equals(ChessTeam.PRIMARY)) {
+                futureRook.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
+                        PorterDuff.Mode.SRC_ATOP);
+            } else if (player.equals(ChessTeam.SECONDARY)) {
+                futureRook.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
+                        PorterDuff.Mode.SRC_ATOP);
+            }
 
             // Get rid of the old rook.
             ImageButton previousRook = (ImageButton) grid.getChildAt(rookPrevIndex);
             previousRook.setImageResource(0);
-            board.remove("index" + String.valueOf(rookPrevIndex));
+            board.delete(rookPrevIndex);
         }
 
         // Handle the Castling Booleans.
-        ChessPiece currentPiece = board.get("index" + String.valueOf(highlightedIndex));
+        ChessPiece currentPiece = board.retrieve(highlightedIndex);
         Chess model = (Chess)mExperience;
         if (currentPiece != null) {
-            if (currentPiece.getPiece().equals(ChessHelper.KING)) {
-                if (currentPiece.getTeam() == ChessHelper.PRIMARY_TEAM) {
-                    model.primaryKingHasMoved = true;
-                } else {
-                    model.secondaryKingHasMoved = true;
+            if (currentPiece.isTeamPiece(KING, PRIMARY)) {
+                model.primaryKingHasMoved = true;
+            } else if (currentPiece.isTeamPiece(KING, SECONDARY)) {
+                model.secondaryKingHasMoved = true;
+            } else if (currentPiece.isTeamPiece(ROOK, PRIMARY)) {
+                if (highlightedIndex == 0) {
+                    model.primaryQueenSideRookHasMoved = true;
+                } else if (highlightedIndex == 7) {
+                    model.primaryKingSideRookHasMoved = true;
                 }
-            } else if (currentPiece.getPiece().equals(ChessHelper.ROOK)) {
-                if (currentPiece.getTeam() == ChessHelper.PRIMARY_TEAM) {
-                    if (highlightedIndex == 0) {
-                        model.primaryQueenSideRookHasMoved = true;
-                    } else if (highlightedIndex == 7) {
-                        model.primaryKingSideRookHasMoved = true;
-                    }
-                } else {
-                    if (highlightedIndex == 56) {
-                        model.secondaryQueenSideRookHasMoved = true;
-                    } else if (highlightedIndex == 63) {
-                        model.secondaryKingSideRookHasMoved = true;
-                    }
+            } else if (currentPiece.isTeamPiece(ROOK, SECONDARY)) {
+                if (highlightedIndex == 56) {
+                    model.secondaryQueenSideRookHasMoved = true;
+                } else if (highlightedIndex == 63) {
+                    model.secondaryKingSideRookHasMoved = true;
                 }
             }
         }
 
         // Delete the piece's previous location and end the turn.
-        board.remove("index" + String.valueOf(highlightedIndex));
+        board.delete(highlightedIndex);
         handleTurnChange(true);
         checkFinished(board);
     }
@@ -792,16 +774,16 @@ public class ChessFragment extends BaseGameExpFragment {
      * @param position the position of the pawn when it is promoted.
      * @param team the team the pawn belongs to.
      */
-    private void promotePawn(final int position, final int team) {
+    private void promotePawn(final int position, final ChessTeam team) {
         // Generate an AlertDialog via the AlertDialog Builder
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setTitle(getString(R.string.PromotePawnMsg))
-                .setIcon(ChessHelper.getDrawableFor(ChessHelper.PAWN))
+                .setIcon(ChessPiece.getDrawableFor(PieceType.PAWN))
                 .setView(R.layout.pawn_dialog);
         AlertDialog pawnChooser = alertDialogBuilder.create();
         pawnChooser.show();
 
-        int color = (team == ChessHelper.PRIMARY_TEAM) ? ContextCompat.getColor(getContext(),
+        int color = (team == PRIMARY) ? ContextCompat.getColor(getContext(),
                 R.color.colorPrimary) : ContextCompat.getColor(getContext(), R.color.colorAccent);
 
         // Change the Dialog's Icon color.
@@ -847,9 +829,9 @@ public class ChessFragment extends BaseGameExpFragment {
     private class Promoter implements View.OnClickListener {
         AlertDialog mDialog;
         int position;
-        int team;
+        ChessTeam team;
 
-        Promoter(final int indexClicked, final int teamNumber, AlertDialog dialog) {
+        Promoter(final int indexClicked, final ChessTeam teamNumber, AlertDialog dialog) {
             position = indexClicked;
             team = teamNumber;
             mDialog = dialog;
@@ -857,33 +839,32 @@ public class ChessFragment extends BaseGameExpFragment {
 
         @Override public void onClick(final View v) {
             int id = v.getId();
-            String pieceType;
+            PieceType pieceType;
             switch (id) {
                 default:
                 case R.id.queen_icon:
                 case R.id.queen_text:
-                    pieceType = ChessHelper.QUEEN;
+                    pieceType = PieceType.QUEEN;
                     break;
                 case R.id.bishop_icon:
                 case R.id.bishop_text:
-                    pieceType = ChessHelper.BISHOP;
+                    pieceType = PieceType.BISHOP;
                     break;
                 case R.id.knight_icon:
                 case R.id.knight_text:
-                    pieceType = ChessHelper.KNIGHT;
+                    pieceType = PieceType.KNIGHT;
                     break;
                 case R.id.rook_icon:
                 case R.id.rook_text:
-                    pieceType = ChessHelper.ROOK;
+                    pieceType = PieceType.ROOK;
                     break;
             }
 
-            Map<String, ChessPiece> board = ((Chess)mExperience).board;
-            board.put("index" + String.valueOf(position), new ChessPiece(pieceType, team));
+            ChessBoard board = ((Chess)mExperience).board;
+            board.add(position, pieceType, team);
             ImageButton promotedPieceTile = (ImageButton) grid.getChildAt(position);
-            promotedPieceTile.setImageResource(ChessHelper.getDrawableFor(pieceType));
-            boolean teamColor = team == ChessHelper.PRIMARY_TEAM;
-            int color = teamColor ? R.color.colorPrimary: R.color.colorAccent;
+            promotedPieceTile.setImageResource(ChessPiece.getDrawableFor(pieceType));
+            int color = team == ChessTeam.PRIMARY ? R.color.colorPrimary: R.color.colorAccent;
             promotedPieceTile.setColorFilter(ContextCompat.getColor(getContext(), color),
                     PorterDuff.Mode.SRC_ATOP);
 
@@ -897,13 +878,13 @@ public class ChessFragment extends BaseGameExpFragment {
     private class ChessClick implements View.OnClickListener {
         @Override public void onClick(final View v) {
             int index = Integer.parseInt((String)v.getTag());
-            Map<String, ChessPiece> board = ((Chess) mExperience).board;
+            ChessBoard board = ((Chess) mExperience).board;
             boolean changedBoard = false;
             if (mHighlightedTile != null) {
                 changedBoard = showPossibleMoves(index, board);
                 mHighlightedTile = null;
             } else {
-                if (board.get("index" + String.valueOf(index)) != null) {
+                if (board.retrieve(index) != null) {
                     mHighlightedTile = (ImageButton) v;
                     changedBoard = showPossibleMoves(index, board);
                 }

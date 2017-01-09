@@ -29,7 +29,7 @@ public class Player {
     /** The player's symbol (either X or O for tictactoe - not used for chess or checkers). */
     public String symbol;
 
-    /** The player's team (e.g., primary or secondary for checkers) */
+    /** The player's team (e.g., primary or secondary for checkers and chess) */
     public String team;
 
     /** The player's win count. */
