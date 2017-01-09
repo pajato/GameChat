@@ -111,8 +111,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     /** Return either a null placeholder key value or a sentinel value as the experience key. */
     protected String getExperienceKey() {
         // Determine if there is a signed in account.  If so use the null placeholder.
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (accountId != null) return null;
+        if (!AccountManager.instance.hasAccount()) return null;
 
         // There is no signed in User.  Return one of the two sentinel values associated with being
         // either signed out or without access to a network.
@@ -208,7 +207,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             }
         } else
             // Create a new experience.
-            if(this instanceof BaseGameExpFragment) {
+            if (this instanceof BaseGameExpFragment) {
                 ((BaseGameExpFragment)this).createExperience(context, dispatcher);
             }
     }

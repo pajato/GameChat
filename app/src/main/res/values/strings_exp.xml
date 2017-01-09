@@ -21,6 +21,7 @@
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>
     <string name="TieMessage">Tie game!</string>
+    <string name="StalemateMessage">Stalemate!</string>
     <string name="TieMessageNotification">Well done players</string>
     <string name="WinMessageFormat">%1$s Wins!</string>
     <string name="WinMessageNotificationFormat">Congratulations %s, you win</string>
@@ -41,4 +42,5 @@
     <string name="xValue">X</string>
     <string name="primaryTeam">primary</string>
     <string name="secondaryTeam">secondary</string>
+    <string name="PromotePawnMsg">Promote Your Pawn:</string>
 </resources>
