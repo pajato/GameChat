@@ -38,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.pajato.android.gamechat.R;
 
 import java.util.Arrays;
 
@@ -129,6 +130,8 @@ public class IntroActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
                 new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
         // Disable Smart Lock for development purposes -- to ensure logging in processes work correctly.
         intentBuilder.setIsSmartLockEnabled(false);
 

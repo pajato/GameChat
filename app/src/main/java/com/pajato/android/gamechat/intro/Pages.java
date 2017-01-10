@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.intro;
 
+import com.pajato.android.gamechat.R;
+
 /**
  * Provide an enumeration of panels used in the app.
  */

@@ -313,6 +313,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
                 new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
         ));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
 
         // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
         intentBuilder.setIsSmartLockEnabled(false);
@@ -350,6 +352,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
                 new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
 
         // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
         intentBuilder.setIsSmartLockEnabled(false);
