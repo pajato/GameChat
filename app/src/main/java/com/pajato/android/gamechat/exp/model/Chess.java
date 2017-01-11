@@ -28,7 +28,7 @@ public class Chess implements Experience {
     public ChessBoard board;
 
     /** The creation timestamp. */
-    private long createTime;
+    public long createTime;
 
     /** The group push key. */
     public String groupKey;
@@ -40,7 +40,7 @@ public class Chess implements Experience {
     public int level;
 
     /** The last modification timestamp. */
-    private long modTime;
+    public long modTime;
 
     /** The experience display name. */
     public String name;
@@ -70,14 +70,19 @@ public class Chess implements Experience {
 
     /** Remember that the primary team queen side rook has moved */
     public boolean primaryQueenSideRookHasMoved;
+
     /** Remember that the primary team king side rook has moved */
     public boolean primaryKingSideRookHasMoved;
+
     /** Remember that the primary team king has moved */
     public boolean primaryKingHasMoved;
+
     /** Remember that the secondary team queen side rook has moved */
     public boolean secondaryQueenSideRookHasMoved;
+
     /** Remember that the secondary team king side rook has moved */
     public boolean secondaryKingSideRookHasMoved;
+
     /** Remember that the secondary team king has moved */
     public boolean secondaryKingHasMoved;
 
