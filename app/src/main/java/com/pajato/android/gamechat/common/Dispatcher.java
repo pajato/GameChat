@@ -36,7 +36,7 @@ public class Dispatcher<T, O> {
     /** The experience or message key. */
     public String key;
 
-    /** The message or experience profile. */
+    /** The message or experience. */
     public O payload;
 
     /** A list of messages or experience profiles. */
@@ -86,14 +86,14 @@ public class Dispatcher<T, O> {
         payload = list.size() > 0 ? list.get(0) : null;
     }
 
-    /** Build an instance given a type and a list of message or experience profiles. */
+    /** Build an instance given a type and a message or experience list. */
     public Dispatcher(final T type, List<O> list) {
         this.type = type;
         this.list = list;
         payload = list.size() > 0 ? list.get(0) : null;
     }
 
-    /** Build an instance given a fragment type and a message or experience profile. */
+    /** Build an instance given a fragment type and a message or experience. */
     public Dispatcher(final T type, O payload) {
         this.type = type;
         this.payload = payload;

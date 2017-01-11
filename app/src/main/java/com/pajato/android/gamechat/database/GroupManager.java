@@ -83,12 +83,11 @@ public enum GroupManager {
     /** Persist a given group object using the given key. */
     public void createGroupProfile(final Group group) {
         // Ensure that a valid group key exists.  Abort quietly (for now) if not.
-        // TODO: do something about a null group key.
         if (group.key == null) return;
         String profilePath = String.format(Locale.US, GROUP_PROFILE_PATH, group.key);
         group.createTime = new Date().getTime();
         DBUtils.instance.updateChildren(profilePath, group.toMap());
-        setGroupProfileWatcher(group.key);
+        setWatcher(group.key);
     }
 
     /** Return a room push key to use with a subsequent room object persistence. */
@@ -138,7 +137,7 @@ public enum GroupManager {
         // Return the group if it has been loaded.  Set a watcher to load it if not.
         Group result = groupMap.get(groupKey);
         if (result != null) return result;
-        setGroupProfileWatcher(groupKey);
+        setWatcher(groupKey);
         return null;
     }
 
@@ -149,16 +148,19 @@ public enum GroupManager {
 
     /** Handle a account change event by setting up or clearing variables. */
     @Subscribe public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
-        // Determine if a User has been authenticated.  If so, do nothing, otherwise clear the
-        // message list for the logged out User.
+        // Determine if a User has been authenticated.  If so, setup the group profile change
+        // watchers on all groups the User has joined.
         if (event.account != null) {
-            // Set up watchers on the group profile this User has access to.
-            if (event.account.groupKey != null) setGroupProfileWatcher(event.account.groupKey);
-            for (String groupKey : event.account.joinList) setGroupProfileWatcher(groupKey);
+            // Set up watchers on the User's private group profile and all groups the User has
+            // joined.
+            if (event.account.groupKey != null)
+                setWatcher(event.account.groupKey);
+            for (String groupKey : event.account.joinList)
+                setWatcher(groupKey);
             return;
         }
 
-        // There is no current User.  Clear the data.
+        // There is no current User.  Clear the cached data, if any.
         mDateHeaderTypeToGroupListMap.clear();
         groupMap.clear();
         mGroupToLastNewMessageMap.clear();
@@ -166,13 +168,12 @@ public enum GroupManager {
 
     /** Handle a group profile change by updating the map. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // Ensure that the group profile is cached and set up watchers for each member and room in
-        // the group.
+        // Ensure that the group profile is cacheable.  Abort if not, otherwise cache the group
+        // object and access all the member accounts in the group in order to communicate with them.
+        String groupKey = event.key;
+        if (groupKey == null || event.group == null) return;
         groupMap.put(event.key, event.group);
-        for (String key : event.group.roomList)
-            RoomManager.instance.setRoomProfileWatcher(event.group.key, key);
-        for (String key : event.group.memberList)
-            MemberManager.instance.setMemberWatcher(event.group.key, key);
+        for (String key : event.group.memberList) MemberManager.instance.setWatcher(groupKey, key);
     }
 
     /** Return a list of joined group push keys based on the given item. */
@@ -201,7 +202,7 @@ public enum GroupManager {
     // Private instance methods.
 
     /** Setup a database listener for the group profile. */
-    private void setGroupProfileWatcher(final String groupKey) {
+    private void setWatcher(final String groupKey) {
         // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
         String path = GroupManager.instance.getGroupProfilePath(groupKey);
         String name = DBUtils.instance.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);

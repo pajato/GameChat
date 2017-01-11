@@ -47,9 +47,6 @@ import java.util.Map;
     /** The creation timestamp. */
     public long createTime;
 
-    /** The list of experience profiles.  One exists for each experience. */
-    //@Exclude public List<ExpProfile> expProfileList;
-
     /** The parent group push key. */
     public String groupKey;
 

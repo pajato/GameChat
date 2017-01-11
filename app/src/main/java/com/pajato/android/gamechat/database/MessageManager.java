@@ -153,7 +153,7 @@ public enum MessageManager {
     }
 
     /** Setup a Firebase child event listener for the messages in the given joined room. */
-    public void setMessageWatcher(final String groupKey, final String roomKey) {
+    public void setWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
         String name = DBUtils.instance.getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;

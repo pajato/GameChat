@@ -34,7 +34,6 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -74,8 +73,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     private static final String FORMAT_WITH_BUNDLE =
             "Event: %s; Fragment: %s; Fragment Manager: %s; Bundle: %s.";
 
-    // Package private instance variables.
-
+    // Private instance variables.
 
     /** The experience being enjoyed. */
     Experience mExperience;
@@ -84,6 +82,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Provide a default, no args constructor. */
     public BaseExperienceFragment() {}
+
+    // Public instance methods.
 
     /** Handle the player 2 control click. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -107,6 +107,16 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     // Protected instance methods.
+
+    /** Provide a base implementation that will result in no players, i.e. an error. */
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
+        return null;
+    }
+
+    /** Provide a base implementation that does nothing. */
+    protected void createExperience(final Context context, final List<Account> playerAccounts) {
+        // Very quietly do nothing.
+    }
 
     /** Return either a null placeholder key value or a sentinel value as the experience key. */
     protected String getExperienceKey() {
@@ -186,30 +196,27 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         bar.setSubtitle(subtitle);
     }
 
-    /** Provide a default implementation for setting up an experience. */
+    /**
+     * Provide a default implementation for setting up an experience.  There are two scenarios
+     * where an experience fragment needs to be set up.  First, when a User asks to start a game,
+     * like tictactoe or checkers, and a game of that type has been cached or needs to be created.
+     * Second, when at startup, it is discoovered that there is a single experience to be shown.
+     */
     protected void setupExperience(final Context context,
-                                   final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+                                   final Dispatcher<ExpFragmentType, Experience> dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
-        if (dispatcher == null || dispatcher.type == null) return;
+        if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
+            return;
 
-        // Determine if the fragment type does not require an experience. Abort if not.
-        ExpType expType = dispatcher.type.expType;
-        if (expType == null) return;
-
-        // Determine if the dispatcher has a single experience profile.
-        if (dispatcher.payload != null) {
-            // It does.  Either get the cached experience or fetch it from the database.
-            Experience exp = ExperienceManager.instance.experienceMap.get(dispatcher.key);
-            if (exp == null) {
-                // Fetch the experience from the database.
-                ExperienceManager.instance.setExperienceWatcher(dispatcher.payload);
-            }
-        } else
-            // Create a new experience.
-            if (this instanceof BaseGameExpFragment) {
-                ((BaseGameExpFragment)this).createExperience(context, dispatcher);
-            }
+        // At this point there are three choices: 1) the dispatcher contains an experience, 2) the
+        // dispatcher contains an experience key, or 3) the dispatcher contains the type of
+        // experience which needs to be created using the given context.  experience to use with the
+        // fragment being created.
+        mExperience = dispatcher.payload != null
+                ? dispatcher.payload : ExperienceManager.instance.experienceMap.get(dispatcher.key);
+        if (mExperience == null)
+            createExperience(context, getPlayers(dispatcher));
     }
 
     // Private instance methods.

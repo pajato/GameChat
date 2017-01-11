@@ -26,12 +26,11 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.exp.model.Chess;
-import com.pajato.android.gamechat.exp.model.ChessBoard;
 import com.pajato.android.gamechat.exp.ChessPiece.ChessTeam;
 import com.pajato.android.gamechat.exp.ChessPiece.PieceType;
+import com.pajato.android.gamechat.exp.model.Chess;
+import com.pajato.android.gamechat.exp.model.ChessBoard;
 import com.pajato.android.gamechat.exp.model.ChessHelper;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.ProgressManager;
 
@@ -64,7 +63,7 @@ import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
  *
  * @author Bryan Scott
  */
-public class ChessFragment extends BaseGameExpFragment {
+public class ChessFragment extends BaseExperienceFragment {
 
     // Chess Management Objects
     private TextView mHighlightedTile;
@@ -83,8 +82,7 @@ public class ChessFragment extends BaseGameExpFragment {
     // Public instance methods.
 
     /** Handle a FAM or Snackbar Chess click event. */
-    @Subscribe
-    public void onClick(final TagClickEvent event) {
+    @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
         if (GameManager.instance.getCurrent() != ExpType.chess.ordinal()) return;
 
@@ -101,10 +99,9 @@ public class ChessFragment extends BaseGameExpFragment {
 
     /** Handle an experience posting event to see if this is a chess experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
-        // Check the payload to see if this is not chess.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.chess) return;
-
-        // The experience is a chess experience.  Start the game.
+        // Check the payload to see if this is not chess.  Abort if not, otherwise resume the game.
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.chess)
+            return;
         mExperience = event.experience;
         resume();
     }
@@ -142,6 +139,7 @@ public class ChessFragment extends BaseGameExpFragment {
     }
 
     /** Return a default, partially populated, Chess experience. */
+    @Override
     protected void createExperience(final Context context, final List<Account> playerAccounts) {
         // Setup the default key, players, and name.
         String key = getExperienceKey();
@@ -182,8 +180,9 @@ public class ChessFragment extends BaseGameExpFragment {
         }
     }
 
-    /** Return a possibly null list of player information for a chess experience (always 2 players) */
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    /** Return a possibly null list of chess player information. */
+    @Override
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -355,12 +354,7 @@ public class ChessFragment extends BaseGameExpFragment {
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final Chess model) {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
-        if (model.board == null)
-            startGame();
-        else {
-            // TODO: handle a game reloaded from the database
-            // startGame();
-        }
+        if (model.board == null) startGame();
    }
 
     /** Update the UI using the current experience state from the database. */
@@ -413,7 +407,6 @@ public class ChessFragment extends BaseGameExpFragment {
         boolean containsPrimaryPlayerPiece = index > 47;
         boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
         ChessTeam team;
-        int color;
 
         // If the tile is meant to contain a board piece at the start of play, give it a piece.
         if (containsPiece) {
@@ -459,19 +452,12 @@ public class ChessFragment extends BaseGameExpFragment {
         return currentTile;
     }
 
-    /**
-     * Handles starting game of chess, resetting the board either for a new game or a restart
-     * after loading a game board from the database.
-     */
+    /** Handle a new chess game by resetting the board on a new game or a database reload. */
     private void startGame() {
+        // Initialize the new board state.
         grid.removeAllViews();
         Chess model = (Chess)mExperience;
-        boolean isNewBoard = false;
-        if (model.board == null) {
-            isNewBoard = true;
-            model.board = new ChessBoard();
-        }
-
+        if (model.board == null) model.board = new ChessBoard();
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         if (winner != null) winner.setText("");
 
@@ -499,9 +485,6 @@ public class ChessFragment extends BaseGameExpFragment {
 
         // Go through and populate the GridLayout / board.
         for (int i = 0; i < 64; i++) {
-            if(!isNewBoard) {
-                // TODO: What to do to read in board from DB? Maybe write a different method?!!
-            }
             TextView currentTile = makeBoardButton(i, pieceSideLength, model.board);
             currentTile.setOnClickListener(new ChessClick());
             grid.addView(currentTile);
@@ -520,13 +503,10 @@ public class ChessFragment extends BaseGameExpFragment {
      * @return true if we've made any updates that should be written to the database; false otherwise
      */
     private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
-        // If the game is over, we don't need to do anything.
-        if (checkFinished(board)) {
-            return false;
-        }
-
+        // If the game is over, we don't need to do anything, so return.  Otheriwse find the
+        // possible moves for the selected piece.
+        if (checkFinished(board)) return false;
         boolean hasChanged = false;
-        boolean turn = ((Chess)mExperience).turn;
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         findPossibleMoves(highlightedIndex, mPossibleMoves, board);
 

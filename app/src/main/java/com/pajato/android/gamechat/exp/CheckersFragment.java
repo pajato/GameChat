@@ -16,24 +16,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Checkers;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +54,7 @@ import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
  *
  * @author Bryan Scott
  */
-public class CheckersFragment extends BaseGameExpFragment {
+public class CheckersFragment extends BaseExperienceFragment {
     // We refer to the two sides as primary and secondary to differentiate between the two players.
     // (Primary pieces belong to player1, secondary belong to player 2).
     public static final String PRIMARY_PIECE = "pp";
@@ -100,10 +98,10 @@ public class CheckersFragment extends BaseGameExpFragment {
 
     /** Handle an experience posting event to see if this is a checkers experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
-        // Check the payload to see if this is not checkers.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.checkers) return;
-
-        // The experience is a checkers experience.  Start the game.
+        // Check the payload to see if this is not checkers.  Ignore the event if not, otherwise
+        // resume the game.
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.checkers)
+            return;
         mExperience = event.experience;
         resume();
     }
@@ -181,7 +179,7 @@ public class CheckersFragment extends BaseGameExpFragment {
     }
 
     /** Return a possibly null list of player information for a checkers experience (always 2 players) */
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -355,10 +353,6 @@ public class CheckersFragment extends BaseGameExpFragment {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
         if (model.board == null)
             startGame();
-        else {
-            // TODO: handle a game reloaded from the database - startGame should work here, but it isn't tested
-            // startGame();
-        }
     }
 
     /** Update the UI using the current experience state from the database. */
@@ -789,7 +783,9 @@ public class CheckersFragment extends BaseGameExpFragment {
             int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
             TextView capturedTile = (TextView) grid.getChildAt(pieceCapturedIndex);
             capturedTile.setText(" " );
-            board.remove(capturedTile.getTag());
+            String key = (String) capturedTile.getTag();
+            if (board.containsKey(key))
+                board.remove(capturedTile.getTag());
 
             // If there are no more jumps, change turns. If there is at least one jump left, don't.
             ArrayList<Integer> possibleJumps = new ArrayList<>();

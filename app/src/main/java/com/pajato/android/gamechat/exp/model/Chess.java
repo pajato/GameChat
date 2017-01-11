@@ -12,10 +12,14 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.exp.ExpType.chess;
 
-/** Provide a Firebase model class for a chess game experience. */
-@IgnoreExtraProperties
-public class Chess implements Experience {
+/**
+ *  Provide a Firebase model class for a chess game experience.
+ *
+ *  Created by sscott on 12/30/16.
+ */
+@IgnoreExtraProperties public class Chess implements Experience {
 
+    // State values.
     public final static int ACTIVE = 0;
     public final static int PRIMARY_WINS = 1;
     public final static int SECONDARY_WINS = 2;
@@ -61,7 +65,7 @@ public class Chess implements Experience {
     public boolean turn;
 
     /** The experience type ordinal value. */
-    public int type = -1;
+    public String type;
 
     /** The experience icon url. */
     public String url;
@@ -104,7 +108,7 @@ public class Chess implements Experience {
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = chess.ordinal();
+        type = chess.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
         primaryQueenSideRookHasMoved = false;
         primaryKingSideRookHasMoved = false;
@@ -148,11 +152,8 @@ public class Chess implements Experience {
     }
 
     /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude
-    @Override public ExpType getExperienceType() {
-        if (type < 0 || type >= ExpType.values().length) return null;
-
-        return ExpType.values()[type];
+    @Exclude @Override public ExpType getExperienceType() {
+        return ExpType.valueOf(type);
     }
 
     /** Return the group push key. */
@@ -214,5 +215,4 @@ public class Chess implements Experience {
                 return null;
         }
     }
-
 }

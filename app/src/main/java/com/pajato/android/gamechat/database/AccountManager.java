@@ -279,7 +279,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Determine if this is a relevant registration event.
         if (!mRegistrationClassNameMap.containsKey(event.name)) return;
 
-        // The event is of interest. Update the map and determine if Firebase needs to be enabled or disabled.
+        // The event is of interest. Update the map and determine if Firebase needs to be enabled or
+        // disabled.  When all of the values in the registration class name map are true, the app is
+        // ready for the account manager to be registered.  When any of the values are false, the
+        // account manager will be unregistered.
         mRegistrationClassNameMap.put(event.name, event.changeType == REGISTERED);
         boolean enable = true;
         for (Boolean value : mRegistrationClassNameMap.values()) {

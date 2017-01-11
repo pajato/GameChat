@@ -38,7 +38,6 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
@@ -75,7 +74,7 @@ import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
  *
  * @author Bryan Scott
  */
-public class TTTFragment extends BaseGameExpFragment implements View.OnClickListener {
+public class TTTFragment extends BaseExperienceFragment implements View.OnClickListener {
 
     // Public constants.
 
@@ -230,7 +229,8 @@ public class TTTFragment extends BaseGameExpFragment implements View.OnClickList
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
+    @Override
+    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
