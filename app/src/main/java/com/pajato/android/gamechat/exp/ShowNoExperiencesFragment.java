@@ -20,7 +20,7 @@ package com.pajato.android.gamechat.exp;
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -38,7 +38,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
     }
 
     /** Handle an experience profile list change event. */
-    @Subscribe public void onExpProfileListChangeEvent(ExpProfileListChangeEvent event) {
+    @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {
         switch (event.changeType) {
             case CHANGED:
             case NEW:

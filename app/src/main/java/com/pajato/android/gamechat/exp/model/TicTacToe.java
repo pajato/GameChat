@@ -83,8 +83,8 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     /** The current turn. */
     public boolean turn;
 
-    /** The experience type ordinal value. */
-    public int type = -1;
+    /** The experience type name. */
+    public String type;
 
     /** The experience icon url. */
     public String url;
@@ -107,7 +107,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = ttt.ordinal();
+        type = ttt.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 
@@ -138,9 +138,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
     /** Return the fragment type value or null if no such fragment type exists. */
     @Exclude @Override public ExpType getExperienceType() {
-        if (type < 0 || type >= ExpType.values().length) return null;
-
-        return ExpType.values()[type];
+        return ExpType.valueOf(type);
     }
 
     /** Return the group push key. */
@@ -212,5 +210,4 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
                 return null;
         }
     }
-
 }

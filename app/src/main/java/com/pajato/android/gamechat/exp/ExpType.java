@@ -18,6 +18,9 @@
 package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.exp.model.Checkers;
+import com.pajato.android.gamechat.exp.model.Chess;
+import com.pajato.android.gamechat.exp.model.TicTacToe;
 
 /**
  * The games enum values associate games, modes, fragments and resources in a very flexible, concise
@@ -26,14 +29,14 @@ import com.pajato.android.gamechat.R;
  * @author Paul Michael Reilly
  */
 public enum ExpType {
-    checkers(R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
-    chess(R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
-    ttt(R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
+    checkers(Checkers.class, R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
+    chess(Chess.class, R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
+    ttt(TicTacToe.class, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
 
     // Instance variables.
 
-    /** The fragment type handling this experience type. */
-    ExpFragmentType mFragmentType;
+    /** The concrete experience (model) class. */
+    public Class experienceClass;
 
     /** The primary player index. */
     int mPrimaryIndex;
@@ -50,7 +53,9 @@ public enum ExpType {
     // Constructor.
 
     /** Build an instance given the online, local and computer opponent fragment indexes. */
-    ExpType(final int iconId, final int titleId, final int primary, final int secondary) {
+    ExpType(final Class experienceClass, final int iconId, final int titleId, final int primary,
+            final int secondary) {
+        this.experienceClass = experienceClass;
         mIconResId = iconId;
         mTitleResId = titleId;
         mPrimaryIndex = primary;

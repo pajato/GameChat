@@ -24,16 +24,19 @@ import com.pajato.android.gamechat.exp.Experience;
  *
  * @author Paul Michael Reilly
  */
-public class ExperienceChangeEvent {
+public class ExperienceChangeEvent extends BaseChangeEvent {
 
     // Public instance variables.
 
     /** The experience subject to the change. */
     public Experience experience;
 
-    /** Build the event with the given experience. */
-    public ExperienceChangeEvent(final Experience experience) {
-        this.experience = experience;
-    }
+    /** The change type. */
+    public int changeType;
 
+    /** Build the event with the given experience and the change type. */
+    public ExperienceChangeEvent(final Experience experience, final int changeType) {
+        this.experience = experience;
+        this.changeType = changeType;
+    }
 }
