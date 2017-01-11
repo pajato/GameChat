@@ -28,7 +28,7 @@ public class Checkers implements Experience {
     public Map<String, String> board;
 
     /** The creation timestamp. */
-    private long createTime;
+    public long createTime;
 
     /** The group push key. */
     public String groupKey;
@@ -40,7 +40,7 @@ public class Checkers implements Experience {
     public int level;
 
     /** The last modification timestamp. */
-    private long modTime;
+    public long modTime;
 
     /** The experience display name. */
     public String name;
