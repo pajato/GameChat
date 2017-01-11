@@ -33,6 +33,8 @@ import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -144,8 +146,10 @@ public class CheckersFragment extends BaseGameExpFragment {
         List<Player> players = getDefaultPlayers(context, playerAccounts);
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
+
         long tstamp = new Date().getTime();
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, tstamp);
+        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
+                SimpleDateFormat.getDateTimeInstance().format(tstamp));
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
