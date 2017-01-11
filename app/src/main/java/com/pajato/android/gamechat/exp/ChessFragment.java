@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.GridLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,7 +23,6 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -44,11 +42,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.PRIMARY;
 import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.SECONDARY;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.BISHOP;
 import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.KING;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.KNIGHT;
 import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.PAWN;
+import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.QUEEN;
 import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.ROOK;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
@@ -64,7 +66,7 @@ import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
 public class ChessFragment extends BaseGameExpFragment {
 
     // Chess Management Objects
-    private ImageButton mHighlightedTile;
+    private TextView mHighlightedTile;
     private boolean mIsHighlighted = false;
     private ArrayList<Integer> mPossibleMoves;
 
@@ -381,8 +383,8 @@ public class ChessFragment extends BaseGameExpFragment {
      * @param sideSize size to use for width and height of the new item to add to the board
      * @param board a ChessBoard object representing the game board (0->63) the piece type at that location.
      */
-    private ImageButton makeBoardButton(int index, int sideSize, ChessBoard board) {
-        ImageButton currentTile = new ImageButton(getContext());
+    private TextView makeBoardButton(int index, int sideSize, ChessBoard board) {
+        TextView currentTile = new TextView(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
         GridLayout.LayoutParams param = new GridLayout.LayoutParams();
@@ -397,6 +399,10 @@ public class ChessFragment extends BaseGameExpFragment {
         // Set up the tile-specific information.
         currentTile.setLayoutParams(param);
         currentTile.setTag(String.valueOf(index));
+        float sp = sideSize / getResources().getDisplayMetrics().scaledDensity;
+        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.8));
+        currentTile.setGravity(Gravity.CENTER);
+        currentTile.setText(" ");
         handleTileBackground(index, currentTile);
 
         // Handle the chess starting piece positions.
@@ -410,43 +416,41 @@ public class ChessFragment extends BaseGameExpFragment {
         if (containsPiece) {
             if (containsPrimaryPlayerPiece) {
                 team = PRIMARY;
-                color = R.color.colorPrimary;
+                currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             } else {
                 team = ChessTeam.SECONDARY;
-                color = R.color.colorAccent;
+                currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             }
             switch(index) {
                 default:
                     board.add(index, PAWN, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(PAWN));
+                    currentTile.setText(ChessPiece.getUnicodeText(PAWN));
                     break;
                 case 0: case 7:
                 case 56: case 63:
                     board.add(index, ROOK, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(ROOK));
+                    currentTile.setText(ChessPiece.getUnicodeText(ROOK));
                     break;
                 case 1: case 6:
                 case 57: case 62:
-                    board.add(index, PieceType.KNIGHT, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.KNIGHT));
+                    board.add(index, KNIGHT, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(KNIGHT));
                     break;
                 case 2: case 5:
                 case 58: case 61:
-                    board.add(index, PieceType.BISHOP, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.BISHOP));
+                    board.add(index, BISHOP, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(BISHOP));
                     break;
                 case 3:
                 case 59:
-                    board.add(index, PieceType.QUEEN, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(PieceType.QUEEN));
+                    board.add(index, QUEEN, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(QUEEN));
                     break;
                 case 4:
                 case 60:
                     board.add(index, KING, team);
-                    currentTile.setImageResource(ChessPiece.getDrawableFor(KING));
+                    currentTile.setText(ChessPiece.getUnicodeText(KING));
             }
-            currentTile.setColorFilter(ContextCompat.getColor(getContext(), color),
-                    PorterDuff.Mode.SRC_ATOP);
         }
 
         return currentTile;
@@ -478,16 +482,24 @@ public class ChessFragment extends BaseGameExpFragment {
 
         mPossibleMoves = new ArrayList<>();
 
+        // Take the smaller of width/height to adjust for tablet (landscape) view and adjust for
+        // the player controls and FAB. TODO: the fab currently returns "top" value of 0...
         int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
-        Log.d(TAG, "screen width=" + screenWidth);
-        int pieceSideLength = screenWidth / 8;
+        ImageView v = (ImageView) getActivity().findViewById(R.id.player_1_icon);
+        int screenHeight = getActivity().findViewById(R.id.gameFragmentContainer).getHeight()
+                - v.getBottom() - getActivity().findViewById(R.id.gameFab).getTop();
+
+        int sideSize = Math.min(screenWidth, screenHeight);
+        Log.d(TAG, "screen width=" + screenWidth + ", screen height=" + screenHeight);
+        int pieceSideLength = sideSize / 8;
+        Log.d(TAG, "using piece side length=" + pieceSideLength);
 
         // Go through and populate the GridLayout / board.
         for (int i = 0; i < 64; i++) {
             if(!isNewBoard) {
                 // TODO: What to do to read in board from DB? Maybe write a different method?!!
             }
-            ImageButton currentTile = makeBoardButton(i, pieceSideLength, model.board);
+            TextView currentTile = makeBoardButton(i, pieceSideLength, model.board);
             currentTile.setOnClickListener(new ChessClick());
             grid.addView(currentTile);
         }
@@ -527,7 +539,7 @@ public class ChessFragment extends BaseGameExpFragment {
                     handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
                     hasChanged = true;
                 }
-                handleTileBackground(possiblePosition, (ImageButton) grid.getChildAt(possiblePosition));
+                handleTileBackground(possiblePosition, (TextView) grid.getChildAt(possiblePosition));
             }
             mHighlightedTile = null;
 
@@ -586,7 +598,7 @@ public class ChessFragment extends BaseGameExpFragment {
      * @param index the index of the tile, used to determine the color of the background.
      * @param currentTile the tile whose color we are changing.
      */
-    private void handleTileBackground(final int index, final ImageButton currentTile) {
+    private void handleTileBackground(final int index, final TextView currentTile) {
         // Handle the checkerboard positions (where 'checkerboard' means the background pattern).
         boolean isEven = (index % 2 == 0);
         boolean isOdd = (index % 2 == 1);
@@ -598,8 +610,7 @@ public class ChessFragment extends BaseGameExpFragment {
             currentTile.setBackgroundColor(ContextCompat.getColor(
                     getContext(), android.R.color.white));
         } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(
-                    getContext(), android.R.color.darker_gray));
+            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorLightGray));
         }
     }
 
@@ -659,14 +670,14 @@ public class ChessFragment extends BaseGameExpFragment {
     private void handleMovement(final ChessTeam player, final int indexClicked,
                                 final boolean capturesPiece, ChessBoard board) {
         // Reset the highlighted tile's image.
-        mHighlightedTile.setImageResource(0);
+        mHighlightedTile.setText(" ");
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         ChessPiece highlightedPiece = board.retrieve(highlightedIndex);
 
         // Handle capturing pieces.
         if (capturesPiece) {
-            ImageButton capturedTile = (ImageButton) grid.getChildAt(indexClicked);
-            capturedTile.setImageResource(0);
+            TextView capturedTile = (TextView) grid.getChildAt(indexClicked);
+            capturedTile.setText(" ");
             board.delete(highlightedIndex);
         }
 
@@ -680,16 +691,14 @@ public class ChessFragment extends BaseGameExpFragment {
             board.add(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
-            ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
-            newLocation.setImageResource(ChessPiece.getDrawableFor(board.getPieceType(indexClicked)));
+            TextView newLocation = (TextView) grid.getChildAt(indexClicked);
+            newLocation.setText(ChessPiece.getUnicodeText(board.getPieceType(indexClicked)));
 
             // Color the piece according to the player.
             if (player.equals(ChessTeam.PRIMARY)) {
-                newLocation.setColorFilter(ContextCompat.getColor(getContext(),
-                        R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-            } else if (player.equals(ChessTeam.SECONDARY)){
-                newLocation.setColorFilter(ContextCompat.getColor(getContext(),
-                        R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
+                newLocation.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+            } else if (player.equals(ChessTeam.SECONDARY)) {
+                newLocation.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             }
         }
 
@@ -712,21 +721,19 @@ public class ChessFragment extends BaseGameExpFragment {
 
             // Put a rook at the new rook position.
             board.add(rookFutureIndex, ROOK, player);
-            ImageButton futureRook = (ImageButton) grid.getChildAt(rookFutureIndex);
+            TextView futureRook = (TextView) grid.getChildAt(rookFutureIndex);
 
             // Handle the player-dependent pieces of the castle (color)
-            futureRook.setImageResource(ChessPiece.getDrawableFor(ROOK));
+            futureRook.setText(ChessPiece.getUnicodeText(ROOK));
             if (player.equals(ChessTeam.PRIMARY)) {
-                futureRook.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-                        PorterDuff.Mode.SRC_ATOP);
+                futureRook.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             } else if (player.equals(ChessTeam.SECONDARY)) {
-                futureRook.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
-                        PorterDuff.Mode.SRC_ATOP);
+                futureRook.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             }
 
             // Get rid of the old rook.
-            ImageButton previousRook = (ImageButton) grid.getChildAt(rookPrevIndex);
-            previousRook.setImageResource(0);
+            TextView previousRook = (TextView) grid.getChildAt(rookPrevIndex);
+            previousRook.setText(" ");
             board.delete(rookPrevIndex);
         }
 
@@ -798,7 +805,7 @@ public class ChessFragment extends BaseGameExpFragment {
         // Generate an AlertDialog via the AlertDialog Builder
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setTitle(getString(R.string.PromotePawnMsg))
-                .setIcon(ChessPiece.getDrawableFor(PieceType.PAWN))
+//                .setIcon(ChessPiece.getDrawableFor(PieceType.PAWN))
                 .setView(R.layout.pawn_dialog);
         AlertDialog pawnChooser = alertDialogBuilder.create();
         pawnChooser.show();
@@ -864,15 +871,15 @@ public class ChessFragment extends BaseGameExpFragment {
                 default:
                 case R.id.queen_icon:
                 case R.id.queen_text:
-                    pieceType = PieceType.QUEEN;
+                    pieceType = QUEEN;
                     break;
                 case R.id.bishop_icon:
                 case R.id.bishop_text:
-                    pieceType = PieceType.BISHOP;
+                    pieceType = BISHOP;
                     break;
                 case R.id.knight_icon:
                 case R.id.knight_text:
-                    pieceType = PieceType.KNIGHT;
+                    pieceType = KNIGHT;
                     break;
                 case R.id.rook_icon:
                 case R.id.rook_text:
@@ -882,11 +889,10 @@ public class ChessFragment extends BaseGameExpFragment {
 
             ChessBoard board = ((Chess)mExperience).board;
             board.add(position, pieceType, team);
-            ImageButton promotedPieceTile = (ImageButton) grid.getChildAt(position);
-            promotedPieceTile.setImageResource(ChessPiece.getDrawableFor(pieceType));
+            TextView promotedPieceTile = (TextView) grid.getChildAt(position);
+            promotedPieceTile.setText(ChessPiece.getUnicodeText(pieceType));
             int color = team == ChessTeam.PRIMARY ? R.color.colorPrimary: R.color.colorAccent;
-            promotedPieceTile.setColorFilter(ContextCompat.getColor(getContext(), color),
-                    PorterDuff.Mode.SRC_ATOP);
+            promotedPieceTile.setTextColor(ContextCompat.getColor(getContext(), color));
 
             mDialog.dismiss();
         }
@@ -905,7 +911,7 @@ public class ChessFragment extends BaseGameExpFragment {
                 mHighlightedTile = null;
             } else {
                 if (board.retrieve(index) != null) {
-                    mHighlightedTile = (ImageButton) v;
+                    mHighlightedTile = (TextView) v;
                     changedBoard = showPossibleMoves(index, board);
                 }
             }

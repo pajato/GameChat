@@ -20,14 +20,26 @@ public class ChessPiece {
     }
 
     public enum PieceType {
-        NONE,
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
-    }
+        NONE, KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN
+   }
+
+    // Unicode value for king
+    private static final String UC_KING = "\u2654";
+
+    // Unicode value for queen
+    private static final String UC_QUEEN = "\u2655";
+
+    // Unicode value for bishop
+    private static final String UC_BISHOP = "\u2657";
+
+    // Unicode value for knight
+    private static final String UC_KNIGHT = "\u2658";
+
+    // Unicode value for rook
+    private static final String UC_ROOK = "\u2656";
+
+    // Unicode value for pawn
+    private static final String UC_PAWN = "\u2659";
 
     // Access must be public for Firebase use
     public PieceType pieceType;
@@ -73,24 +85,24 @@ public class ChessPiece {
      * @return a drawable ID that corresponds to the parameter.
      */
     @Exclude
-    static int getDrawableFor(final PieceType pieceType) {
-        int drawable;
+    static String getUnicodeText(final PieceType pieceType) {
+        String ucText;
         switch(pieceType) {
-            case KING: drawable = R.drawable.ic_stars_black_36dp;
+            case KING: ucText = UC_KING;
                 break;
-            case QUEEN: drawable = R.drawable.ic_games_white;
+            case QUEEN: ucText = UC_QUEEN;
                 break;
-            case BISHOP: drawable = R.drawable.ic_info_black_24dp;
+            case BISHOP: ucText = UC_BISHOP;
                 break;
-            case KNIGHT: drawable = R.drawable.vd_help_black_24px;
+            case KNIGHT: ucText = UC_KNIGHT;
                 break;
-            case ROOK: drawable = R.drawable.vd_settings_black_24px;
+            case ROOK: ucText = UC_ROOK;
                 break;
             default:
-            case PAWN: drawable = R.drawable.ic_account_circle_black_36dp;
+            case PAWN: ucText = UC_PAWN;
                 break;
         }
-        return drawable;
+        return ucText;
     }
 
 

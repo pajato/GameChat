@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -11,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.GridLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,7 +23,6 @@ import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -41,7 +40,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
@@ -61,7 +62,10 @@ public class CheckersFragment extends BaseGameExpFragment {
     public static final String SECONDARY_PIECE = "sp";
     public static final String SECONDARY_KING = "sk";
 
-    public ImageButton mHighlightedTile;
+    public static final String KING_UNICODE = "\u26c1";
+    public static final String PIECE_UNICODE = "\u26c0";
+
+    public TextView mHighlightedTile;
     public boolean mIsHighlighted = false;
     public ArrayList<Integer> mPossibleMoves;
 
@@ -115,7 +119,7 @@ public class CheckersFragment extends BaseGameExpFragment {
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons.
-        ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
+        ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
                 PorterDuff.Mode.SRC_ATOP);
 
@@ -153,6 +157,7 @@ public class CheckersFragment extends BaseGameExpFragment {
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
+
     /** Notify the user about an error and log it. */
     private void reportError(final Context context, final int messageResId, String... args) {
         // Let the User know that something is amiss.
@@ -170,7 +175,6 @@ public class CheckersFragment extends BaseGameExpFragment {
                 break;
         }
     }
-
 
     /** Return a possibly null list of player information for a checkers experience (always 2 players) */
     protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, ExpProfile> dispatcher) {
@@ -405,8 +409,8 @@ public class CheckersFragment extends BaseGameExpFragment {
     }
 
     // Set up an image button which will be a cell in the game board
-    private ImageButton makeBoardButton(int index, int sideSize, Map<String, String> board, String pieceType) {
-        ImageButton currentTile = new ImageButton(getContext());
+    private TextView makeBoardButton(int index, int sideSize, Map<String, String> board, String pieceType) {
+        TextView currentTile = new TextView(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
         GridLayout.LayoutParams param = new GridLayout.LayoutParams();
@@ -422,6 +426,10 @@ public class CheckersFragment extends BaseGameExpFragment {
         currentTile.setLayoutParams(param);
         String buttonTag = String.valueOf(index);
         currentTile.setTag(buttonTag);
+        float sp = sideSize / getResources().getDisplayMetrics().scaledDensity;
+        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.8));
+        currentTile.setTypeface(null, Typeface.BOLD);
+        currentTile.setGravity(Gravity.CENTER);
 
         // Handle the checkerboard positions.
         boolean isEven = index % 2 == 0;
@@ -429,26 +437,32 @@ public class CheckersFragment extends BaseGameExpFragment {
         // Create the checkerboard pattern on the button backgrounds.
         if (isEvenEvenOrOddOdd(index, isEven)) {
             currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.white));
-            currentTile.setImageResource(0);
+            currentTile.setText(" ");
         } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.darker_gray));
-            currentTile.setImageResource(0);
+            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorLightGray));
+            currentTile.setText(" ");
         }
 
         // If the tile is meant to contain a board piece at the start of play, give it a piece.
         if (containsSecondaryPiece(index, isEven) || (pieceType.equals(SECONDARY_PIECE) || pieceType.equals(SECONDARY_KING))) {
-            currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
-            currentTile.setColorFilter(ContextCompat.getColor(getContext(),
-                    R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
+            if (pieceType.equals(SECONDARY_KING)) {
+                currentTile.setText(KING_UNICODE);
+            } else {
+                currentTile.setText(PIECE_UNICODE);
+            }
+            currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
             if(pieceType.equals(SECONDARY_KING)) {
                 board.put(buttonTag, SECONDARY_KING);
             } else {
                 board.put(buttonTag, SECONDARY_PIECE);
             }
         } else if (containsPrimaryPiece(index, isEven) || (pieceType.equals(PRIMARY_PIECE) || pieceType.equals(PRIMARY_KING))) {
-            currentTile.setImageResource(R.drawable.ic_account_circle_black_36dp);
-            currentTile.setColorFilter(ContextCompat.getColor(getContext(),
-                    R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
+            if (pieceType.equals(PRIMARY_KING)) {
+                currentTile.setText(KING_UNICODE);
+            } else {
+                currentTile.setText(PIECE_UNICODE);
+            }
+            currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
             if(pieceType.equals(PRIMARY_KING)) {
                 board.put(buttonTag, PRIMARY_KING);
             } else {
@@ -476,9 +490,17 @@ public class CheckersFragment extends BaseGameExpFragment {
 
         mPossibleMoves = new ArrayList<>();
 
+        // Take the smaller of width/height to adjust for tablet (landscape) view and adjust for
+        // the player controls and FAB. TODO: the fab currently returns "top" value of 0...
         int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
-        Log.d(TAG, "screen width=" + screenWidth);
-        int pieceSideLength = screenWidth / 8;
+        ImageView v = (ImageView) getActivity().findViewById(R.id.player_1_icon);
+        int screenHeight = getActivity().findViewById(R.id.gameFragmentContainer).getHeight()
+                - v.getBottom() - getActivity().findViewById(R.id.gameFab).getTop();
+
+        int sideSize = Math.min(screenWidth, screenHeight);
+        Log.d(TAG, "screen width=" + screenWidth + ", screen height=" + screenHeight);
+        int pieceSideLength = sideSize / 8;
+        Log.d(TAG, "using piece side length=" + pieceSideLength);
 
         // Go through and populate the GridLayout / board.
         for (int i = 0; i < 64; i++) {
@@ -487,7 +509,7 @@ public class CheckersFragment extends BaseGameExpFragment {
                 pieceType = model.board.get(String.valueOf(i));
                 if(pieceType == null) pieceType = "";
             }
-            ImageButton currentTile = makeBoardButton(i, pieceSideLength, model.board, pieceType);
+            TextView currentTile = makeBoardButton(i, pieceSideLength, model.board, pieceType);
             currentTile.setOnClickListener(new CheckersClick());
             grid.addView(currentTile);
         }
@@ -725,7 +747,7 @@ public class CheckersFragment extends BaseGameExpFragment {
     private void handleMovement(Map<String, String> board, final boolean player, final int indexClicked,
                                 final boolean capturesPiece) {
         // Reset the highlighted tile's image.
-        mHighlightedTile.setImageResource(0);
+        mHighlightedTile.setText(" ");
         int highlightedIndex = Integer.parseInt((String)mHighlightedTile.getTag());
         String highlightedPieceType = board.get(mHighlightedTile.getTag());
         String indexClickedStr = String.valueOf(indexClicked);
@@ -740,12 +762,12 @@ public class CheckersFragment extends BaseGameExpFragment {
         }
 
         // Find the new tile and give it a piece.
-        ImageButton newLocation = (ImageButton) grid.getChildAt(indexClicked);
+        TextView newLoc = (TextView) grid.getChildAt(indexClicked);
         if(board.get(indexClickedStr).equals(PRIMARY_KING) ||
                 board.get(indexClickedStr).equals(SECONDARY_KING)) {
-            newLocation.setImageResource(R.drawable.ic_stars_black_36dp);
+            newLoc.setText(KING_UNICODE);
         } else {
-            newLocation.setImageResource(R.drawable.ic_account_circle_black_36dp);
+            newLoc.setText(PIECE_UNICODE);
         }
 
         // Color the piece according to the player.
@@ -755,15 +777,15 @@ public class CheckersFragment extends BaseGameExpFragment {
         } else {
             color = ContextCompat.getColor(getContext(), R.color.colorAccent);
         }
-        newLocation.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        newLoc.setTextColor(color);
 
         // Handle capturing pieces.
         boolean finishedJumping = true;
         if(capturesPiece) {
             int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
-            ImageButton capturedTile = (ImageButton) grid.getChildAt(pieceCapturedIndex);
-            capturedTile.setImageResource(0);
-            board.remove((String) capturedTile.getTag());
+            TextView capturedTile = (TextView) grid.getChildAt(pieceCapturedIndex);
+            capturedTile.setText(" " );
+            board.remove(capturedTile.getTag());
 
             // If there are no more jumps, change turns. If there is at least one jump left, don't.
             ArrayList<Integer> possibleJumps = new ArrayList<>();
@@ -824,7 +846,7 @@ public class CheckersFragment extends BaseGameExpFragment {
                 mHighlightedTile = null;
             } else {
                 if (board.get(String.valueOf(index)) != null) {
-                    mHighlightedTile = (ImageButton) v;
+                    mHighlightedTile = (TextView) v;
                     changedBoard = showPossibleMoves(index, board);
                 }
             }
