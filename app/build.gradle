@@ -23,6 +23,9 @@ android {
         }
         debug {
             // Run code coverage reports by default on debug builds.
+            minifyEnabled true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled = true
         }
     }
