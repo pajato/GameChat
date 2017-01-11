@@ -54,7 +54,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     public TTTBoard board;
 
     /** The creation timestamp. */
-    private long createTime;
+    public long createTime;
 
     /** The experience push key. */
     public String key;
@@ -63,7 +63,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     public String groupKey;
 
     /** The last modification timestamp. */
-    private long modTime;
+    public long modTime;
 
     /** The experience display name. */
     public String name;
