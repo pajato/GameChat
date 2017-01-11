@@ -101,22 +101,27 @@ public enum MemberManager {
 
     /** Handle changes to the list of joined rooms by capturing all group and room profiles. */
     @Subscribe public void onMemberChange(@NonNull final MemberChangeEvent event) {
-        // Update the member in the local caches, creating the caches as necessary.
+        // Update the member in the local caches, creating the caches as necessary and ensure that
+        // the event payload is well formed.  Abort if not, otherwise cache the member account.
         Map<String, Account> map = memberMap.get(event.member.groupKey);
         if (map == null) map = new HashMap<>();
+        String id = event.member != null ? event.member.id : null;
+        if (id == null || event.member.groupKey == null) return;
         map.put(event.member.id, event.member);
         memberMap.put(event.member.groupKey, map);
 
-        // Determine if the payload is for the current account holder.  If so, set a message watcher
-        // on the joined rooms.
+        // Determine if the payload is for the current account holder.  If so, set a message and
+        // experience watcher on the joined rooms.
         if (event.member.id.equals(AccountManager.instance.getCurrentAccountId()))
-            for (String roomKey : event.member.joinList)
-                MessageManager.instance.setMessageWatcher(event.member.groupKey, roomKey);
+            for (String roomKey : event.member.joinList) {
+                MessageManager.instance.setWatcher(event.member.groupKey, roomKey);
+                ExperienceManager.instance.setWatcher(event.member.groupKey, roomKey);
+            }
     }
 
     /** Setup a listener for member changes in the given account. */
-    public void setMemberWatcher(final String groupKey, final String memberKey) {
-        // Obtain a room and set watchers on all the experience profiles in that room.
+    public void setWatcher(final String groupKey, final String memberKey) {
+        // Obtain a room and set watchers on all the experiences in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
         String tag = String.format(Locale.US, "%s,%s", groupKey, memberKey);
         String name = DBUtils.instance.getHandlerName(MEMBER_CHANGE_HANDLER, tag);

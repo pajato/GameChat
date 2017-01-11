@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.database.handler;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.firebase.database.ChildEventListener;
@@ -24,8 +25,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ExpProfileListChangeEvent;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.exp.ExpType;
+import com.pajato.android.gamechat.exp.Experience;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -37,11 +39,11 @@ import static com.pajato.android.gamechat.event.MessageChangeEvent.NEW;
 import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
 
 /**
- * Provide a class to handle new and changed experience profiles inside a room.
+ * Provide a class to handle new and changed experiences inside a room.
  *
  * @author Paul Michael Reilly
  */
-public class ExpProfileListChangeHandler extends DatabaseEventHandler
+public class ExperiencesChangeHandler extends DatabaseEventHandler
         implements ChildEventListener {
 
     // Public constants.
@@ -50,14 +52,13 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
     private static final String LOG_FORMAT = "%s: {%s, %s}.";
 
     /** The logcat TAG. */
-    private static final String TAG = ExpProfileListChangeHandler.class.getSimpleName();
+    private static final String TAG = ExperiencesChangeHandler.class.getSimpleName();
 
     // Public constructors.
 
     /** Build a handler with the given name and path. */
-    public ExpProfileListChangeHandler(final String name, final String groupKey,
-                                       final String roomKey) {
-        super(name, ExperienceManager.instance.getExpProfilesPath(groupKey, roomKey));
+    public ExperiencesChangeHandler(final String name, final String path) {
+        super(name, path);
     }
 
     // Public instance methods.
@@ -93,64 +94,73 @@ public class ExpProfileListChangeHandler extends DatabaseEventHandler
 
     // Private instance methods.
 
-    /** Return a map of experience profiles for the room in the given experience profile. */
-    private Map<String, ExpProfile> getExpProfileMap(final ExpProfile expProfile) {
+    /** Return an experience from the given snapshot. */
+    private Experience getExperience(@NonNull DataSnapshot snapshot) {
+        // Ensure that the snapshot contains a type value.  Abort if not, otherwise return the
+        // converted snapshot.
+        DataSnapshot typeSnapshot = snapshot.child("type");
+        String value = typeSnapshot.getValue(String.class);
+        ExpType type = value != null ? ExpType.valueOf(value) : null;
+        if (type == null) return null;
+        @SuppressWarnings("unchecked")
+        Experience result = (Experience) snapshot.getValue(type.experienceClass);
+        return result;
+    }
+
+    /** Return a map of experiences for the room and group in the given experience. */
+    private Map<String, Experience> getExpMap(final Experience experience) {
         // Ensure that the room map exists for the group in the master map, creating it if need be.
-        Map<String, ExpProfile> expProfileMap;
-        Map<String, Map<String, ExpProfile>> roomMap;
-        if (!ExperienceManager.instance.expProfileMap.containsKey(expProfile.groupKey)) {
-            // This would be the first entry for the group.  Create an empty room map and associate
-            // it with the group key.
+        Map<String, Experience> expMap;
+        Map<String, Map<String, Experience>> roomMap;
+        roomMap = ExperienceManager.instance.expGroupMap.get(experience.getGroupKey());
+        if (roomMap == null) {
+            // This would be the first room map entry for the group.  Create an empty room map and
+            // associate it with the group key.
             roomMap = new HashMap<>();
-            ExperienceManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
-        } else {
-            // This would be an additional profile for the group.  Determine if it is the first for
-            // the room.
-            roomMap = ExperienceManager.instance.expProfileMap.get(expProfile.groupKey);
-            if (roomMap == null) {
-                // It is the first profile for the room.  Create a map for the room and associate it
-                // with the group.
-                roomMap = new HashMap<>();
-                ExperienceManager.instance.expProfileMap.put(expProfile.groupKey, roomMap);
-            }
+            ExperienceManager.instance.expGroupMap.put(experience.getGroupKey(), roomMap);
         }
 
-        // The room map now exists if it did not before.  Determine if the profile map needs to be
-        // created.
-        expProfileMap = roomMap.get(expProfile.roomKey);
-        if (expProfileMap == null) {
+        // The room map now exists if it did not before.  Determine if the experience map needs to
+        // be created.
+        expMap = roomMap.get(experience.getRoomKey());
+        if (expMap == null) {
             // The profile map needs to be created.  Do it now and associate it with the room.
-            expProfileMap = new HashMap<>();
-            roomMap.put(expProfile.roomKey, expProfileMap);
+            expMap = new HashMap<>();
+            roomMap.put(experience.getRoomKey(), expMap);
         }
-
-        return expProfileMap;
+        return expMap;
     }
 
     /** Process the change by updating the database list and notifying the app. */
     private void process(final DataSnapshot snapshot, final int type) {
-        // Abort if the data snapshot does not exist.
-        if (!snapshot.exists()) return;
+        // Validate the snapshot and the experience.  Abort if eitehr is invalid.
+        Experience experience = snapshot.exists() ? getExperience(snapshot) : null;
+        Map<String, Experience> expMap = experience != null ? getExpMap(experience) : null;
+        if (expMap == null) return;
 
-        // A snapshot exists.  Extract the experience profile from it and determine if the profile
-        // has been handled already.  If not, then case on the change type and notify the app.
-        ExpProfile expProfile = snapshot.getValue(ExpProfile.class);
-        Map<String, ExpProfile> expProfileMap = getExpProfileMap(expProfile);
+        // A snapshot exists with a valid experience. Case on the change type to update the cached
+        // model.
+        String key = experience.getExperienceKey();
         switch (type) {
             case NEW:
             case CHANGED:
-                // Add the profile to the list manager (or replace it if it already exists.)
-                expProfileMap.put(expProfile.key, expProfile);
+                // Add the experience to the list manager (or replace it if it already exists.) in
+                // two places: 1) a flat map associating an experience key with an experience
+                // object, and 2) a group map associating a group, room, and experience key with
+                // the experience object.
+                expMap.put(key, experience);
+                ExperienceManager.instance.experienceMap.put(key, experience);
                 break;
             case REMOVED:
                 // Update the database list experience profile map by removing the entry (key).
-                expProfileMap.remove(expProfile.key);
+                expMap.remove(key);
+                ExperienceManager.instance.experienceMap.remove(key);
                 break;
             case MOVED:
             default:
                 // Not sure what a moved change means or what to do about it, so do nothing.
                 break;
         }
-        AppEventManager.instance.post(new ExpProfileListChangeEvent(expProfile, type));
+        AppEventManager.instance.post(new ExperienceChangeEvent(experience, type));
     }
 }

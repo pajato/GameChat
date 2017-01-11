@@ -19,15 +19,12 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
-import com.pajato.android.gamechat.database.handler.ExpProfileListChangeHandler;
-import com.pajato.android.gamechat.database.handler.ExperienceChangeHandler;
+import com.pajato.android.gamechat.database.handler.ExperiencesChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
-import com.pajato.android.gamechat.exp.model.ExpProfile;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -35,8 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import static android.R.attr.type;
 
 /**
  * Provide a class to manage the experience database objects.
@@ -49,23 +44,18 @@ public enum ExperienceManager {
     // Public class constants.
 
     // Database paths, often used as format strings.
-    public static final String EXP_PROFILE_LIST_PATH =
-            RoomManager.ROOMS_PATH + "%s/profile/expProfileList";
     public static final String EXPERIENCES_PATH = RoomManager.ROOMS_PATH + "%s/experiences/";
     public static final String EXPERIENCE_PATH = EXPERIENCES_PATH + "%s/";
 
     // Private class constants.
 
     /** The experience profile change handler base name. */
-    private static final String EXP_PROFILE_LIST_CHANGE_HANDLER = "expProfileListChangeHandler";
-
-    /** The experience change handler base name. */
-    private static final String EXPERIENCES_CHANGE_HANDLER = "experiencesChangeHandler";
+    private static final String EXPERIENCE_LIST_CHANGE_HANDLER = "experienceListChangeHandler";
 
     // Public instance variables.
 
-    /** The map associating group and room push keys with a map of experience profiles. */
-    public Map<String, Map<String, Map<String, ExpProfile>>> expProfileMap = new HashMap<>();
+    /** The map associating group and room push keys with a map of experiences. */
+    public Map<String, Map<String, Map<String, Experience>>> expGroupMap = new HashMap<>();
 
     /** The experience map. */
     public Map<String, Experience> experienceMap = new HashMap<>();
@@ -74,43 +64,23 @@ public enum ExperienceManager {
 
     /** Persist the given experience to the database. */
     public void createExperience(final Experience experience) {
-        // Ensure that the requisite keys exist.  Abort if either key does not exist.
+        // Ensure that the requisite keys, name and type all exist.  Abort if any do not exist.
         String groupKey = experience.getGroupKey();
         String roomKey = experience.getRoomKey();
-        if (groupKey == null || roomKey == null) return;
-
-        // Get the name and type for the given experience.  Abort if either does not exist.
         String name = experience.getName();
         ExpType expType = experience.getExperienceType();
-        if (name == null || type == -1) return;
+        if (groupKey == null || roomKey == null || name == null || expType == null) return;
 
         // Persist the experience.
-        String path = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(path).push();
-        experience.setExperienceKey(ref.getKey());
-        ref.setValue(experience.toMap());
-
-        // Persist the experience profile so that the room's experience profile list watcher will
-        // append it.  Finally set the experience watcher as, presumbably, the User is creating the
-        // experience to enjoy it asap.
-        path = String.format(Locale.US, EXP_PROFILE_LIST_PATH, groupKey, roomKey);
-        ref = FirebaseDatabase.getInstance().getReference().child(path).push();
-        String key = ref.getKey();
-        String expKey = experience.getExperienceKey();
-        ExpProfile profile = new ExpProfile(key, name, expType, groupKey, roomKey, expKey);
-        ref.setValue(profile.toMap());
-        setExperienceWatcher(profile);
+        String key = getExperienceKey();
+        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, key);
+        experience.setExperienceKey(key);
+        DBUtils.instance.updateChildren(path, experience.toMap());
     }
 
-    /** Return the database path to an experience for a given experience profile. */
-    public String getExperiencePath(final ExpProfile profile) {
-        String key = profile.expKey;
-        return String.format(Locale.US, EXPERIENCE_PATH, profile.groupKey, profile.roomKey, key);
-    }
-
-    /** Return the database path to a experience profile for a given room and profile key. */
-    public String getExpProfilesPath(final String groupKey, final String roomKey) {
-        return String.format(Locale.US, EXP_PROFILE_LIST_PATH, groupKey, roomKey);
+    /** Return a room push key to use with a subsequent room object persistence. */
+    public String getExperienceKey() {
+        return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
     }
 
     /** Handle a account change event by setting up or clearing variables. */
@@ -118,21 +88,11 @@ public enum ExperienceManager {
         // Determine if a User has been authenticated.  If so, do nothing, otherwise clear the
         // message list for the logged out User.
         if (event.account != null) return;
-        expProfileMap.clear();
+        expGroupMap.clear();
         experienceMap.clear();
     }
 
-    /** Setup a listener for experience changes in the given room. */
-    public void setExperienceWatcher(final ExpProfile profile) {
-        // Set up a watcher in the given room for experiences changes.
-        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = DBUtils.instance.getHandlerName(EXPERIENCES_CHANGE_HANDLER, profile.expKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExperienceChangeHandler(name, profile);
-        DatabaseRegistrar.instance.registerHandler(handler);
-    }
-
-    /** Persist the given experience. */
+    /** Perist the given experience. */
     public void updateExperience(final Experience experience) {
         // Persist the experience.
         experience.setModTime(new Date().getTime());
@@ -144,12 +104,13 @@ public enum ExperienceManager {
     }
 
     /** Setup a listener for experience changes in the given room. */
-    public void setExpProfileListWatcher(final String groupKey, final String roomKey) {
+    public void setWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = DBUtils.instance.getHandlerName(EXP_PROFILE_LIST_CHANGE_HANDLER, roomKey);
+        String name = DBUtils.instance.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
+        String path = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ExpProfileListChangeHandler(name, groupKey, roomKey);
+        DatabaseEventHandler handler = new ExperiencesChangeHandler(name, path);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 }

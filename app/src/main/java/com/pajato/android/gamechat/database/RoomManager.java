@@ -148,6 +148,6 @@ public enum RoomManager {
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
-        ExperienceManager.instance.setExpProfileListWatcher(groupKey, roomKey);
+        ExperienceManager.instance.setWatcher(groupKey, roomKey);
     }
 }

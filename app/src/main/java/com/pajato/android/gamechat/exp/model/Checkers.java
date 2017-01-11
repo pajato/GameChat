@@ -15,6 +15,7 @@ import static com.pajato.android.gamechat.exp.ExpType.checkers;
 @IgnoreExtraProperties
 public class Checkers implements Experience {
 
+    // State definitions.
     public final static int ACTIVE = 0;
     public final static int PRIMARY_WINS = 1;
     public final static int SECONDARY_WINS = 2;
@@ -60,8 +61,8 @@ public class Checkers implements Experience {
     /** The current turn indicator: True = Player 1, False = Player 2. */
     public boolean turn;
 
-    /** The experience type ordinal value. */
-    public int type = -1;
+    /** The experience type name. */
+    public String type;
 
     /** The experience icon url. */
     public String url;
@@ -84,13 +85,12 @@ public class Checkers implements Experience {
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = checkers.ordinal();
+        type = checkers.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_checkers";
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude
-    @Override public Map<String, Object> toMap() {
+    @Exclude @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("board", board);
         result.put("createTime", createTime);
@@ -115,11 +115,8 @@ public class Checkers implements Experience {
     }
 
     /** Return the fragment type value or null if no such fragment type exists. */
-    @Exclude
-    @Override public ExpType getExperienceType() {
-        if (type < 0 || type >= ExpType.values().length) return null;
-
-        return ExpType.values()[type];
+    @Exclude @Override public ExpType getExperienceType() {
+        return ExpType.valueOf(type);
     }
 
     /** Return the group push key. */
@@ -181,5 +178,4 @@ public class Checkers implements Experience {
                 return null;
         }
     }
-
 }
