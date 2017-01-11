@@ -16,6 +16,8 @@
 #   public *;
 #}
 -ignorewarnings
+-dontshrink
+-dontoptimize
 -dontpreverify
 -repackageclasses ''
 -allowaccessmodification
@@ -25,3 +27,5 @@
 -keep class com.pajato.** {
     *;
 }
+
+-keeppackagenames com.pajato.**
