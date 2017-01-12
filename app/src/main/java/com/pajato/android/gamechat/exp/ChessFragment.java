@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -42,8 +41,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.R.color.colorAccent;
+import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.PRIMARY;
 import static com.pajato.android.gamechat.exp.ChessPiece.ChessTeam.SECONDARY;
 import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.BISHOP;
@@ -121,12 +123,10 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
-        playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-                PorterDuff.Mode.SRC_ATOP);
+        playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
 
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
-        playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
-                PorterDuff.Mode.SRC_ATOP);
+        playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
 
     /** Handle taking the foreground by updating the UI based on the current experience. */
@@ -380,7 +380,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param sideSize size to use for width and height of the new item to add to the board
      * @param board a ChessBoard object representing the game board (0->63) the piece type at that location.
      */
-    private TextView makeBoardButton(int index, int sideSize, ChessBoard board) {
+    private TextView makeBoardButton(final int index, final int sideSize, final ChessBoard board) {
         TextView currentTile = new TextView(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
@@ -800,38 +800,42 @@ public class ChessFragment extends BaseExperienceFragment {
         int alertIconId = getActivity().getResources().getIdentifier("android:id/icon", null, null);
         ImageView alertIcon = (ImageView) pawnChooser.findViewById(alertIconId);
         if(alertIcon != null) {
-            alertIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            alertIcon.setColorFilter(color, SRC_ATOP);
         }
         // Setup the Queen Listeners and change color appropriate to the team.
-        ImageView queenIcon = (ImageView) pawnChooser.findViewById(R.id.queen_icon);
+        TextView queenIcon = (TextView) pawnChooser.findViewById(R.id.queen_icon);
         TextView queenText = (TextView) pawnChooser.findViewById(R.id.queen_text);
         if(queenIcon != null && queenText != null) {
-            queenIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            queenIcon.setText(ChessPiece.UC_QUEEN);
+            queenIcon.setTextColor(color);
             queenIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             queenText.setOnClickListener(new Promoter(position, team, pawnChooser));
         }
         // Do the same for bishop.
-        ImageView bishopIcon = (ImageView) pawnChooser.findViewById(R.id.bishop_icon);
+        TextView bishopIcon = (TextView) pawnChooser.findViewById(R.id.bishop_icon);
         TextView bishopText = (TextView) pawnChooser.findViewById(R.id.bishop_text);
         if(bishopIcon != null && bishopText != null) {
-            bishopIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            bishopIcon.setText(ChessPiece.UC_BISHOP);
+            bishopIcon.setTextColor(color);
             bishopIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             bishopText.setOnClickListener(new Promoter(position, team, pawnChooser));
         }
         // And the same for knight.
-        ImageView knightIcon = (ImageView) pawnChooser.findViewById(R.id.knight_icon);
+        TextView knightIcon = (TextView) pawnChooser.findViewById(R.id.knight_icon);
         TextView knightText = (TextView) pawnChooser.findViewById(R.id.knight_text);
         if(knightIcon != null && knightText != null) {
-            knightIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            knightIcon.setText(ChessPiece.UC_KNIGHT);
+            knightIcon.setTextColor(color);
             knightIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             knightText.setOnClickListener(new Promoter(position, team, pawnChooser));
         }
         // And finally, the same for rook.
-        ImageView rookIcon = (ImageView) pawnChooser.findViewById(R.id.rook_icon);
+        TextView rookIcon = (TextView) pawnChooser.findViewById(R.id.rook_icon);
         TextView rookText = (TextView) pawnChooser.findViewById(R.id.rook_text);
         if(rookIcon != null && rookText != null) {
+            rookIcon.setText(ChessPiece.UC_ROOK);
+            rookIcon.setTextColor(color);
             rookIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
-            rookIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             rookText.setOnClickListener(new Promoter(position, team, pawnChooser));
         }
     }
