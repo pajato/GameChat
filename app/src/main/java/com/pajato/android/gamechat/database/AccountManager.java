@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -45,11 +46,11 @@ import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.signin.SignInActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -308,8 +309,20 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Sign in using the given User account. */
     public void signIn(final Context context, final String provider, final String accountName) {
-        // Invoke the sign in activity to kick off a Firebase auth event.
-        Intent intent = new Intent(context, SignInActivity.class);
+        // Get an instance of AuthUI based on the default app, and build an intent.
+        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
+        intentBuilder.setProviders(Arrays.asList(
+                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
+        ));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
+
+        // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
+        intentBuilder.setIsSmartLockEnabled(false);
+
+        Intent intent = intentBuilder.build();
         intent.putExtra("signin", true);
         intent.putExtra("provider", provider);
         intent.putExtra("accountName", accountName);
@@ -336,8 +349,19 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Sign in using the saved User account. */
     private void signIn(final Context context) {
-        // Invoke the sign in activity to kick off a Firebase auth event.
-        Intent intent = new Intent(context, SignInActivity.class);
+        // Get an instance of AuthUI based on the default app, and build an intent.
+        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
+        intentBuilder.setProviders(Arrays.asList(
+                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
+
+        // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
+        intentBuilder.setIsSmartLockEnabled(false);
+
+        Intent intent = intentBuilder.build();
         intent.putExtra("signin", true);
         context.startActivity(intent);
     }

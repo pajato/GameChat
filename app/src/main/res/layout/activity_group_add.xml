@@ -74,7 +74,7 @@ http://www.gnu.org/licenses
             android:onClick="onClick"
             android:background="@color/colorLightGray"
             android:contentDescription="@string/AddGroupDesc"
-            android:src="@drawable/ic_clear_black_24dp"/>
+            app:srcCompat="@drawable/ic_clear_black_24dp"/>
     </LinearLayout>
     <TextView
         android:id="@+id/addGroupMembers"

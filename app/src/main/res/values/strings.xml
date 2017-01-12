@@ -16,6 +16,18 @@
     <string name="arrow_left"><![CDATA[<]]></string>
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="facebook_application_id" translatable="false">477157459160674</string>
+    <!-- Facebook Application ID, prefixed by 'fb'.  Enables Chrome Custom tabs. -->
+    <string name="facebook_login_protocol_scheme" translatable="false">fb477157459160674</string>
+    <string name="intro_chat_message">Public private secure messaging with any Google user</string>
+    <string name="intro_chat_title">Chat</string>
+    <string name="intro_game_message">Play popular well known games with other GameChat users or against the computer</string>
+    <string name="intro_game_title">Game</string>
+    <string name="intro_home_message">Chat and play games with friends and family</string>
+    <string name="intro_home_title">GameChat</string>
+    <string name="intro_levels_message">Relaxed games for teaching and learning as well as competiitve levels for serious players</string>
+    <string name="intro_levels_title">Levels</string>
+    <string name="intro_page_circle">\u25CF</string>
     <string name="manage_accounts">Manage Accounts</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
@@ -30,5 +42,6 @@
     <string name="switch_account">\u25bc Switch account</string>
     <string name="me">me</string>
     <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
+    <string name="signInButtonText">Sign in to teach, learn and have fun with friends and family.</string>
     <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
 </resources>

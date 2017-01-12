@@ -67,7 +67,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_info_black"
+        app:srcCompat="@drawable/ic_info_black_24dp"
         android:id="@+id/bishop_icon"
         android:contentDescription="@string/chess_promotion_bishop"
         android:layout_marginEnd="16dp"
