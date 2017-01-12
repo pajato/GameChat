@@ -173,7 +173,9 @@ public enum GroupManager {
         String groupKey = event.key;
         if (groupKey == null || event.group == null) return;
         groupMap.put(event.key, event.group);
-        for (String key : event.group.memberList) MemberManager.instance.setWatcher(groupKey, key);
+        for (String key : event.group.memberList) {
+            MemberManager.instance.setWatcher(groupKey, key);
+        }
     }
 
     /** Return a list of joined group push keys based on the given item. */
