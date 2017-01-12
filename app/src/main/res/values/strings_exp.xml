@@ -18,12 +18,13 @@
     <string name="PlayModeLocalMenuTitle">Play a friend</string>
     <string name="PlayModeUserMenuTitle">Play a User</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
+    <string name="PromotePawnMsg">Promote Your Pawn:</string>
     <string name="SignIn">Sign In</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
+    <string name="StalemateMessage">Stalemate!</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>
     <string name="TieMessage">Tie game!</string>
-    <string name="StalemateMessage">Stalemate!</string>
     <string name="TieMessageNotification">Well done players</string>
     <string name="WinMessageFormat">%1$s Wins!</string>
     <string name="WinMessageNotificationFormat">Congratulations %s, you win</string>
@@ -38,11 +39,10 @@
     <string name="oValue">O</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>
+    <string name="primaryTeam">primary</string>
+    <string name="secondaryTeam">secondary</string>
     <string name="turn">turn</string>
     <string name="vs">vs</string>
     <string name="wins">wins</string>
     <string name="xValue">X</string>
-    <string name="primaryTeam">primary</string>
-    <string name="secondaryTeam">secondary</string>
-    <string name="PromotePawnMsg">Promote Your Pawn:</string>
 </resources>

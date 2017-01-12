@@ -28,14 +28,13 @@
         app:layout_constraintRight_toRightOf="@id/pawn_promotion_window"
         app:layout_constraintLeft_toLeftOf="@id/pawn_promotion_window"/>
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_games_white"
         android:id="@+id/queen_icon"
+        android:textSize="20sp"
         android:contentDescription="@string/chess_promotion_queen"
         android:layout_marginEnd="16dp"
-
         app:layout_constraintRight_toLeftOf="@id/queen_text"
         app:layout_constraintTop_toTopOf="@id/queen_text"
         app:layout_constraintBottom_toBottomOf="@id/queen_text"/>
@@ -45,13 +44,11 @@
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
         android:id="@+id/dividing_line_1"
-
         android:layout_marginTop="8dp"
         android:layout_marginEnd="30dp"
         app:layout_constraintTop_toBottomOf="@id/queen_text"
         app:layout_constraintLeft_toLeftOf="@id/pawn_promotion_window"
         app:layout_constraintRight_toRightOf="@id/pawn_promotion_window"/>
-
 
     <TextView
         android:layout_width="wrap_content"
@@ -59,19 +56,17 @@
         android:id="@+id/bishop_text"
         android:text="@string/chess_promotion_bishop"
         android:textSize="20sp"
-
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/dividing_line_1"
         app:layout_constraintLeft_toLeftOf="@id/queen_text"/>
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_info_black_24dp"
         android:id="@+id/bishop_icon"
+        android:textSize="20sp"
         android:contentDescription="@string/chess_promotion_bishop"
         android:layout_marginEnd="16dp"
-
         app:layout_constraintTop_toTopOf="@id/bishop_text"
         app:layout_constraintBottom_toBottomOf="@id/bishop_text"
         app:layout_constraintRight_toLeftOf="@id/bishop_text"/>
@@ -81,7 +76,6 @@
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
         android:id="@+id/dividing_line_2"
-
         android:layout_marginTop="8dp"
         android:layout_marginEnd="30dp"
         app:layout_constraintTop_toBottomOf="@id/bishop_text"
@@ -94,18 +88,17 @@
         android:id="@+id/knight_text"
         android:text="@string/chess_promotion_knight"
         android:textSize="20sp"
-
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/dividing_line_2"
         app:layout_constraintLeft_toLeftOf="@id/queen_text"/>
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/knight_icon"
+        android:textSize="20sp"
         android:contentDescription="@string/chess_promotion_knight"
         android:layout_marginEnd="16dp"
-        app:srcCompat="@drawable/vd_help_black_24px"
         app:layout_constraintRight_toLeftOf="@id/knight_text"
         app:layout_constraintTop_toTopOf="@id/knight_text"
         app:layout_constraintBottom_toBottomOf="@id/knight_text"/>
@@ -128,18 +121,17 @@
         android:id="@+id/rook_text"
         android:text="@string/chess_promotion_rook"
         android:textSize="20sp"
-
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/dividing_line_3"
         app:layout_constraintLeft_toLeftOf="@id/queen_text"/>
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/rook_icon"
+        android:textSize="20sp"
         android:contentDescription="@string/chess_promotion_rook"
         android:layout_marginEnd="16dp"
-        app:srcCompat="@drawable/vd_settings_black_24px"
         app:layout_constraintTop_toTopOf="@id/rook_text"
         app:layout_constraintBottom_toBottomOf="@id/rook_text"
         app:layout_constraintRight_toLeftOf="@id/rook_text"/>

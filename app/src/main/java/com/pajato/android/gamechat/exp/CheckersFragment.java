@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,8 +39,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.R.color.white;
+import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.R.color.colorAccent;
+import static com.pajato.android.gamechat.R.color.colorPrimary;
+import static com.pajato.android.gamechat.R.color.colorLightGray;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
@@ -55,8 +59,7 @@ import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
  * @author Bryan Scott
  */
 public class CheckersFragment extends BaseExperienceFragment {
-    // We refer to the two sides as primary and secondary to differentiate between the two players.
-    // (Primary pieces belong to player1, secondary belong to player 2).
+
     public static final String PRIMARY_PIECE = "pp";
     public static final String PRIMARY_KING = "pk";
     public static final String SECONDARY_PIECE = "sp";
@@ -120,12 +123,10 @@ public class CheckersFragment extends BaseExperienceFragment {
 
         // Color the player icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
-        playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-                PorterDuff.Mode.SRC_ATOP);
+        playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
 
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
-        playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorAccent),
-                PorterDuff.Mode.SRC_ATOP);
+        playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
 
     /** Handle taking the foreground by updating the UI based on the current experience. */
@@ -407,7 +408,8 @@ public class CheckersFragment extends BaseExperienceFragment {
     }
 
     // Set up an image button which will be a cell in the game board
-    private TextView makeBoardButton(int index, int sideSize, Map<String, String> board, String pieceType) {
+    private TextView makeBoardButton(final int index, final int sideSize,
+                                     final Map<String, String> board, final String pieceType) {
         TextView currentTile = new TextView(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
@@ -429,20 +431,19 @@ public class CheckersFragment extends BaseExperienceFragment {
         currentTile.setTypeface(null, Typeface.BOLD);
         currentTile.setGravity(Gravity.CENTER);
 
-        // Handle the checkerboard positions.
-        boolean isEven = index % 2 == 0;
-
         // Create the checkerboard pattern on the button backgrounds.
+        boolean isEven = index % 2 == 0;
         if (isEvenEvenOrOddOdd(index, isEven)) {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.white));
+            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), white));
             currentTile.setText(" ");
         } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorLightGray));
+            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), colorLightGray));
             currentTile.setText(" ");
         }
 
         // If the tile is meant to contain a board piece at the start of play, give it a piece.
-        if (containsSecondaryPiece(index, isEven) || (pieceType.equals(SECONDARY_PIECE) || pieceType.equals(SECONDARY_KING))) {
+        if (containsSecondaryPiece(index, isEven) ||
+                (pieceType.equals(SECONDARY_PIECE) || pieceType.equals(SECONDARY_KING))) {
             if (pieceType.equals(SECONDARY_KING)) {
                 currentTile.setText(KING_UNICODE);
             } else {
@@ -454,7 +455,8 @@ public class CheckersFragment extends BaseExperienceFragment {
             } else {
                 board.put(buttonTag, SECONDARY_PIECE);
             }
-        } else if (containsPrimaryPiece(index, isEven) || (pieceType.equals(PRIMARY_PIECE) || pieceType.equals(PRIMARY_KING))) {
+        } else if (containsPrimaryPiece(index, isEven) ||
+                (pieceType.equals(PRIMARY_PIECE) || pieceType.equals(PRIMARY_KING))) {
             if (pieceType.equals(PRIMARY_KING)) {
                 currentTile.setText(KING_UNICODE);
             } else {

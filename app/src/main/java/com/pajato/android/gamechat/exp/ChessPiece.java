@@ -2,12 +2,9 @@ package com.pajato.android.gamechat.exp;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.pajato.android.gamechat.R;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.R.attr.name;
 
 /**
  * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
@@ -27,16 +24,16 @@ public class ChessPiece {
     private static final String UC_KING = "\u2654";
 
     // Unicode value for queen
-    private static final String UC_QUEEN = "\u2655";
+    static final String UC_QUEEN = "\u2655";
 
     // Unicode value for bishop
-    private static final String UC_BISHOP = "\u2657";
+    static final String UC_BISHOP = "\u2657";
 
     // Unicode value for knight
-    private static final String UC_KNIGHT = "\u2658";
+    static final String UC_KNIGHT = "\u2658";
 
     // Unicode value for rook
-    private static final String UC_ROOK = "\u2656";
+    static final String UC_ROOK = "\u2656";
 
     // Unicode value for pawn
     private static final String UC_PAWN = "\u2659";
