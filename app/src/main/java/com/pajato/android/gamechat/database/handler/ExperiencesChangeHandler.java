@@ -43,8 +43,7 @@ import static com.pajato.android.gamechat.event.MessageChangeEvent.REMOVED;
  *
  * @author Paul Michael Reilly
  */
-public class ExperiencesChangeHandler extends DatabaseEventHandler
-        implements ChildEventListener {
+public class ExperiencesChangeHandler extends DatabaseEventHandler implements ChildEventListener {
 
     // Public constants.
 
