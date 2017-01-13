@@ -43,7 +43,7 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.exp.ExperienceFragment;
-import com.pajato.android.gamechat.exp.GameManager;
+import com.pajato.android.gamechat.exp.ExpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -273,7 +273,7 @@ public class MainActivity extends BaseActivity
         DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
-        GameManager.instance.init();
+        ExpManager.instance.init();
     }
 
     /** Return the file where logcat data has been placed, null if no data is available. */

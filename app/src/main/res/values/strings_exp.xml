@@ -9,7 +9,6 @@
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>
-    <string name="NewGame">New Game</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>

@@ -42,7 +42,7 @@ import static com.pajato.android.gamechat.exp.ExpFragmentType.signedOut;
  *
  * @author Bryan Scott
  */
-public enum GameManager {
+public enum ExpManager {
     instance;
 
     // Public instance variables.

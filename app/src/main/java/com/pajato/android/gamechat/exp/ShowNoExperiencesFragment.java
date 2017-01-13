@@ -42,7 +42,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                GameManager.instance.startNextFragment(getActivity());
+                ExpManager.instance.startNextFragment(getActivity());
                 break;
             default:
                 break;
