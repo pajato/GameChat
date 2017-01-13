@@ -24,7 +24,8 @@ http://www.gnu.org/licenses
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name="android.support.multidex.MultiDexApplication">
         <provider
             android:authorities="com.pajato.fileprovider"
             android:name="android.support.v4.content.FileProvider"

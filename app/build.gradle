@@ -14,18 +14,13 @@ android {
         versionName "1.0-alpha"
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            // Run code coverage reports by default on debug builds.
-            minifyEnabled true
-            useProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled = true
         }
     }
@@ -39,10 +34,14 @@ android {
 
     lintOptions {
         disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
-        warning 'RestrictedApi', 'GradleCompatible'
+
+        warning 'RestrictedApi', 'GradleCompatible', 'InvalidPackage'
         abortOnError true
     }
 
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
 }
 
 gradle.projectsEvaluated {
@@ -56,6 +55,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibraryVersion"
     compile "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha6'
+    compile 'com.android.support:multidex:1.0.1'
 
     // Google
     compile "com.google.android.gms:play-services-ads:$rootProject.ext.gmsVersion"
