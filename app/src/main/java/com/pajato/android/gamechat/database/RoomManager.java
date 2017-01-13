@@ -50,7 +50,11 @@ public enum RoomManager {
     // Public class constants.
 
     // Database paths, often used as format strings.
+
+    /** The Firebase database path to the room objects. */
     public static final String ROOMS_PATH = GroupManager.GROUPS_PATH + "%s/rooms/";
+
+    /** The Firebase database path to the room profile object. */
     public static final String ROOM_PROFILE_PATH = ROOMS_PATH + "%s/profile/";
 
     // Private class constants.
@@ -67,13 +71,13 @@ public enum RoomManager {
 
     /** Return a room push key resulting from persisting the given room on the database. */
     public void createRoomProfile(final Room room) {
-        // Ensure that a valid group key exists.  Abort quietly (for now) if not.
-        // TODO: do something about a null group key.
+        // Ensure that the room is valid.  Abort if not, otherwise persist the room and set a
+        // watcher on it.
         if (room.groupKey == null || room.key == null) return;
-        setRoomProfileWatcher(room.groupKey, room.key);
         String profilePath = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
         room.createTime = new Date().getTime();
         DBUtils.instance.updateChildren(profilePath, room.toMap());
+        setWatcher(room.groupKey, room.key);
     }
 
     /** Return the "Me" room or null if there is no such room for one reason or another. */
@@ -141,7 +145,7 @@ public enum RoomManager {
     }
 
     /** Setup database listeners for the room profile and the experience profiles in the room. */
-    public void setRoomProfileWatcher(final String groupKey, final String roomKey) {
+    public void setWatcher(final String groupKey, final String roomKey) {
         // Determine if the room has a profile change watcher.  If so, abort, if not, then set one.
         String path = RoomManager.instance.getRoomProfilePath(groupKey, roomKey);
         String name = DBUtils.instance.getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
