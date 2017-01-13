@@ -86,7 +86,7 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
-        if (GameManager.instance.getCurrent() != ExpType.chess.ordinal()) return;
+        if (ExpManager.instance.getCurrent() != ExpType.chess.ordinal()) return;
 
         // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
         // handle a snackbar action first.

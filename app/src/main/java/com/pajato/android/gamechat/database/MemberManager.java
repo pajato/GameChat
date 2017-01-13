@@ -114,7 +114,7 @@ public enum MemberManager {
         // experience watcher on the joined rooms.
         if (event.member.id.equals(AccountManager.instance.getCurrentAccountId()))
             for (String roomKey : event.member.joinList) {
-                RoomManager.instance.setRoomProfileWatcher(event.member.groupKey, roomKey);
+                RoomManager.instance.setWatcher(event.member.groupKey, roomKey);
                 MessageManager.instance.setWatcher(event.member.groupKey, roomKey);
                 ExperienceManager.instance.setWatcher(event.member.groupKey, roomKey);
             }

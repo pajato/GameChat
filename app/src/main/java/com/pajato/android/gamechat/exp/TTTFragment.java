@@ -91,7 +91,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
-        if (GameManager.instance.getCurrent() != tictactoe.ordinal()) return;
+        if (ExpManager.instance.getCurrent() != tictactoe.ordinal()) return;
 
         // The event has been initiated by a FAM menu item.  It is either a snackbar action (start a
         // new game) or a menu (FAM or Player2) entry.  Detect and handle a snackbar action first.

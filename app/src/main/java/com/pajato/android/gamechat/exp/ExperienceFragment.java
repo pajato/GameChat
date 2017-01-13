@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.exp;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -26,10 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -62,7 +59,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
-        GameManager.instance.startNextFragment(this.getActivity());
+        ExpManager.instance.startNextFragment(this.getActivity());
     }
 
     /** Process a button click event with a tag value. */
@@ -77,7 +74,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
         // The index represents an experience type.  Start the appropriate fragment after
         // dismissing the FAM.
         FabManager.game.dismissMenu(this);
-        GameManager.instance.startNextFragment(getActivity(), ExpFragmentType.values()[index]);
+        ExpManager.instance.startNextFragment(getActivity(), ExpFragmentType.values()[index]);
     }
 
     /** Process a given button click event looking for one on the game fab button. */
@@ -108,7 +105,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
                 break;
         }
 
-        if (type != null) GameManager.instance.startNextFragment(getActivity(), type);
+        if (type != null) ExpManager.instance.startNextFragment(getActivity(), type);
     }
 
     /** Handle the options menu by inflating it. */
@@ -151,7 +148,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
     @Override public void onResume() {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
-        GameManager.instance.startNextFragment(getActivity());
+        ExpManager.instance.startNextFragment(getActivity());
     }
 
     // Private instance methods.

@@ -86,7 +86,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Determine if this event is for this fragment.  Abort if not.
-        if (GameManager.instance.getCurrent() != ExpFragmentType.checkers.ordinal()) return;
+        if (ExpManager.instance.getCurrent() != ExpFragmentType.checkers.ordinal()) return;
 
         // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
         // handle a snackbar action first.
