@@ -1,13 +1,11 @@
 package com.pajato.android.gamechat.exp.model;
 
-import com.pajato.android.gamechat.exp.ChessPiece;
-import com.pajato.android.gamechat.exp.ChessPiece.PieceType;
-import com.pajato.android.gamechat.exp.ChessPiece.ChessTeam;
+import com.pajato.android.gamechat.exp.fragment.ChessPiece;
+import com.pajato.android.gamechat.exp.fragment.ChessPiece.PieceType;
+import com.pajato.android.gamechat.exp.fragment.ChessPiece.ChessTeam;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.R.attr.type;
 
 /**
  * Provide a POJO representing a Chess board and methods to modify the board. The basic board is

@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.exp;
+package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -38,6 +38,11 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.ExpFragmentType;
+import com.pajato.android.gamechat.exp.ExpManager;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;

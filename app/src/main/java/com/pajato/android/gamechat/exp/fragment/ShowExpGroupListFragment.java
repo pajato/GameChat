@@ -15,32 +15,32 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.exp;
+package com.pajato.android.gamechat.exp.fragment;
 
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowSignedOutFragment extends BaseExperienceFragment {
+public class ShowExpGroupListFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
-        logEvent("onClick (showSignedOut)");
+        logEvent("onClick (showExpGroupList)");
     }
 
-    /** Establish the layout file to show that the user is signed out and cannot chat. */
-    @Override public void onCreate(Bundle bundle) {
+    @Override
+    public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_exp_signed_out);
+        super.setLayoutId(R.layout.fragment_game_no_games);
     }
 
-    /** Initialize the fragment by setting up the FAB/FAM. */
+    /** Initialize the fragment by setting in the FAB. */
     @Override public void onStart() {
-        // Set up the FAB.
         super.onStart();
         FabManager.game.init(this);
     }

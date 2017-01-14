@@ -1,4 +1,4 @@
-package com.pajato.android.gamechat.exp;
+package com.pajato.android.gamechat.exp.fragment;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;

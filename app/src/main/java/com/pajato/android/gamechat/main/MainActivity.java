@@ -42,7 +42,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.exp.ExperienceFragment;
+import com.pajato.android.gamechat.exp.fragment.ExperienceFragment;
 import com.pajato.android.gamechat.exp.ExpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
