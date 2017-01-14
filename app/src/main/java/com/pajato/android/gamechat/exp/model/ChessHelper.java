@@ -1,12 +1,10 @@
 package com.pajato.android.gamechat.exp.model;
 
-import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.exp.ChessPiece;
-import com.pajato.android.gamechat.exp.ChessPiece.ChessTeam;
+import com.pajato.android.gamechat.exp.fragment.ChessPiece.ChessTeam;
 
 import java.util.ArrayList;
 
-import static com.pajato.android.gamechat.exp.ChessPiece.PieceType.ROOK;
+import static com.pajato.android.gamechat.exp.fragment.ChessPiece.PieceType.ROOK;
 
 /**
  * Helper class to determine for chess features.

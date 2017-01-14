@@ -76,7 +76,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     // Private instance variables.
 
     /** The experience being enjoyed. */
-    Experience mExperience;
+    protected Experience mExperience;
 
     // Public constructors.
 

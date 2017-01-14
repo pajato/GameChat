@@ -36,7 +36,7 @@ import com.pajato.android.gamechat.event.TagClickEvent;
  * @author Bryan Scott
  * @author Paul Michael Reilly
  */
-enum NotificationManager {
+public enum NotificationManager {
     instance;
 
     // Public instance methods.

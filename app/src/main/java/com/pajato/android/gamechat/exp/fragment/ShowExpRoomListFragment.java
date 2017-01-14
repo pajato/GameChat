@@ -15,13 +15,14 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.exp;
+package com.pajato.android.gamechat.exp.fragment;
 
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 

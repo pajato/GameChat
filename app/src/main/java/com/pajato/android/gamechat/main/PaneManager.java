@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatFragment;
-import com.pajato.android.gamechat.exp.ExperienceFragment;
+import com.pajato.android.gamechat.exp.fragment.ExperienceFragment;
 
 import java.util.ArrayList;
 import java.util.List;

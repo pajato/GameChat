@@ -15,37 +15,34 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.exp;
+package com.pajato.android.gamechat.exp.fragment;
 
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
-import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
+public class ShowSignedOutFragment extends BaseExperienceFragment {
 
-public class ShowNoExperiencesFragment extends BaseExperienceFragment {
-
-    // Public instance methods.
-
-    /** Establish the layout file to indicate that no experiences are available. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_game_no_games);
+    @Subscribe public void onClick(final ClickEvent event) {
+        // todo add some code here.
+        logEvent("onClick (showSignedOut)");
     }
 
-    /** Handle an experience profile list change event. */
-    @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {
-        switch (event.changeType) {
-            case CHANGED:
-            case NEW:
-                ExpManager.instance.startNextFragment(getActivity());
-                break;
-            default:
-                break;
-        }
+    /** Establish the layout file to show that the user is signed out and cannot chat. */
+    @Override public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        super.setLayoutId(R.layout.fragment_exp_signed_out);
+    }
+
+    /** Initialize the fragment by setting up the FAB/FAM. */
+    @Override public void onStart() {
+        // Set up the FAB.
+        super.onStart();
+        FabManager.game.init(this);
     }
 }

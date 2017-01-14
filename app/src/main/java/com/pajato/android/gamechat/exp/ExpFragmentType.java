@@ -17,6 +17,17 @@
 
 package com.pajato.android.gamechat.exp;
 
+import com.pajato.android.gamechat.exp.fragment.CheckersFragment;
+import com.pajato.android.gamechat.exp.fragment.ChessFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowExpGroupListFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowExpListFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowExpRoomListFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowExpTypeListFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowOfflineFragment;
+import com.pajato.android.gamechat.exp.fragment.ShowSignedOutFragment;
+import com.pajato.android.gamechat.exp.fragment.TTTFragment;
+
 /**
  * Defines the fragments that can be shown in the experience (aka "games") panel.
  *
