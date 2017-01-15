@@ -114,6 +114,14 @@ public enum ExpManager {
         // identifies the group, room and the list of experience profiles.
         String roomKey = roomMap.keySet().iterator().next();
         List<Experience> experienceList = new ArrayList<>(roomMap.get(roomKey).values());
+
+        // If we have a signed in user with multiple experience in a single room and the current
+        // experience is one of the experiences in said room, just stick with it
+        if(experienceList.contains(exp)) {
+            ExpFragmentType type = ExpFragmentType.values()[mCurrentFragment];
+            return new Dispatcher<>(type, exp);
+        }
+
         if (experienceList.size() > 1)
             return new Dispatcher<>(expList, exp.getGroupKey(), roomKey, experienceList);
 
