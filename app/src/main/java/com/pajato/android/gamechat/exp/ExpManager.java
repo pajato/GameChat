@@ -117,7 +117,7 @@ public enum ExpManager {
 
         // If we have a signed in user with multiple experience in a single room and the current
         // experience is one of the experiences in said room, just stick with it
-        if(experienceList.contains(exp)) {
+        if (experienceList.contains(exp)) {
             ExpFragmentType type = ExpFragmentType.values()[mCurrentFragment];
             return new Dispatcher<>(type, exp);
         }
