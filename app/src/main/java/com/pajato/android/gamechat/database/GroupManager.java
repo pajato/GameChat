@@ -111,7 +111,9 @@ public enum GroupManager {
                 // Add the header item followed by all the group items.
                 result.add(new ChatListItem(new DateHeaderItem(dht)));
                 for (String groupKey : groupList) {
-                    result.add(new ChatListItem(new GroupItem(groupKey)));
+                    if(!(groupKey.equals(AccountManager.instance.getMeGroup()))) {
+                        result.add(new ChatListItem(new GroupItem(groupKey)));
+                    }
                 }
             }
         }

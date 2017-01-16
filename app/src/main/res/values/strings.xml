@@ -37,6 +37,9 @@
     <string name="navigation_drawer_label_favorite_chats">Favorite Chats</string>
     <string name="navigation_drawer_label_recent_chat">Recent Chat</string>
     <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
+    <string name="navigation_drawer_label_your_groups">Your Group List</string>
+    <string name="navigation_drawer_label_your_room">Your Private Room</string>
+    <string name="navigation_drawer_label_yours">Your Groups</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
     <string name="switch_account">\u25bc Switch account</string>

@@ -24,14 +24,17 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckedTextView;
 
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.ChatManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -55,6 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
 /**
@@ -134,9 +138,15 @@ public class MainActivity extends BaseActivity
     /** Process a navigation menu item click by posting a click event. */
     @Override public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
+        String format =  "Navigation Item Selected on view: {%s}";
+        Log.v(TAG, String.format(Locale.US, format, item.getClass().getSimpleName()));
         switch (item.getItemId()) {
+            case R.id.nav_me_room: ChatManager.instance.startMeRoom(this);
+                break;
+            case R.id.nav_groups: ChatManager.instance.startGroupList(this);
+                break;
             default:
-                // Todo: add menu button handling as a future feature.
+                // Todo: add more menu button handling as a future feature.
                 break;
         }
         AppEventManager.instance.post(new NavDrawerOpenEvent(this));
@@ -274,6 +284,7 @@ public class MainActivity extends BaseActivity
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         ExpManager.instance.init();
+        NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
     }
 
     /** Return the file where logcat data has been placed, null if no data is available. */

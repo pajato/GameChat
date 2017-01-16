@@ -81,6 +81,8 @@ public enum NavigationManager {
         // event manager.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(activity);
+        NavigationView footer = (NavigationView) activity.findViewById(R.id.nav_footer);
+        footer.setNavigationItemSelectedListener(activity);
     }
 
     /** Process a given button click event handling the nav drawer closing. */
