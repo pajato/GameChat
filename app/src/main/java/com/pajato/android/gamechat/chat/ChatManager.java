@@ -74,6 +74,23 @@ public enum ChatManager {
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
+    /** Directly navigate to the Me Room. Return true iff the fragment is started. */
+    public boolean startMeRoom(final FragmentActivity context) {
+        Room meRoom = RoomManager.instance.getMeRoom();
+        if(meRoom == null) return false;
+
+        List<Message> list = MessageManager.instance.getMessageList(meRoom.groupKey, meRoom.key);
+        Dispatcher<ChatFragmentType, Message> dispatcher =
+                new Dispatcher<>(messageList, meRoom.groupKey, meRoom.key, list);
+
+        return startNextFragment(context, dispatcher);
+    }
+
+    public boolean startGroupList(final FragmentActivity context) {
+        Dispatcher<ChatFragmentType, Message> dispatcher = new Dispatcher<>(groupList);
+        return startNextFragment(context, dispatcher);
+    }
+
     /** Attach a drill down fragment identified by a type, creating that fragment as necessary. */
     public void chainFragment(final ChatFragmentType type, final FragmentActivity context,
                               final ChatListItem item) {

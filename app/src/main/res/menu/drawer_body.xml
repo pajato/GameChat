@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/navigation_drawer_label_yours">
+        <menu>
+            <group>
+                <item
+                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
+                    android:id="@+id/nav_groups"
+                    android:title="@string/navigation_drawer_label_your_groups"/>
+                <item
+                    android:icon="@drawable/ic_account_circle_black_24dp"
+                    android:id="@+id/nav_me_room"
+                    android:title="@string/navigation_drawer_label_your_room"/>
+            </group>
+        </menu>
+    </item>
     <item android:title="@string/navigation_drawer_label_favorite_chats"
         android:id="@+id/nav_favorite_chats">
         <menu>
@@ -27,19 +41,11 @@
             </group>
         </menu>
     </item>
-        <group
-        android:orderInCategory="100">
-        <item
-            android:title="">
-        </item>
-        <item
-            android:title="">
-        </item>
-        <item
-            android:title="">
-        </item>
-        <item
-            android:title="">
-        </item>
+        <group android:orderInCategory="100">
+            <item android:title=""/>
+            <item android:title=""/>
+            <item android:title=""/>
+            <item android:title=""/>
+            <item android:title=""/>
     </group>
 </menu>
