@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import com.pajato.android.gamechat.R;
@@ -59,7 +60,10 @@ public class CreateGroupFragment extends BaseCreateFragment {
         RadioGroup accessControl = (RadioGroup) mLayout.findViewById(R.id.AccessControl);
         accessControl.setVisibility(View.GONE);
 
-        // Creaate the group to be configure and, optionally, persisted.
+        EditText hint = (EditText) mLayout.findViewById(R.id.NameText);
+        hint.setText(R.string.CreateGroupNameHint);
+
+        // Create the group to be configure and, optionally, persisted.
         mGroup = new Group();
         mGroup.name = getDefaultName();
         mGroup.roomList = new ArrayList<>();
