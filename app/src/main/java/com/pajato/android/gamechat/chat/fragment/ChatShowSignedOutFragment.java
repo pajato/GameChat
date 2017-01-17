@@ -23,7 +23,7 @@ import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
@@ -36,12 +36,14 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+
 /**
  * Provide a fragment to deal with no account or a signed out account.
  *
  * @author Paul Michael Reilly
  */
-public class ShowSignedOutFragment extends BaseChatFragment {
+public class ChatShowSignedOutFragment extends BaseChatFragment {
 
     // Public constants.
 
@@ -95,7 +97,7 @@ public class ShowSignedOutFragment extends BaseChatFragment {
             mTimer.cancel();
             ProgressManager.instance.hide();
         }
-        ChatManager.instance.startNextFragment(this.getActivity());
+        DispatchManager.instance.startNextFragment(this.getActivity(), chat);
     }
 
     /** Establish the layout file to show that the user is signed out and cannot chat. */

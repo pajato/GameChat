@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DBUtils;
@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatFragmentType.createGroup;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
+import static com.pajato.android.gamechat.common.FragmentType.createGroup;
+import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 
 /**
@@ -48,7 +48,7 @@ import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
  *
  * @author Paul Michael Reilly
  */
-public class ShowGroupListFragment extends BaseChatFragment {
+public class ChatShowGroupsFragment extends BaseChatFragment {
 
     // Public class constants.
 
@@ -73,10 +73,10 @@ public class ShowGroupListFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                ChatManager.instance.chainFragment(createGroup, getActivity(), mItem);
+                DispatchManager.instance.chainFragment(createGroup, getActivity());
                 break;
             case R.string.JoinRoomsMenuTitle:
-                ChatManager.instance.chainFragment(joinRoom, getActivity(), mItem);
+                DispatchManager.instance.chainFragment(joinRoom, getActivity());
                 break;
             default:
                 // ...

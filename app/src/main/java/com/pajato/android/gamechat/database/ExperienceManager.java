@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ExperiencesChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -28,8 +29,10 @@ import com.pajato.android.gamechat.exp.Experience;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -78,6 +81,16 @@ public enum ExperienceManager {
         DBUtils.instance.updateChildren(path, experience.toMap());
     }
 
+    /** Return the number of experiences for the givne type. */
+    public List<Experience> getExperienceList(FragmentType type) {
+        // First approximation is to generate the count brute force.
+        List<Experience> result = new ArrayList<>();
+        for (Experience exp : experienceMap.values()) {
+            if (exp.getExperienceType() == type.expType) result.add(exp);
+        }
+        return result;
+    }
+
     /** Return a room push key to use with a subsequent room object persistence. */
     public String getExperienceKey() {
         return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
@@ -113,4 +126,5 @@ public enum ExperienceManager {
         DatabaseEventHandler handler = new ExperiencesChangeHandler(name, path);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
+
 }

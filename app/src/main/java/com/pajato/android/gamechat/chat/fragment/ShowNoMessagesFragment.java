@@ -21,11 +21,12 @@ import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 
@@ -44,7 +45,7 @@ public class ShowNoMessagesFragment extends BaseChatFragment {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                ChatManager.instance.startNextFragment(getActivity());
+                DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
             default:
                 break;

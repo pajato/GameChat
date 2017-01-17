@@ -26,11 +26,11 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowExpRoomListFragment extends BaseExperienceFragment {
+public class ShowExperiencesFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
-        logEvent("onClick (showExpRoomList)");
+        logEvent("onClick (showExp)");
     }
 
     /** Set the layout file. */

@@ -26,16 +26,17 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowExpGroupListFragment extends BaseExperienceFragment {
+public class ExpShowRoomsFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
-        logEvent("onClick (showExpGroupList)");
+        logEvent("onClick (showExpRoomList)");
     }
 
-    @Override
-    public void onCreate(Bundle bundle) {
+    /** Set the layout file. */
+    @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        //TODO: Establish better layout for the list of games. Potentially like fragment_chat_list?
         super.setLayoutId(R.layout.fragment_game_no_games);
     }
 
