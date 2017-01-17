@@ -18,15 +18,20 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowSignedOutFragment extends BaseExperienceFragment {
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+
+public class ExpShowSignedOutFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
@@ -37,6 +42,12 @@ public class ShowSignedOutFragment extends BaseExperienceFragment {
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_exp_signed_out);
+    }
+
+    /** Handle a group profile change by trying again to start a better fragment. */
+    @Subscribe public void onExperienceChange(@NonNull final ExperienceChangeEvent event) {
+        // An experience event has occurred.  Ensure that we are in the right fragment.
+        DispatchManager.instance.startNextFragment(this.getActivity(), exp);
     }
 
     /** Initialize the fragment by setting up the FAB/FAM. */

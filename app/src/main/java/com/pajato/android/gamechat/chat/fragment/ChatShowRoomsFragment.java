@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.DBUtils;
@@ -35,9 +35,9 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.chat.ChatFragmentType.createGroup;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.createRoom;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
+import static com.pajato.android.gamechat.common.FragmentType.createGroup;
+import static com.pajato.android.gamechat.common.FragmentType.createRoom;
+import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.  This is the
@@ -46,7 +46,7 @@ import static com.pajato.android.gamechat.chat.ChatFragmentType.joinRoom;
  *
  * @author Paul Michael Reilly
  */
-public class ShowRoomListFragment extends BaseChatFragment {
+public class ChatShowRoomsFragment extends BaseChatFragment {
 
     // Public class constants.
 
@@ -71,13 +71,13 @@ public class ShowRoomListFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                ChatManager.instance.chainFragment(createGroup, getActivity(), mItem);
+                DispatchManager.instance.chainFragment(createGroup, getActivity());
                 break;
             case R.string.CreateRoomMenuTitle:
-                ChatManager.instance.chainFragment(createRoom, getActivity(), mItem);
+                DispatchManager.instance.chainFragment(createRoom, getActivity());
                 break;
             case R.string.JoinRoomsMenuTitle:
-                ChatManager.instance.chainFragment(joinRoom, getActivity(), mItem);
+                DispatchManager.instance.chainFragment(joinRoom, getActivity());
                 break;
             default:
                 // ...

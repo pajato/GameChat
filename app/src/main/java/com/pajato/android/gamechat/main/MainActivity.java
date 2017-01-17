@@ -30,15 +30,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckedTextView;
 
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.chat.fragment.ChatFragment;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.chat.fragment.ChatFragment;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -46,7 +44,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.exp.fragment.ExperienceFragment;
-import com.pajato.android.gamechat.exp.ExpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -58,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
 /**
@@ -121,7 +117,7 @@ public class MainActivity extends BaseActivity
             case R.id.signIn:
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
-                AppEventManager.instance.post(new NavDrawerOpenEvent(this));
+                AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 break;
             default:
                 // Ignore everything else.
@@ -140,16 +136,7 @@ public class MainActivity extends BaseActivity
         // Handle navigation view item clicks here by posting a click event and closing the drawer.
         String format =  "Navigation Item Selected on view: {%s}";
         Log.v(TAG, String.format(Locale.US, format, item.getClass().getSimpleName()));
-        switch (item.getItemId()) {
-            case R.id.nav_me_room: ChatManager.instance.startMeRoom(this);
-                break;
-            case R.id.nav_groups: ChatManager.instance.startGroupList(this);
-                break;
-            default:
-                // Todo: add more menu button handling as a future feature.
-                break;
-        }
-        AppEventManager.instance.post(new NavDrawerOpenEvent(this));
+        AppEventManager.instance.post(new NavDrawerOpenEvent(this, item));
         return true;
     }
 
@@ -283,7 +270,6 @@ public class MainActivity extends BaseActivity
         DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
-        ExpManager.instance.init();
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
     }
 

@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
@@ -37,6 +38,9 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+
+/** Provide a base class for fragments that create something. */
 public abstract class BaseCreateFragment extends BaseChatFragment {
 
     // Public enum.
@@ -68,30 +72,36 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
         // The event appears to be expected.  Confirm by finding the selector check view.
         switch (event.view.getId()) {
-            case R.id.SaveButton:
-                // Process the group (validate and persist it) and be done with the activity.
+            case R.id.SaveButton: // Validate and persist the group, and be done with the activity.
                 Account account = AccountManager.instance.getCurrentAccount();
-                if (account != null) save(account);
-                else abort("The User account does not exist.  Aborting.");
-                ChatManager.instance.startNextFragment(getActivity());
+                if (account != null)
+                    save(account);
+                else
+                    abort("The User account does not exist.  Aborting.");
+                DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            case R.id.ClearNameButton:
-                // Clear the group name edit text field by setting it to contain the empty string.
+
+            case R.id.ClearNameButton: // Clear the group name edit text field.
                 EditText editText = (EditText) mLayout.findViewById(R.id.NameText);
                 if (editText != null) editText.setText("");
                 break;
+
             case R.id.AddMembers:
                 showFutureFeatureMessage(R.string.InviteMembersFeature);
                 break;
+
             case R.id.SettableIconButton:
                 showFutureFeatureMessage(R.string.SetCreateIconFeature);
                 break;
+
             case R.id.PublicButton:
                 setType(Room.PUBLIC);
                 break;
+
             case R.id.PrivateButton:
                 setType(Room.PRIVATE);
                 break;
+
             default:
                 // Ignore everything else.
                 break;

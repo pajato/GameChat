@@ -26,7 +26,7 @@ http://www.gnu.org/licenses
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/gameFragmentContainer"
+        android:id="@+id/expFragmentContainer"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 

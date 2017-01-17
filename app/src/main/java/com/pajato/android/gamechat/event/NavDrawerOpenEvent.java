@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.event;
 
 import android.app.Activity;
+import android.view.MenuItem;
 
 /**
  * Provides a nav drawer open event class. This informs the nav drawer manager so that the drawer
@@ -32,11 +33,14 @@ public class NavDrawerOpenEvent {
     /** The activity detecting the event. */
     public Activity activity;
 
+    /** The menu item payload for the event. */
+    public MenuItem item;
+
     // Public constructors.
 
     /** Build the instance with a given activity. */
-    public NavDrawerOpenEvent(final Activity activity) {
+    public NavDrawerOpenEvent(final Activity activity, final MenuItem item) {
         this.activity = activity;
+        this.item = item;
     }
-
 }

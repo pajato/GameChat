@@ -39,9 +39,6 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.ExpFragmentType;
-import com.pajato.android.gamechat.exp.ExpManager;
-import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
@@ -57,9 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.FragmentType.checkers;
+import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
@@ -95,11 +91,12 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
-        // Determine if this event is for this fragment.  Abort if not.
-        if (ExpManager.instance.getCurrent() != tictactoe.ordinal()) return;
-
-        // The event has been initiated by a FAM menu item.  It is either a snackbar action (start a
-        // new game) or a menu (FAM or Player2) entry.  Detect and handle a snackbar action first.
+        // Determine if this fragment is active, i.e. is running in the foreground.  Abort if not,
+        // otherwise process the event, which has been initiated by a FAM menu item.  It is either
+        // a snackbar action (start a new game) or a menu (FAM or Player2) entry.  Detect and
+        // handle a snackbar action first.
+        if (!mActive)
+            return;
         Object tag = event.view.getTag();
         FabManager.game.dismissMenu(this);
         if (isPlayAgain(tag, TAG)) handleNewGame();
@@ -194,6 +191,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         String roomKey = AccountManager.instance.getMeRoom();
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
+        mExperience = model;
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
@@ -234,8 +232,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    @Override
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
+    @Override protected List<Account> getPlayers(final Dispatcher dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;

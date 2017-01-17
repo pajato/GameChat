@@ -20,29 +20,24 @@ package com.pajato.android.gamechat.exp.fragment;
 import android.os.Bundle;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-public class ShowExpListFragment extends BaseExperienceFragment {
+public class ExpShowOfflineFragment extends BaseExperienceFragment {
 
+    // Public instance methods.
+
+    /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // todo add some code here.
-        logEvent("onClick (showExp)");
+        // Use a logging placeholder.
+        logEvent("onClick (showOffline)");
     }
 
-    /** Set the layout file. */
+    /** Establish the layout file to show that the app is offline due to network loss. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        //TODO: Establish better layout for the list of games. Potentially like fragment_chat_list?
-        super.setLayoutId(R.layout.fragment_game_no_games);
-    }
-
-    /** Initialize the fragment by setting in the FAB. */
-    @Override public void onStart() {
-        super.onStart();
-        FabManager.game.init(this);
+        super.setLayoutId(R.layout.fragment_game_offline);
     }
 }
