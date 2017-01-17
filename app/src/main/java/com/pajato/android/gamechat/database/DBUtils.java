@@ -119,7 +119,7 @@ public enum DBUtils {
         return String.format(Locale.US, "%s{%s}", base, modelName);
     }
 
-    /** Return a, poissibly null, system resource. */
+    /** Return a, possibly null, system resource. */
     public String getResource(final String key) {
         return mResourceMap.get(key);
     }

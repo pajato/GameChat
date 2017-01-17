@@ -7,6 +7,7 @@
     <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
+    <string name="InviteFriend">Send invitation</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
@@ -18,6 +19,7 @@
     <string name="PlayModeUserMenuTitle">Play a User</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
+    <string name="SendGame">Send this game</string>
     <string name="SignIn">Sign In</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
     <string name="StalemateMessage">Stalemate!</string>

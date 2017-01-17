@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provide a fragment to handle the display of the rooms available to the current user.
+ * Handle invitations to groups.
  *
  * @author Paul Michael Reilly
  */

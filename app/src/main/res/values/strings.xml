@@ -3,6 +3,8 @@
     <string name="GridRoomIconBlue">Blue room icon</string>
     <string name="GridRoomIconGray">Gray room icon</string>
     <string name="GridRoomIconGreen">Green room icon</string>
+    <string name="InviteTitle">Invite Friends to GameChat</string>
+    <string name="InviteMessage">You should check out GameChat</string>
     <string name="MenuItemFileBugReport">File Bug Report</string>
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemFeedback">Feedback</string>

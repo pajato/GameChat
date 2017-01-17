@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.ExpFragmentType;
 import com.pajato.android.gamechat.exp.ExpManager;
+import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -69,6 +70,18 @@ public class ExperienceFragment extends BaseExperienceFragment {
     @Subscribe public void onClick(final TagClickEvent event) {
         Object payload = event.view.getTag();
         if (payload == null || !(payload instanceof MenuEntry)) return;
+
+        // Handle invitation - extend app invitation, dismiss menu and return (there is no
+        // new experience to start).
+        if (((MenuEntry) payload).titleResId == R.string.InviteFriend) {
+
+            ((MainActivity)getActivity()).extendAppInvitation(null); // TODO: we need a group key here !!!???
+            FabManager.game.dismissMenu(this);
+            return;
+        } else if (((MenuEntry) payload).titleResId == R.string.SendGame) {
+            // This one is handled by the game fragment, not here (WHY??)
+            return;
+        }
 
         // Process the payload assuming it is a valid fragment type index.  Abort if wrong.
         int index = ((MenuEntry) payload).fragmentTypeIndex;
@@ -162,6 +175,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        menu.add(getNoTintEntry(R.string.InviteFriend, R.drawable.ic_email_black_24dp));
         return menu;
     }
 }
