@@ -21,6 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -73,11 +74,20 @@ public enum DispatchManager {
      * @param type The type of the fragment to drill into.  One will be created if necessary.
      * @param context The activity that will attach to the drill down fragment.
      */
-    public void chainFragment(final FragmentType type, final FragmentActivity context) {
-        // Determine if the replacement fragment has been attached yet. If not, abort, otherwise
-        // make the next fragment current and chain to it.
+    public void chainFragment(final FragmentActivity context, final FragmentType type,
+                              final ChatListItem item) {
+        // Ensure that type is valid.  Abort if not, otherwise validate the fragment, aborting if
+        // invalid.
+        if (type == null || type.kind == null)
+            return;
+        Dispatcher dispatcher = getDispatcher(type, item);
         BaseFragment fragment = getFragment(type);
-        if (fragment == null) return;
+        if (fragment == null)
+            return;
+
+        // Setup the fragment using the dispatcher and chain to the fragment such that the back
+        // arrow and a back press return to the originating fragment.
+        fragment.onSetup(context, dispatcher);
         FragmentManager manager = context.getSupportFragmentManager();
         FragmentManager.enableDebugLogging(true);
         manager.beginTransaction()
@@ -110,7 +120,7 @@ public enum DispatchManager {
         // successfully started.
         if (kind == null)
             return false;
-        Dispatcher dispatcher = getDispatcher(null, kind);
+        Dispatcher dispatcher = getDispatcher(kind);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
@@ -128,7 +138,7 @@ public enum DispatchManager {
         // dispatcher if so.
         if (type == null || type.kind == null)
             return false;
-        Dispatcher dispatcher = getDispatcher(type, type.kind);
+        Dispatcher dispatcher = getDispatcher(type, null);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
@@ -138,19 +148,24 @@ public enum DispatchManager {
      *  Return a dispatcher object for a predisposed experience type.
      *
      * @param type An predisposed experience type or null to indicate the type should be computed.
-     * @param kind The kind of fragment the dispatcher should handle, either chat or experience.
+     * @param item The chat list item carrying the group key.
      */
-    private Dispatcher getDispatcher(final FragmentType type, final DispatcherKind kind) {
+    private Dispatcher getDispatcher(final FragmentType type, final ChatListItem item) {
         // Determine if the dispatcher should be generate based on the kind, in which case a
         // suitable dispatcher will be returned, otherwise set up an experience dispatcher based
         // on the given type.
-        if (type == null) return getDispatcher(kind);
         switch (type) {
             case checkers:
             case chess:
-            case tictactoe:
+            case tictactoe:     // Handle an experience dispatch providing a type.
                 return new Dispatcher(type);
-            default: return new Dispatcher(null);
+
+            case messageList:
+            case chatRoomList:  // Handle a chat dispatch providing both a type and an item.
+                return new Dispatcher(type, item);
+
+            default:            // Handle all the other types in the normal fashion.
+                return getDispatcher(type.kind);
         }
     }
 

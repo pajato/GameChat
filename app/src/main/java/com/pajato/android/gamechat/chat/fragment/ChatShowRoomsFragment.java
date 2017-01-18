@@ -71,13 +71,13 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(createGroup, getActivity());
+                DispatchManager.instance.chainFragment(getActivity(), createGroup, null);
                 break;
             case R.string.CreateRoomMenuTitle:
-                DispatchManager.instance.chainFragment(createRoom, getActivity());
+                DispatchManager.instance.chainFragment(getActivity(), createRoom, null);
                 break;
             case R.string.JoinRoomsMenuTitle:
-                DispatchManager.instance.chainFragment(joinRoom, getActivity());
+                DispatchManager.instance.chainFragment(getActivity(), joinRoom, null);
                 break;
             default:
                 // ...
