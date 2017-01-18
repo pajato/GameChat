@@ -33,15 +33,17 @@ import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
@@ -58,10 +60,10 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutCompat.VERTICAL;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.messageList;
-import static com.pajato.android.gamechat.chat.ChatFragmentType.roomList;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
+import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 import static com.pajato.android.gamechat.database.DBUtils.ChatListType.message;
 
@@ -196,22 +198,19 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** Return TRUE iff the fragment setup is handled successfully. */
     @Override protected boolean onDispatch(@NonNull final Context context,
                                            @NonNull final Dispatcher dispatcher) {
-        // Ensure that the type and payload both are consistent with a chat dispatch.
-        if (!(dispatcher.type instanceof ChatFragmentType)) return false;
-
-        // Case on the fragment type to set up the fragment item.
-        ChatFragmentType type = (ChatFragmentType) dispatcher.type;
+        // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
+        // case signalling success.  If there are no valid cases signal failure.
+        if (dispatcher.type == null) return false;
         switch (type) {
-            case groupList:
-                // A group list does not need an item.
+            case chatGroupList: // A group list does not need an item.
                 return true;
-            case messageList:
-                MessageItem messageItem = new MessageItem((Message) dispatcher.payload);
-                mItem = new ChatListItem(messageItem);
-                return true;
-            case roomList:
+            case messageList:   // The messages in a room require both the group and room keys.
                 RoomItem roomItem = new RoomItem(dispatcher.groupKey, dispatcher.roomKey);
                 mItem = new ChatListItem(roomItem);
+                return true;
+            case chatRoomList:  // The rooms in a group need the group key.
+                GroupItem groupItem = new GroupItem(dispatcher.groupKey);
+                mItem = new ChatListItem(groupItem);
                 return true;
             default:
                 return false;
@@ -220,21 +219,18 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Proces a button click that may be a chat list item click. */
     protected void processPayload(final View view) {
-        // Determine if some action needs to be taken, i.e if the button click is coming
-        // from a group or room item view.
+        // Ensure that the payload is valid.  Abort if not, otherwise determine chain to the next
+        // appropriate fragment based on the type associated with the payload.
         Object payload = view.getTag();
-        if (!(payload instanceof ChatListItem)) return;
-
-        // Action needs be taken.  Case on the item to determine what action.
+        if (!(payload instanceof ChatListItem))
+            return;
         ChatListItem item = (ChatListItem) payload;
         switch (item.type) {
-            case GROUP_ITEM_TYPE:
-                // Drill into the rooms in group.
-                ChatManager.instance.chainFragment(roomList, getActivity(), item);
+            case GROUP_ITEM_TYPE: // Drill into the rooms in group.
+                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, item);
                 break;
-            case ROOM_ITEM_TYPE:
-                // Show the messages in a room.
-                ChatManager.instance.chainFragment(messageList, getActivity(), item);
+            case ROOM_ITEM_TYPE: // Show the messages in a room.
+                DispatchManager.instance.chainFragment(getActivity(), messageList, item);
                 break;
             default:
                 break;
@@ -244,8 +240,10 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** Do a redisplay to catch potential changes that should be shown in the current view. */
     protected void redisplay() {
         FabManager.chat.init(this);
-        if (mAdView != null) mAdView.resume();
-        if (mItemListType != null) updateAdapterList();
+        if (mAdView != null)
+            mAdView.resume();
+        if (mItemListType != null)
+            updateAdapterList();
         setTitles();
     }
 

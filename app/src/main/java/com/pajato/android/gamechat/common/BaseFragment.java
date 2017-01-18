@@ -34,7 +34,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.exp.ExpFragmentType;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
@@ -57,6 +56,11 @@ public abstract class BaseFragment extends Fragment {
     /** The logcat tag. */
     private static final String TAG = BaseFragment.class.getSimpleName();
 
+    // Public instance variables.
+
+    /** The fragment type. */
+    public FragmentType type;
+
     // Protected instance variables.
 
     /** The fragment active state; set when entering onResume and cleared in onPause. */
@@ -64,6 +68,7 @@ public abstract class BaseFragment extends Fragment {
 
     /** The persisted layout view for this fragment. */
     protected View mLayout;
+
     /** The persistent layout's corresponding resource ID. */
     protected int mLayoutId;
 
@@ -186,7 +191,7 @@ public abstract class BaseFragment extends Fragment {
     // Protected instance methods.
 
     /** Return a menu entry for a given title and icon id, and a given fragment type. */
-    protected MenuEntry getEntry(final int titleId, final int iconId, final ExpFragmentType type) {
+    protected MenuEntry getEntry(final int titleId, final int iconId, final FragmentType type) {
         int ordinal = type.ordinal();
         return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId, ordinal));
     }

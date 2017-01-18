@@ -26,10 +26,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.ExpFragmentType;
-import com.pajato.android.gamechat.exp.ExpManager;
 import com.pajato.android.gamechat.exp.ExpType;
-import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -48,13 +45,13 @@ import java.util.Map;
 import static android.R.color.white;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
-import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.R.color.colorAccent;
-import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.R.color.colorLightGray;
+import static com.pajato.android.gamechat.R.color.colorPrimary;
+import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
 import static com.pajato.android.gamechat.exp.model.Checkers.PRIMARY_WINS;
 import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
@@ -91,11 +88,11 @@ public class CheckersFragment extends BaseExperienceFragment {
 
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
-        // Determine if this event is for this fragment.  Abort if not.
-        if (ExpManager.instance.getCurrent() != ExpFragmentType.checkers.ordinal()) return;
-
-        // The event is either a snackbar action (start a new game) or a FAM menu entry.  Detect and
-        // handle a snackbar action first.
+        // Determine if this fragment has the foreground.  Abort if not, otherwise the event is
+        // either a snackbar action (start a new game) or a FAM menu entry.  Detect and handle a
+        // snackbar action first.
+        if (!mActive)
+            return;
         Object tag = event.view.getTag();
         if (isPlayAgain(tag, TAG)) {
             // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
@@ -163,6 +160,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
         Checkers model = new Checkers(key, id, 0, name, tstamp, groupKey, roomKey, players);
+        mExperience = model;
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
@@ -186,7 +184,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     }
 
     /** Return a possibly null list of player information for a checkers experience (always 2 players) */
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
+    protected List<Account> getPlayers(final Dispatcher dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -498,9 +496,9 @@ public class CheckersFragment extends BaseExperienceFragment {
 
         // Take the smaller of width/height to adjust for tablet (landscape) view and adjust for
         // the player controls and FAB. TODO: the fab currently returns "top" value of 0...
-        int screenWidth = getActivity().findViewById(R.id.gameFragmentContainer).getWidth();
+        int screenWidth = getActivity().findViewById(R.id.expFragmentContainer).getWidth();
         ImageView v = (ImageView) getActivity().findViewById(R.id.player_1_icon);
-        int screenHeight = getActivity().findViewById(R.id.gameFragmentContainer).getHeight()
+        int screenHeight = getActivity().findViewById(R.id.expFragmentContainer).getHeight()
                 - v.getBottom() - getActivity().findViewById(R.id.gameFab).getTop();
 
         int sideSize = Math.min(screenWidth, screenHeight);

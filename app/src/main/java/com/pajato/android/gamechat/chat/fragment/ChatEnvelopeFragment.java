@@ -26,28 +26,33 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
+import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
+import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
+
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
  *
- * @author Paul Michael Reilly (based on ExperienceFragment written by Bryan Scott)
+ * @author Paul Michael Reilly (based on ExpEnvelopeFragment written by Bryan Scott)
  */
-public class ChatFragment extends BaseChatFragment {
+public class ChatEnvelopeFragment extends BaseChatFragment {
 
     // Public constants.
 
@@ -57,13 +62,32 @@ public class ChatFragment extends BaseChatFragment {
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
         logEvent(String.format("onAuthenticationChange: with event {%s};", event));
-        ChatManager.instance.startNextFragment(getActivity());
+        DispatchManager.instance.startNextFragment(getActivity(), chat);
     }
 
     /** Set the layout file, which specifies the chat FAB and the basic options menu. */
     @Override public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat);
+    }
+
+    /** Process a given button click event looking for the chat FAB. */
+    @Subscribe public void onClick(final NavDrawerOpenEvent event) {
+        // Ensure that the event is not empty.  If it is empty, abort,otherwise process nav drawer
+        // button click events.
+        if (event == null || event.item == null)
+            return;
+        switch (event.item.getItemId()) {
+            case R.id.nav_me_room:
+                DispatchManager.instance.startNextFragment(getActivity(), chatRoomList);
+                break;
+            case R.id.nav_groups:
+                DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
+                break;
+            default:
+                // Todo: add more menu button handling as a future feature.
+                break;
+        }
     }
 
     /** Process a given button click event looking for the chat FAB. */
@@ -119,7 +143,7 @@ public class ChatFragment extends BaseChatFragment {
     @Override public void onResume() {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
-        ChatManager.instance.startNextFragment(getActivity());
+        DispatchManager.instance.startNextFragment(getActivity(), chat);
     }
 
     /** Setup the fragment with what would otherwise be constructor arguments. */

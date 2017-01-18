@@ -26,7 +26,7 @@ import android.widget.LinearLayout;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.ChatManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.FabManager;
@@ -49,6 +49,7 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_R
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.all;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.members;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.rooms;
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 
 public class JoinRoomsFragment extends BaseChatFragment {
 
@@ -76,21 +77,24 @@ public class JoinRoomsFragment extends BaseChatFragment {
     @Subscribe public void onClick(final ClickEvent event) {
         // Log the event and determine if the event looks right.  Abort if it doesn't.
         logEvent(String.format(Locale.US, "onClick (join rooms) event: {%s}.", event));
-        if (event == null || event.view == null) return;
+        if (event == null || event.view == null)
+            return;
 
         // The event appears to be expected.  Confirm by finding the selector check view.
         switch (event.view.getId()) {
             case R.id.saveButton:
                 // Implement the save operation.
-                for (ChatListItem item : mJoinMap.values()) JoinManager.instance.joinRoom(item);
-                ChatManager.instance.startNextFragment(getActivity());
+                for (ChatListItem item : mJoinMap.values())
+                    JoinManager.instance.joinRoom(item);
+                DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            default:
-                // Determine if the view might be a click on a list view row.  Abort if not, look
-                // for a checkbox if so and if that is found, process the selection.
-                if (!(event.view instanceof LinearLayout)) return;
+            default: // Determine if the view might be a click on a list view row.  Abort if not,
+                     // look for a checkbox if so and if that is found, process the selection.
+                if (!(event.view instanceof LinearLayout))
+                    return;
                 CheckBox checkBox = (CheckBox) event.view.findViewById(R.id.selectorCheck);
-                if (checkBox != null) processSelection(event, checkBox);
+                if (checkBox != null)
+                    processSelection(event, checkBox);
                 break;
         }
     }

@@ -22,10 +22,11 @@ import android.os.Bundle;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.ExpManager;
+import com.pajato.android.gamechat.common.DispatchManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 
@@ -44,7 +45,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                ExpManager.instance.startNextFragment(getActivity());
+                DispatchManager.instance.startNextFragment(getActivity(), exp);
                 break;
             default:
                 break;

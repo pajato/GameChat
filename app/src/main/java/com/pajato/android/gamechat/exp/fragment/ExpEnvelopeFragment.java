@@ -25,14 +25,14 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.ExpFragmentType;
-import com.pajato.android.gamechat.exp.ExpManager;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -41,9 +41,10 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.exp.ExpFragmentType.checkers;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.chess;
-import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentType.checkers;
+import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 
 /**
  * A Fragment that contains and controls the current experience shown to the User.
@@ -51,7 +52,7 @@ import static com.pajato.android.gamechat.exp.ExpFragmentType.tictactoe;
  * @author Bryan Scott
  * @author Paul Reilly
  */
-public class ExperienceFragment extends BaseExperienceFragment {
+public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     // Public constants.
 
@@ -63,7 +64,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
-        ExpManager.instance.startNextFragment(this.getActivity());
+        DispatchManager.instance.startNextFragment(this.getActivity(), exp);
     }
 
     /** Process a button click event with a tag value. */
@@ -85,19 +86,19 @@ public class ExperienceFragment extends BaseExperienceFragment {
 
         // Process the payload assuming it is a valid fragment type index.  Abort if wrong.
         int index = ((MenuEntry) payload).fragmentTypeIndex;
-        if (index < 0 || index > ExpFragmentType.values().length) return;
+        if (index < 0 || index > FragmentType.values().length) return;
 
         // The index represents an experience type.  Start the appropriate fragment after
         // dismissing the FAM.
         FabManager.game.dismissMenu(this);
-        ExpManager.instance.startNextFragment(getActivity(), ExpFragmentType.values()[index]);
+        DispatchManager.instance.startNextFragment(getActivity(), FragmentType.values()[index]);
     }
 
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Grab the View ID and the floating action button and dimmer views.
         View view = event.view;
-        ExpFragmentType type = null;
+        FragmentType type = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
                 type = tictactoe;
@@ -121,7 +122,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
                 break;
         }
 
-        if (type != null) ExpManager.instance.startNextFragment(getActivity(), type);
+        if (type != null) DispatchManager.instance.startNextFragment(getActivity(), type);
     }
 
     /** Handle the options menu by inflating it. */
@@ -133,7 +134,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_game);
+        super.setLayoutId(R.layout.fragment_exp);
     }
 
     /** Intialize the game fragment envelope. */
@@ -164,7 +165,7 @@ public class ExperienceFragment extends BaseExperienceFragment {
     @Override public void onResume() {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
-        ExpManager.instance.startNextFragment(getActivity());
+        DispatchManager.instance.startNextFragment(getActivity(), exp);
     }
 
     // Private instance methods.

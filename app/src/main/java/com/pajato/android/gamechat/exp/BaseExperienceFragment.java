@@ -98,6 +98,29 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
+    /**
+     * Provide a default implementation for setting up an experience.  There are two scenarios
+     * where an experience fragment needs to be set up.  First, when a User asks to start a game,
+     * like tictactoe or checkers, and a game of that type has been cached or needs to be created.
+     * Second, when at startup, it is discoovered that there is a single experience to be shown.
+     */
+    @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
+        // Ensure that the dispatcher is valid.  Abort if not.
+        // TODO: might be better to show a toast or snackbar on error.
+        if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
+            return;
+
+        // At this point there are three choices: 1) the dispatcher contains an experience, 2) the
+        // dispatcher contains an experience key, or 3) the dispatcher contains the type of
+        // experience which needs to be created using the given context.  experience to use with the
+        // fragment being created.
+        mExperience = dispatcher.experiencePayload != null
+                ? dispatcher.experiencePayload
+                : ExperienceManager.instance.experienceMap.get(dispatcher.key);
+        if (mExperience == null)
+            createExperience(context, getPlayers(dispatcher));
+    }
+
     /** Handle the setup for the mode control. */
     @Override public void onStart() {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
@@ -109,7 +132,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     // Protected instance methods.
 
     /** Provide a base implementation that will result in no players, i.e. an error. */
-    protected List<Account> getPlayers(final Dispatcher<ExpFragmentType, Experience> dispatcher) {
+    protected List<Account> getPlayers(final Dispatcher dispatcher) {
         return null;
     }
 
@@ -194,29 +217,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         String subtitle = GroupManager.instance.getGroupName(groupKey);
         bar.setTitle(title);
         bar.setSubtitle(subtitle);
-    }
-
-    /**
-     * Provide a default implementation for setting up an experience.  There are two scenarios
-     * where an experience fragment needs to be set up.  First, when a User asks to start a game,
-     * like tictactoe or checkers, and a game of that type has been cached or needs to be created.
-     * Second, when at startup, it is discoovered that there is a single experience to be shown.
-     */
-    protected void setupExperience(final Context context,
-                                   final Dispatcher<ExpFragmentType, Experience> dispatcher) {
-        // Ensure that the dispatcher is valid.  Abort if not.
-        // TODO: might be better to show a toast or snackbar on error.
-        if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
-            return;
-
-        // At this point there are three choices: 1) the dispatcher contains an experience, 2) the
-        // dispatcher contains an experience key, or 3) the dispatcher contains the type of
-        // experience which needs to be created using the given context.  experience to use with the
-        // fragment being created.
-        mExperience = dispatcher.payload != null
-                ? dispatcher.payload : ExperienceManager.instance.experienceMap.get(dispatcher.key);
-        if (mExperience == null)
-            createExperience(context, getPlayers(dispatcher));
     }
 
     // Private instance methods.
