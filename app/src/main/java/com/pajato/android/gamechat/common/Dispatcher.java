@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.common;
 
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.MessageManager;
@@ -95,11 +96,21 @@ public class Dispatcher {
             case messageList:
                 List<Message> list = MessageManager.instance.getMessageList(groupKey, roomKey);
                 messagePayload = list.size() > 0 ? list.get(0) : null;
+                key = messagePayload != null ? messagePayload.key : null;
                 break;
             case experienceList: // Handle a list of experiences in a room.
                 processExperienceList(groupKey, roomKey);
                 break;
             default: break;
+        }
+    }
+
+    /** Build an instance given a chat list item. */
+    public Dispatcher(FragmentType type, ChatListItem item) {
+        this.type = type;
+        if (item != null) {
+            groupKey = item.groupKey;
+            roomKey = item.key;
         }
     }
 
@@ -122,6 +133,9 @@ public class Dispatcher {
                 break;
             case 1: // A single experience in the room.
                 experiencePayload = experiences.iterator().next();
+                groupKey = experiencePayload.getGroupKey();
+                roomKey = experiencePayload.getRoomKey();
+                key = experiencePayload.getExperienceKey();
                 type = getFragmentType(experiencePayload.getExperienceType());
                 break;
             default: // Show a room list.
@@ -141,6 +155,9 @@ public class Dispatcher {
                 break;
             case 1: // There is exactly one experience of this type.  Use it.
                 experiencePayload = experienceList.get(0);
+                groupKey = experiencePayload.getGroupKey();
+                roomKey = experiencePayload.getRoomKey();
+                key = experiencePayload.getExperienceKey();
                 break;
             default: // There are multiple experiences of this type.  Present a list of
                 // them by changing the type to the corresponding list type.
