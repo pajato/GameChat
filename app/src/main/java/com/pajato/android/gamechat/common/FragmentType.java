@@ -18,7 +18,7 @@
 package com.pajato.android.gamechat.common;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.fragment.ChatFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowOfflineFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowSignedOutFragment;
@@ -37,7 +37,7 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowTypeListFragment;
-import com.pajato.android.gamechat.exp.fragment.ExperienceFragment;
+import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
@@ -52,14 +52,14 @@ import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.
  * @author Paul Michael Reilly
  */
 public enum FragmentType {
-    chatEnvelope (chat, ChatFragment.class),
+    chatEnvelope (chat, ChatEnvelopeFragment.class),
     chatGroupList (chat, ChatShowGroupsFragment.class, R.id.chatFragmentContainer),
     chatOffline (chat, ChatShowOfflineFragment.class, R.id.chatFragmentContainer),
     chatRoomList (chat, ChatShowRoomsFragment.class, R.id.chatFragmentContainer),
     chatSignedOut (chat, ChatShowSignedOutFragment.class, R.id.chatFragmentContainer),
     createGroup (chat, CreateGroupFragment.class, R.id.chatFragmentContainer),
     createRoom (chat, CreateRoomFragment.class, R.id.chatFragmentContainer),
-    expEnvelope (exp, ExperienceFragment.class),
+    expEnvelope (exp, ExpEnvelopeFragment.class),
     expGroupList (exp, ExpShowGroupsFragment.class, R.id.expFragmentContainer),
     expOffline (exp, ExpShowOfflineFragment.class, R.id.expFragmentContainer),
     expRoomList (exp, ExpShowRoomsFragment.class, R.id.expFragmentContainer),

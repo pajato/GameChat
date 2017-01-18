@@ -51,7 +51,7 @@ import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
  * @author Bryan Scott
  * @author Paul Reilly
  */
-public class ExperienceFragment extends BaseExperienceFragment {
+public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     // Public constants.
 

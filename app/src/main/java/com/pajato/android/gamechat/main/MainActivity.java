@@ -33,7 +33,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.fragment.ChatFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -43,7 +43,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
-import com.pajato.android.gamechat.exp.fragment.ExperienceFragment;
+import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -261,8 +261,8 @@ public class MainActivity extends BaseActivity
         // unregistered, Firebase will be turned off.
         List<String> list = new ArrayList<>();
         list.add(this.getClass().getName());
-        list.add(ChatFragment.class.getName());
-        list.add(ExperienceFragment.class.getName());
+        list.add(ChatEnvelopeFragment.class.getName());
+        list.add(ExpEnvelopeFragment.class.getName());
         AccountManager.instance.init(list);
         CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 
