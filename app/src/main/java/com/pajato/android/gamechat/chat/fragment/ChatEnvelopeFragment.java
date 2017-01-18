@@ -26,6 +26,8 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
@@ -79,7 +81,8 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             return;
         switch (event.item.getItemId()) {
             case R.id.nav_me_room:
-                DispatchManager.instance.startNextFragment(getActivity(), chatRoomList);
+                ChatListItem item = new ChatListItem(new GroupItem(AccountManager.instance.getMeGroup()));
+                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, item);
                 break;
             case R.id.nav_groups:
                 DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
