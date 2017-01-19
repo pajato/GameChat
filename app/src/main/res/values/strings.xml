@@ -33,6 +33,8 @@
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
     <string name="navigation_drawer_action_close">Close navigation drawer</string>
     <string name="navigation_drawer_action_open">Open navigation drawer</string>
+    <string name="navigation_drawer_account_management">Account Management</string>
+    <string name="navigation_drawer_protected_user">Add a Protected User</string>
     <string name="navigation_drawer_label_favorite_chat">Favorite Chat</string>
     <string name="navigation_drawer_label_favorite_chats">Favorite Chats</string>
     <string name="navigation_drawer_label_recent_chat">Recent Chat</string>

@@ -31,8 +31,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -90,6 +93,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The logcat tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
 
+    // Public instance variables.
+
+    public String mChaperoneUser;
+
     // Private instance variables
 
     /** The current account, null if there is no current account. */
@@ -107,12 +114,40 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     // Public instance methods
 
     /** Create and persist an account to the database. */
-    public void createAccount(@NonNull Account account) {
+    public void createAccount(@NonNull final Account account) {
         // Set up the push keys for the account, default "me" group and room.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String groupKey = database.child(GroupManager.GROUPS_PATH).push().getKey();
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = database.child(path).push().getKey();
+
+        // Check for a chaperone account. If it exists, be sure to update both accounts accordingly.
+        if(mChaperoneUser != null) {
+            account.chaperone = mChaperoneUser;
+            account.type = Account.PROTECTED;
+            final Map<String, Object> protectedUsers = new HashMap<>();
+
+            //TODO: Find a way to make this happen without compromising the database's security.
+            DatabaseReference chaperone = database.child(
+                    String.format(ACCOUNT_PATH, mChaperoneUser)).child("protectedUsers");
+            chaperone.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        protectedUsers.put(data.getKey(), data.getValue());
+                    }
+                }
+
+                @Override public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Getting protected users for account " + mChaperoneUser + " failed");
+                }
+            });
+
+            protectedUsers.put("" + protectedUsers.size(), account.id);
+            chaperone.updateChildren(protectedUsers);
+            mChaperoneUser = null;
+        } else {
+            account.type = Account.STANDARD;
+        }
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
@@ -307,15 +342,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
     }
 
-    /** Sign in using the given User account. */
-    public void signIn(final Context context, final String provider, final String accountName) {
+    /** Sign in using the saved User account. */
+    public void signIn(final Context context) {
         // Get an instance of AuthUI based on the default app, and build an intent.
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
         intentBuilder.setProviders(Arrays.asList(
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
-        ));
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
 
@@ -324,8 +358,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         Intent intent = intentBuilder.build();
         intent.putExtra("signin", true);
-        intent.putExtra("provider", provider);
-        intent.putExtra("accountName", accountName);
         context.startActivity(intent);
     }
 
@@ -345,25 +377,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             FirebaseAuth.getInstance().addAuthStateListener(this);
             mIsFirebaseEnabled = true;
         }
-    }
-
-    /** Sign in using the saved User account. */
-    private void signIn(final Context context) {
-        // Get an instance of AuthUI based on the default app, and build an intent.
-        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
-        intentBuilder.setProviders(Arrays.asList(
-                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
-        intentBuilder.setLogo(R.drawable.signin_logo);
-        intentBuilder.setTheme(R.style.signInTheme);
-
-        // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
-        intentBuilder.setIsSmartLockEnabled(false);
-
-        Intent intent = intentBuilder.build();
-        intent.putExtra("signin", true);
-        context.startActivity(intent);
     }
 
     /** Unregister the component during lifecycle pause events. */

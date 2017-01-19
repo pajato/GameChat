@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
@@ -86,6 +87,11 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 break;
             case R.id.nav_groups:
                 DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
+                break;
+            case R.id.manageProtectedUsers:
+                AccountManager.instance.mChaperoneUser = AccountManager.instance.getCurrentAccountId();
+                FirebaseAuth.getInstance().signOut();
+                AccountManager.instance.signIn(getContext());
                 break;
             default:
                 // Todo: add more menu button handling as a future feature.

@@ -14,38 +14,30 @@
             </group>
         </menu>
     </item>
-    <item android:title="@string/navigation_drawer_label_favorite_chats"
-        android:id="@+id/nav_favorite_chats">
+    <item android:title="@string/navigation_drawer_account_management">
         <menu>
             <group>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
+                    android:id="@+id/manageProtectedUsers"
+                    android:title="@string/navigation_drawer_protected_user"
+                    android:icon="@drawable/ic_group_add_black_24dp" />
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
-                    android:title="@string/navigation_drawer_label_favorite_chat"/>
-            </group>
-
-        </menu>
-    </item>
-    <item android:title="@string/navigation_drawer_label_recent_chats"
-        android:id="@+id/nav_recent_chats">
-        <menu>
-            <group>
+                    android:id="@+id/manageAccounts"
+                    android:title="@string/manage_accounts"
+                    android:icon="@drawable/vd_login_2" />
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
-                    android:title="@string/navigation_drawer_label_recent_chat"/>
+                        android:id="@+id/manageGroups"
+                    android:title="@string/MenuItemManageGroups"
+                    android:icon="@drawable/vd_group_black_24px"/>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
-                    android:title="@string/navigation_drawer_label_recent_chat"/>
+                    android:id="@+id/manageRooms"
+                    android:title="@string/MenuItemManageRooms"
+                    android:icon="@drawable/ic_casino_black_24dp"/>
             </group>
         </menu>
     </item>
-        <group android:orderInCategory="100">
-            <item android:title=""/>
-            <item android:title=""/>
-            <item android:title=""/>
-            <item android:title=""/>
-            <item android:title=""/>
+    <group android:orderInCategory="100">
+        <item android:title=""/>
+        <item android:title=""/>
     </group>
 </menu>

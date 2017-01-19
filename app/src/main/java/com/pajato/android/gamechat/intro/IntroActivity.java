@@ -128,8 +128,8 @@ public class IntroActivity extends AppCompatActivity {
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
         intentBuilder.setProviders(Arrays.asList(
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
         // Disable Smart Lock for development purposes -- to ensure logging in processes work correctly.
