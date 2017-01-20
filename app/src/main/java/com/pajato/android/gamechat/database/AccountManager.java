@@ -85,9 +85,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The sentinel value to use for indicating a signed out experience key. */
     public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
 
+    /** The database path to an invitation.  */
+    public static final String INVITE_PATH = "/invites/%s/";
+
     // Private class constants.
 
-    /** The database path. */
+    /** The database path to an account profile. */
     private static final String ACCOUNT_PATH = "/accounts/%s/";
 
     /** The logcat tag. */
@@ -122,28 +125,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String roomKey = database.child(path).push().getKey();
 
         // Check for a chaperone account. If it exists, be sure to update both accounts accordingly.
-        if(mChaperoneUser != null) {
+        if(mChaperoneUser != null && !mChaperoneUser.equals(account.id)) {
             account.chaperone = mChaperoneUser;
             account.type = Account.PROTECTED;
-            final Map<String, Object> protectedUsers = new HashMap<>();
-
-            //TODO: Find a way to make this happen without compromising the database's security.
-            DatabaseReference chaperone = database.child(
-                    String.format(ACCOUNT_PATH, mChaperoneUser)).child("protectedUsers");
-            chaperone.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        protectedUsers.put(data.getKey(), data.getValue());
-                    }
-                }
-
-                @Override public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Getting protected users for account " + mChaperoneUser + " failed");
-                }
-            });
-
-            protectedUsers.put("" + protectedUsers.size(), account.id);
-            chaperone.updateChildren(protectedUsers);
+            // Leave a note for the chaperone in the database to pick up their new user on sign in.
+            Map<String, Object> protectedUsers = new HashMap<>();
+            protectedUsers.put(mChaperoneUser, account.id);
+            String invitePath = String.format(INVITE_PATH, mChaperoneUser);
+            DBUtils.instance.updateChildren(invitePath, protectedUsers);
             mChaperoneUser = null;
         } else {
             account.type = Account.STANDARD;
@@ -247,6 +236,30 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
+        }
+
+        // Check for protected user invites and update the account if there are any.
+        if(event.account != null) {
+            DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
+                    .child(String.format(AccountManager.INVITE_PATH, mCurrentAccount.id));
+
+            invite.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override public void onDataChange(DataSnapshot dataSnapshot) {
+                    // If the snapshot has nothing to offer, move on. Otherwise update the account.
+                    if(!dataSnapshot.hasChildren()) return;
+                    Account account = AccountManager.instance.getCurrentAccount();
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        account.protectedUsers.add((String) data.getValue());
+                        data.getRef().removeValue();
+                    }
+                    AccountManager.instance.updateAccount(account);
+                }
+
+                @Override public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Fetch protected user invitations failed.");
+                    Log.e(TAG, "Database Error Details: " + databaseError.getDetails());
+                }
+            });
         }
     }
 
