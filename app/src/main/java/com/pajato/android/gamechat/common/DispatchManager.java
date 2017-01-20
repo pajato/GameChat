@@ -186,17 +186,6 @@ public enum DispatchManager {
                 type = kind == chat ? chatSignedOut : expSignedOut;
                 return new Dispatcher(type);
 
-            case 0: // Return a list dispatcher to show the items in the User's private (me) room.
-                Room room = RoomManager.instance.getMeRoom();
-                if (room == null) return new Dispatcher(null);
-                type = kind == chat ? chatGroupList : experienceList;
-                return new Dispatcher(type, room.groupKey, room.key);
-
-            case 1: // Return a map dispatcher to show the rooms in a given group.
-                String groupKey = account.joinList.get(0);
-                type = kind == chat ? chatRoomList : expRoomList;
-                return new Dispatcher(type, groupKey);
-
             default: return new Dispatcher(kind == chat ? chatGroupList : expGroupList);
         }
     }

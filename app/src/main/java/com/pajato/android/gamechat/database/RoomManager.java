@@ -83,7 +83,7 @@ public enum RoomManager {
     /** Return the "Me" room or null if there is no such room for one reason or another. */
     public Room getMeRoom() {
         // Find the me room via the current account.
-        String roomKey = AccountManager.instance.getMeRoom();
+        String roomKey = AccountManager.instance.getMeRoomKey();
         return roomKey != null ? roomMap.get(roomKey) : null;
     }
 

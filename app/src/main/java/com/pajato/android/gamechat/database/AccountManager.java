@@ -47,6 +47,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -108,6 +109,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The current account key, null if there is no current account. */
     private String mCurrentAccountKey;
 
+    /** The me group profile. */
+    private Group mGroup;
+
     /** A flag indicating that Firebase is enabled (registered) or not. */
     private boolean mIsFirebaseEnabled;
 
@@ -117,26 +121,28 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     // Public instance methods
 
     /** Create and persist an account to the database. */
-    public void createAccount(@NonNull final Account account) {
-        // Set up the push keys for the account, default "me" group and room.
+    public void createAccount(@NonNull Account account) {
+        // Set up the push keys for the default "me" group and room.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String groupKey = database.child(GroupManager.GROUPS_PATH).push().getKey();
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = database.child(path).push().getKey();
 
-        // Check for a chaperone account. If it exists, be sure to update both accounts accordingly.
-        if(mChaperoneUser != null && !mChaperoneUser.equals(account.id)) {
+        // Check for a chaperone account. If one exists, update this account and leave breadcrumbs
+        // for the chaperone.
+        if (mChaperoneUser != null && !mChaperoneUser.equals(account.id)) {
+            // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
+            // database.
             account.chaperone = mChaperoneUser;
             account.type = Account.PROTECTED;
-            // Leave a note for the chaperone in the database to pick up their new user on sign in.
             Map<String, Object> protectedUsers = new HashMap<>();
             protectedUsers.put(mChaperoneUser, account.id);
             String invitePath = String.format(INVITE_PATH, mChaperoneUser);
             DBUtils.instance.updateChildren(invitePath, protectedUsers);
             mChaperoneUser = null;
-        } else {
+        } else
+            // This User has a standard account.
             account.type = Account.STANDARD;
-        }
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
@@ -192,23 +198,23 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return null;
     }
 
-    /** Return the current account id, null if there is no curent signed in User. */
-    public String getCurrentAccountId() { return mCurrentAccountKey; }
+    /** Return the current account id, null if there is no current signed in User. */
+    public String getCurrentAccountId() {
+        return mCurrentAccountKey;
+    }
 
     /** Return null or the push key for the "me group" associated with the current account. */
-    public String getMeGroup() { return hasAccount() ? mCurrentAccount.groupKey : null; }
+    public String getMeGroupKey() {
+        return hasAccount() ? mCurrentAccount.groupKey : null;
+    }
 
     /** Return null or the push key for the "me room" associated with the current account. */
-    public String getMeRoom() {
-        if (!hasAccount()) return null;
-
-        // There is an account. Ensure that there is one and only one room, the "me room" in the
-        // group.  Abort if not.
-        Group group = GroupManager.instance.groupMap.get(mCurrentAccount.groupKey);
-        if (group == null || group.roomList == null || group.roomList.size() != 1) return null;
-
-        // The me room is valid.
-        return group.roomList.get(0);
+    public String getMeRoomKey() {
+        // Ensure that there is an account and a me group profile has been registered.  If not
+        // return null, otherise return the me room push key.
+        if (!hasAccount() || mGroup == null)
+            return null;
+        return mGroup.roomList.get(0);
     }
 
     /** Return TRUE iff there is a signed in User. */
@@ -224,10 +230,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Deal with an account change by providing an authentication change event as necessary. */
+    /** Handle an account change by providing an authentication change on a sign in or sign out. */
     @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
-        // Persist accounts added during this session; generate authentication change events as
-        // necessary.
+        // Detect a sign in or sign out event.  If either is found, generate an authentication
+        // change event on the account.
         String id = event.account != null ? event.account.id : null;
         String cid = mCurrentAccountKey;
         if ((cid == null && id != null) || (cid != null && id == null)) {
@@ -236,6 +242,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
+        } else {
+            // Detect a change to the account.  If found, set watchers on the joined groups.
+            if (event.account != null)
+                for (String key : event.account.joinList)
+                    GroupManager.instance.setWatcher(key);
         }
 
         // Check for protected user invites and update the account if there are any.
@@ -321,6 +332,16 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             default:
                 break;
         }
+    }
+
+    /** Handle the me group profile change by obtaining the me room push key. */
+    @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
+        // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
+        // watchers and cache all but the me group.  The me group is handled by the account manager.
+        if (event.key == null || !event.key.equals(getMeGroupKey()))
+            return;
+        mGroup = event.group;
+        RoomManager.instance.setWatcher(mGroup.key, mGroup.roomList.get(0));
     }
 
     /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
