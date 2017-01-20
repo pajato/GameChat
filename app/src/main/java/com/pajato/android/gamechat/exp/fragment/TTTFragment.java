@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -103,8 +104,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
         // Handle invitation - extend app invitation, dismiss menu and return (there is no
         // new experience to start).
-        if (((MenuEntry) tag).titleResId == R.string.SendGame) {
-            ((MainActivity)getActivity()).extendAppInvitation(mExperience.getGroupKey());
+        if (((MenuEntry) tag).titleResId == R.string.InviteFriendFromChat) {
+            InvitationManager.instance.extendAppInvitation(getActivity(), mExperience.getGroupKey());
             return;
         }
 
@@ -342,7 +343,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
-        menu.add(getNoTintEntry(R.string.SendGame, R.drawable.ic_email_black_24dp));
+        menu.add(getNoTintEntry(R.string.InviteFriendFromTTT, R.drawable.ic_email_black_24dp));
         return menu;
     }
 

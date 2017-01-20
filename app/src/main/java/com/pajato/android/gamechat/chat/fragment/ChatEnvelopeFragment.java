@@ -20,9 +20,11 @@ package com.pajato.android.gamechat.chat.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -33,14 +35,17 @@ import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.main.MainActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
@@ -53,6 +58,11 @@ import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
  * @author Paul Michael Reilly (based on ExpEnvelopeFragment written by Bryan Scott)
  */
 public class ChatEnvelopeFragment extends BaseChatFragment {
+
+    // Private class constants.
+
+    /** The logcat tag. */
+    private static final String TAG = ChatEnvelopeFragment.class.getSimpleName();
 
     // Public constants.
 

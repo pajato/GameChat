@@ -71,8 +71,9 @@ public enum DispatchManager {
     /**
      * Attach a drill down fragment identified by a type, creating that fragment as necessary.
      *
+     * @param context The activity attached to the fragment that spawned this call.
      * @param type The type of the fragment to drill into.  One will be created if necessary.
-     * @param context The activity that will attach to the drill down fragment.
+     * @param item Encapsulates the group and room key information appropriate to the fragment.
      */
     public void chainFragment(final FragmentActivity context, final FragmentType type,
                               final ChatListItem item) {

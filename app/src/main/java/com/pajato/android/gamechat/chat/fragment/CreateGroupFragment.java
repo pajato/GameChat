@@ -84,7 +84,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         return String.format(Locale.getDefault(), "%s %s", value, group);
     }
 
-    /** Save the room being created to the Firebase realtime database. */
+    /** Save the group being created to the Firebase realtime database. */
     @Override protected void save(@NonNull Account account) {
         // Generate push keys for new group and it's default room; set the self reference key and
         // the owner field values on the group.

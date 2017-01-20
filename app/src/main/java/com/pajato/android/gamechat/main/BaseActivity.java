@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.database.ExperienceManager;
@@ -104,6 +105,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         AppEventManager.instance.register(ExperienceManager.instance);
         AppEventManager.instance.register(MemberManager.instance);
         AppEventManager.instance.register(NavigationManager.instance);
+        AppEventManager.instance.register(InvitationManager.instance);
         AppEventManager.instance.register(this);
     }
 

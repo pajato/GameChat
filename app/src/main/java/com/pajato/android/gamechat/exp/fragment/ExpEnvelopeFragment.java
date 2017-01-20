@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -74,13 +75,13 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
         // Handle invitation - extend app invitation, dismiss menu and return (there is no
         // new experience to start).
-        if (((MenuEntry) payload).titleResId == R.string.InviteFriend) {
-
-            ((MainActivity)getActivity()).extendAppInvitation(null); // TODO: we need a group key here !!!???
+        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromExpEnv) {
+            InvitationManager.instance.extendAppInvitation(getActivity(), mExperience.getGroupKey());
             FabManager.game.dismissMenu(this);
             return;
-        } else if (((MenuEntry) payload).titleResId == R.string.SendGame) {
-            // This one is handled by the game fragment, not here (WHY??)
+        } else if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat ||
+                ((MenuEntry)payload).titleResId == R.string.InviteFriendFromTTT) {
+            // These aren't handled here so we want to return
             return;
         }
 
@@ -176,7 +177,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getNoTintEntry(R.string.InviteFriend, R.drawable.ic_email_black_24dp));
+        menu.add(getNoTintEntry(R.string.InviteFriendFromExpEnv, R.drawable.ic_email_black_24dp));
         return menu;
     }
 }
