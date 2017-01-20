@@ -155,8 +155,8 @@ public class CheckersFragment extends BaseExperienceFragment {
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
-        String groupKey = AccountManager.instance.getMeGroup();
-        String roomKey = AccountManager.instance.getMeRoom();
+        String groupKey = AccountManager.instance.getMeGroupKey();
+        String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
         Checkers model = new Checkers(key, id, 0, name, tstamp, groupKey, roomKey, players);

@@ -83,8 +83,9 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             return;
         switch (event.item.getItemId()) {
             case R.id.nav_me_room:
-                ChatListItem item = new ChatListItem(new GroupItem(AccountManager.instance.getMeGroup()));
-                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, item);
+                GroupItem groupItem = new GroupItem(AccountManager.instance.getMeGroupKey());
+                ChatListItem listItem = new ChatListItem(groupItem);
+                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, listItem);
                 break;
             case R.id.nav_groups:
                 DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
@@ -92,7 +93,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             case R.id.manageProtectedUsers:
                 // Ensure that the current user is not a protected user. Then, start the process of
                 // adding a protected user.
-                if(AccountManager.instance.getCurrentAccount().chaperone != null) {
+                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
                     String protectedWarning = "Protected Users cannot make other Protected Users.";
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;

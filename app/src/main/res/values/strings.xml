@@ -35,10 +35,6 @@
     <string name="navigation_drawer_action_open">Open navigation drawer</string>
     <string name="navigation_drawer_account_management">Account Management</string>
     <string name="navigation_drawer_protected_user">Add a Protected User</string>
-    <string name="navigation_drawer_label_favorite_chat">Favorite Chat</string>
-    <string name="navigation_drawer_label_favorite_chats">Favorite Chats</string>
-    <string name="navigation_drawer_label_recent_chat">Recent Chat</string>
-    <string name="navigation_drawer_label_recent_chats">Recent Chats</string>
     <string name="navigation_drawer_label_your_groups">Your Group List</string>
     <string name="navigation_drawer_label_your_room">Your Private Room</string>
     <string name="navigation_drawer_label_yours">Your Groups</string>

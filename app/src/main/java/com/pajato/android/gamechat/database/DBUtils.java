@@ -98,16 +98,16 @@ public enum DBUtils {
 
     // Public instance methods.
 
-    /** Get the list data given a list type. */
+    /** Get the list data to be displayed by a list adapter for a given list type. */
     public List<ChatListItem> getList(@NonNull final ChatListType type, final ChatListItem item) {
         switch (type) {
-            case group:
+            case group:         // Get the data to be shown in a list of groups.
                 return GroupManager.instance.getGroupListData();
-            case message:
+            case message:       // Get the data to be shown in a room.
                 return MessageManager.instance.getMessageListData(item);
-            case room:
+            case room:          // Get the data to be show in a list of rooms.
                 return RoomManager.instance.getRoomListData(item.groupKey);
-            case joinRoom:
+            case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getJoinableRoomsListData(item);
             default:
                 // TODO: log a message here.

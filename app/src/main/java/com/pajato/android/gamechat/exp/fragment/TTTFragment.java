@@ -187,8 +187,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
-        String groupKey = AccountManager.instance.getMeGroup();
-        String roomKey = AccountManager.instance.getMeRoom();
+        String groupKey = AccountManager.instance.getMeGroupKey();
+        String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
         mExperience = model;
