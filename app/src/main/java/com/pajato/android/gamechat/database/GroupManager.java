@@ -126,7 +126,7 @@ public enum GroupManager {
     /** Return a name for the group with the given key, "Anonymous" if a name is not available. */
     public String getGroupName(final String groupKey) {
         Group group = groupMap.get(groupKey);
-        return group != null ? group.name : "Anonymous";
+        return group != null ? group.name : null;
     }
 
     /** Get the profile for a given group, queueing it up to be loaded if necessary. */

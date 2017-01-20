@@ -75,7 +75,28 @@ import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTER
 public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
 
-    // Public class constants.
+    /**
+     * The account types.  Internally a User can be one of standard or restricted.  Externally,
+     * a User is either standard or protected.  The Java language reserves the protected keyword
+     * thus making this distinction necessary.
+     *
+     * standard: An unrestricted User.  Can create restricted users and has full access to all app
+     * features.
+     *
+     * restricted: A restricted User cannot create another restricted User and has limited access
+     * to app features. For example, a restrited User cannot create a group or a room. The notion
+     * of a restricted/protected User is for use with young children.
+     * Every restricted/protected User has a "chaperone", a standard User.  The restricted User can
+     * only be a member of a group that the chaperone is a member of.
+     */
+    public enum AccountType {
+        // TODO: figure out if we need an admin type.  I suspect we do.
+        // admin,
+        standard,
+        restricted
+    }
+
+    // Public class constants
 
     /** A key used to access account available data. */
     public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
@@ -99,7 +120,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Public instance variables.
 
-    public String mChaperoneUser;
+    /** The standard User (id) associated with this restricted User, if the User is restricted. */
+    public String mChaperone;
 
     // Private instance variables
 
@@ -130,19 +152,19 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Check for a chaperone account. If one exists, update this account and leave breadcrumbs
         // for the chaperone.
-        if (mChaperoneUser != null && !mChaperoneUser.equals(account.id)) {
+        if (mChaperone != null && !mChaperone.equals(account.id)) {
             // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
             // database.
-            account.chaperone = mChaperoneUser;
-            account.type = Account.PROTECTED;
+            account.chaperone = mChaperone;
+            account.type = AccountType.restricted.name();
             Map<String, Object> protectedUsers = new HashMap<>();
-            protectedUsers.put(mChaperoneUser, account.id);
-            String invitePath = String.format(INVITE_PATH, mChaperoneUser);
+            protectedUsers.put(mChaperone, account.id);
+            String invitePath = String.format(INVITE_PATH, mChaperone);
             DBUtils.instance.updateChildren(invitePath, protectedUsers);
-            mChaperoneUser = null;
+            mChaperone = null;
         } else
             // This User has a standard account.
-            account.type = Account.STANDARD;
+            account.type = AccountType.standard.name();
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
@@ -228,6 +250,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         for (String name : classNameList) {
             mRegistrationClassNameMap.put(name, false);
         }
+    }
+
+    /** Return true iff the current user is a restricted/protected user. */
+    public boolean isRestricted() {
+        return hasAccount() && mCurrentAccount.chaperone != null;
     }
 
     /** Handle an account change by providing an authentication change on a sign in or sign out. */

@@ -206,7 +206,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        holder.text.setText(CompatUtils.fromHtml(item.text));
+        if (item.text != null)
+            holder.text.setText(CompatUtils.fromHtml(item.text));
         setChatIcon(holder, item);
         holder.itemView.setTag(item);
 
