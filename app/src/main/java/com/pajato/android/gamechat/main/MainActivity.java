@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -35,12 +34,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.appinvite.AppInviteInvitationResult;
-import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
@@ -68,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
-import static java.security.AccessController.getContext;
 
 /**
  * Provide a main activity to display the chat and game fragments.
@@ -118,12 +112,9 @@ public class MainActivity extends BaseActivity
 
     /** Handle group joined event */
     @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
-        if (event.groupNames.size() > 1) {
-            String msg = getString(R.string.JoinedMultiGroupsMessage);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-        } else {
+        if (event.groupName != null && !event.groupName.equals("")) {
             String format = getString(R.string.JoinedGroupsMessage);
-            String message = String.format(Locale.US, format, event.groupNames.get(0));
+            String message = String.format(Locale.US, format, event.groupName);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
@@ -257,54 +248,6 @@ public class MainActivity extends BaseActivity
         final boolean autoLaunchDeepLink = false;
         AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
                 .setResultCallback(InvitationManager.instance);
-//                        new ResultCallback<AppInviteInvitationResult>() {
-//                            @Override
-//                            public void onResult(@NonNull AppInviteInvitationResult result) {
-//                                Log.i(TAG, "getInvitation with autoLaunchDeepLink=" + autoLaunchDeepLink + " -- onResult:" + result.getStatus());
-//                                Log.i(TAG, "getInvitation intent=" + result.getInvitationIntent());
-//                                Intent i = result.getInvitationIntent();
-//                                if(i != null) {
-//                                    Log.i(TAG, "extras: " + i.getExtras().toString());
-//                                }
-//                                if (result.getStatus().isSuccess()) {
-//                                    // Extract deep link from Intent
-//                                    Intent intent = result.getInvitationIntent();
-//                                    String deepLink = AppInviteReferral.getDeepLink(intent);
-//                                    Log.i(TAG, "getInvitation with deepLink: " + deepLink);
-//                                    String invitationId = AppInviteReferral.getInvitationId(intent);
-//                                    Log.i(TAG, "getInvitation: invitationId=" + invitationId);
-//                                    boolean hasRef = AppInviteReferral.hasReferral(intent);
-//                                    Log.i(TAG, "getInvitation: invitation has a referral=" + hasRef);
-//                                    boolean isFromPlayStore = AppInviteReferral.isOpenedFromPlayStore(intent);
-//                                    Log.i(TAG, "getInvitation: launched after install from play store=" + isFromPlayStore);
-//                                    // If we have a deep link, try to find the groupKey.
-//                                    if(deepLink != null && !deepLink.equals("")) {
-//                                        Uri dlUri = Uri.parse(deepLink);
-//                                        String firebaseLink = dlUri.getQueryParameter("link");
-//                                        if(firebaseLink != null && !firebaseLink.equals("")) {
-//                                            Uri fbUri = Uri.parse(firebaseLink);
-//                                            List<String> parts = fbUri.getPathSegments();
-//                                            // Get the last value which should be the group key
-//                                            String groupKey = parts.get(parts.size() - 1);
-//                                            Log.i(TAG, "getInvitation: groupKey=" + groupKey);
-////                                            Account currAccount = AccountManager.instance.getCurrentAccount();
-//                                            groupKeysToJoin.add(groupKey);
-////                                            DBUtils.instance.updateChildren(
-////                                                    AccountManager.instance.getAccountPath(currAccount.id),
-////                                                    currAccount.toMap());
-//                                        } else {
-//                                            Log.i(TAG, "getInvitation: can't get group key - firebaseLink is not set");
-//                                        }
-//                                    } else {
-//                                        Log.i(TAG, "getInvitation: can't get group key - deepLink is not set");
-//                                    }
-//
-//                                } else {
-//                                    Log.i(TAG, "getInvitation: no deep link found.");
-//                                }
-//                            }
-//                        });
-
     }
 
     // Private instance methods.
@@ -394,40 +337,6 @@ public class MainActivity extends BaseActivity
 
         return outputFile.getPath();
     }
-
-//    /** Extend an invitation to join GameChat using AppInviteInvitation Intent */
-//    public void extendAppInvitation(String groupKey) {
-//        Log.i(TAG, "extendAppInvitation with groupKey=" + groupKey);
-//        String firebaseUrl = FirebaseDatabase.getInstance().getReference().toString();
-//        firebaseUrl += "/groups/";
-//        if(groupKey == null || groupKey.equals("")) {
-//            firebaseUrl += AccountManager.instance.getMeGroup();
-//            Log.i(TAG, "extendAppInvitation: " + firebaseUrl);
-//        } else {
-//            firebaseUrl += groupKey;
-//        }
-//
-//        String APP_CODE = "aq5ca";
-//        String PLAY_STORE_LINK = "https://play.google.com/apps/testing/com.pajato.android.gamechat";
-//        String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
-//        String WEB_LINK = "https://github.com/pajato/GameChat";
-//
-//        String dynamicLink = new Uri.Builder()
-//                .scheme("https")
-//                .authority(APP_CODE + ".app.goo.gl")
-//                .path("/")
-//                .appendQueryParameter("link", firebaseUrl)
-//                .appendQueryParameter("apn", APP_PACKAGE_NAME)
-//                .appendQueryParameter("afl", PLAY_STORE_LINK)
-//                .appendQueryParameter("ifl", WEB_LINK).toString();
-//
-//        Log.i(TAG, "dynamicLink=" + dynamicLink);
-//        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.InviteTitle))
-//                .setMessage(getString(R.string.InviteMessage))
-//                .setDeepLink(Uri.parse(dynamicLink))
-//                .build();
-//        startActivityForResult(intent, RC_INVITE);
-//    }
 
     /** Handle sign in by processing the invoking intent and checking for an existing account. */
     private void signIn() {

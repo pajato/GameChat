@@ -11,13 +11,13 @@ public class GroupJoinedEvent {
      * The name of the group which has been joined. If the group is null, more than one group
      * has been joined.
      */
-    public List<String> groupNames;
+    public String groupName;
 
     /**
      * Build the event and indicate the specified group. If the group is null, more than one
      * group has been joined.
      */
-    public GroupJoinedEvent(List<String> grp) {
-        groupNames = grp;
+    public GroupJoinedEvent(String grp) {
+        groupName = grp;
     }
 }

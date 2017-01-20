@@ -99,6 +99,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         mGroup.owner = account.id;
         mGroup.roomList.add(roomKey);
         mGroup.memberList.add(account.id);
+        mGroup.commonRoomKey = roomKey; // we'll create the 'common' room below
         GroupManager.instance.createGroupProfile(mGroup);
 
         // Create and persist the default (common) room.

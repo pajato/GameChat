@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.database.GroupManager.GROUP_PROFILE_PATH;
+
 /**
  * Provide a class to manage database access to Room objects.
  *
@@ -78,6 +80,13 @@ public enum RoomManager {
         room.createTime = new Date().getTime();
         DBUtils.instance.updateChildren(profilePath, room.toMap());
         setWatcher(room.groupKey, room.key);
+    }
+
+    /** Update the given room profile on the database. */
+    public void updateRoomProfile(final Room room) {
+        String path = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
+        room.modTime = new Date().getTime();
+        DBUtils.instance.updateChildren(path, room.toMap());
     }
 
     /** Return the "Me" room or null if there is no such room for one reason or another. */
