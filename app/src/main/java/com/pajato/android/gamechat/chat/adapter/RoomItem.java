@@ -59,8 +59,10 @@ public class RoomItem {
         this.groupKey = groupKey;
         this.roomKey = roomKey;
         Room room = RoomManager.instance.getRoomProfile(roomKey);
-        name = room.getName();
-        generateCountList();
+        if (room != null) {
+            name = room.getName();
+            generateCountList();
+        }
     }
 
     /** Build a comma separated list of message counts by poster name. */

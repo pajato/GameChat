@@ -17,8 +17,10 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
@@ -37,6 +39,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
 
@@ -61,7 +64,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         accessControl.setVisibility(View.GONE);
 
         EditText hint = (EditText) mLayout.findViewById(R.id.NameText);
-        hint.setText(R.string.CreateGroupNameHint);
+        hint.setHint(R.string.CreateGroupNameHint);
 
         // Create the group to be configure and, optionally, persisted.
         mGroup = new Group();
@@ -116,6 +119,14 @@ public class CreateGroupFragment extends BaseCreateFragment {
         // Post a welcome message to the default room from the owner.
         String text = "Welcome to my new group!";
         MessageManager.instance.createMessage(text, STANDARD, account, room);
+
+        // Dismiss the Keyboard and return to the previous fragment.
+        Activity a = getActivity();
+        InputMethodManager imm = (InputMethodManager) a.getSystemService(INPUT_METHOD_SERVICE);
+        if(imm.isAcceptingText() && a.getCurrentFocus() != null) {
+            imm.hideSoftInputFromWindow(a.getCurrentFocus().getWindowToken(), 0);
+        }
+        getActivity().onBackPressed();
     }
 
     /** Set the name of the managed object conditionally to the given value. */

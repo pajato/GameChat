@@ -73,6 +73,12 @@ import java.util.Map;
     /** The account email. */
     public /*final*/ String email;
 
+    /** The key to the account's chaperone, if applicable. */
+    public String chaperone;
+
+    /** The database keys to any accounts that this account is the chaperone of. */
+    public final List<String> protectedUsers = new ArrayList<>();
+
     /**
      * In an account context this is the Firebase push key for the unexposed Me Group, that private
      * group that each User has for notes and enjoying experiences (games) solo.
@@ -113,6 +119,7 @@ import java.util.Map;
         displayName = account.displayName;
         nickname = account.nickname;
         email = account.email;
+        chaperone = account.chaperone;
         id = account.id;
         modTime = 0;
         providerId = account.providerId;
@@ -144,6 +151,8 @@ import java.util.Map;
         result.put("createTime", createTime);
         result.put("displayName", displayName);
         result.put("email", email);
+        result.put("chaperone", chaperone);
+        result.put("protectedUsers", protectedUsers);
         result.put("groupKey", groupKey);
         result.put("joinList", joinList);
         result.put("id", id);

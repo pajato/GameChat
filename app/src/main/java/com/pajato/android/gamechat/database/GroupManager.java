@@ -20,6 +20,10 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.adapter.ResourceHeaderItem;
+import com.pajato.android.gamechat.chat.adapter.RoomItem;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
@@ -102,25 +106,16 @@ public enum GroupManager {
 
     /** Get the data as a set of list items for all groups. */
     public List<ChatListItem> getGroupListData() {
-        // Generate a list of items to render in the chat group list by extracting the items based
-        // on the date header type ordering.
-        List<ChatListItem> result = new ArrayList<>();
-        for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
-            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
-            if (groupList != null && groupList.size() > 0) {
-                // Add the header item followed by all the group items.
-                result.add(new ChatListItem(new DateHeaderItem(dht)));
-                for (String groupKey : groupList) {
-                    if(!(groupKey.equals(AccountManager.instance.getMeGroup()))) {
-                        result.add(new ChatListItem(new GroupItem(groupKey)));
-                    }
-                }
-            }
+        // Determine whether to handle no groups (a set of welcome list items), one group (a set of
+        // group rooms) or more than one group (a set of groups).
+        switch (groupMap.size()) {
+            case 0:
+                return getNoGroupsItemList();
+            case 1:
+                //return getGroupRoomsItemList();
+            default:
+                return getGroupsItemList();
         }
-
-        // Add the private rooms.
-
-        return result;
     }
 
     /** Get a map of messages by room in a given group. */
@@ -168,24 +163,27 @@ public enum GroupManager {
         mGroupToLastNewMessageMap.clear();
     }
 
-    /** Handle a group profile change by updating the map. */
+    /** Handle a joined group profile change by updating the map and ensuring watchers are set. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // Ensure that the group profile is cacheable.  Abort if not, otherwise cache the group
-        // object and access all the member accounts in the group in order to communicate with them.
+        // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
+        // watchers and cache all but the me group.  The me group is handled by the account manager.
         String groupKey = event.key;
-        if (groupKey == null || event.group == null) return;
-        groupMap.put(event.key, event.group);
-        for (String key : event.group.memberList) {
+        if (groupKey == null || event.group == null)
+            return;
+        for (String key : event.group.memberList)
             MemberManager.instance.setWatcher(groupKey, key);
-        }
+        if (!groupKey.equals(AccountManager.instance.getMeGroupKey()))
+            groupMap.put(event.key, event.group);
     }
 
     /** Return a list of joined group push keys based on the given item. */
     public List<String> getGroups(final ChatListItem item) {
         List<String> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
-        if (item != null && item.groupKey != null) result.add(item.groupKey);
-        if (result.isEmpty() && account != null) result.addAll(account.joinList);
+        if (item != null && item.groupKey != null)
+            result.add(item.groupKey);
+        if (result.isEmpty() && account != null)
+            result.addAll(account.joinList);
         return result;
     }
 
@@ -194,6 +192,16 @@ public enum GroupManager {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.message);
         AppEventManager.instance.post(new ChatListChangeEvent());
+    }
+
+    /** Setup a database listener for the group profile. */
+    public void setWatcher(final String groupKey) {
+        // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
+        String path = GroupManager.instance.getGroupProfilePath(groupKey);
+        String name = DBUtils.instance.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
+        DatabaseRegistrar.instance.registerHandler(handler);
     }
 
     /** Update the given group profile on the database. */
@@ -205,14 +213,35 @@ public enum GroupManager {
 
     // Private instance methods.
 
-    /** Setup a database listener for the group profile. */
-    private void setWatcher(final String groupKey) {
-        // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
-        String path = GroupManager.instance.getGroupProfilePath(groupKey);
-        String name = DBUtils.instance.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
-        DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
-        DatabaseRegistrar.instance.registerHandler(handler);
+    /** Return the normal case: more than one group. */
+    private List<ChatListItem> getGroupsItemList() {
+        // Generate a list of items to render in the chat group list by extracting the items based
+        // on the date header type ordering.
+        List<ChatListItem> result = new ArrayList<>();
+        for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            if (groupList != null && groupList.size() > 0) {
+                // Add the header item followed by all the group items.
+                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                for (String groupKey : groupList) {
+                    if(!(groupKey.equals(AccountManager.instance.getMeGroupKey()))) {
+                        result.add(new ChatListItem(new GroupItem(groupKey)));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /** Return the normal case: more than one group. */
+    private List<ChatListItem> getNoGroupsItemList() {
+        //
+        List<ChatListItem> result = new ArrayList<>();
+        result.add(new ChatListItem(new ResourceHeaderItem(R.string.NoGroupsHeaderText)));
+        Room room = RoomManager.instance.getMeRoom();
+        if (room != null)
+            result.add(new ChatListItem(new RoomItem(room.groupKey, room.key)));
+        return result;
     }
 
     /** Update the headers used to bracket the messages in the main list. */

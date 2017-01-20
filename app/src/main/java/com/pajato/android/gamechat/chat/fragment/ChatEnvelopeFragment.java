@@ -26,8 +26,11 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
@@ -81,18 +84,32 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
         super.setLayoutId(R.layout.fragment_chat);
     }
 
-    /** Process a given button click event looking for the chat FAB. */
+    /** Process a given button click event looking for the navigation drawer. */
     @Subscribe public void onClick(final NavDrawerOpenEvent event) {
-        // Ensure that the event is not empty.  If it is empty, abort,otherwise process nav drawer
+        // Ensure that the event is not empty.  If it is empty, abort, otherwise process nav drawer
         // button click events.
         if (event == null || event.item == null)
             return;
         switch (event.item.getItemId()) {
             case R.id.nav_me_room:
-                DispatchManager.instance.startNextFragment(getActivity(), chatRoomList);
+                GroupItem groupItem = new GroupItem(AccountManager.instance.getMeGroupKey());
+                ChatListItem listItem = new ChatListItem(groupItem);
+                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, listItem);
                 break;
             case R.id.nav_groups:
                 DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
+                break;
+            case R.id.manageProtectedUsers:
+                // Ensure that the current user is not a protected user. Then, start the process of
+                // adding a protected user.
+                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
+                    String protectedWarning = "Protected Users cannot make other Protected Users.";
+                    Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                AccountManager.instance.mChaperoneUser = AccountManager.instance.getCurrentAccountId();
+                FirebaseAuth.getInstance().signOut();
+                AccountManager.instance.signIn(getContext());
                 break;
             default:
                 // Todo: add more menu button handling as a future feature.

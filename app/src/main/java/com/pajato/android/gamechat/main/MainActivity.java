@@ -168,7 +168,7 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    /** Setup the standard set of activty menu items. */
+    /** Setup the standard set of activity menu items. */
     @Override public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the main options menu and enable the join developer groups item in debug builds.
         final MenuInflater inflater = getMenuInflater();

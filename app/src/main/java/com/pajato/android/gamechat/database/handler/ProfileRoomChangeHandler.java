@@ -54,6 +54,7 @@ public class ProfileRoomChangeHandler extends DatabaseEventHandler implements Va
             // There is data.  Publish the group profile to the app.
             Room room = dataSnapshot.getValue(Room.class);
             AppEventManager.instance.post(new ProfileRoomChangeEvent(key, room));
+            AppEventManager.instance.post(new ChatListChangeEvent());
         } else {
             Log.e(TAG, "Invalid key.  No value returned.");
         }

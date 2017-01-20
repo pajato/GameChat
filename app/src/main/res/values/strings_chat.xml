@@ -29,6 +29,7 @@
     <string name="LearnMoreFeature">Providing context help</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
+    <string name="NoGroupsHeaderText">Welcome to GameChat!</string>
     <string name="NoJoinableRoomsHeaderText">No Available Rooms or Members</string>
     <string name="NoMessagesText">There are no messages to show in this room. That\'s weird.</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>

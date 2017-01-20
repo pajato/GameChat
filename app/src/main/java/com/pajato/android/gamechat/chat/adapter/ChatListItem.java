@@ -144,6 +144,13 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given available rooms header item. */
+    public ChatListItem(final ResourceHeaderItem item) {
+        type = ROOMS_HEADER_ITEM_TYPE;
+        nameResourceId = item.getNameResourceId();
+        mDesc = String.format(Locale.US, "Resource header with id: {%d}.", nameResourceId);
+    }
+
+    /** Build an instance for a given available rooms header item. */
     public ChatListItem(final RoomsHeaderItem item) {
         type = ROOMS_HEADER_ITEM_TYPE;
         nameResourceId = item.getNameResourceId();

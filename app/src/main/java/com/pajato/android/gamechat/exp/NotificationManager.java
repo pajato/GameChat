@@ -31,7 +31,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
 /**
- * Manages the presentation of UI messages, mainly error messsages.
+ * Manages the presentation of UI messages, mainly error messages.
  *
  * @author Bryan Scott
  * @author Paul Michael Reilly

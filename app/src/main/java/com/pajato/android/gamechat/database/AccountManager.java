@@ -31,8 +31,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -44,6 +47,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -82,13 +86,20 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The sentinel value to use for indicating a signed out experience key. */
     public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
 
+    /** The database path to an invitation.  */
+    public static final String INVITE_PATH = "/invites/%s/";
+
     // Private class constants.
 
-    /** The database path. */
+    /** The database path to an account profile. */
     private static final String ACCOUNT_PATH = "/accounts/%s/";
 
     /** The logcat tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
+
+    // Public instance variables.
+
+    public String mChaperoneUser;
 
     // Private instance variables
 
@@ -97,6 +108,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** The current account key, null if there is no current account. */
     private String mCurrentAccountKey;
+
+    /** The me group profile. */
+    private Group mGroup;
 
     /** A flag indicating that Firebase is enabled (registered) or not. */
     private boolean mIsFirebaseEnabled;
@@ -108,11 +122,27 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Create and persist an account to the database. */
     public void createAccount(@NonNull Account account) {
-        // Set up the push keys for the account, default "me" group and room.
+        // Set up the push keys for the default "me" group and room.
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String groupKey = database.child(GroupManager.GROUPS_PATH).push().getKey();
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = database.child(path).push().getKey();
+
+        // Check for a chaperone account. If one exists, update this account and leave breadcrumbs
+        // for the chaperone.
+        if (mChaperoneUser != null && !mChaperoneUser.equals(account.id)) {
+            // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
+            // database.
+            account.chaperone = mChaperoneUser;
+            account.type = Account.PROTECTED;
+            Map<String, Object> protectedUsers = new HashMap<>();
+            protectedUsers.put(mChaperoneUser, account.id);
+            String invitePath = String.format(INVITE_PATH, mChaperoneUser);
+            DBUtils.instance.updateChildren(invitePath, protectedUsers);
+            mChaperoneUser = null;
+        } else
+            // This User has a standard account.
+            account.type = Account.STANDARD;
 
         // Set up and persist the account for the given user.
         long tstamp = account.createTime;
@@ -168,23 +198,23 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return null;
     }
 
-    /** Return the current account id, null if there is no curent signed in User. */
-    public String getCurrentAccountId() { return mCurrentAccountKey; }
+    /** Return the current account id, null if there is no current signed in User. */
+    public String getCurrentAccountId() {
+        return mCurrentAccountKey;
+    }
 
     /** Return null or the push key for the "me group" associated with the current account. */
-    public String getMeGroup() { return hasAccount() ? mCurrentAccount.groupKey : null; }
+    public String getMeGroupKey() {
+        return hasAccount() ? mCurrentAccount.groupKey : null;
+    }
 
     /** Return null or the push key for the "me room" associated with the current account. */
-    public String getMeRoom() {
-        if (!hasAccount()) return null;
-
-        // There is an account. Ensure that there is one and only one room, the "me room" in the
-        // group.  Abort if not.
-        Group group = GroupManager.instance.groupMap.get(mCurrentAccount.groupKey);
-        if (group == null || group.roomList == null || group.roomList.size() != 1) return null;
-
-        // The me room is valid.
-        return group.roomList.get(0);
+    public String getMeRoomKey() {
+        // Ensure that there is an account and a me group profile has been registered.  If not
+        // return null, otherise return the me room push key.
+        if (!hasAccount() || mGroup == null)
+            return null;
+        return mGroup.roomList.get(0);
     }
 
     /** Return TRUE iff there is a signed in User. */
@@ -200,10 +230,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Deal with an account change by providing an authentication change event as necessary. */
+    /** Handle an account change by providing an authentication change on a sign in or sign out. */
     @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
-        // Persist accounts added during this session; generate authentication change events as
-        // necessary.
+        // Detect a sign in or sign out event.  If either is found, generate an authentication
+        // change event on the account.
         String id = event.account != null ? event.account.id : null;
         String cid = mCurrentAccountKey;
         if ((cid == null && id != null) || (cid != null && id == null)) {
@@ -212,6 +242,35 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             mCurrentAccount = event.account;
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
+        } else {
+            // Detect a change to the account.  If found, set watchers on the joined groups.
+            if (event.account != null)
+                for (String key : event.account.joinList)
+                    GroupManager.instance.setWatcher(key);
+        }
+
+        // Check for protected user invites and update the account if there are any.
+        if(event.account != null) {
+            DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
+                    .child(String.format(AccountManager.INVITE_PATH, mCurrentAccount.id));
+
+            invite.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override public void onDataChange(DataSnapshot dataSnapshot) {
+                    // If the snapshot has nothing to offer, move on. Otherwise update the account.
+                    if(!dataSnapshot.hasChildren()) return;
+                    Account account = AccountManager.instance.getCurrentAccount();
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        account.protectedUsers.add((String) data.getValue());
+                        data.getRef().removeValue();
+                    }
+                    AccountManager.instance.updateAccount(account);
+                }
+
+                @Override public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "Fetch protected user invitations failed.");
+                    Log.e(TAG, "Database Error Details: " + databaseError.getDetails());
+                }
+            });
         }
     }
 
@@ -275,6 +334,16 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
+    /** Handle the me group profile change by obtaining the me room push key. */
+    @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
+        // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
+        // watchers and cache all but the me group.  The me group is handled by the account manager.
+        if (event.key == null || !event.key.equals(getMeGroupKey()))
+            return;
+        mGroup = event.group;
+        RoomManager.instance.setWatcher(mGroup.key, mGroup.roomList.get(0));
+    }
+
     /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
     @Subscribe public void onRegistrationChange(final RegistrationChangeEvent event) {
         // Determine if this is a relevant registration event.
@@ -307,15 +376,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
     }
 
-    /** Sign in using the given User account. */
-    public void signIn(final Context context, final String provider, final String accountName) {
+    /** Sign in using the saved User account. */
+    public void signIn(final Context context) {
         // Get an instance of AuthUI based on the default app, and build an intent.
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
         intentBuilder.setProviders(Arrays.asList(
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
-        ));
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
 
@@ -324,8 +392,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         Intent intent = intentBuilder.build();
         intent.putExtra("signin", true);
-        intent.putExtra("provider", provider);
-        intent.putExtra("accountName", accountName);
         context.startActivity(intent);
     }
 
@@ -345,25 +411,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             FirebaseAuth.getInstance().addAuthStateListener(this);
             mIsFirebaseEnabled = true;
         }
-    }
-
-    /** Sign in using the saved User account. */
-    private void signIn(final Context context) {
-        // Get an instance of AuthUI based on the default app, and build an intent.
-        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
-        intentBuilder.setProviders(Arrays.asList(
-                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()));
-        intentBuilder.setLogo(R.drawable.signin_logo);
-        intentBuilder.setTheme(R.style.signInTheme);
-
-        // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
-        intentBuilder.setIsSmartLockEnabled(false);
-
-        Intent intent = intentBuilder.build();
-        intent.putExtra("signin", true);
-        context.startActivity(intent);
     }
 
     /** Unregister the component during lifecycle pause events. */

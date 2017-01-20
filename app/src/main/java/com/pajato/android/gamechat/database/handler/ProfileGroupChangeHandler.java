@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 
 /**
@@ -53,6 +54,7 @@ public class ProfileGroupChangeHandler extends DatabaseEventHandler implements V
             // There is data.  Publish the group profile to the app.
             Group group = dataSnapshot.getValue(Group.class);
             AppEventManager.instance.post(new ProfileGroupChangeEvent(key, group));
+            AppEventManager.instance.post(new ChatListChangeEvent());
         } else {
             Log.e(TAG, "Invalid key.  No value returned.");
         }

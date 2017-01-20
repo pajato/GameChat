@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/manageAccounts"
-        android:title="@string/manage_accounts"
-        android:icon="@drawable/vd_login_2" />
-    <item
-        android:id="@+id/manageGroups"
-        android:title="@string/MenuItemManageGroups"
-        android:icon="@drawable/vd_group_black_24px"/>
-    <item
-        android:id="@+id/manageRooms"
-        android:title="@string/MenuItemManageRooms"
-        android:icon="@drawable/ic_casino_black_24dp"/>
-    <item
         android:id="@+id/settings"
         android:title="@string/MenuItemSettings"
         android:icon="@drawable/vd_settings_applications_black_24px"/>
