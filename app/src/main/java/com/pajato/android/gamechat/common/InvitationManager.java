@@ -102,15 +102,24 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     @Subscribe
     public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         Account account = event != null ? event.account : null;
-        if (account != null) {
-            // Update Firebase
-            for (String key : mInvitedGroups.keySet()) {
+        if (account == null) return;
+
+        // Update Firebase
+        boolean accountChanged = false;
+        for (String key : mInvitedGroups.keySet()) {
+            // If the account has already joined, don't add it again!
+            if (account.joinList.contains(key)) {
+                mInvitedGroups.remove(key);
+            } else {
                 account.joinList.add(key);
+                accountChanged = true;
                 mInvitedGroups.get(key).addedToAccountJoinList = true;
                 // Set up the watcher for the common room (the group watcher is set up by
                 // adding the group to the account joinList).
                 RoomManager.instance.setWatcher(key, mInvitedGroups.get(key).commonRoomKey);
             }
+        }
+        if (accountChanged) {
             AccountManager.instance.updateAccount(account);
         }
     }
