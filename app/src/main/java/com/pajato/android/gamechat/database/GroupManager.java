@@ -105,7 +105,7 @@ public enum GroupManager {
     }
 
     /** Get the data as a set of list items for all groups. */
-    public List<ChatListItem> getGroupListData() {
+    public List<ChatListItem> getListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
         // group rooms) or more than one group (a set of groups).
         switch (groupMap.size()) {
