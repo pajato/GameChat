@@ -24,7 +24,6 @@
     <string name="InstallDebugUsers">Install developer users</string>
     <string name="InviteMembersFeature">Inviting group or room members</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
-    <string name="JoinedMultiGroupsMessage">You have joined multiple groups because you accepted invitations.</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
     <string name="LearnMoreFeature">Providing context help</string>
     <string name="MembersAvailableHeaderText">Members</string>

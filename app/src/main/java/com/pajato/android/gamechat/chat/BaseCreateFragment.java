@@ -27,7 +27,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.fragment.CreateGroupFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -84,9 +83,6 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
             case R.id.ClearNameButton: // Clear the group name edit text field.
                 EditText editText = (EditText) mLayout.findViewById(R.id.NameText);
-                if (editText != null && this instanceof CreateGroupFragment) {
-                    editText.setHint(R.string.CreateGroupNameHint);
-                }
                 if (editText != null) editText.setText("");
                 break;
 
