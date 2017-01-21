@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -114,8 +115,10 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
         super.onResume();
+        if (ProgressManager.instance.isShowing())
+            ProgressManager.instance.hide();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
-        FabManager.chat.init(this);
+        FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
@@ -127,8 +130,11 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_casino_black_24dp));
         // TODO: add this when group selection is included:
         //menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.ic_casino_black_24dp));
-        if(AccountManager.instance.getCurrentAccount().chaperone == null) {
-            menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
+        if (!AccountManager.instance.isRestricted()) {
+            menu.add(getTintEntry(R.string.CreateGroupMenuTitle,
+                    R.drawable.ic_group_add_black_24dp));
+            menu.add(getTintEntry(R.string.CreateRestrictedUserTitle,
+                    R.drawable.ic_person_add_black_24px));
         }
         return menu;
     }

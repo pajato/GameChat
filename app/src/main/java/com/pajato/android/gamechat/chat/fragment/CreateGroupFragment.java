@@ -122,12 +122,12 @@ public class CreateGroupFragment extends BaseCreateFragment {
         MessageManager.instance.createMessage(text, STANDARD, account, room);
 
         // Dismiss the Keyboard and return to the previous fragment.
-        Activity a = getActivity();
-        InputMethodManager imm = (InputMethodManager) a.getSystemService(INPUT_METHOD_SERVICE);
-        if(imm.isAcceptingText() && a.getCurrentFocus() != null) {
-            imm.hideSoftInputFromWindow(a.getCurrentFocus().getWindowToken(), 0);
-        }
-        getActivity().onBackPressed();
+        Activity activity = getActivity();
+        InputMethodManager manager;
+        manager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+        if (manager.isAcceptingText() && activity.getCurrentFocus() != null)
+            manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        activity.onBackPressed();
     }
 
     /** Set the name of the managed object conditionally to the given value. */

@@ -42,6 +42,7 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -98,7 +99,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                AccountManager.instance.mChaperoneUser = AccountManager.instance.getCurrentAccountId();
+                AccountManager.instance.mChaperone = AccountManager.instance.getCurrentAccountId();
                 FirebaseAuth.getInstance().signOut();
                 AccountManager.instance.signIn(getContext());
                 break;
@@ -149,6 +150,9 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
     @Override public void onStart() {
         // Declare the use of the options menu and intialize the FAB and it's menu.
         super.onStart();
+        String title = getString(R.string.SignInDialogTitleText);
+        String message = getString(R.string.SignInDialogMessageText);
+        ProgressManager.instance.show(this.getContext(), title, message);
         FabManager.chat.setTag(this.getTag());
     }
 

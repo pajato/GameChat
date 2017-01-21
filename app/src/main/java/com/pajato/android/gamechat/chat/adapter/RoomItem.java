@@ -73,15 +73,16 @@ public class RoomItem {
         Map<String, Boolean> memberNameMap = new HashMap<>();
         Map<String, Map<String, Message>> rooms;
         rooms = MessageManager.instance.messageMap.get(groupKey);
-        for (Message message : rooms.get(roomKey).values()) {
-            // Ensure that the member who posted the message is in the member display name map.
-            String displayName = message.owner.equals(accountId) ? "me" : message.name;
-            if (!memberNameMap.containsKey(displayName)) memberNameMap.put(displayName, false);
-            if (message.unreadList != null && message.unreadList.contains(accountId)) {
-                memberNameMap.put(displayName, true);
-                count++;
+        if (rooms != null)
+            for (Message message : rooms.get(roomKey).values()) {
+                // Ensure that the member who posted the message is in the member display name map.
+                String displayName = message.owner.equals(accountId) ? "me" : message.name;
+                if (!memberNameMap.containsKey(displayName)) memberNameMap.put(displayName, false);
+                if (message.unreadList != null && message.unreadList.contains(accountId)) {
+                    memberNameMap.put(displayName, true);
+                    count++;
+                }
             }
-        }
 
         // Update the members text field by walking the members name map.
         for (String displayName : memberNameMap.keySet()) {
