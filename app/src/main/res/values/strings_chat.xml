@@ -38,7 +38,7 @@
     <string name="SelectRoomsMenuTitle">Select All Rooms</string>
     <string name="SetCreateIconFeature">Setting the create group or room icon</string>
     <string name="SetCreateIconDesc">Set the group or room icon</string>
-    <string name="SignInDialogTitleText">Attempting to sign in …</string>
+    <string name="SignInDialogTitleText">Logging in …</string>
     <string name="SignInDialogMessageText">Hold on a few moments while we sign you in …</string>
     <string name="SignInLastAccountMenuTitle">Use Current Account</string>
     <string name="SwitchAccountDesc">Switch account menu item.</string>

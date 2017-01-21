@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
@@ -49,11 +48,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
 
     /** The sign in floating action menu (FAM) key. */
     public static final String SIGN_IN_FAM_KEY = "signInFamKey";
-
-    // Public instance variables.
-
-    /** A timer to handle signin initialization. */
-    CountDownTimer mTimer;
 
     // Public instance methods.
 
@@ -94,7 +88,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // On the first chat list change event, dismiss the sign in progress spinner.  In any case
         // attempt to present another fragment based on the chat list change.
         if (ProgressManager.instance.isShowing()) {
-            mTimer.cancel();
             ProgressManager.instance.hide();
         }
         DispatchManager.instance.startNextFragment(this.getActivity(), chat);
@@ -106,10 +99,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // after 10 seconds.
         super.onCreate(bundle);
         super.setLayoutId(R.layout.fragment_chat_signed_out);
-        mTimer = new CountDownTimer(10000, 1000) {
-            @Override public void onTick(long millisUntilFinished) {}
-            @Override public void onFinish() { ProgressManager.instance.hide(); }
-        };
     }
 
     /** Handle the setup for the groups panel. */
@@ -117,10 +106,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // Provide an account loading indicator for a brief period before showing the fragment.
         // This will likely be enough time to load the account and message data.
         super.onStart();
-        mTimer.start();
-        String title = getString(R.string.SignInDialogTitleText);
-        String message = getString(R.string.SignInDialogMessageText);
-        ProgressManager.instance.show(this.getContext(), title, message);
         FabManager.chat.init(this);
         FabManager.chat.setMenu(SIGN_IN_FAM_KEY, getSignInMenu());
     }

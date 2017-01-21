@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.fragment.ChatShowRoomsFragment;
 import com.pajato.android.gamechat.common.adapter.MenuAdapter;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 
@@ -130,6 +131,12 @@ public enum FabManager {
         dismissMenu(fragment, layout);
     }
 
+    /** Initialize to use the given fragment and FAM. */
+    public void init(final Fragment fragment, final String name) {
+        this.init(fragment);
+        mDefaultMenuName = name;
+    }
+
     /** Set the named floating action menu (FAM) making it the default. */
     public void setMenu(@NonNull final String name, @NonNull final List<MenuEntry> menu) {
         // Test for a reasonable (non-empty) name.  Abort if not.
@@ -138,21 +145,6 @@ public enum FabManager {
         // Cache the menu and make it the default.
         mMenuMap.put(name, menu);
         mDefaultMenuName = name;
-    }
-
-    /** Set the current FAM using the cached item with the given name. */
-    private void setMenu(final Fragment fragment, final String name) {
-        // Ensure that the game fragment layout is accessible and that there is an adapter on the
-        // recycler view.  Abort quietly if not.
-        View layout = getFragmentLayout(fragment);
-        RecyclerView recyclerView;
-        recyclerView = layout != null ? (RecyclerView) layout.findViewById(R.id.MenuList) : null;
-        MenuAdapter adapter = recyclerView != null ? (MenuAdapter) recyclerView.getAdapter() : null;
-        if (layout == null || recyclerView == null || adapter == null) return;
-
-        // Add the menu to initialize the recycler view's data items.
-        adapter.clearEntries();
-        adapter.addEntries(mMenuMap.get(name));
     }
 
     /** Set the FAB state. */
@@ -274,4 +266,18 @@ public enum FabManager {
         return null;
     }
 
+    /** Set the current FAM using the cached item with the given name. */
+    private void setMenu(final Fragment fragment, final String name) {
+        // Ensure that the game fragment layout is accessible and that there is an adapter on the
+        // recycler view.  Abort quietly if not.
+        View layout = getFragmentLayout(fragment);
+        RecyclerView recyclerView;
+        recyclerView = layout != null ? (RecyclerView) layout.findViewById(R.id.MenuList) : null;
+        MenuAdapter adapter = recyclerView != null ? (MenuAdapter) recyclerView.getAdapter() : null;
+        if (layout == null || recyclerView == null || adapter == null) return;
+
+        // Add the menu to initialize the recycler view's data items.
+        adapter.clearEntries();
+        adapter.addEntries(mMenuMap.get(name));
+    }
 }

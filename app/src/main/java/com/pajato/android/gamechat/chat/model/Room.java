@@ -81,6 +81,7 @@ import java.util.Map;
         this.name = name;
         this.owner = owner;
         this.type = type;
+        memberIdList.add(owner);
     }
 
     /** Provide a default map for a Firebase create/update. */

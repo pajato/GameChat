@@ -19,8 +19,8 @@
             <group>
                 <item
                     android:id="@+id/manageProtectedUsers"
-                    android:title="@string/navigation_drawer_protected_user"
-                    android:icon="@drawable/ic_group_add_black_24dp" />
+                    android:title="@string/CreateRestrictedUserTitle"
+                    android:icon="@drawable/ic_person_add_black_24px" />
                 <item
                     android:id="@+id/manageAccounts"
                     android:title="@string/manage_accounts"

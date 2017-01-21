@@ -84,7 +84,7 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
         account.displayName = user.getDisplayName();
         account.url = getPhotoUrl(user);
         account.providerId = user.getProviderId();
-        account.type = Account.STANDARD;
+        account.type = AccountManager.AccountType.standard.name();
         account.createTime = tstamp;
 
         return account;

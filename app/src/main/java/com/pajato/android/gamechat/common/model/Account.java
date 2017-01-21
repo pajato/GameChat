@@ -56,11 +56,6 @@ import java.util.Map;
 
     // ? public final static int ADMIN = 1;
 
-    /** A STANDARD account has a real email address and uses encryption on messaging. */
-    public final static int STANDARD = 2;
-
-    /** A PROTECTED account has a fake email address and does not use encrypted messaging. */
-    public final static int PROTECTED = 3;
 
     // Public instance variables
 
@@ -100,10 +95,10 @@ import java.util.Map;
     public String nickname;
 
     /** The account provider id, a string like "google.com". */
-    public /*final*/ String providerId;
+    public String providerId;
 
     /** The account type. */
-    public /*final*/ int type;
+    public String type;
 
     /** The account photo URL (icon). */
     public String url;

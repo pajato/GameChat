@@ -1,4 +1,5 @@
 <resources>
+    <string name="CreateRestrictedUserTitle">Create Protected User</string>
     <string name="GridRoomIconRed">Red room icon</string>
     <string name="GridRoomIconBlue">Blue room icon</string>
     <string name="GridRoomIconGray">Gray room icon</string>
@@ -34,7 +35,6 @@
     <string name="navigation_drawer_action_close">Close navigation drawer</string>
     <string name="navigation_drawer_action_open">Open navigation drawer</string>
     <string name="navigation_drawer_account_management">Account Management</string>
-    <string name="navigation_drawer_protected_user">Add a Protected User</string>
     <string name="navigation_drawer_label_your_groups">Your Group List</string>
     <string name="navigation_drawer_label_your_room">Your Private Room</string>
     <string name="navigation_drawer_label_yours">Your Groups</string>

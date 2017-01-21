@@ -107,7 +107,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         // the group list display.
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
-        FabManager.chat.init(this);
+        FabManager.chat.init(this, CHAT_ROOM_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
