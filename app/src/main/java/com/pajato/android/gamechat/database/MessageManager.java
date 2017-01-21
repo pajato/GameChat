@@ -131,7 +131,7 @@ public enum MessageManager {
     }
 
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
-    public List<ChatListItem> getMessageListData(@NonNull final ChatListItem item) {
+    public List<ChatListItem> getListItemData(@NonNull final ChatListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         String groupKey = item.groupKey;

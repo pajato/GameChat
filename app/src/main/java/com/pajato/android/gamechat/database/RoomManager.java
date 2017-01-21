@@ -103,7 +103,7 @@ public enum RoomManager {
     }
 
     /** Get the data as a set of room items for a given group key. */
-    public List<ChatListItem> getRoomListData(final String groupKey) {
+    public List<ChatListItem> getListItemData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
         Map<String, Map<String, Message>> roomMap;

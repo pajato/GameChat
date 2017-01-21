@@ -102,13 +102,13 @@ public enum DBUtils {
     public List<ChatListItem> getList(@NonNull final ChatListType type, final ChatListItem item) {
         switch (type) {
             case group:         // Get the data to be shown in a list of groups.
-                return GroupManager.instance.getGroupListData();
+                return GroupManager.instance.getListItemData();
             case message:       // Get the data to be shown in a room.
-                return MessageManager.instance.getMessageListData(item);
+                return MessageManager.instance.getListItemData(item);
             case room:          // Get the data to be show in a list of rooms.
-                return RoomManager.instance.getRoomListData(item.groupKey);
+                return RoomManager.instance.getListItemData(item.groupKey);
             case joinRoom:      // Get the candidate list of rooms and members.
-                return JoinManager.instance.getJoinableRoomsListData(item);
+                return JoinManager.instance.getListItemData(item);
             default:
                 // TODO: log a message here.
                 break;

@@ -78,8 +78,8 @@ public enum JoinManager {
         DBUtils.instance.updateChildren(path, member.toMap());
     }
 
-    /** Return a set of room the current user might choose to join. */
-    public List<ChatListItem> getJoinableRoomsListData(final ChatListItem item) {
+    /** Return a set of explicit (public) and implicit (member) rooms the current User can join. */
+    public List<ChatListItem> getListItemData(final ChatListItem item) {
         // Determine if there are any rooms to present (excludes joined rooms).
         List<ChatListItem> result = new ArrayList<>();
         result.addAll(getAvailableRooms(item));
