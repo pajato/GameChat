@@ -85,6 +85,12 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     // Private constants.
 
+    private static final String APP_CODE = "aq5ca";
+    private static final String PLAY_STORE_LINK = "https://play.google.com/apps/testing/com.pajato.android.gamechat";
+    private static final String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
+    private static final String WEB_LINK = "https://github.com/pajato/GameChat";
+
+
     /** The logcat TAG. */
     private static final String TAG = InvitationManager.class.getSimpleName();
 
@@ -230,7 +236,30 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     }
 
     /** Extend an invitation to join GameChat using AppInviteInvitation Intent */
-    public void extendAppInvitation(final FragmentActivity fragmentActivity, @NonNull final String groupKey) {
+    public void extendAppInvitation(final FragmentActivity fragmentActivity) {
+        String firebaseUrl = FirebaseDatabase.getInstance().getReference().toString();
+        String dynamicLink = new Uri.Builder()
+                .scheme("https")
+                .authority(APP_CODE + ".app.goo.gl")
+                .path("/")
+                .appendQueryParameter("link", firebaseUrl)
+                .appendQueryParameter("apn", APP_PACKAGE_NAME)
+                .appendQueryParameter("afl", PLAY_STORE_LINK)
+                .appendQueryParameter("ifl", WEB_LINK)
+                .toString();
+
+        Log.i(TAG, "dynamicLink=" + dynamicLink);
+        Intent intent = new AppInviteInvitation.IntentBuilder(fragmentActivity.getString(R.string.InviteTitle))
+                .setMessage(fragmentActivity.getString(R.string.InviteMessage))
+                .setDeepLink(Uri.parse(dynamicLink))
+                .build();
+        fragmentActivity.startActivityForResult(intent, MainActivity.RC_INVITE);
+    }
+
+    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
+    public void extendAppInvitation(final FragmentActivity fragmentActivity, final String groupKey) {
+        String firebaseUrl = FirebaseDatabase.getInstance().getReference().toString();
+
         Log.i(TAG, "extendAppInvitation with groupKey=" + groupKey);
         Group grp = GroupManager.instance.getGroupProfile(groupKey);
         if (grp == null) {
@@ -238,19 +267,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     "can't find this group");
             return;
         }
-        String firebaseUrl = FirebaseDatabase.getInstance().getReference().toString();
         firebaseUrl += "/groups/";
-        if (groupKey.equals("")) {
-            firebaseUrl += AccountManager.instance.getMeGroupKey();
-            Log.i(TAG, "extendAppInvitation: " + firebaseUrl);
-        } else {
-            firebaseUrl += groupKey;
-        }
-
-        String APP_CODE = "aq5ca";
-        String PLAY_STORE_LINK = "https://play.google.com/apps/testing/com.pajato.android.gamechat";
-        String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
-        String WEB_LINK = "https://github.com/pajato/GameChat";
+        firebaseUrl += groupKey;
 
         String dynamicLink = new Uri.Builder()
                 .scheme("https")
@@ -274,22 +292,11 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     public void onResult(@NonNull AppInviteInvitationResult result) {
         Log.i(TAG, "getInvitation intent=" + result.getInvitationIntent());
-        Intent i = result.getInvitationIntent();
-        if (i != null) {
-            Log.i(TAG, "extras: " + i.getExtras().toString());
-        }
         if (result.getStatus().isSuccess()) {
             // Extract deep link from Intent
             Intent intent = result.getInvitationIntent();
             String deepLink = AppInviteReferral.getDeepLink(intent);
             Log.i(TAG, "getInvitation with deepLink: " + deepLink);
-            String invitationId = AppInviteReferral.getInvitationId(intent);
-            Log.i(TAG, "getInvitation: invitationId=" + invitationId);
-            boolean hasRef = AppInviteReferral.hasReferral(intent);
-            Log.i(TAG, "getInvitation: invitation has a referral=" + hasRef);
-            boolean isFromPlayStore = AppInviteReferral.isOpenedFromPlayStore(intent);
-            Log.i(TAG, "getInvitation: launched after install from play store=" + isFromPlayStore);
-
             // If we have a deep link, try to find the groupKey. Also, extract the commonRoomKey
             // and groupName values.
             if (deepLink != null && !deepLink.equals("")) {
@@ -300,16 +307,20 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
                 if (firebaseLink != null && !firebaseLink.equals("")) {
                     Uri fbUri = Uri.parse(firebaseLink);
+                    // Get the group key if one was specified
                     List<String> parts = fbUri.getPathSegments();
-                    // Get the last value which should be the group key
-                    String groupKey = parts.get(parts.size() - 1);
-                    Log.i(TAG, "getInvitation: groupKey=" + groupKey);
-                    mInvitedGroups.put(groupKey, new GroupInviteData(groupName, commonRoomKey));
+                    if (parts.contains("groups")) {
+                        String groupKey = parts.get(parts.lastIndexOf("groups"));
+                        Log.i(TAG, "getInvitation: groupKey=" + groupKey);
+                        mInvitedGroups.put(groupKey, new GroupInviteData(groupName, commonRoomKey));
+                    } else {
+                        Log.i(TAG, "getInvitation: no groupKey specified");
+                    }
                 } else {
-                    Log.i(TAG, "getInvitation: can't get group key - firebaseLink is not set");
+                    Log.e(TAG, "getInvitation: can't get group key - firebaseLink is not set");
                 }
             } else {
-                Log.i(TAG, "getInvitation: can't get group key - deepLink is not set");
+                Log.e(TAG, "getInvitation: can't get group key - deepLink is not set");
             }
 
         } else {
