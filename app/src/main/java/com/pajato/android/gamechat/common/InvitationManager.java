@@ -147,7 +147,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 String text = String.format(Locale.getDefault(), format, currAccount.displayName);
                 MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
 
-                if(data.isDone()) {
+                if (data.isDone()) {
                     AppEventManager.instance.post(new GroupJoinedEvent(entry.getValue().groupName));
                     // We're finally done processing this group invitation so remove it from the list
                     mInvitedGroups.remove(entry.getKey());
