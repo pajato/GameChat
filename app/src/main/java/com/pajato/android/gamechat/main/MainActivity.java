@@ -315,6 +315,7 @@ public class MainActivity extends BaseActivity
         DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
+        InvitationManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
     }
 
