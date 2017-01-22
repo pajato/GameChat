@@ -18,12 +18,12 @@
 package com.pajato.android.gamechat.common;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
@@ -98,7 +98,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     // Private instance variables
 
     /** The repository for any messages needed. */
-    private Map<Integer, String> messageMap = new HashMap<>();
+    private SparseArray<String> messageMap = new SparseArray<>();
 
     /** Keep track of any outstanding invites to groups */
     private Map<String, GroupInviteData> mInvitedGroups = new HashMap<>();
@@ -110,7 +110,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     // Public instance methods.
 
-    /** Initialize the two central panels in the app: chat and game/activity. */
+    /** Initialize the invitation manager */
     public void init(final AppCompatActivity context) {
         messageMap.clear();
         messageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
@@ -154,7 +154,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 mInvitedGroups.put(entry.getKey(), data);
 
                 // Post a message to the common room announcing the user has joined
-                String format = messageMap.get(Integer.valueOf(R.string.HasJoinedMessage));
+                String format = messageMap.get(R.string.HasJoinedMessage);
                 String text = String.format(Locale.getDefault(), format, currAccount.displayName);
                 MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
 
