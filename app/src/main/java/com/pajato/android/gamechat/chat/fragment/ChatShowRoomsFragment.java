@@ -31,7 +31,6 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.main.MainActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 

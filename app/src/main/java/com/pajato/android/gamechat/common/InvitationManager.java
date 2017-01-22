@@ -18,9 +18,11 @@
 package com.pajato.android.gamechat.common;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.appinvite.AppInviteInvitation;
@@ -90,9 +92,13 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     private static final String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
     private static final String WEB_LINK = "https://github.com/pajato/GameChat";
 
-
     /** The logcat TAG. */
     private static final String TAG = InvitationManager.class.getSimpleName();
+
+    // Private instance variables
+
+    /** The repository for any messages needed. */
+    private Map<Integer, String> messageMap = new HashMap<>();
 
     /** Keep track of any outstanding invites to groups */
     private Map<String, GroupInviteData> mInvitedGroups = new HashMap<>();
@@ -104,7 +110,12 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     // Public instance methods.
 
-    /** Handle an account state change by updating the navigation drawer header. */
+    /** Initialize the two central panels in the app: chat and game/activity. */
+    public void init(final AppCompatActivity context) {
+        messageMap.clear();
+        messageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
+    }
+        /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe
     public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         Account account = event != null ? event.account : null;
@@ -132,7 +143,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     /** Handle the room profile change */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
-        // If this room is one we care about,
+        // If this room is one we care about, add the current account to the room memberIdList.
         Account currAccount = AccountManager.instance.getCurrentAccount();
         for (Map.Entry<String, GroupInviteData> entry : mInvitedGroups.entrySet()) {
             GroupInviteData data = entry.getValue();
@@ -143,7 +154,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 mInvitedGroups.put(entry.getKey(), data);
 
                 // Post a message to the common room announcing the user has joined
-                String format = "%s has joined";
+                String format = messageMap.get(Integer.valueOf(R.string.HasJoinedMessage));
                 String text = String.format(Locale.getDefault(), format, currAccount.displayName);
                 MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
 
@@ -310,7 +321,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     // Get the group key if one was specified
                     List<String> parts = fbUri.getPathSegments();
                     if (parts.contains("groups")) {
-                        String groupKey = parts.get(parts.lastIndexOf("groups"));
+                        String groupKey = parts.get(parts.lastIndexOf("groups") + 1); // the group key is after 'groups'
                         Log.i(TAG, "getInvitation: groupKey=" + groupKey);
                         mInvitedGroups.put(groupKey, new GroupInviteData(groupName, commonRoomKey));
                     } else {
