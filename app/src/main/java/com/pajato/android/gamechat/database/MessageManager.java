@@ -94,7 +94,7 @@ public enum MessageManager {
                               final Room room) {
         // Ensure database consistency.  Abort quietly (for now) if any path parts are invalid.
         // If the parts are valid, get a push key.
-        // TODO: say saomething about an onvalid path piece.
+        // TODO: say something about an invalid path piece.
         if (room.groupKey == null || room.key == null) return;
         String path = String.format(Locale.US, MESSAGES_PATH, room.groupKey, room.key);
         String key = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();

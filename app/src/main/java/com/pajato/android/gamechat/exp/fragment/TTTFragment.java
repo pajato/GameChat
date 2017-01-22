@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -43,6 +44,7 @@ import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
+import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -99,8 +101,22 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             return;
         Object tag = event.view.getTag();
         FabManager.game.dismissMenu(this);
-        if (isPlayAgain(tag, TAG)) handleNewGame();
-        else handleMode(tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1);
+
+        // Handle invitation - extend app invitation, dismiss menu and return (there is no
+        // new experience to start).
+        if (((MenuEntry) tag).titleResId == R.string.InviteFriendFromChat) {
+            InvitationManager.instance.extendAppInvitation(getActivity(), mExperience.getGroupKey());
+            return;
+        }
+
+        // The event is either a snackbar action (start a new game) or a menu (FAM or Player2)
+        // entry.  Detect and handle start a new game first.
+        if (isPlayAgain(tag, TAG)) {
+            handleNewGame();
+        }
+        else {
+            handleMode(tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1);
+        }
     }
 
     /** Handle a possible game mode selection by ... */
@@ -128,7 +144,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         super.setLayoutId(R.layout.fragment_game_ttt);
     }
 
-    /** Handle either a TTT board tile click. */
+    /** Handle a TTT board tile click. */
     @Override public void onClick(final View view) {
         Object tag = view.getTag();
         if (tag instanceof String && ((String) tag).startsWith("button")) handleClick((String) tag);
@@ -327,6 +343,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
+        menu.add(getNoTintEntry(R.string.InviteFriendFromTTT, R.drawable.ic_email_black_24dp));
         return menu;
     }
 

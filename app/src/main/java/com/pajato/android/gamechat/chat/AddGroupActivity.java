@@ -230,6 +230,7 @@ public class AddGroupActivity extends AppCompatActivity {
         String groupKey = GroupManager.instance.getGroupKey();
         String roomKey = RoomManager.instance.getRoomKey(groupKey);
         mGroup.key = groupKey;
+        mGroup.commonRoomKey = roomKey;
 
         // Create the default (common) room, update the group's room list, add the group key to the
         // account's group id list, and update the member in the group.

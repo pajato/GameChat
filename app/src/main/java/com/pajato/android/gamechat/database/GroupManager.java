@@ -187,6 +187,15 @@ public enum GroupManager {
         return result;
     }
 
+    /** Return the group's common room */
+    public Room getCommonRoom(final String groupKey) {
+        // Return the group if it has been loaded.  Set a watcher to load it if not.
+        Group result = groupMap.get(groupKey);
+        if (result == null) return null; // We don't have this room!
+
+        return RoomManager.instance.getRoomProfile(result.commonRoomKey);
+    }
+
     /** Handle a message change event by adding the message into the correct room list.  */
     @Subscribe public void onMessageListChange(@NonNull final MessageChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.

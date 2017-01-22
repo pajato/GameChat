@@ -103,6 +103,9 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 FirebaseAuth.getInstance().signOut();
                 AccountManager.instance.signIn(getContext());
                 break;
+            case R.id.inviteFriends:
+                InvitationManager.instance.extendAppInvitation(getActivity());
+                break;
             default:
                 // Todo: add more menu button handling as a future feature.
                 break;

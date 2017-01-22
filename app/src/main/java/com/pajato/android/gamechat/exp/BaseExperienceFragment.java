@@ -87,9 +87,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Handle the player 2 control click. */
     @Subscribe public void onClick(final ClickEvent event) {
-        logEvent("Got a player 2 control click event.");
         switch (event.view.getId()) {
             case R.id.player2Name:
+                logEvent("Got a player 2 control click event.");
                 // Simulate a click on the exp FAB.
                 FabManager.game.toggle(this, EXP_MODE_FAM_KEY);
                 break;

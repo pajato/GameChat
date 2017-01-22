@@ -26,6 +26,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
@@ -80,6 +81,8 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, null);
                 break;
+            case R.string.InviteFriendFromChat:
+                InvitationManager.instance.extendAppInvitation(getActivity(), mItem.groupKey);
             default:
                 // ...
                 break;
@@ -119,6 +122,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         if(AccountManager.instance.getCurrentAccount().chaperone == null) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         }
+        menu.add(getNoTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_email_black_24dp));
         return menu;
     }
 

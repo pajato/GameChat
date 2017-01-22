@@ -47,6 +47,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -233,7 +234,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Return null or the push key for the "me room" associated with the current account. */
     public String getMeRoomKey() {
         // Ensure that there is an account and a me group profile has been registered.  If not
-        // return null, otherise return the me room push key.
+        // return null, otherwise return the me room push key.
         if (!hasAccount() || mGroup == null)
             return null;
         return mGroup.roomList.get(0);

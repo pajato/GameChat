@@ -30,10 +30,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -41,6 +47,7 @@ import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
@@ -63,7 +70,7 @@ import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILA
  * @author Paul Michael Reilly
  */
 public class MainActivity extends BaseActivity
-    implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
+    implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     // Public class constants.
 
@@ -72,6 +79,9 @@ public class MainActivity extends BaseActivity
 
     /** The test user name key. */
     public static final String TEST_USER_KEY = "testUserKey";
+
+    /** The invite activity request code. */
+    public static final int RC_INVITE = 2;
 
     // Private class constants.
 
@@ -98,6 +108,15 @@ public class MainActivity extends BaseActivity
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
         NavigationManager.instance.setAccount(account, header);
+    }
+
+    /** Handle group joined event */
+    @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
+        if (event.groupName != null && !event.groupName.equals("")) {
+            String format = getString(R.string.JoinedGroupsMessage);
+            String message = String.format(Locale.US, format, event.groupName);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
     }
 
     /** Handle a back button press event delivered by the system. */
@@ -193,16 +212,42 @@ public class MainActivity extends BaseActivity
             String key = ACCOUNT_AVAILABLE_KEY;
             editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
             editor.apply();
+        } else if (requestCode == RC_INVITE && resultCode == RESULT_OK) {
+            // For now, just log
+            Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+            // Get the invitation IDs of all sent messages
+            String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
+            for (String id : ids) {
+                Log.d(TAG, "onActivityResult: sent invitation " + id);
+            }
         }
     }
 
+    public void onConnectionFailed (@NonNull ConnectionResult result) {
+        Log.i(TAG, "connection failed: " + result.toString());
+    }
+
     /** Set up the app per the characteristics of the running device. */
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         // Deal with signin, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
+
         signIn();
         setContentView(R.layout.activity_main);
         init();
+
+        // Build GoogleApiClient with AppInvite API for receiving deep links
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(AppInvite.API)
+                .build();
+
+        // Check if this app was launched from a deep link. Setting autoLaunchDeepLink to true
+        // would automatically launch the deep link if one is found.
+        final boolean autoLaunchDeepLink = false;
+        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
+                .setResultCallback(InvitationManager.instance);
     }
 
     // Private instance methods.

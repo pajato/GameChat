@@ -24,8 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Provide a Firebase model class repesenting a chat group, a collection of members and rooms. */
+/** Provide a Firebase model class representing a chat group, a collection of members and rooms. */
 @IgnoreExtraProperties public class Group  {
+
+    /** The key for the group's common room */
+    public String commonRoomKey;
 
     /** The creation timestamp. */
     public long createTime;
@@ -66,6 +69,7 @@ import java.util.Map;
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
+        result.put("commonRoomKey", commonRoomKey);
         result.put("createTime", createTime);
         result.put("key", key);
         result.put("name", name);
