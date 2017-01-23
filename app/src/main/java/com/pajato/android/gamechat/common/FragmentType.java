@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.chat.fragment.CreateGroupFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
 import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowGroupsFragment;
+import com.pajato.android.gamechat.chat.fragment.SelectForInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
@@ -80,6 +81,8 @@ public enum FragmentType {
     messageList (ShowMessagesFragment.class, chatChain, R.layout.fragment_chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.fragment_game_no_games),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.fragment_chat_no_messages),
+    selectGroupsAndRooms (SelectForInviteFragment.class, chatChain,
+            R.layout.fragment_select_for_invite),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain,
                        R.layout.fragment_chat_no_joined_rooms),
     tictactoeList (ExpShowTypeListFragment.class, expMain, R.layout.fragment_chat_no_joined_rooms),
@@ -156,6 +159,7 @@ public enum FragmentType {
             case createRoom:
             case joinRoom:
             case messageList:
+            case selectGroupsAndRooms:
             case showNoJoinedRooms:
                 return chat;
             default:

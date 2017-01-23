@@ -49,9 +49,9 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsAndRooms;
 
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
@@ -104,7 +104,8 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 AccountManager.instance.signIn(getContext());
                 break;
             case R.id.inviteFriends:
-                InvitationManager.instance.extendAppInvitation(getActivity());
+                DispatchManager.instance.chainFragment(getActivity(), selectGroupsAndRooms, null);
+//                InvitationManager.instance.extendAppInvitation(getActivity());
                 break;
             default:
                 // Todo: add more menu button handling as a future feature.

@@ -80,7 +80,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 DispatchManager.instance.chainFragment(getActivity(), createGroup, null);
                 break;
             case R.string.CreateRoomMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createRoom, null);
+                DispatchManager.instance.chainFragment(getActivity(), createRoom, mItem);
                 break;
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, null);
