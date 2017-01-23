@@ -105,7 +105,6 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 break;
             case R.id.inviteFriends:
                 DispatchManager.instance.chainFragment(getActivity(), selectGroupsAndRooms, null);
-//                InvitationManager.instance.extendAppInvitation(getActivity());
                 break;
             default:
                 // Todo: add more menu button handling as a future feature.
