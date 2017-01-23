@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.exp;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
@@ -31,8 +30,6 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.NetworkManager;
 
@@ -205,18 +202,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     @Override protected boolean onDispatch(@NonNull final Context context,
                                            @NonNull final Dispatcher dispatcher) {
         return true;
-    }
-
-    /** Implement the setTitles() contract. */
-    protected void setTitles(final String groupKey, final String roomKey) {
-        // Ensure that there is an accessible toolbar.  Abort if not, otherwise show the room name
-        // as the title and the group name as the subtitle.
-        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
-        if (bar == null) return;
-        String title = RoomManager.instance.getRoomName(roomKey);
-        String subtitle = GroupManager.instance.getGroupName(groupKey);
-        bar.setTitle(title);
-        bar.setSubtitle(subtitle);
     }
 
     // Private instance methods.

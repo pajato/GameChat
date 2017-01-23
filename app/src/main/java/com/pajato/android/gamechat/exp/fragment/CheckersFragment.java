@@ -2,7 +2,6 @@ package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -18,6 +17,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -112,10 +112,9 @@ public class CheckersFragment extends BaseExperienceFragment {
         resume();
     }
 
-    /** Setup the Player Controls. The Board setup will be done later. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_checkers);
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.checkers_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override public void onStart() {
@@ -261,7 +260,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
+            ToolbarManager.instance.setTitles(this, mExperience);
             ProgressManager.instance.hide();
             updateUiFromExperience();
         }
@@ -278,11 +277,6 @@ public class CheckersFragment extends BaseExperienceFragment {
             // Make player2's decorations the more prominent.
             setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
                     R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.checkers_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     /** Manage a particular player's symbol decorations. */

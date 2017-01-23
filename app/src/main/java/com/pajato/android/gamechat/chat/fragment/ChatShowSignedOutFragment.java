@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
@@ -91,14 +90,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
             ProgressManager.instance.hide();
         }
         DispatchManager.instance.startNextFragment(this.getActivity(), chat);
-    }
-
-    /** Establish the layout file to show that the user is signed out and cannot chat. */
-    @Override public void onCreate(Bundle bundle) {
-        // Establish the layout file and set up a countdown timer to shut off the progress spinner
-        // after 10 seconds.
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_signed_out);
     }
 
     /** Handle the setup for the groups panel. */

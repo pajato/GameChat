@@ -22,10 +22,8 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;
@@ -35,13 +33,10 @@ import java.util.Map;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatOffline;
-import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.chatSignedOut;
 import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expOffline;
-import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.expSignedOut;
-import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 
 /**
  * Manages the game related aspects of the GameChat application. These include the creation of new
@@ -79,7 +74,7 @@ public enum DispatchManager {
                               final ChatListItem item) {
         // Ensure that type is valid.  Abort if not, otherwise validate the fragment, aborting if
         // invalid.
-        if (type == null || type.kind == null)
+        if (type == null)
             return;
         Dispatcher dispatcher = getDispatcher(type, item);
         BaseFragment fragment = getFragment(type);
@@ -92,7 +87,7 @@ public enum DispatchManager {
         FragmentManager manager = context.getSupportFragmentManager();
         FragmentManager.enableDebugLogging(true);
         manager.beginTransaction()
-            .replace(type.envelopeResId, fragment)
+            .replace(type.getEnvelopeId(type), fragment)
             .addToBackStack(type.toString())
             .commit();
     }
@@ -137,7 +132,7 @@ public enum DispatchManager {
     public boolean startNextFragment(final FragmentActivity context, final FragmentType type) {
         // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
         // dispatcher if so.
-        if (type == null || type.kind == null)
+        if (type == null)
             return false;
         Dispatcher dispatcher = getDispatcher(type, null);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
@@ -166,7 +161,7 @@ public enum DispatchManager {
                 return new Dispatcher(type, item);
 
             default:            // Handle all the other types in the normal fashion.
-                return getDispatcher(type.kind);
+                return getDispatcher(type.getKind(type));
         }
     }
 
@@ -217,7 +212,7 @@ public enum DispatchManager {
             return false;
         fragment.onSetup(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
-            .replace(dispatcher.type.envelopeResId, fragment)
+            .replace(dispatcher.type.getEnvelopeId(dispatcher.type), fragment)
             .commit();
         return true;
     }

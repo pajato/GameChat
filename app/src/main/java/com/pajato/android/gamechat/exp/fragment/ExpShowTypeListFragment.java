@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.os.Bundle;
-
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 /**
@@ -26,11 +24,4 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
  *
  * Created by pmr on 10/5/16.
  */
-public class ExpShowTypeListFragment extends BaseExperienceFragment {
-
-    /** Set the layout file. */
-    @Override public void onCreate(Bundle bundle) {
-        // TODO: Add a real layout for this class.
-        super.onCreate(bundle);
-    }
-}
+public class ExpShowTypeListFragment extends BaseExperienceFragment {}

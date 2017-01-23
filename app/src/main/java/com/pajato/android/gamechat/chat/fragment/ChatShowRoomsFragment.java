@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -27,15 +26,17 @@ import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
@@ -57,10 +58,13 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Set the layout to a shared layout file for showing a list (of rooms, in this case). */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_list);
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
+        // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
+        String format = "onChatListChange with event {%s}";
+        logEvent(String.format(Locale.US, format, "no list", event));
+        if (mActive)
+            redisplay();
     }
 
     /** Process a menu click event ... */
@@ -98,8 +102,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        mItemListType = DBUtils.ChatListType.room;
-        initToolbar();
+        ToolbarManager.instance.init(this);
         FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 
