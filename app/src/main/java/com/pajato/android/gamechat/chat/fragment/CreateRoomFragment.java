@@ -20,11 +20,11 @@ package com.pajato.android.gamechat.chat.fragment;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
@@ -68,8 +68,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Establish the list type and setup the toolbar.
         mCreateType = CreateType.room;
-        mItemListType = DBUtils.ChatListType.addRoom;
-        initToolbar();
+        ToolbarManager.instance.init(this);
 
         // Set up the room profile.
         mRoom = new Room();

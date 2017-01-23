@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.support.annotation.NonNull;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowOfflineFragment;
@@ -29,6 +31,7 @@ import com.pajato.android.gamechat.chat.fragment.ChatShowGroupsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
+import com.pajato.android.gamechat.common.ToolbarManager.ToolbarType;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.fragment.CheckersFragment;
 import com.pajato.android.gamechat.exp.fragment.ChessFragment;
@@ -45,6 +48,14 @@ import com.pajato.android.gamechat.common.DispatchManager.DispatcherKind;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatChain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createGroupTT;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createRoomTT;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expChain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
+import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
 /**
  * Defines the fragments that can be shown in the chat or experience panes.
@@ -52,76 +63,103 @@ import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.
  * @author Paul Michael Reilly
  */
 public enum FragmentType {
-    chatEnvelope (chat, ChatEnvelopeFragment.class),
-    chatGroupList (chat, ChatShowGroupsFragment.class, R.id.chatFragmentContainer),
-    chatOffline (chat, ChatShowOfflineFragment.class, R.id.chatFragmentContainer),
-    chatRoomList (chat, ChatShowRoomsFragment.class, R.id.chatFragmentContainer),
-    chatSignedOut (chat, ChatShowSignedOutFragment.class, R.id.chatFragmentContainer),
-    createGroup (chat, CreateGroupFragment.class, R.id.chatFragmentContainer),
-    createRoom (chat, CreateRoomFragment.class, R.id.chatFragmentContainer),
-    expEnvelope (exp, ExpEnvelopeFragment.class),
-    expGroupList (exp, ExpShowGroupsFragment.class, R.id.expFragmentContainer),
-    expOffline (exp, ExpShowOfflineFragment.class, R.id.expFragmentContainer),
-    expRoomList (exp, ExpShowRoomsFragment.class, R.id.expFragmentContainer),
-    expSignedOut (exp, ExpShowSignedOutFragment.class, R.id.expFragmentContainer),
-    experienceList (exp, ShowExperiencesFragment.class, R.id.expFragmentContainer),
-    joinRoom (chat, JoinRoomsFragment.class, R.id.chatFragmentContainer),
-    messageList (chat, ShowMessagesFragment.class, R.id.chatFragmentContainer),
-    noExperiences (exp, ShowNoExperiencesFragment.class, R.id.expFragmentContainer),
-    noMessages (chat, ShowNoMessagesFragment.class, R.id.chatFragmentContainer),
-    showNoJoinedRooms (chat, ShowNoJoinedRoomsFragment.class, R.id.chatFragmentContainer),
-    tictactoeList (exp, ExpShowTypeListFragment.class, R.id.expFragmentContainer),
-    tictactoe (exp, TTTFragment.class, R.id.expFragmentContainer, ExpType.ttt, tictactoeList),
-    checkersList (exp, ExpShowTypeListFragment.class, R.id.expFragmentContainer),
-    checkers (exp, CheckersFragment.class, R.id.expFragmentContainer, ExpType.checkers, checkersList),
-    chessList(exp, ExpShowTypeListFragment.class, R.id.expFragmentContainer),
-    chess (exp, ChessFragment.class, R.id.expFragmentContainer, ExpType.chess, chessList);
+    chatEnvelope (ChatEnvelopeFragment.class, null, R.layout.fragment_chat),
+    chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.fragment_chat_list),
+    chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.fragment_chat_offline),
+    chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.fragment_chat_list),
+    chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.fragment_chat_signed_out),
+    createGroup (CreateGroupFragment.class, createGroupTT, R.layout.fragment_chat_create),
+    createRoom (CreateRoomFragment.class, createRoomTT, R.layout.fragment_chat_create),
+    expEnvelope (ExpEnvelopeFragment.class, null, R.layout.fragment_exp),
+    expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.fragment_game_no_games),
+    expOffline (ExpShowOfflineFragment.class, expMain, R.layout.fragment_game_offline),
+    expRoomList (ExpShowRoomsFragment.class, expChain, R.layout.fragment_game_no_games),
+    expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.fragment_exp_signed_out),
+    experienceList (ShowExperiencesFragment.class, expMain, R.layout.fragment_game_no_games),
+    joinRoom (JoinRoomsFragment.class, joinRoomTT, R.layout.fragment_chat_join_rooms),
+    messageList (ShowMessagesFragment.class, chatChain, R.layout.fragment_chat_messages),
+    noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.fragment_game_no_games),
+    noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.fragment_chat_no_messages),
+    showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain,
+                       R.layout.fragment_chat_no_joined_rooms),
+    tictactoeList (ExpShowTypeListFragment.class, expMain, R.layout.fragment_chat_no_joined_rooms),
+    tictactoe (TTTFragment.class, expChain, R.layout.fragment_game_ttt, ttt, tictactoeList),
+    checkersList (ExpShowTypeListFragment.class, expMain, R.layout.fragment_game_no_games),
+    checkers (CheckersFragment.class, expChain, R.layout.fragment_checkers, ExpType.checkers,
+              checkersList),
+    chessList (ExpShowTypeListFragment.class, expMain, R.layout.fragment_game_no_games),
+    chess (ChessFragment.class, expChain, R.layout.fragment_checkers, ExpType.chess, chessList);
 
     // Public instance variables.
-
-    /** The fragment kind, one of chat or exp. */
-    public DispatchManager.DispatcherKind kind;
-
-    /** The envelope container id used to replace the current or chain to another fragment. */
-    public int envelopeResId;
-
-    /** The fragment base class for the type. */
-    public  Class<? extends BaseFragment> fragmentClass;
 
     /** The experience type for this value. */
     public ExpType expType;
 
+    /** The fragment base class for the type. */
+    public  Class<? extends BaseFragment> fragmentClass;
+
+    /** The fragment layout resource id. */
+    public int layoutResId;
+
     /** The fragment type that will be used to show a homogeneous experience collection. */
     public FragmentType listType;
 
+    /** The fragment toolbar type. */
+    public ToolbarType toolbarType;
+
     // Public constructors.
 
-    /** Build an instance with only a given fragment kind and class. */
-    FragmentType(final DispatcherKind kind, final Class<? extends BaseFragment> fragmentClass) {
-        this.kind = kind;
+    /** Build an instance with a given fragment class, toolbar type and layout resource id. */
+    FragmentType(@NonNull final Class<? extends BaseFragment> fragmentClass,
+                 final ToolbarType toolbarType, final int layoutResId) {
         this.fragmentClass = fragmentClass;
-    }
-
-    /** Build an instance with a given class and an envelope container id resource. */
-    FragmentType(final DispatcherKind kind, final Class<? extends BaseFragment> fragmentClass,
-                 final int envelopeResId) {
-        this(kind, fragmentClass);
-        this.envelopeResId = envelopeResId;
+        this.toolbarType = toolbarType;
+        this.layoutResId = layoutResId;
     }
 
     /**
      * Build an instance that supports a list of experiences of a single type.
      *
-     * @param kind The dispatcher kind, one of chat or exp.
-     * @param fragmentClass A given fragment class,
-     * @param envelopeResId The resource id for the envelope fragment.
+     * @param fragmentClass A given fragment class.
+     * @param toolbarType A toolbar type, possibly null.
+     * @param layoutResId The layout resource id.
      * @param expType The Firebase model type information.
      * @param listType The fragment type that will show a list of given model type experiences.
      */
-    FragmentType(final DispatcherKind kind, final Class<? extends BaseFragment> fragmentClass,
-                 final int envelopeResId, final ExpType expType, final FragmentType listType) {
-        this(kind, fragmentClass, envelopeResId);
+    FragmentType(@NonNull final Class<? extends BaseFragment> fragmentClass,
+                 final ToolbarType toolbarType, final int layoutResId, final ExpType expType,
+                 final FragmentType listType) {
+        this(fragmentClass, toolbarType, layoutResId);
         this.expType = expType;
         this.listType = listType;
+    }
+
+    // Public instance methods.
+
+    /** Return the fragment envelope resource id for given type. */
+    public int getEnvelopeId(final FragmentType type) {
+        if (getKind(type) == chat)
+            return R.id.chatFragmentContainer;
+        else
+            return R.id.expFragmentContainer;
+    }
+
+    /** Return the dispatch kind for this fragment type. */
+    public DispatcherKind getKind(final FragmentType type) {
+        switch(type) {
+            case chatEnvelope:
+            case chatGroupList:
+            case chatOffline:
+            case chatRoomList:
+            case chatSignedOut:
+            case createGroup:
+            case createRoom:
+            case joinRoom:
+            case messageList:
+            case showNoJoinedRooms:
+                return chat;
+            default:
+                return exp;
+        }
     }
 }

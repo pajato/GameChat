@@ -61,11 +61,6 @@ http://www.gnu.org/licenses
         <activity
             android:name=".intro.IntroActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".chat.AddGroupActivity"
-            android:label="@string/CreateGroupTitle"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <service
             android:name=".main.GameChatMessagingService"
             android:exported="false">

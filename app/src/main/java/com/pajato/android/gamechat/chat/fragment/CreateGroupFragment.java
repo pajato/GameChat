@@ -26,11 +26,11 @@ import android.widget.RadioGroup;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
@@ -58,8 +58,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         // control.
         super.onStart();
         mCreateType = CreateType.group;
-        mItemListType = DBUtils.ChatListType.addGroup;
-        initToolbar();
+        ToolbarManager.instance.init(this);
         RadioGroup accessControl = (RadioGroup) mLayout.findViewById(R.id.AccessControl);
         accessControl.setVisibility(View.GONE);
 

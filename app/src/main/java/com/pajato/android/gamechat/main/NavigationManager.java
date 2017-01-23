@@ -69,7 +69,7 @@ public enum NavigationManager {
     }
 
     /** Initialize the navigation drawer. */
-    public void init(final MainActivity activity, final Toolbar toolbar) {
+    public void init(final Activity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle;
@@ -80,9 +80,9 @@ public enum NavigationManager {
         // Set up the handle navigation menu item clicks and register this manager with the app
         // event manager.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(activity);
+        navigationView.setNavigationItemSelectedListener((MainActivity) activity);
         NavigationView footer = (NavigationView) activity.findViewById(R.id.nav_footer);
-        footer.setNavigationItemSelectedListener(activity);
+        footer.setNavigationItemSelectedListener((MainActivity) activity);
     }
 
     /** Process a given button click event handling the nav drawer closing. */

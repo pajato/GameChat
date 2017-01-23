@@ -20,11 +20,9 @@ package com.pajato.android.gamechat.chat;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -41,15 +39,13 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.MenuItemEvent;
-import com.pajato.android.gamechat.main.MainActivity;
-import com.pajato.android.gamechat.main.NavigationManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -62,8 +58,6 @@ import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_T
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
-import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
-import static com.pajato.android.gamechat.database.DBUtils.ChatListType.message;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -83,7 +77,7 @@ public abstract class BaseChatFragment extends BaseFragment {
     private static final String LOG_FORMAT = "Event: %s; Fragment: %s; Fragment Manager: %s.";
 
     /** Extra information format string. */
-    private static final String SUFFIX_FORMAT = "Fragment List Type: %s; State: %s; Bundle: %s.";
+    private static final String SUFFIX_FORMAT = "Fragment Type: %s; State: %s; Bundle: %s.";
 
     // Protected instance variables.
 
@@ -92,9 +86,6 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** The item information passed from the parent fragment. */
     protected ChatListItem mItem;
-
-    /** The list type for this fragment. */
-    protected DBUtils.ChatListType mItemListType;
 
     // Public instance methods.
 
@@ -157,27 +148,6 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
-    /** Initialize the toolbar for all chat pages. */
-    protected void initToolbar() {
-        // Determine if this fragment supports a toolbar.  Abort if not.
-        Toolbar toolbar = (Toolbar) mLayout.findViewById(R.id.toolbar);
-        if (toolbar == null || mItemListType == null) return;
-
-        // Setup the group page (home) toolbar via the navigation manager initialization.
-        if (mItemListType == group) {
-            NavigationManager.instance.init((MainActivity) getActivity(), toolbar);
-            return;
-        }
-
-        // Setup the overflow menu on all pages but the group (home) page.
-        int id = mItemListType.overflowMenuIconResourceId;
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(mItemListType.overflowMenuResourceId);
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(getResources(), id, null));
-        toolbar.setNavigationIcon(mItemListType.navigationIconResourceId);
-        toolbar.setNavigationOnClickListener(new UpHandler());
-    }
-
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
         logEvent(event, null);
@@ -186,11 +156,10 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** Log a lifecycle event that has a bundle. */
     @Override protected void logEvent(final String event, final Bundle bundle) {
         String manager = getFragmentManager().toString();
-        String list = mItemListType == null ? "N/A" : mItemListType.toString();
         String state = mActive ? "foreground" : "background";
         String bundleMessage = bundle == null ? "N/A" : bundle.toString();
         Log.v(TAG, String.format(Locale.US, LOG_FORMAT, event, this, manager));
-        Log.v(TAG, String.format(Locale.US, SUFFIX_FORMAT, list, state, bundleMessage));
+        Log.v(TAG, String.format(Locale.US, SUFFIX_FORMAT, type, state, bundleMessage));
     }
 
     /** Return TRUE iff the fragment setup is handled successfully. */
@@ -237,40 +206,22 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Do a redisplay to catch potential changes that should be shown in the current view. */
     protected void redisplay() {
+        // Update the FAB for this fragment, process the ad, determine if a list adapter update
+        // needs be processed and set the toolbar titles.
         FabManager.chat.init(this);
         if (mAdView != null)
             mAdView.resume();
-        if (mItemListType != null)
-            updateAdapterList();
-        setTitles();
-    }
-
-    /** Set the title in the toolbar based on the list type. */
-    @Override protected void setTitles() {
-        // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
-        // on the list type to apply the titles.
-        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
-        if (bar == null || mItemListType == null) return;
-        switch (mItemListType) {
-            case addGroup:
-                // Simply set the title to the group name, clearing the subtitle.
-                setTitles(bar, getResources().getString(R.string.CreateGroupMenuTitle), null);
-                break;
-            case addRoom:
-            case joinRoom:
-                // Set the title to the given resource and the subtitle to the group name.
-                setTitles(bar, mItemListType.titleResourceId);
-                break;
-            case group:
-            case message:
-            case room:
-                // Set the title and subtitle based on the item content.
-                setTitles(bar, mItem);
-                break;
-            default:
-                setTitles(bar, getResources().getString(R.string.app_name), null);
-                break;
-        }
+        if (type != null)
+            switch (type) {
+                case chatGroupList:
+                case chatRoomList:
+                case messageList:   // Update the state of the list adapter.
+                    updateAdapterList();
+                    break;
+                default:            // Ignore all other fragments.
+                    break;
+            }
+        ToolbarManager.instance.setTitles(this, mItem);
     }
 
     // Private instance methods.
@@ -306,43 +257,11 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
-    /** Set the titles in the given toolbar using the given item. */
-    private void setTitles(@NonNull final Toolbar bar, final ChatListItem item) {
-        // Use the item content to set the title and subtitle.
-        if (item == null || (item.groupKey == null && item.key == null)) {
-            setTitles(bar, R.string.app_name);
-            return;
-        }
-
-        // Determine if the group name should be the title.
-        String title = item.key == null
-            ? GroupManager.instance.getGroupName(item.groupKey)
-            : RoomManager.instance.getRoomName(item.key);
-        String subtitle = item.key != null
-            ? GroupManager.instance.getGroupName(item.groupKey) : null;
-        setTitles(bar, title, subtitle);
-    }
-
-    /** Set the title to the given resource and the subtitle to the group name, if available. */
-    private void setTitles(@NonNull final Toolbar bar, final int resourceId) {
-        String title = getResources().getString(resourceId);
-        String key = mItem != null ? mItem.groupKey : null;
-        String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;
-        setTitles(bar, title, subtitle);
-    }
-
-    /** Set the titles in the given toolbar using the given (possibly null) titles. */
-    private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
-        // Apply the given titles to the toolbar; nulls will clear the fields.
-        bar.setTitle(title);
-        bar.setSubtitle(subtitle);
-    }
-
     /** Return TRUE iff the list can be considered up to date. */
     private boolean updateAdapterList() {
         // Determine if the fragment has a view and that it has a list type.
         View layout = getView();
-        if (layout == null || mItemListType == null) return false;
+        if (layout == null) return false;
 
         // It has both.  Ensure that the list view (recycler) exists.
         RecyclerView view = (RecyclerView) layout.findViewById(R.id.chatList);
@@ -364,21 +283,10 @@ public abstract class BaseChatFragment extends BaseFragment {
         // list when showing messages.
         ChatListAdapter listAdapter = (ChatListAdapter) adapter;
         listAdapter.clearItems();
-        List<ChatListItem> items = DBUtils.instance.getList(mItemListType, mItem);
+        List<ChatListItem> items = DBUtils.instance.getList(type, mItem);
         Log.d(TAG, String.format(Locale.US, "Updating with %d items.", items.size()));
         listAdapter.addItems(items);
-        if (mItemListType == message) view.scrollToPosition(listAdapter.getItemCount() - 1);
+        if (type == messageList) view.scrollToPosition(listAdapter.getItemCount() - 1);
         return true;
     }
-
-    // Protected inner classes.
-
-    /** Provide a handler that will generate a backpress event. */
-    private class UpHandler implements View.OnClickListener {
-        /** Handle a click on the back arrow button by generating a back press. */
-        public void onClick(final View view) {
-            getActivity().onBackPressed();
-        }
-    }
-
 }

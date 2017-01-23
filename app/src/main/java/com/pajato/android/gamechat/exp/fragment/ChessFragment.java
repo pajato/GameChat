@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -18,6 +17,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -97,12 +97,6 @@ public class ChessFragment extends BaseExperienceFragment {
             return;
         mExperience = event.experience;
         resume();
-    }
-
-    /** Setup the Player Controls. The board setup will be done later. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_checkers);
     }
 
     @Override public void onStart() {
@@ -251,7 +245,7 @@ public class ChessFragment extends BaseExperienceFragment {
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
+            ToolbarManager.instance.setTitles(this, mExperience);
             ProgressManager.instance.hide();
             updateUiFromExperience();
         }

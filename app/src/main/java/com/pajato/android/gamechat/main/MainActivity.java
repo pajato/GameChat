@@ -94,7 +94,19 @@ public class MainActivity extends BaseActivity
     /** The Intro activity request code. */
     private static final int RC_INTRO = 1;
 
-    // Public instance methods
+    // Private instance variables.
+
+    /** The current, possibly null, fragment back press handler. */
+    private View.OnClickListener mUpHandler;
+
+    // Public instance methods.
+
+    /** Lazily create a navigation back press handler for fragment toolbars. */
+    public View.OnClickListener getUpHandler() {
+        if (mUpHandler == null)
+            mUpHandler = new UpHandler();
+        return mUpHandler;
+    }
 
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
@@ -127,7 +139,7 @@ public class MainActivity extends BaseActivity
 
     /** Process a given button click event handling the nav drawer closing. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Log all button clicks and rocess the sign in and sign out button clicks.
+        // Log all button clicks and process the sign in and sign out button clicks.
         View view = event.view;
         String format = "Button click event on view: {%s}.";
         Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
@@ -354,5 +366,15 @@ public class MainActivity extends BaseActivity
         // sign in.
         Intent introIntent = new Intent(this, IntroActivity.class);
         startActivityForResult(introIntent, RC_INTRO);
+    }
+
+    // Protected inner classes.
+
+    /** Provide a handler that will generate a backpress event. */
+    private class UpHandler implements View.OnClickListener {
+        /** Handle a click on the back arrow button by generating a back press. */
+        public void onClick(final View view) {
+            onBackPressed();
+        }
     }
 }

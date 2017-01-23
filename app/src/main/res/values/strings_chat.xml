@@ -4,7 +4,6 @@
     <string name="ClearSelectionsMenuTitle">Clear Selections</string>
     <string name="CreateGroupMenuTitle">Create Group</string>
     <string name="CreateGroupNameHint">Type group name</string>Title">
-    <string name="CreateGroupTitle">Create Group</string>
     <string name="CreateRoomMenuTitle">Create Room</string>
     <string name="CreateRoomNameHint">Type room name</string>
     <string name="CreateRoomPrivate">Private</string>
@@ -26,7 +25,6 @@
     <string name="InviteFriends">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
-    <string name="LearnMoreFeature">Providing context help</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
     <string name="NoGroupsHeaderText">Welcome to GameChat!</string>

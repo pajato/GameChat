@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -26,9 +25,9 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.ProgressManager;
@@ -41,7 +40,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
-import static com.pajato.android.gamechat.database.DBUtils.ChatListType.group;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -58,12 +56,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
     public static final String CHAT_GROUP_FAM_KEY = "chatGroupFamKey";
 
     // Public instance methods.
-
-    /** Set the layout to a shared layout file for showing a list (of groups, in this case). */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_list);
-    }
 
     /** Process a menu click event ... */
     @Subscribe public void onClick(final TagClickEvent event) {
@@ -94,18 +86,19 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes:
+        // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
-        if (mActive && (mItemListType == group || mItemListType == DBUtils.ChatListType.room))
+        if (mActive)
             redisplay();
     }
 
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        mItemListType = DBUtils.ChatListType.group;
-        initToolbar();
+        if (ProgressManager.instance.isShowing())
+            ProgressManager.instance.hide();
+        ToolbarManager.instance.init(this);
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 
@@ -115,8 +108,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
         // the group list display.
         super.onResume();
-        if (ProgressManager.instance.isShowing())
-            ProgressManager.instance.hide();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
