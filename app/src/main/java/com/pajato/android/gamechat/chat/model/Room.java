@@ -106,7 +106,13 @@ import java.util.Map;
             case ME:
                 return account.getDisplayName();
             case PRIVATE:
-                return memberNames(account);
+                // if name is not set, try to get memberNames value
+                if (name == null || name.equals("")) {
+                    name = memberNames(account);
+                }
+                if (!name.equals("")) return name;
+                // when no other name is available, use account display name
+                return account.getDisplayName();
             default:
                 return name;
         }

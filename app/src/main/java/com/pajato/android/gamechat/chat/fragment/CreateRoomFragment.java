@@ -17,7 +17,9 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.view.inputmethod.InputMethodManager;
 
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -30,6 +32,7 @@ import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 
 /**
@@ -99,6 +102,14 @@ public class CreateRoomFragment extends BaseCreateFragment {
         // Post a welcome message to the new room from the owner.
         String text = "Welcome to my new room!";
         MessageManager.instance.createMessage(text, STANDARD, account, mRoom);
+
+        // Dismiss the Keyboard and return to the previous fragment.
+        Activity activity = getActivity();
+        InputMethodManager manager;
+        manager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+        if (manager.isAcceptingText() && activity.getCurrentFocus() != null)
+            manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        activity.onBackPressed();
     }
 
     /** Set the room name conditionally to the given value. */

@@ -156,6 +156,7 @@ public enum DispatchManager {
             case tictactoe:     // Handle an experience dispatch providing a type.
                 return new Dispatcher(type);
 
+            case createRoom:
             case messageList:
             case chatRoomList:  // Handle a chat dispatch providing both a type and an item.
                 return new Dispatcher(type, item);

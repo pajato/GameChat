@@ -175,6 +175,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 RoomItem roomItem = new RoomItem(dispatcher.groupKey, dispatcher.roomKey);
                 mItem = new ChatListItem(roomItem);
                 return true;
+            case createRoom:
             case chatRoomList:  // The rooms in a group need the group key.
                 GroupItem groupItem = new GroupItem(dispatcher.groupKey);
                 mItem = new ChatListItem(groupItem);
