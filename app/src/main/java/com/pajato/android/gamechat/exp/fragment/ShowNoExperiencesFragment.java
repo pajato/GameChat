@@ -17,12 +17,9 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.os.Bundle;
-
-import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.common.DispatchManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -33,12 +30,6 @@ import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 public class ShowNoExperiencesFragment extends BaseExperienceFragment {
 
     // Public instance methods.
-
-    /** Establish the layout file to indicate that no experiences are available. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_game_no_games);
-    }
 
     /** Handle an experience profile list change event. */
     @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {

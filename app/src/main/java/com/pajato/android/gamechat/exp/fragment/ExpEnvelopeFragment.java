@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,6 +41,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
@@ -59,6 +59,13 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     /** The lookup key for the FAB game home memu. */
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
+
+    // Default constructor.
+
+    /** Build an instance setting the fragment type. */
+    public ExpEnvelopeFragment() {
+        type = FragmentType.expEnvelope;
+    }
 
     // Public instance methods.
 
@@ -99,16 +106,16 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     @Subscribe public void onClick(final ClickEvent event) {
         // Grab the View ID and the floating action button and dimmer views.
         View view = event.view;
-        FragmentType type = null;
+        FragmentType expType = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
-                type = tictactoe;
+                expType = tictactoe;
                 break;
             case R.id.IconCheckers:
-                type = checkers;
+                expType = checkers;
                 break;
             case R.id.IconChess:
-                type = chess;
+                expType = chess;
                 break;
             case R.drawable.ic_casino_black_24dp:
                 // And do it for the rooms option buttons.
@@ -123,19 +130,14 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
                 break;
         }
 
-        if (type != null) DispatchManager.instance.startNextFragment(getActivity(), type);
+        if (expType != null)
+            DispatchManager.instance.startNextFragment(getActivity(), expType);
     }
 
     /** Handle the options menu by inflating it. */
     @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.game_menu, menu);
-    }
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_exp);
     }
 
     /** Intialize the game fragment envelope. */

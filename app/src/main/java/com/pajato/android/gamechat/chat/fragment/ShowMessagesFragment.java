@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -32,11 +31,11 @@ import android.widget.EditText;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
@@ -83,12 +82,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         }
     }
 
-    /** Setup a layout akin to the other "show list" fragments, but with the input section. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_messages);
-    }
-
     /** Handle a button click on the FAB button by posting a new message. */
     @Override public void onClick(final View view) {
         // Ensure that the click occurred on the send message button.
@@ -105,18 +98,18 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes:
+        // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
-        if (mActive && mItemListType == DBUtils.ChatListType.message) redisplay();
+        if (mActive)
+            redisplay();
     }
 
     /** Establish the create time state. */
     @Override public void onStart() {
         // Establish the list type and setup the toolbar.
         super.onStart();
-        mItemListType = DBUtils.ChatListType.message;
-        initToolbar();
+        ToolbarManager.instance.init(this);
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */

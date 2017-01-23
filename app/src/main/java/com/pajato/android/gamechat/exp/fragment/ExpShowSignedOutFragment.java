@@ -17,10 +17,8 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -36,12 +34,6 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
         logEvent("onClick (showSignedOut)");
-    }
-
-    /** Establish the layout file to show that the user is signed out and cannot chat. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_exp_signed_out);
     }
 
     /** Handle a group profile change by trying again to start a better fragment. */

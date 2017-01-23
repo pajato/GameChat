@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +33,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -49,6 +49,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 
@@ -59,7 +60,12 @@ import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
  */
 public class ChatEnvelopeFragment extends BaseChatFragment {
 
-    // Public constants.
+    // Default constructor.
+
+    /** Build an instance setting the fragment type. */
+    public ChatEnvelopeFragment() {
+        type = FragmentType.chatEnvelope;
+    }
 
     // Public instance methods.
 
@@ -68,12 +74,6 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
         // Simply start the next logical fragment.
         logEvent(String.format("onAuthenticationChange: with event {%s};", event));
         DispatchManager.instance.startNextFragment(getActivity(), chat);
-    }
-
-    /** Set the layout file, which specifies the chat FAB and the basic options menu. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat);
     }
 
     /** Process a given button click event looking for the navigation drawer. */

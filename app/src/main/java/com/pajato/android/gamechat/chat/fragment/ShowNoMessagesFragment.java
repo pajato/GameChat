@@ -17,9 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.os.Bundle;
-
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
@@ -33,12 +30,6 @@ import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 public class ShowNoMessagesFragment extends BaseChatFragment {
 
     // Public instance methods.
-
-    /** Establish the layout file to indicate that no experiences are available. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_no_messages);
-    }
 
     /** Handle a message list change event by starting the next fragment, as necessary. */
     @Subscribe public void onMessageListChange(MessageChangeEvent event) {

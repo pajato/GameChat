@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -32,6 +31,7 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -136,12 +136,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             default:
                 break;
         }
-    }
-
-    /** Setup the Player Controls and empty board. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_game_ttt);
     }
 
     /** Handle a TTT board tile click. */
@@ -428,7 +422,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            setTitles(mExperience.getGroupKey(), mExperience.getRoomKey());
+            ToolbarManager.instance.setTitles(this, mExperience);
             ProgressManager.instance.hide();
             updateUiFromExperience();
         }

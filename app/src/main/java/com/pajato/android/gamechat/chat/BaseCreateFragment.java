@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,10 +26,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.DispatchManager;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
@@ -46,7 +45,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     // Public enum.
 
     /** The create type. */
-    public enum CreateType {group, room}
+    protected enum CreateType {group, room}
 
     // Protected instance variables.
 
@@ -57,12 +56,6 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     protected abstract void setType(final int type);
 
     // Public instance methods.
-
-    /** Establish the layout file to show that the app is offline due to network loss. */
-    @Override public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        super.setLayoutId(R.layout.fragment_chat_create);
-    }
 
     /** Provide a click event handler. */
     @Subscribe public void onClick(final ClickEvent event) {

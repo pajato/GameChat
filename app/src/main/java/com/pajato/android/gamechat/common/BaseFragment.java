@@ -69,15 +69,22 @@ public abstract class BaseFragment extends Fragment {
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
-    /** The persistent layout's corresponding resource ID. */
-    protected int mLayoutId;
-
     // Public constructors.
 
     /** Provide a default, no args constructor. */
     public BaseFragment() {}
 
     // Public instance methods.
+
+    /** Return the toolbar being used by this fragment. */
+    public Toolbar getToolbar() {
+        return mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
+    }
+
+    /** Return the, possibly null, toolbar type being used by this fragemnt. */
+    public ToolbarManager.ToolbarType getToolbarType() {
+        return type != null ? type.toolbarType : null;
+    }
 
     @Override public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
@@ -102,7 +109,7 @@ public abstract class BaseFragment extends Fragment {
         if (mLayout != null) return mLayout;
 
         // The layout does not exist.  Create and persist it, and initialize the fragment layout.
-        mLayout = inflater.inflate(mLayoutId, container, false);
+        mLayout = inflater.inflate(type.layoutResId, container, false);
         // All chat and game fragments will use the options menu.
         setHasOptionsMenu(true);
         return mLayout;
@@ -219,21 +226,6 @@ public abstract class BaseFragment extends Fragment {
     protected void setItemState(final Menu menu, final int itemId, final boolean state) {
         MenuItem item = menu.findItem(itemId);
         if (item != null) item.setVisible(state);
-    }
-
-    /** Set the Layout ID. Should be called by child classes in their onCreate methods. */
-    protected void setLayoutId(int id) {
-        this.mLayoutId = id;
-    }
-
-    /** Set the title in the toolbar based on the list type. */
-    protected void setTitles() {
-        // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
-        // on the list type to apply the titles.
-        Toolbar bar = mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
-        if (bar == null) return;
-
-        bar.setTitle(getResources().getString(R.string.app_name));
     }
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */

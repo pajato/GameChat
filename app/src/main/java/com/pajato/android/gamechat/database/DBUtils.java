@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.common.FragmentType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,57 +40,12 @@ import java.util.Map;
 public enum DBUtils {
     instance;
 
-    // Public enums.
-
-    /** The chat list type. */
-    public enum ChatListType {
-        addGroup(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        addRoom(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                R.string.CreateRoomMenuTitle),
-        group,
-        message(R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
-        room(R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
-        joinMemberRoom(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        joinRoom(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                 R.string.JoinRoomsMenuTitle);
-
-        /** The overflow menu icon resource id. */
-        public int overflowMenuIconResourceId;
-
-        /** The overflow menu resource id. */
-        public int overflowMenuResourceId;
-
-        /** The navigation icon resource id. */
-        public int navigationIconResourceId;
-
-        /** The toolbar title resource id. */
-        public int titleResourceId;
-
-        /** Build the default (group) instance. */
-        ChatListType() {}
-
-        /** Build an instance using the given arguments. */
-        ChatListType(final int overflowMenuIconResourceId, final int navigationIconResourceId) {
-            this.overflowMenuIconResourceId = overflowMenuIconResourceId;
-            this.navigationIconResourceId = navigationIconResourceId;
-            overflowMenuResourceId = R.menu.overflow_main_menu;
-        }
-
-        /** Build an instance using all possible arguments. */
-        ChatListType(final int overflowResId, final int navResId, final int titleResId) {
-            this(overflowResId, navResId);
-            titleResourceId = titleResId;
-        }
-    }
-
     // Public class constants.
 
     // Lookup keys.
     public static final String DEFAULT_ROOM_NAME_KEY = "defaultRoomNameKey";
     public static final String SYSTEM_NAME_KEY = "systemNameKey";
     public static final String WELCOME_MESSAGE_KEY = "welcomeMessageKey";
-
-    // Public instance variables.
 
     // Private instance variables.
 
@@ -99,13 +55,13 @@ public enum DBUtils {
     // Public instance methods.
 
     /** Get the list data to be displayed by a list adapter for a given list type. */
-    public List<ChatListItem> getList(@NonNull final ChatListType type, final ChatListItem item) {
+    public List<ChatListItem> getList(@NonNull final FragmentType type, final ChatListItem item) {
         switch (type) {
-            case group:         // Get the data to be shown in a list of groups.
+            case chatGroupList: // Get the data to be shown in a list of groups.
                 return GroupManager.instance.getListItemData();
-            case message:       // Get the data to be shown in a room.
+            case messageList:   // Get the data to be shown in a room.
                 return MessageManager.instance.getListItemData(item);
-            case room:          // Get the data to be show in a list of rooms.
+            case chatRoomList:          // Get the data to be show in a list of rooms.
                 return RoomManager.instance.getListItemData(item.groupKey);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
