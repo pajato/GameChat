@@ -191,9 +191,7 @@ public enum GroupManager {
     public Room getCommonRoom(final String groupKey) {
         // Return the group if it has been loaded.  Set a watcher to load it if not.
         Group result = groupMap.get(groupKey);
-        if (result == null) return null; // We don't have this room!
-
-        return RoomManager.instance.getRoomProfile(result.commonRoomKey);
+        return result != null ? RoomManager.instance.getRoomProfile(result.commonRoomKey) : null;
     }
 
     /** Handle a message change event by adding the message into the correct room list.  */

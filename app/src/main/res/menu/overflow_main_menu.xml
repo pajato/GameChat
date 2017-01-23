@@ -15,4 +15,9 @@
         android:title="@string/InstallDebugUsers"
         app:showAsAction="never"
         android:orderInCategory="100" />
+    <item
+        android:id="@+id/inviteFriends"
+        android:title="@string/InviteFriends"
+        app:showAsAction="never"
+        android:orderInCategory="100" />
 </menu>

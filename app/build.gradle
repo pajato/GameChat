@@ -68,7 +68,7 @@ dependencies {
     compile "com.google.firebase:firebase-database:$rootProject.ext.gmsVersion"
     compile "com.google.firebase:firebase-messaging:$rootProject.ext.gmsVersion"
     compile "com.firebase:firebase-client-android:2.4.0"
-    compile 'com.google.firebase:firebase-invites:10.0.1'
+    compile "com.google.firebase:firebase-invites:$rootProject.ext.gmsVersion"
 
     // Firebase UI
     compile 'com.firebaseui:firebase-ui-auth:1.0.1'
