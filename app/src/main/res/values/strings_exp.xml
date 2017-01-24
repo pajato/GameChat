@@ -12,6 +12,8 @@
     <string name="InviteFriendFromTTT">Send invitation</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>
+    <string name="NewGameCheckers">New Game (Checkers)</string>
+    <string name="NewGameChess">New Game (Chess)</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>
@@ -36,8 +38,6 @@
     <string name="chess_promotion_rook">Rook</string>
     <string name="friend">Friend</string>
     <string name="game">Game</string>
-    <string name="new_game_checkers">New Game (Checkers)</string>
-    <string name="new_game_chess">New Game (Chess)</string>
     <string name="oValue">O</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>

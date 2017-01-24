@@ -106,7 +106,7 @@ public class Dispatcher {
     }
 
     /** Build an instance given a chat list item. */
-    public Dispatcher(FragmentType type, ChatListItem item) {
+    Dispatcher(final FragmentType type, final ChatListItem item) {
         this.type = type;
         if (item != null) {
             groupKey = item.groupKey;

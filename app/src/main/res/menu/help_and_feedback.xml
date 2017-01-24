@@ -29,12 +29,6 @@ more. -->
         android:visible="false"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/settings"
-        android:title="@string/MenuItemSettings" />
-    <item
-        android:id="@+id/helpAndFeedback"
-        android:title="@string/MenuItemHelpAndFeedback" />
-    <item
         android:id="@+id/staleHelpAndFeedback"
         android:title="@string/MenuItemFeedback" />
     <item
@@ -44,9 +38,4 @@ more. -->
         android:id="@+id/fileBugReport"
         android:orderInCategory="80"
         android:title="@string/MenuItemFileBugReport" />
-    <item
-        android:id="@+id/joinDeveloperGroups"
-        android:orderInCategory="100"
-        android:visible="false"
-        android:title="@string/joinDeveloperGroups" />
 </menu>

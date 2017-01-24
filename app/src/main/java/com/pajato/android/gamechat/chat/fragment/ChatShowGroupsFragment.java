@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -40,6 +38,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -78,12 +77,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         }
     }
 
-    /** Deal with the options menu by making the search button visible. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        // Turn on the search option.
-        setItemState(menu, R.id.search, true);
-    }
-
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
@@ -98,7 +91,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         super.onStart();
         if (ProgressManager.instance.isShowing())
             ProgressManager.instance.hide();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, search);
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 

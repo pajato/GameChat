@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
@@ -52,6 +50,7 @@ import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.checkers;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
 import static com.pajato.android.gamechat.exp.model.Checkers.PRIMARY_WINS;
 import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
@@ -112,21 +111,16 @@ public class CheckersFragment extends BaseExperienceFragment {
         resume();
     }
 
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.checkers_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
     @Override public void onStart() {
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
-
+        ToolbarManager.instance.init(this, checkers);
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
-
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }

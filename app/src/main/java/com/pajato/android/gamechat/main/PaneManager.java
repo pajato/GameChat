@@ -83,7 +83,6 @@ public enum PaneManager {
                 .add(R.id.chat_container, fragmentList.get(CHAT_INDEX), "chat")
                 .add(R.id.game_container, fragmentList.get(GAME_INDEX), "game")
                 .commit();
-        context.invalidateOptionsMenu();
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 

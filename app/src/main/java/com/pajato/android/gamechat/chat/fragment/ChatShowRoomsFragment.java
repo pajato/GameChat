@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -41,6 +39,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.  This is the
@@ -93,16 +92,10 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         }
     }
 
-    /** Deal with the options menu creation by making the search item visible. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        // Turn on both the back and search buttons.
-        setItemState(menu, R.id.search, true);
-    }
-
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, search);
         FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 
