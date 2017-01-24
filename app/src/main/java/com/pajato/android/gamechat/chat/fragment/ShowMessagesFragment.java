@@ -23,8 +23,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -46,6 +44,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 
 /**
  * Display the chat associated with the room selected by the current logged in User.
@@ -91,11 +90,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         }
     }
 
-    /** Deal with the options menu creation by making the search item visible. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        setItemState(menu, R.id.search, true);
-    }
-
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
@@ -109,7 +103,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     @Override public void onStart() {
         // Establish the list type and setup the toolbar.
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, search);
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */

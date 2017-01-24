@@ -18,9 +18,6 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -28,12 +25,13 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -41,7 +39,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
@@ -134,10 +131,18 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
             DispatchManager.instance.startNextFragment(getActivity(), expType);
     }
 
-    /** Handle the options menu by inflating it. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.game_menu, menu);
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            default:
+                break;
+        }
     }
 
     /** Intialize the game fragment envelope. */
@@ -146,22 +151,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         super.onStart();
         FabManager.game.setTag(this.getTag());
         FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
-    }
-
-    /** Handle a menu item selection. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        // Case on the item.
-        switch (item.getItemId()) {
-            case R.id.toolbar_chat_icon:
-                // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-        return true;
+        ToolbarManager.instance.init(this);
     }
 
     /** Dispatch to a more suitable fragment. */

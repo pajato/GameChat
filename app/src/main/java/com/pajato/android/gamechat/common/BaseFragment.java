@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.common;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,7 +33,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Locale;
 
@@ -108,10 +106,8 @@ public abstract class BaseFragment extends Fragment {
         logEvent("onCreateView", savedInstanceState);
         if (mLayout != null) return mLayout;
 
-        // The layout does not exist.  Create and persist it, and initialize the fragment layout.
+        // The layout does not exist.  Create and save it by initializing the fragment layout.
         mLayout = inflater.inflate(type.layoutResId, container, false);
-        // All chat and game fragments will use the options menu.
-        setHasOptionsMenu(true);
         return mLayout;
     }
 
@@ -129,26 +125,6 @@ public abstract class BaseFragment extends Fragment {
     @Override public void onDetach() {
         super.onDetach();
         logEvent("onDetach");
-    }
-
-    /** Handle an options menu choice. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.toolbar_game_icon:
-                // Show the game panel.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if(viewPager != null) {
-                    viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                }
-                break;
-            case R.id.search:
-                // TODO: Handle a search in the groups panel by fast scrolling to chat.
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-        return true;
     }
 
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
@@ -221,12 +197,6 @@ public abstract class BaseFragment extends Fragment {
 
     /** Delegate the setup to the subclasses. */
     protected abstract boolean onDispatch(Context context, Dispatcher dispatcher);
-
-    /** Make the given menu item either visible or invisible. */
-    protected void setItemState(final Menu menu, final int itemId, final boolean state) {
-        MenuItem item = menu.findItem(itemId);
-        if (item != null) item.setVisible(state);
-    }
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */
     protected void showFutureFeatureMessage(final int resourceId) {

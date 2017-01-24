@@ -6,8 +6,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
@@ -49,6 +47,7 @@ import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chess;
 import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
 import static com.pajato.android.gamechat.exp.model.Chess.PRIMARY_WINS;
 import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
@@ -100,16 +99,15 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     @Override public void onStart() {
-        // Setup the board and start a new game to create the board.
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
-
+        ToolbarManager.instance.init(this, chess);
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
-
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
@@ -262,11 +260,6 @@ public class ChessFragment extends BaseExperienceFragment {
             // Make player2's decorations the more prominent.
             setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
                     R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
-    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.chess_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     /** Manage a particular player's symbol decorations. */

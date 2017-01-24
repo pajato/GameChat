@@ -19,8 +19,6 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Toast;
 
@@ -128,11 +126,6 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 processPayload(event.view);
                 break;
         }
-    }
-
-    /** Post the chat options menu on demand. */
-    @Override public void onCreateOptionsMenu(final Menu menu, final MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.chat_menu_base, menu);
     }
 
     /** A new group loaded event has been detected.  Join it if not already joined. */

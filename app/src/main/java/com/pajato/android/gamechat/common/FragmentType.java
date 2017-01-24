@@ -56,6 +56,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.crea
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expChain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.none;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
 /**
@@ -64,14 +65,14 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
  * @author Paul Michael Reilly
  */
 public enum FragmentType {
-    chatEnvelope (ChatEnvelopeFragment.class, null, R.layout.fragment_chat),
+    chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.fragment_chat),
     chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.fragment_chat_list),
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.fragment_chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.fragment_chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.fragment_chat_signed_out),
     createGroup (CreateGroupFragment.class, createGroupTT, R.layout.fragment_chat_create),
     createRoom (CreateRoomFragment.class, createRoomTT, R.layout.fragment_chat_create),
-    expEnvelope (ExpEnvelopeFragment.class, null, R.layout.fragment_exp),
+    expEnvelope (ExpEnvelopeFragment.class, none, R.layout.fragment_exp),
     expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.fragment_game_no_games),
     expOffline (ExpShowOfflineFragment.class, expMain, R.layout.fragment_game_offline),
     expRoomList (ExpShowRoomsFragment.class, expChain, R.layout.fragment_game_no_games),

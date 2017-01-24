@@ -26,8 +26,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -171,18 +169,6 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    /** Setup the standard set of activity menu items. */
-    @Override public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the main options menu and enable the join developer groups item in debug builds.
-        final MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        if (BuildConfig.DEBUG) {
-            MenuItem item = menu.findItem(R.id.joinDeveloperGroups);
-            if (item != null) item.setVisible(true);
-        }
-        return true;
-    }
-
     /** Handle a menu item click by providing a last ditch chance to do something. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         // Case on the menu id to handle the item.
@@ -200,12 +186,6 @@ public class MainActivity extends BaseActivity
                 Log.d(TAG, String.format(Locale.US, format, event.item.getTitle()));
                 break;
         }
-    }
-
-    /** Post the menu item click to the app. */
-    @Override public boolean onOptionsItemSelected(final MenuItem item) {
-        AppEventManager.instance.post(new MenuItemEvent(item));
-        return true;
     }
 
     // Protected instance methods
