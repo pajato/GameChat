@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -104,7 +103,6 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Create and persist the default (common) room.
         Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, PUBLIC);
-        Log.i(CreateGroupFragment.class.getSimpleName(), "******** adding " + account.id + " to room " + room.key);
         room.addMember(account.id);
         RoomManager.instance.createRoomProfile(room);
 
