@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
@@ -35,7 +36,6 @@ import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import static android.view.Menu.NONE;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -92,8 +92,8 @@ public enum ToolbarManager {
                       R.string.CreateGroupMenuTitle),
         createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                      R.string.CreateRoomMenuTitle),
-        expMain (),
-        expChain (),
+        expMain (R.drawable.ic_more_vert_white_24dp),
+        expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                 R.string.JoinRoomsMenuTitle),
         none ();
@@ -117,11 +117,16 @@ public enum ToolbarManager {
         /** Build a default instance. */
         ToolbarType() {}
 
+        /** Build an instance using just the action menu icon resource id. */
+        ToolbarType(final int overflowMenuIconResourceId) {
+            this.overflowMenuIconResourceId = overflowMenuIconResourceId;
+            overflowMenuResourceId = R.menu.overflow_main_menu;
+        }
+
         /** Build an instance using the given arguments. */
         ToolbarType(final int overflowMenuIconResourceId, final int navigationIconResourceId) {
-            this.overflowMenuIconResourceId = overflowMenuIconResourceId;
+            this(overflowMenuIconResourceId);
             this.navigationIconResourceId = navigationIconResourceId;
-            overflowMenuResourceId = R.menu.overflow_main_menu;
         }
 
         /** Build an instance using all possible arguments. */
@@ -159,12 +164,16 @@ public enum ToolbarManager {
         ToolbarType toolbarType = toolbar != null ? fragment.getToolbarType() : null;
         if (toolbar == null || toolbarType == null)
             return;
-        if (toolbarType == chatMain)
-            // Setup the group (home) toolbar using the naviation manager.
-            NavigationManager.instance.init(fragment.getActivity(), toolbar);
-        else
-            // Deal with all other types using the toolbar type.
-            setupNonHomeToolbar(fragment, toolbar, toolbarType);
+        switch (toolbarType) {
+            case chatMain: // Setup the group (home) toolbar using the naviation manager.
+                NavigationManager.instance.init(fragment.getActivity(), toolbar);
+                break;
+            case none:
+                break;
+            default: // Deal with all other types using the toolbar type.
+                setupToolbar(fragment, toolbar, toolbarType);
+                break;
+        }
 
         // Handle any extra menu items to add to the action menu.
         for (MenuItemType value : menuEntries)
@@ -184,11 +193,33 @@ public enum ToolbarManager {
         item.setShowAsAction(type.flag);
     }
 
+    /** Set the title using the given resource string. */
+    public void setTitle(@NonNull final BaseFragment fragment, final int resId) {
+        // Ensure that the toolbar, toolbar type and the title all exist and that the title is not
+        // empty.  Abort if not, otherwise set the titles based on the toolbar type.
+        Toolbar bar = fragment.getToolbar();
+        String title = fragment.getString(resId);
+        ToolbarType toolbarType = bar != null ? fragment.getToolbarType() : null;
+        if (bar == null || toolbarType == null || title == null || title.isEmpty())
+            return;
+        switch (toolbarType) {
+            case expChain:
+            case expMain: // Center the title.
+                update(bar, R.id.centeredTitle, title);
+                update(bar, R.id.centeredSubtitle, null);
+                break;
+            default:
+                setTitles(bar, title, null);
+                break;
+        }
+    }
+
     /** Set the titles in the toolbar for the given title and subtitle. */
     public void setTitles(@NonNull final BaseFragment fragment, final Experience experience) {
-        // Ensure that the toolbar exists.  Abort if not, otherwise set the titles accordingly.
+        // Ensure that the toolbar and the experience both exist.  Abort if not, otherwise set the
+        // titles accordingly.
         Toolbar bar = fragment.getToolbar();
-        if (bar == null)
+        if (bar == null || experience == null)
             return;
         String title = experience.getGroupKey();
         String subtitle = experience.getRoomKey();
@@ -259,9 +290,9 @@ public enum ToolbarManager {
         bar.setSubtitle(subtitle);
     }
 
-    /** Setup a non home toolbar, one that provides an overflow menu and a back/cancel nav icon. */
-    private void setupNonHomeToolbar(@NonNull BaseFragment fragment, @NonNull final Toolbar toolbar,
-                                     @NonNull final ToolbarType toolbarType) {
+    /** Setup a default toolbar, one that provides an overflow menu and a navigation icon. */
+    private void setupToolbar(@NonNull BaseFragment fragment, @NonNull final Toolbar toolbar,
+                              @NonNull final ToolbarType toolbarType) {
         // Reset the current toolbar overflow menu.
         int id = toolbarType.overflowMenuIconResourceId;
         toolbar.getMenu().clear();
@@ -269,11 +300,26 @@ public enum ToolbarManager {
         toolbar.setOverflowIcon(VectorDrawableCompat.create(fragment.getResources(), id, null));
         toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
 
-        // Set up the navigation menu icon.
+        // Determine if the navigation icon should be set up.  Abort it not, otherwise set it up.
+        if (toolbarType.navigationIconResourceId <= 0)
+            return;
         toolbar.setNavigationIcon(toolbarType.navigationIconResourceId);
         MainActivity mainActivity = (MainActivity) fragment.getActivity();
         View.OnClickListener upHandler = mainActivity.getUpHandler();
         toolbar.setNavigationOnClickListener(upHandler);
+    }
+
+    /** Update the given toolbar view with the provided text. */
+    private void update(@NonNull final Toolbar bar, final int resId, final String text) {
+        // First, ensure that the view associated with the resourc id exists.  Abort if not.  Then
+        // determine if the text is null or empty.  Make the view gone if either is true.  Finally,
+        // render the text in the view and make it visible.
+        TextView view = (TextView) bar.findViewById(resId);
+        if (view == null)
+            return;
+        if (text != null && !text.isEmpty())
+            view.setText(text);
+        view.setVisibility(text == null || text.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     // Private inner classes.
