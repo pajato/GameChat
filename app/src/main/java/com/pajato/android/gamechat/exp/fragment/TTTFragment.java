@@ -119,25 +119,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         }
     }
 
-    /** Handle a possible game mode selection by ... */
-    private void handleMode(final int titleResId) {
-        // Case on the title resource id to handle a mode selection.
-        switch (titleResId) {
-            case R.string.PlayModeLocalMenuTitle:
-            case R.string.PlayModeComputerMenuTitle:
-                // Handle selecting a friend by deferring for now and restoring the default menu.
-                showFutureFeatureMessage(R.string.FutureSelectModes);
-                FabManager.game.dismissMenu(this);
-                break;
-            case R.string.PlayModeUserMenuTitle:
-                // Handle selecting another User.
-                //selectModeUser();
-                break;
-            default:
-                break;
-        }
-    }
-
     /** Handle a TTT board tile click. */
     @Override public void onClick(final View view) {
         Object tag = view.getTag();
@@ -206,39 +187,17 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
 
-    /** Notify the user about an error and log it. */
-    private void reportError(final Context context, final int messageResId, String... args) {
-        // Let the User know that something is amiss.
-        String message = context.getString(messageResId);
-        NotificationManager.instance.notify(this, message, false);
+    /** Return a list of default TicTacToe players. */
+    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+        List<Player> result = new ArrayList<>();
+        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String symbol = context.getString(R.string.xValue);
+        result.add(new Player(name, symbol, ""));
+        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        symbol = context.getString(R.string.oValue);
+        result.add(new Player(name, symbol, ""));
 
-        // Generate a logcat item casing on the given resource id.
-        String format;
-        switch (messageResId) {
-            case R.string.ErrorTTTCreation:
-                format = "Failed to create a TicTacToe experience with group/room keys: {%s/%s}";
-                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
-                break;
-            default:
-                break;
-        }
-    }
-
-    /** Return a done message text to show in a snackbar.  The given model provides the state. */
-    private String getDoneMessage(final TicTacToe model) {
-        // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWinningPlayerName();
-        if (name == null) return getString(R.string.TieMessageNotification);
-
-        // There was a winner.  Return a congratulatory message.
-        String format = getString(R.string.WinMessageNotificationFormat);
-        return String.format(Locale.getDefault(), format, name);
-    }
-
-    /** Return the TicTacToe model class, null if it does not exist. */
-    private TicTacToe getModel() {
-        if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
-        return (TicTacToe) mExperience;
+        return result;
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
@@ -267,17 +226,23 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         return players;
     }
 
-    /** Return a list of default TicTacToe players. */
-    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
-        List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
-        String symbol = context.getString(R.string.xValue);
-        result.add(new Player(name, symbol, ""));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        symbol = context.getString(R.string.oValue);
-        result.add(new Player(name, symbol, ""));
+    // Private instance methods.
 
-        return result;
+    /** Return a done message text to show in a snackbar.  The given model provides the state. */
+    private String getDoneMessage(final TicTacToe model) {
+        // Determine if there is a winner.  If not, return the "tie" message.
+        String name = model.getWinningPlayerName();
+        if (name == null) return getString(R.string.TieMessageNotification);
+
+        // There was a winner.  Return a congratulatory message.
+        String format = getString(R.string.WinMessageNotificationFormat);
+        return String.format(Locale.getDefault(), format, name);
+    }
+
+    /** Return the TicTacToe model class, null if it does not exist. */
+    private TicTacToe getModel() {
+        if (mExperience == null || !(mExperience instanceof TicTacToe)) return null;
+        return (TicTacToe) mExperience;
     }
 
     /** Return the game state after applying the given button move to the data model. */
@@ -378,6 +343,25 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
+    /** Handle a possible game mode selection by ... */
+    private void handleMode(final int titleResId) {
+        // Case on the title resource id to handle a mode selection.
+        switch (titleResId) {
+            case R.string.PlayModeLocalMenuTitle:
+            case R.string.PlayModeComputerMenuTitle:
+                // Handle selecting a friend by deferring for now and restoring the default menu.
+                showFutureFeatureMessage(R.string.FutureSelectModes);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.string.PlayModeUserMenuTitle:
+                // Handle selecting another User.
+                //selectModeUser();
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Handle a new game by resetting the data model. */
     private void handleNewGame() {
         // Ensure that the data model exists and is valid.
@@ -411,6 +395,24 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                 TextView button = (TextView) mLayout.findViewWithTag(tag);
                 if (button != null) button.setText("");
             }
+        }
+    }
+
+    /** Notify the user about an error and log it. */
+    private void reportError(final Context context, final int messageResId, String... args) {
+        // Let the User know that something is amiss.
+        String message = context.getString(messageResId);
+        NotificationManager.instance.notify(this, message, false);
+
+        // Generate a logcat item casing on the given resource id.
+        String format;
+        switch (messageResId) {
+            case R.string.ErrorTTTCreation:
+                format = "Failed to create a TicTacToe experience with group/room keys: {%s/%s}";
+                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
+                break;
+            default:
+                break;
         }
     }
 
