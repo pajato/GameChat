@@ -88,7 +88,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
     @Override protected void save(@NonNull Account account) {
         // Persist the configured room.
         mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
-        mRoom.memberIdList.add(account.id);
+        mRoom.addMember(account.id);
         RoomManager.instance.createRoomProfile(mRoom);
 
         // Update and persist the group adding the new room to it's room list.

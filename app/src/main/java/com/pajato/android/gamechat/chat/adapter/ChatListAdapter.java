@@ -223,9 +223,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the check box using the item selection state.
         if (holder.checkBox == null) return;
         holder.checkBox.setChecked(item.selected);
+        holder.checkBox.setTag(item);
     }
 
     // Inner classes.
+
+    private class ChatListCheckBoxClickListener implements View.OnClickListener {
+        public void onClick(View v) {
+            // Perform action on click
+            AppEventManager.instance.post(new ClickEvent(v));
+        }
+    }
 
     /** Provide a view holder for a chat list item. */
     private class ChatListViewHolder extends RecyclerView.ViewHolder {
@@ -243,6 +251,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             text = (TextView) itemView.findViewById(R.id.chatText);
             icon = (ImageView) itemView.findViewById(R.id.chatIcon);
             checkBox = (CheckBox) itemView.findViewById(R.id.selectorCheck);
+            if (checkBox != null) {
+                checkBox.setOnClickListener(new ChatListCheckBoxClickListener());
+            }
         }
     }
 

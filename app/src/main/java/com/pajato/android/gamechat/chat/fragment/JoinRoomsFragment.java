@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -79,15 +78,13 @@ public class JoinRoomsFragment extends BaseChatFragment {
                 // Implement the save operation.
                 for (ChatListItem item : mJoinMap.values())
                     JoinManager.instance.joinRoom(item);
+                mJoinMap.clear();
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            default: // Determine if the view might be a click on a list view row.  Abort if not,
-                     // look for a checkbox if so and if that is found, process the selection.
-                if (!(event.view instanceof LinearLayout))
-                    return;
-                CheckBox checkBox = (CheckBox) event.view.findViewById(R.id.selectorCheck);
-                if (checkBox != null)
-                    processSelection(event, checkBox);
+            case R.id.selectorCheck:
+                processSelection(event, (CheckBox) event.view);
+                break;
+            default:
                 break;
         }
     }
@@ -149,7 +146,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
 
     /** Process a selection by toggling the selected state and managing the item map. */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
-        // Set the check icon visility and get the item object from the event payload.
+        // Set the check icon visibility and get the item object from the event payload.
         ChatListItem item = null;
         Object payload = event.view != null ? event.view.getTag() : null;
         if (payload != null && payload instanceof ChatListItem) item = (ChatListItem) payload;

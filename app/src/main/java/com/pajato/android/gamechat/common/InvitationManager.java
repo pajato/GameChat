@@ -115,7 +115,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         mMessageMap.clear();
         mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
     }
-        /** Handle an account state change by updating the navigation drawer header. */
+
+    /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe
     public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         Account account = event != null ? event.account : null;
@@ -143,13 +144,13 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     /** Handle the room profile change */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
-        // If this room is in the mInvitedGroups list, add the current account to the room memberIdList.
+        // If this room is in the invite list, add the current account to the room member list.
         Account currAccount = AccountManager.instance.getCurrentAccount();
         if (currAccount == null) return;
         for (Map.Entry<String, GroupInviteData> entry : mInvitedGroups.entrySet()) {
             GroupInviteData data = entry.getValue();
             if (data.commonRoomKey.equals(event.key)) {
-                event.room.memberIdList.add(currAccount.id);
+                event.room.addMember(currAccount.id);
                 RoomManager.instance.updateRoomProfile(event.room);
                 data.addedToCommRoomMemberList = true;
                 mInvitedGroups.put(entry.getKey(), data);
@@ -311,11 +312,10 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             return;
         }
 
-        // Extract deep link from Intent
+        // Extract deep link from Intent. If no deep link exists, just log and return
         Intent intent = result.getInvitationIntent();
         String deepLink = AppInviteReferral.getDeepLink(intent);
         Log.i(TAG, "getInvitation with deepLink: " + deepLink);
-        // If deep link doesn't exist, just log and return
         if (deepLink == null || deepLink.equals("")) {
             Log.e(TAG, "getInvitation: can't get group key - deepLink is not set");
             return;

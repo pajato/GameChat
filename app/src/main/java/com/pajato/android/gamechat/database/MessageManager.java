@@ -106,7 +106,7 @@ public enum MessageManager {
         String url = type == SYSTEM ? systemUrl : account.url;
         long tstamp = new Date().getTime();
         List<String> members = new ArrayList<>();
-        members.addAll(room.memberIdList);
+        members.addAll(room.getMemberIdList());
         Message message = new Message(key, account.id, name, url, tstamp, text, type, members);
 
         // Persist the message.

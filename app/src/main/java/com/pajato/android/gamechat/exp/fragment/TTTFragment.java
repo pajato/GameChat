@@ -302,7 +302,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
-        menu.add(getNoTintEntry(R.string.InviteFriendFromTTT, R.drawable.ic_email_black_24dp));
+        menu.add(getTintEntry(R.string.InviteFriendFromTTT, R.drawable.ic_email_black_24dp));
         return menu;
     }
 

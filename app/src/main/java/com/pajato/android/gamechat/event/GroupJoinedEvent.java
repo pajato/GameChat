@@ -11,5 +11,7 @@ public class GroupJoinedEvent {
     public String groupName;
 
     /** Build the event and indicate the specified group (or null) */
-    public GroupJoinedEvent(String grp) { groupName = grp; }
+    public GroupJoinedEvent(String groupName) {
+        this.groupName = groupName;
+    }
 }

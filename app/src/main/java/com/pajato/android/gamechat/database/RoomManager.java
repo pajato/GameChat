@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
