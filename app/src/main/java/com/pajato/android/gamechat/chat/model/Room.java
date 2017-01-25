@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class for representing a chat room. */
-@IgnoreExtraProperties public class Room {
+@IgnoreExtraProperties
+public class Room {
 
     // The room types.
 
@@ -54,7 +55,7 @@ import java.util.Map;
     public String key;
 
     /** The room member identifiers. These are the Users joined to the room. */
-    public List<String> memberIdList = new ArrayList<>();
+    private List<String> memberIdList = new ArrayList<>();
 
     /** The last modification timestamp. */
     public long modTime;
@@ -81,11 +82,12 @@ import java.util.Map;
         this.name = name;
         this.owner = owner;
         this.type = type;
-        memberIdList.add(owner);
+        addMember(owner);
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude public Map<String, Object> toMap() {
+    @Exclude
+    public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("createTime", createTime);
         result.put("groupKey", groupKey);
@@ -98,6 +100,29 @@ import java.util.Map;
         return result;
     }
 
+    /** Accessor for member list */
+    public void setMemberIdList(List<String> newList) {
+        memberIdList = newList;
+    }
+
+    /** Get the list of member ids for this room */
+    public List<String> getMemberIdList() {
+        return memberIdList;
+    }
+
+    /** add a member to the list (if the member already on the list, just return) */
+    @Exclude public void addMember(final String member) {
+        if (memberIdList.contains(member))
+            return;
+        memberIdList.add(member);
+    }
+
+    /** Determine if this room is a member-to-member chat room */
+    @Exclude public boolean isMemberPrivateRoom(final String member1, final String member2) {
+        return (this.type == Room.PRIVATE && memberIdList.size() == 2 &&
+                memberIdList.contains(member1) && memberIdList.contains(member2));
+    }
+
     /** Return a stylized version of the name. */
     @Exclude public String getName() {
         // Case on the room type.
@@ -106,12 +131,11 @@ import java.util.Map;
             case ME:
                 return account.getDisplayName();
             case PRIVATE:
-                // if name is not set, try to get memberNames value
-                if (name == null || name.equals("")) {
+                // try to get a room name value; use display name as last resort
+                if (name == null || name.equals(""))
                     name = memberNames(account);
-                }
-                if (!name.equals("")) return name;
-                // when no other name is available, use account display name
+                if (!name.equals(""))
+                    return name;
                 return account.getDisplayName();
             default:
                 return name;

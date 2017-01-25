@@ -42,6 +42,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -308,6 +309,7 @@ public class MainActivity extends BaseActivity
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         InvitationManager.instance.init(this);
+        JoinManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
     }
 

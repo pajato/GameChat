@@ -52,12 +52,12 @@ http://www.gnu.org/licenses
         ads:adSize="SMART_BANNER"
         ads:adUnitId="@string/banner_ad_unit_id"/>
 
-    <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:tint="@color/colorRed"
-        android:contentDescription="@string/GridRoomIconRed"
-        app:srcCompat="@drawable/ic_casino_black_24dp" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/chatList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:tag="@integer/groupList"/>
 
     <TextView
         android:layout_width="match_parent"

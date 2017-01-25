@@ -172,8 +172,13 @@ public enum GroupManager {
             return;
         for (String key : event.group.memberList)
             MemberManager.instance.setWatcher(groupKey, key);
-        if (!groupKey.equals(AccountManager.instance.getMeGroupKey()))
+        if (!groupKey.equals(AccountManager.instance.getMeGroupKey())) {
             groupMap.put(event.key, event.group);
+            // if this isn't the me group, add watchers for all the rooms
+            for (String roomKey : event.group.roomList) {
+                RoomManager.instance.setWatcher(groupKey, roomKey);
+            }
+        }
     }
 
     /** Return a list of joined group push keys based on the given item. */

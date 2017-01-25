@@ -18,6 +18,9 @@
 package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
@@ -35,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
 
@@ -46,12 +50,24 @@ import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
 public enum JoinManager {
     instance;
 
+    /** The repository for any messages needed. */
+    private SparseArray<String> mMessageMap = new SparseArray<>();
+
+    /** The logcat TAG. */
+    private static final String TAG = JoinManager.class.getSimpleName();
+
     // Public instance methods.
 
-    /** Join the curernt account holder to a room specified by a given item. */
+    /** Initialize the join manager */
+    public void init(final AppCompatActivity context) {
+        mMessageMap.clear();
+        mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
+    }
+
+    /** Join the current account holder to a room specified by a given item. */
     public void joinRoom(@NonNull final ChatListItem item) {
         // Ensure that the member object exists, aborting if not.
-        String roomKey = null;
+        Room room = null;
         Account member = MemberManager.instance.getMember(item.groupKey);
         if (member == null) return;
 
@@ -60,22 +76,26 @@ public enum JoinManager {
         switch (item.type) {
             case ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE:
                 // Create and persist the private chat room and get it's push key.
-                roomKey = joinMember(item.groupKey, item.key);
+                room = joinMember(item.groupKey, item.key);
                 break;
             case ChatListItem.SELECTABLE_ROOM_ITEM_TYPE:
                 // Update and persist the room.
-                roomKey = joinRoom(item.groupKey, item.key);
+                room = joinRoom(item.groupKey, item.key);
                 break;
             default:
                 break;
         }
 
-        // Ensure that the roomKey was returned (abort if not), update and persist the member join
-        // list.
-        if (roomKey == null) return;
-        member.joinList.add(roomKey);
+        // Abort if the room wasn't returned. Otherwise update and persist the member join list.
+        if (room == null) return;
+        member.joinList.add(room.key);
         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
         DBUtils.instance.updateChildren(path, member.toMap());
+
+        // Post a message to the room announcing the user has joined
+        String format = mMessageMap.get(R.string.HasJoinedMessage);
+        String text = String.format(Locale.getDefault(), format, member.displayName);
+        MessageManager.instance.createMessage(text, STANDARD, member, room);
     }
 
     /** Return a set of explicit (public) and implicit (member) rooms the current User can join. */
@@ -103,7 +123,10 @@ public enum JoinManager {
 
                 // Determine if this room is public.  If so, accumulate it to the result.
                 Room room = RoomManager.instance.roomMap.get(roomKey);
-                if (room.type == Room.PUBLIC) result.add(roomKey);
+                if (room == null)
+                    Log.e(TAG, "RoomManager roomMap doesn't contain roomKey " + roomKey);
+                else if (room.type == Room.PUBLIC)
+                    result.add(roomKey);
             }
         return result;
     }
@@ -128,11 +151,25 @@ public enum JoinManager {
         List<ChatListItem> result = new ArrayList<>();
         List<ChatListItem> items = new ArrayList<>();
         List<String> groupList = GroupManager.instance.getGroups(item);
+        String currentAccountId = AccountManager.instance.getCurrentAccountId();
         for (String groupKey : groupList) {
             Map<String, Account> map = MemberManager.instance.memberMap.get(groupKey);
             for (Account member : map.values()) {
-                if (member.id.equals(AccountManager.instance.getCurrentAccountId())) continue;
-                items.add(new ChatListItem(new SelectableMemberItem(groupKey, member)));
+                if (member.id.equals(currentAccountId)) continue;
+
+                // Don't add the member to the list of members if there is already a room which
+                // is private, contains only two members and they are the current account and
+                // the member we're considering now.
+                boolean hasMemberRoom = false;
+                for (Map.Entry<String, Room> entry : RoomManager.instance.roomMap.entrySet()) {
+                    Room room = entry.getValue();
+                    if (room.isMemberPrivateRoom(member.id, currentAccountId)) {
+                        hasMemberRoom = true;
+                        break;
+                    }
+                }
+                if (!hasMemberRoom)
+                    items.add(new ChatListItem(new SelectableMemberItem(groupKey, member)));
             }
         }
 
@@ -174,7 +211,7 @@ public enum JoinManager {
     }
 
     /** Join the given member and the curernt User to a private room. */
-    private String joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
+    private Room joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
         // Ensure that a current account, member and group profile all exist (abort if not) and
         // obtain a push key for the new room.
         Group group = GroupManager.instance.getGroupProfile(groupKey);
@@ -187,8 +224,8 @@ public enum JoinManager {
         // Build, update and persist a room object adding the two principals as members.
         long tstamp = new Date().getTime();
         Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, PRIVATE);
-        room.memberIdList.add(account.id);
-        room.memberIdList.add(memberKey);
+        room.addMember(account.id);
+        room.addMember(memberKey);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.instance.updateChildren(path, room.toMap());
 
@@ -203,11 +240,11 @@ public enum JoinManager {
         String memberName = member.getDisplayName();
         String text = String.format(Locale.getDefault(), format, accountName, memberName);
         MessageManager.instance.createMessage(text, SYSTEM, account, room);
-        return roomKey;
+        return room;
     }
 
     /** Join the given room in the given group to the current User. */
-    private String joinRoom(@NonNull final String groupKey, @NonNull final String roomKey) {
+    private Room joinRoom(@NonNull final String groupKey, @NonNull final String roomKey) {
         // Ensuure that the signed in User is really signed in and has an id.  Abort if either is
         // not true.
         String id = AccountManager.instance.getCurrentAccountId();
@@ -215,10 +252,10 @@ public enum JoinManager {
 
         // Update the member id list in the room profile.
         Room room = RoomManager.instance.getRoomProfile(roomKey);
-        room.memberIdList.add(id);
+        room.addMember(id);
         room.modTime = new Date().getTime();
         String path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.instance.updateChildren(path, room.toMap());
-        return roomKey;
+        return room;
     }
 }

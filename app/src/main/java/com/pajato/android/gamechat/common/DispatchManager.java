@@ -157,6 +157,7 @@ public enum DispatchManager {
                 return new Dispatcher(type);
 
             case createRoom:
+            case joinRoom:
             case messageList:
             case chatRoomList:  // Handle a chat dispatch providing both a type and an item.
                 return new Dispatcher(type, item);

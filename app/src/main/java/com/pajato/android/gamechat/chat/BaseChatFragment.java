@@ -176,7 +176,10 @@ public abstract class BaseChatFragment extends BaseFragment {
                 mItem = new ChatListItem(roomItem);
                 return true;
             case createRoom:
+            case joinRoom:
             case chatRoomList:  // The rooms in a group need the group key.
+                if (dispatcher.groupKey == null)
+                    return false;
                 GroupItem groupItem = new GroupItem(dispatcher.groupKey);
                 mItem = new ChatListItem(groupItem);
                 return true;
@@ -214,8 +217,10 @@ public abstract class BaseChatFragment extends BaseFragment {
             mAdView.resume();
         if (type != null)
             switch (type) {
+                case joinRoom:
                 case chatGroupList:
                 case chatRoomList:
+                case selectGroupsAndRooms:
                 case messageList:   // Update the state of the list adapter.
                     updateAdapterList();
                     break;

@@ -169,7 +169,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getNoTintEntry(R.string.InviteFriendFromExpEnv, R.drawable.ic_email_black_24dp));
+        menu.add(getTintEntry(R.string.InviteFriendFromExpEnv, R.drawable.ic_email_black_24dp));
         return menu;
     }
 }

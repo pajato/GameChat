@@ -41,8 +41,21 @@ public class SelectForInviteFragment extends BaseChatFragment {
         // control.
         super.onStart();
         ToolbarManager.instance.init(this);
+//        FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
 
-        // Get a list of known groups?
+
+
+    }
+
+    /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
+    @Override public void onResume() {
+        // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
+        // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
+        // the group list display.
+        super.onResume();
+//        FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
+//        FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
+//        FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
 
