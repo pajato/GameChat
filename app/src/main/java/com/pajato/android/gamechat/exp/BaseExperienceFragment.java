@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
@@ -30,6 +31,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.NetworkManager;
 
@@ -202,6 +204,15 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     @Override protected boolean onDispatch(@NonNull final Context context,
                                            @NonNull final Dispatcher dispatcher) {
         return true;
+    }
+
+    /** Set the name for a given player index. */
+    protected void setRoomName(final Experience model) {
+        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
+        // does.
+        TextView name = (TextView) mLayout.findViewById(R.id.roomName);
+        if (name == null) return;
+        name.setText(RoomManager.instance.getRoomName(model.getRoomKey()));
     }
 
     // Private instance methods.

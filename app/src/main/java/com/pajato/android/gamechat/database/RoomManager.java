@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.database.GroupManager.GROUP_PROFILE_PATH;
-
 /**
  * Provide a class to manage database access to Room objects.
  *

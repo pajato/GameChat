@@ -243,7 +243,6 @@ public class ChessFragment extends BaseExperienceFragment {
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            ToolbarManager.instance.setTitles(this, mExperience);
             ProgressManager.instance.hide();
             updateUiFromExperience();
         }
@@ -344,6 +343,7 @@ public class ChessFragment extends BaseExperienceFragment {
         // A valid experience is available. Use the data model to populate the UI and check if the
         // game is finished.
         Chess model = (Chess) mExperience;
+        setRoomName(mExperience);
         setPlayerName(R.id.player1Name, 0, model);
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);
