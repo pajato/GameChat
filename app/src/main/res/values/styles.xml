@@ -183,4 +183,10 @@ http://www.gnu.org/licenses
         <item name="android:visibility">gone</item>
     </style>
 
+    <style name="ExpToolbarTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
 </resources>

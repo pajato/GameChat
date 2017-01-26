@@ -31,7 +31,6 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.MenuItemEvent;
-import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
@@ -212,18 +211,6 @@ public enum ToolbarManager {
                 setTitles(bar, title, null);
                 break;
         }
-    }
-
-    /** Set the titles in the toolbar for the given title and subtitle. */
-    public void setTitles(@NonNull final BaseFragment fragment, final Experience experience) {
-        // Ensure that the toolbar and the experience both exist.  Abort if not, otherwise set the
-        // titles accordingly.
-        Toolbar bar = fragment.getToolbar();
-        if (bar == null || experience == null)
-            return;
-        String title = experience.getGroupKey();
-        String subtitle = experience.getRoomKey();
-        setTitles(bar, title, subtitle);
     }
 
     /** Set the titles in the toolbar based on the list type. */

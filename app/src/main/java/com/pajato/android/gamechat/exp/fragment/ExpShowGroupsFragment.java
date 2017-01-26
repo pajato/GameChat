@@ -57,8 +57,9 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the group name only; ensure that the FAB is visible, the
-        // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
-        // the group list display.
+        // FAM is not and the FAM is set to the home experience menu; and display a list of groups
+        // with experiences showing the rooms and highlighting new experiences, much like messages
+        // in the chat group display.
         super.onResume();
         FabManager.game.setImage(R.drawable.ic_add_white_24dp);
         FabManager.game.init(this, GAME_HOME_FAM_KEY);

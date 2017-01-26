@@ -44,7 +44,6 @@ import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
-import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -75,7 +74,8 @@ import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
  * TODO: Abstract out a player: name, win count, association (X/O/black/white/etc.), type (creator,
  * online, offline, gamechat, other?)
  *
- * @author Bryan Scott
+ * @author Bryan Scott (original code)
+ * @author Paul Michael Reilly (extensive revisions)
  */
 public class TTTFragment extends BaseExperienceFragment implements View.OnClickListener {
 
@@ -111,12 +111,10 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
         // The event is either a snackbar action (start a new game) or a menu (FAM or Player2)
         // entry.  Detect and handle start a new game first.
-        if (isPlayAgain(tag, TAG)) {
+        if (isPlayAgain(tag, TAG))
             handleNewGame();
-        }
-        else {
-            handleMode(tag instanceof MenuEntry ? ((MenuEntry) tag).titleResId : -1);
-        }
+        else
+            handleMode(((MenuEntry) tag).titleResId);
     }
 
     /** Handle a TTT board tile click. */
@@ -146,11 +144,15 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     /** Initialize by setting up tile click handlers on the board. */
     @Override public void onStart() {
-        // Place an click listener on all nine buttons by iterating over all nine buttons.
+        // Initialize the FAB/FAM and the toolbar.
         super.onStart();
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
+        FabManager.game.init(this);
+        ToolbarManager.instance.init(this);
+
+        // Place a click listener on each button in the grid.
         final String format = "Invalid tag found on button with tag {%s}";
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++) {
                 String tag = String.format(Locale.US, "button%s%s", i, j);
                 View view = mLayout.findViewWithTag(tag);
@@ -159,7 +161,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                 else
                     Log.e(TAG, String.format(Locale.US, format, tag));
             }
-        }
     }
 
     // Protected instance methods.
@@ -423,9 +424,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             mLayout.setVisibility(View.GONE);
         } else {
             // Start the game and update the views using the current state of the experience.
-            mLayout.setVisibility(View.VISIBLE);
-            ToolbarManager.instance.setTitles(this, mExperience);
             ProgressManager.instance.hide();
+            mLayout.setVisibility(View.VISIBLE);
             updateUiFromExperience();
         }
     }
@@ -558,6 +558,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // A valid experience is available. Use the data model to populate the UI and check if the
         // game is finished.
         TicTacToe model = (TicTacToe) mExperience;
+        setRoomName(mExperience);
         setPlayerName(R.id.player1Name, 0, model);
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);
