@@ -379,14 +379,13 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         mInvitedGroups.put(groupKey, new GroupInviteData(groupName, commonRoomKey));
     }
 
-    /** Return a set of explicit (public) and implicit (member) rooms the current User can join. */
+    /** Return a set of groups and rooms for invitations */
     public List<ChatListItem> getListItemData() {
-        // Determine if there are any rooms to present (excludes joined rooms).
         List<ChatListItem> result = new ArrayList<>();
-        result.addAll(getSelectItems());
+        result.addAll(getInviteItems());
         if (result.size() > 0) return result;
 
-        // There is nothing to join.  Provide a header message to that effect.
+        // There is nothing available for invitations.  Provide a header message to that effect.
         result.add(new ChatListItem(new ResourceHeaderItem(R.string.NoSelectableItemsHeaderText)));
         return result;
     }
@@ -394,7 +393,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     /**
      * Return a list of items which represent the available groups and their rooms.
      */
-    private List<ChatListItem> getSelectItems() {
+    private List<ChatListItem> getInviteItems() {
         // Determine if there are groups to look at.  If not, return an empty result.
         List<ChatListItem> result = new ArrayList<>();
         if (GroupManager.instance.groupMap.size() == 0) {

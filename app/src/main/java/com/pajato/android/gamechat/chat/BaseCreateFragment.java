@@ -54,7 +54,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     /** The current create type. */
     protected CreateType mCreateType;
 
-    /** Set the room or group type. */
+    /** Set the room type. */
     protected abstract void setType(final RoomType type);
 
     // Public instance methods.

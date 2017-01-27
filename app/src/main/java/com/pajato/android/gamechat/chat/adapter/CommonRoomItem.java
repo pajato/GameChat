@@ -19,8 +19,8 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 
 /**
- * Provide a POJO to encapsulate a recycler view list item that presents common rooms for join and
- * invite operations.
+ * Provide a POJO to encapsulate a recycler view list item that presents common rooms for
+ * invitations.
  */
 public class CommonRoomItem {
 
