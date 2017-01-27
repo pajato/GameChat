@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
+import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -39,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.R.string.Group;
 
 /**
  * Provide a class to manage database access to Room objects.
@@ -99,6 +102,21 @@ public enum RoomManager {
     public String getRoomKey(final String groupKey) {
         String roomsPath = String.format(Locale.US, ROOMS_PATH, groupKey);
         return FirebaseDatabase.getInstance().getReference().child(roomsPath).push().getKey();
+    }
+
+    /** Return a list of rooms for a specified group, optionally excluding the common room */
+    public List<Room> getRooms(final String groupKey, final boolean includeCommonRoom) {
+        List<Room> rooms = new ArrayList<>();
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        if (group == null) return rooms;
+        for (String roomKey : group.roomList) {
+            if (!includeCommonRoom && roomKey.equals(group.commonRoomKey)) {
+                continue;
+            }
+            Room aRoom = RoomManager.instance.getRoomProfile(roomKey);
+            rooms.add(aRoom);
+        }
+        return rooms;
     }
 
     /** Get the data as a set of room items for a given group key. */

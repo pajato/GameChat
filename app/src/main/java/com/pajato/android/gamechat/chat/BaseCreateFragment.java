@@ -26,7 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.chat.model.Room.RoomType;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.model.Account;
@@ -38,6 +38,8 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
 
 /** Provide a base class for fragments that create something. */
 public abstract class BaseCreateFragment extends BaseChatFragment {
@@ -52,8 +54,8 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     /** The current create type. */
     protected CreateType mCreateType;
 
-    /** Set the room or group type. */
-    protected abstract void setType(final int type);
+    /** Set the room type. */
+    protected abstract void setType(final RoomType type);
 
     // Public instance methods.
 
@@ -88,11 +90,11 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 break;
 
             case R.id.PublicButton:
-                setType(Room.PUBLIC);
+                setType(PUBLIC);
                 break;
 
             case R.id.PrivateButton:
-                setType(Room.PRIVATE);
+                setType(PRIVATE);
                 break;
 
             default:

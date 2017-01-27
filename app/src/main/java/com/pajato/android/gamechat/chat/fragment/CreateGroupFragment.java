@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.chat.model.Room.RoomType;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -41,7 +42,7 @@ import java.util.Locale;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
-import static com.pajato.android.gamechat.chat.model.Room.PUBLIC;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 
 public class CreateGroupFragment extends BaseCreateFragment {
 
@@ -102,7 +103,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         GroupManager.instance.createGroupProfile(mGroup);
 
         // Create and persist the default (common) room.
-        Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, PUBLIC);
+        Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, COMMON);
         room.addMember(account.id);
         RoomManager.instance.createRoomProfile(room);
 
@@ -133,5 +134,5 @@ public class CreateGroupFragment extends BaseCreateFragment {
     @Override protected void setName(final String value) {if (mGroup != null) mGroup.name = value;}
 
     /** Implement the set type as a nop. */
-    @Override protected void setType(final int type) {}
+    @Override protected void setType(final RoomType type) {}
 }

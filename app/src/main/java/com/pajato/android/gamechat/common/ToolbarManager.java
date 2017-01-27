@@ -35,6 +35,7 @@ import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import static android.view.Menu.NONE;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -95,6 +96,8 @@ public enum ToolbarManager {
         expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                 R.string.JoinRoomsMenuTitle),
+        selectInviteTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
+                R.string.PickForInvitationTitle),
         none ();
 
         // Instance variables.
@@ -142,14 +145,14 @@ public enum ToolbarManager {
 
     // Private instance variables.
 
-    /** The standard overlow item click handler that posts an app event. */
+    /** The standard overflow item click handler that posts an app event. */
     private final OverflowMenuItemHandler mOverflowMenuItemClickHandler;
 
     // Sole Constructor.
 
     /** Build the instance with the given resource ids. */
     ToolbarManager() {
-        // Create the overflowm menu item click handler.
+        // Create the overflow menu item click handler.
         mOverflowMenuItemClickHandler = new OverflowMenuItemHandler();
     }
 
@@ -164,7 +167,7 @@ public enum ToolbarManager {
         if (toolbar == null || toolbarType == null)
             return;
         switch (toolbarType) {
-            case chatMain: // Setup the group (home) toolbar using the naviation manager.
+            case chatMain: // Setup the group (home) toolbar using the navigation manager.
                 NavigationManager.instance.init(fragment.getActivity(), toolbar);
                 break;
             case none:
@@ -228,6 +231,10 @@ public enum ToolbarManager {
                            // name, if one is available.
                 int resId = toolbarType.titleResourceId;
                 setTitles(fragment, bar, resId, item);
+                break;
+            case selectInviteTT:
+                int resourceId = toolbarType.titleResourceId;
+                setTitles(fragment, bar, resourceId, item);
                 break;
             case chatMain:
             case chatChain:     // Set the title and subtitle based on the item content.

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.chat.model.Room.RoomType;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
@@ -178,7 +179,8 @@ public class ChessFragment extends BaseExperienceFragment {
         // Determine the second account, if any, based on the room.
         String key = dispatcher.roomKey;
         Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        int type = room != null ? room.type : -1;
+        if (room == null) return players;
+
         switch (type) {
             //case MEMBER:
             // Handle another User by providing their account.

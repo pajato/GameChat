@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.chat.model.Room.RoomType;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -79,7 +80,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
         mRoom.name = getDefaultName();
         mRoom.groupKey = mGroup.key;
         mRoom.owner = mMember.id;
-        mRoom.type = Room.PUBLIC;
+        mRoom.type = RoomType.PUBLIC;
     }
 
     // Protected instance methods.
@@ -116,5 +117,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
     @Override protected void setName(final String value) {if (mRoom != null) mRoom.name = value;}
 
     /** Implement the set type. */
-    @Override protected void setType(final int type) {mRoom.type = type;}
+    @Override protected void setType(final RoomType type) {
+        mRoom.type = type;
+    }
 }

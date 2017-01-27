@@ -13,6 +13,7 @@
     <string name="DefaultRoomName">Common</string>
     <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
     <string name="Group">Group</string>
+    <string name="GroupsAvailableHeaderText">Groups</string>
     <string name="ListIconDesc">The list icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
@@ -31,6 +32,8 @@
     <string name="NoJoinableRoomsHeaderText">No Available Rooms or Members</string>
     <string name="NoMessagesText">There are no messages to show in this room. That\'s weird.</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
+    <string name="NoSelectableItemsHeaderText">No Groups or Rooms to select</string>
+    <string name="PickForInvitationTitle">Room Invitations</string>
     <string name="RoomListIcon">The room list icon.</string>
     <string name="RoomsAvailableHeaderText">Rooms</string>
     <string name="SelectAllMenuTitle">Select All</string>

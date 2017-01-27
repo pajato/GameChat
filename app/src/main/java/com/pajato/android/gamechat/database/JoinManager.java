@@ -40,7 +40,9 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
-import static com.pajato.android.gamechat.chat.model.Room.PRIVATE;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -125,7 +127,7 @@ public enum JoinManager {
                 Room room = RoomManager.instance.roomMap.get(roomKey);
                 if (room == null)
                     Log.e(TAG, "RoomManager roomMap doesn't contain roomKey " + roomKey);
-                else if (room.type == Room.PUBLIC)
+                else if (room.type == PUBLIC || room.type == COMMON)
                     result.add(roomKey);
             }
         return result;
