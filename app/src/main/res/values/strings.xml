@@ -18,6 +18,7 @@
     <string name="SwitchToChat">Switch to Chat</string>
     <string name="SwitchToExp">Switch to Game</string>
     <string name="action_save">SAVE</string>
+    <string name="action_invite">INVITE</string>
     <string name="app_name">GameChat</string>
     <string name="arrow_left"><![CDATA[<]]></string>
     <string name="arrow_right"><![CDATA[>]]></string>

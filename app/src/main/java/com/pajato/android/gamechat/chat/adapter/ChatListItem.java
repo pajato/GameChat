@@ -37,6 +37,9 @@ public class ChatListItem {
     static final int ROOMS_HEADER_ITEM_TYPE = 6;
     public static final int SELECTABLE_MEMBER_ITEM_TYPE = 7;
     public static final int SELECTABLE_ROOM_ITEM_TYPE = 8;
+    public static final int INVITE_ROOM_ITEM_TYPE = 9;
+    public static final int INVITE_GROUP_ITEM_TYPE = 10;
+    public static final int INVITE_COMMON_ROOM_ITEM_TYPE = 11;
 
     // Public enums
 
@@ -65,6 +68,9 @@ public class ChatListItem {
 
     /** The item selection state. */
     public boolean selected;
+
+    /** The item enabled state */
+    public boolean enabled;
 
     /** The item type, always non-null. */
     public int type;
@@ -178,6 +184,45 @@ public class ChatListItem {
         text = item.text;
         String format = "Selectable room item with name {%s} and text: {%s}.";
         mDesc = String.format(Locale.US, format, name, text);
+        enabled = true;
+    }
+
+    /** Build an instance for a room item used for invitations */
+    public ChatListItem(final InviteRoomItem item) {
+        type = INVITE_ROOM_ITEM_TYPE;
+        groupKey = item.groupKey;
+        key = item.roomKey;
+        name = item.name;
+        text = item.text;
+        String format = "Selectable room item with name {%s} and text: {%s}.";
+        mDesc = String.format(Locale.US, format, name, text);
+        enabled = true;
+    }
+
+    /** Build an instance for a common room item where selection is reflected but never enabled */
+    public ChatListItem(final CommonRoomItem item) {
+        type = INVITE_COMMON_ROOM_ITEM_TYPE;
+        groupKey = item.groupKey;
+        key = item.roomKey;
+        name = item.name;
+        text = item.text;
+        String format = "Common room item with name {%s} and text: {%s}.";
+        mDesc = String.format(Locale.US, format, name, text);
+        enabled = false;
+    }
+
+    /**
+     * Build an instance for a given selectable group
+     */
+    public ChatListItem(final SelectableGroupItem item) {
+        type = INVITE_GROUP_ITEM_TYPE;
+        groupKey = item.groupKey;
+        key = item.groupKey;
+        name = item.name;
+        text = "";
+        String format = "Selectable group item with name {%s}.";
+        mDesc = String.format(Locale.US, format, name);
+        enabled = true;
     }
 
     // Public instance methods.

@@ -35,15 +35,12 @@ import java.util.Map;
 public class Room {
 
     // The room types.
-
-    /** A room no one can join. */
-    public final static int ME = 0;
-
-    /** A room for two or more members by implicit or explicit invitation. */
-    public final static int PRIVATE = 1;
-
-    /** A room in which any User can join. */
-    public final static int PUBLIC = 2;
+    public enum RoomType {
+        ME, // a room no one can join
+        PRIVATE, // a room for two or more members by implicit or explicit invitation
+        PUBLIC, // a room in which any user can join
+        COMMON // the 'general' room for a group; all group members are joined automatically
+    }
 
     /** The creation timestamp. */
     public long createTime;
@@ -67,14 +64,14 @@ public class Room {
     public String owner;
 
     /** The room type, one of "public", "private" or "me". */
-    public int type;
+    public RoomType type;
 
     /** Build an empty args constructor for the database. */
     public Room() {}
 
     /** Build a default room. */
     public Room(final String key, final String owner, final String name, final String groupKey,
-                final long createTime, final long modTime, final int type) {
+                final long createTime, final long modTime, final RoomType type) {
         this.createTime = createTime;
         this.groupKey = groupKey;
         this.key = key;
@@ -119,7 +116,7 @@ public class Room {
 
     /** Determine if this room is a member-to-member chat room */
     @Exclude public boolean isMemberPrivateRoom(final String member1, final String member2) {
-        return (this.type == Room.PRIVATE && memberIdList.size() == 2 &&
+        return (this.type == RoomType.PRIVATE && memberIdList.size() == 2 &&
                 memberIdList.contains(member1) && memberIdList.contains(member2));
     }
 

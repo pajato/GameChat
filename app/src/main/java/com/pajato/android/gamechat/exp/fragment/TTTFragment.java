@@ -214,7 +214,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Determine the second account, if any, based on the room.
         String key = dispatcher.roomKey;
         Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        int type = room != null ? room.type : -1;
+        if (room == null) return players;
+
         switch (type) {
             //case MEMBER:
             // Handle another User by providing their account.

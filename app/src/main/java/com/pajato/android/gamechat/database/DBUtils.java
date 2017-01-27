@@ -24,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.InvitationManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +66,8 @@ public enum DBUtils {
                 return RoomManager.instance.getListItemData(item.groupKey);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
+            case selectGroupsAndRooms:
+                return InvitationManager.instance.getListItemData();
             default:
                 // TODO: log a message here.
                 break;

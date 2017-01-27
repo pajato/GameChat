@@ -47,7 +47,6 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -63,7 +62,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
-import static com.pajato.android.gamechat.chat.model.Room.ME;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**

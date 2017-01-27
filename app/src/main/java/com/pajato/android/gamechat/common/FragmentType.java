@@ -57,6 +57,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expC
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.none;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 
 /**
@@ -82,7 +83,7 @@ public enum FragmentType {
     messageList (ShowMessagesFragment.class, chatChain, R.layout.chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
-    selectGroupsAndRooms (SelectForInviteFragment.class, chatChain, R.layout.select_for_invite),
+    selectGroupsAndRooms (SelectForInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain, R.layout.chat_no_joined_rooms),
     tictactoeList (ExpShowTypeListFragment.class, expMain, R.layout.chat_no_joined_rooms),
     tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, ttt, tictactoeList),

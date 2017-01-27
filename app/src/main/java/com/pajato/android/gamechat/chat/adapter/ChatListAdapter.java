@@ -40,15 +40,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_COMMON_ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_GROUP_ITEM_TYPE;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
@@ -63,6 +66,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     /** The logcat tag. */
     private static final String TAG = ChatListAdapter.class.getSimpleName();
+
+    /** Click listener for selection check boxes */
+    private ChatListCheckBoxClickListener checkboxListener = new ChatListCheckBoxClickListener();
 
     /** A format string for displaying unhandled cases. */
     private static final String UNHANDLED_FORMAT = "Unhandled item entry type: {%s}.";
@@ -108,6 +114,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ChatListViewHolder(getView(parent, R.layout.item_join_member));
             case SELECTABLE_ROOM_ITEM_TYPE:
                 return new ChatListViewHolder(getView(parent, R.layout.item_join_room));
+            case INVITE_COMMON_ROOM_ITEM_TYPE:
+            case INVITE_ROOM_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_select_invites_room));
+            case INVITE_GROUP_ITEM_TYPE:
+                return new ChatListViewHolder(getView(parent, R.layout.item_select_for_invites));
             default:
                 Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, entryType));
                 break;
@@ -133,6 +144,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case ROOM_ITEM_TYPE:
                 case SELECTABLE_MEMBER_ITEM_TYPE:
                 case SELECTABLE_ROOM_ITEM_TYPE:
+                case INVITE_ROOM_ITEM_TYPE:
+                case INVITE_COMMON_ROOM_ITEM_TYPE:
+                case INVITE_GROUP_ITEM_TYPE:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateChatHolder((ChatListViewHolder) holder, item);
@@ -172,15 +186,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     /** Update the chat icon in the given holder based on the given item type. */
     private void setChatIcon(final ChatListViewHolder holder, final ChatListItem item) {
-        // Ensure that both the holder and the item have an icon.
-        if (holder.icon == null || item.url == null) return;
-
-        // The icon and url both exist.  Case on the item type.
         Context context = holder.icon.getContext();
         switch (item.type) {
             case SELECTABLE_MEMBER_ITEM_TYPE:
             case MESSAGE_ITEM_TYPE:
-                // For a message, load the icon, if there is one.
+                // For a message, ensure that both the holder and the item have an icon value,
+                // and load the icon or default if not found at the specified URL.
+                if (holder.icon == null || item.url == null) return;
                 Uri imageUri = Uri.parse(item.url);
                 if (imageUri != null) {
                     // There is an image to load.  Use Glide to do the heavy lifting.
@@ -206,7 +218,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        if (item.text != null)
+        if (item.text != null && !item.text.equals(""))
             holder.text.setText(CompatUtils.fromHtml(item.text));
         setChatIcon(holder, item);
         holder.itemView.setTag(item);
@@ -223,6 +235,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the check box using the item selection state.
         if (holder.checkBox == null) return;
         holder.checkBox.setChecked(item.selected);
+        // common room selection is set based on group selection and never allowed separately
+        if (item.type == INVITE_COMMON_ROOM_ITEM_TYPE)
+            holder.checkBox.setEnabled(false);
+        else
+            holder.checkBox.setEnabled(item.enabled);
         holder.checkBox.setTag(item);
     }
 
@@ -230,7 +247,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     private class ChatListCheckBoxClickListener implements View.OnClickListener {
         public void onClick(View v) {
-            // Perform action on click
+            // Post the click event to the app
             AppEventManager.instance.post(new ClickEvent(v));
         }
     }
@@ -252,7 +269,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
             icon = (ImageView) itemView.findViewById(R.id.chatIcon);
             checkBox = (CheckBox) itemView.findViewById(R.id.selectorCheck);
             if (checkBox != null) {
-                checkBox.setOnClickListener(new ChatListCheckBoxClickListener());
+                checkBox.setOnClickListener(checkboxListener);
             }
         }
     }
