@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Pajato Technologies LLC.
+ * Copyright (C) 2017 Pajato Technologies LLC.
  *
  * This file is part of Pajato GameChat.
 
@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License along with GameChat.  If not,
  * see http://www.gnu.org/licenses
  */
-
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -24,11 +23,10 @@ import com.pajato.android.gamechat.database.RoomManager;
 
 /**
  * Provide a POJO to encapsulate a recycler view list item: one that allows rooms to be selected for
- * joining.
- *
- * @author Paul Michael Reilly
+ * invitations.
  */
-public class SelectableRoomItem {
+
+public class InviteRoomItem {
 
     // Public instance variables.
 
@@ -41,13 +39,13 @@ public class SelectableRoomItem {
     /** The room name. */
     public String name;
 
-    /** The list of group members with messages.  Bold items are associated with new messages. */
-    String text;
+    /** Group name. */
+    public String text;
 
     // Public constructors.
 
     /** Build an instance for the given group. */
-    public SelectableRoomItem(final String groupKey, final String roomKey) {
+    public InviteRoomItem(final String groupKey, final String roomKey) {
         // Generate the name value (the room name) and the text value (the group name).
         this.groupKey = groupKey;
         this.roomKey = roomKey;

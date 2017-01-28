@@ -19,14 +19,13 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.adapter.RoomItem;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.RoomItem;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -40,8 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static com.pajato.android.gamechat.R.string.Group;
 
 /**
  * Provide a class to manage database access to Room objects.
@@ -120,19 +117,19 @@ public enum RoomManager {
     }
 
     /** Get the data as a set of room items for a given group key. */
-    public List<ChatListItem> getListItemData(final String groupKey) {
+    public List<ListItem> getListItemData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
         Map<String, Map<String, Message>> roomMap;
-        List<ChatListItem> result = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
         for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
             List<String> groupList = GroupManager.instance.getGroupList(dht);
             if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {
                 // Add the header item followed by all the room items in the given group.
-                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(new DateHeaderItem(dht)));
                 roomMap = MessageManager.instance.messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
-                    result.add(new ChatListItem(new RoomItem(groupKey, key)));
+                    result.add(new ListItem(new RoomItem(groupKey, key)));
                 }
             }
         }

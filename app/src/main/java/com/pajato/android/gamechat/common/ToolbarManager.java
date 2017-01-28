@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -35,7 +35,6 @@ import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import static android.view.Menu.NONE;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -85,14 +84,16 @@ public enum ToolbarManager {
     }
 
     /** The toolbar types. */
-    enum ToolbarType {
+    public enum ToolbarType {
         chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         chatMain (),
         createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                      R.string.CreateGroupMenuTitle),
+                       R.string.CreateGroupMenuTitle),
         createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                     R.string.CreateRoomMenuTitle),
+                      R.string.CreateRoomMenuTitle),
         expMain (R.drawable.ic_more_vert_white_24dp),
+        expMoveTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
+                   R.string.SelectRoomMenuTitle),
         expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                 R.string.JoinRoomsMenuTitle),
@@ -112,7 +113,7 @@ public enum ToolbarManager {
         int navigationIconResourceId;
 
         /** The toolbar title resource id. */
-        int titleResourceId;
+        public int titleResourceId;
 
         // Constructors.
 
@@ -217,7 +218,7 @@ public enum ToolbarManager {
     }
 
     /** Set the titles in the toolbar based on the list type. */
-    public void setTitles(@NonNull final BaseFragment fragment, final ChatListItem item) {
+    public void setTitles(@NonNull final BaseFragment fragment, final ListItem item) {
         // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
         // on the list type to apply the titles.
         Toolbar bar = fragment.getToolbar();
@@ -252,7 +253,7 @@ public enum ToolbarManager {
 
     /** Set the titles in the given toolbar using the given item. */
     private void setTitles(@NonNull final BaseFragment fragment, @NonNull final Toolbar bar,
-                           final ChatListItem item) {
+                           final ListItem item) {
         // Use the item content to set the title and subtitle.
         if (item == null || (item.groupKey == null && item.key == null)) {
             setTitles(fragment, bar, R.string.app_name, null);
@@ -270,7 +271,7 @@ public enum ToolbarManager {
 
     /** Set the title to the given resource and the subtitle to the group name, if available. */
     private void setTitles(@NonNull final BaseFragment fragment, @NonNull final Toolbar bar,
-                           final int resourceId, final ChatListItem item) {
+                           final int resourceId, final ListItem item) {
         String title = fragment.getResources().getString(resourceId);
         String key = item != null ? item.groupKey : null;
         String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;

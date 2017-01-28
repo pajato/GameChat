@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.chat.model.Message;
@@ -46,10 +46,10 @@ public class RoomItem {
     public String name;
 
     /** The number of new messages in the group rooms. */
-    int count;
+    public int count;
 
     /** The list of group members with messages.  Bold items are associated with new messages. */
-    String text;
+    public String text;
 
     // Public constructors.
 

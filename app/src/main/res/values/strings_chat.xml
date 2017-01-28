@@ -13,7 +13,6 @@
     <string name="DefaultRoomName">Common</string>
     <string name="FutureFeature">is a future feature.  Volunteer by sending feedback using the overflow menu.</string>
     <string name="Group">Group</string>
-    <string name="GroupsAvailableHeaderText">Groups</string>
     <string name="ListIconDesc">The list icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
@@ -54,5 +53,4 @@
     <string name="contacts">Contacts</string>
     <string name="editMessageHint">Type a message</string>
     <string name="frequent">Frequent</string>
-    <string name="joinDeveloperGroups">Join Developer Groups</string>
 </resources>

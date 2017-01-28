@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -45,13 +45,13 @@ public class MessageItem {
     public String roomKey;
 
     /** The message sender's icon URL, possibly null. */
-    String url;
+    public String url;
 
     /** The owner (poster) name. */
     public String name;
 
     /** The message text. */
-    String text;
+    public String text;
 
     // Public constructors.
 

@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import com.pajato.android.gamechat.R;
 
@@ -30,7 +30,7 @@ public class ContactHeaderItem {
     // Public enums
 
     /** Provide an enumeration of the types of views presented in a rooms list. */
-    public enum ContactHeaderType {
+    private enum ContactHeaderType {
         frequent (R.string.frequent),
         contacts (R.string.contacts);
 
@@ -57,5 +57,5 @@ public class ContactHeaderItem {
 
     // Public instance methods.
 
-    int getNameResourceId() {return mType.getNameResourceId();}
+    public int getNameResourceId() {return mType.getNameResourceId();}
 }

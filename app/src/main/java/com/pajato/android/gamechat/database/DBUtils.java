@@ -22,9 +22,9 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public enum DBUtils {
     // Public instance methods.
 
     /** Get the list data to be displayed by a list adapter for a given list type. */
-    public List<ChatListItem> getList(@NonNull final FragmentType type, final ChatListItem item) {
+    public List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.
                 return GroupManager.instance.getListItemData();

@@ -15,46 +15,77 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contactHeader;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.group;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.room;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomsHeader;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
+
 /**
- * Provide a POJO to encapsulate a recycler view list item: either a date label view or a room list
- * view showing the rooms in a group with messages characterized by a preceding date label view.
- *
+ * Provides a POJO to encapsulate a number of recycler view list items.
+ * <p><ul>
+ * <li> a date label item showing periods like now, yesterday, last week, this year, etc,
+ * <li> a group item encapsulating an icon, the group name and the the group's room names,
+ * <li> a room item encapsulating an icon, the room name and some members of the room,
+ * <li> a group selection item,
+ * <li> a room selection item,
+ * <li> a User (aka member) selection item,
+ * <li> and likely other to be defined in the future.
+ * </ul><p>
  * @author Paul Michael Reilly
  */
-public class ChatListItem {
+public class ListItem {
 
-    // Type constants.
-    static final int CONTACT_HEADER_ITEM_TYPE = 0;
-    static final int CONTACT_ITEM_TYPE = 1;
-    static final int DATE_ITEM_TYPE = 2;
-    public static final int GROUP_ITEM_TYPE= 3;
-    static final int MESSAGE_ITEM_TYPE = 4;
-    public static final int ROOM_ITEM_TYPE = 5;
-    static final int ROOMS_HEADER_ITEM_TYPE = 6;
-    public static final int SELECTABLE_MEMBER_ITEM_TYPE = 7;
-    public static final int SELECTABLE_ROOM_ITEM_TYPE = 8;
-    public static final int INVITE_ROOM_ITEM_TYPE = 9;
-    public static final int INVITE_GROUP_ITEM_TYPE = 10;
-    public static final int INVITE_COMMON_ROOM_ITEM_TYPE = 11;
+    // Public enums.
 
-    // Public enums
+    /** Identifies the types of list items supported. */
+    public enum ItemType {
+        contactHeader,
+        contact,
+        date,
+        experience,
+        group,
+        message,
+        room,
+        roomsHeader,
+        roomList,
+        selectableMember,
+        selectableRoom,
+        inviteGroup,
+        inviteRoom,
+        inviteCommonRoom
+    }
+
+    /** Identifies the types of play. */
+    public enum PlayModeType {comptuer, local, user}
 
     // Public instance variables.
 
-    /** The chat list item count of new messages in a group or a room. */
-    int count;
+    /** The number of new messages or experiences in a group or a room. */
+    public int count;
 
     /** The item email address, possibly null, used for contact items. */
     public String email;
 
-    /** The group (push) key, possibly null, used for chat list items (groups, rooms, messages) */
+    /** The item enabled state */
+    public boolean enabled;
+
+    /** The group (push) key, possibly null, used for many list items (groups, rooms, messages) */
     public String groupKey;
 
-    /** The item (push) key, possibly null, either a room or member key. */
+    /** The item (push) key, possibly null, either a room, member or experience key. */
     public String key;
 
     /** The item name, possibly null, used for all items. */
@@ -63,23 +94,23 @@ public class ChatListItem {
     /** The item name resource identifier. */
     int nameResourceId;
 
-    /** The item phone number, possibly null, used for contact items. */
-    // Todo: uncomment when phone numbers are relevant: String phone;
+    /** The experience play mode type for this item. */
+    public PlayModeType playMode;
+
+    /** The room (push) key, possibly null, used for accessing an experience. */
+    public String roomKey;
 
     /** The item selection state. */
     public boolean selected;
 
-    /** The item enabled state */
-    public boolean enabled;
+    /** The list of rooms or groups with messages to show, or the text of a message. */
+    public String text;
 
     /** The item type, always non-null. */
-    public int type;
+    public ItemType type;
 
     /** The URL for the item, possibly null, used for icons with contacts and chat list items. */
     public String url;
-
-    /** The list of rooms or groups with messages to show, or the text of a message. */
-    public String text;
 
     // Private instance variables.
 
@@ -89,15 +120,15 @@ public class ChatListItem {
     // Public constructors.
 
     /** Build an instance for a given contact header item. */
-    public ChatListItem(final ContactHeaderItem item) {
-        type = CONTACT_HEADER_ITEM_TYPE;
+    public ListItem(final ContactHeaderItem item) {
+        type = contactHeader;
         nameResourceId = item.getNameResourceId();
         mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given contact list item. */
-    public ChatListItem(final ContactItem item) {
-        type = CONTACT_ITEM_TYPE;
+    public ListItem(final ContactItem item) {
+        type = contact;
         name = item.name;
         email = item.email;
         // TODO: uncomment when phone numbers are relevant: phone = item.phone;
@@ -107,15 +138,26 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given date header item. */
-    public ChatListItem(final DateHeaderItem item) {
-        type = DATE_ITEM_TYPE;
+    public ListItem(final DateHeaderItem item) {
+        type = date;
         nameResourceId = item.getNameResourceId();
         mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
     }
 
+    /** Build an instance for a given room list item. */
+    public ListItem(final ExperienceItem item, PlayModeType playMode) {
+        type = experience;
+        this.playMode = playMode;
+        groupKey = item.groupKey;
+        roomKey = item.roomKey;
+        key = item.key;
+        String format = "Experience item with group/room/experience keys {%s/%s/%s} and mode {%s}.";
+        mDesc = String.format(Locale.US, format, groupKey, roomKey, key, playMode);
+    }
+
     /** Build an instance for a given group list item. */
-    public ChatListItem(final GroupItem item) {
-        type = GROUP_ITEM_TYPE;
+    public ListItem(final GroupItem item) {
+        type = group;
         groupKey = item.groupKey;
         name = item.name;
         count = item.count;
@@ -125,8 +167,8 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given room list item. */
-    public ChatListItem(final MessageItem item) {
-        type = MESSAGE_ITEM_TYPE;
+    public ListItem(final MessageItem item) {
+        type = message;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
@@ -138,8 +180,8 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given room list item. */
-    public ChatListItem(final RoomItem item) {
-        type = ROOM_ITEM_TYPE;
+    public ListItem(final RoomItem item) {
+        type = room;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
@@ -150,22 +192,22 @@ public class ChatListItem {
     }
 
     /** Build an instance for a given available rooms header item. */
-    public ChatListItem(final ResourceHeaderItem item) {
-        type = ROOMS_HEADER_ITEM_TYPE;
+    public ListItem(final ResourceHeaderItem item) {
+        type = roomsHeader;
         nameResourceId = item.getNameResourceId();
         mDesc = String.format(Locale.US, "Resource header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given available rooms header item. */
-    public ChatListItem(final RoomsHeaderItem item) {
-        type = ROOMS_HEADER_ITEM_TYPE;
+    public ListItem(final RoomsHeaderItem item) {
+        type = roomsHeader;
         nameResourceId = item.getNameResourceId();
         mDesc = String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given contact list item. */
-    public ChatListItem(final SelectableMemberItem item) {
-        type = SELECTABLE_MEMBER_ITEM_TYPE;
+    public ListItem(final SelectableMemberItem item) {
+        type = selectableMember;
         groupKey = item.groupKey;
         key = item.memberKey;
         name = item.name;
@@ -175,9 +217,21 @@ public class ChatListItem {
         mDesc = String.format(Locale.US, format, name, email, url);
     }
 
+    /** Build an instance for a given selectable group. */
+    public ListItem(final SelectableGroupItem item) {
+        type = inviteGroup;
+        groupKey = item.groupKey;
+        key = item.groupKey;
+        name = item.name;
+        text = "";
+        String format = "Selectable group item with name {%s}.";
+        mDesc = String.format(Locale.US, format, name);
+        enabled = true;
+    }
+
     /** Build an instance for a given contact list item. */
-    public ChatListItem(final SelectableRoomItem item) {
-        type = SELECTABLE_ROOM_ITEM_TYPE;
+    public ListItem(final SelectableRoomItem item) {
+        type = selectableRoom;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
@@ -188,8 +242,8 @@ public class ChatListItem {
     }
 
     /** Build an instance for a room item used for invitations */
-    public ChatListItem(final InviteRoomItem item) {
-        type = INVITE_ROOM_ITEM_TYPE;
+    public ListItem(final InviteRoomItem item) {
+        type = inviteRoom;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
@@ -200,8 +254,8 @@ public class ChatListItem {
     }
 
     /** Build an instance for a common room item where selection is reflected but never enabled */
-    public ChatListItem(final CommonRoomItem item) {
-        type = INVITE_COMMON_ROOM_ITEM_TYPE;
+    public ListItem(final CommonRoomItem item) {
+        type = inviteCommonRoom;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
@@ -209,20 +263,6 @@ public class ChatListItem {
         String format = "Common room item with name {%s} and text: {%s}.";
         mDesc = String.format(Locale.US, format, name, text);
         enabled = false;
-    }
-
-    /**
-     * Build an instance for a given selectable group
-     */
-    public ChatListItem(final SelectableGroupItem item) {
-        type = INVITE_GROUP_ITEM_TYPE;
-        groupKey = item.groupKey;
-        key = item.groupKey;
-        name = item.name;
-        text = "";
-        String format = "Selectable group item with name {%s}.";
-        mDesc = String.format(Locale.US, format, name);
-        enabled = true;
     }
 
     // Public instance methods.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Pajato Technologies LLC.
+ * Copyright (C) 2016 Pajato Technologies LLC.
  *
  * This file is part of Pajato GameChat.
 
@@ -14,44 +14,49 @@
  * You should have received a copy of the GNU General Public License along with GameChat.  If not,
  * see http://www.gnu.org/licenses
  */
-package com.pajato.android.gamechat.chat.adapter;
 
+package com.pajato.android.gamechat.common.adapter;
+
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.RoomManager;
 
 /**
- * Provide a POJO to encapsulate a recycler view list item: one that allows rooms to be selected for
- * invitations.
+ * Provide a POJO to encapsulate a member item to be added to a list view.
+ *
+ * @author Paul Michael Reilly
  */
-
-public class InviteRoomItem {
+public class SelectableMemberItem {
 
     // Public instance variables.
 
-    /** The group key */
+    /** The group key. */
     public String groupKey;
 
-    /** The room key. */
-    public String roomKey;
+    /** The possibly empty (null) group member push key. */
+    public String memberKey;
 
-    /** The room name. */
+    /** The member's display name. */
     public String name;
 
-    /** Group name. */
-    String text;
+    /** The selection state. */
+    public boolean selected;
+
+    /** The member's nickname. */
+    public String text;
+
+    /** The member's icon URL, possibly null. */
+    public String url;
 
     // Public constructors.
 
-    /** Build an instance for the given group. */
-    public InviteRoomItem(final String groupKey, final String roomKey) {
-        // Generate the name value (the room name) and the text value (the group name).
+    /** Build an instance using the given group name and account. */
+    public SelectableMemberItem(final String groupKey, final Account member) {
         this.groupKey = groupKey;
-        this.roomKey = roomKey;
-        Room room = RoomManager.instance.getRoomProfile(roomKey);
-        name = room.name;
+        this.memberKey = member.id;
+        this.name = member.getNickName();
         Group group = GroupManager.instance.getGroupProfile(groupKey);
-        text = group != null ? group.name : "";
+        text = group != null ? group.name : null;
+        this.url = member.url;
     }
 }

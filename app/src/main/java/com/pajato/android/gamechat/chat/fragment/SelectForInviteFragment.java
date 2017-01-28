@@ -23,12 +23,12 @@ import android.widget.CheckBox;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListAdapter;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -42,9 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_COMMON_ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_GROUP_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_ROOM_ITEM_TYPE;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 
 /**
@@ -61,10 +61,10 @@ public class SelectForInviteFragment extends BaseChatFragment {
     // Private instance variables.
 
     /** The groups selected. */
-    private Set<ChatListItem> mSelectedGroups = new HashSet<>();
+    private Set<ListItem> mSelectedGroups = new HashSet<>();
 
     /** The groups selected. */
-    private Set<ChatListItem> mSelectedRooms = new HashSet<>();
+    private Set<ListItem> mSelectedRooms = new HashSet<>();
 
     // Public instance methods.
 
@@ -76,7 +76,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             case R.id.inviteButton:
                 // Handle the invitation
-                InvitationManager.instance.extendAppInvitation(getActivity(), getSelections());
+                InvitationManager.instance.extendInvitation(getActivity(), getSelections());
                 mSelectedGroups.clear();
                 mSelectedRooms.clear();
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
@@ -145,9 +145,9 @@ public class SelectForInviteFragment extends BaseChatFragment {
     /** Process a selection */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
         // Set the checkbox visibility and get the item object from the event payload.
-        ChatListItem clickedItem = null;
+        ListItem clickedItem = null;
         Object payload = event.view != null ? event.view.getTag() : null;
-        if (payload != null && payload instanceof ChatListItem) clickedItem = (ChatListItem) payload;
+        if (payload != null && payload instanceof ListItem) clickedItem = (ListItem) payload;
         if (clickedItem == null) return;
 
         // Toggle the selection state and operate accordingly on the selected items lists.
@@ -155,20 +155,20 @@ public class SelectForInviteFragment extends BaseChatFragment {
         checkBox.setChecked(clickedItem.selected);
 
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
-        ChatListAdapter adapter = (ChatListAdapter) view.getAdapter();
-        List <ChatListItem> adapterList = adapter.getItems();
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        List <ListItem> adapterList = adapter.getItems();
 
         // If the item is a group, then if it's selected, also select it's common room. If it's
         // deselected, deselect all of it's rooms.
-        if (clickedItem.type == INVITE_GROUP_ITEM_TYPE) {
+        if (clickedItem.type == inviteGroup) {
             if (clickedItem.selected)
                 mSelectedGroups.add(clickedItem);
             else
                 mSelectedGroups.remove(clickedItem);
 
-            for (ChatListItem adapterItem : adapterList) {
+            for (ListItem adapterItem : adapterList) {
                 switch (adapterItem.type) {
-                    case INVITE_COMMON_ROOM_ITEM_TYPE:
+                    case inviteCommonRoom:
                         if (adapterItem.groupKey.equals(clickedItem.key)) {
                             adapterItem.selected = clickedItem.selected;
                             if(clickedItem.selected) {
@@ -178,7 +178,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
                             }
                         }
                         break;
-                    case INVITE_ROOM_ITEM_TYPE:
+                    case inviteRoom:
                         if (adapterItem.groupKey.equals(clickedItem.key) && !clickedItem.selected) {
                             adapterItem.selected = false;
                             mSelectedRooms.remove(adapterItem);
@@ -189,18 +189,18 @@ public class SelectForInviteFragment extends BaseChatFragment {
                 }
             }
 
-        } else if (clickedItem.type == INVITE_ROOM_ITEM_TYPE) {
+        } else if (clickedItem.type == inviteRoom) {
             // if the item is a room, and it's selection is enabled, make sure to also enable
             // the group and the group's common room.
             if (clickedItem.selected) {
                 mSelectedRooms.add(clickedItem);
-                for (ChatListItem adapterItem : adapterList) {
-                    if (adapterItem.type == INVITE_GROUP_ITEM_TYPE &&
+                for (ListItem adapterItem : adapterList) {
+                    if (adapterItem.type == inviteGroup &&
                             adapterItem.key.equals(clickedItem.groupKey)) {
                         mSelectedGroups.add(adapterItem);
                         adapterItem.selected = true;
                     }
-                    else if (adapterItem.type == INVITE_COMMON_ROOM_ITEM_TYPE &&
+                    else if (adapterItem.type == inviteCommonRoom &&
                             adapterItem.groupKey.equals(clickedItem.groupKey)) {
                         adapterItem.selected = true;
                         mSelectedRooms.add(adapterItem);
@@ -220,23 +220,23 @@ public class SelectForInviteFragment extends BaseChatFragment {
     /** Called from FAM click handling */
     private void updateSelections(final boolean state) {
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
-        ChatListAdapter adapter = (ChatListAdapter) view.getAdapter();
-        List <ChatListItem> itemList = adapter.getItems();
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        List <ListItem> itemList = adapter.getItems();
 
         // Select all or clear all items, depending on 'state'. Update all items in the adapter
         // and set group and room lists accordingly.
         mSelectedGroups.clear();
         mSelectedRooms.clear();
 
-        for (ChatListItem item : itemList) {
+        for (ListItem item : itemList) {
             item.selected = state;
             switch (item.type) {
-                case INVITE_GROUP_ITEM_TYPE:
+                case inviteGroup:
                     if (state)
                         mSelectedGroups.add(item);
                     break;
-                case INVITE_ROOM_ITEM_TYPE:
-                case INVITE_COMMON_ROOM_ITEM_TYPE:
+                case inviteRoom:
+                case inviteCommonRoom:
                     if (state)
                         mSelectedRooms.add(item);
                     break;
@@ -258,10 +258,10 @@ public class SelectForInviteFragment extends BaseChatFragment {
 
     private Map<String, List<String>> getSelections() {
         Map<String, List<String>> selections = new HashMap<>();
-        for (ChatListItem groupItem : mSelectedGroups) {
+        for (ListItem groupItem : mSelectedGroups) {
             selections.put(groupItem.key, new ArrayList<String>());
         }
-        for (ChatListItem roomItem : mSelectedRooms) {
+        for (ListItem roomItem : mSelectedRooms) {
             List<String> rooms = selections.get(roomItem.groupKey);
             rooms.add(roomItem.key);
             selections.put(roomItem.groupKey, rooms);

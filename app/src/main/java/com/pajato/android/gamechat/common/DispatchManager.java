@@ -21,7 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -68,10 +68,10 @@ public enum DispatchManager {
      *
      * @param context The activity attached to the fragment that spawned this call.
      * @param type The type of the fragment to drill into.  One will be created if necessary.
-     * @param item Encapsulates the group and room key information appropriate to the fragment.
+     * @param item Encapsulates the push key information appropriate to the fragment.
      */
     public void chainFragment(final FragmentActivity context, final FragmentType type,
-                              final ChatListItem item) {
+                              final ListItem item) {
         // Ensure that type is valid.  Abort if not, otherwise validate the fragment, aborting if
         // invalid.
         if (type == null)
@@ -87,9 +87,9 @@ public enum DispatchManager {
         FragmentManager manager = context.getSupportFragmentManager();
         FragmentManager.enableDebugLogging(true);
         manager.beginTransaction()
-            .replace(type.getEnvelopeId(type), fragment)
-            .addToBackStack(type.toString())
-            .commit();
+                .replace(type.getEnvelopeId(type), fragment)
+                .addToBackStack(type.toString())
+                .commit();
     }
 
     /** Return null or the fragment associated with the given type, creating it as needed. */
@@ -146,7 +146,7 @@ public enum DispatchManager {
      * @param type An predisposed experience type or null to indicate the type should be computed.
      * @param item The chat list item carrying the group key.
      */
-    private Dispatcher getDispatcher(final FragmentType type, final ChatListItem item) {
+    private Dispatcher getDispatcher(final FragmentType type, final ListItem item) {
         // Determine if the dispatcher should be generate based on the kind, in which case a
         // suitable dispatcher will be returned, otherwise set up an experience dispatcher based
         // on the given type.

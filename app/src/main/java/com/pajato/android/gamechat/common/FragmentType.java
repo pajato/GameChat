@@ -21,31 +21,31 @@ import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatShowGroupsFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowOfflineFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowSignedOutFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateGroupFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
 import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
-import com.pajato.android.gamechat.chat.fragment.ChatShowGroupsFragment;
 import com.pajato.android.gamechat.chat.fragment.SelectForInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
+import com.pajato.android.gamechat.common.DispatchManager.DispatcherKind;
 import com.pajato.android.gamechat.common.ToolbarManager.ToolbarType;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.fragment.CheckersFragment;
 import com.pajato.android.gamechat.exp.fragment.ChessFragment;
+import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowGroupsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
-import com.pajato.android.gamechat.exp.fragment.ExpShowTypeListFragment;
-import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
+import com.pajato.android.gamechat.exp.fragment.PlayModeSetupFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
-import com.pajato.android.gamechat.common.DispatchManager.DispatcherKind;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
@@ -55,6 +55,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.crea
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createRoomTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expChain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMoveTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.none;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
@@ -71,6 +72,8 @@ public enum FragmentType {
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
+    checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, ExpType.checkers),
+    chess (ChessFragment.class, expChain, R.layout.exp_checkers, ExpType.chess),
     createGroup (CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
     createRoom (CreateRoomFragment.class, createRoomTT, R.layout.chat_create),
     expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
@@ -84,14 +87,9 @@ public enum FragmentType {
     noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
     selectGroupsAndRooms (SelectForInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
+    playModeSetup (PlayModeSetupFragment.class, expMoveTT, R.layout.exp_play_mode_setup),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain, R.layout.chat_no_joined_rooms),
-    tictactoeList (ExpShowTypeListFragment.class, expMain, R.layout.chat_no_joined_rooms),
-    tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, ttt, tictactoeList),
-    checkersList (ExpShowTypeListFragment.class, expMain, R.layout.exp_none),
-    checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, ExpType.checkers,
-              checkersList),
-    chessList (ExpShowTypeListFragment.class, expMain, R.layout.exp_none),
-    chess (ChessFragment.class, expChain, R.layout.exp_checkers, ExpType.chess, chessList);
+    tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, ttt);
 
     // Public instance variables.
 
@@ -103,9 +101,6 @@ public enum FragmentType {
 
     /** The fragment layout resource id. */
     public int layoutResId;
-
-    /** The fragment type that will be used to show a homogeneous experience collection. */
-    public FragmentType listType;
 
     /** The fragment toolbar type. */
     public ToolbarType toolbarType;
@@ -127,14 +122,11 @@ public enum FragmentType {
      * @param toolbarType A toolbar type, possibly null.
      * @param layoutResId The layout resource id.
      * @param expType The Firebase model type information.
-     * @param listType The fragment type that will show a list of given model type experiences.
      */
     FragmentType(@NonNull final Class<? extends BaseFragment> fragmentClass,
-                 final ToolbarType toolbarType, final int layoutResId, final ExpType expType,
-                 final FragmentType listType) {
+                 final ToolbarType toolbarType, final int layoutResId, final ExpType expType) {
         this(fragmentClass, toolbarType, layoutResId);
         this.expType = expType;
-        this.listType = listType;
     }
 
     // Public instance methods.

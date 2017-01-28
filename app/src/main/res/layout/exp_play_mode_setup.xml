@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2016 Pajato Technologies LLC.
+
+This file is part of Pajato GameChat.
+
+GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with GameChat.  If not, see
+http://www.gnu.org/licenses
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/userModeSetupLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/border">
+        <TextView android:id="@+id/SaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|end"
+            android:enabled="false"
+            android:onClick="onClick"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="@string/action_save"/>
+    </android.support.v7.widget.Toolbar>
+    <RadioGroup android:id="@+id/AccessControl"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <RadioButton android:id="@+id/PublicButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:text="@string/CreateRoomPublic"
+            android:checked="true"
+            android:onClick="onClick" />
+        <RadioButton android:id="@+id/PrivateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:text="@string/CreateRoomPrivate"
+            android:onClick="onClick" />
+    </RadioGroup>
+    <TextView android:id="@+id/AddMembers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="36dp"
+        android:layout_gravity="center"
+        android:onClick="onClick"
+        android:textColor="@color/colorBlue"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:text="@string/AddMembers"/>
+</LinearLayout>

@@ -24,9 +24,14 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.ListItem.PlayModeType;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.adapter.ExperienceItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -41,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.FragmentType.playModeSetup;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -76,6 +82,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** The experience being enjoyed. */
     protected Experience mExperience;
+
+    /** The current play mode for the experience being enjoyed. */
+    protected PlayModeType mPlayMode;
 
     // Public constructors.
 
@@ -180,6 +189,27 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return players.get(index);
     }
 
+    /** Handle a possible game mode selection by distributing to a procedural abstration. */
+    protected void handlePlayMode(final int titleResId) {
+        // Case on the title resource id to handle a mode selection.
+        switch (titleResId) {
+            case R.string.PlayModeLocalMenuTitle:
+            case R.string.PlayModeComputerMenuTitle: // Defer to the future.
+                showFutureFeatureMessage(R.string.FutureSelectModes);
+                FabManager.game.dismissMenu(this);
+                break;
+            case R.string.PlayModeUserMenuTitle:
+                // Handle selecting another User by chaining to the fragment that will select the
+                // User, copy the experience to a new room, and continue the game in that room with
+                // the current state.
+                ListItem listItem = new ListItem(new ExperienceItem(mExperience), mPlayMode);
+                DispatchManager.instance.chainFragment(this.getActivity(), playModeSetup, listItem);
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Return TRUE iff the User has requested to play again. */
     protected boolean isPlayAgain(final Object tag, final String className) {
         // Determine if the given tag is the class name, i.e. a snackbar action request to play
@@ -225,5 +255,4 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         menu.add(getTintEntry(R.string.PlayModeUserMenuTitle, R.drawable.ic_person_black_24px));
         return menu;
     }
-
 }

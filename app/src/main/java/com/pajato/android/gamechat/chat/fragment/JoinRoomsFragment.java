@@ -24,11 +24,11 @@ import android.widget.CheckBox;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.adapter.ChatListAdapter;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListAdapter;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -42,12 +42,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_ROOM_ITEM_TYPE;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.all;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.members;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.rooms;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
 
 public class JoinRoomsFragment extends BaseChatFragment {
 
@@ -61,7 +61,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
     // Private instance variables.
 
     /** A map of items specifying rooms or members to join. */
-    private Map<String, ChatListItem> mJoinMap = new HashMap<>();
+    private Map<String, ListItem> mJoinMap = new HashMap<>();
 
     // Public instance methods.
 
@@ -76,7 +76,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             case R.id.saveButton:
                 // Implement the save operation.
-                for (ChatListItem item : mJoinMap.values())
+                for (ListItem item : mJoinMap.values())
                     JoinManager.instance.joinRoom(item);
                 mJoinMap.clear();
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
@@ -147,34 +147,40 @@ public class JoinRoomsFragment extends BaseChatFragment {
     /** Process a selection by toggling the selected state and managing the item map. */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
         // Set the check icon visibility and get the item object from the event payload.
-        ChatListItem item = null;
+        ListItem item = null;
         Object payload = event.view != null ? event.view.getTag() : null;
-        if (payload != null && payload instanceof ChatListItem) item = (ChatListItem) payload;
-        if (item == null) return;
+        if (payload != null && payload instanceof ListItem)
+            item = (ListItem) payload;
+        if (item == null)
+            return;
 
         // Toggle the selection state and operate accordingly on the join map.
         item.selected = !item.selected;
         checkBox.setChecked(item.selected);
-        if (item.selected) mJoinMap.put(item.key, item);
-        else mJoinMap.remove(item.key);
+        if (item.selected)
+            mJoinMap.put(item.key, item);
+        else
+            mJoinMap.remove(item.key);
         updateSaveButton();
     }
 
     /** ... */
     private void updateSelections(@NonNull final SelectionType type, final boolean state) {
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
-        ChatListAdapter adapter = (ChatListAdapter) view.getAdapter();
-        List<ChatListItem> itemList = adapter.getItems();
-        for (ChatListItem item : itemList) {
-            if (type == all || (type == members && item.type == SELECTABLE_MEMBER_ITEM_TYPE) ||
-                    (type == rooms && item.type == SELECTABLE_ROOM_ITEM_TYPE))
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        List<ListItem> itemList = adapter.getItems();
+        for (ListItem item : itemList) {
+            if (type == all || (type == members && item.type == selectableMember) ||
+                    (type == rooms && item.type == selectableRoom))
                 item.selected = state;
         }
         adapter.notifyDataSetChanged();
 
         // Update the join map based on the update arguments.
         mJoinMap.clear();
-        for (ChatListItem item : itemList) if (item.selected) mJoinMap.put(item.key, item);
+        for (ListItem item : itemList)
+            if (item.selected)
+                mJoinMap.put(item.key, item);
         updateSaveButton();
     }
 

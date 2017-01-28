@@ -80,7 +80,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         // Handle invitation - extend app invitation, dismiss menu and return (there is no
         // new experience to start).
         if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromExpEnv) {
-            InvitationManager.instance.extendAppInvitation(getActivity(), mExperience.getGroupKey());
+            InvitationManager.instance.extendInvitation(getActivity(), mExperience.getGroupKey());
             FabManager.game.dismissMenu(this);
             return;
         } else if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat ||

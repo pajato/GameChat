@@ -63,7 +63,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
         if (mActive)
-            redisplay();
+            updateAdapterList();
     }
 
     /** Process a menu click event ... */
@@ -85,7 +85,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, mItem);
                 break;
             case R.string.InviteFriendFromChat:
-                InvitationManager.instance.extendAppInvitation(getActivity(), mItem.groupKey);
+                InvitationManager.instance.extendInvitation(getActivity(), mItem.groupKey);
             default:
                 // ...
                 break;
