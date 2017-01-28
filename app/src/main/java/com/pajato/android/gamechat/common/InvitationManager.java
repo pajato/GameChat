@@ -217,7 +217,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         if (isMember || !isInvited || group == null) return;
 
         // The account holder has been invited to join the given group.  Do so by adding the group
-        // key the account join list and create a copy of the account as a member of the group.
+        // key to the account join list and create a copy of the account as a member of the group.
         account.joinList.add(groupKey);
         AccountManager.instance.updateAccount(account);
         Account member = new Account(account);
@@ -231,24 +231,30 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         DBUtils.instance.updateChildren(path, group.toMap());
     }
 
-    /** Extend an invitation to join GameChat using AppInviteInvitation on the given group. */
-    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
+    /** Extend a group invite to a given account by registering both. */
+    public void extendGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Insert the account id into the list associated with the group key.
+        List<String> memberList = mGroupInviteMap.get(groupKey);
+        if (memberList == null) memberList = new ArrayList<>();
+        memberList.add(account.id);
+        mGroupInviteMap.put(groupKey, memberList);
+    }
 
-        Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
+    // Private instance methods.
 
-        Uri dynLinkUri = buildDefaultDynamicLink();
+    /** Return TRUE iff the given group has an invitation registered for the given account owner. */
+    private boolean hasGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Ensure that there is a list of invites for the given group.
+        List<String> invitedMembers = mGroupInviteMap.get(groupKey);
+        if (invitedMembers == null) return false;
 
-        String encodedInfo = encodeGroupInfo(groupKey, null);
-        dynLinkUri.buildUpon().appendQueryParameter("group", encodedInfo);
-        String dynamicLink = dynLinkUri.toString();
-        Log.i(TAG, "dynamicLink=" + dynamicLink);
+        // Ensure that the invited members list includes the account owner.
+        if (!invitedMembers.contains(account.id)) return false;
 
-        String title = activity.getString(R.string.InviteTitle);
-        Intent intent = new AppInviteInvitation.IntentBuilder(title)
-                .setMessage(activity.getString(R.string.InviteMessage))
-                .setDeepLink(Uri.parse(dynamicLink))
-                .build();
-        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
+        // Remove the invited account holder from the list and possibly the list from the map.
+        invitedMembers.remove(account.id);
+        if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
+        return true;
     }
 
     /** Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
@@ -275,21 +281,39 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
-    // Private instance methods.
+    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
+    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
 
-    /** Return TRUE iff the given group has an invitation registered for the given account owner. */
-    private boolean hasGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
-        // Ensure that there is a list of invites for the given group.
-        List<String> invitedMembers = mGroupInviteMap.get(groupKey);
-        if (invitedMembers == null) return false;
+        Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
+        Group grp = GroupManager.instance.getGroupProfile(groupKey);
+        if (grp == null) {
+            Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
+                    "can't find this group");
+            return;
+        }
 
-        // Ensure that the invited members list includes the account owner.
-        if (!invitedMembers.contains(account.id)) return false;
+        String firebaseUrl = FirebaseDatabase.getInstance().getReference().toString();
+        firebaseUrl += GroupManager.GROUPS_PATH;
+        firebaseUrl += groupKey;
 
-        // Remove the invited account holder from the list and possibly the list from the map.
-        invitedMembers.remove(account.id);
-        if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
-        return true;
+        String dynamicLink = new Uri.Builder()
+                .scheme("https")
+                .authority(APP_CODE + ".app.goo.gl")
+                .path("/")
+                .appendQueryParameter("link", firebaseUrl)
+                .appendQueryParameter("apn", APP_PACKAGE_NAME)
+                .appendQueryParameter("afl", PLAY_STORE_LINK)
+                .appendQueryParameter("ifl", WEB_LINK)
+                .appendQueryParameter("commonRoomKey", grp.commonRoomKey)
+                .appendQueryParameter("groupName", grp.name)
+                .toString();
+
+        Log.i(TAG, "dynamicLink=" + dynamicLink);
+        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
+                .setMessage(activity.getString(R.string.InviteMessage))
+                .setDeepLink(Uri.parse(dynamicLink))
+                .build();
+        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
     private Uri buildDefaultDynamicLink() {
@@ -312,7 +336,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             return "";
         }
 
-        // If no roomkeys were specified, get the common room key - we must always have it
+        // If no room keys were specified, get the common room key - we must always have it
         if (roomKeys == null) {
             roomKeys = new ArrayList<>();
             roomKeys.add(group.commonRoomKey);
@@ -325,7 +349,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         // add a comma-separated list of room keys for the specified group to the list
         items.add(TextUtils.join(",", roomKeys));
 
-        // Create a string like this: groupKey/groupName/commonRoomKey[,roomkey...]
+        // Create a string like this: groupKey/groupName/commonRoomKey[,roomKey...]
         return TextUtils.join("/", items);
     }
 

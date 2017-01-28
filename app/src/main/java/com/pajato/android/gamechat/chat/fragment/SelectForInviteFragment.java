@@ -142,6 +142,48 @@ public class SelectForInviteFragment extends BaseChatFragment {
         return menu;
     }
 
+    /** When a group is selected, find it's common room and insure that it is also selected in
+     * the adapter list and add it to the list of selected rooms. */
+    private void selectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
+        mSelectedGroups.add(groupItem);
+        for (ListItem adapterItem : adapterList) {
+            if (adapterItem.type == inviteCommonRoom &&
+                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+                mSelectedRooms.add(adapterItem);
+            }
+        }
+    }
+
+    /** When a group is deselected, also deselect all of it's rooms (including the common room). */
+    private void deselectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
+        mSelectedGroups.remove(groupItem);
+        for (ListItem adapterItem : adapterList) {
+            if ((adapterItem.type == inviteCommonRoom ||
+                    adapterItem.type == inviteRoom) &&
+                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                adapterItem.selected = false;
+                mSelectedRooms.remove(adapterItem);
+            }
+        }
+    }
+
+    /** When a non-common room is selected, make sure its group and common room are also selected
+     * and added to the respective list of selected groups/rooms */
+    private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
+        mSelectedRooms.add(groupItem);
+        for (ListItem adapterItem : adapterList) {
+            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+                mSelectedGroups.add(adapterItem);
+            } else if (adapterItem.type == inviteCommonRoom &&
+                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+                mSelectedRooms.add(adapterItem);
+            }
+        }
+    }
+
     /** Process a selection */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
         // Set the checkbox visibility and get the item object from the event payload.
@@ -161,56 +203,19 @@ public class SelectForInviteFragment extends BaseChatFragment {
         // If the item is a group, then if it's selected, also select it's common room. If it's
         // deselected, deselect all of it's rooms.
         if (clickedItem.type == inviteGroup) {
-            if (clickedItem.selected)
-                mSelectedGroups.add(clickedItem);
-            else
-                mSelectedGroups.remove(clickedItem);
-
-            for (ListItem adapterItem : adapterList) {
-                switch (adapterItem.type) {
-                    case inviteCommonRoom:
-                        if (adapterItem.groupKey.equals(clickedItem.key)) {
-                            adapterItem.selected = clickedItem.selected;
-                            if(clickedItem.selected) {
-                                mSelectedRooms.add(adapterItem);
-                            } else {
-                                mSelectedRooms.remove(adapterItem);
-                            }
-                        }
-                        break;
-                    case inviteRoom:
-                        if (adapterItem.groupKey.equals(clickedItem.key) && !clickedItem.selected) {
-                            adapterItem.selected = false;
-                            mSelectedRooms.remove(adapterItem);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-        } else if (clickedItem.type == inviteRoom) {
-            // if the item is a room, and it's selection is enabled, make sure to also enable
-            // the group and the group's common room.
             if (clickedItem.selected) {
-                mSelectedRooms.add(clickedItem);
-                for (ListItem adapterItem : adapterList) {
-                    if (adapterItem.type == inviteGroup &&
-                            adapterItem.key.equals(clickedItem.groupKey)) {
-                        mSelectedGroups.add(adapterItem);
-                        adapterItem.selected = true;
-                    }
-                    else if (adapterItem.type == inviteCommonRoom &&
-                            adapterItem.groupKey.equals(clickedItem.groupKey)) {
-                        adapterItem.selected = true;
-                        mSelectedRooms.add(adapterItem);
-                    }
-                }
+                selectGroupForInvite(clickedItem, adapterList);
+            }
+            else {
+                deselectGroupForInvite(clickedItem, adapterList);
+            }
+        } else if (clickedItem.type == inviteRoom) {
+            if (clickedItem.selected) {
+                selectRoomForInvite(clickedItem, adapterList);
             } else {
                 mSelectedRooms.remove(clickedItem);
             }
         }
-
         adapter.notifyDataSetChanged();
 
         // Set the 'invite' button enabled or disabled based on whether there are selections
