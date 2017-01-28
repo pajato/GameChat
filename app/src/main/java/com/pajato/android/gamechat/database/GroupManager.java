@@ -21,15 +21,15 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.adapter.ResourceHeaderItem;
-import com.pajato.android.gamechat.chat.adapter.RoomItem;
-import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
-import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
+import com.pajato.android.gamechat.common.adapter.GroupItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
+import com.pajato.android.gamechat.common.adapter.RoomItem;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType.old;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -105,7 +105,7 @@ public enum GroupManager {
     }
 
     /** Get the data as a set of list items for all groups. */
-    public List<ChatListItem> getListItemData() {
+    public List<ListItem> getListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
         // group rooms) or more than one group (a set of groups).
         switch (groupMap.size()) {
@@ -182,7 +182,7 @@ public enum GroupManager {
     }
 
     /** Return a list of joined group push keys based on the given item. */
-    public List<String> getGroups(final ChatListItem item) {
+    public List<String> getGroups(final ListItem item) {
         List<String> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
         if (item != null && item.groupKey != null)
@@ -190,13 +190,6 @@ public enum GroupManager {
         if (result.isEmpty() && account != null)
             result.addAll(account.joinList);
         return result;
-    }
-
-    /** Return the group's common room */
-    public Room getCommonRoom(final String groupKey) {
-        // Return the group if it has been loaded.  Set a watcher to load it if not.
-        Group result = groupMap.get(groupKey);
-        return result != null ? RoomManager.instance.getRoomProfile(result.commonRoomKey) : null;
     }
 
     /** Handle a message change event by adding the message into the correct room list.  */
@@ -226,18 +219,18 @@ public enum GroupManager {
     // Private instance methods.
 
     /** Return the normal case: more than one group. */
-    private List<ChatListItem> getGroupsItemList() {
+    private List<ListItem> getGroupsItemList() {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
-        List<ChatListItem> result = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
         for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0) {
                 // Add the header item followed by all the group items.
-                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(new DateHeaderItem(dht)));
                 for (String groupKey : groupList) {
                     if(!(groupKey.equals(AccountManager.instance.getMeGroupKey()))) {
-                        result.add(new ChatListItem(new GroupItem(groupKey)));
+                        result.add(new ListItem(new GroupItem(groupKey)));
                     }
                 }
             }
@@ -246,13 +239,13 @@ public enum GroupManager {
     }
 
     /** Return the normal case: more than one group. */
-    private List<ChatListItem> getNoGroupsItemList() {
+    private List<ListItem> getNoGroupsItemList() {
         //
-        List<ChatListItem> result = new ArrayList<>();
-        result.add(new ChatListItem(new ResourceHeaderItem(R.string.NoGroupsHeaderText)));
+        List<ListItem> result = new ArrayList<>();
+        result.add(new ListItem(new ResourceHeaderItem(R.string.NoGroupsHeaderText)));
         Room room = RoomManager.instance.getMeRoom();
         if (room != null)
-            result.add(new ChatListItem(new RoomItem(room.groupKey, room.key)));
+            result.add(new ListItem(new RoomItem(room.groupKey, room.key)));
         return result;
     }
 

@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import android.content.Context;
 import android.net.Uri;
@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.CompatUtils;
@@ -40,46 +41,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_COMMON_ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_HEADER_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.CONTACT_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.DATE_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.GROUP_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.MESSAGE_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOMS_HEADER_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.SELECTABLE_ROOM_ITEM_TYPE;
-import static com.pajato.android.gamechat.chat.adapter.ChatListItem.INVITE_GROUP_ITEM_TYPE;
-
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
  * how recently messages in those room were generated.
  *
  * @author Paul Michael Reilly
  */
-public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
+public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     implements View.OnClickListener {
 
     // Private class constants.
 
     /** The logcat tag. */
-    private static final String TAG = ChatListAdapter.class.getSimpleName();
+    private static final String TAG = ListAdapter.class.getSimpleName();
 
     /** Click listener for selection check boxes */
-    private ChatListCheckBoxClickListener checkboxListener = new ChatListCheckBoxClickListener();
+    private CheckBoxClickListener checkboxListener = new CheckBoxClickListener();
 
     /** A format string for displaying unhandled cases. */
     private static final String UNHANDLED_FORMAT = "Unhandled item entry type: {%s}.";
 
     /** The list displayed by the owning list view. */
-    private List<ChatListItem> mList = new ArrayList<>();
+    private List<ListItem> mList = new ArrayList<>();
 
     // Public instance methods.
 
     /** Add items to the adapter's main list. */
-    public void addItems(final List<ChatListItem> items) {
+    public void addItems(final List<ListItem> items) {
         // Add all the items after clearing the current ones.
         mList.addAll(items);
         notifyDataSetChanged();
@@ -91,65 +79,64 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Get the items being adapted. */
-    public List<ChatListItem> getItems() {return mList;}
+    public List<ListItem> getItems() {return mList;}
 
     /** Manage the recycler view holder. */
-    @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int entryType) {
-        switch (entryType) {
-            case CONTACT_HEADER_ITEM_TYPE:
+    @Override public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        if (viewType < 0 || viewType >= ItemType.values().length)
+            return null;
+        ItemType type = ItemType.values()[viewType];
+        switch (type) {
+            case contactHeader:
+            case date:
+            case roomsHeader:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
-            case CONTACT_ITEM_TYPE:
+            case contact:
                 return new ContactViewHolder(getView(parent, R.layout.item_contact));
-            case DATE_ITEM_TYPE:
-                return new HeaderViewHolder(getView(parent, R.layout.item_header));
-            case GROUP_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_group));
-            case ROOM_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_room));
-            case ROOMS_HEADER_ITEM_TYPE:
-                return new HeaderViewHolder(getView(parent, R.layout.item_header));
-            case MESSAGE_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_message));
-            case SELECTABLE_MEMBER_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_join_member));
-            case SELECTABLE_ROOM_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_join_room));
-            case INVITE_COMMON_ROOM_ITEM_TYPE:
-            case INVITE_ROOM_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_select_invites_room));
-            case INVITE_GROUP_ITEM_TYPE:
-                return new ChatListViewHolder(getView(parent, R.layout.item_select_for_invites));
+            case group:
+                return new ItemListViewHolder(getView(parent, R.layout.item_group));
+            case room:
+                return new ItemListViewHolder(getView(parent, R.layout.item_room));
+            case message:
+                return new ItemListViewHolder(getView(parent, R.layout.item_message));
+            case selectableMember:
+                return new ItemListViewHolder(getView(parent, R.layout.item_join_member));
+            case selectableRoom:
+                return new ItemListViewHolder(getView(parent, R.layout.item_join_room));
+            case inviteCommonRoom:
+            case inviteRoom:
+                return new ItemListViewHolder(getView(parent, R.layout.item_select_invites_room));
+            case inviteGroup:
+                return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
             default:
-                Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, entryType));
-                break;
+                Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, viewType));
+                return null;
         }
-
-        return null;
     }
 
     /** Populate the widgets for the item at the given position. */
     @Override public void onBindViewHolder(ViewHolder holder, int position) {
-        ChatListItem item = mList.get(position);
+        ListItem item = mList.get(position);
         if (item != null) {
             switch (item.type) {
-                case DATE_ITEM_TYPE:
-                case ROOMS_HEADER_ITEM_TYPE:
+                case date:
+                case roomsHeader:
                     // The header item types simply update the section title.
                     int id = item.nameResourceId;
                     String name = holder.itemView.getContext().getResources().getString(id);
                     ((HeaderViewHolder) holder).title.setText(name);
                     break;
-                case GROUP_ITEM_TYPE:
-                case MESSAGE_ITEM_TYPE:
-                case ROOM_ITEM_TYPE:
-                case SELECTABLE_MEMBER_ITEM_TYPE:
-                case SELECTABLE_ROOM_ITEM_TYPE:
-                case INVITE_ROOM_ITEM_TYPE:
-                case INVITE_COMMON_ROOM_ITEM_TYPE:
-                case INVITE_GROUP_ITEM_TYPE:
+                case group:
+                case message:
+                case room:
+                case selectableMember:
+                case selectableRoom:
+                case inviteRoom:
+                case inviteCommonRoom:
+                case inviteGroup:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
-                    updateChatHolder((ChatListViewHolder) holder, item);
+                    updateChatHolder((ItemListViewHolder) holder, item);
                     break;
                 default:
                     Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
@@ -171,7 +158,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     /** Obtain the type for the item at the given position. */
     @Override public int getItemViewType(int position) {
         // Return the type for the item at the given position, -1 if there is no such item.
-        return mList != null && mList.size() > position ? mList.get(position).type : -1;
+        return mList != null && mList.size() > position ? mList.get(position).type.ordinal() : -1;
     }
 
     // Private instance methods.
@@ -185,11 +172,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Update the chat icon in the given holder based on the given item type. */
-    private void setChatIcon(final ChatListViewHolder holder, final ChatListItem item) {
+    private void setChatIcon(final ItemListViewHolder holder, final ListItem item) {
         Context context = holder.icon.getContext();
         switch (item.type) {
-            case SELECTABLE_MEMBER_ITEM_TYPE:
-            case MESSAGE_ITEM_TYPE:
+            case selectableMember:
+            case message:
                 // For a message, ensure that both the holder and the item have an icon value,
                 // and load the icon or default if not found at the specified URL.
                 if (holder.icon == null || item.url == null) return;
@@ -214,7 +201,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Update the given view holder using the data from the given item. */
-    private void updateChatHolder(ChatListViewHolder holder, final ChatListItem item) {
+    private void updateChatHolder(ItemListViewHolder holder, final ListItem item) {
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
@@ -236,7 +223,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         if (holder.checkBox == null) return;
         holder.checkBox.setChecked(item.selected);
         // common room selection is set based on group selection and never allowed separately
-        if (item.type == INVITE_COMMON_ROOM_ITEM_TYPE)
+        if (item.type == ItemType.inviteCommonRoom)
             holder.checkBox.setEnabled(false);
         else
             holder.checkBox.setEnabled(item.enabled);
@@ -245,7 +232,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     // Inner classes.
 
-    private class ChatListCheckBoxClickListener implements View.OnClickListener {
+    private class CheckBoxClickListener implements View.OnClickListener {
         public void onClick(View v) {
             // Post the click event to the app
             AppEventManager.instance.post(new ClickEvent(v));
@@ -253,7 +240,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Provide a view holder for a chat list item. */
-    private class ChatListViewHolder extends RecyclerView.ViewHolder {
+    private class ItemListViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         TextView count;
         TextView text;
@@ -261,7 +248,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ViewHolder>
         CheckBox checkBox;
 
         /** Build an instance given the item view. */
-        ChatListViewHolder(View itemView) {
+        ItemListViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.chatName);
             count = (TextView) itemView.findViewById(R.id.newCount);

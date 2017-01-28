@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import android.support.annotation.NonNull;
 
@@ -46,10 +46,10 @@ public class GroupItem {
     public String name;
 
     /** The number of new messages in the group rooms. */
-    int count;
+    public int count;
 
     /** The list of rooms with messages.  Bold items have new messages. */
-    String text;
+    public String text;
 
     // Public constructors.
 

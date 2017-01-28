@@ -30,8 +30,8 @@ import android.provider.ContactsContract.Data;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.ContactItem;
+import com.pajato.android.gamechat.common.adapter.ContactItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,14 +60,14 @@ public enum ContactManager {
     // Private instance variables.
 
     /** The contact cache, a map associating a name and a chat list item. */
-    private Map<String, ChatListItem> mContactMap = new HashMap<>();
+    private Map<String, ListItem> mContactMap = new HashMap<>();
 
     // Public instance methods.
 
     /** Return a list of device contacts formatted as chat list items. */
-    public List<ChatListItem> getDeviceContactList() {
+    public List<ListItem> getDeviceContactList() {
         // Convert each contact to a chat list item.
-        List<ChatListItem> result = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
         for (String name : mContactMap.keySet()) {
             result.add(mContactMap.get(name));
         }
@@ -107,7 +107,7 @@ public enum ContactManager {
                 String phone = Integer.parseInt(value) > 0 ? getPhone(resolver, id) : null;
                 String url = getPhotoUrl(resolver, id);
                 if ((email != null && email.length() > 0) || phone != null && phone.length() > 0) {
-                    ChatListItem item = new ChatListItem(new ContactItem(name, email, phone, url));
+                    ListItem item = new ListItem(new ContactItem(name, email, phone, url));
                     mContactMap.put(name, item);
                 }
             }

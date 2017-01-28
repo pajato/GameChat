@@ -17,16 +17,11 @@
 
 package com.pajato.android.gamechat.common;
 
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.MessageManager;
-import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The fragment dispatcher provides mediation between the experience or chat managers and the main
@@ -45,20 +40,11 @@ public class Dispatcher {
     /** The experience payload. */
     public Experience experiencePayload;
 
-    /** The message payload. */
-    public Message messagePayload;
-
     /** The group key. */
     public String groupKey;
 
     /** The room key. */
     public String roomKey;
-
-    /** The map associating a room key with experiences in the room. */
-    public Map<String, Map<String, Experience>> experienceRoomMap;
-
-    /** The map associating a room key with messagess in the room. */
-    public Map<String, Map<String, Message>> messageRoomMap;
 
     /** The fragment type denoting the fragment index and the experience type. */
     public FragmentType type;
@@ -72,41 +58,8 @@ public class Dispatcher {
         if (type != null) processType();
     }
 
-    /** Build an instance given a group key. */
-    Dispatcher(final FragmentType type, final String groupKey) {
-        this.type = type;
-        this.groupKey = groupKey;
-        switch (type) {
-            case chatGroupList:
-                messageRoomMap = MessageManager.instance.messageMap.get(groupKey);
-                break;
-            case expGroupList:
-                experienceRoomMap = ExperienceManager.instance.expGroupMap.get(groupKey);
-                break;
-            default: break;
-        }
-    }
-
-    /** Build an instance given a group key, room key, and an experience or message list. */
-    Dispatcher(final FragmentType type, final String groupKey, final String roomKey) {
-        this.type = type;
-        this.groupKey = groupKey;
-        this.roomKey = roomKey;
-        switch (type) {
-            case messageList:
-                List<Message> list = MessageManager.instance.getMessageList(groupKey, roomKey);
-                messagePayload = list.size() > 0 ? list.get(0) : null;
-                key = messagePayload != null ? messagePayload.key : null;
-                break;
-            case experienceList: // Handle a list of experiences in a room.
-                processExperienceList(groupKey, roomKey);
-                break;
-            default: break;
-        }
-    }
-
     /** Build an instance given a chat list item. */
-    Dispatcher(final FragmentType type, final ChatListItem item) {
+    Dispatcher(final FragmentType type, final ListItem item) {
         this.type = type;
         if (item != null) {
             groupKey = item.groupKey;
@@ -115,34 +68,6 @@ public class Dispatcher {
     }
 
     // Private instance methods.
-
-    /** Return the fragment type associated with the given experience type. */
-    private FragmentType getFragmentType(ExpType experienceType) {
-        for (FragmentType type : FragmentType.values())
-            if (type.expType == experienceType)
-                return type;
-        return null;
-    }
-
-    /** Handle a list of experiences in a given room. */
-    private void processExperienceList(final String gKey, final String rKey) {
-        Map<String, Map<String, Experience>> map = ExperienceManager.instance.expGroupMap.get(gKey);
-        Collection<Experience> experiences = map.get(rKey).values();
-        switch (experiences.size()) {
-            case 0: // impossible.
-                break;
-            case 1: // A single experience in the room.
-                experiencePayload = experiences.iterator().next();
-                groupKey = experiencePayload.getGroupKey();
-                roomKey = experiencePayload.getRoomKey();
-                key = experiencePayload.getExperienceKey();
-                type = getFragmentType(experiencePayload.getExperienceType());
-                break;
-            default: // Show a room list.
-                type = FragmentType.expRoomList;
-                break;
-        }
-    }
 
     /** Handle one of the main experience types. */
     private void processExperienceType() {
@@ -161,7 +86,7 @@ public class Dispatcher {
                 break;
             default: // There are multiple experiences of this type.  Present a list of
                 // them by changing the type to the corresponding list type.
-                type = type.listType;
+                type = FragmentType.experienceList;
                 break;
         }
     }

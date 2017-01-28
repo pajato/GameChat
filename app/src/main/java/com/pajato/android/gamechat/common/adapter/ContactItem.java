@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 /**
  * Provide a POJO to encapsulate a contact item to be added to a recycler view.
@@ -35,7 +35,7 @@ public class ContactItem {
     public String phone;
 
     /** The contact's icon URL, possibly null. */
-    String url;
+    public String url;
 
     /** The contact's display name. */
     public String name;

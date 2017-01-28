@@ -15,32 +15,35 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
+
+import com.pajato.android.gamechat.exp.Experience;
 
 /**
- * Provide a POJO to encapsulate a general heading item containing text from a given string
- * resource.
+ * Provide a POJO to encapsulate an experience item to be added to a recycler view.
  *
  * @author Paul Michael Reilly
  */
-public class ResourceHeaderItem {
+public class ExperienceItem {
 
-    // Private instance variables.
+    // Public instance variables.
 
-    /** The item resourceId. */
-    private int mResourceId;
+    /** The group key */
+    public String groupKey;
+
+    /** The experience (push) key. */
+    public String key;
+
+    /** The room key. */
+    public String roomKey;
 
     // Public constructors.
 
-    /** Build an instance for a given resource identifier. */
-    public ResourceHeaderItem(final int resourceId) {
-        mResourceId = resourceId;
-    }
-
-    // Public instance methods.
-
-    /** Return the reource id. */
-    int getNameResourceId() {
-        return mResourceId;
+    /** Build an instance for the given group. */
+    public ExperienceItem(final Experience experience) {
+        // Update the various push keys.
+        groupKey = experience.getGroupKey();
+        roomKey = experience.getRoomKey();
+        key = experience.getExperienceKey();
     }
 }

@@ -79,11 +79,12 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
+        // Determine if this fragment cares about chat list changes.  If so, update the list
+        // content.
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
         if (mActive)
-            redisplay();
+            updateAdapterList();
     }
 
     /** Initialize ... */

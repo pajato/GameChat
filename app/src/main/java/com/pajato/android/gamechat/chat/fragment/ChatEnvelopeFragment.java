@@ -25,14 +25,14 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.GroupItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.adapter.GroupItem;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -83,7 +83,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
         switch (event.item.getItemId()) {
             case R.id.nav_me_room:
                 GroupItem groupItem = new GroupItem(AccountManager.instance.getMeGroupKey());
-                ChatListItem listItem = new ChatListItem(groupItem);
+                ListItem listItem = new ListItem(groupItem);
                 DispatchManager.instance.chainFragment(getActivity(), chatRoomList, listItem);
                 break;
             case R.id.nav_groups:

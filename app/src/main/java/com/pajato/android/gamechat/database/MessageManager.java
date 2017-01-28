@@ -20,12 +20,13 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
-import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.DateHeaderItem;
-import com.pajato.android.gamechat.chat.adapter.MessageItem;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
+import com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.MessageItem;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MessageListChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -41,8 +42,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.chat.adapter.DateHeaderItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
+import static com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType.old;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of chat messages.
@@ -131,7 +132,7 @@ public enum MessageManager {
     }
 
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
-    public List<ChatListItem> getListItemData(@NonNull final ChatListItem item) {
+    public List<ListItem> getListItemData(@NonNull final ListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         String groupKey = item.groupKey;
@@ -170,9 +171,9 @@ public enum MessageManager {
     // Private instance methods.
 
     /** Return the date header type most closely associated with the given message timestamp. */
-    private DateHeaderItem.DateHeaderType getDateHeaderType(final Message message) {
+    private DateHeaderType getDateHeaderType(final Message message) {
         long now = new Date().getTime();
-        for (DateHeaderItem.DateHeaderType type : DateHeaderItem.DateHeaderType.values()) {
+        for (DateHeaderType type : DateHeaderType.values()) {
             // Determine if this is the right dht value.
             if (now - message.createTime <= type.getLimit()) {
                 // This is the correct dht value to use. Done.
@@ -183,20 +184,20 @@ public enum MessageManager {
     }
 
     /** Return a list of ordered chat items from a map of chronologically ordered messages. */
-    private List<ChatListItem> getItems(final Map<DateHeaderItem.DateHeaderType, List<Message>> messageMap) {
+    private List<ListItem> getItems(final Map<DateHeaderType, List<Message>> messageMap) {
         // Build the list of display items, in reverse order (oldest to newest).
-        List<ChatListItem> result = new ArrayList<>();
-        DateHeaderItem.DateHeaderType[] types = DateHeaderItem.DateHeaderType.values();
+        List<ListItem> result = new ArrayList<>();
+        DateHeaderType[] types = DateHeaderType.values();
         int size = types.length;
         for (int index = size - 1; index >= 0; index--) {
             // Add the header item followed by all the room messages.
-            DateHeaderItem.DateHeaderType dht = types[index];
+            DateHeaderType dht = types[index];
             List<Message> list = messageMap.get(dht);
             if (list != null) {
-                result.add(new ChatListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(new DateHeaderItem(dht)));
                 Collections.sort(list, new MessageComparator());
                 for (Message message : list) {
-                    result.add(new ChatListItem(new MessageItem(message)));
+                    result.add(new ListItem(new MessageItem(message)));
                 }
             }
         }
@@ -214,13 +215,13 @@ public enum MessageManager {
     }
 
     /** Return a map of the given messages, sorted into chronological buckets. */
-    private Map<DateHeaderItem.DateHeaderType, List<Message>> getMessageMap(final Map<String, Message> messageList) {
+    private Map<DateHeaderType, List<Message>> getMessageMap(final Map<String, Message> messageList) {
         // Stick the messages into a message map keyed by date header type.
-        Map<DateHeaderItem.DateHeaderType, List<Message>> result = new HashMap<>();
+        Map<DateHeaderType, List<Message>> result = new HashMap<>();
         for (Message message : messageList.values()) {
             // Append the message to the list keyed by the date header type value associated with
             // the message creation date.
-            DateHeaderItem.DateHeaderType type = getDateHeaderType(message);
+            DateHeaderType type = getDateHeaderType(message);
             List<Message> list = result.get(type);
             if (list == null) {
                 list = new ArrayList<>();

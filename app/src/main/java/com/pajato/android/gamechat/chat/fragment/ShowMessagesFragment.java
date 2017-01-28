@@ -96,7 +96,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         String format = "onChatListChange with event {%s}";
         logEvent(String.format(Locale.US, format, "no list", event));
         if (mActive)
-            redisplay();
+            updateAdapterList();
     }
 
     /** Establish the create time state. */

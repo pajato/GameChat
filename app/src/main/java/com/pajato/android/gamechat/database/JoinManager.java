@@ -24,13 +24,13 @@ import android.util.SparseArray;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.chat.adapter.ChatListItem;
-import com.pajato.android.gamechat.chat.adapter.RoomsHeaderItem;
-import com.pajato.android.gamechat.chat.adapter.SelectableMemberItem;
-import com.pajato.android.gamechat.chat.adapter.SelectableRoomItem;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.RoomsHeaderItem;
+import com.pajato.android.gamechat.common.adapter.SelectableMemberItem;
+import com.pajato.android.gamechat.common.adapter.SelectableRoomItem;
+import com.pajato.android.gamechat.common.model.Account;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -67,7 +67,7 @@ public enum JoinManager {
     }
 
     /** Join the current account holder to a room specified by a given item. */
-    public void joinRoom(@NonNull final ChatListItem item) {
+    public void joinRoom(@NonNull final ListItem item) {
         // Ensure that the member object exists, aborting if not.
         Room room = null;
         Account member = MemberManager.instance.getMember(item.groupKey);
@@ -76,11 +76,11 @@ public enum JoinManager {
         // Case on the item type to handle joing an existing public room or a freshly minted private
         // room.
         switch (item.type) {
-            case ChatListItem.SELECTABLE_MEMBER_ITEM_TYPE:
+            case selectableMember:
                 // Create and persist the private chat room and get it's push key.
                 room = joinMember(item.groupKey, item.key);
                 break;
-            case ChatListItem.SELECTABLE_ROOM_ITEM_TYPE:
+            case selectableRoom:
                 // Update and persist the room.
                 room = joinRoom(item.groupKey, item.key);
                 break;
@@ -101,15 +101,15 @@ public enum JoinManager {
     }
 
     /** Return a set of explicit (public) and implicit (member) rooms the current User can join. */
-    public List<ChatListItem> getListItemData(final ChatListItem item) {
+    public List<ListItem> getListItemData(final ListItem item) {
         // Determine if there are any rooms to present (excludes joined rooms).
-        List<ChatListItem> result = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
         result.addAll(getAvailableRooms(item));
         result.addAll(getAvailableMembers(item));
         if (result.size() > 0) return result;
 
         // There are no rooms to join.  Provide a header message to that effect.
-        result.add(new ChatListItem(new RoomsHeaderItem(R.string.NoJoinableRoomsHeaderText)));
+        result.add(new ListItem(new RoomsHeaderItem(R.string.NoJoinableRoomsHeaderText)));
         return result;
     }
 
@@ -148,10 +148,10 @@ public enum JoinManager {
     // Private instance methods.
 
     /** Return a list of available room entries from the given group excluding joined ones. */
-    public List<ChatListItem> getAvailableMembers(final ChatListItem item) {
+    public List<ListItem> getAvailableMembers(final ListItem item) {
         // Get a list of all members visible to the current User.
-        List<ChatListItem> result = new ArrayList<>();
-        List<ChatListItem> items = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
+        List<ListItem> items = new ArrayList<>();
         List<String> groupList = GroupManager.instance.getGroups(item);
         String currentAccountId = AccountManager.instance.getCurrentAccountId();
         for (String groupKey : groupList) {
@@ -171,7 +171,7 @@ public enum JoinManager {
                     }
                 }
                 if (!hasMemberRoom)
-                    items.add(new ChatListItem(new SelectableMemberItem(groupKey, member)));
+                    items.add(new ListItem(new SelectableMemberItem(groupKey, member)));
             }
         }
 
@@ -179,15 +179,15 @@ public enum JoinManager {
         int noAvailableMembers = R.string.MembersNotAvailableHeaderText;
         int availableMembers = R.string.MembersAvailableHeaderText;
         int resourceId = items.size() == 0 ? noAvailableMembers : availableMembers;
-        result.add(new ChatListItem(new RoomsHeaderItem(resourceId)));
+        result.add(new ListItem(new RoomsHeaderItem(resourceId)));
         result.addAll(items);
         return result;
     }
 
     /** Return a possibly empty list of items consisting of unjoined rooms. */
-    private List<ChatListItem> getAvailableRooms(final ChatListItem item) {
+    private List<ListItem> getAvailableRooms(final ListItem item) {
         // Determine if there are groups to look at.  If not, return an empty result.
-        List<ChatListItem> result = new ArrayList<>();
+        List<ListItem> result = new ArrayList<>();
         List<String> groupList = GroupManager.instance.getGroups(item);
 
         // The group list is not empty.  Determine if there are any joinable rooms.
@@ -195,10 +195,10 @@ public enum JoinManager {
         List<String> joinableRoomList = JoinManager.instance.getJoinableRooms(groupList, joinedRoomList);
         if (joinableRoomList.size() > 0) {
             // There are joinable rooms.  Add a header item and the list of joinable rooms.
-            result.add(new ChatListItem(new RoomsHeaderItem(R.string.RoomsAvailableHeaderText)));
+            result.add(new ListItem(new RoomsHeaderItem(R.string.RoomsAvailableHeaderText)));
             for (String roomKey : joinableRoomList) {
                 Room room = RoomManager.instance.roomMap.get(roomKey);
-                result.add(new ChatListItem(new SelectableRoomItem(room.groupKey, roomKey)));
+                result.add(new ListItem(new SelectableRoomItem(room.groupKey, roomKey)));
             }
         }
         return result;

@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.chat.adapter;
+package com.pajato.android.gamechat.common.adapter;
 
 import com.pajato.android.gamechat.R;
 
@@ -70,5 +70,5 @@ public class DateHeaderItem {
 
     // Public instance methods.
 
-    int getNameResourceId() {return mType.getNameResourceId();}
+    public int getNameResourceId() {return mType.getNameResourceId();}
 }

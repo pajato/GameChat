@@ -20,22 +20,29 @@ package com.pajato.android.gamechat.common;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.adapter.ListAdapter;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
+import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.event.AppEventManager;
 
+import java.util.List;
 import java.util.Locale;
 
+import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
+import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
 
@@ -63,6 +70,9 @@ public abstract class BaseFragment extends Fragment {
 
     /** The fragment active state; set when entering onResume and cleared in onPause. */
     protected boolean mActive;
+
+    /** The item information passed from the parent fragment. */
+    protected ListItem mItem;
 
     /** The persisted layout view for this fragment. */
     protected View mLayout;
@@ -206,5 +216,36 @@ public abstract class BaseFragment extends Fragment {
         String suffix = context.getString(R.string.FutureFeature);
         CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
+    /** Return TRUE iff the list can be considered up to date. */
+    protected boolean updateAdapterList() {
+        // Determine if the fragment has a view and that it has a list type.  Abort if not,
+        // otherwise ensure that the list adapter exists, creating it if necessary.
+        View view = mLayout != null ? mLayout.findViewById(R.id.chatList) : null;
+        if (view == null)
+            return false;
+        RecyclerView recycler = (RecyclerView) view;
+        RecyclerView.Adapter adapter = recycler.getAdapter();
+        if (adapter == null) {
+            // Initialize the recycler view.
+            adapter = new ListAdapter();
+            recycler.setAdapter(adapter);
+            Context context = mLayout.getContext();
+            LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
+            recycler.setLayoutManager(layoutManager);
+            recycler.setItemAnimator(new DefaultItemAnimator());
+        }
+
+        // Inject the list items into the recycler view making sure to scroll to the end of the
+        // list when showing messages.
+        ListAdapter listAdapter = (ListAdapter) adapter;
+        listAdapter.clearItems();
+        List<ListItem> items = DBUtils.instance.getList(type, mItem);
+        Log.d(TAG, String.format(Locale.US, "Updating with %d items.", items.size()));
+        listAdapter.addItems(items);
+        if (type == messageList)
+            recycler.scrollToPosition(listAdapter.getItemCount() - 1);
+        return true;
     }
 }

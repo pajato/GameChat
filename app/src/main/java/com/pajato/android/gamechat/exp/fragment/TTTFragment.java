@@ -105,7 +105,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Handle invitation - extend app invitation, dismiss menu and return (there is no
         // new experience to start).
         if (((MenuEntry) tag).titleResId == R.string.InviteFriendFromChat) {
-            InvitationManager.instance.extendAppInvitation(getActivity(), mExperience.getGroupKey());
+            InvitationManager.instance.extendInvitation(getActivity(), mExperience.getGroupKey());
             return;
         }
 
@@ -114,13 +114,14 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         if (isPlayAgain(tag, TAG))
             handleNewGame();
         else
-            handleMode(((MenuEntry) tag).titleResId);
+            handlePlayMode(((MenuEntry) tag).titleResId);
     }
 
     /** Handle a TTT board tile click. */
     @Override public void onClick(final View view) {
         Object tag = view.getTag();
-        if (tag instanceof String && ((String) tag).startsWith("button")) handleClick((String) tag);
+        if (tag instanceof String && ((String) tag).startsWith("button"))
+            handleClick((String) tag);
     }
 
     /** Handle an experience posting event to see if this is a tictactoe experience. */
@@ -343,25 +344,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         model.setWinCount();
         model.toggleTurn();
         ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /** Handle a possible game mode selection by ... */
-    private void handleMode(final int titleResId) {
-        // Case on the title resource id to handle a mode selection.
-        switch (titleResId) {
-            case R.string.PlayModeLocalMenuTitle:
-            case R.string.PlayModeComputerMenuTitle:
-                // Handle selecting a friend by deferring for now and restoring the default menu.
-                showFutureFeatureMessage(R.string.FutureSelectModes);
-                FabManager.game.dismissMenu(this);
-                break;
-            case R.string.PlayModeUserMenuTitle:
-                // Handle selecting another User.
-                //selectModeUser();
-                break;
-            default:
-                break;
-        }
     }
 
     /** Handle a new game by resetting the data model. */
