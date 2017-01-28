@@ -259,8 +259,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
     /** Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
      *  groups and their rooms to join (always has at least the Common room). */
-    public void extendInvitation(final FragmentActivity fragmentActivity,
-                                    final Map<String, List<String>> keys) {
+    public void extendInvitation(final FragmentActivity activity,
+                                 final Map<String, List<String>> keys) {
         Log.i(TAG, "extendInvitation with list of keys");
 
         Uri dynLinkUri = buildDefaultDynamicLink();
@@ -274,15 +274,15 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         String dynamicLink = dynLinkUri.toString();
         Log.i(TAG, "dynamicLink=" + dynamicLink);
 
-        Intent intent = new AppInviteInvitation.IntentBuilder(fragmentActivity.getString(R.string.InviteTitle))
-                .setMessage(fragmentActivity.getString(R.string.InviteMessage))
+        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
+                .setMessage(activity.getString(R.string.InviteMessage))
                 .setDeepLink(Uri.parse(dynamicLink))
                 .build();
-        fragmentActivity.startActivityForResult(intent, MainActivity.RC_INVITE);
+        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
     /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
-    public void extendInvitation(final FragmentActivity fragmentActivity, final String groupKey) {
+    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
 
         Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
         Group grp = GroupManager.instance.getGroupProfile(groupKey);
@@ -309,11 +309,11 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 .toString();
 
         Log.i(TAG, "dynamicLink=" + dynamicLink);
-        Intent intent = new AppInviteInvitation.IntentBuilder(fragmentActivity.getString(R.string.InviteTitle))
-                .setMessage(fragmentActivity.getString(R.string.InviteMessage))
+        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
+                .setMessage(activity.getString(R.string.InviteMessage))
                 .setDeepLink(Uri.parse(dynamicLink))
                 .build();
-        fragmentActivity.startActivityForResult(intent, MainActivity.RC_INVITE);
+        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
     private Uri buildDefaultDynamicLink() {
