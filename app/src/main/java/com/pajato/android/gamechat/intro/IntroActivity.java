@@ -58,7 +58,7 @@ public class IntroActivity extends AppCompatActivity {
 
     // Private class variables.
 
-    /** Handle signing into an existing account by invoking the signin activity. */
+    /** Handle signing into an existing account by invoking the sign-in activity. */
     public void doSignIn(final View view) {
         invokeSignIn("signin");
     }

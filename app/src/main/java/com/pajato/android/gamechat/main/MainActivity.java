@@ -30,10 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
@@ -69,7 +66,7 @@ import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILA
  * @author Paul Michael Reilly
  */
 public class MainActivity extends BaseActivity
-    implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+    implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     // Public class constants.
 
@@ -216,31 +213,14 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public void onConnectionFailed (@NonNull ConnectionResult result) {
-        Log.i(TAG, "connection failed: " + result.toString());
-    }
-
     /** Set up the app per the characteristics of the running device. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Deal with signin, set up the main layout, and initialize the app.
+        // Deal with sign-in, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
-
         signIn();
         setContentView(R.layout.activity_main);
         init();
-
-        // Build GoogleApiClient with AppInvite API for receiving deep links
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(AppInvite.API)
-                .build();
-
-        // Check if this app was launched from a deep link. Setting autoLaunchDeepLink to true
-        // would automatically launch the deep link if one is found.
-        final boolean autoLaunchDeepLink = false;
-        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
-                .setResultCallback(InvitationManager.instance);
     }
 
     // Private instance methods.
@@ -268,6 +248,7 @@ public class MainActivity extends BaseActivity
             outputStream = new FileOutputStream(imageFile);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.flush();
+
             outputStream.close();
         } catch (IOException exc) {
             Log.e(TAG, exc.getMessage(), exc);
