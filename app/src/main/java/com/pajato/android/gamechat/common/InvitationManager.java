@@ -26,9 +26,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
 import com.google.android.gms.appinvite.AppInviteReferral;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
@@ -69,7 +72,8 @@ import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
  *
  * @author Paul Michael Reilly
  */
-public enum InvitationManager implements ResultCallback<AppInviteInvitationResult> {
+public enum InvitationManager implements ResultCallback<AppInviteInvitationResult>,
+        GoogleApiClient.OnConnectionFailedListener {
     instance;
 
     /** Simple POJO to hold the group name and common room key while the join is processed */
@@ -122,11 +126,22 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     public void init(final AppCompatActivity context) {
         mMessageMap.clear();
         mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
+
+        // Build GoogleApiClient with AppInvite API for receiving deep links
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .enableAutoManage(context, InvitationManager.instance)
+                .addApi(AppInvite.API)
+                .build();
+
+        // Check if this app was launched from a deep link. Setting autoLaunchDeepLink to true
+        // would automatically launch the deep link if one is found.
+        final boolean autoLaunchDeepLink = false;
+        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, context, autoLaunchDeepLink)
+                .setResultCallback(InvitationManager.instance);
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe
-    public void onAuthenticationChange(final AuthenticationChangeEvent event) {
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         Account account = event != null ? event.account : null;
         if (account == null) return;
 
@@ -148,6 +163,10 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         if (accountChanged) {
             AccountManager.instance.updateAccount(account);
         }
+    }
+
+    public void onConnectionFailed (@NonNull ConnectionResult result) {
+        Log.i(TAG, "connection failed: " + result.toString());
     }
 
     /** Handle the room profile change */
