@@ -30,6 +30,7 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.GroupInviteData;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -60,12 +61,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
 
     // Private instance variables.
 
-    /** The groups selected. */
-    private Set<ListItem> mSelectedGroups = new HashSet<>();
-
-    /** The groups selected. */
-    private Set<ListItem> mSelectedRooms = new HashSet<>();
-
     // Public instance methods.
 
     /** Provide subscriber to listen for click events. */
@@ -77,8 +72,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
             case R.id.inviteButton:
                 // Handle the invitation
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
-                mSelectedGroups.clear();
-                mSelectedRooms.clear();
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
             case R.id.selectorCheck:
@@ -126,10 +119,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
-
-        // Clear selections - is this the correct place to do this (onResume)??????
-        mSelectedGroups.clear();
-        mSelectedRooms.clear();
     }
 
     // Private instance methods
@@ -142,44 +131,35 @@ public class SelectForInviteFragment extends BaseChatFragment {
         return menu;
     }
 
-    /** When a group is selected, find it's common room and insure that it is also selected in
-     * the adapter list and add it to the list of selected rooms. */
+    /** When a group is selected, also select it's common room */
     private void selectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
-        mSelectedGroups.add(groupItem);
         for (ListItem adapterItem : adapterList) {
             if (adapterItem.type == inviteCommonRoom &&
                     adapterItem.groupKey.equals(groupItem.groupKey)) {
                 adapterItem.selected = true;
-                mSelectedRooms.add(adapterItem);
             }
         }
     }
 
     /** When a group is deselected, also deselect all of it's rooms (including the common room). */
     private void deselectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
-        mSelectedGroups.remove(groupItem);
         for (ListItem adapterItem : adapterList) {
             if ((adapterItem.type == inviteCommonRoom ||
                     adapterItem.type == inviteRoom) &&
                     adapterItem.groupKey.equals(groupItem.groupKey)) {
                 adapterItem.selected = false;
-                mSelectedRooms.remove(adapterItem);
             }
         }
     }
 
-    /** When a non-common room is selected, make sure its group and common room are also selected
-     * and added to the respective list of selected groups/rooms */
+    /** When a non-common room is selected, also select its group and common room */
     private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
-        mSelectedRooms.add(groupItem);
         for (ListItem adapterItem : adapterList) {
             if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey)) {
                 adapterItem.selected = true;
-                mSelectedGroups.add(adapterItem);
             } else if (adapterItem.type == inviteCommonRoom &&
                     adapterItem.groupKey.equals(groupItem.groupKey)) {
                 adapterItem.selected = true;
-                mSelectedRooms.add(adapterItem);
             }
         }
     }
@@ -200,8 +180,9 @@ public class SelectForInviteFragment extends BaseChatFragment {
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
 
-        // If the item is a group, then if it's selected, also select it's common room. If it's
-        // deselected, deselect all of it's rooms.
+        // If a group is selected, also select it's common room; if deselected, also deselect all
+        // of it's rooms. If a room is selected, also select it's group and common room. Common
+        // room selection is disabled, so don't check for that.
         if (clickedItem.type == inviteGroup) {
             if (clickedItem.selected) {
                 selectGroupForInvite(clickedItem, adapterList);
@@ -212,8 +193,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
         } else if (clickedItem.type == inviteRoom) {
             if (clickedItem.selected) {
                 selectRoomForInvite(clickedItem, adapterList);
-            } else {
-                mSelectedRooms.remove(clickedItem);
             }
         }
         adapter.notifyDataSetChanged();
@@ -223,31 +202,14 @@ public class SelectForInviteFragment extends BaseChatFragment {
     }
 
     /** Called from FAM click handling */
-    private void updateSelections(final boolean state) {
+    private void updateSelections(final boolean selectedState) {
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> itemList = adapter.getItems();
 
-        // Select all or clear all items, depending on 'state'. Update all items in the adapter
-        // and set group and room lists accordingly.
-        mSelectedGroups.clear();
-        mSelectedRooms.clear();
-
+        // Update all items in the adapter to reflect specified state
         for (ListItem item : itemList) {
-            item.selected = state;
-            switch (item.type) {
-                case inviteGroup:
-                    if (state)
-                        mSelectedGroups.add(item);
-                    break;
-                case inviteRoom:
-                case inviteCommonRoom:
-                    if (state)
-                        mSelectedRooms.add(item);
-                    break;
-                default:
-                    break;
-            }
+            item.selected = selectedState;
         }
         adapter.notifyDataSetChanged();
 
@@ -258,18 +220,38 @@ public class SelectForInviteFragment extends BaseChatFragment {
     /** Update the invite button state based on the current join map content. */
     private void updateSendInviteButton() {
         View inviteButton = mLayout.findViewById(R.id.inviteButton);
-        inviteButton.setEnabled(mSelectedGroups.size() > 0 || mSelectedRooms.size() > 0);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        List <ListItem> adapterList = adapter.getItems();
+        for (ListItem item : adapterList) {
+            if (item.selected) {
+                inviteButton.setEnabled(true);
+                return;
+            }
+        }
+        inviteButton.setEnabled(false);
     }
 
-    private Map<String, List<String>> getSelections() {
-        Map<String, List<String>> selections = new HashMap<>();
-        for (ListItem groupItem : mSelectedGroups) {
-            selections.put(groupItem.key, new ArrayList<String>());
+    /** Return a map of groupKey to data representing the current selections of groups/rooms */
+    private Map<String, GroupInviteData> getSelections() {
+        Map<String, GroupInviteData> selections = new HashMap<>();
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        // First loop through adapter items and handle groups
+        for(ListItem item : adapter.getItems()) {
+            if (item.selected && item.type == inviteGroup) {
+                selections.put(item.key, new GroupInviteData(item.key, item.name));
+            }
         }
-        for (ListItem roomItem : mSelectedRooms) {
-            List<String> rooms = selections.get(roomItem.groupKey);
-            rooms.add(roomItem.key);
-            selections.put(roomItem.groupKey, rooms);
+        // Next, add rooms from adapter list
+        for(ListItem item : adapter.getItems()) {
+            GroupInviteData data = selections.get(item.groupKey);
+            if (!item.selected) continue;
+            if (item.type == inviteCommonRoom)
+                data.commonRoomKey = item.key;
+            else if (item.type == inviteRoom) {
+                data.rooms.add(item.key);
+            }
         }
         return selections;
     }

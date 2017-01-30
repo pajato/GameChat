@@ -202,13 +202,18 @@ public class MainActivity extends BaseActivity
             String key = ACCOUNT_AVAILABLE_KEY;
             editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
             editor.apply();
-        } else if (requestCode == RC_INVITE && resultCode == RESULT_OK) {
-            // For now, just log
-            Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
-            // Get the invitation IDs of all sent messages
-            String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
-            for (String id : ids) {
-                Log.d(TAG, "onActivityResult: sent invitation " + id);
+        } else if (requestCode == RC_INVITE) {
+            if (resultCode != RESULT_OK) {
+                InvitationManager.instance.clearInvitationMap();
+            } else {
+                // For now, just log
+                Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+                // Get the invitation IDs of all sent messages
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
+                for (String id : ids) {
+                    Log.d(TAG, "onActivityResult: sent invitation " + id);
+                    InvitationManager.instance.saveInvitation(id);
+                }
             }
         }
     }

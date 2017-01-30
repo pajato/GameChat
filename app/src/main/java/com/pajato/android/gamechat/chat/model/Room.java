@@ -114,6 +114,14 @@ public class Room {
         memberIdList.add(member);
     }
 
+    /** determine if a member already has been added to this room */
+    @Exclude public boolean hasMember(final String member) {
+        if (memberIdList.contains(member)) {
+            return true;
+        }
+        return false;
+    }
+
     /** Determine if this room is a member-to-member chat room */
     @Exclude public boolean isMemberPrivateRoom(final String member1, final String member2) {
         return (this.type == RoomType.PRIVATE && memberIdList.size() == 2 &&

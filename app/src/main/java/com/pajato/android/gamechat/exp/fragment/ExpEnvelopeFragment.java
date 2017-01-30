@@ -77,15 +77,10 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         Object payload = event.view.getTag();
         if (payload == null || !(payload instanceof MenuEntry)) return;
 
-        // Handle invitation - extend app invitation, dismiss menu and return (there is no
-        // new experience to start).
-        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromExpEnv) {
-            InvitationManager.instance.extendInvitation(getActivity(), mExperience.getGroupKey());
-            FabManager.game.dismissMenu(this);
-            return;
-        } else if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat ||
+        // these aren't handled here so just return
+        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromExpEnv ||
+                ((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat ||
                 ((MenuEntry)payload).titleResId == R.string.InviteFriendFromTTT) {
-            // These aren't handled here so we want to return
             return;
         }
 
@@ -169,7 +164,6 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getTintEntry(R.string.InviteFriendFromExpEnv, R.drawable.ic_email_black_24dp));
         return menu;
     }
 }
