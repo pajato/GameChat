@@ -135,7 +135,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     private Group mGroup;
 
     /** A flag indicating that Firebase is enabled (registered) or not. */
-    private boolean mIsFirebaseEnabled;
+    private boolean mIsFirebaseEnabled = false;
 
     /** A map tracking registrations from the key classed that are needed to enable Firebase. */
     private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
@@ -246,7 +246,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public void init(final List<String> classNameList) {
         // Setup the class map that drives enabling and disabling Firebase. Each of these classes
         // must be registered with the app event manager before Firebase can be enabled.  If any are
-        // deregistered, Firebase will be disabled.
+        // deregistered, Firebase will effectively be disabled.
         for (String name : classNameList) {
             mRegistrationClassNameMap.put(name, false);
         }
@@ -309,7 +309,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         if (user != null) {
             // A User has signed in. Determine if an account change listener is registered.  If so,
             // abort.  If not, set one up.
-            if (DatabaseRegistrar.instance.isRegistered(name)) return;
+            if (DatabaseRegistrar.instance.isRegistered(name))
+                return;
             String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
         } else {
@@ -321,40 +322,18 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Handle a FAM item click. */
-    @Subscribe public void onClick(final TagClickEvent event) {
-        // Ensure that the event has a menu entry payload.  Abort if not.
-        Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof MenuEntry)) return;
-
-        // The event represents a menu entry.  Handle the sign in meny entry.
-        MenuEntry entry = (MenuEntry) payload;
-        switch (entry.titleResId) {
-            case R.string.SignInLastAccountMenuTitle:
-                // Dismiss the FAB menu, and sign in using the saved User account.
-                signIn(event.view.getContext());
-                break;
-            default:
-                // Ignore any other items.
-                break;
-        }
-    }
-
-    /** Handle a sign in or sign out button click coming from a non menu item. */
+    /** Handle a sign in button click coming from a non menu item. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Determine if there was a button click on a view.  If not, abort (since it is a menu item
         // that is not interesting here.)
         View view = event.view;
-        if (view == null) return;
+        if (view == null)
+            return;
 
         // Handle the button click if it is either a sign-in or a sign-out.
         switch (view.getId()) {
             case R.id.signIn:
                 signIn(view.getContext());
-                break;
-            case R.id.signOut:
-                // Have Firebase log out the user.
-                FirebaseAuth.getInstance().signOut();
                 break;
             default:
                 break;
@@ -381,19 +360,24 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // ready for the account manager to be registered.  When any of the values are false, the
         // account manager will be unregistered.
         mRegistrationClassNameMap.put(event.name, event.changeType == REGISTERED);
-        boolean enable = true;
         for (Boolean value : mRegistrationClassNameMap.values()) {
             if (!value) {
-                enable = false;
-                break;
+                // If the account manager is currently listening for account changes, make it stop.
+                if (mIsFirebaseEnabled) {
+                    Log.d(TAG, "Unregistering the AccountManager from Firebase.");
+                    FirebaseAuth.getInstance().removeAuthStateListener(this);
+                    mIsFirebaseEnabled = false;
+                }
+                return;
             }
         }
 
-        // Determine if Firebase should be disabled or enabled.
-        if (enable)
-            register();
-        else
-            unregister();
+        // If the account manager is not currently listening for account changes, do so now.
+        if (!mIsFirebaseEnabled) {
+            Log.d(TAG, "Registering the account manager with Firebase.");
+            FirebaseAuth.getInstance().addAuthStateListener(this);
+            mIsFirebaseEnabled = true;
+        }
     }
 
     /** Handle a sign in with the given credentials. */
@@ -422,31 +406,22 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         context.startActivity(intent);
     }
 
+    public void signOut(final Activity activity) {
+        AuthUI.getInstance()
+            .signOut(activity)
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                public void onComplete(@NonNull Task<Void> task) {
+                    // user is now signed out
+                    Log.d(TAG, "Log out is complete.");
+                }
+            });
+    }
+
     /** Update the given account on the database. */
     public void updateAccount(final Account account) {
         String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         account.modTime = new Date().getTime();
         DBUtils.instance.updateChildren(path, account.toMap());
-    }
-
-    // Private instance methods.
-
-    /** Register the account manager with the database. */
-    private void register() {
-        if (!mIsFirebaseEnabled) {
-            Log.d(TAG, "Registering the account manager with Firebase.");
-            FirebaseAuth.getInstance().addAuthStateListener(this);
-            mIsFirebaseEnabled = true;
-        }
-    }
-
-    /** Unregister the component during lifecycle pause events. */
-    private void unregister() {
-        if (mIsFirebaseEnabled) {
-            Log.d(TAG, "Unregistering the AccountManager from Firebase.");
-            FirebaseAuth.getInstance().removeAuthStateListener(this);
-            mIsFirebaseEnabled = false;
-        }
     }
 
     // Private classes

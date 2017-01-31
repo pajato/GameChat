@@ -22,7 +22,6 @@ import android.animation.StateListAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 
 import java.util.Arrays;
@@ -48,6 +48,7 @@ import static android.view.animation.AnimationUtils.loadAnimation;
  * Provide an intro activity ala Telegram.
  *
  * @author Paul Michael Reilly
+ * @author Bryan Scott
  */
 public class IntroActivity extends AppCompatActivity {
 
@@ -60,7 +61,8 @@ public class IntroActivity extends AppCompatActivity {
 
     /** Handle signing into an existing account by invoking the sign-in activity. */
     public void doSignIn(final View view) {
-        invokeSignIn("signin");
+        // Prepare an intent to handle sign in and let it rip.
+        startActivityForResult(getAuthIntent("signin"), RC_SIGN_IN);
     }
 
     // Protected instance methods.
@@ -77,14 +79,11 @@ public class IntroActivity extends AppCompatActivity {
     }
     /** Create the intro activity to highlight some features and provide a get started opertion. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
-        // Establish the activity state and set up the intro layout.
+        // Establish the activity state and set up the intro layout enhancing the experience for
+        // Lollipop and follow on devices by enabling elevated animation.
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_intro);
-
-        // Determine whether or not to enable button elevation animation. */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // From lollippop on, enable the button elevation animation.
             final StateListAnimator animator = new StateListAnimator();
             final TextView button = (TextView) findViewById(R.id.register_button);
             addState(animator, android.R.attr.state_pressed, button, 2.0f, 4.0f);
@@ -98,7 +97,7 @@ public class IntroActivity extends AppCompatActivity {
         ViewGroup pageMonitor = (ViewGroup) findViewById(R.id.page_monitor);
         topImage2.setVisibility(View.GONE);
 
-        // Set up the view pager adapter, the page change handler and the view pager.
+        // Set up the view pager adapter, change handler and the view pager.
         IntroAdapter adapter = new IntroAdapter(pageMonitor);
         ViewPager pager = (ViewPager) findViewById(R.id.intro_view_pager);
         pager.setAdapter(adapter);
@@ -123,8 +122,9 @@ public class IntroActivity extends AppCompatActivity {
     }
 
     /** Finish the intro screen and handle the given mode in a new activity. */
-    private void invokeSignIn(final String mode) {
-        // Get an instance of AuthUI based on the default app
+    private Intent getAuthIntent(final String mode) {
+        // Get an intent for which to handle the authentication mode.  While in development mode,
+        // disable smart lock.
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
         intentBuilder.setProviders(Arrays.asList(
                 new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
@@ -132,12 +132,10 @@ public class IntroActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
-        // Disable Smart Lock for development purposes -- to ensure logging in processes work correctly.
-        intentBuilder.setIsSmartLockEnabled(false);
-
+        intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
         Intent intent = intentBuilder.build();
         intent.putExtra(mode, true);
-        startActivityForResult(intent, RC_SIGN_IN);
+        return intent;
     }
 
     /** Update a given page monitor for a given selected position. */

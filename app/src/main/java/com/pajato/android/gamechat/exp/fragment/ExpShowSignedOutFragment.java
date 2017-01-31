@@ -19,8 +19,10 @@ package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.annotation.NonNull;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
@@ -28,6 +30,7 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
 
 public class ExpShowSignedOutFragment extends BaseExperienceFragment {
 
@@ -42,10 +45,23 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
         DispatchManager.instance.startNextFragment(this.getActivity(), exp);
     }
 
+    /** Deal with the fragment's activity's lifecycle by managing the FAB. */
+    @Override public void onResume() {
+        // Set the titles in the toolbar to the group name only; ensure that the FAB is visible, the
+        // FAM is not and the FAM is set to the home experience menu; and display a list of groups
+        // with experiences showing the rooms and highlighting new experiences, much like messages
+        // in the chat group display.
+        super.onResume();
+        FabManager.game.setImage(R.drawable.ic_add_white_24dp);
+        FabManager.game.init(this, GAME_HOME_FAM_KEY);
+        ToolbarManager.instance.setTitle(this, R.string.SignedOutTitleText);
+    }
+
     /** Initialize the fragment by setting up the FAB/FAM. */
     @Override public void onStart() {
         // Set up the FAB.
         super.onStart();
         FabManager.game.init(this);
+        ToolbarManager.instance.init(this);
     }
 }

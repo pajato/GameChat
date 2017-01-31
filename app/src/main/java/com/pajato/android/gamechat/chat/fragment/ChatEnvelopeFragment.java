@@ -142,13 +142,10 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             InvitationManager.instance.acceptGroupInvite(account, groupKey);
     }
 
-    /** Create the view to do essentially nothing. Things will happen in the onStart() method. */
+    /** Create the view to do essentially nothing. */
     @Override public void onStart() {
-        // Declare the use of the options menu and intialize the FAB and it's menu.
+        // Initialize the FAB.
         super.onStart();
-        String title = getString(R.string.SignInDialogTitleText);
-        String message = getString(R.string.SignInDialogMessageText);
-        ProgressManager.instance.show(this.getContext(), title, message);
         FabManager.chat.setTag(this.getTag());
     }
 

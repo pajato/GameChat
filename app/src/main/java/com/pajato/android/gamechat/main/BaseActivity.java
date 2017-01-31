@@ -77,15 +77,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override protected void onDestroy() {
         super.onDestroy();
         logEvent("onDestroy");
+        AppEventManager.instance.unregisterAll();
+        DatabaseRegistrar.instance.unregisterAll();
     }
 
     /** Log the onPause() state. */
     @Override protected void onPause() {
         super.onPause();
         logEvent("onPause");
-        AppEventManager.instance.unregister(this);
-        AppEventManager.instance.unregisterAll();
-        DatabaseRegistrar.instance.unregisterAll();
     }
 
     /** Log the onRestart() state. */
@@ -98,7 +97,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override protected void onResume() {
         super.onResume();
         logEvent("onResume");
-        AppEventManager.instance.register(AccountManager.instance);
         AppEventManager.instance.register(GroupManager.instance);
         AppEventManager.instance.register(RoomManager.instance);
         AppEventManager.instance.register(MessageManager.instance);
@@ -106,7 +104,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         AppEventManager.instance.register(MemberManager.instance);
         AppEventManager.instance.register(NavigationManager.instance);
         AppEventManager.instance.register(InvitationManager.instance);
-        AppEventManager.instance.register(this);
     }
 
     /** Log the lifecycle event. */

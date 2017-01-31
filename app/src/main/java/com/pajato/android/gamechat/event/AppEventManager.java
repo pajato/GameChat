@@ -70,9 +70,9 @@ public enum AppEventManager {
         // Maintain the posting level using a stack; report the start and end of the post.
         mStack.push(event);
         String name = event != null ? event.getClass().getSimpleName() : "null";
-        Log.d(TAG, String.format(Locale.US, "Posting event {%s}.", name));
+        Log.d(TAG, String.format(Locale.US, "Posting event {%s(%s)}.", name, event));
         EventBus.getDefault().post(event);
-        Log.d(TAG, String.format(Locale.US, "Posted event {%s}.", name));
+        Log.d(TAG, String.format(Locale.US, "Posted event {%s(%s)}.", name, event));
         mStack.pop();
     }
 

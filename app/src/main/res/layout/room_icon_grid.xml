@@ -20,6 +20,8 @@ http://www.gnu.org/licenses
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:layout_gravity="center"
     android:useDefaultMargins="true"
     android:columnOrderPreserved="true"
     android:columnCount="2">

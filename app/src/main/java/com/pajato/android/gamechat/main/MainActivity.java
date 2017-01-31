@@ -39,6 +39,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.DatabaseRegistrar;
 import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -107,7 +108,9 @@ public class MainActivity extends BaseActivity
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
-        // click handler does not work.  Instead we do it here programmatically.
+        // click handler does not work.  Instead we do it here programmatically.  But first, turn
+        // off the sign in spinner.
+        ProgressManager.instance.hide();
         Account account = event != null ? event.account : null;
         NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
         View header = navView.getHeaderView(0) != null
@@ -116,6 +119,10 @@ public class MainActivity extends BaseActivity
         View layout = header.findViewById(R.id.currentProfile);
         if (layout != null) layout.setOnClickListener(this);
         NavigationManager.instance.setAccount(account, header);
+
+        // Turn off all database handlers if the account has been signed out.
+        if (account == null)
+            DatabaseRegistrar.instance.unregisterAll();
     }
 
     /** Handle group joined event */
@@ -142,9 +149,13 @@ public class MainActivity extends BaseActivity
         switch (view.getId()) {
             case R.id.currentProfile:
             case R.id.signIn:
+                // On a sign in or sign out event, make sure the navigation drawer gets closed.
+                AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
+                break;
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
+                AccountManager.instance.signOut(this);
                 break;
             default:
                 // Ignore everything else.
@@ -218,7 +229,7 @@ public class MainActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         // Deal with sign-in, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
-        signIn();
+        processIntroPage();
         setContentView(R.layout.activity_main);
         init();
     }
@@ -258,6 +269,26 @@ public class MainActivity extends BaseActivity
         return imageFile.getPath();
     }
 
+    /** Return the file where logcat data has been placed, null if no data is available. */
+    private String getLogcatPath() {
+        // Capture the current state of the logcat file.
+        File dir = new File(getFilesDir(), "logcat");
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        File outputFile = new File(dir, "logcat.txt");
+        try {
+            Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
+        } catch (IOException exc) {
+            Log.e(TAG, exc.getMessage(), exc);
+            return null;
+        }
+
+        Log.d(TAG, String.format("File size is %d.", outputFile.length()));
+        Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
+
+        return outputFile.getPath();
+    }
+
     /** Handle a bug report by performing a screen capture, grabbing logcat and sending email. */
     private void handleBugReport(final MenuItemEvent event) {
         // Capture the screen (with any luck, sans menu.), send the message and cancel event
@@ -292,30 +323,14 @@ public class MainActivity extends BaseActivity
         InvitationManager.instance.init(this);
         JoinManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
+
+        // Register the first of many app event listeners.
+        AppEventManager.instance.register(AccountManager.instance);
+        AppEventManager.instance.register(this);
     }
 
-    /** Return the file where logcat data has been placed, null if no data is available. */
-    private String getLogcatPath() {
-        // Capture the current state of the logcat file.
-        File dir = new File(getFilesDir(), "logcat");
-        if (!dir.exists() && !dir.mkdirs()) return null;
-
-        File outputFile = new File(dir, "logcat.txt");
-        try {
-            Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
-        } catch (IOException exc) {
-            Log.e(TAG, exc.getMessage(), exc);
-            return null;
-        }
-
-        Log.d(TAG, String.format("File size is %d.", outputFile.length()));
-        Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
-
-        return outputFile.getPath();
-    }
-
-    /** Handle sign in by processing the invoking intent and checking for an existing account. */
-    private void signIn() {
+    /** Determine if the intro screen needs to be presented and do so. */
+    private void processIntroPage() {
         // Determine if the calling intent prefers not to run the intro activity (for example
         // during a connected test run) or if there is an available account.  Abort in either case.
         Intent intent = getIntent();

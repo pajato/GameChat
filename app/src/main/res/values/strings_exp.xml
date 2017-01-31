@@ -25,7 +25,6 @@
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
     <string name="SelectRoomMenuTitle">Select Room</string>
-    <string name="SignIn">Sign In</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
     <string name="StalemateMessage">Stalemate!</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>

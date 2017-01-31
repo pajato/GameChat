@@ -1,5 +1,7 @@
 package com.pajato.android.gamechat.event;
 
+import java.util.Locale;
+
 /**
  * Provides an event class to encapsulate a registration change event for a given class name.
  *
@@ -29,6 +31,11 @@ public class RegistrationChangeEvent {
     public RegistrationChangeEvent(final String name, final int changeType) {
         this.name = name;
         this.changeType = changeType;
+    }
+
+    public String toString() {
+        String type = changeType == REGISTERED ? "Registered" : "Unregistered";
+        return String.format(Locale.US, "%s %s", type, name);
     }
 
 }
