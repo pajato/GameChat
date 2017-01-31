@@ -68,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
@@ -93,27 +94,88 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     /** The logcat TAG. */
     private static final String TAG = InvitationManager.class.getSimpleName();
 
-    // Private instance variables
-
-    /** The repository for any messages needed. */
-    private SparseArray<String> mMessageMap = new SparseArray<>();
-
-    /** Map to hold group/rooms while the external invite intent is running */
-    private Map<String, GroupInviteData> mInviteMap = new HashMap<>();
-
-    /** Outstanding invitations found during app creation but prior to account authentication */
-    private List<String> mInvitationIds = new ArrayList<>();
-
-    // Public instance variables.
+    // Private instance variables.
 
     /** The map managing group invitations. */
     private Map<String, List<String>> mGroupInviteMap = new HashMap<>();
 
+    /** Outstanding invitations found during app creation but prior to account authentication */
+    private List<String> mInvitationIds = new ArrayList<>();
+
+    /** Map to hold group/rooms while the external invite intent is running */
+    private Map<String, GroupInviteData> mInviteMap = new HashMap<>();
+
+    /** The repository for any messages needed. */
+    private SparseArray<String> mMessageMap = new SparseArray<>();
+
+    // Public instance variables.
+
     // Public instance methods.
+
+    /** Accept a group invite for a given account by updating both the group and the account. */
+    public void acceptGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Determine if the current account is already a member of the given group, has not been
+        // invited or if there is no group to accept the invitation to. Abort if any are true.
+        boolean isMember = account.joinList.contains(groupKey);
+        boolean isInvited = hasGroupInvite(account, groupKey);
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        if (isMember || !isInvited || group == null) return;
+
+        // The account holder has been invited to join the given group.  Do so by adding the group
+        // key to the account join list and create a copy of the account as a member of the group.
+        account.joinList.add(groupKey);
+        AccountManager.instance.updateAccount(account);
+        Account member = new Account(account);
+        member.groupKey = groupKey;
+        String path = MemberManager.instance.getMembersPath(groupKey, member.id);
+        DBUtils.instance.updateChildren(path, member.toMap());
+
+        // Finally add the invited account to the accepting group's profile member list.
+        group.memberList.add(member.id);
+        path = GroupManager.instance.getGroupProfilePath(groupKey);
+        DBUtils.instance.updateChildren(path, group.toMap());
+    }
 
     /** Clear the external app invitations map */
     public void clearInvitationMap() {
         mInviteMap.clear();
+    }
+
+    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
+     *  groups and their rooms to join (always has at least the Common room). */
+    public void extendInvitation(final FragmentActivity activity,
+                                 final Map<String, GroupInviteData> keys) {
+        Log.i(TAG, "extendInvitation with list of keys");
+        // Save the groups/rooms map to write to Firebase after the invite id(s) are returned */
+        mInviteMap = keys;
+        startInvitationIntent(activity);
+    }
+
+    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
+    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
+
+        Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
+        Group grp = GroupManager.instance.getGroupProfile(groupKey);
+        if (grp == null) {
+            Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
+                    "can't find this group");
+            return;
+        }
+        // Create an entry for the invite map for the specified group.
+        GroupInviteData data = new GroupInviteData(grp.key, grp.name, grp.commonRoomKey);
+        mInviteMap.put(data.groupKey, data);
+        startInvitationIntent(activity);
+    }
+
+    /** Return a set of groups and rooms for invitations */
+    public List<ListItem> getListItemData() {
+        List<ListItem> result = new ArrayList<>();
+        result.addAll(getInviteItems());
+        if (result.size() > 0) return result;
+
+        // There is nothing available for invitations.  Provide a header message to that effect.
+        result.add(new ListItem(new ResourceHeaderItem(R.string.NoSelectableItemsHeaderText)));
+        return result;
     }
 
     /** Initialize the invitation manager */
@@ -180,65 +242,56 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         }
     }
 
-    // Set up value listener on invitation id and handler to start processing invitation.
-    private void handleOutstandingInvite(String inviteId) {
-        DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
-                .child(String.format(APP_INVITE_ID_PATH, inviteId));
-        invite.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // If the snapshot has nothing to offer, move on...
-                if(!dataSnapshot.hasChildren())
-                    return;
-
-                // The key in the snapshot is the invitation id. The value is a map of groupKey
-                // to group item data objects.
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String key = child.getKey();
-                    Object objVal = child.getValue();
-                    GroupInviteData value = child.getValue(GroupInviteData.class);
-                    if (value.rooms == null) // avoid future null pointer exceptions
-                        value.rooms = new ArrayList<>();
-                    mInviteMap.put(key, value);
-                }
-
-                startInvitationProcessing();
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled called with error: " + databaseError.getMessage());
-            }
-        });
-    }
-
-    /** Start to process an invitation: a series of steps to update various Firebase objects */
-    private void startInvitationProcessing() {
-        Account account = AccountManager.instance.getCurrentAccount();
-        boolean accountChanged = false;
-        for (String key : mInviteMap.keySet()) {
-            // If the account has already joined, don't add it again!
-            if (account.joinList.contains(key)) {
-                mInviteMap.get(key).addedToAccountJoinList = true;
-            } else {
-                account.joinList.add(key);
-                accountChanged = true;
-                mInviteMap.get(key).addedToAccountJoinList = true;
-            }
-            // Always set up the watcher for the common room (the group watcher is set up by
-            // adding the group to the account joinList). Watch all other rooms in the invite.
-            RoomManager.instance.setWatcher(key, mInviteMap.get(key).commonRoomKey);
-            if (mInviteMap.get(key).rooms != null) {
-                for (String roomKey : mInviteMap.get(key).rooms)
-                    RoomManager.instance.setWatcher(key, roomKey);
-            }
-        }
-        if (accountChanged) {
-            AccountManager.instance.updateAccount(account);
-        }
-    }
-
+    /** Handle an error connecting the client to the  GoogleApiClient service (required for
+     *  AppInvite API */
     public void onConnectionFailed (@NonNull ConnectionResult result) {
         Log.i(TAG, "connection failed: " + result.toString());
+    }
+
+    /** Handle the group profile changes */
+    @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
+        // If the current event is for a group not represented on the invite list, just return.
+        if (!mInviteMap.keySet().contains(event.key))
+            return;
+
+        Account currAccount = AccountManager.instance.getCurrentAccount();
+        if (currAccount == null) return;
+        Group changedGroup = event.group;
+        GroupInviteData data = mInviteMap.get(event.key);
+
+        // Add this account to the group profile member list; add a new member object to the group
+        if (!changedGroup.memberList.contains(currAccount.id)) {
+            changedGroup.memberList.add(currAccount.id);
+            GroupManager.instance.updateGroupProfile(changedGroup);
+
+            // Create and persist a member object to the database and join to the specified rooms
+            Account member = new Account(currAccount);
+            member.joinList.add(data.commonRoomKey);
+            for(String roomKey : data.rooms) {
+                member.joinList.add(roomKey);
+            }
+            member.groupKey = changedGroup.key;
+            MemberManager.instance.createMember(member);
+        }
+        mInviteMap.get(event.key).addedToGroupMemberList = true;
+
+        handleInvitationComplete(mInviteMap.get(event.key));
+    }
+
+    /** Handle result of invitation intent (after receiving invitation) */
+    public void onResult(@NonNull AppInviteInvitationResult result) {
+        Log.i(TAG, "getInvitation intent=" + result.getInvitationIntent());
+        if (!result.getStatus().isSuccess()) {
+            Log.i(TAG, "getInvitation: no deep link found.");
+            return;
+        }
+
+        // Extract deep link from Intent. If no deep link exists, just log and return
+        Intent intent = result.getInvitationIntent();
+
+        // Get our data out of firebase for this invitation and save for use after authentication
+        String invitationId = AppInviteReferral.getInvitationId(intent);
+        mInvitationIds.add(invitationId);
     }
 
     /** Handle the room profile change */
@@ -276,111 +329,21 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         }
     }
 
-    /** Check for group invitation completed. If so, post event and clean up */
-    private void handleInvitationComplete(GroupInviteData groupData) {
-        if (groupData.isDone()) {
-            AppEventManager.instance.post(new GroupJoinedEvent(groupData.groupName));
-            // We're finally done processing this group invitation so remove it from the list
-            mInviteMap.remove(groupData.groupKey);
+    /** Persist invitation information in Firebase */
+    public void saveInvitation(String id) {
+        Map<String, Object> objMap = new HashMap<>();
+        for(Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
+            objMap.put(entry.getKey(), entry.getValue());
         }
+        // For the time being, put app invites in their own location in firebase to differentiate
+        // them from invites for protected users.
+        String invitePath = String.format(APP_INVITE_ID_PATH, id);
+        DBUtils.instance.updateChildren(invitePath, objMap);
+        clearInvitationMap();
     }
 
-    /** Handle the group profile changes */
-    @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // If the current event is for a group not represented on the invite list, just return.
-        if (!mInviteMap.keySet().contains(event.key))
-            return;
-
-        Account currAccount = AccountManager.instance.getCurrentAccount();
-        if (currAccount == null) return;
-        Group changedGroup = event.group;
-        GroupInviteData data = mInviteMap.get(event.key);
-
-        // Add this account to the group profile member list; add a new member object to the group
-        if (!changedGroup.memberList.contains(currAccount.id)) {
-            changedGroup.memberList.add(currAccount.id);
-            GroupManager.instance.updateGroupProfile(changedGroup);
-
-            // Create and persist a member object to the database and join to the specified rooms
-            Account member = new Account(currAccount);
-            member.joinList.add(data.commonRoomKey);
-            for(String roomKey : data.rooms) {
-                member.joinList.add(roomKey);
-            }
-            member.groupKey = changedGroup.key;
-            MemberManager.instance.createMember(member);
-        }
-        mInviteMap.get(event.key).addedToGroupMemberList = true;
-
-        handleInvitationComplete(mInviteMap.get(event.key));
-    }
-
-    /** Accept a group invite for a given account by updating both the group and the account. */
-    public void acceptGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
-        // Determine if the current account is already a member of the given group, has not been
-        // invited or if there is no group to accept the invitation to. Abort if any are true.
-        boolean isMember = account.joinList.contains(groupKey);
-        boolean isInvited = hasGroupInvite(account, groupKey);
-        Group group = GroupManager.instance.getGroupProfile(groupKey);
-        if (isMember || !isInvited || group == null) return;
-
-        // The account holder has been invited to join the given group.  Do so by adding the group
-        // key to the account join list and create a copy of the account as a member of the group.
-        account.joinList.add(groupKey);
-        AccountManager.instance.updateAccount(account);
-        Account member = new Account(account);
-        member.groupKey = groupKey;
-        String path = MemberManager.instance.getMembersPath(groupKey, member.id);
-        DBUtils.instance.updateChildren(path, member.toMap());
-
-        // Finally add the invited account to the accepting group's profile member list.
-        group.memberList.add(member.id);
-        path = GroupManager.instance.getGroupProfilePath(groupKey);
-        DBUtils.instance.updateChildren(path, group.toMap());
-    }
 
     // Private instance methods.
-
-    /** Return TRUE iff the given group has an invitation registered for the given account owner. */
-    private boolean hasGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
-        // Ensure that there is a list of invites for the given group.
-        List<String> invitedMembers = mGroupInviteMap.get(groupKey);
-        if (invitedMembers == null) return false;
-
-        // Ensure that the invited members list includes the account owner.
-        if (!invitedMembers.contains(account.id)) return false;
-
-        // Remove the invited account holder from the list and possibly the list from the map.
-        invitedMembers.remove(account.id);
-        if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
-        return true;
-    }
-
-    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
-     *  groups and their rooms to join (always has at least the Common room). */
-    public void extendInvitation(final FragmentActivity activity,
-                                 final Map<String, GroupInviteData> keys) {
-        Log.i(TAG, "extendInvitation with list of keys");
-        // Save the groups/rooms map to write to Firebase after the invite id(s) are returned */
-        mInviteMap = keys;
-        startInvitationIntent(activity);
-    }
-
-    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
-    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
-
-        Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
-        Group grp = GroupManager.instance.getGroupProfile(groupKey);
-        if (grp == null) {
-            Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
-                    "can't find this group");
-            return;
-        }
-        // Create an entry for the invite map for the specified group.
-        GroupInviteData data = new GroupInviteData(grp.key, grp.name, grp.commonRoomKey);
-        mInviteMap.put(data.groupKey, data);
-        startInvitationIntent(activity);
-    }
 
     /** Build the dynamic link to be used for Firebase invitations */
     private String buildDynamicLink() {
@@ -395,56 +358,6 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 .appendQueryParameter("ifl", WEB_LINK).toString();
         Log.i(TAG, "dynamicLink=" + dynamicLink);
         return dynamicLink;
-    }
-
-    /** Build the dynamic link to be used for Firebase invitations */
-    private void startInvitationIntent(final FragmentActivity activity) {
-        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
-                .setMessage(activity.getString(R.string.InviteMessage))
-                .setDeepLink(Uri.parse(buildDynamicLink()))
-                .build();
-        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
-    }
-
-    /** Handle result of invitation intent (after receiving invitation) */
-    public void onResult(@NonNull AppInviteInvitationResult result) {
-        Log.i(TAG, "getInvitation intent=" + result.getInvitationIntent());
-        if (!result.getStatus().isSuccess()) {
-            Log.i(TAG, "getInvitation: no deep link found.");
-            return;
-        }
-
-        // Extract deep link from Intent. If no deep link exists, just log and return
-        Intent intent = result.getInvitationIntent();
-
-        // Get our data out of firebase for this invitation and save for use after authentication
-        String invitationId = AppInviteReferral.getInvitationId(intent);
-        mInvitationIds.add(invitationId);
-    }
-
-
-    /** Persist invitation information in Firebase */
-    public void saveInvitation(String id) {
-        Map<String, Object> objMap = new HashMap<>();
-        for(Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
-            objMap.put(entry.getKey(), entry.getValue());
-        }
-        // For the time being, put app invites in their own location in firebase to differentiate
-        // them from invites for protected users.
-        String invitePath = String.format(APP_INVITE_ID_PATH, id);
-        DBUtils.instance.updateChildren(invitePath, objMap);
-        clearInvitationMap();
-    }
-
-    /** Return a set of groups and rooms for invitations */
-    public List<ListItem> getListItemData() {
-        List<ListItem> result = new ArrayList<>();
-        result.addAll(getInviteItems());
-        if (result.size() > 0) return result;
-
-        // There is nothing available for invitations.  Provide a header message to that effect.
-        result.add(new ListItem(new ResourceHeaderItem(R.string.NoSelectableItemsHeaderText)));
-        return result;
     }
 
     /**
@@ -469,5 +382,95 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             }
         }
         return result;
+    }
+
+    /** Check for group invitation completed. If so, post event and clean up. */
+    private void handleInvitationComplete(GroupInviteData groupData) {
+        if (groupData.isDone()) {
+            AppEventManager.instance.post(new GroupJoinedEvent(groupData.groupName));
+            // We're finally done processing this group invitation so remove it from the list
+            mInviteMap.remove(groupData.groupKey);
+        }
+    }
+
+    /** Set up value listener on invitation id and handler to start processing invitation. */
+    private void handleOutstandingInvite(String inviteId) {
+        DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
+                .child(String.format(APP_INVITE_ID_PATH, inviteId));
+        invite.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // If the snapshot has nothing to offer, move on...
+                if(!dataSnapshot.hasChildren())
+                    return;
+
+                // The key in the snapshot is the invitation id. The value is a map of groupKey
+                // to group item data objects.
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    String key = child.getKey();
+                    Object objVal = child.getValue();
+                    GroupInviteData value = child.getValue(GroupInviteData.class);
+                    if (value.rooms == null) // avoid future null pointer exceptions
+                        value.rooms = new ArrayList<>();
+                    mInviteMap.put(key, value);
+                }
+
+                startInvitationProcessing();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled called with error: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    /** Return TRUE iff the given group has an invitation registered for the given account owner. */
+    private boolean hasGroupInvite(@NonNull final Account account, @NonNull final String groupKey) {
+        // Ensure that there is a list of invites for the given group.
+        List<String> invitedMembers = mGroupInviteMap.get(groupKey);
+        if (invitedMembers == null) return false;
+
+        // Ensure that the invited members list includes the account owner.
+        if (!invitedMembers.contains(account.id)) return false;
+
+        // Remove the invited account holder from the list and possibly the list from the map.
+        invitedMembers.remove(account.id);
+        if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
+        return true;
+    }
+
+    /** Build the dynamic link to be used for Firebase invitations */
+    private void startInvitationIntent(final FragmentActivity activity) {
+        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
+                .setMessage(activity.getString(R.string.InviteMessage))
+                .setDeepLink(Uri.parse(buildDynamicLink()))
+                .build();
+        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
+    }
+
+    /** Start to process an invitation: a series of steps to update various Firebase objects */
+    private void startInvitationProcessing() {
+        Account account = AccountManager.instance.getCurrentAccount();
+        boolean accountChanged = false;
+        for (String key : mInviteMap.keySet()) {
+            // If the account has already joined, don't add it again!
+            if (account.joinList.contains(key)) {
+                mInviteMap.get(key).addedToAccountJoinList = true;
+            } else {
+                account.joinList.add(key);
+                accountChanged = true;
+                mInviteMap.get(key).addedToAccountJoinList = true;
+            }
+            // Always set up the watcher for the common room (the group watcher is set up by
+            // adding the group to the account joinList). Watch all other rooms in the invite.
+            RoomManager.instance.setWatcher(key, mInviteMap.get(key).commonRoomKey);
+            if (mInviteMap.get(key).rooms != null) {
+                for (String roomKey : mInviteMap.get(key).rooms)
+                    RoomManager.instance.setWatcher(key, roomKey);
+            }
+        }
+        if (accountChanged) {
+            AccountManager.instance.updateAccount(account);
+        }
     }
 }

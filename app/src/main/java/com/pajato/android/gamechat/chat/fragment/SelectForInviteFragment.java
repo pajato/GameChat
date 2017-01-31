@@ -59,8 +59,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
     /** The lookup key for the FAB chat selection memu. */
     public static final String INVITE_SELECTION_FAM_KEY = "inviteSelectionFamKey";
 
-    // Private instance variables.
-
     // Public instance methods.
 
     /** Provide subscriber to listen for click events. */
@@ -103,6 +101,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
         }
     }
 
+    /** Set up toolbar and FAM */
     @Override public void onStart() {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
@@ -123,22 +122,28 @@ public class SelectForInviteFragment extends BaseChatFragment {
 
     // Private instance methods
 
-    /** Return the home FAM used in the top level show games and show no games fragments. */
-    private List<MenuEntry> getSelectionMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getTintEntry(R.string.SelectAllMenuTitle, R.drawable.ic_done_all_black_24dp));
-        menu.add(getTintEntry(R.string.ClearSelectionsMenuTitle, R.drawable.ic_clear_black_24dp));
-        return menu;
-    }
-
-    /** When a group is selected, also select it's common room */
-    private void selectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
-        for (ListItem adapterItem : adapterList) {
-            if (adapterItem.type == inviteCommonRoom &&
-                    adapterItem.groupKey.equals(groupItem.groupKey)) {
-                adapterItem.selected = true;
+    /** Return a map of group key to data representing the current selections of groups/rooms */
+    private Map<String, GroupInviteData> getSelections() {
+        Map<String, GroupInviteData> selections = new HashMap<>();
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        // First loop through adapter items and handle groups
+        for(ListItem item : adapter.getItems()) {
+            if (item.selected && item.type == inviteGroup) {
+                selections.put(item.key, new GroupInviteData(item.key, item.name));
             }
         }
+        // Next, add rooms from adapter list
+        for(ListItem item : adapter.getItems()) {
+            GroupInviteData data = selections.get(item.groupKey);
+            if (!item.selected) continue;
+            if (item.type == inviteCommonRoom)
+                data.commonRoomKey = item.key;
+            else if (item.type == inviteRoom) {
+                data.rooms.add(item.key);
+            }
+        }
+        return selections;
     }
 
     /** When a group is deselected, also deselect all of it's rooms (including the common room). */
@@ -152,19 +157,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
         }
     }
 
-    /** When a non-common room is selected, also select its group and common room */
-    private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
-        for (ListItem adapterItem : adapterList) {
-            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey)) {
-                adapterItem.selected = true;
-            } else if (adapterItem.type == inviteCommonRoom &&
-                    adapterItem.groupKey.equals(groupItem.groupKey)) {
-                adapterItem.selected = true;
-            }
-        }
-    }
-
-    /** Process a selection */
+    /** Process a selection by updating the recycler view adapter's items */
     private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
         // Set the checkbox visibility and get the item object from the event payload.
         ListItem clickedItem = null;
@@ -201,7 +194,37 @@ public class SelectForInviteFragment extends BaseChatFragment {
         updateSendInviteButton();
     }
 
-    /** Called from FAM click handling */
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getSelectionMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getTintEntry(R.string.SelectAllMenuTitle, R.drawable.ic_done_all_black_24dp));
+        menu.add(getTintEntry(R.string.ClearSelectionsMenuTitle, R.drawable.ic_clear_black_24dp));
+        return menu;
+    }
+
+    /** When a group is selected, also select it's common room */
+    private void selectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
+        for (ListItem adapterItem : adapterList) {
+            if (adapterItem.type == inviteCommonRoom &&
+                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+            }
+        }
+    }
+
+    /** When a non-common room is selected, also select its group and common room */
+    private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
+        for (ListItem adapterItem : adapterList) {
+            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+            } else if (adapterItem.type == inviteCommonRoom &&
+                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                adapterItem.selected = true;
+            }
+        }
+    }
+
+    /** Called from FAM click handling to update selections in the recycler view adapter list */
     private void updateSelections(final boolean selectedState) {
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
@@ -230,30 +253,6 @@ public class SelectForInviteFragment extends BaseChatFragment {
             }
         }
         inviteButton.setEnabled(false);
-    }
-
-    /** Return a map of groupKey to data representing the current selections of groups/rooms */
-    private Map<String, GroupInviteData> getSelections() {
-        Map<String, GroupInviteData> selections = new HashMap<>();
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
-        ListAdapter adapter = (ListAdapter) view.getAdapter();
-        // First loop through adapter items and handle groups
-        for(ListItem item : adapter.getItems()) {
-            if (item.selected && item.type == inviteGroup) {
-                selections.put(item.key, new GroupInviteData(item.key, item.name));
-            }
-        }
-        // Next, add rooms from adapter list
-        for(ListItem item : adapter.getItems()) {
-            GroupInviteData data = selections.get(item.groupKey);
-            if (!item.selected) continue;
-            if (item.type == inviteCommonRoom)
-                data.commonRoomKey = item.key;
-            else if (item.type == inviteRoom) {
-                data.rooms.add(item.key);
-            }
-        }
-        return selections;
     }
 
 }
