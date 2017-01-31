@@ -16,18 +16,13 @@ You should have received a copy of the GNU General Public License along with Gam
 http://www.gnu.org/licenses
 -->
 <!-- The main content for the no sign in fragment is a message imploring the User to sign in. -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="48dp"
-    android:id="@+id/emptyListContent"
-    android:gravity="center"
     android:orientation="vertical">
-
+    <include layout="@layout/chat_toolbar_inc" />
     <include layout="@layout/room_icon_grid"/>
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,13 +30,30 @@ http://www.gnu.org/licenses
         android:padding="24dp"
         android:text="@string/ChatSignedOutMessageText"
         android:textAlignment="center"
-        android:textSize="24sp"
-        tools:text="Placeholder message ... updated at runtime." />
-
-    <Button style="@style/CenteredButton"
-        android:id="@+id/chatSignIn"
-        android:textSize="20sp"
-        android:text="@string/SignIn"
-        android:onClick="onClick"/>
-
+        android:textSize="24sp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SignInPrefixMessageText"
+            android:textAlignment="center"
+            android:textSize="24sp"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:contentDescription="@string/HamburgerMenuDesc"
+            app:srcCompat="@drawable/ic_menu_black_24px"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SignInSuffixMessageText"
+            android:textAlignment="center"
+            android:textSize="24sp"/>
+    </LinearLayout>
 </LinearLayout>

@@ -40,11 +40,6 @@
     <string name="SelectRoomsMenuTitle">Select All Rooms</string>
     <string name="SetCreateIconFeature">Setting the create group or room icon</string>
     <string name="SetCreateIconDesc">Set the group or room icon</string>
-    <string name="SignInDialogTitleText">Logging in …</string>
-    <string name="SignInDialogMessageText">Hold on a few moments while we sign you in …</string>
-    <string name="SignInLastAccountMenuTitle">Use Current Account</string>
-    <string name="SwitchAccountDesc">Switch account menu item.</string>
-    <string name="SwitchAccountMenuTitle">Switch Account</string>
     <string name="TakePicture">Inserting a picture using your camera</string>
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
