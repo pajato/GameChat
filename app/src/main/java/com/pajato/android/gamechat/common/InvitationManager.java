@@ -184,7 +184,6 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     private void handleOutstandingInvite(String inviteId) {
         DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
                 .child(String.format(APP_INVITE_ID_PATH, inviteId));
-//            invite.addListenerForSingleValueEvent(new ValueEventListener() {
         invite.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

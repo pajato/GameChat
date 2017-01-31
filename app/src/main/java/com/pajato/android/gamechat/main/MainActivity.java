@@ -203,11 +203,10 @@ public class MainActivity extends BaseActivity
             editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
             editor.apply();
         } else if (requestCode == RC_INVITE) {
-            if (resultCode != RESULT_OK) {
+            Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + resultCode);
+            if (resultCode != RESULT_OK)
                 InvitationManager.instance.clearInvitationMap();
-            } else {
-                // For now, just log
-                Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+            else {
                 // Get the invitation IDs of all sent messages
                 String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
                 for (String id : ids) {
