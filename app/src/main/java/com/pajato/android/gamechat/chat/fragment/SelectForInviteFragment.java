@@ -83,7 +83,8 @@ public class SelectForInviteFragment extends BaseChatFragment {
     /** Process a menu click event ... */
     @Subscribe public void onClick(final TagClickEvent event) {
         Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof MenuEntry)) return;
+        if (payload == null || !(payload instanceof MenuEntry))
+            return;
 
         // The event represents a menu entry.  Close the FAM and case on the title id.
         FabManager.chat.dismissMenu(this);
@@ -128,20 +129,19 @@ public class SelectForInviteFragment extends BaseChatFragment {
         RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         // First loop through adapter items and handle groups
-        for(ListItem item : adapter.getItems()) {
-            if (item.selected && item.type == inviteGroup) {
+        for (ListItem item : adapter.getItems()) {
+            if (item.selected && item.type == inviteGroup)
                 selections.put(item.key, new GroupInviteData(item.key, item.name));
-            }
         }
         // Next, add rooms from adapter list
-        for(ListItem item : adapter.getItems()) {
+        for (ListItem item : adapter.getItems()) {
             GroupInviteData data = selections.get(item.groupKey);
-            if (!item.selected) continue;
+            if (!item.selected)
+                continue;
             if (item.type == inviteCommonRoom)
                 data.commonRoomKey = item.key;
-            else if (item.type == inviteRoom) {
+            else if (item.type == inviteRoom)
                 data.rooms.add(item.key);
-            }
         }
         return selections;
     }
@@ -151,9 +151,8 @@ public class SelectForInviteFragment extends BaseChatFragment {
         for (ListItem adapterItem : adapterList) {
             if ((adapterItem.type == inviteCommonRoom ||
                     adapterItem.type == inviteRoom) &&
-                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                    adapterItem.groupKey.equals(groupItem.groupKey))
                 adapterItem.selected = false;
-            }
         }
     }
 
@@ -177,16 +176,13 @@ public class SelectForInviteFragment extends BaseChatFragment {
         // of it's rooms. If a room is selected, also select it's group and common room. Common
         // room selection is disabled, so don't check for that.
         if (clickedItem.type == inviteGroup) {
-            if (clickedItem.selected) {
+            if (clickedItem.selected)
                 selectGroupForInvite(clickedItem, adapterList);
-            }
-            else {
+            else
                 deselectGroupForInvite(clickedItem, adapterList);
-            }
         } else if (clickedItem.type == inviteRoom) {
-            if (clickedItem.selected) {
+            if (clickedItem.selected)
                 selectRoomForInvite(clickedItem, adapterList);
-            }
         }
         adapter.notifyDataSetChanged();
 
@@ -206,21 +202,19 @@ public class SelectForInviteFragment extends BaseChatFragment {
     private void selectGroupForInvite(ListItem groupItem, List<ListItem> adapterList) {
         for (ListItem adapterItem : adapterList) {
             if (adapterItem.type == inviteCommonRoom &&
-                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+                    adapterItem.groupKey.equals(groupItem.groupKey))
                 adapterItem.selected = true;
-            }
         }
     }
 
     /** When a non-common room is selected, also select its group and common room */
     private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
         for (ListItem adapterItem : adapterList) {
-            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey)) {
+            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey))
                 adapterItem.selected = true;
-            } else if (adapterItem.type == inviteCommonRoom &&
-                    adapterItem.groupKey.equals(groupItem.groupKey)) {
+            else if (adapterItem.type == inviteCommonRoom &&
+                    adapterItem.groupKey.equals(groupItem.groupKey))
                 adapterItem.selected = true;
-            }
         }
     }
 
@@ -231,9 +225,8 @@ public class SelectForInviteFragment extends BaseChatFragment {
         List <ListItem> itemList = adapter.getItems();
 
         // Update all items in the adapter to reflect specified state
-        for (ListItem item : itemList) {
+        for (ListItem item : itemList)
             item.selected = selectedState;
-        }
         adapter.notifyDataSetChanged();
 
         // Set the 'invite' button enabled or disabled based on whether there are selections

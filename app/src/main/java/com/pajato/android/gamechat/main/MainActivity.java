@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
@@ -59,6 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 
 /**
@@ -214,23 +217,27 @@ public class MainActivity extends BaseActivity
             editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
             editor.apply();
         } else if (requestCode == RC_INVITE) {
+            // Hand off to invitation manager as quickly as possible
             Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + resultCode);
-            if (resultCode != RESULT_OK)
-                InvitationManager.instance.clearInvitationMap();
-            else {
-                // Get the invitation IDs of all sent messages
-                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
-                for (String id : ids) {
-                    Log.d(TAG, "onActivityResult: sent invitation " + id);
-                    InvitationManager.instance.saveInvitation(id);
-                }
+            InvitationManager.instance.onInvitationResult(resultCode, intent);
+        }
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                                     @NonNull  int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CONTACTS: {
+                // Hand off to contact manager
+                ContactManager.instance.onRequestContactsResult(this, permissions, grantResults);
+                break;
             }
+            default:
+                break;
         }
     }
 
     /** Set up the app per the characteristics of the running device. */
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         // Deal with sign-in, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
         processIntroPage();
