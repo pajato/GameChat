@@ -32,7 +32,6 @@ import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,8 +67,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
+import static android.app.Activity.RESULT_OK;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 
@@ -88,7 +87,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     private static final String PLAY_STORE_LINK = "https://play.google.com/apps/testing/com.pajato.android.gamechat";
     private static final String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
     private static final String WEB_LINK = "https://github.com/pajato/GameChat";
-    public static final String APP_INVITE_PATH = "/invites/app/";
+//    public static final String APP_INVITE_PATH = "/invites/app/";
     public static final String APP_INVITE_ID_PATH = "/invites/app/%s/";
 
     /** The logcat TAG. */
@@ -141,8 +140,10 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         mInviteMap.clear();
     }
 
-    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
-     *  groups and their rooms to join (always has at least the Common room). */
+    /**
+     * Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
+     * groups and their rooms to join (always has at least the Common room).
+     */
     public void extendInvitation(final FragmentActivity activity,
                                  final Map<String, GroupInviteData> keys) {
         Log.i(TAG, "extendInvitation with list of keys");
@@ -203,38 +204,38 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
         // Since Firebase invitations aren't working, add a watcher for app invites so we can
         // bypass the Firebase mechanism for now.
-        DatabaseReference invites = FirebaseDatabase.getInstance().getReference()
-                .child(APP_INVITE_PATH);
-        invites.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "onChildAdded");
-                mInvitationIds.add(dataSnapshot.getKey());
-                handleOutstandingInvite(dataSnapshot.getKey());
-                // For now, don't delete the invite from the database. This is hack-in-progress!
-//                dataSnapshot.getRef().removeValue();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "onChildChanged");
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.i(TAG, "onChildRemoved");
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "onChildMoved");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i(TAG, "onCancelled: " + databaseError.getMessage());
-            }
-        });
+//        DatabaseReference invites = FirebaseDatabase.getInstance().getReference()
+//                .child(APP_INVITE_PATH);
+//        invites.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                Log.i(TAG, "onChildAdded");
+//                mInvitationIds.add(dataSnapshot.getKey());
+//                handleOutstandingInvite(dataSnapshot.getKey());
+//                // For now, don't delete the invite from the database. This is hack-in-progress!
+////                dataSnapshot.getRef().removeValue();
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//                Log.i(TAG, "onChildChanged");
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                Log.i(TAG, "onChildRemoved");
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//                Log.i(TAG, "onChildMoved");
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.i(TAG, "onCancelled: " + databaseError.getMessage());
+//            }
+//        });
 
         // Get any outstanding invitation(s) and set up to process
         for (String id : mInvitationIds) {
@@ -242,8 +243,10 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         }
     }
 
-    /** Handle an error connecting the client to the  GoogleApiClient service (required for
-     *  AppInvite API */
+    /**
+     * Handle an error connecting the client to the  GoogleApiClient service (required for
+     * AppInvite API
+     */
     public void onConnectionFailed (@NonNull ConnectionResult result) {
         Log.i(TAG, "connection failed: " + result.toString());
     }
@@ -267,7 +270,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             // Create and persist a member object to the database and join to the specified rooms
             Account member = new Account(currAccount);
             member.joinList.add(data.commonRoomKey);
-            for(String roomKey : data.rooms) {
+            for (String roomKey : data.rooms) {
                 member.joinList.add(roomKey);
             }
             member.groupKey = changedGroup.key;
@@ -276,6 +279,20 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         mInviteMap.get(event.key).addedToGroupMemberList = true;
 
         handleInvitationComplete(mInviteMap.get(event.key));
+    }
+
+    /** Handle app invitation result. Called only from MainActivity onResult method. */
+    public void onInvitationResult(final int resultCode, final Intent intent) {
+        if (resultCode != RESULT_OK)
+            clearInvitationMap();
+        else {
+            // Get the invitation IDs of all sent messages
+            String[] ids = AppInviteInvitation.getInvitationIds(resultCode, intent);
+            for (String id : ids) {
+                Log.d(TAG, "onInvitationResult: sent invitation " + id);
+                saveInvitation(id);
+            }
+        }
     }
 
     /** Handle result of invitation intent (after receiving invitation) */
@@ -302,7 +319,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         for (Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
             GroupInviteData data = entry.getValue();
             if (data.commonRoomKey.equals(event.key)) {
-                if(!event.room.hasMember(currAccount.id)) {
+                if (!event.room.hasMember(currAccount.id)) {
                     // Add account as member, update the profile and the invitation map data
                     event.room.addMember(currAccount.id);
                     RoomManager.instance.updateRoomProfile(event.room);
@@ -313,7 +330,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
                 }
             } else if (data.rooms.contains(event.key)) {
-                if(!event.room.getMemberIdList().contains(currAccount.id)) {
+                if (!event.room.getMemberIdList().contains(currAccount.id)) {
                     // Add account as member, update the profile and the invitation map data
                     event.room.addMember(currAccount.id);
                     RoomManager.instance.updateRoomProfile(event.room);
@@ -332,7 +349,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     /** Persist invitation information in Firebase */
     public void saveInvitation(String id) {
         Map<String, Object> objMap = new HashMap<>();
-        for(Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
+        for (Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
             objMap.put(entry.getKey(), entry.getValue());
         }
         // For the time being, put app invites in their own location in firebase to differentiate
@@ -401,21 +418,23 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // If the snapshot has nothing to offer, move on...
-                if(!dataSnapshot.hasChildren())
+                if (!dataSnapshot.hasChildren())
                     return;
 
                 // The key in the snapshot is the invitation id. The value is a map of groupKey
-                // to group item data objects.
+                // to group item data objects. Save the found data in the invite map.
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     String key = child.getKey();
-                    Object objVal = child.getValue();
                     GroupInviteData value = child.getValue(GroupInviteData.class);
-                    if (value.rooms == null) // avoid future null pointer exceptions
+                    if (value.rooms == null) // avoid null pointer exceptions
                         value.rooms = new ArrayList<>();
                     mInviteMap.put(key, value);
                 }
 
                 startInvitationProcessing();
+
+                // Finally, remove invitation from Firebase
+                dataSnapshot.getRef().removeValue();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {

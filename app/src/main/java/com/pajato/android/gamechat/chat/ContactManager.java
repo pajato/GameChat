@@ -17,9 +17,11 @@
 
 package com.pajato.android.gamechat.chat;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -28,6 +30,9 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.pajato.android.gamechat.common.adapter.ContactItem;
@@ -53,6 +58,7 @@ public enum ContactManager {
     // Public enums.
 
     // Private class constants.
+    public static final int REQUEST_CONTACTS = 1;
 
     /** The logcat tag. */
     private static final String TAG = ContactManager.class.getSimpleName();
@@ -64,9 +70,9 @@ public enum ContactManager {
 
     // Public instance methods.
 
-    /** Return a list of device contacts formatted as chat list items. */
-    public List<ListItem> getDeviceContactList() {
-        // Convert each contact to a chat list item.
+    /** Return a list of device contacts formatted as list items. For future use. */
+    @SuppressWarnings("unused") public List<ListItem> getDeviceContactList() {
+        // Convert each contact to a list item.
         List<ListItem> result = new ArrayList<>();
         for (String name : mContactMap.keySet()) {
             result.add(mContactMap.get(name));
@@ -75,26 +81,55 @@ public enum ContactManager {
         return result;
     }
 
-    /** Initialize the contacts cache. */
-    public void init(@NonNull final Context context) {
-        // If the cache has data, use it.
-        if (mContactMap.size() > 0) return;
+    /** Get permissions to access contacts. Not used, but could be added to MainActivity init */
+    public void init(@NonNull final AppCompatActivity context) {
+        getPermission(context);
+    }
 
-        // Populate the cache.
-        Log.d(TAG, "Starting to populate the contacts cache.");
-        fetch(context);
-        Log.d(TAG, "Finished populating the contacts cache.");
+    /** Check for and if necessary ask user for permission to access contacts */
+    public void getPermission(@NonNull final Activity context) {
+        int permissionCheck = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_CONTACTS);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            // we can proceed
+            fetchContacts(context);
+            return;
+        }
+
+        // ask the user for permission (assume no explanation is needed)
+        ActivityCompat.requestPermissions(context,
+                new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
+    }
+
+    /** Handle response from request for permission to access contacts. Return true on success. */
+    public boolean onRequestContactsResult(Activity context, @SuppressWarnings("unused") String permissions[],
+                                             int[] grantResults) {
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            fetchContacts(context);
+            return true;
+        } else if (grantResults.length <= 0) {
+            // How to disable the functionality that depends on this permission.
+            Log.e(TAG, "grantResults length is invalid; cannot access contacts");
+            return false;
+        } else {
+            // permission denied, boo! Disable the
+            // functionality that depends on this permission.
+            Log.w(TAG, "Permission denied for contacts access");
+            return false;
+        }
     }
 
     // Private instance methods.
 
-    /** ... */
-    public void fetch(Context context) {
+    /** Fetch the contacts having already determined that access is granted. */
+    private void fetchContacts(@NonNull final Activity context) {
+        Log.d(TAG, "Starting to populate the contacts cache.");
         ContentResolver resolver = context.getContentResolver();
         Cursor cursor = resolver.query(CONTENT_URI, null, null, null, null);
         if (cursor == null) return;
 
-        // ...
         while (cursor.moveToNext()) {
             // Determine if this row is for a contact not seen yet.
             String name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
@@ -113,6 +148,7 @@ public enum ContactManager {
             }
         }
         cursor.close();
+        Log.d(TAG, "Finished populating the contacts cache.");
     }
 
     /** Return the first email from a contact, null if there is no email entries. */
