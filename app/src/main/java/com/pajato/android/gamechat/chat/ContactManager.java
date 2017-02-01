@@ -31,7 +31,6 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -71,8 +70,8 @@ public enum ContactManager {
 
     // Public instance methods.
 
-    /** Return a list of device contacts formatted as list items. */
-    public List<ListItem> getDeviceContactList() {
+    /** Return a list of device contacts formatted as list items. For future use. */
+    @SuppressWarnings("unused") public List<ListItem> getDeviceContactList() {
         // Convert each contact to a list item.
         List<ListItem> result = new ArrayList<>();
         for (String name : mContactMap.keySet()) {
@@ -103,7 +102,7 @@ public enum ContactManager {
     }
 
     /** Handle response from request for permission to access contacts. Return true on success. */
-    public boolean onRequestContactsResult(Activity context, String permissions[],
+    public boolean onRequestContactsResult(Activity context, @SuppressWarnings("unused") String permissions[],
                                              int[] grantResults) {
         // If request is cancelled, the result arrays are empty.
         if (grantResults.length > 0

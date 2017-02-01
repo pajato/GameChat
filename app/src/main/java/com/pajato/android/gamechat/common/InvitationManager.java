@@ -425,7 +425,6 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 // to group item data objects. Save the found data in the invite map.
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     String key = child.getKey();
-                    Object objVal = child.getValue();
                     GroupInviteData value = child.getValue(GroupInviteData.class);
                     if (value.rooms == null) // avoid null pointer exceptions
                         value.rooms = new ArrayList<>();

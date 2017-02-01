@@ -20,7 +20,6 @@ package com.pajato.android.gamechat.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,7 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.ContactManager;
@@ -223,6 +221,7 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    /** Process the result from a request for a permission */
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                                      @NonNull  int[] grantResults) {
         switch (requestCode) {

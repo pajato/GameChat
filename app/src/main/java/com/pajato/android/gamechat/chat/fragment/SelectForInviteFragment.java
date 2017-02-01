@@ -38,10 +38,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
@@ -56,7 +54,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
 
     // Public constants.
 
-    /** The lookup key for the FAB chat selection memu. */
+    /** The lookup key for the FAB chat selection menu. */
     public static final String INVITE_SELECTION_FAM_KEY = "inviteSelectionFamKey";
 
     // Public instance methods.
