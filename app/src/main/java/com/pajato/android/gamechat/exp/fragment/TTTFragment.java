@@ -160,7 +160,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         resume();
     }
 
-    /** Handle taking the foreground by updating the UI based on the current expeience. */
+    /** Handle taking the foreground by updating the UI based on the current experience. */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
         // present a spinner.  When an experience is posted by the app event manager, the game can
@@ -307,7 +307,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     /** Return the game state after updating the given tallies. */
     private int getState(@NonNull final TicTacToe model, final int value, final String... tallyKeys) {
-        // Ensure that the tallies map exists, crearing it if it doesn't and apply the value to each
+        // Ensure that the tallies map exists, creating it if it doesn't and apply the value to each
         // of the keys and return the state.
         final int X_WIN_VALUE = 3;
         final int O_WIN_VALUE = 12;
@@ -522,7 +522,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                 message = getString(R.string.TieMessage);
                 break;
             default:
-                // keeep playing or waiting for a new game.
+                // keep playing or waiting for a new game.
                 break;
         }
 
@@ -550,7 +550,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         else
             // Place the X and O symbols on the grid.
             for (String tag : model.board.grid.keySet()) {
-                // Determine if the position denoted by the suffix is valid and has mot yet been
+                // Determine if the position denoted by the suffix is valid and has not yet been
                 // updated.  If so, then update the position.
                 String value = model.board.grid.get(tag);
                 Button button = (Button) mLayout.findViewWithTag(tag);

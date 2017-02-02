@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;

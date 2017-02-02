@@ -30,7 +30,6 @@ import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.adapter.ExperienceItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
@@ -110,7 +109,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
      * Provide a default implementation for setting up an experience.  There are two scenarios
      * where an experience fragment needs to be set up.  First, when a User asks to start a game,
      * like tictactoe or checkers, and a game of that type has been cached or needs to be created.
-     * Second, when at startup, it is discoovered that there is a single experience to be shown.
+     * Second, when at startup, it is discovered that there is a single experience to be shown.
      */
     @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
@@ -160,7 +159,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return ONLINE ? SIGNED_OUT_EXPERIENCE_KEY : OFFLINE_EXPERIENCE_KEY;
     }
 
-        // Return either a signed in User id or a sentinel value as the owner id. */
+    // Return either a signed in User id or a sentinel value as the owner id. */
     protected String getOwnerId() {
         // Determine if there is a signed in account.  If so return it.
         String accountId = AccountManager.instance.getCurrentAccountId();

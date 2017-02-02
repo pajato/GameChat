@@ -88,7 +88,7 @@ public enum DBUtils {
         return mResourceMap.get(key);
     }
 
-    /** Intialize the database manager by setting up localized resources. */
+    /** Initialize the database manager by setting up localized resources. */
     public void init(final Context context) {
         mResourceMap.clear();
         mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));

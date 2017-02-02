@@ -34,7 +34,6 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
-import com.pajato.android.gamechat.database.AccountManager;
 
 import java.util.Locale;
 
@@ -107,7 +106,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 default:            // Ignore all other fragments.
                     break;
             }
-        ToolbarManager.instance.setTitles(this,  mItem);
+        ToolbarManager.instance.setTitles(this, mItem);
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
@@ -166,7 +165,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
-    /** Proces a button click that may be a chat list item click. */
+    /** Process a button click that may be a chat list item click. */
     protected void processPayload(final View view) {
         // Ensure that the payload is valid.  Abort if not, otherwise determine chain to the next
         // appropriate fragment based on the type associated with the payload.

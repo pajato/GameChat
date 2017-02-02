@@ -18,14 +18,12 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
-import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
@@ -132,11 +130,10 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
-        Log.i(ExpEnvelopeFragment.class.getSimpleName(), "******** we got here ************");
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
             case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 break;
@@ -145,7 +142,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         }
     }
 
-    /** Intialize the game fragment envelope. */
+    /** Initialize the game fragment envelope. */
     @Override public void onStart() {
         // Inflate the layout, and initialize the various managers.
         super.onStart();

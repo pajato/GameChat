@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -44,9 +43,7 @@ import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.  This is the
