@@ -18,18 +18,28 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * Provide a fragment to deal with no account or a signed out account.
@@ -50,12 +60,28 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         DispatchManager.instance.startNextFragment(this.getActivity(), chat);
     }
 
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.SwitchToExp:
+                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Handle the setup for the groups panel. */
     @Override public void onStart() {
         // Provide an account loading indicator for a brief period before showing the fragment.
         // This will likely be enough time to load the account and message data.
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, game, settings);
         FabManager.chat.setVisibility(this, View.GONE);
     }
 }

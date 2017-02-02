@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
@@ -105,7 +107,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         FabManager.chat.setMenu(INVITE_SELECTION_FAM_KEY, getSelectionMenu());
     }
 

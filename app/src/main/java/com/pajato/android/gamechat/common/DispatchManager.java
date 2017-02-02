@@ -159,7 +159,8 @@ public enum DispatchManager {
             case createRoom:
             case joinRoom:
             case messageList:
-            case selectGroupsAndRooms:
+            case selectChatGroupsRooms:
+            case selectExpGroupsRooms:
             case chatRoomList:  // Handle a chat dispatch providing both a type and an item.
                 return new Dispatcher(type, item);
 

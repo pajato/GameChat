@@ -66,7 +66,8 @@ public enum DBUtils {
                 return RoomManager.instance.getListItemData(item.groupKey);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
-            case selectGroupsAndRooms:
+            case selectChatGroupsRooms:
+            case selectExpGroupsRooms:
                 return InvitationManager.instance.getListItemData();
             default:
                 // TODO: log a message here.

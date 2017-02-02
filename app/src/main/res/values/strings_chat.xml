@@ -22,7 +22,7 @@
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
     <string name="InstallDebugUsers">Install developer users</string>
     <string name="InviteMembersFeature">Inviting group or room members</string>
-    <string name="InviteFriends">Invite friends</string>
+    <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
     <string name="MembersAvailableHeaderText">Members</string>

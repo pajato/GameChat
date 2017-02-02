@@ -10,6 +10,6 @@
         android:icon="@drawable/vd_help_black_24px"/>
     <item
         android:id="@+id/inviteFriends"
-        android:title="@string/InviteFriendFromChat"
-        android:icon="@drawable/ic_email_black_24dp"/>
+        android:title="@string/InviteFriendNav"
+        android:icon="@drawable/ic_share_black_24dp"/>
 </menu>

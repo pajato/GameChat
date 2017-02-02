@@ -34,6 +34,7 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
+import com.pajato.android.gamechat.database.AccountManager;
 
 import java.util.Locale;
 
@@ -98,14 +99,15 @@ public abstract class BaseChatFragment extends BaseFragment {
                 case joinRoom:
                 case chatGroupList:
                 case chatRoomList:
-                case selectGroupsAndRooms:
+                case selectChatGroupsRooms:
+                case selectExpGroupsRooms:
                 case messageList:   // Update the state of the list adapter.
                     updateAdapterList();
                     break;
                 default:            // Ignore all other fragments.
                     break;
             }
-        ToolbarManager.instance.setTitles(this, mItem);
+        ToolbarManager.instance.setTitles(this,  mItem);
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */

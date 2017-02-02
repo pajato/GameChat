@@ -210,6 +210,23 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
+    /**
+     * Return TRUE if this experience is in the "me" group. If either the 'me' group key or the
+     * current experience group key is null, return true (assume we're in the 'me' situation).
+     */
+    protected boolean isInMeGroup() {
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        if (meGroupKey == null) {
+            Log.e(TAG, "The 'me' groupKey is null for experience " + mExperience.getName());
+            return true;
+        }
+        if (mExperience == null || mExperience.getGroupKey() == null) {
+            Log.e(TAG, "This experience is null or the groupKey is null ");
+            return true;
+        }
+        return meGroupKey.equals(mExperience.getGroupKey());
+    }
+
     /** Return TRUE iff the User has requested to play again. */
     protected boolean isPlayAgain(final Object tag, final String className) {
         // Determine if the given tag is the class name, i.e. a snackbar action request to play

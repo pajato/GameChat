@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -43,6 +44,9 @@ import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * A Fragment that contains and controls the current experience shown to the User.
@@ -54,7 +58,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     // Public constants.
 
-    /** The lookup key for the FAB game home memu. */
+    /** The lookup key for the FAB game home menu. */
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
 
     // Default constructor.
@@ -128,6 +132,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        Log.i(ExpEnvelopeFragment.class.getSimpleName(), "******** we got here ************");
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
             case R.string.SwitchToChat:
@@ -146,7 +151,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         super.onStart();
         FabManager.game.setTag(this.getTag());
         FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 
     /** Dispatch to a more suitable fragment. */

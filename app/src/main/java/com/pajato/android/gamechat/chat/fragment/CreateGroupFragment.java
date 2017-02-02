@@ -43,6 +43,8 @@ import java.util.Locale;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 public class CreateGroupFragment extends BaseCreateFragment {
 
@@ -59,7 +61,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         // control.
         super.onStart();
         mCreateType = CreateType.group;
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         RadioGroup accessControl = (RadioGroup) mLayout.findViewById(R.id.AccessControl);
         accessControl.setVisibility(View.GONE);
 

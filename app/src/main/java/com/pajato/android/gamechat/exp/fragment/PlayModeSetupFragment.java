@@ -24,6 +24,9 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+
 /**
  * Provides a class to allow the currently signed in User to select both a room and another User for
  * a two-player game experience.
@@ -40,7 +43,7 @@ public class PlayModeSetupFragment extends BaseExperienceFragment {
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
     }
 
     /** .... */

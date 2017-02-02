@@ -48,7 +48,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
-import static com.pajato.android.gamechat.common.FragmentType.selectGroupsAndRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
 
 /**
  * Provide a fragment class that decides which alternative chat fragment to show to the User.
@@ -101,7 +101,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 AccountManager.instance.signIn(getContext());
                 break;
             case R.id.inviteFriends:
-                DispatchManager.instance.chainFragment(getActivity(), selectGroupsAndRooms, null);
+                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
                 break;
             default:
                 // Todo: add more menu button handling as a future feature.

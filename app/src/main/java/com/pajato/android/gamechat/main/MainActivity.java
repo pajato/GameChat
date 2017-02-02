@@ -179,7 +179,8 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    /** Handle a menu item click by providing a last ditch chance to do something. */
+    /** Handle a menu item click by providing a last ditch chance to do something. *** we get here
+     * for handling options menu items */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         // Case on the menu id to handle the item.
         switch (event.item.getItemId()) {
