@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -27,7 +28,9 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -38,6 +41,8 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.createGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
+import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 
 /**
@@ -51,7 +56,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     // Public class constants.
 
-    /** The lookup key for the FAB game home memu. */
+    /** The lookup key for the FAB game home menu. */
     public static final String CHAT_GROUP_FAM_KEY = "chatGroupFamKey";
 
     // Public instance methods.
@@ -71,8 +76,27 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, null);
                 break;
+            case R.string.InviteFriendFromChat:
+                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
+                break;
             default:
                 // ...
+                break;
+        }
+    }
+
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.SwitchToExp:
+                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+                break;
+            default:
                 break;
         }
     }
@@ -92,7 +116,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         super.onStart();
         if (ProgressManager.instance.isShowing())
             ProgressManager.instance.hide();
-        ToolbarManager.instance.init(this, search);
+        ToolbarManager.instance.init(this, game, search);
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 
@@ -121,6 +145,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             menu.add(getTintEntry(R.string.CreateRestrictedUserTitle,
                     R.drawable.ic_person_add_black_24px));
         }
+        menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));
         return menu;
     }
 

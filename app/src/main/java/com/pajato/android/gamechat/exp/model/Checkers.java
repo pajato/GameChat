@@ -49,7 +49,7 @@ public class Checkers implements Experience {
     /** The member account identifier who created the experience. */
     public String owner;
 
-    /** The list of players, for chess, two of them. */
+    /** The list of players, for checkers, two of them. */
     public List<Player> players;
 
     /** The room push key. */

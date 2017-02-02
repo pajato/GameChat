@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -13,9 +14,10 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
@@ -23,12 +25,14 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -50,8 +54,13 @@ import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.checkers;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newCheckers;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
 import static com.pajato.android.gamechat.exp.model.Checkers.PRIMARY_WINS;
 import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
@@ -78,7 +87,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     /** Visual layout of checkers board objects */
     private GridLayout grid;
 
-    /** The lookup key for the FAB chess memu. */
+    /** The lookup key for the FAB checkers menu. */
     public static final String CHECKERS_FAM_KEY = "CheckersFamKey";
 
     /** logcat TAG */
@@ -102,6 +111,29 @@ public class CheckersFragment extends BaseExperienceFragment {
         }
     }
 
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.InviteFriendsOverflow:
+                if (isInMeGroup())
+                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
+                else
+                    InvitationManager.instance.extendInvitation(getActivity(),
+                            mExperience.getGroupKey());
+                break;
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Handle an experience posting event to see if this is a checkers experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not checkers.  Ignore the event if not, otherwise
@@ -116,7 +148,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
-        ToolbarManager.instance.init(this, checkers);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, newCheckers, invite);
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons.

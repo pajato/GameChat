@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with GameChat.  If not,
  * see http://www.gnu.org/licenses
  */
-package com.pajato.android.gamechat.chat.fragment;
+package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -41,21 +41,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 
 /**
  * Provide a fragment class used to choose groups and rooms to include in an invite.
  */
 
-public class SelectForInviteFragment extends BaseChatFragment {
+public class SelectExpInviteFragment extends BaseChatFragment {
 
     // Public constants.
 
-    /** The lookup key for the FAB chat selection menu. */
-    public static final String INVITE_SELECTION_FAM_KEY = "inviteSelectionFamKey";
+    /** The lookup key for the FAB experience selection menu. */
+    public static final String INVITE_EXP_FAM_KEY = "inviteExpSelectionFamKey";
 
     // Public instance methods.
 
@@ -68,7 +70,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
             case R.id.inviteButton:
                 // Handle the invitation
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
-                DispatchManager.instance.startNextFragment(getActivity(), chat);
+                DispatchManager.instance.startNextFragment(getActivity(), exp);
                 break;
             case R.id.selectorCheck:
                 processSelection(event, (CheckBox) event.view);
@@ -85,7 +87,7 @@ public class SelectForInviteFragment extends BaseChatFragment {
             return;
 
         // The event represents a menu entry.  Close the FAM and case on the title id.
-        FabManager.chat.dismissMenu(this);
+        FabManager.game.dismissMenu(this);
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.SelectAllMenuTitle:
@@ -105,18 +107,18 @@ public class SelectForInviteFragment extends BaseChatFragment {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
         super.onStart();
-        ToolbarManager.instance.init(this);
-        FabManager.chat.setMenu(INVITE_SELECTION_FAM_KEY, getSelectionMenu());
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        FabManager.game.setMenu(INVITE_EXP_FAM_KEY, getSelectionMenu());
     }
 
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
-        // FAM is not and the FAM is set to the home chat menu.
+        // FAM is not and the FAM is set to the home game menu.
         super.onResume();
-        FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
-        FabManager.chat.init(this);
-        FabManager.chat.setVisibility(this, View.VISIBLE);
+        FabManager.game.setImage(R.drawable.ic_add_white_24dp);
+        FabManager.game.init(this, INVITE_EXP_FAM_KEY);
+        FabManager.game.setVisibility(this, View.VISIBLE);
     }
 
     // Private instance methods

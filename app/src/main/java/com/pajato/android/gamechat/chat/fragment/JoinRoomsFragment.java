@@ -46,6 +46,8 @@ import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.Select
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.members;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.rooms;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
 
@@ -55,7 +57,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
 
     // Public constants.
 
-    /** The lookup key for the FAB chat selection memu. */
+    /** The lookup key for the FAB chat selection menu. */
     public static final String CHAT_SELECTION_FAM_KEY = "chatSelectionFamKey";
 
     // Private instance variables.
@@ -120,7 +122,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
     @Override public void onStart() {
         // Establish the list type and setup the toolbar.
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
     }
 

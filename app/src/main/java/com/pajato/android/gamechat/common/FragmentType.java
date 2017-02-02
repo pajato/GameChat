@@ -28,7 +28,7 @@ import com.pajato.android.gamechat.chat.fragment.ChatShowSignedOutFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateGroupFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
 import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
-import com.pajato.android.gamechat.chat.fragment.SelectForInviteFragment;
+import com.pajato.android.gamechat.chat.fragment.SelectChatInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
@@ -43,6 +43,7 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
 import com.pajato.android.gamechat.exp.fragment.PlayModeSetupFragment;
+import com.pajato.android.gamechat.exp.fragment.SelectExpInviteFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
@@ -50,6 +51,7 @@ import com.pajato.android.gamechat.exp.fragment.TTTFragment;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatChain;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatGroup;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createGroupTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createRoomTT;
@@ -68,7 +70,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
  */
 public enum FragmentType {
     chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope),
-    chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list),
+    chatGroupList (ChatShowGroupsFragment.class, chatGroup, R.layout.chat_list),
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
@@ -86,7 +88,8 @@ public enum FragmentType {
     messageList (ShowMessagesFragment.class, chatChain, R.layout.chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
-    selectGroupsAndRooms (SelectForInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
+    selectChatGroupsRooms(SelectChatInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
+    selectExpGroupsRooms (SelectExpInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
     playModeSetup (PlayModeSetupFragment.class, expMoveTT, R.layout.exp_play_mode_setup),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain, R.layout.chat_no_joined_rooms),
     tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, ttt);
@@ -151,9 +154,11 @@ public enum FragmentType {
             case createRoom:
             case joinRoom:
             case messageList:
-            case selectGroupsAndRooms:
+            case selectChatGroupsRooms:
             case showNoJoinedRooms:
                 return chat;
+            case selectExpGroupsRooms:
+                return exp;
             default:
                 return exp;
         }

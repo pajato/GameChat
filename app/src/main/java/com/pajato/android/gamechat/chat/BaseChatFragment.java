@@ -98,7 +98,8 @@ public abstract class BaseChatFragment extends BaseFragment {
                 case joinRoom:
                 case chatGroupList:
                 case chatRoomList:
-                case selectGroupsAndRooms:
+                case selectChatGroupsRooms:
+                case selectExpGroupsRooms:
                 case messageList:   // Update the state of the list adapter.
                     updateAdapterList();
                     break;
@@ -164,7 +165,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
-    /** Proces a button click that may be a chat list item click. */
+    /** Process a button click that may be a chat list item click. */
     protected void processPayload(final View view) {
         // Ensure that the payload is valid.  Abort if not, otherwise determine chain to the next
         // appropriate fragment based on the type associated with the payload.

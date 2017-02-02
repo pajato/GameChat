@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -25,11 +26,16 @@ import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
 
 public class ExpShowSignedOutFragment extends BaseExperienceFragment {
@@ -43,6 +49,22 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
     @Subscribe public void onExperienceChange(@NonNull final ExperienceChangeEvent event) {
         // An experience event has occurred.  Ensure that we are in the right fragment.
         DispatchManager.instance.startNextFragment(this.getActivity(), exp);
+    }
+
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            default:
+                break;
+        }
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -62,6 +84,6 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
         // Set up the FAB.
         super.onStart();
         FabManager.game.init(this);
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 }

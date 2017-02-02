@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.exp.fragment;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
@@ -38,12 +40,14 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
+import com.pajato.android.gamechat.main.PaneManager;
 import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -57,6 +61,12 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newTtt;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
@@ -81,7 +91,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     // Public constants.
 
-    /** The lookup key for the FAB tictactoe memu. */
+    /** The lookup key for the FAB tictactoe menu. */
     public static final String TIC_TAC_TOE_FAM_KEY = "TicTacToeFamKey";
 
     // Private constants.
@@ -117,6 +127,29 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             handleClick((String) tag);
     }
 
+    /** Handle a menu item selection. */
+    @Subscribe public void onMenuItem(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.InviteFriendsOverflow:
+                if (isInMeGroup())
+                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
+                else
+                    InvitationManager.instance.extendInvitation(getActivity(),
+                            mExperience.getGroupKey());
+                break;
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Handle an experience posting event to see if this is a tictactoe experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
@@ -127,7 +160,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         resume();
     }
 
-    /** Handle taking the foreground by updating the UI based on the current expeience. */
+    /** Handle taking the foreground by updating the UI based on the current experience. */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
         // present a spinner.  When an experience is posted by the app event manager, the game can
@@ -142,7 +175,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         super.onStart();
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         FabManager.game.init(this);
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, newTtt, invite);
 
         // Place a click listener on each button in the grid.
         final String format = "Invalid tag found on button with tag {%s}";
@@ -274,7 +307,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     /** Return the game state after updating the given tallies. */
     private int getState(@NonNull final TicTacToe model, final int value, final String... tallyKeys) {
-        // Ensure that the tallies map exists, crearing it if it doesn't and apply the value to each
+        // Ensure that the tallies map exists, creating it if it doesn't and apply the value to each
         // of the keys and return the state.
         final int X_WIN_VALUE = 3;
         final int O_WIN_VALUE = 12;
@@ -489,7 +522,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                 message = getString(R.string.TieMessage);
                 break;
             default:
-                // keeep playing or waiting for a new game.
+                // keep playing or waiting for a new game.
                 break;
         }
 
@@ -517,7 +550,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         else
             // Place the X and O symbols on the grid.
             for (String tag : model.board.grid.keySet()) {
-                // Determine if the position denoted by the suffix is valid and has mot yet been
+                // Determine if the position denoted by the suffix is valid and has not yet been
                 // updated.  If so, then update the position.
                 String value = model.board.grid.get(tag);
                 Button button = (Button) mLayout.findViewWithTag(tag);

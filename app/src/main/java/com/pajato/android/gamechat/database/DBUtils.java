@@ -66,7 +66,8 @@ public enum DBUtils {
                 return RoomManager.instance.getListItemData(item.groupKey);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
-            case selectGroupsAndRooms:
+            case selectChatGroupsRooms:
+            case selectExpGroupsRooms:
                 return InvitationManager.instance.getListItemData();
             default:
                 // TODO: log a message here.
@@ -87,7 +88,7 @@ public enum DBUtils {
         return mResourceMap.get(key);
     }
 
-    /** Intialize the database manager by setting up localized resources. */
+    /** Initialize the database manager by setting up localized resources. */
     public void init(final Context context) {
         mResourceMap.clear();
         mResourceMap.put(DEFAULT_ROOM_NAME_KEY, context.getString(R.string.DefaultRoomName));

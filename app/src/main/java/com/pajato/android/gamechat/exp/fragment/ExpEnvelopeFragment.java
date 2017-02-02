@@ -24,7 +24,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
-import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
@@ -43,6 +42,9 @@ import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * A Fragment that contains and controls the current experience shown to the User.
@@ -54,7 +56,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     // Public constants.
 
-    /** The lookup key for the FAB game home memu. */
+    /** The lookup key for the FAB game home menu. */
     public static final String GAME_HOME_FAM_KEY = "gameHomeFamKey";
 
     // Default constructor.
@@ -131,7 +133,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
             case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smartphone devices we can change panes.
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 break;
@@ -140,13 +142,13 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         }
     }
 
-    /** Intialize the game fragment envelope. */
+    /** Initialize the game fragment envelope. */
     @Override public void onStart() {
         // Inflate the layout, and initialize the various managers.
         super.onStart();
         FabManager.game.setTag(this.getTag());
         FabManager.game.setMenu(GAME_HOME_FAM_KEY, getHomeMenu());
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 
     /** Dispatch to a more suitable fragment. */

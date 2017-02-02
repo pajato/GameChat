@@ -53,10 +53,14 @@ public enum ToolbarManager {
     /** The set of menu item types. */
     public enum MenuItemType {
         chat (R.string.SwitchToChat, 0, IF_ROOM, R.drawable.ic_chat_bubble_outline_white_24px),
-        checkers (R.string.NewGameCheckers, 20, NEVER, -1),
-        chess (R.string.NewGameChess, 20, NEVER, -1),
+        newCheckers(R.string.NewGameCheckers, 20, NEVER, -1),
+        newChess(R.string.NewGameChess, 20, NEVER, -1),
         game (R.string.SwitchToExp, 0, IF_ROOM, R.drawable.ic_games_white),
-        search (R.string.MenuItemSearch, 20, IF_ROOM, R.drawable.ic_search_white_24px);
+        helpAndFeedback (R.string.MenuItemHelpAndFeedback, 55, NEVER, -1), // should always be included
+        invite (R.string.InviteFriendsOverflow, 20, IF_ROOM, R.drawable.ic_share_white_24dp),
+        search (R.string.MenuItemSearch, 20, IF_ROOM, R.drawable.ic_search_white_24px),
+        settings (R.string.MenuItemSettings, 0, NEVER, -1), // should always be included
+        newTtt (R.string.NewGameTTT, 0, NEVER, -1);
 
         // Instance variables.
 
@@ -86,6 +90,7 @@ public enum ToolbarManager {
     /** The toolbar types. */
     public enum ToolbarType {
         chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
+        chatGroup (R.drawable.ic_more_vert_black_24dp),
         chatMain (),
         createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                        R.string.CreateGroupMenuTitle),
@@ -192,7 +197,9 @@ public enum ToolbarManager {
         MenuItem item = add ? menu.add(NONE, type.itemResId, type.order, type.itemResId) : null;
         if (item == null)
             return;
-        item.setIcon(type.iconResId);
+        if (type.iconResId != -1) {
+            item.setIcon(type.iconResId);
+        }
         item.setShowAsAction(type.flag);
     }
 
@@ -238,6 +245,7 @@ public enum ToolbarManager {
                 setTitles(fragment, bar, resourceId, item);
                 break;
             case chatMain:
+            case chatGroup:
             case chatChain:     // Set the title and subtitle based on the item content.
                 setTitles(fragment, bar, item);
                 break;
@@ -306,7 +314,7 @@ public enum ToolbarManager {
 
     /** Update the given toolbar view with the provided text. */
     private void update(@NonNull final Toolbar bar, final int resId, final String text) {
-        // First, ensure that the view associated with the resourc id exists.  Abort if not.  Then
+        // First, ensure that the view associated with the resource id exists.  Abort if not.  Then
         // determine if the text is null or empty.  Make the view gone if either is true.  Finally,
         // render the text in the view and make it visible.
         TextView view = (TextView) bar.findViewById(resId);
@@ -319,7 +327,7 @@ public enum ToolbarManager {
 
     // Private inner classes.
 
-    /** Provide a class to post overflown menu item click events. */
+    /** Provide a class to post overflow menu item click events. */
     private class OverflowMenuItemHandler implements Toolbar.OnMenuItemClickListener {
         @Override public boolean onMenuItemClick(final MenuItem item) {
             AppEventManager.instance.post(new MenuItemEvent(item));
