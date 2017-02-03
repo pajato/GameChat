@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.Toolbar;
@@ -53,14 +54,11 @@ public enum ToolbarManager {
     /** The set of menu item types. */
     public enum MenuItemType {
         chat (R.string.SwitchToChat, 0, IF_ROOM, R.drawable.ic_chat_bubble_outline_white_24px),
-        newCheckers(R.string.NewGameCheckers, 20, NEVER, -1),
-        newChess(R.string.NewGameChess, 20, NEVER, -1),
         game (R.string.SwitchToExp, 0, IF_ROOM, R.drawable.ic_games_white),
         helpAndFeedback (R.string.MenuItemHelpAndFeedback, 55, NEVER, -1), // should always be included
         invite (R.string.InviteFriendsOverflow, 20, IF_ROOM, R.drawable.ic_share_white_24dp),
         search (R.string.MenuItemSearch, 20, IF_ROOM, R.drawable.ic_search_white_24px),
-        settings (R.string.MenuItemSettings, 0, NEVER, -1), // should always be included
-        newTtt (R.string.NewGameTTT, 0, NEVER, -1);
+        settings (R.string.MenuItemSettings, 0, NEVER, -1); // should always be included
 
         // Instance variables.
 
@@ -90,8 +88,7 @@ public enum ToolbarManager {
     /** The toolbar types. */
     public enum ToolbarType {
         chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
-        chatGroup (R.drawable.ic_more_vert_black_24dp),
-        chatMain (),
+        chatMain (R.drawable.ic_more_vert_white_24dp),
         createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
                        R.string.CreateGroupMenuTitle),
         createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
@@ -202,6 +199,18 @@ public enum ToolbarManager {
         item.setShowAsAction(type.flag);
     }
 
+    /** Reset the current toolbar overflow menu */
+    public void resetOverflowMenu(@NonNull Resources resources, final ToolbarType type,
+                                  final Toolbar toolbar) {
+        int id = type.overflowMenuIconResourceId;
+        if (toolbar.getMenu() != null) {
+            toolbar.getMenu().clear();
+        }
+        toolbar.inflateMenu(type.overflowMenuResourceId);
+        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
+        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
+    }
+
     /** Set the title using the given resource string. */
     public void setTitle(@NonNull final BaseFragment fragment, final int resId) {
         // Ensure that the toolbar, toolbar type and the title all exist and that the title is not
@@ -244,7 +253,6 @@ public enum ToolbarManager {
                 setTitles(fragment, bar, resourceId, item);
                 break;
             case chatMain:
-            case chatGroup:
             case chatChain:     // Set the title and subtitle based on the item content.
                 setTitles(fragment, bar, item);
                 break;
@@ -296,11 +304,7 @@ public enum ToolbarManager {
     private void setupToolbar(@NonNull BaseFragment fragment, @NonNull final Toolbar toolbar,
                               @NonNull final ToolbarType toolbarType) {
         // Reset the current toolbar overflow menu.
-        int id = toolbarType.overflowMenuIconResourceId;
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(toolbarType.overflowMenuResourceId);
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(fragment.getResources(), id, null));
-        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
+        resetOverflowMenu(fragment.getResources(), toolbarType, toolbar);
 
         // Determine if the navigation icon should be set up.  Abort it not, otherwise set it up.
         if (toolbarType.navigationIconResourceId <= 0)

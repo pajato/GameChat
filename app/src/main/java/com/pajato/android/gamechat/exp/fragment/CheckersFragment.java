@@ -58,7 +58,6 @@ import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRoo
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newCheckers;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.model.Checkers.ACTIVE;
@@ -148,7 +147,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
-        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, newCheckers, invite);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons.
@@ -844,7 +843,7 @@ public class CheckersFragment extends BaseExperienceFragment {
             turn = ((Checkers) mExperience).toggleTurn();
         }
 
-        // Handle the textviews that serve as our turn indicator.
+        // Handle the text views that serve as our turn indicator.
         TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
         TextView playerOneRight = (TextView) mLayout.findViewById(R.id.rightIndicator1);
         TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);

@@ -56,7 +56,6 @@ import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newChess;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
 import static com.pajato.android.gamechat.exp.model.Chess.PRIMARY_WINS;
@@ -135,7 +134,7 @@ public class ChessFragment extends BaseExperienceFragment {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
-        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, newChess, invite);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         grid = (GridLayout) mLayout.findViewById(board);
 
         // Color the Player Icons.
@@ -163,9 +162,9 @@ public class ChessFragment extends BaseExperienceFragment {
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
 
-        long tstamp = new Date().getTime();
+        long tStamp = new Date().getTime();
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tstamp));
+                SimpleDateFormat.getDateTimeInstance().format(tStamp));
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
@@ -173,7 +172,7 @@ public class ChessFragment extends BaseExperienceFragment {
         String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
-        Chess model = new Chess(key, id, 0, name, tstamp, groupKey, roomKey, players);
+        Chess model = new Chess(key, id, 0, name, tStamp, groupKey, roomKey, players);
         mExperience = model;
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorChessCreation, groupKey, roomKey);
@@ -516,7 +515,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @return true if we've made any updates that should be written to the database; false otherwise
      */
     private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
-        // If the game is over, we don't need to do anything, so return.  Otheriwse find the
+        // If the game is over, we don't need to do anything, so return.  Otherwise find the
         // possible moves for the selected piece.
         if (checkFinished(board)) return false;
         boolean hasChanged = false;
@@ -588,7 +587,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /**
      * A utility method that facilitates keeping the board's checker pattern in place throughout the
-     * highlighting and de-higlighting process. It accepts a tile and sets its background to white
+     * highlighting and de-highlighting process. It accepts a tile and sets its background to white
      * or dark grey, depending on its location in the board.
      *
      * @param index the index of the tile, used to determine the color of the background.

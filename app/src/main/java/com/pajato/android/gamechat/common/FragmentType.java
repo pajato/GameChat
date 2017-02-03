@@ -52,7 +52,6 @@ import com.pajato.android.gamechat.exp.fragment.TTTFragment;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
 import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatChain;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatGroup;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createGroupTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createRoomTT;
@@ -73,7 +72,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
  */
 public enum FragmentType {
     chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope),
-    chatGroupList (ChatShowGroupsFragment.class, chatGroup, R.layout.chat_list),
+    chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list),
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),

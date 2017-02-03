@@ -96,6 +96,9 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
+            case R.string.MenuItemSearch:
+                showFutureFeatureMessage(R.string.MenuItemSearch);
+                break;
             default:
                 break;
         }
@@ -137,8 +140,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
     private List<MenuEntry> getGroupMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_casino_black_24dp));
-        // TODO: add this when group selection is included:
-        //menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.ic_casino_black_24dp));
         if (!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle,
                     R.drawable.ic_group_add_black_24dp));

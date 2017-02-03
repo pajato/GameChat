@@ -358,7 +358,7 @@ public class MainActivity extends BaseActivity
 
     // Protected inner classes.
 
-    /** Provide a handler that will generate a backpress event. */
+    /** Provide a handler that will generate a back-press event. */
     private class UpHandler implements View.OnClickListener {
         /** Handle a click on the back arrow button by generating a back press. */
         public void onClick(final View view) {

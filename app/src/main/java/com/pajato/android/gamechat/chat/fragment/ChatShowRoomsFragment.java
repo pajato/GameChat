@@ -107,6 +107,9 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
+            case R.string.MenuItemSearch:
+                showFutureFeatureMessage(R.string.MenuItemSearch);
+                break;
             default:
                 break;
         }
