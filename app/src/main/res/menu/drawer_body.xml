@@ -26,7 +26,7 @@
                     android:title="@string/manage_accounts"
                     android:icon="@drawable/vd_login_2" />
                 <item
-                        android:id="@+id/manageGroups"
+                    android:id="@+id/manageGroups"
                     android:title="@string/MenuItemManageGroups"
                     android:icon="@drawable/vd_group_black_24px"/>
                 <item

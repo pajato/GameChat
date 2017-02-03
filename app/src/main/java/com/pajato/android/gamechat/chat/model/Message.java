@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Provide a Firebase model class repesenting a chat message, an icon, a name and text. */
+/** Provide a Firebase model class representing a chat message, an icon, a name and text. */
 @IgnoreExtraProperties public class Message {
 
     // Public class constants.
@@ -49,7 +49,7 @@ import java.util.Map;
     /** The poster's display name. */
     public String name;
 
-    /** The member account identifer who posted the message. */
+    /** The member account identifier who posted the message. */
     public String owner;
 
     /** The push key for the room in which the message was created. */

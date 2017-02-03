@@ -104,7 +104,6 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
                 break;
             default:
-                // Todo: add more menu button handling as a future feature.
                 break;
         }
     }

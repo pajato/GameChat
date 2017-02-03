@@ -93,7 +93,7 @@ public abstract class BaseFragment extends Fragment {
         return mLayout != null ? (Toolbar) mLayout.findViewById(R.id.toolbar) : null;
     }
 
-    /** Return the, possibly null, toolbar type being used by this fragemnt. */
+    /** Return the, possibly null, toolbar type being used by this fragment. */
     public ToolbarManager.ToolbarType getToolbarType() {
         return type != null ? type.toolbarType : null;
     }
@@ -254,7 +254,7 @@ public abstract class BaseFragment extends Fragment {
         return true;
     }
 
-    /** Regturn null or a list to be displayed by a list adapter for a given fragment type. */
+    /** Return null or a list to be displayed by a list adapter for a given fragment type. */
     private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.

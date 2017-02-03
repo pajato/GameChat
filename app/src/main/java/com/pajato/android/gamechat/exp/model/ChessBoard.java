@@ -48,8 +48,7 @@ public class ChessBoard {
      * Add a piece to the board
      * @param index index into the board (valid indices are 0->63).
      * @param type piece type
-     * // TODO: change this to take one of the ChessTeam enum values
-     * @param team the team (0 = primary team, 1 = secondary team)
+     * @param team the team
      */
     public void add(final int index, final PieceType type, final ChessTeam team) {
         board.put(makeCellId(index), new ChessPiece(type, team));
@@ -86,7 +85,7 @@ public class ChessBoard {
     }
 
     /**
-     * Determine if specified peice type for the specified team is at the cell location indicates
+     * Determine if specified piece type for the specified team is at the cell location indicates
      * @return true if the primary king is at the specified index
      */
     private boolean cellHasTeamPiece(final int index, PieceType type, ChessTeam team) {
