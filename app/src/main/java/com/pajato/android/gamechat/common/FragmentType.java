@@ -42,8 +42,9 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowGroupsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
-import com.pajato.android.gamechat.exp.fragment.PlayModeSetupFragment;
 import com.pajato.android.gamechat.exp.fragment.SelectExpInviteFragment;
+import com.pajato.android.gamechat.exp.fragment.SelectRoomFragment;
+import com.pajato.android.gamechat.exp.fragment.SelectUserFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
@@ -61,7 +62,9 @@ import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expM
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.none;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.checkersET;
+import static com.pajato.android.gamechat.exp.ExpType.chessET;
+import static com.pajato.android.gamechat.exp.ExpType.tttET;
 
 /**
  * Defines the fragments that can be shown in the chat or experience panes.
@@ -74,8 +77,8 @@ public enum FragmentType {
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
-    checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, ExpType.checkers),
-    chess (ChessFragment.class, expChain, R.layout.exp_checkers, ExpType.chess),
+    checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, checkersET),
+    chess (ChessFragment.class, expChain, R.layout.exp_checkers, chessET),
     createGroup (CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
     createRoom (CreateRoomFragment.class, createRoomTT, R.layout.chat_create),
     expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
@@ -90,9 +93,10 @@ public enum FragmentType {
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
     selectChatGroupsRooms(SelectChatInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
     selectExpGroupsRooms (SelectExpInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
-    playModeSetup (PlayModeSetupFragment.class, expMoveTT, R.layout.exp_play_mode_setup),
+    selectRoom (SelectRoomFragment.class, expMoveTT, R.layout.exp_select_user),
+    selectUser (SelectUserFragment.class, expMoveTT, R.layout.exp_select_user),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain, R.layout.chat_no_joined_rooms),
-    tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, ttt);
+    tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, tttET);
 
     // Public instance variables.
 
@@ -135,16 +139,16 @@ public enum FragmentType {
     // Public instance methods.
 
     /** Return the fragment envelope resource id for given type. */
-    public int getEnvelopeId(final FragmentType type) {
-        if (getKind(type) == chat)
+    public int getEnvelopeId() {
+        if (getKind() == chat)
             return R.id.chatFragmentContainer;
         else
             return R.id.expFragmentContainer;
     }
 
     /** Return the dispatch kind for this fragment type. */
-    public DispatcherKind getKind(final FragmentType type) {
-        switch(type) {
+    public DispatcherKind getKind() {
+        switch(this) {
             case chatEnvelope:
             case chatGroupList:
             case chatOffline:

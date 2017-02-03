@@ -58,12 +58,24 @@ public class Dispatcher {
         if (type != null) processType();
     }
 
-    /** Build an instance given a chat list item. */
+    /** Build an instance given a list item. */
     Dispatcher(final FragmentType type, final ListItem item) {
+        // Determine if either the type or the item is null.  Abort if so, otherwise case on the
+        // type to handle the dispatch setup.
         this.type = type;
-        if (item != null) {
-            groupKey = item.groupKey;
-            roomKey = item.key;
+        if (type == null || item == null)
+            return;
+        switch (type) {
+            case selectUser:
+                if (item.key != null) {
+                    experiencePayload = ExperienceManager.instance.experienceMap.get(item.key);
+                    this.type.expType = experiencePayload.getExperienceType();
+                }
+                break;
+            default:
+                groupKey = item.groupKey;
+                roomKey = item.key;
+                break;
         }
     }
 

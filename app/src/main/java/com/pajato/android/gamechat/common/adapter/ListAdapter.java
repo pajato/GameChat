@@ -19,14 +19,19 @@ package com.pajato.android.gamechat.common.adapter;
 
 import android.content.Context;
 import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -55,8 +60,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     /** The logcat tag. */
     private static final String TAG = ListAdapter.class.getSimpleName();
 
-    /** Click listener for selection check boxes */
-    private CheckBoxClickListener checkboxListener = new CheckBoxClickListener();
+    /** Click listener for selection widgets */
+    private SelectorClickListener selectorListener = new SelectorClickListener();
 
     /** A format string for displaying unhandled cases. */
     private static final String UNHANDLED_FORMAT = "Unhandled item entry type: {%s}.";
@@ -103,6 +108,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ItemListViewHolder(getView(parent, R.layout.item_join_member));
             case selectableRoom:
                 return new ItemListViewHolder(getView(parent, R.layout.item_join_room));
+            case selectUser:
+                return new ItemListViewHolder(getView(parent, R.layout.item_select_user));
             case inviteCommonRoom:
             case inviteRoom:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_invites_room));
@@ -129,6 +136,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case group:
                 case message:
                 case room:
+                case selectRoom:
+                case selectUser:
                 case selectableMember:
                 case selectableRoom:
                 case inviteRoom:
@@ -167,7 +176,6 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     private View getView(final ViewGroup parent, final int resourceId) {
         View result = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
         result.setOnClickListener(this);
-
         return result;
     }
 
@@ -175,6 +183,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     private void setChatIcon(final ItemListViewHolder holder, final ListItem item) {
         Context context = holder.icon.getContext();
         switch (item.type) {
+            case selectUser:
             case selectableMember:
             case message:
                 // For a message, ensure that both the holder and the item have an icon value,
@@ -219,23 +228,34 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             if (holder.count != null) holder.count.setVisibility(View.GONE);
         }
 
-        // Set the check box using the item selection state.
-        if (holder.checkBox == null) return;
-        holder.checkBox.setChecked(item.selected);
-        // common room selection is set based on group selection and never allowed separately
-        if (item.type == ItemType.inviteCommonRoom)
-            holder.checkBox.setEnabled(false);
-        else
-            holder.checkBox.setEnabled(item.enabled);
-        holder.checkBox.setTag(item);
+        // Set the selector button checked state using the item selection state, enable or
+        // disable the button if the item has something to do with the common room, and attach the
+        // item as a payload to the button tag.
+        if (holder.button == null || !(holder.button instanceof CompoundButton))
+            return;
+        CompoundButton settableButton = (CompoundButton) holder.button;
+        settableButton.setChecked(item.selected);
+        holder.button.setEnabled(getEnableState(item));
+        holder.button.setTag(item);
+    }
+
+    /** Return TRUE iff the given item's selector button should be enabled. */
+    private boolean getEnableState(@NonNull final ListItem item) {
+        switch (item.type) {
+            case inviteCommonRoom:
+                return false;
+            default:
+                return true;
+        }
     }
 
     // Inner classes.
 
-    private class CheckBoxClickListener implements View.OnClickListener {
-        public void onClick(View v) {
-            // Post the click event to the app
-            AppEventManager.instance.post(new ClickEvent(v));
+    /** Provide a handler for clicks on the selector button. */
+    private class SelectorClickListener implements View.OnClickListener {
+        public void onClick(View view) {
+            // Post the click event to the app.
+            AppEventManager.instance.post(new ClickEvent(view));
         }
     }
 
@@ -245,7 +265,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView count;
         TextView text;
         ImageView icon;
-        CheckBox checkBox;
+        Button button;
 
         /** Build an instance given the item view. */
         ItemListViewHolder(View itemView) {
@@ -254,10 +274,21 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             count = (TextView) itemView.findViewById(R.id.newCount);
             text = (TextView) itemView.findViewById(R.id.chatText);
             icon = (ImageView) itemView.findViewById(R.id.chatIcon);
-            checkBox = (CheckBox) itemView.findViewById(R.id.selectorCheck);
-            if (checkBox != null) {
-                checkBox.setOnClickListener(checkboxListener);
+            setSelectorButton(itemView);
+            if (button != null) {
+                button.setOnClickListener(selectorListener);
             }
+        }
+
+        /** Get a selector button dealing with the pathological case of a single radio button. */
+        private void setSelectorButton(@NonNull final View itemView) {
+            // Determine if this item view is the ugly case of a single radio button.  If not,
+            // abort.  If so replace the radio button with a check box alternative.
+            button = (Button) itemView.findViewById(R.id.selector);
+            if (button == null || mList.size() > 1 || !(button instanceof RadioButton))
+                return;
+            button.setVisibility(View.GONE);
+            button = (Button) itemView.findViewById(R.id.altSelector);
         }
     }
 

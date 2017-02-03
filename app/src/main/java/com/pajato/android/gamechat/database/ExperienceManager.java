@@ -74,10 +74,11 @@ public enum ExperienceManager {
         ExpType expType = experience.getExperienceType();
         if (groupKey == null || roomKey == null || name == null || expType == null) return;
 
-        // Persist the experience.
-        String key = getExperienceKey();
+        // Persist the experience obtaining a push key if necessary.
+        if (experience.getExperienceKey() == null)
+            experience.setExperienceKey(getExperienceKey());
+        String key = experience.getExperienceKey();
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, key);
-        experience.setExperienceKey(key);
         DBUtils.instance.updateChildren(path, experience.toMap());
     }
 
@@ -127,4 +128,13 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
+    /** Move an experience from one room to another. */
+    public void move(@NonNull final Experience experience, final String gKey, final String rKey) {
+        //String srcGroupKey = experience.getGroupKey();
+        //String srcRoomKey = experience.getRoomKey();
+        experience.setGroupKey(gKey);
+        experience.setRoomKey(rKey);
+        experience.setExperienceKey(null);
+        createExperience(experience);
+    }
 }

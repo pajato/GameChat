@@ -39,7 +39,7 @@ http://www.gnu.org/licenses
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/chatList"
+        android:id="@+id/ItemList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"/>

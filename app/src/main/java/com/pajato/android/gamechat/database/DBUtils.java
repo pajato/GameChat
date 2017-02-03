@@ -55,29 +55,6 @@ public enum DBUtils {
 
     // Public instance methods.
 
-    /** Get the list data to be displayed by a list adapter for a given list type. */
-    public List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
-        switch (type) {
-            case chatGroupList: // Get the data to be shown in a list of groups.
-                return GroupManager.instance.getListItemData();
-            case messageList:   // Get the data to be shown in a room.
-                return MessageManager.instance.getListItemData(item);
-            case chatRoomList:          // Get the data to be show in a list of rooms.
-                return RoomManager.instance.getListItemData(item.groupKey);
-            case joinRoom:      // Get the candidate list of rooms and members.
-                return JoinManager.instance.getListItemData(item);
-            case selectChatGroupsRooms:
-            case selectExpGroupsRooms:
-                return InvitationManager.instance.getListItemData();
-            default:
-                // TODO: log a message here.
-                break;
-        }
-
-        // Return an empty list by default.  This should never happen.
-        return new ArrayList<>();
-    }
-
     /** Return a canonical change handler name for a given database model name. */
     public String getHandlerName(@NonNull final String base, @NonNull final String modelName) {
         return String.format(Locale.US, "%s{%s}", base, modelName);

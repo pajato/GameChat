@@ -15,6 +15,7 @@
     <string name="MenuItemManageRooms">Manage rooms</string>
     <string name="MenuItemSearch">Search</string>
     <string name="MenuItemSettings">Settings</string>
+    <string name="SelectUserToolbarTitle">Select User</string>
     <string name="SignInPrefixMessageText">Use the</string>
     <string name="SignInSuffixMessageText">menu in the toolbar to sign in.</string>
     <string name="SwitchToChat">Switch to Chat</string>

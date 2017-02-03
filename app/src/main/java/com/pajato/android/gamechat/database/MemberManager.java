@@ -27,8 +27,11 @@ import com.pajato.android.gamechat.event.MemberChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -138,5 +141,15 @@ public enum MemberManager {
         String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
         member.modTime = new Date().getTime();
         DBUtils.instance.updateChildren(path, member.toMap());
+    }
+
+    /** Return a possibly empty list of members in the given group. */
+    public List<Account> getMemberList(@NonNull final String groupKey) {
+        List<Account> result = new ArrayList<>();
+        Map<String, Account> map = memberMap.get(groupKey);
+        if (map != null)
+            for (Account account : map.values())
+                result.add(account);
+        return result;
     }
 }

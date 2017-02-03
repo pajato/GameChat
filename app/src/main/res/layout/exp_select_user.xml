@@ -24,43 +24,20 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@drawable/border">
-        <TextView android:id="@+id/SaveButton"
+        <TextView android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|end"
+            android:layout_marginEnd="8dp"
             android:enabled="false"
             android:onClick="onClick"
             android:textSize="16sp"
             android:textStyle="bold"
             android:text="@string/action_save"/>
     </android.support.v7.widget.Toolbar>
-    <RadioGroup android:id="@+id/AccessControl"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-        <RadioButton android:id="@+id/PublicButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
-            android:text="@string/CreateRoomPublic"
-            android:checked="true"
-            android:onClick="onClick" />
-        <RadioButton android:id="@+id/PrivateButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
-            android:text="@string/CreateRoomPrivate"
-            android:onClick="onClick" />
-    </RadioGroup>
-    <TextView android:id="@+id/AddMembers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="36dp"
-        android:layout_gravity="center"
-        android:onClick="onClick"
-        android:textColor="@color/colorBlue"
-        android:textSize="16sp"
-        android:textStyle="normal"
-        android:text="@string/AddMembers"/>
+    <android.support.v7.widget.RecyclerView
+            android:id="@+id/ItemList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="32dp" />
 </LinearLayout>

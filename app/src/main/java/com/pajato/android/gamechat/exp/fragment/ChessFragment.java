@@ -125,7 +125,7 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Handle an experience posting event to see if this is a chess experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not chess.  Abort if not, otherwise resume the game.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.chess)
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.chessET)
             return;
         mExperience = event.experience;
         resume();

@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.chess;
+import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
 /**
- *  Provide a Firebase model class for a chess game experience.
+ *  Provide a Firebase model class for a chessET game experience.
  *
  *  Created by sscott on 12/30/16.
  */
@@ -51,7 +51,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chess;
     /** The member account identifier who created the experience. */
     public String owner;
 
-    /** The list of players, for chess, two of them. */
+    /** The list of players, for chessET, two of them. */
     public List<Player> players;
 
     /** The room push key. */
@@ -107,7 +107,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chess;
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = chess.name();
+        type = chessET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
         primaryQueenSideRookHasMoved = false;
         primaryKingSideRookHasMoved = false;
@@ -171,6 +171,16 @@ import static com.pajato.android.gamechat.exp.ExpType.chess;
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
+    }
+
+    /** Set the group key to satisfy the Experience contract. */
+    @Exclude @Override public void setGroupKey(final String key) {
+        this.groupKey = key;
+    }
+
+    /** Set the room key to satisfy the Experience contract. */
+    @Exclude @Override public void setRoomKey(final String key) {
+        this.roomKey = key;
     }
 
     /** Set the modification timestamp. */
