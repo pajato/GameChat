@@ -82,7 +82,7 @@ public enum ExperienceManager {
         DBUtils.instance.updateChildren(path, experience.toMap());
     }
 
-    /** Return the number of experiences for the givne type. */
+    /** Return the number of experiences for the given type. */
     public List<Experience> getExperienceList(FragmentType type) {
         // First approximation is to generate the count brute force.
         List<Experience> result = new ArrayList<>();
@@ -106,7 +106,7 @@ public enum ExperienceManager {
         experienceMap.clear();
     }
 
-    /** Perist the given experience. */
+    /** Persist the given experience. */
     public void updateExperience(final Experience experience) {
         // Persist the experience.
         experience.setModTime(new Date().getTime());

@@ -72,7 +72,7 @@ public enum NavigationManager {
     }
 
     /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type.*/
-    public void init(final FragmentActivity activity, final Toolbar toolbar) {
+    public void init(final Activity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle;

@@ -148,7 +148,7 @@ public enum ToolbarManager {
     // Private instance variables.
 
     /** The standard overflow item click handler that posts an app event. */
-    public final OverflowMenuItemHandler mOverflowMenuItemClickHandler;
+    private final OverflowMenuItemHandler mOverflowMenuItemClickHandler;
 
     // Sole Constructor.
 
