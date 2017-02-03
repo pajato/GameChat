@@ -65,7 +65,6 @@ import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRoo
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newTtt;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.exp.ExpType.ttt;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
@@ -175,7 +174,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         super.onStart();
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         FabManager.game.init(this);
-        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, newTtt, invite);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
 
         // Place a click listener on each button in the grid.
         final String format = "Invalid tag found on button with tag {%s}";
@@ -200,16 +199,16 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
 
-        long tstamp = new Date().getTime();
+        long tStamp = new Date().getTime();
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tstamp));
+                SimpleDateFormat.getDateTimeInstance().format(tStamp));
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
         String groupKey = AccountManager.instance.getMeGroupKey();
         String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
-        TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
+        TicTacToe model = new TicTacToe(key, id, name, tStamp, groupKey, roomKey, players);
         mExperience = model;
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);

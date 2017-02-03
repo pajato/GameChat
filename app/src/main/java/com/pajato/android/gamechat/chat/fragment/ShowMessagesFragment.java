@@ -49,6 +49,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -116,6 +117,9 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
+            case R.string.MenuItemSearch:
+                showFutureFeatureMessage(R.string.MenuItemSearch);
+                break;
             default:
                 break;
         }
@@ -125,7 +129,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     @Override public void onStart() {
         // Establish the list type and setup the toolbar.
         super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, game, search, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, game, search, invite, settings);
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */

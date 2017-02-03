@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -37,12 +38,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import static android.graphics.Shader.TileMode.CLAMP;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
 
 
 /** Provide a singleton to manage the app navigation provided by the navigation drawer. */
@@ -68,8 +71,8 @@ public enum NavigationManager {
         return false;
     }
 
-    /** Initialize the navigation drawer. */
-    public void init(final Activity activity, final Toolbar toolbar) {
+    /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type.*/
+    public void init(final FragmentActivity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle;
@@ -83,6 +86,10 @@ public enum NavigationManager {
         navigationView.setNavigationItemSelectedListener((MainActivity) activity);
         NavigationView footer = (NavigationView) activity.findViewById(R.id.nav_footer);
         footer.setNavigationItemSelectedListener((MainActivity) activity);
+
+        // Have toolbar manager set up overflow menu, etc.
+        if (toolbar != null)
+            ToolbarManager.instance.resetOverflowMenu(activity.getResources(), chatMain, toolbar);
     }
 
     /** Process a given button click event handling the nav drawer closing. */
