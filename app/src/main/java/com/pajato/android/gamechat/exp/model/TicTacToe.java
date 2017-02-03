@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.tttET;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
 @IgnoreExtraProperties public class TicTacToe implements Experience {
@@ -107,7 +107,7 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = ttt.name();
+        type = tttET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
     }
 
@@ -170,6 +170,16 @@ import static com.pajato.android.gamechat.exp.ExpType.ttt;
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
+    }
+
+    /** Set the group key to satisfy the Experience contract. */
+    @Exclude @Override public void setGroupKey(final String key) {
+        this.groupKey = key;
+    }
+
+    /** Set the room key to satisfy the Experience contract. */
+    @Exclude @Override public void setRoomKey(final String key) {
+        this.roomKey = key;
     }
 
     /** Set the modification timestamp. */

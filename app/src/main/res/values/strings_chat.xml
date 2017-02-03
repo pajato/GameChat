@@ -20,7 +20,6 @@
     <string name="InsertMapDesc">Inser map image button.</string>
     <string name="InsertPhoto">Inserting a photo from your device</string>
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
-    <string name="InstallDebugUsers">Install developer users</string>
     <string name="InviteMembersFeature">Inviting group or room members</string>
     <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>

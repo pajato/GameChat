@@ -46,6 +46,12 @@ public interface Experience {
     /** Set the experience push key. */
     void setExperienceKey(String key);
 
+    /** Set the experience group key. */
+    void setGroupKey(String gKey);
+
+    /** Set the room key. */
+    void setRoomKey(String key);
+
     /** Set the modification timestamp. */
     void setModTime(long value);
 
@@ -54,4 +60,5 @@ public interface Experience {
 
     /** Provide a map of experience properties. */
     Map<String, Object> toMap();
+
 }

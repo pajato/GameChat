@@ -6,21 +6,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
-        <CheckBox style="@style/ChatListItemSelector" android:id="@+id/selector" />
+        <RadioButton style="@style/ChatListItemSelector" android:id="@+id/selector" />
+        <CheckBox style="@style/ChatListItemSelector" android:id="@+id/altSelector" />
         <ImageView style="@style/ChatListItemSelectorImage" android:id="@+id/chatIcon"
             android:tint="@color/colorPrimaryDark"
-            android:contentDescription="@string/RoomListIcon"
-            app:srcCompat="@drawable/ic_casino_black_24dp" />
+            android:contentDescription="@string/SelectUserListIcon"
+            app:srcCompat="@drawable/ic_account_circle_black_24dp" />
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
             <TextView style="@style/ChatListItemTitle" android:id="@+id/chatName"
                 tools:text="Fred C. Jones"/>
             <TextView style="@style/ChatListItemSubtitle" android:id="@+id/chatText"
-                tools:text="The Jones Boys Group" />
+                tools:text="My Group Name"/>
         </LinearLayout>
     </LinearLayout>
     <View style="@style/ChatListItemFooter" />

@@ -26,6 +26,7 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -39,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 
 /**
  * Provide a class to manage database access to Room objects.
@@ -176,5 +179,27 @@ public enum RoomManager {
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
         ExperienceManager.instance.setWatcher(groupKey, roomKey);
+    }
+
+    /** Return the room in the given group with the given members. */
+    public Room getPrivateRoom(final Group group, final Account... members) {
+        // Determine if the arguments preclude the existence of such a room.  Abort is so,
+        // otherwise find the room if it is to be found.
+        if (group == null || members.length != 2)
+            return null;
+        for (Account account : members)
+            if (account == null)
+                return null;
+        for (Room room : roomMap.values())
+            if (room.type == PRIVATE && room.groupKey.equals(group.key) && contains(room, members))
+                return room;
+        return null;
+    }
+
+    // Private instance methods.
+
+    /** Return true iff the given room contains the given members. */
+    private boolean contains(@NonNull final Room room, final Account... members) {
+        return room.isMemberPrivateRoom(members[0].id, members[1].id);
     }
 }

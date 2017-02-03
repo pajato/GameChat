@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.ListItem.PlayModeType;
+import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.playModeSetup;
+import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -150,11 +150,11 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Return either a null placeholder key value or a sentinel value as the experience key. */
     protected String getExperienceKey() {
-        // Determine if there is a signed in account.  If so use the null placeholder.
-        if (!AccountManager.instance.hasAccount()) return null;
-
-        // There is no signed in User.  Return one of the two sentinel values associated with being
-        // either signed out or without access to a network.
+        // Determine if there is a signed in account.  If so use the null placeholder, otherwise
+        // return one of the two sentinel values associated with being either signed out or having
+        // no network.
+        if (AccountManager.instance.hasAccount())
+            return null;
         final boolean ONLINE = NetworkManager.instance.isConnected();
         return ONLINE ? SIGNED_OUT_EXPERIENCE_KEY : OFFLINE_EXPERIENCE_KEY;
     }
@@ -202,7 +202,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 // User, copy the experience to a new room, and continue the game in that room with
                 // the current state.
                 ListItem listItem = new ListItem(new ExperienceItem(mExperience), mPlayMode);
-                DispatchManager.instance.chainFragment(this.getActivity(), playModeSetup, listItem);
+                DispatchManager.instance.chainFragment(this.getActivity(), selectUser, listItem);
                 break;
             default:
                 break;

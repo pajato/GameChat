@@ -33,7 +33,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
  *
  * @author Paul Michael Reilly
  */
-public class PlayModeSetupFragment extends BaseExperienceFragment {
+public class SelectRoomFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.

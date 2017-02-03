@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.exp.ExpType.checkers;
+import static com.pajato.android.gamechat.exp.ExpType.checkersET;
 
 /** Provide a Firebase model class for a checkers game experience. */
 @IgnoreExtraProperties
@@ -85,7 +85,7 @@ public class Checkers implements Experience {
         this.roomKey = roomKey;
         state = ACTIVE;
         turn = true;
-        type = checkers.name();
+        type = checkersET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_checkers";
     }
 
@@ -135,6 +135,16 @@ public class Checkers implements Experience {
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
+    }
+
+    /** Set the group key to satisfy the Experience contract. */
+    @Exclude @Override public void setGroupKey(final String key) {
+        this.groupKey = key;
+    }
+
+    /** Set the room key to satisfy the Experience contract. */
+    @Exclude @Override public void setRoomKey(final String key) {
+        this.roomKey = key;
     }
 
     /** Set the modification timestamp. */

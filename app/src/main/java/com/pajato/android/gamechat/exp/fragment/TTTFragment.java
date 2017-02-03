@@ -67,7 +67,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.newTtt;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
-import static com.pajato.android.gamechat.exp.ExpType.ttt;
+import static com.pajato.android.gamechat.exp.ExpType.tttET;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.END_COL;
@@ -153,7 +153,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Handle an experience posting event to see if this is a tictactoe experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != ttt) return;
+        if (event.experience == null || event.experience.getExperienceType() != tttET) return;
 
         // The experience is a tictactoe experience.  Start the game.
         mExperience = event.experience;
@@ -211,8 +211,10 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         String id = getOwnerId();
         TicTacToe model = new TicTacToe(key, id, name, tstamp, groupKey, roomKey, players);
         mExperience = model;
-        if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
-        else reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
+        if (groupKey != null && roomKey != null)
+            ExperienceManager.instance.createExperience(model);
+        else
+            reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
 
     /** Return a list of default TicTacToe players. */

@@ -23,6 +23,7 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
@@ -99,10 +100,14 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
         // converted snapshot.
         DataSnapshot typeSnapshot = snapshot.child("type");
         String value = typeSnapshot.getValue(String.class);
-        ExpType type = value != null ? ExpType.valueOf(value) : null;
-        if (type == null) return null;
+        ExpType expType = value != null ? ExpType.valueOf(value) : null;
+        if (expType == null)
+            return null;
+
+        // Obtain the fragment type from the experience type in order to convert to the right model
+        // class.
         @SuppressWarnings("unchecked")
-        Experience result = (Experience) snapshot.getValue(type.experienceClass);
+        Experience result = (Experience) snapshot.getValue(expType.experienceClass);
         return result;
     }
 

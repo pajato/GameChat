@@ -25,10 +25,9 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@drawable/border">
-        <TextView
+        <TextView android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/saveButton"
             android:layout_gravity="center|end"
             android:enabled="false"
             android:onClick="onClick"
@@ -36,13 +35,11 @@ http://www.gnu.org/licenses
             android:textStyle="bold"
             android:text="@string/action_save"/>
     </android.support.v7.widget.Toolbar>
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/chatList"
+    <android.support.v7.widget.RecyclerView android:id="@+id/ItemList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="32dp" />
-    <TextView
-        android:id="@+id/addMembers"
+    <TextView android:id="@+id/addMembers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="36dp"

@@ -61,7 +61,7 @@ http://www.gnu.org/licenses
         android:layout_weight="1.0">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/chatList"
+            android:id="@+id/ItemList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:tag="@integer/messagesList"/>

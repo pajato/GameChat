@@ -87,7 +87,7 @@ public enum DispatchManager {
         FragmentManager manager = context.getSupportFragmentManager();
         FragmentManager.enableDebugLogging(true);
         manager.beginTransaction()
-                .replace(type.getEnvelopeId(type), fragment)
+                .replace(type.getEnvelopeId(), fragment)
                 .addToBackStack(type.toString())
                 .commit();
     }
@@ -138,6 +138,25 @@ public enum DispatchManager {
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 
+    /**
+     * Start the next fragment of a given type as indicated by the current app state.  The fragment
+     * type will determine the dispatch kind.
+     *
+     * @param context The activity that will attach to the next fragment.
+     * @param type The fragment type, which detemrines the dispatch kind.
+     *
+     * @return TRUE iff the next fragment is started.
+     */
+    public boolean startNextFragment(final FragmentActivity context, final FragmentType type,
+                                     final ListItem item) {
+        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
+        // dispatcher if so.
+        if (type == null)
+            return false;
+        Dispatcher dispatcher = getDispatcher(type, item);
+        return dispatcher.type != null && startNextFragment(context, dispatcher);
+    }
+
     // Private instance methods.
 
     /**
@@ -156,16 +175,18 @@ public enum DispatchManager {
             case tictactoe:     // Handle an experience dispatch providing a type.
                 return new Dispatcher(type);
 
+            case chatRoomList:
             case createRoom:
             case joinRoom:
             case messageList:
             case selectChatGroupsRooms:
             case selectExpGroupsRooms:
-            case chatRoomList:  // Handle a chat dispatch providing both a type and an item.
+            case selectRoom:
+            case selectUser:    // Handle a chat dispatch providing both a type and an item.
                 return new Dispatcher(type, item);
 
             default:            // Handle all the other types in the normal fashion.
-                return getDispatcher(type.getKind(type));
+                return getDispatcher(type.getKind());
         }
     }
 
@@ -216,7 +237,7 @@ public enum DispatchManager {
             return false;
         fragment.onSetup(context, dispatcher);
         context.getSupportFragmentManager().beginTransaction()
-            .replace(dispatcher.type.getEnvelopeId(dispatcher.type), fragment)
+            .replace(dispatcher.type.getEnvelopeId(), fragment)
             .commit();
         return true;
     }
