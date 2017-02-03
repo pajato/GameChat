@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.common;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,7 +36,10 @@ import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
-import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.JoinManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
 import java.util.List;
@@ -222,7 +226,7 @@ public abstract class BaseFragment extends Fragment {
     protected boolean updateAdapterList() {
         // Determine if the fragment has a view and that it has a list type.  Abort if not,
         // otherwise ensure that the list adapter exists, creating it if necessary.
-        View view = mLayout != null ? mLayout.findViewById(R.id.chatList) : null;
+        View view = mLayout != null ? mLayout.findViewById(R.id.ItemList) : null;
         if (view == null)
             return false;
         RecyclerView recycler = (RecyclerView) view;
@@ -241,11 +245,36 @@ public abstract class BaseFragment extends Fragment {
         // list when showing messages.
         ListAdapter listAdapter = (ListAdapter) adapter;
         listAdapter.clearItems();
-        List<ListItem> items = DBUtils.instance.getList(type, mItem);
-        Log.d(TAG, String.format(Locale.US, "Updating with %d items.", items.size()));
+        List<ListItem> items = getList(type, mItem);
+        int size = items != null ? items.size() : 0;
+        Log.d(TAG, String.format(Locale.US, "Updating with %d items.", size));
         listAdapter.addItems(items);
         if (type == messageList)
             recycler.scrollToPosition(listAdapter.getItemCount() - 1);
         return true;
     }
+
+    /** Regturn null or a list to be displayed by a list adapter for a given fragment type. */
+    private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
+        switch (type) {
+            case chatGroupList: // Get the data to be shown in a list of groups.
+                return GroupManager.instance.getListItemData();
+            case messageList:   // Get the data to be shown in a room.
+                return MessageManager.instance.getListItemData(item);
+            case chatRoomList:  // Get the data to be show in a list of rooms.
+                return RoomManager.instance.getListItemData(item.groupKey);
+            case joinRoom:      // Get the candidate list of rooms and members.
+                return JoinManager.instance.getListItemData(item);
+            case selectExpGroupsRooms:
+            case selectChatGroupsRooms: // Get the group and room selections.
+                return InvitationManager.instance.getListItemData();
+            case selectRoom:    // Get all the visible rooms for the current players.
+                return PlayModeManager.instance.getListItemData(type);
+            case selectUser:    // Get all the visible Users for the current account holder.
+                return PlayModeManager.instance.getListItemData(type);
+            default:
+                return null;
+        }
+    }
+
 }

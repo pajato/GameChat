@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
-        <CheckBox style="@style/InviteRoomItemSelector" android:id="@+id/selectorCheck" />
+        <CheckBox style="@style/InviteRoomItemSelector" android:id="@+id/selector" />
         <ImageView style="@style/ChatListItemSelectorImage" android:id="@+id/chatIcon"
             android:tint="@color/colorPrimaryDark"
             android:contentDescription="@string/RoomListIcon"

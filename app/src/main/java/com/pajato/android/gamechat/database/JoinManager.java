@@ -71,25 +71,30 @@ public enum JoinManager {
         // Ensure that the member object exists, aborting if not.
         Room room = null;
         Account member = MemberManager.instance.getMember(item.groupKey);
-        if (member == null) return;
+        if (member == null)
+            return;
 
-        // Case on the item type to handle joing an existing public room or a freshly minted private
-        // room.
+        // Case on the item type to handle joinng an existing public room or a new private room.
         switch (item.type) {
+            case selectUser:
             case selectableMember:
                 // Create and persist the private chat room and get it's push key.
                 room = joinMember(item.groupKey, item.key);
+                item.roomKey = room != null ? room.key : null;
                 break;
             case selectableRoom:
                 // Update and persist the room.
                 room = joinRoom(item.groupKey, item.key);
+                item.roomKey = room != null ? room.key : null;
                 break;
             default:
                 break;
         }
 
-        // Abort if the room wasn't returned. Otherwise update and persist the member join list.
-        if (room == null) return;
+        // Abort if the room wasn't returned or if the room has already been joined. Otherwise
+        // update and persist the member join list.
+        if (room == null || member.joinList.contains(room.key))
+            return;
         member.joinList.add(room.key);
         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
         DBUtils.instance.updateChildren(path, member.toMap());
@@ -214,18 +219,23 @@ public enum JoinManager {
 
     /** Join the given member and the curernt User to a private room. */
     private Room joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
-        // Ensure that a current account, member and group profile all exist (abort if not) and
-        // obtain a push key for the new room.
+        // Ensure that a current account, member and group profile all exist. Abort if not,
+        // otherwise determine if the room already exists.  Return it if so, otherwise obtain a
+        // push key for the new room.
         Group group = GroupManager.instance.getGroupProfile(groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
         Account member = MemberManager.instance.getMember(groupKey, memberKey);
-        if (account == null || group == null || member == null) return null;
+        Room room = RoomManager.instance.getPrivateRoom(group, account, member);
+        if (account == null || group == null || member == null)
+            return null;
+        if (room != null)
+            return room;
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();
 
         // Build, update and persist a room object adding the two principals as members.
         long tstamp = new Date().getTime();
-        Room room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, PRIVATE);
+        room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, PRIVATE);
         room.addMember(account.id);
         room.addMember(memberKey);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);

@@ -97,7 +97,8 @@ public class Room {
         return result;
     }
 
-    /** Accessor for member list */
+    /** Mutator for member list */
+    @SuppressWarnings("unused")
     public void setMemberIdList(List<String> newList) {
         memberIdList = newList;
     }
@@ -116,10 +117,7 @@ public class Room {
 
     /** determine if a member already has been added to this room */
     @Exclude public boolean hasMember(final String member) {
-        if (memberIdList.contains(member)) {
-            return true;
-        }
-        return false;
+        return memberIdList.contains(member);
     }
 
     /** Determine if this room is a member-to-member chat room */

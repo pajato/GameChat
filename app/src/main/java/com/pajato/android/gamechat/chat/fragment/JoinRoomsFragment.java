@@ -83,7 +83,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
                 mJoinMap.clear();
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            case R.id.selectorCheck:
+            case R.id.selector:
                 processSelection(event, (CheckBox) event.view);
                 break;
             default:
@@ -118,20 +118,19 @@ public class JoinRoomsFragment extends BaseChatFragment {
         }
     }
 
-    /** Establish the create time state. */
-    @Override public void onStart() {
-        // Establish the list type and setup the toolbar.
-        super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
-        FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
-    }
-
     /** Reset the FAM to use the game home menu. */
     @Override public void onResume() {
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_check_white_24dp);
         FabManager.chat.init(this);
         FabManager.chat.setVisibility(this, View.VISIBLE);
+    }
+
+    /** Establish the toolbar and FAB. */
+    @Override public void onStart() {
+        super.onStart();
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
     }
 
     // Private instance methods.
@@ -168,7 +167,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
 
     /** ... */
     private void updateSelections(@NonNull final SelectionType type, final boolean state) {
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List<ListItem> itemList = adapter.getItems();
         for (ListItem item : itemList) {

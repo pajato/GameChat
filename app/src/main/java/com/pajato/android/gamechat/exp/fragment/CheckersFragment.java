@@ -137,7 +137,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not checkers.  Ignore the event if not, otherwise
         // resume the game.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.checkers)
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.checkersET)
             return;
         mExperience = event.experience;
         resume();
@@ -186,8 +186,10 @@ public class CheckersFragment extends BaseExperienceFragment {
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
         Checkers model = new Checkers(key, id, 0, name, tstamp, groupKey, roomKey, players);
         mExperience = model;
-        if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
-        else reportError(context, R.string.ErrorCheckersCreation, groupKey, roomKey);
+        if (groupKey != null && roomKey != null)
+            ExperienceManager.instance.createExperience(model);
+        else
+            reportError(context, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
 
     /** Notify the user about an error and log it. */

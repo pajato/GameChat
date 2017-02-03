@@ -17,6 +17,10 @@
 
 package com.pajato.android.gamechat.common.adapter;
 
+import android.support.annotation.NonNull;
+
+import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
+
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
@@ -30,6 +34,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.room;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomsHeader;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
 
@@ -61,15 +66,14 @@ public class ListItem {
         room,
         roomsHeader,
         roomList,
+        selectUser,
+        selectRoom,
         selectableMember,
         selectableRoom,
         inviteGroup,
         inviteRoom,
         inviteCommonRoom
     }
-
-    /** Identifies the types of play. */
-    public enum PlayModeType {comptuer, local, user}
 
     // Public instance variables.
 
@@ -115,7 +119,7 @@ public class ListItem {
     // Private instance variables.
 
     /** A description of the item. */
-    private  String mDesc;
+    private String mDesc;
 
     // Public constructors.
 
@@ -239,6 +243,18 @@ public class ListItem {
         String format = "Selectable room item with name {%s} and text: {%s}.";
         mDesc = String.format(Locale.US, format, name, text);
         enabled = true;
+    }
+
+    /** Build an instance for a given User item. */
+    public ListItem(@NonNull final UserItem item) {
+        type = selectUser;
+        groupKey = item.groupKey;
+        key = item.memberKey;
+        name = item.name;
+        text = item.text;
+        url = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
+        mDesc = String.format(Locale.US, format, name, email, url);
     }
 
     /** Build an instance for a room item used for invitations */

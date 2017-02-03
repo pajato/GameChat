@@ -72,7 +72,7 @@ public class SelectChatInviteFragment extends BaseChatFragment {
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            case R.id.selectorCheck:
+            case R.id.selector:
                 processSelection(event, (CheckBox) event.view);
                 break;
             default:
@@ -126,7 +126,7 @@ public class SelectChatInviteFragment extends BaseChatFragment {
     /** Return a map of group key to data representing the current selections of groups/rooms */
     private Map<String, GroupInviteData> getSelections() {
         Map<String, GroupInviteData> selections = new HashMap<>();
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         // First loop through adapter items and handle groups
         for (ListItem item : adapter.getItems()) {
@@ -168,7 +168,7 @@ public class SelectChatInviteFragment extends BaseChatFragment {
         clickedItem.selected = !clickedItem.selected;
         checkBox.setChecked(clickedItem.selected);
 
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
 
@@ -220,7 +220,7 @@ public class SelectChatInviteFragment extends BaseChatFragment {
 
     /** Called from FAM click handling to update selections in the recycler view adapter list */
     private void updateSelections(final boolean selectedState) {
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> itemList = adapter.getItems();
 
@@ -236,7 +236,7 @@ public class SelectChatInviteFragment extends BaseChatFragment {
     /** Update the invite button state based on the current join map content. */
     private void updateSendInviteButton() {
         View inviteButton = mLayout.findViewById(R.id.inviteButton);
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.chatList);
+        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
         for (ListItem item : adapterList) {
