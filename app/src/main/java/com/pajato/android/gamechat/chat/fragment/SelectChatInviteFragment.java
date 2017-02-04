@@ -72,10 +72,8 @@ public class SelectChatInviteFragment extends BaseChatFragment {
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
-            case R.id.selector:
-                processSelection(event, (CheckBox) event.view);
-                break;
             default:
+                processSelection(event.view);
                 break;
         }
     }
@@ -156,32 +154,60 @@ public class SelectChatInviteFragment extends BaseChatFragment {
         }
     }
 
+    /** Return a boolean value obtained by processing the given item view */
+    private boolean getValue(@NonNull final View itemView) {
+        // Handle a checkbox (an unlikely but possible event.)
+        View view = itemView.findViewById(R.id.selector);
+        if (view != null && view instanceof CheckBox && view.getVisibility() == View.VISIBLE) {
+            ((CheckBox) view).toggle();
+            return ((CheckBox) view).isChecked();
+        }
+
+        // Handle other by doing nothing, i.e. return the current state of the save button.
+        View saveButton = mLayout.findViewById(R.id.inviteButton);
+        return saveButton.isEnabled();
+    }
+
     /** Process a selection by updating the recycler view adapter's items */
-    private void processSelection(@NonNull final ClickEvent event, @NonNull final CheckBox checkBox) {
+    private void processSelection(@NonNull final View view) {
         // Set the checkbox visibility and get the item object from the event payload.
-        ListItem clickedItem = null;
-        Object payload = event.view != null ? event.view.getTag() : null;
-        if (payload != null && payload instanceof ListItem) clickedItem = (ListItem) payload;
-        if (clickedItem == null) return;
+        Object payload = view.getTag();
+        if (payload == null || !(payload instanceof ListItem))
+            return;
+        ListItem clickedItem = (ListItem) payload;
+        // Ignore clicks on common room
+        if (clickedItem.type == inviteCommonRoom)
+            return;
+
+        boolean value;
+        switch (view.getId()) {
+            case R.id.selector:
+                // Checkbox click
+                value = ((CheckBox) view).isChecked();
+                break;
+            default:
+                // handle a view item clicked
+                value = getValue(view);
+                break;
+        }
 
         // Toggle the selection state and operate accordingly on the selected items lists.
         clickedItem.selected = !clickedItem.selected;
-        checkBox.setChecked(clickedItem.selected);
 
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
-        ListAdapter adapter = (ListAdapter) view.getAdapter();
+        RecyclerView recyclerView = (RecyclerView) mLayout.findViewById(R.id.ItemList);
+        ListAdapter adapter = (ListAdapter) recyclerView.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
 
         // If a group is selected, also select it's common room; if deselected, also deselect all
         // of it's rooms. If a room is selected, also select it's group and common room. Common
         // room selection is disabled, so don't check for that.
         if (clickedItem.type == inviteGroup) {
-            if (clickedItem.selected)
+            if (value)
                 selectGroupForInvite(clickedItem, adapterList);
             else
                 deselectGroupForInvite(clickedItem, adapterList);
         } else if (clickedItem.type == inviteRoom) {
-            if (clickedItem.selected)
+            if (value)
                 selectRoomForInvite(clickedItem, adapterList);
         }
         adapter.notifyDataSetChanged();

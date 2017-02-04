@@ -120,7 +120,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     // Protected instance methods.
 
-    /** Log and prsent a toast message to the User. */
+    /** Log and present a toast message to the User. */
     protected void abort(final String message) {
         logEvent(String.format(Locale.US, "Error: (create %s): %s.", mCreateType, message));
         // TODO: throw up a toast or snackbar.

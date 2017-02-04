@@ -118,7 +118,7 @@ public class SelectUserFragment extends BaseExperienceFragment {
         saveButton.setEnabled(value);
     }
 
-    /** Return a boolean value obtaine by processing the given item view. */
+    /** Return a boolean value obtained by processing the given item view. */
     private boolean getValue(@NonNull final View itemView) {
         // Handle a radio button (the most likely event.)
         View view = itemView.findViewById(R.id.selector);

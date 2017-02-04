@@ -19,7 +19,9 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -78,6 +80,16 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 break;
             case R.string.InviteFriendFromChat:
                 DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
+                break;
+            case R.string.CreateRestrictedUserTitle:
+                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
+                    String protectedWarning = "Protected Users cannot make other Protected Users.";
+                    Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                AccountManager.instance.mChaperone = AccountManager.instance.getCurrentAccountId();
+                FirebaseAuth.getInstance().signOut();
+                AccountManager.instance.signIn(getContext());
                 break;
             default:
                 // ...
