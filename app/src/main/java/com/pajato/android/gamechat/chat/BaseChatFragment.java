@@ -35,8 +35,6 @@ import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
 
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
