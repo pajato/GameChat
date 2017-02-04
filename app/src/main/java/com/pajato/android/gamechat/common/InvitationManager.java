@@ -40,7 +40,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.CommonRoomItem;
 import com.pajato.android.gamechat.common.adapter.InviteRoomItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
@@ -71,6 +70,7 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 
 /**
  * Handle invitations to groups.
@@ -393,7 +393,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
             List<Room> rooms = RoomManager.instance.getRooms(entry.getKey(), true);
             for (Room aRoom : rooms) {
                 if (aRoom.type == COMMON)
-                    result.add(new ListItem(new CommonRoomItem(aRoom.groupKey, aRoom.key)));
+                    result.add(new ListItem(inviteCommonRoom, aRoom.groupKey, aRoom.key));
                 else
                     result.add(new ListItem(new InviteRoomItem(aRoom.groupKey, aRoom.key)));
             }

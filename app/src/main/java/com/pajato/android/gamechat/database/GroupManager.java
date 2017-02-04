@@ -24,7 +24,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
@@ -47,7 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -76,7 +76,7 @@ public enum GroupManager {
     // Private instance variables.
 
     /** A map associating date header type values with lists of group push keys. */
-    private Map<DateHeaderItem.DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap =
+    private Map<ListItem.DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap =
             new HashMap<>();
 
     /** A map associating a group push key with it's most recent new message. */
@@ -100,7 +100,7 @@ public enum GroupManager {
     }
 
     /** Return a list of group push keys associated with a given date header type. */
-    public List<String> getGroupList(final DateHeaderItem.DateHeaderType type) {
+    public List<String> getGroupList(final ListItem.DateHeaderType type) {
         return mDateHeaderTypeToGroupListMap.get(type);
     }
 
@@ -223,11 +223,11 @@ public enum GroupManager {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
         List<ListItem> result = new ArrayList<>();
-        for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
+        for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
             List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
             if (groupList != null && groupList.size() > 0) {
                 // Add the header item followed by all the group items.
-                result.add(new ListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(date, dht.resId));
                 for (String groupKey : groupList) {
                     if(!(groupKey.equals(AccountManager.instance.getMeGroupKey()))) {
                         result.add(new ListItem(new GroupItem(groupKey)));
@@ -259,11 +259,11 @@ public enum GroupManager {
         for (String key : mGroupToLastNewMessageMap.keySet()) {
             // Determine which date header type the current group should be associated with.
             long groupTimestamp = mGroupToLastNewMessageMap.get(key).createTime;
-            for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
+            for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
                 // Determine if the current group fits the constraints of the current date header
                 // type.  The declaration of DateHeaderType is ordered so that this algorithm will
                 // work.
-                if (dht == old || nowTimestamp - groupTimestamp <= dht.getLimit()) {
+                if (dht == old || nowTimestamp - groupTimestamp <= dht.limit) {
                     // This is the one.  Add this group to the associated list.
                     List<String> list = mDateHeaderTypeToGroupListMap.get(dht);
                     if (list == null) {

@@ -23,7 +23,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
 import com.pajato.android.gamechat.common.model.Account;
@@ -42,6 +41,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 
 /**
  * Provide a class to manage database access to Room objects.
@@ -125,11 +125,11 @@ public enum RoomManager {
         // on the date header type ordering.
         Map<String, Map<String, Message>> roomMap;
         List<ListItem> result = new ArrayList<>();
-        for (DateHeaderItem.DateHeaderType dht : DateHeaderItem.DateHeaderType.values()) {
+        for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
             List<String> groupList = GroupManager.instance.getGroupList(dht);
             if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {
                 // Add the header item followed by all the room items in the given group.
-                result.add(new ListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(date, dht.resId));
                 roomMap = MessageManager.instance.messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
                     result.add(new ListItem(new RoomItem(groupKey, key)));

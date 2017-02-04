@@ -19,16 +19,18 @@ package com.pajato.android.gamechat.common.adapter;
 
 import android.support.annotation.NonNull;
 
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contactHeader;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.group;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
@@ -53,7 +55,30 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selec
  */
 public class ListItem {
 
-    // Public enums.
+    // Public enums
+
+    /** Provide an enumeration of the date header limit and resource data used in handling lists. */
+    public enum DateHeaderType {
+        now (60000L, R.string.now),
+        recent (3600000L, R.string.recent),
+        today (3600000L * 24, R.string.today),
+        yesterday (3600000L * 48, R.string.yesterday),
+        thisWeek (3600000L * 24 * 7, R.string.thisWeek),
+        lastWeek (3600000L * 24 * 14, R.string.lastWeek),
+        thisMonth (3600000L * 24 * 30, R.string.thisMonth),
+        lastMonth (3600000L * 24 * 60, R.string.lastMonth),
+        thisYear (3600000L * 24 * 365, R.string.thisYear),
+        lastYear (3600000L * 24 * 365 * 2, R.string.lastYear),
+        old (-1, R.string.old);
+
+        public long limit;
+        public int resId;
+
+        DateHeaderType(final long limit, final int resId) {
+            this.limit = limit;
+            this.resId = resId;
+        }
+    }
 
     /** Identifies the types of list items supported. */
     public enum ItemType {
@@ -99,7 +124,10 @@ public class ListItem {
     int nameResourceId;
 
     /** The experience play mode type for this item. */
-    public PlayModeType playMode;
+    private PlayModeType playMode;
+
+    /** The contact phone number. */
+    private String phone;
 
     /** The room (push) key, possibly null, used for accessing an experience. */
     public String roomKey;
@@ -123,29 +151,19 @@ public class ListItem {
 
     // Public constructors.
 
-    /** Build an instance for a given contact header item. */
-    public ListItem(final ContactHeaderItem item) {
-        type = contactHeader;
-        nameResourceId = item.getNameResourceId();
-        mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
+    /** Build a header instance for a given resource id. */
+    public ListItem(final ItemType type, int resId) {
+        this.type = type;
+        nameResourceId = resId;
     }
 
-    /** Build an instance for a given contact list item. */
-    public ListItem(final ContactItem item) {
+    /** Build an instance for a contact item. */
+    public ListItem(final String name, final String email, final String phone, final String url) {
         type = contact;
-        name = item.name;
-        email = item.email;
-        // TODO: uncomment when phone numbers are relevant: phone = item.phone;
-        url = item.url;
-        String format = "Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}.";
-        mDesc = String.format(Locale.US, format, name, email, "todo/tbd", url);
-    }
-
-    /** Build an instance for a given date header item. */
-    public ListItem(final DateHeaderItem item) {
-        type = date;
-        nameResourceId = item.getNameResourceId();
-        mDesc = String.format(Locale.US, "Contact header with id: {%d}.", nameResourceId);
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.url = url;
     }
 
     /** Build an instance for a given room list item. */
@@ -155,8 +173,6 @@ public class ListItem {
         groupKey = item.groupKey;
         roomKey = item.roomKey;
         key = item.key;
-        String format = "Experience item with group/room/experience keys {%s/%s/%s} and mode {%s}.";
-        mDesc = String.format(Locale.US, format, groupKey, roomKey, key, playMode);
     }
 
     /** Build an instance for a given group list item. */
@@ -269,19 +285,52 @@ public class ListItem {
         enabled = true;
     }
 
-    /** Build an instance for a common room item where selection is reflected but never enabled */
-    public ListItem(final CommonRoomItem item) {
-        type = inviteCommonRoom;
-        groupKey = item.groupKey;
-        key = item.roomKey;
-        name = item.name;
-        text = item.text;
-        String format = "Common room item with name {%s} and text: {%s}.";
-        mDesc = String.format(Locale.US, format, name, text);
+    /** Build an instance for a common room item where selection is reflected but disabled */
+    public ListItem(final ItemType type, final String groupKey, final String key) {
+        this.type = type;
+        this.groupKey = groupKey;
+        this.key = key;
+        Room room = RoomManager.instance.getRoomProfile(key);
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        name = room.name;
+        text = group != null ? group.name : "";
         enabled = false;
     }
 
     // Public instance methods.
 
-    @Override public String toString() {return mDesc;}
+    @Override public String toString() {
+        return getDescription();
+    }
+
+    // Private instance methods.
+
+    /** Return a description for the item. */
+    private String getDescription() {
+        // Deal with a uninitialized type, a legacy type and a modern type in that order to provide
+        // a description of the list item.
+        String format;
+        if (type == null)
+            return "Uninitialized list item.";
+        if (mDesc != null)
+            return mDesc;
+        switch (type) {
+            case contact:
+                format = "Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}.";
+                return String.format(Locale.US, format, name, email, phone, url);
+            case contactHeader:
+                return String.format(Locale.US, "Contact header with resource id: {%d}.", nameResourceId);
+            case date:
+                return String.format(Locale.US, "Date header with resource id: {%d}.", nameResourceId);
+            case experience:
+                format = "Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}.";
+                return String.format(Locale.US, format, groupKey, roomKey, key, playMode);
+            case inviteCommonRoom:
+                format = "Common room item with name {%s} and text: {%s}.";
+                return String.format(Locale.US, format, name, text);
+            default:
+                format = "Undescribed type: {%s}.";
+                return String.format(Locale.US, format, type);
+        }
+    }
 }

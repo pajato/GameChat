@@ -35,7 +35,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.pajato.android.gamechat.common.adapter.ContactItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 
 import java.util.ArrayList;
@@ -141,10 +140,8 @@ public enum ContactManager {
                 String value = cursor.getString(cursor.getColumnIndex(HAS_PHONE_NUMBER));
                 String phone = Integer.parseInt(value) > 0 ? getPhone(resolver, id) : null;
                 String url = getPhotoUrl(resolver, id);
-                if ((email != null && email.length() > 0) || phone != null && phone.length() > 0) {
-                    ListItem item = new ListItem(new ContactItem(name, email, phone, url));
-                    mContactMap.put(name, item);
-                }
+                if ((email != null && email.length() > 0) || phone != null && phone.length() > 0)
+                    mContactMap.put(name, new ListItem(name, email, phone, url));
             }
         }
         cursor.close();
