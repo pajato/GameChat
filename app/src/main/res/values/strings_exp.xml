@@ -13,9 +13,6 @@
     <string name="InviteFriendNav">Invite friends</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>
-    <string name="NewGameCheckers">New Checkers Game</string>
-    <string name="NewGameChess">New Chess Game</string>
-    <string name="NewGameTTT">New Tic-Tac-Toe Game</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesTitleText">Games</string>
     <string name="PlayAgain">Play again</string>

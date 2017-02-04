@@ -22,9 +22,8 @@ import android.support.annotation.NonNull;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.DateHeaderItem;
-import com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType;
 import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
 import com.pajato.android.gamechat.common.adapter.MessageItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
@@ -43,7 +42,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
-import static com.pajato.android.gamechat.common.adapter.DateHeaderItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 
 /**
  * Provide a class to manage the app interactions with the database for lists of chat messages.
@@ -121,6 +121,7 @@ public enum MessageManager {
     }
 
     /** Return a possibly empty list of messages for a given group and room. */
+    @SuppressWarnings("unused")
     public List<Message> getMessageList(final String groupKey, final String roomKey) {
         // Ensure there are some messages to be had in the group.  Return the empty list if none
         // are found, otherwise return all messages in that room.
@@ -175,7 +176,7 @@ public enum MessageManager {
         long now = new Date().getTime();
         for (DateHeaderType type : DateHeaderType.values()) {
             // Determine if this is the right dht value.
-            if (now - message.createTime <= type.getLimit()) {
+            if (now - message.createTime <= type.limit) {
                 // This is the correct dht value to use. Done.
                 return type;
             }
@@ -194,7 +195,7 @@ public enum MessageManager {
             DateHeaderType dht = types[index];
             List<Message> list = messageMap.get(dht);
             if (list != null) {
-                result.add(new ListItem(new DateHeaderItem(dht)));
+                result.add(new ListItem(date, dht.resId));
                 Collections.sort(list, new MessageComparator());
                 for (Message message : list) {
                     result.add(new ListItem(new MessageItem(message)));
@@ -205,7 +206,7 @@ public enum MessageManager {
         return result;
     }
 
-    /** Sort lists of messages after they've been sorted by DateHeaderItem.DateHeaderTypes. */
+    /** Sort lists of messages after they've been sorted into date categories. */
     private class MessageComparator implements Comparator<Message> {
         @Override public int compare(Message m1, Message m2) {
             Date d1 = new Date(m1.createTime);
