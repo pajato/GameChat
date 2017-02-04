@@ -89,7 +89,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, mItem);
                 break;
             case R.string.InviteFriendFromChat:
-                InvitationManager.instance.extendInvitation(getActivity(), mItem.groupKey);
+                InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
             default:
                 // ...
                 break;

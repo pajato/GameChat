@@ -67,7 +67,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
                 if (isInMeGroup())
                     DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 else
-                    InvitationManager.instance.extendInvitation(getActivity(),
+                    InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
                 break;
             case R.string.SwitchToChat:

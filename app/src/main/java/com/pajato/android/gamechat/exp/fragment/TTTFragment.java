@@ -136,7 +136,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                 if (isInMeGroup())
                     DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 else
-                    InvitationManager.instance.extendInvitation(getActivity(),
+                    InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
                 break;
             case R.string.SwitchToChat:
@@ -412,7 +412,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     private void reportError(final Context context, final int messageResId, String... args) {
         // Let the User know that something is amiss.
         String message = context.getString(messageResId);
-        NotificationManager.instance.notify(this, message, false);
+        NotificationManager.instance.notifyNoAction(this, message);
 
         // Generate a logcat item casing on the given resource id.
         String format;
@@ -535,7 +535,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notify(this, getDoneMessage(model), true);
+        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
         model.state = TicTacToe.PENDING;
         ExperienceManager.instance.updateExperience(mExperience);
     }

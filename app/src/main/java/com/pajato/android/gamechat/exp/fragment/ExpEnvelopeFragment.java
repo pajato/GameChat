@@ -80,9 +80,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         if (payload == null || !(payload instanceof MenuEntry)) return;
 
         // these aren't handled here so just return
-        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromExpEnv ||
-                ((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat ||
-                ((MenuEntry)payload).titleResId == R.string.InviteFriendFromTTT) {
+        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat) {
             return;
         }
 
