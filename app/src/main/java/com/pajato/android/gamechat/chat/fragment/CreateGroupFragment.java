@@ -62,7 +62,8 @@ public class CreateGroupFragment extends BaseCreateFragment {
         // control.
         super.onStart();
         mCreateType = CreateType.group;
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        int titleResId = R.string.CreateGroupMenuTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
         RadioGroup accessControl = (RadioGroup) mLayout.findViewById(R.id.AccessControl);
         accessControl.setVisibility(View.GONE);
 

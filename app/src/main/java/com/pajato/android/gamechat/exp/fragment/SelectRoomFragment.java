@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -40,17 +41,17 @@ public class SelectRoomFragment extends BaseExperienceFragment {
         logEvent("onClick (playModeSetup)");
     }
 
-    /** Initialize the fragment by setting up the FAB and toolbar. */
-    @Override public void onStart() {
-        super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
-    }
-
     /** .... */
     @Override public void onResume() {
         super.onResume();
         FabManager.game.init(this);
         updateAdapterList();
-        ToolbarManager.instance.setTitle(this, this.type.toolbarType.titleResourceId);
+    }
+
+    /** Initialize the fragment by setting up the FAB and toolbar. */
+    @Override public void onStart() {
+        super.onStart();
+        int titleResId = R.string.SelectRoomToolbarTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
     }
 }

@@ -45,7 +45,7 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.all;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.members;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.rooms;
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
@@ -129,7 +129,8 @@ public class JoinRoomsFragment extends BaseChatFragment {
     /** Establish the toolbar and FAB. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        int titleResId = R.string.JoinRoomsMenuTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
     }
 

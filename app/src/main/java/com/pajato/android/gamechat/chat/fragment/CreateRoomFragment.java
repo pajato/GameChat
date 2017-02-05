@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.inputmethod.InputMethodManager;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -75,7 +76,8 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Establish the list type and setup the toolbar.
         mCreateType = CreateType.room;
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        int titleResId = R.string.CreateRoomMenuTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
 
         // Set up the room profile.
         mRoom = new Room();

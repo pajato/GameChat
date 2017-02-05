@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatOffline;
 import static com.pajato.android.gamechat.common.FragmentType.chatSignedOut;
@@ -48,9 +48,6 @@ import static com.pajato.android.gamechat.common.FragmentType.expSignedOut;
 public enum DispatchManager {
     instance;
 
-    /** Provide a discriminant to differentiate a chat vs experience dispatcher. */
-    public enum DispatcherKind {chat, exp}
-
     // Private class constants.
 
     /** The logcat tag. */
@@ -62,6 +59,16 @@ public enum DispatchManager {
     private Map<FragmentType, BaseFragment> mFragmentMap = new HashMap<>();
 
     // Public instance methods.
+
+    /**
+     * Attach a drill down fragment identified by a type, creating that fragment as necessary.
+     *
+     * @param context The activity attached to the fragment that spawned this call.
+     * @param type The type of the fragment to drill into.  One will be created if necessary.
+     */
+    public void chainFragment(final FragmentActivity context, final FragmentType type) {
+        chainFragment(context, type, null);
+    }
 
     /**
      * Attach a drill down fragment identified by a type, creating that fragment as necessary.
@@ -109,7 +116,7 @@ public enum DispatchManager {
      *
      * @return TRUE iff the next fragment is started.
      */
-    public boolean startNextFragment(final FragmentActivity context, final DispatcherKind kind) {
+    public boolean startNextFragment(final FragmentActivity context, final FragmentKind kind) {
         // Ensure that the dispatcher has a valid kind.  If not then abort, otherwise create a
         // dispatcher of the given kind and determine if an associated fragment can be started.
         // Return false if not, otherwise start the fragment and return true iff the fragment is
@@ -191,7 +198,7 @@ public enum DispatchManager {
     }
 
     /** Return a dispatcher object based on the current message list state. */
-    private Dispatcher getDispatcher(final DispatcherKind kind) {
+    private Dispatcher getDispatcher(final FragmentKind kind) {
         // Deal with an off line user, a signed out user, or no messages or experiences at all, in
         // that order.  In each case, return an empty dispatcher but for the fragment type of the
         // next screen to show.
@@ -207,7 +214,8 @@ public enum DispatchManager {
                 type = kind == chat ? chatSignedOut : expSignedOut;
                 return new Dispatcher(type);
 
-            default: return new Dispatcher(kind == chat ? chatGroupList : expGroupList);
+            default:
+                return new Dispatcher(kind == chat ? chatGroupList : expGroupList);
         }
     }
 

@@ -22,6 +22,7 @@ import android.support.v4.view.ViewPager;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -30,7 +31,8 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
+import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -60,21 +62,22 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
             return;
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.InviteFriendsOverflow:
+                String groupKey = mExperience.getGroupKey();
+                if (isInMeGroup())
+                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
+                else
+                    InvitationManager.instance.extendGroupInvitation(getActivity(), groupKey);
+                break;
             case R.string.SwitchToChat:
                 // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                if (viewPager != null)
+                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 break;
             default:
                 break;
         }
-    }
-
-    /** Initialize the fragment by setting up the FAB and toolbar. */
-    @Override public void onStart() {
-        super.onStart();
-        FabManager.game.init(this);
-        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -85,6 +88,13 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
         super.onResume();
         FabManager.game.setImage(R.drawable.ic_add_white_24dp);
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
-        ToolbarManager.instance.setTitle(this, R.string.NoGamesTitleText);
+    }
+
+    /** Initialize the fragment by setting up the FAB and toolbar. */
+    @Override public void onStart() {
+        super.onStart();
+        FabManager.game.init(this);
+        int titleResId = R.string.NoGamesToolbarTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, settings);
     }
 }

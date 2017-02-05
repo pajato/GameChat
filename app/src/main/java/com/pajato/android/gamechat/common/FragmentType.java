@@ -32,7 +32,6 @@ import com.pajato.android.gamechat.chat.fragment.SelectChatInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
-import com.pajato.android.gamechat.common.DispatchManager.DispatcherKind;
 import com.pajato.android.gamechat.common.ToolbarManager.ToolbarType;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.fragment.CheckersFragment;
@@ -49,8 +48,8 @@ import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatChain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createGroupTT;
@@ -81,7 +80,7 @@ public enum FragmentType {
     createGroup (CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
     createRoom (CreateRoomFragment.class, createRoomTT, R.layout.chat_create),
     expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
-    expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_none),
+    expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_list),
     expOffline (ExpShowOfflineFragment.class, expMain, R.layout.exp_offline),
     expRoomList (ExpShowRoomsFragment.class, expChain, R.layout.exp_none),
     expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out),
@@ -146,7 +145,7 @@ public enum FragmentType {
     }
 
     /** Return the dispatch kind for this fragment type. */
-    public DispatcherKind getKind() {
+    public FragmentKind getKind() {
         switch(this) {
             case chatEnvelope:
             case chatGroupList:

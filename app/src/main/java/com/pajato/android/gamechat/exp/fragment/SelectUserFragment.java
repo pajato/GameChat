@@ -63,13 +63,12 @@ public class SelectUserFragment extends BaseExperienceFragment {
         super.onResume();
         FabManager.game.init(this);
         updateAdapterList();
-        ToolbarManager.instance.setTitle(this, R.string.SelectUserToolbarTitle);
     }
 
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this);
+        ToolbarManager.instance.init(this, R.string.SelectUserToolbarTitle);
     }
 
     // Private instance methods.

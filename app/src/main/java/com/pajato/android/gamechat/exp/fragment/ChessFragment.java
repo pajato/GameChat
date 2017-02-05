@@ -35,7 +35,6 @@ import com.pajato.android.gamechat.exp.model.ChessBoard;
 import com.pajato.android.gamechat.exp.model.ChessHelper;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -276,7 +275,6 @@ public class ChessFragment extends BaseExperienceFragment {
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            ProgressManager.instance.hide();
             updateUiFromExperience();
         }
     }
@@ -468,7 +466,7 @@ public class ChessFragment extends BaseExperienceFragment {
     private void startGame() {
         // Initialize the new board state.
         grid.removeAllViews();
-        Chess model = (Chess)mExperience;
+        Chess model = (Chess) mExperience;
         if (model.board == null) model.board = new ChessBoard();
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         if (winner != null) winner.setText("");
@@ -622,7 +620,7 @@ public class ChessFragment extends BaseExperienceFragment {
             return;
         }
 
-        Chess model = (Chess)mExperience;
+        Chess model = (Chess) mExperience;
         possibleMoves.clear();
         ChessPiece.PieceType highlightedPieceType = board.getPieceType(highlightedIndex);
 
@@ -734,7 +732,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Handle the Castling Booleans.
         ChessPiece currentPiece = board.retrieve(highlightedIndex);
-        Chess model = (Chess)mExperience;
+        Chess model = (Chess) mExperience;
         if (currentPiece != null) {
             if (currentPiece.isTeamPiece(ChessPiece.PieceType.KING, ChessPiece.ChessTeam.PRIMARY)) {
                 model.primaryKingHasMoved = true;
@@ -766,7 +764,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param switchPlayer if false, just set up the UI views but don't switch the player turn.
      */
     private void handleTurnChange(final boolean switchPlayer) {
-        boolean turn = ((Chess)mExperience).turn;
+        boolean turn = ((Chess) mExperience).turn;
         if(switchPlayer) {
             turn = ((Chess) mExperience).toggleTurn();
         }
@@ -886,7 +884,7 @@ public class ChessFragment extends BaseExperienceFragment {
                     break;
             }
 
-            ChessBoard board = ((Chess)mExperience).board;
+            ChessBoard board = ((Chess) mExperience).board;
             board.add(position, pieceType, team);
             TextView promotedPieceTile = (TextView) grid.getChildAt(position);
             promotedPieceTile.setText(ChessPiece.getUnicodeText(pieceType));

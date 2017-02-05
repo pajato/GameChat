@@ -13,6 +13,8 @@
     <string name="DefaultRoomName">Common</string>
     <string name="FutureFeature">is a future feature. Volunteer by sending feedback using the Help &amp; Feedback menu item.</string>
     <string name="Group">Group</string>
+    <string name="GroupsToolbarTitle">Groups with Messages</string>
+    <string name="GroupMeToolbarTitle">My Chat Room</string>
     <string name="ListIconDesc">The list icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
@@ -20,7 +22,6 @@
     <string name="InsertMapDesc">Insert map image button.</string>
     <string name="InsertPhoto">Inserting a photo from your device</string>
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
-    <string name="InviteMembersFeature">Inviting group or room members</string>
     <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinedOneRoom">You have joined the %1$s room in group %2$s</string>
@@ -36,6 +37,7 @@
     <string name="PickForInvitationTitle">Room Invitations</string>
     <string name="RoomListIcon">The room list icon.</string>
     <string name="RoomsAvailableHeaderText">Rooms</string>
+    <string name="RoomsToolbarTitle">Rooms with Messages</string>
     <string name="SelectAllMenuTitle">Select All</string>
     <string name="SelectMembersMenuTitle">Select All Members</string>
     <string name="SelectRoomsMenuTitle">Select All Rooms</string>

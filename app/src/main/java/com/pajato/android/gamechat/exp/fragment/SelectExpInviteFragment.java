@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
@@ -105,7 +105,8 @@ public class SelectExpInviteFragment extends BaseChatFragment {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
         super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        int titleResId = R.string.InviteTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
         FabManager.game.setMenu(INVITE_EXP_FAM_KEY, getSelectionMenu());
     }
 

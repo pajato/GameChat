@@ -24,7 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
@@ -89,17 +88,13 @@ public enum ToolbarManager {
     public enum ToolbarType {
         chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         chatMain (R.drawable.ic_more_vert_white_24dp),
-        createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                       R.string.CreateGroupMenuTitle),
-        createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                      R.string.CreateRoomMenuTitle),
+        createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         expMain (R.drawable.ic_more_vert_white_24dp),
         expMoveTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
-        joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                R.string.JoinRoomsMenuTitle),
-        selectInviteTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp,
-                R.string.PickForInvitationTitle),
+        joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        selectInviteTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         none ();
 
         // Instance variables.
@@ -112,9 +107,6 @@ public enum ToolbarManager {
 
         /** The navigation icon resource id. */
         int navigationIconResourceId;
-
-        /** The toolbar title resource id. */
-        public int titleResourceId;
 
         // Constructors.
 
@@ -131,12 +123,6 @@ public enum ToolbarManager {
         ToolbarType(final int overflowMenuIconResourceId, final int navigationIconResourceId) {
             this(overflowMenuIconResourceId);
             this.navigationIconResourceId = navigationIconResourceId;
-        }
-
-        /** Build an instance using all possible arguments. */
-        ToolbarType(final int overflowResId, final int navResId, final int titleResId) {
-            this(overflowResId, navResId);
-            titleResourceId = titleResId;
         }
     }
 
@@ -160,8 +146,32 @@ public enum ToolbarManager {
 
     // Public instance methods
 
-    /** Initialize the toolbar for a given fragment. */
+    /** Initialize the toolbar for a given fragment and menu entries. */
     public void init(@NonNull final BaseFragment fragment, final MenuItemType... menuEntries) {
+        init(fragment, null, null, menuEntries);
+    }
+
+    /** Initialize the toolbar for a given fragment, list item and menu entries. */
+    public void init(@NonNull final BaseFragment fragment, ListItem item,
+                     final MenuItemType... menuEntries) {
+        // Determine if the group name or the room name should be the title.
+        String title = item.key == null
+            ? GroupManager.instance.getGroupName(item.groupKey)
+            : RoomManager.instance.getRoomName(item.key);
+        String subtitle = item.key != null
+            ? GroupManager.instance.getGroupName(item.groupKey) : null;
+        init(fragment, title, subtitle, menuEntries);
+    }
+
+    /** Initialize the toolbar for a given fragment, title resource id and menu entries. */
+    public void init(@NonNull final BaseFragment fragment, int resId,
+                     final MenuItemType... menuEntries) {
+        init(fragment, fragment.getString(resId), null, menuEntries);
+    }
+
+    /** Initialize the toolbar for a given fragment, title, subtitle, and menu entries. */
+    public void init(@NonNull final BaseFragment fragment, final String title, final String subtitle,
+                     final MenuItemType... menuEntries) {
         // Determine if this fragment exists and supports a managed toolbar.  Abort if not,
         // otherwise handle the toolbar based on the fragment's toolbar type.
         Toolbar toolbar = fragment.getToolbar();
@@ -172,14 +182,15 @@ public enum ToolbarManager {
             case chatMain: // Setup the group (home) toolbar using the navigation manager.
                 NavigationManager.instance.init(fragment.getActivity(), toolbar);
                 break;
-            case none:
-                break;
-            default: // Deal with all other types using the toolbar type.
+            case none:          // There is no toolbar.  Abort.
+                return;
+            default:            // Deal with all other types using the toolbar type.
                 setupToolbar(fragment, toolbar, toolbarType);
                 break;
         }
 
-        // Handle any extra menu items to add to the action menu.
+        // Set the title, subtitle and add the menu items to the action menu.
+        setTitles(toolbar, title, subtitle);
         for (MenuItemType value : menuEntries)
             addMenuItem(toolbar, value);
     }
@@ -211,87 +222,7 @@ public enum ToolbarManager {
         toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
     }
 
-    /** Set the title using the given resource string. */
-    public void setTitle(@NonNull final BaseFragment fragment, final int resId) {
-        // Ensure that the toolbar, toolbar type and the title all exist and that the title is not
-        // empty.  Abort if not, otherwise set the titles based on the toolbar type.
-        Toolbar bar = fragment.getToolbar();
-        String title = fragment.getString(resId);
-        ToolbarType toolbarType = bar != null ? fragment.getToolbarType() : null;
-        if (bar == null || toolbarType == null || title == null || title.isEmpty())
-            return;
-        switch (toolbarType) {
-            case expChain:
-            case expMain: // Center the title.
-                update(bar, R.id.centeredTitle, title);
-                update(bar, R.id.centeredSubtitle, null);
-                break;
-            default:
-                setTitles(bar, title, null);
-                break;
-        }
-    }
-
-    /** Set the titles in the toolbar based on the list type. */
-    public void setTitles(@NonNull final BaseFragment fragment, final ListItem item) {
-        // Ensure that there is an accessible toolbar at this point.  Abort if not, otherwise case
-        // on the list type to apply the titles.
-        Toolbar bar = fragment.getToolbar();
-        if (bar == null)
-            return;
-        ToolbarType toolbarType = fragment.getToolbarType();
-        switch (toolbarType) {
-            case createGroupTT:
-            case createRoomTT:
-            case joinRoomTT: // Set the title to the given resource and the subtitle to the group
-                           // name, if one is available.
-                int resId = toolbarType.titleResourceId;
-                setTitles(fragment, bar, resId, item);
-                break;
-            case selectInviteTT:
-                int resourceId = toolbarType.titleResourceId;
-                setTitles(fragment, bar, resourceId, item);
-                break;
-            case chatMain:
-            case chatChain:     // Set the title and subtitle based on the item content.
-                setTitles(fragment, bar, item);
-                break;
-            case none:
-                break;
-            default:
-                setTitles(fragment, bar, R.string.app_name, null);
-                break;
-        }
-    }
-
     // Private instance methods.
-
-    /** Set the titles in the given toolbar using the given item. */
-    private void setTitles(@NonNull final BaseFragment fragment, @NonNull final Toolbar bar,
-                           final ListItem item) {
-        // Use the item content to set the title and subtitle.
-        if (item == null || (item.groupKey == null && item.key == null)) {
-            setTitles(fragment, bar, R.string.app_name, null);
-            return;
-        }
-
-        // Determine if the group name should be the title.
-        String title = item.key == null
-            ? GroupManager.instance.getGroupName(item.groupKey)
-            : RoomManager.instance.getRoomName(item.key);
-        String subtitle = item.key != null
-            ? GroupManager.instance.getGroupName(item.groupKey) : null;
-        setTitles(bar, title, subtitle);
-    }
-
-    /** Set the title to the given resource and the subtitle to the group name, if available. */
-    private void setTitles(@NonNull final BaseFragment fragment, @NonNull final Toolbar bar,
-                           final int resourceId, final ListItem item) {
-        String title = fragment.getResources().getString(resourceId);
-        String key = item != null ? item.groupKey : null;
-        String subtitle = key != null ? GroupManager.instance.getGroupName(key) : null;
-        setTitles(bar, title, subtitle);
-    }
 
     /** Set the titles in the given toolbar using the given (possibly null) titles. */
     private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
@@ -303,29 +234,15 @@ public enum ToolbarManager {
     /** Setup a default toolbar, one that provides an overflow menu and a navigation icon. */
     private void setupToolbar(@NonNull BaseFragment fragment, @NonNull final Toolbar toolbar,
                               @NonNull final ToolbarType toolbarType) {
-        // Reset the current toolbar overflow menu.
+        // Reset the current toolbar overflow menu and determine if the navigation icon should be
+        // set up.  Abort it not, otherwise set it up.
         resetOverflowMenu(fragment.getResources(), toolbarType, toolbar);
-
-        // Determine if the navigation icon should be set up.  Abort it not, otherwise set it up.
         if (toolbarType.navigationIconResourceId <= 0)
             return;
         toolbar.setNavigationIcon(toolbarType.navigationIconResourceId);
         MainActivity mainActivity = (MainActivity) fragment.getActivity();
         View.OnClickListener upHandler = mainActivity.getUpHandler();
         toolbar.setNavigationOnClickListener(upHandler);
-    }
-
-    /** Update the given toolbar view with the provided text. */
-    private void update(@NonNull final Toolbar bar, final int resId, final String text) {
-        // First, ensure that the view associated with the resource id exists.  Abort if not.  Then
-        // determine if the text is null or empty.  Make the view gone if either is true.  Finally,
-        // render the text in the view and make it visible.
-        TextView view = (TextView) bar.findViewById(resId);
-        if (view == null)
-            return;
-        if (text != null && !text.isEmpty())
-            view.setText(text);
-        view.setVisibility(text == null || text.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     // Private inner classes.

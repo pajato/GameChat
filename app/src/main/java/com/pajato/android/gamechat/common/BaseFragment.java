@@ -31,6 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
@@ -74,6 +76,9 @@ public abstract class BaseFragment extends Fragment {
 
     /** The fragment active state; set when entering onResume and cleared in onPause. */
     protected boolean mActive;
+
+    /** An ad view to be conditionally shown at the top of the view. */
+    protected AdView mAdView;
 
     /** The item information passed from the parent fragment. */
     protected ListItem mItem;
@@ -203,6 +208,15 @@ public abstract class BaseFragment extends Fragment {
         return new MenuEntry(new MenuItemEntry(MENU_ITEM_TINT_TYPE, titleId, iconId));
     }
 
+    /** Initialize the ad view by building and loading an ad request. */
+    protected void initAdView(@NonNull final View layout) {
+        mAdView = (AdView) layout.findViewById(R.id.adView);
+        if (mAdView != null) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+        }
+    }
+
     /** Provide a logger to show the given message and the given bundle. */
     protected abstract void logEvent(String message, Bundle bundle);
 
@@ -258,13 +272,15 @@ public abstract class BaseFragment extends Fragment {
     private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.
-                return GroupManager.instance.getListItemData();
-            case messageList:   // Get the data to be shown in a room.
-                return MessageManager.instance.getListItemData(item);
+                return GroupManager.instance.getListItemData(type.getKind());
             case chatRoomList:  // Get the data to be show in a list of rooms.
                 return RoomManager.instance.getListItemData(item.groupKey);
+            case expGroupList:  // Get the groups with experiences.
+                return GroupManager.instance.getListItemData(type.getKind());
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
+            case messageList:   // Get the data to be shown in a room.
+                return MessageManager.instance.getListItemData(item);
             case selectExpGroupsRooms:
             case selectChatGroupsRooms: // Get the group and room selections.
                 return InvitationManager.instance.getListItemData();

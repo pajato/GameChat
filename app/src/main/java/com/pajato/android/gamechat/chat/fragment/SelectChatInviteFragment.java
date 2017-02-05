@@ -46,7 +46,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 
 /**
  * Provide a fragment class used to choose groups and rooms to include in an invite.
@@ -105,7 +105,8 @@ public class SelectChatInviteFragment extends BaseChatFragment {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
         super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        int titleResId = R.string.PickForInvitationTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
         FabManager.chat.setMenu(INVITE_CHAT_FAM_KEY, getSelectionMenu());
     }
 

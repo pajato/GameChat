@@ -24,7 +24,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.GroupItem;
+import com.pajato.android.gamechat.common.FragmentKind;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
@@ -36,6 +36,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.exp.Experience;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 
@@ -104,20 +106,6 @@ public enum GroupManager {
         return mDateHeaderTypeToGroupListMap.get(type);
     }
 
-    /** Get the data as a set of list items for all groups. */
-    public List<ListItem> getListItemData() {
-        // Determine whether to handle no groups (a set of welcome list items), one group (a set of
-        // group rooms) or more than one group (a set of groups).
-        switch (groupMap.size()) {
-            case 0:
-                return getNoGroupsItemList();
-            case 1:
-                //return getGroupRoomsItemList();
-            default:
-                return getGroupsItemList();
-        }
-    }
-
     /** Get a map of messages by room in a given group. */
     public Map<String, Map<String, Message>> getGroupMessages(final String groupKey) {
         return MessageManager.instance.messageMap.get(groupKey);
@@ -141,6 +129,20 @@ public enum GroupManager {
     /** Return the database path to the given group's profile. */
     public String getGroupProfilePath(final String groupKey) {
         return String.format(Locale.US, GROUP_PROFILE_PATH, groupKey);
+    }
+
+    /** Get the data as a set of list items for all groups. */
+    public List<ListItem> getListItemData(@NonNull final FragmentKind kind) {
+        // Determine whether to handle no groups (a set of welcome list items), one group (a set of
+        // group rooms) or more than one group (a set of groups).
+        switch (groupMap.size()) {
+            case 0:
+                return getNoGroupsItemList();
+            case 1:
+                //return getGroupRoomsItemList();
+            default:
+                return getGroupsItemList(kind);
+        }
     }
 
     /** Handle a account change event by setting up or clearing variables. */
@@ -218,8 +220,18 @@ public enum GroupManager {
 
     // Private instance methods.
 
-    /** Return the normal case: more than one group. */
-    private List<ListItem> getGroupsItemList() {
+    /** Add a group list item for the given kind (chat message or game experience) and group. */
+    private void addItem(@NonNull final List<ListItem> result, @NonNull final FragmentKind kind,
+                         @NonNull final String groupKey) {
+        String name = getGroupName(groupKey);
+        Map<String, Integer> roomCountMap = new HashMap<>();
+        int count = getNewCount(kind, groupKey, roomCountMap);
+        String text = getGroupText(roomCountMap);
+        result.add(new ListItem(groupKey, name, count, text));
+    }
+
+    /** Return a list of items of the given kind. */
+    private List<ListItem> getGroupsItemList(@NonNull final FragmentKind kind) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
         List<ListItem> result = new ArrayList<>();
@@ -228,12 +240,73 @@ public enum GroupManager {
             if (groupList != null && groupList.size() > 0) {
                 // Add the header item followed by all the group items.
                 result.add(new ListItem(date, dht.resId));
-                for (String groupKey : groupList) {
-                    if(!(groupKey.equals(AccountManager.instance.getMeGroupKey()))) {
-                        result.add(new ListItem(new GroupItem(groupKey)));
-                    }
-                }
+                for (String groupKey : groupList)
+                    if(!(groupKey.equals(AccountManager.instance.getMeGroupKey())))
+                        addItem(result, kind, groupKey);
             }
+        }
+        return result;
+    }
+
+    /** Return a textual list of rooms in the group indicating new items by bolding the name. */
+    private String getGroupText(@NonNull final Map<String, Integer> roomCountMap) {
+        // Process each room to determine if bolding is required.
+        StringBuilder textBuilder = new StringBuilder();
+        for (String roomKey : roomCountMap.keySet()) {
+            Room room = RoomManager.instance.getRoomProfile(roomKey);
+            if (textBuilder.length() != 0)
+                textBuilder.append(", ");
+            if (roomCountMap.get(roomKey) > 0)
+                textBuilder.append("<b>").append(room.getName()).append("</b>");
+            else
+                textBuilder.append(room.getName());
+        }
+        return textBuilder.toString();
+    }
+
+    /** Return 0 or the number of new items of the given kind in the given group. */
+    private int getNewCount(@NonNull final FragmentKind kind, @NonNull final String groupKey,
+                            @NonNull final Map<String, Integer> roomCountMap) {
+        if (kind == chat)
+            return getNewMessageCount(groupKey, roomCountMap);
+        return getNewExpCount(groupKey, roomCountMap);
+    }
+
+    /** Return 0 or the number of new experiences in the given group. */
+    private int getNewExpCount(@NonNull final String key,
+                               @NonNull final Map<String, Integer> roomCountMap) {
+        // Return the total number of new experiences in the joined rooms for the given group.
+        int result = 0;
+        Map<String, Map<String, Experience>> map = ExperienceManager.instance.expGroupMap.get(key);
+        if (map == null)
+            return result;
+        for (String roomKey : map.keySet()) {
+            int roomNewCount = 0;
+            for (Experience experience : map.get(roomKey).values())
+                if (ExperienceManager.instance.isNew(experience))
+                    roomNewCount++;
+            roomCountMap.put(roomKey, roomNewCount);
+            result += roomNewCount;
+        }
+        return result;
+    }
+
+    /** Return 0 or the number of unseen messages in all the joined rooms for the given group. */
+    private int getNewMessageCount(@NonNull final String key,
+                                   @NonNull final Map<String, Integer> roomCountMap) {
+        // Return the total number of unseen messsages in the joined rooms for the given group.
+        int result = 0;
+        Map<String, Map<String, Message>> map = GroupManager.instance.getGroupMessages(key);
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        if (map == null || accountId == null)
+            return result;
+        for (String roomKey : map.keySet()) {
+            int roomNewCount = 0;
+            for (Message message : map.get(roomKey).values())
+                if (message.unreadList != null && message.unreadList.contains(accountId))
+                    roomNewCount++;
+            roomCountMap.put(roomKey, roomNewCount);
+            result += roomNewCount;
         }
         return result;
     }
@@ -251,6 +324,11 @@ public enum GroupManager {
 
     /** Update the headers used to bracket the messages in the main list. */
     private void updateGroupHeaders(final Message message) {
+        // Filter out me room messages.
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (message.groupKey.equals(account.groupKey))
+            return;
+
         // Add the new message to be the last message emanating from
         // the given group.  Then rebuild the lists of date header type to group list associations.
         mGroupToLastNewMessageMap.put(message.groupKey, message);

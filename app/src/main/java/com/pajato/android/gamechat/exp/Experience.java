@@ -28,6 +28,9 @@ import java.util.Map;
  */
 public interface Experience {
 
+    /** Return the experience create time. */
+    long getCreateTime();
+
     /** Return the experience group push key. */
     String getGroupKey();
 

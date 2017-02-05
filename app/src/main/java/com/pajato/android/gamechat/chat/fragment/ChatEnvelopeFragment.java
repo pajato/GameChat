@@ -31,7 +31,6 @@ import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
-import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -45,7 +44,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
@@ -81,8 +80,8 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             return;
         switch (event.item.getItemId()) {
             case R.id.nav_me_room:
-                GroupItem groupItem = new GroupItem(AccountManager.instance.getMeGroupKey());
-                ListItem listItem = new ListItem(groupItem);
+                String groupKey = AccountManager.instance.getMeGroupKey();
+                ListItem listItem = new ListItem(groupKey, null, 0, null);
                 DispatchManager.instance.chainFragment(getActivity(), chatRoomList, listItem);
                 break;
             case R.id.nav_groups:

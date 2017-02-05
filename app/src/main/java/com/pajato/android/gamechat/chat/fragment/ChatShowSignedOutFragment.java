@@ -19,24 +19,20 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.chat;
-import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -52,11 +48,8 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
 
     /** Handle a group profile change by trying again to start a better fragment. */
     @Subscribe public void onChatListChange(@NonNull final ChatListChangeEvent event) {
-        // On the first chat list change event, dismiss the sign in progress spinner.  In any case
-        // attempt to present another fragment based on the chat list change.
-        if (ProgressManager.instance.isShowing()) {
-            ProgressManager.instance.hide();
-        }
+        // On the first chat list change event, attempt to present another fragment based on the
+        // chat list change.
         DispatchManager.instance.startNextFragment(this.getActivity(), chat);
     }
 
@@ -81,7 +74,8 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // Provide an account loading indicator for a brief period before showing the fragment.
         // This will likely be enough time to load the account and message data.
         super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, game, settings);
+        int titleResId = R.string.SignedOutToolbarTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, game, settings);
         FabManager.chat.setVisibility(this, View.GONE);
     }
 }

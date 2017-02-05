@@ -4,6 +4,7 @@
     <string name="ErrorCheckersCreation">Error: cannot create a Checkers experience</string>
     <string name="ErrorChessCreation">Error: cannot create a Chess experience</string>
     <string name="ErrorTTTCreation">Error: cannot create a TicTacToe experience</string>
+    <string name="ExpGroupsToolbarTitle">Groups with Games</string>
     <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
@@ -12,7 +13,7 @@
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
-    <string name="NoGamesTitleText">Games</string>
+    <string name="NoGamesToolbarTitle">No Games</string>
     <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
@@ -21,6 +22,8 @@
     <string name="PlayModeUserMenuTitle">Play a User</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
+    <string name="SelectRoomToolbarTitle">Select Room</string>
+    <string name="SelectUserToolbarTitle">Select User</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
     <string name="StalemateMessage">Stalemate!</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>

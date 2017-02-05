@@ -31,7 +31,7 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -41,11 +41,18 @@ import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
 
+/**
+ * Provide a fragment to show joined groups that contain experiences.  This is the top level (home)
+ * view in the experience hierarchy.  From this view the User can drill into rooms within a group
+ * and then experiences in a room.
+ *
+ * @author Paul Michael Reilly
+ */
 public class ExpShowGroupsFragment extends BaseExperienceFragment {
 
     // Public instance methods.
 
-    /** Handle an experience list change event. */
+    /** Handle an experience list change event by dispatching again. */
     @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {
         switch (event.changeType) {
             case CHANGED:
@@ -65,7 +72,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
         switch (event.item != null ? event.item.getItemId() : -1) {
             case R.string.InviteFriendsOverflow:
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
+                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -73,18 +80,12 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
             case R.string.SwitchToChat:
                 // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
                 ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                if (viewPager != null)
+                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 break;
             default:
                 break;
         }
-    }
-
-    /** Initialize the fragment by setting up the FAB and toolbar. */
-    @Override public void onStart() {
-        super.onStart();
-        FabManager.game.init(this);
-        ToolbarManager.instance.init(this, helpAndFeedback, chat, invite, settings);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -96,6 +97,13 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
         super.onResume();
         FabManager.game.setImage(R.drawable.ic_add_white_24dp);
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
-        ToolbarManager.instance.setTitle(this, R.string.NoGamesTitleText);
+    }
+
+    /** Initialize the fragment by setting up the FAB and toolbar. */
+    @Override public void onStart() {
+        super.onStart();
+        FabManager.game.init(this);
+        int titleResId = R.string.ExpGroupsToolbarTitle;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, invite, settings);
     }
 }

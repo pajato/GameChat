@@ -28,12 +28,12 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -126,15 +126,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             updateAdapterList();
     }
 
-    /** Initialize ... */
-    @Override public void onStart() {
-        super.onStart();
-        if (ProgressManager.instance.isShowing())
-            ProgressManager.instance.hide();
-        ToolbarManager.instance.init(this, game, search);
-        FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
-    }
-
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
@@ -144,6 +135,13 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
+    }
+
+    /** Initialize ... */
+    @Override public void onStart() {
+        super.onStart();
+        ToolbarManager.instance.init(this, getTitleResId(), game, search);
+        FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 
     // Private instance methods.
@@ -162,4 +160,16 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         return menu;
     }
 
+    /** Return the toolbar title resource id based on the presence or absence of groups. */
+    private int getTitleResId() {
+        // Show the app title if there is no current account (impossible), the standard groups
+        // toolbar title if there are joined groups, otherwise show the me room name (account
+        // display name.)
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null)
+            return R.string.app_name;
+        if (account.joinList.size() > 0)
+            return R.string.GroupsToolbarTitle;
+        return R.string.GroupMeToolbarTitle;
+    }
 }

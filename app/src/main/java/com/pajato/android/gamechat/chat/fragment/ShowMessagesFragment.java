@@ -125,18 +125,17 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         }
     }
 
-    /** Establish the create time state. */
-    @Override public void onStart() {
-        // Establish the list type and setup the toolbar.
-        super.onStart();
-        ToolbarManager.instance.init(this, helpAndFeedback, game, search, invite, settings);
-    }
-
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
         FabManager.chat.setVisibility(this, View.GONE);
+    }
+
+    /** Setup the toolbar. */
+    @Override public void onStart() {
+        super.onStart();
+        ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
     }
 
     // Private instance methods.

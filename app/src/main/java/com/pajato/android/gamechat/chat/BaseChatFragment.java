@@ -60,11 +60,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     /** Extra information format string. */
     private static final String SUFFIX_FORMAT = "Fragment Type: %s; State: %s; Bundle: %s.";
 
-    // Protected instance variables.
-
-    /** Show an ad at the top of the view. */
-    protected AdView mAdView;
-
     // Public instance methods.
 
     /** Log the lifecycle event and kill the ads. */
@@ -73,16 +68,11 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (mAdView != null) mAdView.destroy();
     }
 
-    /** Initialize chat list fragments by dealing with ads. */
-    @Override public void onStart() {
-        super.onStart();
-        initAdView(mLayout);
-    }
-
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
     @Override public void onPause() {
         super.onPause();
-        if (mAdView != null) mAdView.pause();
+        if (mAdView != null)
+            mAdView.pause();
     }
 
     /** Log the lifecycle event and resume showing ads. */
@@ -106,7 +96,12 @@ public abstract class BaseChatFragment extends BaseFragment {
                 default:            // Ignore all other fragments.
                     break;
             }
-        ToolbarManager.instance.setTitles(this, mItem);
+    }
+
+    /** Initialize chat list fragments by dealing with ads. */
+    @Override public void onStart() {
+        super.onStart();
+        initAdView(mLayout);
     }
 
     /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
@@ -115,15 +110,6 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     // Protected instance methods.
-
-    /** Initialize the ad view by building and loading an ad request. */
-    protected void initAdView(@NonNull final View layout) {
-        mAdView = (AdView) layout.findViewById(R.id.adView);
-        if (mAdView != null) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mAdView.loadAd(adRequest);
-        }
-    }
 
     /** Log a lifecycle event that has no bundle. */
     @Override protected void logEvent(final String event) {
@@ -157,8 +143,7 @@ public abstract class BaseChatFragment extends BaseFragment {
             case chatRoomList:  // The rooms in a group need the group key.
                 if (dispatcher.groupKey == null)
                     return false;
-                GroupItem groupItem = new GroupItem(dispatcher.groupKey);
-                mItem = new ListItem(groupItem);
+                mItem = new ListItem(dispatcher.groupKey, null, 0, null);
                 return true;
             default:
                 return false;

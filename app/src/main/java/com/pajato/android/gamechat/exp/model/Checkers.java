@@ -119,6 +119,11 @@ public class Checkers implements Experience {
         return ExpType.valueOf(type);
     }
 
+    /** Return the create time to satisfy the Experience contract. */
+    @Override public long getCreateTime() {
+        return createTime;
+    }
+
     /** Return the group push key. */
     @Exclude @Override public String getGroupKey() {
         return groupKey;
