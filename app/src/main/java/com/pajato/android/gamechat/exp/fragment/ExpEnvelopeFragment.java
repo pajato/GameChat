@@ -38,7 +38,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
@@ -71,7 +71,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
-        DispatchManager.instance.startNextFragment(this.getActivity(), exp);
+        DispatchManager.instance.startNextFragment(getActivity(), exp);
     }
 
     /** Process a button click event with a tag value. */

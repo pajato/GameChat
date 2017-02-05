@@ -105,6 +105,26 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
+    /** Log the lifecycle event and resume showing ads. */
+    @Override public void onResume() {
+        // Log the event, update the FAB for this fragment, process the ad, determine if a list
+        // adapter update needs be processed and set the toolbar titles.
+        super.onResume();
+        FabManager.chat.init(this);
+        if (mAdView != null)
+            mAdView.resume();
+        if (type != null)
+            switch (type) {
+                case expGroupList:
+                case expRoomList:
+                case experienceList: // Update the state of the list adapter.
+                    updateAdapterList();
+                    break;
+                default:        // Ignore all other fragments.
+                    break;
+            }
+    }
+
     /**
      * Provide a default implementation for setting up an experience.  There are two scenarios
      * where an experience fragment needs to be set up.  First, when a User asks to start a game,
@@ -133,6 +153,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
         // view and the listeners for backend data changes.
         super.onStart();
+        initAdView(mLayout);
         FabManager.game.addMenu(EXP_MODE_FAM_KEY, getExpModeFam());
     }
 
@@ -257,7 +278,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
         // does.
         TextView name = (TextView) mLayout.findViewById(R.id.roomName);
-        if (name == null) return;
+        if (name == null)
+            return;
         name.setText(RoomManager.instance.getRoomName(model.getRoomKey()));
     }
 

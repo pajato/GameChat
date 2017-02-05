@@ -118,7 +118,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, game, search);
+        ToolbarManager.instance.init(this, mItem, game, search);
         FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 

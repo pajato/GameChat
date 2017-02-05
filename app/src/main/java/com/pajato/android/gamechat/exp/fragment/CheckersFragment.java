@@ -33,7 +33,6 @@ import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -143,6 +142,15 @@ public class CheckersFragment extends BaseExperienceFragment {
         resume();
     }
 
+    /** Handle taking the foreground by updating the UI based on the current experience. */
+    @Override public void onResume() {
+        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
+        // present a spinner.  When an experience is posted by the app event manager, the game can
+        // be shown
+        super.onResume();
+        resume();
+    }
+
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
         super.onStart();
@@ -155,15 +163,6 @@ public class CheckersFragment extends BaseExperienceFragment {
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
-    }
-
-    /** Handle taking the foreground by updating the UI based on the current experience. */
-    @Override public void onResume() {
-        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
-        // present a spinner.  When an experience is posted by the app event manager, the game can
-        // be shown
-        super.onResume();
-        resume();
     }
 
     /** Return a default, partially populated, Checkers experience. */
@@ -289,7 +288,6 @@ public class CheckersFragment extends BaseExperienceFragment {
         } else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
-            ProgressManager.instance.hide();
             updateUiFromExperience();
         }
     }
@@ -505,7 +503,7 @@ public class CheckersFragment extends BaseExperienceFragment {
      */
     private void startGame() {
         grid.removeAllViews();
-        Checkers model = (Checkers)mExperience;
+        Checkers model = (Checkers) mExperience;
         boolean isNewBoard = false;
         if (model.board == null) {
             isNewBoard = true;
@@ -559,7 +557,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         }
 
         boolean hasChanged = false;
-        boolean turn = ((Checkers)mExperience).turn;
+        boolean turn = ((Checkers) mExperience).turn;
         String highlightedIdxTag = (String) mHighlightedTile.getTag();
         int highlightedIndex = Integer.parseInt(highlightedIdxTag);
         findPossibleMoves(board, highlightedIndex, mPossibleMoves);
@@ -838,7 +836,7 @@ public class CheckersFragment extends BaseExperienceFragment {
      */
     private void handleTurnChange(final boolean switchPlayer) {
 
-        boolean turn = ((Checkers)mExperience).turn;
+        boolean turn = ((Checkers) mExperience).turn;
         if(switchPlayer) {
             turn = ((Checkers) mExperience).toggleTurn();
         }
@@ -869,7 +867,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         @Override public void onClick(final View v) {
             int index = Integer.parseInt((String)v.getTag());
             boolean changedBoard = false;
-            Map<String, String> board = ((Checkers)mExperience).board;
+            Map<String, String> board = ((Checkers) mExperience).board;
             if (mHighlightedTile != null) {
                 changedBoard = showPossibleMoves(index, board);
                 mHighlightedTile = null;

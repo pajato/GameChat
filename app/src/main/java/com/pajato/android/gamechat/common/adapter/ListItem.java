@@ -151,6 +151,16 @@ public class ListItem {
 
     // Public constructors.
 
+    /** Build an item instance for the given group. */
+    public ListItem(final String groupKey, final String name, final int count, final String text) {
+        // Set the type and populate the member fields for the given group.
+        type = group;
+        this.groupKey = groupKey;
+        this.name = name;
+        this.count = count;
+        this.text = text;
+    }
+
     /** Build a header instance for a given resource id. */
     public ListItem(final ItemType type, int resId) {
         this.type = type;
@@ -173,17 +183,6 @@ public class ListItem {
         groupKey = item.groupKey;
         roomKey = item.roomKey;
         key = item.key;
-    }
-
-    /** Build an instance for a given group list item. */
-    public ListItem(final GroupItem item) {
-        type = group;
-        groupKey = item.groupKey;
-        name = item.name;
-        count = item.count;
-        text = item.text;
-        String format = "Group item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        mDesc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given room list item. */
@@ -325,6 +324,9 @@ public class ListItem {
             case experience:
                 format = "Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}.";
                 return String.format(Locale.US, format, groupKey, roomKey, key, playMode);
+            case group:
+                format = "Group item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
+                return String.format(Locale.US, format, name, key, count, text);
             case inviteCommonRoom:
                 format = "Common room item with name {%s} and text: {%s}.";
                 return String.format(Locale.US, format, name, text);

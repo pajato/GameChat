@@ -48,7 +48,6 @@ import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
 import com.pajato.android.gamechat.main.PaneManager;
-import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -433,7 +432,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             mLayout.setVisibility(View.GONE);
         } else {
             // Start the game and update the views using the current state of the experience.
-            ProgressManager.instance.hide();
             mLayout.setVisibility(View.VISIBLE);
             updateUiFromExperience();
         }

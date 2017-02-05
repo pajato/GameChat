@@ -131,6 +131,11 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         return result;
     }
 
+    /** Return the create time to satisfy the Experience contract. */
+    @Override public long getCreateTime() {
+        return createTime;
+    }
+
     /** Return the experience push key. */
     @Exclude @Override public String getExperienceKey() {
         return key;

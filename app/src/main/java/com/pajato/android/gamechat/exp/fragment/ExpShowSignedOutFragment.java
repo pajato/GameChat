@@ -32,7 +32,7 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.DispatchManager.DispatcherKind.exp;
+import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -76,7 +76,6 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
         super.onResume();
         FabManager.game.setImage(R.drawable.ic_add_white_24dp);
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
-        ToolbarManager.instance.setTitle(this, R.string.SignedOutTitleText);
     }
 
     /** Initialize the fragment by setting up the FAB/FAM. */
@@ -84,6 +83,7 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
         // Set up the FAB.
         super.onStart();
         FabManager.game.init(this);
-        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
+        int titleResId = R.string.SignedOutTitleText;
+        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, settings);
     }
 }

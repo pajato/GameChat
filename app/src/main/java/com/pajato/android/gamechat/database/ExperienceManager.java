@@ -21,9 +21,13 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ExperiencesChangeHandler;
+import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
+import com.pajato.android.gamechat.event.ExpListChangeEvent;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -35,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 
 /**
  * Provide a class to manage the experience database objects.
@@ -62,6 +68,14 @@ public enum ExperienceManager {
 
     /** The experience map. */
     public Map<String, Experience> experienceMap = new HashMap<>();
+
+    // Private instance variables.
+
+    /** A map associating date header type values with lists of group push keys. */
+    private Map<DateHeaderType, List<String>> mDateHeaderTypeToGroupListMap = new HashMap<>();
+
+    /** A map associating a group push key with it's most recent new message. */
+    private Map<String, Experience> mGroupToLastNewExpMap = new HashMap<>();
 
     // Public instance methods.
 
@@ -106,6 +120,13 @@ public enum ExperienceManager {
         experienceMap.clear();
     }
 
+    /** Handle an experience change event by updating the date headers ... */
+    @Subscribe public void onEperienceChangeEvent(@NonNull final ExperienceChangeEvent event) {
+        // Update the date headers for this message and post an event to trigger an adapter refresh.
+        updateGroupHeaders(event.experience);
+        AppEventManager.instance.post(new ExpListChangeEvent());
+    }
+
     /** Persist the given experience. */
     public void updateExperience(final Experience experience) {
         // Persist the experience.
@@ -136,5 +157,40 @@ public enum ExperienceManager {
         experience.setRoomKey(rKey);
         experience.setExperienceKey(null);
         createExperience(experience);
+    }
+
+    // Private instance methods.
+
+    /** Update the headers used to bracket the messages in the main list. */
+    private void updateGroupHeaders(final Experience experience) {
+        // Deal with a message ...
+        mGroupToLastNewExpMap.put(experience.getGroupKey(), experience);
+        mDateHeaderTypeToGroupListMap.clear();
+        long nowTimestamp = new Date().getTime();
+        for (String key : mGroupToLastNewExpMap.keySet()) {
+            // Determine which date header type the current group should be associated with.
+            long groupTimestamp = mGroupToLastNewExpMap.get(key).getCreateTime();
+            for (DateHeaderType dht : DateHeaderType.values()) {
+                // Determine if the current group fits the constraints of the current date header
+                // type.  The declaration of DateHeaderType is ordered so that this algorithm will
+                // work.
+                if (dht == old || nowTimestamp - groupTimestamp <= dht.limit) {
+                    // This is the one.  Add this group to the associated list.
+                    List<String> list = mDateHeaderTypeToGroupListMap.get(dht);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                        mDateHeaderTypeToGroupListMap.put(dht, list);
+                    }
+                    list.add(key);
+                    break;
+                }
+            }
+        }
+    }
+
+    /** Return TRUE iff this experience has a new move that has not been seen? */
+    public boolean isNew(@NonNull final Experience experience) {
+        // TODO: figure this one out, but use a placeholder hack for now.
+        return experienceMap.get(experience.getExperienceKey()) == null;
     }
 }
