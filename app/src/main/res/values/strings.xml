@@ -7,6 +7,9 @@
     <string name="HasJoinedMessage">%s has joined</string>
     <string name="InviteTitle">Invite Friends to GameChat</string>
     <string name="InviteMessage">You should check out GameChat</string>
+    <string name="InviteToGroupFormat">You are invited to join my GameChat group: %s</string>
+    <string name="InviteFriendMessage">Invite friends</string>
+    <string name="ItemCreatedMessage">%s is created</string>
     <string name="MenuItemFileBugReport">File Bug Report</string>
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemFeedback">Feedback</string>
@@ -35,7 +38,7 @@
     <string name="intro_game_title">Game</string>
     <string name="intro_home_message">Chat and play games with friends and family</string>
     <string name="intro_home_title">GameChat</string>
-    <string name="intro_levels_message">Relaxed games for teaching and learning as well as competiitve levels for serious players</string>
+    <string name="intro_levels_message">Relaxed games for teaching and learning as well as competitive levels for serious players</string>
     <string name="intro_levels_title">Levels</string>
     <string name="intro_page_circle">\u25CF</string>
     <string name="manage_accounts">Manage Accounts</string>

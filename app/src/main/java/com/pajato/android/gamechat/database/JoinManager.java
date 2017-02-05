@@ -74,7 +74,7 @@ public enum JoinManager {
         if (member == null)
             return;
 
-        // Case on the item type to handle joinng an existing public room or a new private room.
+        // Case on the item type to handle joining an existing public room or a new private room.
         switch (item.type) {
             case selectUser:
             case selectableMember:
@@ -217,7 +217,7 @@ public enum JoinManager {
         return result;
     }
 
-    /** Join the given member and the curernt User to a private room. */
+    /** Join the given member and the current User to a private room. */
     private Room joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
         // Ensure that a current account, member and group profile all exist. Abort if not,
         // otherwise determine if the room already exists.  Return it if so, otherwise obtain a
@@ -234,8 +234,8 @@ public enum JoinManager {
         String roomKey = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();
 
         // Build, update and persist a room object adding the two principals as members.
-        long tstamp = new Date().getTime();
-        room = new Room(roomKey, account.id, null, groupKey, tstamp, 0, PRIVATE);
+        long tStamp = new Date().getTime();
+        room = new Room(roomKey, account.id, null, groupKey, tStamp, 0, PRIVATE);
         room.addMember(account.id);
         room.addMember(memberKey);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
@@ -257,7 +257,7 @@ public enum JoinManager {
 
     /** Join the given room in the given group to the current User. */
     private Room joinRoom(@NonNull final String groupKey, @NonNull final String roomKey) {
-        // Ensuure that the signed in User is really signed in and has an id.  Abort if either is
+        // Ensure that the signed in User is really signed in and has an id.  Abort if either is
         // not true.
         String id = AccountManager.instance.getCurrentAccountId();
         if (id == null) return null;

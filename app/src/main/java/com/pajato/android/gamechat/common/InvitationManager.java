@@ -149,13 +149,34 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         Log.i(TAG, "extendInvitation with list of keys");
         // Save the groups/rooms map to write to Firebase after the invite id(s) are returned */
         mInviteMap = keys;
-        startInvitationIntent(activity);
+        startInvitationIntent(activity, null);
+    }
+
+    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a room to join. */
+    public void extendRoomInvitation(final FragmentActivity activity, final String roomKey) {
+        Room room = RoomManager.instance.getRoomProfile(roomKey);
+        if (room == null) {
+            Log.e(TAG, "Room manager cannot find room " + roomKey + "; invitation aborted!");
+            return;
+        }
+        Group group = GroupManager.instance.getGroupProfile(room.groupKey);
+        if (group == null) {
+            Log.e(TAG, "Group manager cannot find group " + room.groupKey + "; invitation aborted!");
+            return;
+        }
+        Map<String, GroupInviteData> dataMap = new HashMap<>();
+        List<String> roomList = new ArrayList<>();
+        roomList.add(room.key);
+        GroupInviteData map = new GroupInviteData(group.key, group.name, group.commonRoomKey,
+                roomList);
+        dataMap.put(group.key, map);
+        extendInvitation(activity, dataMap);
     }
 
     /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
-    public void extendInvitation(final FragmentActivity activity, final String groupKey) {
+    public void extendGroupInvitation(final FragmentActivity activity, final String groupKey) {
 
-        Log.i(TAG, "extendInvitation with groupKey=" + groupKey);
+        Log.i(TAG, "extendGroupInvitation with groupKey=" + groupKey);
         Group grp = GroupManager.instance.getGroupProfile(groupKey);
         if (grp == null) {
             Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
@@ -165,7 +186,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         // Create an entry for the invite map for the specified group.
         GroupInviteData data = new GroupInviteData(grp.key, grp.name, grp.commonRoomKey);
         mInviteMap.put(data.groupKey, data);
-        startInvitationIntent(activity);
+        startInvitationIntent(activity, grp.name);
     }
 
     /** Return a set of groups and rooms for invitations */
@@ -198,7 +219,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
+    @Subscribe
+    public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         Account account = event != null ? event.account : null;
         if (account == null) return;
 
@@ -334,6 +356,15 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     // Add account as member, update the profile and the invitation map data
                     event.room.addMember(currAccount.id);
                     RoomManager.instance.updateRoomProfile(event.room);
+
+                    // Update the member within the group to include this room
+                    Account member = MemberManager.instance.getMember(data.groupKey);
+                    if (member != null) {
+                        member.joinList.add(event.key);
+                        String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, data.groupKey, member.id);
+                        DBUtils.instance.updateChildren(path, member.toMap());
+                    }
+
                     // Post a message to the room announcing the user has joined
                     String format = mMessageMap.get(R.string.HasJoinedMessage);
                     String text = String.format(Locale.getDefault(), format, currAccount.displayName);
@@ -404,7 +435,14 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     /** Check for group invitation completed. If so, post event and clean up. */
     private void handleInvitationComplete(GroupInviteData groupData) {
         if (groupData.isDone()) {
-            AppEventManager.instance.post(new GroupJoinedEvent(groupData.groupName));
+            // If the invitation added additional room(s) to an existing group, make the message
+            // informative.
+            List<String> roomList = new ArrayList<>();
+            if (groupData.roomsOnly) {
+                for (String roomKey : groupData.rooms)
+                    roomList.add(RoomManager.instance.getRoomProfile(roomKey).name);
+            }
+            AppEventManager.instance.post(new GroupJoinedEvent(groupData.groupName, roomList));
             // We're finally done processing this group invitation so remove it from the list
             mInviteMap.remove(groupData.groupKey);
         }
@@ -458,10 +496,19 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         return true;
     }
 
-    /** Build the dynamic link to be used for Firebase invitations */
-    private void startInvitationIntent(final FragmentActivity activity) {
+    /**
+     * Build the dynamic link to be used for Firebase invitations. Optionally specify a group
+     * name if there is only one group in the invitation.
+     */
+    private void startInvitationIntent(final FragmentActivity activity, final String groupName) {
+        String msgText;
+        if (groupName != null) {
+            msgText = String.format(activity.getString(R.string.InviteToGroupFormat), groupName);
+        } else {
+            msgText = activity.getString(R.string.InviteMessage);
+        }
         Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
-                .setMessage(activity.getString(R.string.InviteMessage))
+                .setMessage(msgText)
                 .setDeepLink(Uri.parse(buildDynamicLink()))
                 .build();
         activity.startActivityForResult(intent, MainActivity.RC_INVITE);
@@ -472,17 +519,23 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         Account account = AccountManager.instance.getCurrentAccount();
         boolean accountChanged = false;
         for (String key : mInviteMap.keySet()) {
-            // If the account has already joined, don't add it again!
+            // If the account has already joined, don't add it again and don't wait to re-join
+            // common room or group, since that won't happen.
             if (account.joinList.contains(key)) {
+                mInviteMap.get(key).roomsOnly = true;
                 mInviteMap.get(key).addedToAccountJoinList = true;
+                mInviteMap.get(key).addedToCommRoomMemberList = true;
+                mInviteMap.get(key).addedToGroupMemberList = true;
             } else {
                 account.joinList.add(key);
                 accountChanged = true;
                 mInviteMap.get(key).addedToAccountJoinList = true;
             }
-            // Always set up the watcher for the common room (the group watcher is set up by
-            // adding the group to the account joinList). Watch all other rooms in the invite.
-            RoomManager.instance.setWatcher(key, mInviteMap.get(key).commonRoomKey);
+            // Set a watcher for the common room unless this account is already a member of the
+            // group. The group watcher is set up by adding the group to the account joinList.
+            // Watch all other rooms in the invite.
+            if (!mInviteMap.get(key).addedToCommRoomMemberList)
+                RoomManager.instance.setWatcher(key, mInviteMap.get(key).commonRoomKey);
             if (mInviteMap.get(key).rooms != null) {
                 for (String roomKey : mInviteMap.get(key).rooms)
                     RoomManager.instance.setWatcher(key, roomKey);

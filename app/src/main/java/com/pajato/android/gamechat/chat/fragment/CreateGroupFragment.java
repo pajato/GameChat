@@ -36,6 +36,7 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.exp.NotificationManager;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -68,7 +69,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         EditText hint = (EditText) mLayout.findViewById(R.id.NameText);
         hint.setHint(R.string.CreateGroupNameHint);
 
-        // Create the group to be configure and, optionally, persisted.
+        // Create the group to be configured and, optionally, persisted.
         mGroup = new Group();
         mGroup.name = getDefaultName();
         mGroup.roomList = new ArrayList<>();
@@ -129,6 +130,10 @@ public class CreateGroupFragment extends BaseCreateFragment {
         manager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
         if (manager.isAcceptingText() && activity.getCurrentFocus() != null)
             manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+
+        // Give the user a snackbar message offering to join friends to the group.
+        NotificationManager.instance.notifyGroupCreate(this, mGroup.key, mGroup.name);
+
         activity.onBackPressed();
     }
 

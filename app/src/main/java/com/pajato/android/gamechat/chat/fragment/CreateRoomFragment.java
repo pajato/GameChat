@@ -32,6 +32,7 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.exp.NotificationManager;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
@@ -112,6 +113,10 @@ public class CreateRoomFragment extends BaseCreateFragment {
         manager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
         if (manager.isAcceptingText() && activity.getCurrentFocus() != null)
             manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+
+        // Give the user a snackbar message offering to join friends to the room.
+        NotificationManager.instance.notifyRoomCreate(this, mRoom.key, mRoom.name);
+
         activity.onBackPressed();
     }
 

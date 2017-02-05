@@ -108,7 +108,7 @@ public class ChessFragment extends BaseExperienceFragment {
                 if (isInMeGroup())
                     DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 else
-                    InvitationManager.instance.extendInvitation(getActivity(),
+                    InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
                 break;
             case R.string.SwitchToChat:
@@ -182,7 +182,7 @@ public class ChessFragment extends BaseExperienceFragment {
     private void reportError(final Context context, final int messageResId, String... args) {
         // Let the User know that something is amiss.
         String message = context.getString(messageResId);
-        NotificationManager.instance.notify(this, message, false);
+        NotificationManager.instance.notifyNoAction(this, message);
 
         // Generate a logcat item casing on the given resource id.
         String format;
@@ -357,7 +357,7 @@ public class ChessFragment extends BaseExperienceFragment {
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notify(this, getDoneMessage(model), true);
+        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
         model.state = Chess.PENDING;
         ExperienceManager.instance.updateExperience(mExperience);
     }
@@ -567,7 +567,7 @@ public class ChessFragment extends BaseExperienceFragment {
         }
         // Generate win conditions. If one side runs out of pieces, the other side wins.
         if (!board.containsSecondaryKing()) {
-            NotificationManager.instance.notify(this, "Game Over! Player 1 Wins!", true);
+            NotificationManager.instance.notifyGameDone(this, "Game Over! Player 1 Wins!");
             if(model != null) {
                 model.state = PRIMARY_WINS;
                 model.setWinCount();
@@ -575,7 +575,7 @@ public class ChessFragment extends BaseExperienceFragment {
             return true;
         }
         if (!board.containsPrimaryKing()) {
-            NotificationManager.instance.notify(this, "Game Over! Player 2 Wins!", true);
+            NotificationManager.instance.notifyGameDone(this, "Game Over! Player 2 Wins!");
             if(model != null) {
                 model.state = SECONDARY_WINS;
                 model.setWinCount();

@@ -8,8 +8,6 @@
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
     <string name="InviteFriendFromChat">Invite friends</string>
-    <string name="InviteFriendFromExpEnv">Invite friends</string>
-    <string name="InviteFriendFromTTT">Invite friends</string>
     <string name="InviteFriendNav">Invite friends</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyRooms">Go To My Rooms</string>

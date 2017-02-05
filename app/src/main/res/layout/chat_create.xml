@@ -93,16 +93,5 @@ http://www.gnu.org/licenses
             android:text="@string/CreateRoomPrivate"
             android:onClick="onClick" />
     </RadioGroup>
-    <TextView
-        android:id="@+id/AddMembers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="36dp"
-        android:layout_gravity="center"
-        android:onClick="onClick"
-        android:textColor="@color/colorBlue"
-        android:textSize="16sp"
-        android:textStyle="normal"
-        android:text="@string/AddMembers"/>
 
 </LinearLayout>

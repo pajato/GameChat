@@ -23,6 +23,8 @@
     <string name="InviteMembersFeature">Inviting group or room members</string>
     <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
+    <string name="JoinedOneRoom">You have joined the %1$s room in group %2$s</string>
+    <string name="JoinedMultiRooms">You have joined rooms: %1$s in group %2$s</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>

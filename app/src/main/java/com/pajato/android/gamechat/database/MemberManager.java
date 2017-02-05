@@ -28,7 +28,6 @@ import com.pajato.android.gamechat.event.MemberChangeEvent;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,14 +68,14 @@ public enum MemberManager {
 
     /** Return null or a group member using the current account holder's id and given group key. */
     public Account getMember(@NonNull final String groupKey) {
-        // Determine if there is no curent account (should be impossible.)  Abort if so.
+        // Determine if there is no current account (should be impossible.)  Abort if so.
         Account account = AccountManager.instance.getCurrentAccount();
         if (account == null) return null;
 
         // Determine if there is an expected member account in the given group.  Abort if not.
         // Return the account if so.
         Map<String, Account> map = memberMap.get(groupKey);
-        if (memberMap == null) return null;
+        if (map == null) return null;
         return map.get(account.id);
     }
 
@@ -89,7 +88,7 @@ public enum MemberManager {
         return map.get(memberKey);
     }
 
-    /** Retrun the path to the group members for the given group and member keys. */
+    /** Return the path to the group members for the given group and member keys. */
     public String getMembersPath(final String groupKey, final String memberKey) {
         return String.format(Locale.US, MEMBERS_PATH, groupKey, memberKey);
     }

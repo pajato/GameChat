@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +45,7 @@ import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
@@ -61,6 +63,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 
 /**
  * Provide a main activity to display the chat and game fragments.
@@ -107,7 +110,8 @@ public class MainActivity extends BaseActivity
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
+    @Subscribe
+    public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.  But first, turn
         // off the sign in spinner.
@@ -129,8 +133,18 @@ public class MainActivity extends BaseActivity
     /** Handle group joined event */
     @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
         if (event.groupName != null && !event.groupName.equals("")) {
-            String format = getString(R.string.JoinedGroupsMessage);
-            String message = String.format(Locale.US, format, event.groupName);
+            String message;
+            if (event.rooms.size() == 1) {
+                message = String.format(Locale.US, getString(R.string.JoinedOneRoom),
+                        event.rooms.get(0), event.groupName);
+            } else if (event.rooms.size() > 1) {
+                String roomList = TextUtils.join(", ", event.rooms);
+                message = String.format(Locale.US, getString(R.string.JoinedMultiRooms),
+                        roomList, event.groupName);
+            } else {
+                String format = getString(R.string.JoinedGroupsMessage);
+                message = String.format(Locale.US, format, event.groupName);
+            }
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
@@ -161,6 +175,17 @@ public class MainActivity extends BaseActivity
             default:
                 // Ignore everything else.
                 break;
+        }
+    }
+
+    /** Handle Snackbar click event. */
+    @Subscribe
+    public void onClick(final InviteEvent event) {
+        // Send the invitation
+        if (event.type == group) {
+            InvitationManager.instance.extendGroupInvitation(this, event.key);
+        } else {
+            InvitationManager.instance.extendRoomInvitation(this, event.key);
         }
     }
 

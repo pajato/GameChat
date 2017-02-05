@@ -81,10 +81,6 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 if (editText != null) editText.setText("");
                 break;
 
-            case R.id.AddMembers:
-                showFutureFeatureMessage(R.string.InviteMembersFeature);
-                break;
-
             case R.id.SettableIconButton:
                 showFutureFeatureMessage(R.string.SetCreateIconFeature);
                 break;

@@ -120,7 +120,7 @@ public class CheckersFragment extends BaseExperienceFragment {
                 if (isInMeGroup())
                     DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 else
-                    InvitationManager.instance.extendInvitation(getActivity(),
+                    InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
                 break;
             case R.string.SwitchToChat:
@@ -174,9 +174,9 @@ public class CheckersFragment extends BaseExperienceFragment {
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
 
-        long tstamp = new Date().getTime();
+        long tStamp = new Date().getTime();
         String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tstamp));
+                SimpleDateFormat.getDateTimeInstance().format(tStamp));
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
@@ -184,7 +184,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
-        Checkers model = new Checkers(key, id, 0, name, tstamp, groupKey, roomKey, players);
+        Checkers model = new Checkers(key, id, 0, name, tStamp, groupKey, roomKey, players);
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
@@ -196,7 +196,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     private void reportError(final Context context, final int messageResId, String... args) {
         // Let the User know that something is amiss.
         String message = context.getString(messageResId);
-        NotificationManager.instance.notify(this, message, false);
+        NotificationManager.instance.notifyNoAction(this, message);
 
         // Generate a logcat item casing on the given resource id.
         String format;
@@ -370,7 +370,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notify(this, getDoneMessage(model), true);
+        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
         model.state = Checkers.PENDING;
         ExperienceManager.instance.updateExperience(mExperience);
     }
@@ -664,7 +664,7 @@ public class CheckersFragment extends BaseExperienceFragment {
             return;
         }
 
-        NotificationManager.instance.notify(this, winMsg, true);
+        NotificationManager.instance.notifyGameDone(this, winMsg);
         model.state = state;
         model.setWinCount();
     }

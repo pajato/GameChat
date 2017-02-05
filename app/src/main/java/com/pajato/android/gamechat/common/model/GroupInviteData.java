@@ -41,6 +41,12 @@ public class GroupInviteData {
     /** Number of rooms for which processing has been completed; doesn't include the common room */
     public int roomsCompleted;
 
+    /**
+     * True if current account already belongs to the group in the invitation but there may be new
+     * rooms added. Used only on the receiving end of invitations.
+     */
+    public boolean roomsOnly;
+
     /** Empty args constructor for the database */
     public GroupInviteData() {}
 
@@ -52,7 +58,8 @@ public class GroupInviteData {
         addedToGroupMemberList = false;
         addedToCommRoomMemberList = false;
         rooms = new ArrayList<>();
-        this.roomsCompleted = 0;
+        roomsCompleted = 0;
+        roomsOnly = false;
     }
 
     /** Constructor */
@@ -64,7 +71,8 @@ public class GroupInviteData {
         addedToGroupMemberList = false;
         addedToCommRoomMemberList = false;
         this.rooms = rooms;
-        this.roomsCompleted = 0;
+        roomsCompleted = 0;
+        roomsOnly = false;
     }
 
     /** Constructor */
@@ -75,8 +83,9 @@ public class GroupInviteData {
         addedToAccountJoinList = false;
         addedToGroupMemberList = false;
         addedToCommRoomMemberList = false;
-        this.rooms = new ArrayList<>();
-        this.roomsCompleted = 0;
+        rooms = new ArrayList<>();
+        roomsCompleted = 0;
+        roomsOnly = false;
     }
 
     /** Provide a default map for Firebase create/update */
@@ -90,6 +99,7 @@ public class GroupInviteData {
         result.put("addedToGroupMemberList", addedToGroupMemberList);
         result.put("addedToCommRoomMemberList", addedToCommRoomMemberList);
         result.put("roomsCompleted", roomsCompleted);
+        result.put("roomsOnly", roomsOnly);
         return result;
     }
 

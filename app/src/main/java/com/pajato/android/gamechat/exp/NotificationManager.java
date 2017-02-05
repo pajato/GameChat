@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -28,10 +29,14 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.room;
+
 /**
- * Manages the presentation of UI messages, mainly error messages.
+ * Manages the presentation of UI messages, currently via a Snackbar message.
  *
  * @author Bryan Scott
  * @author Paul Michael Reilly
@@ -41,22 +46,54 @@ public enum NotificationManager {
 
     // Public instance methods.
 
-    /** Create and show a Snackbar notification based on the given parameters. */
-    public void notify(@NonNull final Fragment fragment, final String text, final boolean done) {
+    /** Create a Snackbar notification indicating a group has been created */
+    public void notifyGroupCreate(@NonNull final Fragment fragment,  @NonNull String groupKey,
+                                  @NonNull String groupName) {
+        Context context = fragment.getContext();
+        String text = String.format(context.getString(R.string.ItemCreatedMessage), groupName);
+        final String sendInvites = context.getString(R.string.InviteFriendMessage);
+        showSnackbar(fragment, text, sendInvites, new SnackbarGroupActionHandler(groupKey));
+    }
+
+    /** Create a Snackbar notification indicating a room has been created */
+    public void notifyRoomCreate(@NonNull final Fragment fragment, @NonNull String roomKey,
+                                 @NonNull String roomName) {
+        Context context = fragment.getContext();
+        String text = String.format(context.getString(R.string.ItemCreatedMessage), roomName);
+        final String sendInvites = fragment.getContext().getString(R.string.InviteFriendMessage);
+        showSnackbar(fragment, text, sendInvites, new SnackbarRoomActionHandler(roomKey));
+    }
+
+    /** Show a snackbar notification for game-complete */
+    public void notifyGameDone(@NonNull final Fragment fragment, final String text) {
+        final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
+        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment));
+    }
+
+    /** Create and show a Snackbar notification for game-complete, based on the given parameters. */
+    public void notifyNoAction(@NonNull final Fragment fragment, final String text) {
+        // The game is ended so generate a notification that could start a new game.
+        final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
+        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment));
+    }
+
+    /** Put up a snackbar for the given fragment and resource string. */
+    public void notify(final Fragment fragment, final int resId) {
+        String message = fragment.getContext().getString(resId);
+        notifyNoAction(fragment, message);
+    }
+
+    /** Show a snackbar message. If actionText is null, use a short duration with no action. */
+    private void showSnackbar(@NonNull final Fragment fragment, @NonNull final String message,
+                              final String actionText, @NonNull View.OnClickListener listener) {
         // Ensure that the fragment is attached and has a view.  Abort if it does not.
         if (fragment.getView() == null) return;
-
-        // Determine if the experience is finished.
-        /* The notifcation snackbar. */
         Snackbar snackbar;
-        if (done) {
-            // The game is ended so generate a notification that could start a new game.
-            snackbar = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_LONG);
-            final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
-            snackbar.setAction(playAgain, new SnackbarActionHandler(fragment));
+        if (actionText == null) {
+            snackbar = Snackbar.make(fragment.getView(), message, Snackbar.LENGTH_SHORT);
         } else {
-            // The game hasn't ended so generate a notification without an action.
-            snackbar = Snackbar.make(fragment.getView(), text, Snackbar.LENGTH_SHORT);
+            snackbar = Snackbar.make(fragment.getView(), message, Snackbar.LENGTH_LONG);
+            snackbar.setAction(actionText, listener);
         }
 
         // Use a primary color background with white text for the snackbar and hide the FAB button
@@ -64,14 +101,8 @@ public enum NotificationManager {
         int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
         snackbar.getView().setBackgroundColor(color);
         snackbar.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
-            .addCallback(new SnackbarChangeHandler(fragment))
-            .show();
-    }
-
-    /** Put up a snackbar for the given fragment and resource string. */
-    public void notify(final Fragment fragment, final int resId) {
-        String message = fragment.getContext().getString(resId);
-        notify(fragment, message, false);
+                .addCallback(new SnackbarChangeHandler(fragment))
+                .show();
     }
 
     // Inner classes.
@@ -97,6 +128,48 @@ public enum NotificationManager {
 
         @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
             FabManager.game.hide(mFragment);
+        }
+    }
+
+    /** Handle a snackbar action click specifically to send an invitation to a group */
+    private class SnackbarRoomActionHandler implements View.OnClickListener {
+        // Instance variables.
+
+        /** The room key to which to send an invitation */
+        String mRoomKey;
+
+        // Constructor
+
+        /** Build an instance with a given room key */
+        SnackbarRoomActionHandler(final String key) {
+            mRoomKey = key;
+        }
+
+        /** Handle an action click from the snackbar by posting the event to the app */
+        @Override public void onClick(final View view) {
+            view.setTag(mRoomKey);
+            AppEventManager.instance.post(new InviteEvent(mRoomKey, room));
+        }
+    }
+
+    /** Handle a snackbar action click specifically to send an invitation to a group */
+    private class SnackbarGroupActionHandler implements View.OnClickListener {
+        // Instance variables.
+
+        /** The group key to which to send an invitation */
+        String mGroupKey;
+
+        // Constructor
+
+        /** Build an instance with a given group key */
+        SnackbarGroupActionHandler(final String key) {
+            mGroupKey = key;
+        }
+
+        /** Handle an action click from the snackbar by posting the event to the app */
+        @Override public void onClick(final View view) {
+            view.setTag(mGroupKey);
+            AppEventManager.instance.post(new InviteEvent(mGroupKey, group));
         }
     }
 
