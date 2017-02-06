@@ -118,8 +118,6 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the room.
         NotificationManager.instance.notifyRoomCreate(this, mRoom.key, mRoom.name);
-
-        activity.onBackPressed();
     }
 
     /** Set the room name conditionally to the given value. */

@@ -92,6 +92,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         switch (type) {
             case contactHeader:
             case date:
+            case resourceHeader:
             case roomsHeader:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
             case contact:
@@ -125,6 +126,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         if (item != null) {
             switch (item.type) {
                 case date:
+                case resourceHeader:
                 case roomsHeader:
                     // The header item types simply update the section title.
                     int id = item.nameResourceId;
