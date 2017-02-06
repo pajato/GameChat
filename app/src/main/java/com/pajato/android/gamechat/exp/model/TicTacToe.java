@@ -68,7 +68,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     /** The experience display name. */
     public String name;
 
-    /** The member account identifer who created the experience. */
+    /** The member account identifier who created the experience. */
     public String owner;
 
     /** The list of players, for tictactoe, two of them. */

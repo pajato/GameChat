@@ -23,7 +23,6 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
@@ -137,7 +136,7 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
 
     /** Process the change by updating the database list and notifying the app. */
     private void process(final DataSnapshot snapshot, final int type) {
-        // Validate the snapshot and the experience.  Abort if eitehr is invalid.
+        // Validate the snapshot and the experience.  Abort if either is invalid.
         Experience experience = snapshot.exists() ? getExperience(snapshot) : null;
         Map<String, Experience> expMap = experience != null ? getExpMap(experience) : null;
         if (expMap == null) return;

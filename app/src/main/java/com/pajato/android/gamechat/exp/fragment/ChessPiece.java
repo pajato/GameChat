@@ -60,7 +60,7 @@ public class ChessPiece {
     /** Provide a default map for a Firebase create/update. */
     public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
-        result.put("peiceId", pieceType);
+        result.put("pieceType", pieceType);
         result.put("teamId", teamId);
         return result;
     }

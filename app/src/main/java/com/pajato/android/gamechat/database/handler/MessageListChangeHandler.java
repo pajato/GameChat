@@ -125,7 +125,7 @@ public class MessageListChangeHandler extends DatabaseEventHandler implements Ch
         // The room map exists.  Determine if the message map needs to be created.
         messageMap = roomMap.get(mRoomKey);
         if (messageMap == null) {
-            // The m mapessage needs to be created.  Do it now and associate it with the room.
+            // The message map needs to be created.  Do it now and associate it with the room.
             messageMap = new HashMap<>();
             roomMap.put(mRoomKey, messageMap);
         }

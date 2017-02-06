@@ -24,7 +24,7 @@ import com.pajato.android.gamechat.database.GroupManager;
 
 public class SelectableGroupItem {
 
-    // public instance varaibles
+    // public instance variables
 
     /** the group key */
     public String groupKey;

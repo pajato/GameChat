@@ -28,7 +28,7 @@ public class AccountChangeEvent {
 
     // Public instance variable.
 
-    /** The changed, non-null acount. */
+    /** The changed, non-null account. */
     public Account account;
 
     // Public constructor.

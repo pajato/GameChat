@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.auth.api.credentials.CredentialsApi;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -37,11 +36,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
@@ -51,7 +48,6 @@ import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
-import com.pajato.android.gamechat.event.TagClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -86,7 +82,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
      * features.
      *
      * restricted: A restricted User cannot create another restricted User and has limited access
-     * to app features. For example, a restrited User cannot create a group or a room. The notion
+     * to app features. For example, a restricted User cannot create a group or a room. The notion
      * of a restricted/protected User is for use with young children.
      * Every restricted/protected User has a "chaperone", a standard User.  The restricted User can
      * only be a member of a group that the chaperone is a member of.
@@ -109,8 +105,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The sentinel value to use for indicating a signed out experience key. */
     public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
 
-    /** The database path to an invitation.  */
-    public static final String INVITE_PATH = "/invites/%s/";
+    /** The database path to protected user data */
+    public static final String PROTECTED_PATH = "/protectedUsers/%s";
 
     // Private class constants.
 
@@ -153,33 +149,38 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String roomKey = database.child(path).push().getKey();
 
         // Check for a chaperone account. If one exists, update this account and leave breadcrumbs
-        // for the chaperone.
+        // for the chaperone. Due to the authentication rules, this can't be done until after the
+        // new account is created (as only authorized accounts can access the database).
         if (mChaperone != null && !mChaperone.equals(account.id)) {
-            // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
-            // database.
             account.chaperone = mChaperone;
             account.type = AccountType.restricted.name();
-            Map<String, Object> protectedUsers = new HashMap<>();
-            protectedUsers.put(mChaperone, account.id);
-            String invitePath = String.format(INVITE_PATH, mChaperone);
-            DBUtils.instance.updateChildren(invitePath, protectedUsers);
-            mChaperone = null;
         } else
             // This User has a standard account.
             account.type = AccountType.standard.name();
 
         // Set up and persist the account for the given user.
-        long tstamp = account.createTime;
+        long tStamp = account.createTime;
         account.groupKey = groupKey;
         path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         DBUtils.instance.updateChildren(path, account.toMap());
+
+        // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
+        // database. This must be done after the new account has been added, because the database
+        // authorization rules don't allow non-authorized users to have access.
+        if (mChaperone != null && !mChaperone.equals(account.id)) {
+            Map<String, Object> protectedUsers = new HashMap<>();
+            protectedUsers.put(mChaperone, account.id);
+            String protectedUserPath = String.format(PROTECTED_PATH, mChaperone);
+            DBUtils.instance.updateChildren(protectedUserPath, protectedUsers);
+            mChaperone = null;
+        }
 
         // Update and persist the group profile.
         List<String> rooms = new ArrayList<>();
         rooms.add(roomKey);
         List<String> members = new ArrayList<>();
         members.add(account.id);
-        Group group = new Group(groupKey, account.id, null, tstamp, members, rooms);
+        Group group = new Group(groupKey, account.id, null, tStamp, members, rooms);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
         DBUtils.instance.updateChildren(path, group.toMap());
 
@@ -192,7 +193,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Update the "me" room profile on the database.
         String name = account.getDisplayName();
-        Room room = new Room(roomKey, account.id, name, groupKey, tstamp, 0, ME);
+        Room room = new Room(roomKey, account.id, name, groupKey, tStamp, 0, ME);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.instance.updateChildren(path, room.toMap());
 
@@ -278,16 +279,20 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     GroupManager.instance.setWatcher(key);
         }
 
-        // Check for protected user invites and update the account if there are any.
+        // Check for protected user data and update the account if there are any.
         if(event.account != null) {
             DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
-                    .child(String.format(AccountManager.INVITE_PATH, mCurrentAccount.id));
+                    .child(String.format(AccountManager.PROTECTED_PATH, mCurrentAccount.id));
 
             invite.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override public void onDataChange(DataSnapshot dataSnapshot) {
                     // If the snapshot has nothing to offer, move on. Otherwise update the account.
-                    if(!dataSnapshot.hasChildren()) return;
+                    if (!dataSnapshot.hasChildren())
+                        return;
+                    // Update the account.
                     Account account = AccountManager.instance.getCurrentAccount();
+                    if (account == null) // not logged in
+                        return;
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
                         account.protectedUsers.add((String) data.getValue());
                         data.getRef().removeValue();

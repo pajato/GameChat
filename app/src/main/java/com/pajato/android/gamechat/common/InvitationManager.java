@@ -178,16 +178,16 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     public void extendGroupInvitation(final FragmentActivity activity, final String groupKey) {
 
         Log.i(TAG, "extendGroupInvitation with groupKey=" + groupKey);
-        Group grp = GroupManager.instance.getGroupProfile(groupKey);
-        if (grp == null) {
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        if (group == null) {
             Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
                     "can't find this group");
             return;
         }
         // Create an entry for the invite map for the specified group.
-        GroupInviteData data = new GroupInviteData(grp.key, grp.name, grp.commonRoomKey);
+        GroupInviteData data = new GroupInviteData(group.key, group.name, group.commonRoomKey);
         mInviteMap.put(data.groupKey, data);
-        startInvitationIntent(activity, grp.name);
+        startInvitationIntent(activity, group.name);
     }
 
     /** Return a set of groups and rooms for invitations */

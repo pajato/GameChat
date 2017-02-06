@@ -1,7 +1,7 @@
 package com.pajato.android.gamechat.event;
 
 /**
- * Provides an event type indicating that a group invitation should be initiated.
+ * Provides an event type indicating that an invitation should be initiated.
  */
 
 public class InviteEvent {

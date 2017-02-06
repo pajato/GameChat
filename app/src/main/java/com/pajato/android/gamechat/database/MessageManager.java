@@ -105,10 +105,10 @@ public enum MessageManager {
         String name = type == SYSTEM ? systemName : account.getDisplayName();
         String systemUrl = "android.resource://com.pajato.android.gamechat/drawable/ic_launcher";
         String url = type == SYSTEM ? systemUrl : account.url;
-        long tstamp = new Date().getTime();
+        long tStamp = new Date().getTime();
         List<String> members = new ArrayList<>();
         members.addAll(room.getMemberIdList());
-        Message message = new Message(key, account.id, name, url, tstamp, text, type, members);
+        Message message = new Message(key, account.id, name, url, tStamp, text, type, members);
 
         // Persist the message.
         path = String.format(Locale.US, MESSAGE_PATH, room.groupKey, room.key, key);

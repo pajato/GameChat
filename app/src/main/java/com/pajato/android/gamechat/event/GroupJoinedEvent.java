@@ -1,6 +1,5 @@
 package com.pajato.android.gamechat.event;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
