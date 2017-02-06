@@ -35,7 +35,7 @@ public class MemberChangeEvent {
     /** The account push key (User id) */
     public String key;
 
-    /** The changed, non-null acount. */
+    /** The changed, non-null account. */
     public Account member;
 
     /** Build the instance with the given account; null indicates a sign out occurred. */

@@ -77,7 +77,7 @@ public class IntroActivity extends AppCompatActivity {
             finish();
         }
     }
-    /** Create the intro activity to highlight some features and provide a get started opertion. */
+    /** Create the intro activity to highlight some features and provide a get started operation. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
         // Establish the activity state and set up the intro layout enhancing the experience for
         // Lollipop and follow on devices by enabling elevated animation.
@@ -289,7 +289,7 @@ public class IntroActivity extends AppCompatActivity {
         /** The fadein image. */
         private final ImageView mFadeinImage;
 
-        /** The fadout image. */
+        /** The fadeout image. */
         private final ImageView mFadeoutImage;
 
         /** Build the animation handler. */

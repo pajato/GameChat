@@ -13,8 +13,6 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
 /**
  *  Provide a Firebase model class for a chessET game experience.
- *
- *  Created by sscott on 12/30/16.
  */
 @IgnoreExtraProperties public class Chess implements Experience {
 

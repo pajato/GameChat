@@ -18,14 +18,9 @@
 package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
-
-import static com.pajato.android.gamechat.common.FragmentType.checkers;
-import static com.pajato.android.gamechat.common.FragmentType.chess;
-import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 
 /**
  * The games enum values associate games, modes, fragments and resources in a very flexible, concise

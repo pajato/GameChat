@@ -34,6 +34,8 @@ import com.pajato.android.gamechat.event.TagClickEvent;
 
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.room;
+import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.chat;
+import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.experience;
 
 /**
  * Manages the presentation of UI messages, currently via a Snackbar message.
@@ -44,6 +46,10 @@ import static com.pajato.android.gamechat.event.InviteEvent.ItemType.room;
 public enum NotificationManager {
     instance;
 
+    enum NotifyType {
+        chat, experience
+    }
+
     // Public instance methods.
 
     /** Create a Snackbar notification indicating a group has been created */
@@ -52,7 +58,7 @@ public enum NotificationManager {
         Context context = fragment.getContext();
         String text = String.format(context.getString(R.string.ItemCreatedMessage), groupName);
         final String sendInvites = context.getString(R.string.InviteFriendMessage);
-        showSnackbar(fragment, text, sendInvites, new SnackbarGroupActionHandler(groupKey));
+        showSnackbar(fragment, text, sendInvites, new SnackbarGroupActionHandler(groupKey), chat);
     }
 
     /** Create a Snackbar notification indicating a room has been created */
@@ -61,23 +67,23 @@ public enum NotificationManager {
         Context context = fragment.getContext();
         String text = String.format(context.getString(R.string.ItemCreatedMessage), roomName);
         final String sendInvites = fragment.getContext().getString(R.string.InviteFriendMessage);
-        showSnackbar(fragment, text, sendInvites, new SnackbarRoomActionHandler(roomKey));
+        showSnackbar(fragment, text, sendInvites, new SnackbarRoomActionHandler(roomKey), chat);
     }
 
     /** Show a snackbar notification for game-complete */
     public void notifyGameDone(@NonNull final Fragment fragment, final String text) {
         final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
-        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment));
+        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment), experience);
     }
 
     /** Create and show a Snackbar notification for game-complete, based on the given parameters. */
     public void notifyNoAction(@NonNull final Fragment fragment, final String text) {
         // The game is ended so generate a notification that could start a new game.
         final String playAgain = fragment.getContext().getString(R.string.PlayAgain);
-        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment));
+        showSnackbar(fragment, text, playAgain, new SnackbarActionHandler(fragment), experience);
     }
 
-    /** Put up a snackbar for the given fragment and resource string. */
+    /** Put up a snackbar for the given experience fragment and resource string. */
     public void notify(final Fragment fragment, final int resId) {
         String message = fragment.getContext().getString(resId);
         notifyNoAction(fragment, message);
@@ -85,9 +91,11 @@ public enum NotificationManager {
 
     /** Show a snackbar message. If actionText is null, use a short duration with no action. */
     private void showSnackbar(@NonNull final Fragment fragment, @NonNull final String message,
-                              final String actionText, @NonNull View.OnClickListener listener) {
+                              final String actionText, @NonNull View.OnClickListener listener,
+                              NotifyType type) {
         // Ensure that the fragment is attached and has a view.  Abort if it does not.
-        if (fragment.getView() == null) return;
+        if (fragment.getView() == null)
+            return;
         Snackbar snackbar;
         if (actionText == null) {
             snackbar = Snackbar.make(fragment.getView(), message, Snackbar.LENGTH_SHORT);
@@ -100,14 +108,14 @@ public enum NotificationManager {
         // while the snackbar is presenting.
         int color = ContextCompat.getColor(fragment.getContext(), R.color.colorPrimaryDark);
         snackbar.getView().setBackgroundColor(color);
-        snackbar.setActionTextColor(ColorStateList.valueOf(Color.WHITE))
-                .addCallback(new SnackbarChangeHandler(fragment))
+        snackbar.addCallback(new SnackbarChangeHandler(fragment, type))
+                .setActionTextColor(ColorStateList.valueOf(Color.WHITE))
                 .show();
     }
 
     // Inner classes.
 
-    /** Provide a handler to show/hide the FAB for snackbar messaging. */
+    /** Provide a handler to show/hide the FAB for snackbar messaging for game fragments. */
     private class SnackbarChangeHandler extends Snackbar.Callback {
 
         // Instance variables.
@@ -115,19 +123,29 @@ public enum NotificationManager {
         /** The calling fragment. */
         Fragment mFragment;
 
+        /** Whether this notification is from an experience or chat */
+        NotifyType mType;
+
         // Constructors
 
         /** Build an instance with a given fragment. */
-        SnackbarChangeHandler(final Fragment fragment) {
+        SnackbarChangeHandler(final Fragment fragment, NotifyType type) {
             mFragment = fragment;
+            mType = type;
         }
 
         @Override public void onDismissed(final Snackbar snackbar, final int event) {
-            FabManager.game.show(mFragment);
+            if (mType == chat)
+                FabManager.chat.show(mFragment);
+            else
+                FabManager.game.show(mFragment);
         }
 
         @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
-            FabManager.game.hide(mFragment);
+            if (mType == chat)
+                FabManager.chat.hide(mFragment);
+            else
+                FabManager.game.hide(mFragment);
         }
     }
 

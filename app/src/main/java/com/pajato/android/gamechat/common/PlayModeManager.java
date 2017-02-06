@@ -20,11 +20,9 @@ package com.pajato.android.gamechat.common;
 import android.support.annotation.NonNull;
 
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.SelectableMemberItem;
 import com.pajato.android.gamechat.common.adapter.UserItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 
 import java.util.ArrayList;

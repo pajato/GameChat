@@ -29,7 +29,6 @@ import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.fragment.ChatShowRoomsFragment;
 import com.pajato.android.gamechat.common.adapter.MenuAdapter;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 
@@ -170,7 +169,7 @@ public enum FabManager {
         mTag = fragmentTag;
     }
 
-    /** Ensure that the FAb is being shown. */
+    /** Ensure that the FAB is being shown. */
     public void show(@NonNull final Fragment fragment) {
         View layout = getFragmentLayout(fragment);
         if (layout == null) return;
@@ -203,13 +202,13 @@ public enum FabManager {
             switch (value) {
                 case opened:
                     // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
-                    // the menu and undim the frame.
+                    // the menu and un-dim the frame.
                     dismissMenu(fragment, layout);
                     break;
                 case closed:
                     // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
                     // open the named menu (if name is set) or the last one used.
-                    if (name != null) setMenu(fragment, name);
+                    setMenu(fragment, name);
                     fab.setImageResource(R.drawable.ic_clear_white_24dp);
                     fab.setTag(R.integer.fabStateKey, opened);
                     dimmerView.setVisibility(View.VISIBLE);

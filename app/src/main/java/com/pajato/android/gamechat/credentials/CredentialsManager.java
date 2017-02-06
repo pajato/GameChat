@@ -52,7 +52,7 @@ public enum CredentialsManager {
     /** The email provider type. */
     private static final String EMAIL_PROVIDER = "emailProvider";
 
-    /** The format used to perist a credential email address. */
+    /** The format used to persist a credential email address. */
     private static final String FORMAT_EMAIL = "%s:email:%s";
 
     /** The format used to persist a credential provider. */
@@ -71,7 +71,7 @@ public enum CredentialsManager {
 
     // Public instance methods
 
-    /** Return credientials for a given User account by email address, null on no account. */
+    /** Return credentials for a given User account by email address, null on no account. */
     public AuthCredential getAuthCredential(final String emailAddress) {
         // Determine if there is no such account.
         Credentials credentials = mCredentialsMap.get(emailAddress);
@@ -92,8 +92,7 @@ public enum CredentialsManager {
     /** Build the object by reading in the saved credentials. */
     public void init(final SharedPreferences prefs) {
         mPrefs = prefs;
-        String key = CREDENTIALS_KEY;
-        Set<String> stringSet = prefs.getStringSet(key, null);
+        Set<String> stringSet = prefs.getStringSet(CREDENTIALS_KEY, null);
         if (stringSet != null) {
             for (String value : stringSet) cacheValue(value);
             cacheValidate();
@@ -108,8 +107,7 @@ public enum CredentialsManager {
 
         // Persist the credentials.
         SharedPreferences.Editor editor = mPrefs.edit();
-        String key = CREDENTIALS_KEY;
-        editor.putStringSet(key, getStringSet());
+        editor.putStringSet(CREDENTIALS_KEY, getStringSet());
         editor.apply();
     }
 

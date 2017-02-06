@@ -22,13 +22,8 @@ import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FragmentType;
-import com.pajato.android.gamechat.common.InvitationManager;
-import com.pajato.android.gamechat.common.adapter.ListItem;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 

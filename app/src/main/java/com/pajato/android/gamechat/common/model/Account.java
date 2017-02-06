@@ -37,7 +37,7 @@ import java.util.Map;
  * In the GameChat account context, the class provides a list (named 'joinList') of group
  * identifiers for which the account holder is a member.
  *
- * In the GameChat group member context, the class provides a list ('joinList') of room identifers
+ * In the GameChat group member context, the class provides a list ('joinList') of room identifiers
  * which the member holder has joined.  In this context, the email address and the FirebaseUser
  * provided identifier are and will remain identical to the the values provided by the FirebaseUser
  * object they come from.  The full name (display name) and the photo url may be changed at will.
