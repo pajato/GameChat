@@ -121,7 +121,7 @@ public enum ExperienceManager {
     }
 
     /** Handle an experience change event by updating the date headers ... */
-    @Subscribe public void onEperienceChangeEvent(@NonNull final ExperienceChangeEvent event) {
+    @Subscribe public void onExperienceChangeEvent(@NonNull final ExperienceChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.experience);
         AppEventManager.instance.post(new ExpListChangeEvent());

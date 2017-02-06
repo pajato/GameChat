@@ -24,7 +24,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
 import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.exp.Experience;
 
 import java.util.Locale;
 
@@ -35,7 +35,6 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.room;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomsHeader;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
@@ -88,6 +87,7 @@ public class ListItem {
         experience,
         group,
         message,
+        resourceHeader,
         room,
         roomsHeader,
         roomList,
@@ -177,12 +177,12 @@ public class ListItem {
     }
 
     /** Build an instance for a given room list item. */
-    public ListItem(final ExperienceItem item, PlayModeType playMode) {
+    public ListItem(@NonNull final Experience exp, final PlayModeType playMode) {
         type = experience;
         this.playMode = playMode;
-        groupKey = item.groupKey;
-        roomKey = item.roomKey;
-        key = item.key;
+        groupKey = exp.getGroupKey();
+        roomKey = exp.getRoomKey();
+        key = exp.getExperienceKey();
     }
 
     /** Build an instance for a given room list item. */
@@ -208,20 +208,6 @@ public class ListItem {
         text = item.text;
         String format = "Room item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
         mDesc = String.format(Locale.US, format, name, key, count, text);
-    }
-
-    /** Build an instance for a given available rooms header item. */
-    public ListItem(final ResourceHeaderItem item) {
-        type = roomsHeader;
-        nameResourceId = item.getNameResourceId();
-        mDesc = String.format(Locale.US, "Resource header with id: {%d}.", nameResourceId);
-    }
-
-    /** Build an instance for a given available rooms header item. */
-    public ListItem(final RoomsHeaderItem item) {
-        type = roomsHeader;
-        nameResourceId = item.getNameResourceId();
-        mDesc = String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
     }
 
     /** Build an instance for a given contact list item. */
@@ -272,28 +258,15 @@ public class ListItem {
         mDesc = String.format(Locale.US, format, name, email, url);
     }
 
-    /** Build an instance for a room item used for invitations */
-    public ListItem(final InviteRoomItem item) {
-        type = inviteRoom;
-        groupKey = item.groupKey;
-        key = item.roomKey;
-        name = item.name;
-        text = item.text;
-        String format = "Selectable room item with name {%s} and text: {%s}.";
-        mDesc = String.format(Locale.US, format, name, text);
-        enabled = true;
-    }
-
-    /** Build an instance for a common room item where selection is reflected but disabled */
-    public ListItem(final ItemType type, final String groupKey, final String key) {
+    /** Build an instance for a room or common room invitation. */
+    public ListItem(final ItemType type, final Room room) {
         this.type = type;
-        this.groupKey = groupKey;
-        this.key = key;
-        Room room = RoomManager.instance.getRoomProfile(key);
-        Group group = GroupManager.instance.getGroupProfile(groupKey);
+        groupKey = room.groupKey;
+        key = room.key;
         name = room.name;
+        Group group = GroupManager.instance.getGroupProfile(groupKey);
         text = group != null ? group.name : "";
-        enabled = false;
+        enabled = type == inviteRoom;
     }
 
     // Public instance methods.
@@ -330,8 +303,15 @@ public class ListItem {
             case inviteCommonRoom:
                 format = "Common room item with name {%s} and text: {%s}.";
                 return String.format(Locale.US, format, name, text);
+            case inviteRoom:
+                format = "Selectable room item with name {%s} and text: {%s}.";
+                return String.format(Locale.US, format, name, text);
+            case resourceHeader:
+                return String.format(Locale.US, "Resource header with id: {%d}.", nameResourceId);
+            case roomsHeader:
+                return String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
             default:
-                format = "Undescribed type: {%s}.";
+                format = "Un-described type: {%s}.";
                 return String.format(Locale.US, format, type);
         }
     }

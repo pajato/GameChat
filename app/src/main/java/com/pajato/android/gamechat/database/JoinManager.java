@@ -27,7 +27,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.RoomsHeaderItem;
 import com.pajato.android.gamechat.common.adapter.SelectableMemberItem;
 import com.pajato.android.gamechat.common.adapter.SelectableRoomItem;
 import com.pajato.android.gamechat.common.model.Account;
@@ -43,6 +42,7 @@ import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomsHeader;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -114,7 +114,7 @@ public enum JoinManager {
         if (result.size() > 0) return result;
 
         // There are no rooms to join.  Provide a header message to that effect.
-        result.add(new ListItem(new RoomsHeaderItem(R.string.NoJoinableRoomsHeaderText)));
+        result.add(new ListItem(roomsHeader, R.string.NoJoinableRoomsHeaderText));
         return result;
     }
 
@@ -184,7 +184,7 @@ public enum JoinManager {
         int noAvailableMembers = R.string.MembersNotAvailableHeaderText;
         int availableMembers = R.string.MembersAvailableHeaderText;
         int resourceId = items.size() == 0 ? noAvailableMembers : availableMembers;
-        result.add(new ListItem(new RoomsHeaderItem(resourceId)));
+        result.add(new ListItem(roomsHeader, resourceId));
         result.addAll(items);
         return result;
     }
@@ -200,7 +200,7 @@ public enum JoinManager {
         List<String> joinableRoomList = JoinManager.instance.getJoinableRooms(groupList, joinedRoomList);
         if (joinableRoomList.size() > 0) {
             // There are joinable rooms.  Add a header item and the list of joinable rooms.
-            result.add(new ListItem(new RoomsHeaderItem(R.string.RoomsAvailableHeaderText)));
+            result.add(new ListItem(roomsHeader, R.string.RoomsAvailableHeaderText));
             for (String roomKey : joinableRoomList) {
                 Room room = RoomManager.instance.roomMap.get(roomKey);
                 result.add(new ListItem(new SelectableRoomItem(room.groupKey, roomKey)));

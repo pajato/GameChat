@@ -26,7 +26,6 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FragmentKind;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
@@ -50,6 +49,7 @@ import java.util.Map;
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -294,7 +294,7 @@ public enum GroupManager {
     /** Return 0 or the number of unseen messages in all the joined rooms for the given group. */
     private int getNewMessageCount(@NonNull final String key,
                                    @NonNull final Map<String, Integer> roomCountMap) {
-        // Return the total number of unseen messsages in the joined rooms for the given group.
+        // Return the total number of unseen messages in the joined rooms for the given group.
         int result = 0;
         Map<String, Map<String, Message>> map = GroupManager.instance.getGroupMessages(key);
         String accountId = AccountManager.instance.getCurrentAccountId();
@@ -315,7 +315,7 @@ public enum GroupManager {
     private List<ListItem> getNoGroupsItemList() {
         //
         List<ListItem> result = new ArrayList<>();
-        result.add(new ListItem(new ResourceHeaderItem(R.string.NoGroupsHeaderText)));
+        result.add(new ListItem(resourceHeader, R.string.NoGroupsHeaderText));
         Room room = RoomManager.instance.getMeRoom();
         if (room != null)
             result.add(new ListItem(new RoomItem(room.groupKey, room.key)));
