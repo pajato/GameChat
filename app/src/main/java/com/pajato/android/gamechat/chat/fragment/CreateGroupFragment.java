@@ -134,8 +134,6 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the group.
         NotificationManager.instance.notifyGroupCreate(this, mGroup.key, mGroup.name);
-
-        activity.onBackPressed();
     }
 
     /** Set the name of the managed object conditionally to the given value. */
