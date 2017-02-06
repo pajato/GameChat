@@ -30,7 +30,6 @@ import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.adapter.ExperienceItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -209,7 +208,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return players.get(index);
     }
 
-    /** Handle a possible game mode selection by distributing to a procedural abstration. */
+    /** Handle a possible game mode selection by distributing to a procedural abstraction. */
     protected void handlePlayMode(final int titleResId) {
         // Case on the title resource id to handle a mode selection.
         switch (titleResId) {
@@ -222,7 +221,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 // Handle selecting another User by chaining to the fragment that will select the
                 // User, copy the experience to a new room, and continue the game in that room with
                 // the current state.
-                ListItem listItem = new ListItem(new ExperienceItem(mExperience), mPlayMode);
+                ListItem listItem = new ListItem(mExperience, mPlayMode);
                 DispatchManager.instance.chainFragment(this.getActivity(), selectUser, listItem);
                 break;
             default:

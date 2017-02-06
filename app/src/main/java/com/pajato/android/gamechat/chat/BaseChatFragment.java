@@ -23,15 +23,10 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.ToolbarManager;
-import com.pajato.android.gamechat.common.adapter.GroupItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.RoomItem;
 

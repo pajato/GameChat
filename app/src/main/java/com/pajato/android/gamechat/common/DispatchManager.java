@@ -150,7 +150,8 @@ public enum DispatchManager {
      * type will determine the dispatch kind.
      *
      * @param context The activity that will attach to the next fragment.
-     * @param type The fragment type, which detemrines the dispatch kind.
+     * @param type The fragment type, which determines the dispatch kind.
+     * @param item A template containing payload data to pass along with the UI views.
      *
      * @return TRUE iff the next fragment is started.
      */

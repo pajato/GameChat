@@ -40,9 +40,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.adapter.InviteRoomItem;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.ResourceHeaderItem;
 import com.pajato.android.gamechat.common.adapter.SelectableGroupItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.GroupInviteData;
@@ -71,11 +69,13 @@ import static android.app.Activity.RESULT_OK;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
- * Handle invitations to groups.
+ * Handle invitations to groups, rooms and experiences.
  *
- * @author Paul Michael Reilly
+ * @author Sandy Scott
  */
 public enum InvitationManager implements ResultCallback<AppInviteInvitationResult>,
         GoogleApiClient.OnConnectionFailedListener {
@@ -84,7 +84,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     // Private constants.
 
     private static final String APP_CODE = "aq5ca";
-    private static final String PLAY_STORE_LINK = "https://play.google.com/apps/testing/com.pajato.android.gamechat";
+    private static final String PLAY_STORE_LINK =
+            "https://play.google.com/apps/testing/com.pajato.android.gamechat";
     private static final String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
     private static final String WEB_LINK = "https://github.com/pajato/GameChat";
 //    public static final String APP_INVITE_PATH = "/invites/app/";
@@ -196,7 +197,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         if (result.size() > 0) return result;
 
         // There is nothing available for invitations.  Provide a header message to that effect.
-        result.add(new ListItem(new ResourceHeaderItem(R.string.NoSelectableItemsHeaderText)));
+        result.add(new ListItem(resourceHeader, R.string.NoSelectableItemsHeaderText));
         return result;
     }
 
@@ -415,18 +416,18 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         // Determine if there are groups to look at.  If not, return an empty result.
         List<ListItem> result = new ArrayList<>();
         if (GroupManager.instance.groupMap.size() == 0) {
-            result.add(new ListItem(new ResourceHeaderItem(R.string.NoSelectableItemsHeaderText)));
+            result.add(new ListItem(resourceHeader, R.string.NoSelectableItemsHeaderText));
             return result;
         }
 
         for (Map.Entry<String, Group> entry : GroupManager.instance.groupMap.entrySet()) {
             result.add(new ListItem(new SelectableGroupItem(entry.getKey())));
             List<Room> rooms = RoomManager.instance.getRooms(entry.getKey(), true);
-            for (Room aRoom : rooms) {
-                if (aRoom.type == COMMON)
-                    result.add(new ListItem(inviteCommonRoom, aRoom.groupKey, aRoom.key));
+            for (Room room : rooms) {
+                if (room.type == COMMON)
+                    result.add(new ListItem(inviteCommonRoom, room));
                 else
-                    result.add(new ListItem(new InviteRoomItem(aRoom.groupKey, aRoom.key)));
+                    result.add(new ListItem(inviteRoom, room));
             }
         }
         return result;
