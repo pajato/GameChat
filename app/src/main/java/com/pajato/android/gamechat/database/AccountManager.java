@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static android.R.attr.data;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
@@ -106,10 +105,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The sentinel value to use for indicating a signed out experience key. */
     public static final String SIGNED_OUT_EXPERIENCE_KEY = "signedOutExperienceKey";
 
-    /** The database path to an invitation.  */
-    public static final String INVITE_PATH = "/invites/%s/";
-
-    /** The database path to protected user breadcrumb */
+    /** The database path to protected user data */
     public static final String PROTECTED_PATH = "/protectedUsers/%s";
 
     // Private class constants.
