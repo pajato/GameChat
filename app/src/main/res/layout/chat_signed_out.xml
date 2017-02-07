@@ -17,7 +17,6 @@ http://www.gnu.org/licenses
 -->
 <!-- The main content for the no sign in fragment is a message imploring the User to sign in. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -31,29 +30,12 @@ http://www.gnu.org/licenses
         android:text="@string/ChatSignedOutMessageText"
         android:textAlignment="center"
         android:textSize="24sp" />
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SignInPrefixMessageText"
-            android:textAlignment="center"
-            android:textSize="24sp"/>
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:contentDescription="@string/HamburgerMenuDesc"
-            app:srcCompat="@drawable/ic_menu_black_24px"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/SignInSuffixMessageText"
-            android:textAlignment="center"
-            android:textSize="24sp"/>
-    </LinearLayout>
+        android:id="@+id/emptyListMessage2"
+        android:text="@string/SignInMessageText"
+        android:padding="24dp"
+        android:textAlignment="center"
+        android:textSize="24sp" />
 </LinearLayout>
