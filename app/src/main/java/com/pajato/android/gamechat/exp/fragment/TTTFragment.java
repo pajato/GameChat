@@ -39,6 +39,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -98,6 +99,12 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     private static final String TAG = TTTFragment.class.getSimpleName();
 
     // Public instance methods.
+
+    /** Process a given button click event looking for one on the game fab button. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the event to the base class.
+        processClickEvent(event.view);
+    }
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
     @Subscribe public void onClick(final TagClickEvent event) {

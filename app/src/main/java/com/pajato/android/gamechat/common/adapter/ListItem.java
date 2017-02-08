@@ -28,13 +28,12 @@ import com.pajato.android.gamechat.exp.Experience;
 
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.group;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.room;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
@@ -81,23 +80,34 @@ public class ListItem {
 
     /** Identifies the types of list items supported. */
     public enum ItemType {
-        contactHeader,
-        contact,
-        date,
-        experience,
-        group,
+        chatGroup ("Chat group item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
+        chatRoom ("Chat room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
+        contact ("Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}."),
+        contactHeader ("Contact header with resource id: {%d}."),
+        date ("Date header with resource id: {%d}."),
+        expGroup ("Exp group item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
+        expList ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
+        expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
+        experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
         message,
-        resourceHeader,
-        room,
-        roomsHeader,
-        roomList,
+        resourceHeader ("Resource header with id: {%d}."),
+        roomsHeader ("Rooms header with id: {%d}."),
         selectUser,
         selectRoom,
         selectableMember,
         selectableRoom,
         inviteGroup,
-        inviteRoom,
-        inviteCommonRoom
+        inviteRoom ("Selectable room item with name {%s} and text: {%s}."),
+        inviteCommonRoom ("Common room item with name {%s} and text: {%s}.");
+
+        public String format;
+
+        ItemType() {}
+
+        ItemType(final String format) {
+            this.format = format;
+        }
+
     }
 
     // Public instance variables.
@@ -151,11 +161,13 @@ public class ListItem {
 
     // Public constructors.
 
-    /** Build an item instance for the given group. */
-    public ListItem(final String groupKey, final String name, final int count, final String text) {
-        // Set the type and populate the member fields for the given group.
-        type = group;
+    /** Build an item instance for a group or room item. */
+    public ListItem(final ItemType type, final String groupKey, final String roomKey,
+                    final String name, final int count, final String text) {
+        // Set the type and populate the member fields for a group or room item type.
+        this.type = type;
         this.groupKey = groupKey;
+        this.roomKey = roomKey;
         this.name = name;
         this.count = count;
         this.text = text;
@@ -200,14 +212,12 @@ public class ListItem {
 
     /** Build an instance for a given room list item. */
     public ListItem(final RoomItem item) {
-        type = room;
+        type = chatRoom;
         groupKey = item.groupKey;
         key = item.roomKey;
         name = item.name;
         count = item.count;
         text = item.text;
-        String format = "Room item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        mDesc = String.format(Locale.US, format, name, key, count, text);
     }
 
     /** Build an instance for a given contact list item. */
@@ -281,38 +291,39 @@ public class ListItem {
     private String getDescription() {
         // Deal with a uninitialized type, a legacy type and a modern type in that order to provide
         // a description of the list item.
-        String format;
         if (type == null)
             return "Uninitialized list item.";
         if (mDesc != null)
             return mDesc;
         switch (type) {
+            case chatGroup:
+                return String.format(Locale.US, type.format, name, key, count, text);
+            case chatRoom:
+                return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case contact:
-                format = "Contact item with name {%s}, email: {%s}, phone: {%s} and url {%s}.";
-                return String.format(Locale.US, format, name, email, phone, url);
+                return String.format(Locale.US, type.format, name, email, phone, url);
             case contactHeader:
-                return String.format(Locale.US, "Contact header with resource id: {%d}.", nameResourceId);
+                return String.format(Locale.US, type.format, nameResourceId);
             case date:
-                return String.format(Locale.US, "Date header with resource id: {%d}.", nameResourceId);
+                return String.format(Locale.US, type.format, nameResourceId);
+            case expGroup:
+                return String.format(Locale.US, type.format, name, key, count, text);
+            case expList:
+                return String.format(Locale.US, type.format, name, key, count, text);
+            case expRoom:
+                return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case experience:
-                format = "Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}.";
-                return String.format(Locale.US, format, groupKey, roomKey, key, playMode);
-            case group:
-                format = "Group item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-                return String.format(Locale.US, format, name, key, count, text);
+                return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
             case inviteCommonRoom:
-                format = "Common room item with name {%s} and text: {%s}.";
-                return String.format(Locale.US, format, name, text);
+                return String.format(Locale.US, type.format, name, text);
             case inviteRoom:
-                format = "Selectable room item with name {%s} and text: {%s}.";
-                return String.format(Locale.US, format, name, text);
+                return String.format(Locale.US, type.format, name, text);
             case resourceHeader:
-                return String.format(Locale.US, "Resource header with id: {%d}.", nameResourceId);
+                return String.format(Locale.US, type.format, nameResourceId);
             case roomsHeader:
-                return String.format(Locale.US, "Rooms header with id: {%d}.", nameResourceId);
+                return String.format(Locale.US, type.format, nameResourceId);
             default:
-                format = "Un-described type: {%s}.";
-                return String.format(Locale.US, format, type);
+                return String.format(Locale.US, "Un-described type: {%s}.", type);
         }
     }
 }

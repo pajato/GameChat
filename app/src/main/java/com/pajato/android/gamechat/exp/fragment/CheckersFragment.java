@@ -17,6 +17,7 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
@@ -24,6 +25,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -92,6 +94,13 @@ public class CheckersFragment extends BaseExperienceFragment {
     private static final String TAG = CheckersFragment.class.getSimpleName();
 
     // Public instance methods.
+
+    /** Process a given button click event looking for one on the game fab button. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the event to the base class.
+        logEvent("onClick (tictactoe)");
+        processClickEvent(event.view);
+    }
 
     /** Handle a FAM or Snackbar Checkers click event. */
     @Subscribe public void onClick(final TagClickEvent event) {

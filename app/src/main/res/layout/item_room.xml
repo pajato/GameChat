@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -27,7 +27,7 @@
                     tools:text="3 new"/>
             </LinearLayout>
             <TextView style="@style/ChatListItemSubtitle" android:id="@+id/chatText"
-                tools:text="TheShovel, ConorTheWhiz, GrandPop" />
+                tools:text="TheShovel, ConnorTheWhiz, GrandPop" />
         </LinearLayout>
     </LinearLayout>
     <View style="@style/ChatListItemFooter" />

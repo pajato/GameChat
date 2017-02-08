@@ -94,38 +94,6 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         DispatchManager.instance.startNextFragment(getActivity(), FragmentType.values()[index]);
     }
 
-    /** Process a given button click event looking for one on the game fab button. */
-    @Subscribe public void onClick(final ClickEvent event) {
-        // Grab the View ID and the floating action button and dimmer views.
-        View view = event.view;
-        FragmentType expType = null;
-        switch (view.getId()) {
-            case R.id.IconTicTacToe:
-                expType = tictactoe;
-                break;
-            case R.id.IconCheckers:
-                expType = checkers;
-                break;
-            case R.id.IconChess:
-                expType = chess;
-                break;
-            case R.drawable.ic_casino_black_24dp:
-                // And do it for the rooms option buttons.
-                showFutureFeatureMessage(R.string.FutureSelectRooms);
-                FabManager.game.dismissMenu(this);
-                break;
-            case R.id.gameFab:
-                // If the click is on the fab, we have to handle if it's open or closed.
-                FabManager.game.toggle(this);
-                break;
-            default:
-                break;
-        }
-
-        if (expType != null)
-            DispatchManager.instance.startNextFragment(getActivity(), expType);
-    }
-
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         // Case on the item resource id if there is one to be had.

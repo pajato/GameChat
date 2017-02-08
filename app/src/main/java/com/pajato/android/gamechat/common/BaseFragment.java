@@ -38,6 +38,7 @@ import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MessageManager;
@@ -272,11 +273,11 @@ public abstract class BaseFragment extends Fragment {
     private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.
-                return GroupManager.instance.getListItemData(type.getKind());
+                return GroupManager.instance.getListItemData();
             case chatRoomList:  // Get the data to be show in a list of rooms.
                 return RoomManager.instance.getListItemData(item.groupKey);
             case expGroupList:  // Get the groups with experiences.
-                return GroupManager.instance.getListItemData(type.getKind());
+                return ExperienceManager.instance.getListItemData();
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
             case messageList:   // Get the data to be shown in a room.

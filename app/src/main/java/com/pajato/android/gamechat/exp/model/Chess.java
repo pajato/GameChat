@@ -12,7 +12,9 @@ import java.util.Map;
 import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
 /**
- *  Provide a Firebase model class for a chessET game experience.
+ *  Provide a Firebase model class for a chess game experience.
+ *
+ *  @author Sandy Scott on 12/30/16.
  */
 @IgnoreExtraProperties public class Chess implements Experience {
 
@@ -63,6 +65,9 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
     /** The experience type ordinal value. */
     public String type;
+
+    /** A list of users (by account identifier) in the room, that have not yet seen the message. */
+    public List<String> unseenList;
 
     /** The experience icon url. */
     public String url;
@@ -133,6 +138,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         result.put("state", state);
         result.put("turn", turn);
         result.put("type", type);
+        result.put("unseenList", unseenList);
         result.put("url", url);
         result.put("primaryQueenSideRookHasMoved", primaryQueenSideRookHasMoved);
         result.put("primaryKingSideRookHasMoved", primaryKingSideRookHasMoved);
@@ -168,8 +174,16 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         return name;
     }
 
+    /** Return the experience modification time. */
+    @Exclude @Override public long getModTime() {
+        return modTime;
+    }
+
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
+
+    /** Return the unseen list. */
+    @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {

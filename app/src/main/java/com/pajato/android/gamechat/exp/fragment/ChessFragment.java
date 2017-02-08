@@ -24,6 +24,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
@@ -82,6 +83,13 @@ public class ChessFragment extends BaseExperienceFragment {
     private static final String TAG = ChessFragment.class.getSimpleName();
 
     // Public instance methods.
+
+    /** Process a given button click event looking for one on the game fab button. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the event to the base class.
+        logEvent("onClick (chess)");
+        processClickEvent(event.view);
+    }
 
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe public void onClick(final TagClickEvent event) {

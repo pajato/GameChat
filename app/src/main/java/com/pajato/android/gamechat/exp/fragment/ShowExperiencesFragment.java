@@ -27,7 +27,8 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
 
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
-        logEvent("onClick (showExp)");
+        logEvent("onClick (showExperiences)");
+        processClickEvent(event.view);
     }
 
     /** Initialize the fragment by setting in the FAB. */

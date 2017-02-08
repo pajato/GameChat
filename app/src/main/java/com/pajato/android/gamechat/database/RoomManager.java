@@ -123,8 +123,8 @@ public enum RoomManager {
     public List<ListItem> getListItemData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
-        Map<String, Map<String, Message>> roomMap;
         List<ListItem> result = new ArrayList<>();
+        Map<String, Map<String, Message>> roomMap;
         for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
             List<String> groupList = GroupManager.instance.getGroupList(dht);
             if (groupList != null && groupList.size() > 0 && groupList.contains(groupKey)) {

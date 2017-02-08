@@ -5,6 +5,7 @@
     <string name="ErrorChessCreation">Error: cannot create a Chess experience</string>
     <string name="ErrorTTTCreation">Error: cannot create a TicTacToe experience</string>
     <string name="ExpGroupsToolbarTitle">Groups with Games</string>
+    <string name="ExpRoomsToolbarTitle">Rooms with Games</string>
     <string name="FutureSelectModes">Select playing modes</string>
     <string name="FutureSelectRooms">Select rooms</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
