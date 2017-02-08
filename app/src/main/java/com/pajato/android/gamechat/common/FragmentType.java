@@ -87,7 +87,7 @@ public enum FragmentType {
     experienceList (ShowExperiencesFragment.class, expMain, R.layout.exp_none),
     joinRoom (JoinRoomsFragment.class, joinRoomTT, R.layout.chat_join_rooms),
     messageList (ShowMessagesFragment.class, chatChain, R.layout.chat_messages),
-    noExperiences (ShowNoExperiencesFragment.class, chatMain, R.layout.exp_none),
+    noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
     selectChatGroupsRooms(SelectChatInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
     selectExpGroupsRooms (SelectExpInviteFragment.class, selectInviteTT, R.layout.select_for_invite),
