@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Provide a recycler view adapter to handle showing a list of rooms with messages to view based on
- * how recently messages in those room were generated.
+ * Provide a recycler view adapter to handle showing a list of rooms with messages or experiences
+ * to view based on how recently messages in those room were generated.
  *
  * @author Paul Michael Reilly
  */
@@ -97,9 +97,11 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
             case contact:
                 return new ContactViewHolder(getView(parent, R.layout.item_contact));
-            case group:
+            case expGroup:
+            case chatGroup:
                 return new ItemListViewHolder(getView(parent, R.layout.item_group));
-            case room:
+            case expRoom:
+            case chatRoom:
                 return new ItemListViewHolder(getView(parent, R.layout.item_room));
             case message:
                 return new ItemListViewHolder(getView(parent, R.layout.item_message));
@@ -115,7 +117,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             case inviteGroup:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
             default:
-                Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, viewType));
+                Log.e(TAG, String.format(Locale.US, UNHANDLED_FORMAT, viewType));
                 return null;
         }
     }
@@ -133,9 +135,11 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                     String name = holder.itemView.getContext().getResources().getString(id);
                     ((HeaderViewHolder) holder).title.setText(name);
                     break;
-                case group:
+                case expGroup:
+                case expRoom:
+                case chatGroup:
                 case message:
-                case room:
+                case chatRoom:
                 case selectRoom:
                 case selectUser:
                 case selectableMember:
@@ -145,10 +149,10 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case inviteGroup:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
-                    updateChatHolder((ItemListViewHolder) holder, item);
+                    updateHolder((ItemListViewHolder) holder, item);
                     break;
                 default:
-                    Log.d(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
+                    Log.e(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
                     break;
             }
         }
@@ -210,11 +214,13 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Update the given view holder using the data from the given item. */
-    private void updateChatHolder(ItemListViewHolder holder, final ListItem item) {
+    private void updateHolder(ItemListViewHolder holder, final ListItem item) {
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        if (item.text != null && !item.text.equals(""))
+        if (item.text == null || item.text.length() == 0)
+            holder.text.setVisibility(View.GONE);
+        else
             holder.text.setText(CompatUtils.fromHtml(item.text));
         setChatIcon(holder, item);
         holder.itemView.setTag(item);

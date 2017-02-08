@@ -55,7 +55,8 @@ public class Dispatcher {
     Dispatcher(final FragmentType type) {
         // Capture the type and handle any of the experience types.
         this.type = type;
-        if (type != null) processType();
+        if (type != null)
+            processType();
     }
 
     /** Build an instance given a list item. */

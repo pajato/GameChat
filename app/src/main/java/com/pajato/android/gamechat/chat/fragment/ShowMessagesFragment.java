@@ -63,7 +63,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     // Public instance methods.
 
     /** Process a given button click event looking for one on the chat fab button. */
-    @Subscribe public void buttonClickHandler(final ClickEvent event) {
+    @Subscribe public void onClick(final ClickEvent event) {
         // Determine if this event is for the chat fab button.
         View view = event.view;
         switch (view.getId()) {

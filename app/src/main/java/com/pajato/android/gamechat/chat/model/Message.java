@@ -61,8 +61,8 @@ import java.util.Map;
     /** The message type. */
     public int type;
 
-    /** A list of users (by account identifier) in the room, that have not yet read the message. */
-    public List<String> unreadList;
+    /** A list of users (by account identifier) in the room, that have not yet seen the message. */
+    public List<String> unseenList;
 
     /** The poster's url. */
     public String url;
@@ -84,7 +84,7 @@ import java.util.Map;
         this.text = text;
         this.type = type;
         this.url = url;
-        this.unreadList = unreadList;
+        this.unseenList = unreadList;
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -97,8 +97,8 @@ import java.util.Map;
         result.put("owner", owner);
         result.put("text", text);
         result.put("type", type);
+        result.put("unseenList", unseenList);
         result.put("url", url);
-        result.put("unreadList", unreadList);
 
         return result;
     }

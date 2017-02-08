@@ -159,8 +159,6 @@ public enum FragmentType {
             case selectChatGroupsRooms:
             case showNoJoinedRooms:
                 return chat;
-            case selectExpGroupsRooms:
-                return exp;
             default:
                 return exp;
         }

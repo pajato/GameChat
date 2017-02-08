@@ -86,6 +86,9 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     /** The experience type name. */
     public String type;
 
+    /** A list of joined users (by account id), who have not yet seen the experience. */
+    public List<String> unseenList;
+
     /** The experience icon url. */
     public String url;
 
@@ -126,6 +129,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         result.put("state", state);
         result.put("turn", turn);
         result.put("type", type);
+        result.put("unseenList", unseenList);
         result.put("url", url);
 
         return result;
@@ -156,10 +160,18 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         return name;
     }
 
+    /** Return the experience modification time. */
+    @Exclude @Override public long getModTime() {
+        return modTime;
+    }
+
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() {
         return roomKey;
     }
+
+    /** Return the unseen list. */
+    @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 
     /** Return the value associated with the current player: 1 == X, 2 == O. */
     @Exclude public int getSymbolValue() {

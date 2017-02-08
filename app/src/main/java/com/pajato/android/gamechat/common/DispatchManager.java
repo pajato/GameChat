@@ -24,6 +24,7 @@ import android.util.Log;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import static com.pajato.android.gamechat.common.FragmentType.chatSignedOut;
 import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expOffline;
 import static com.pajato.android.gamechat.common.FragmentType.expSignedOut;
+import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
 
 /**
  * Manages the game related aspects of the GameChat application. These include the creation of new
@@ -185,6 +187,7 @@ public enum DispatchManager {
 
             case chatRoomList:
             case createRoom:
+            case experienceList:
             case joinRoom:
             case messageList:
             case selectChatGroupsRooms:
@@ -206,17 +209,20 @@ public enum DispatchManager {
         FragmentType type = kind == chat ? chatOffline : expOffline;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher(type);
         Account account = AccountManager.instance.getCurrentAccount();
-        int groupsJoined = account != null ? account.joinList.size() : -1;
+        int joinSize = account != null ? account.joinList.size() : -1;
 
         // Case on the number of joined groups: -1 implies the User is signed out, 0 implies the me
         // room, 1 will use the rooms in that group, otherwise set up to show a list of groups.
-        switch (groupsJoined) {
-            case -1: // Return an offline fragment type of the right kind.
+        switch (joinSize) {
+            case -1:            // Return an offline fragment type of the right kind.
                 type = kind == chat ? chatSignedOut : expSignedOut;
                 return new Dispatcher(type);
-
-            default:
-                return new Dispatcher(kind == chat ? chatGroupList : expGroupList);
+            default:            // Depends on kind and number of experiences, if any.
+                if (kind == chat)
+                    return new Dispatcher(chatGroupList);
+                if (ExperienceManager.instance.experienceMap.size() > 0)
+                    return new Dispatcher(expGroupList);
+                return new Dispatcher(noExperiences);
         }
     }
 

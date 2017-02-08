@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -62,6 +63,12 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
     public static final String CHAT_GROUP_FAM_KEY = "chatGroupFamKey";
 
     // Public instance methods.
+
+    /** Process a given button click event looking for the chat FAB. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the processing to the super class.
+        processClickEvent(event.view, "showGroups");
+    }
 
     /** Process a menu click event ... */
     @Subscribe public void onClick(final TagClickEvent event) {

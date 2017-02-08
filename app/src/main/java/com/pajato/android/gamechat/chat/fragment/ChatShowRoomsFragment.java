@@ -29,6 +29,7 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
@@ -68,6 +69,12 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         logEvent(String.format(Locale.US, format, "no list", event));
         if (mActive)
             updateAdapterList();
+    }
+
+    /** Process a given button click event looking for the chat FAB. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the processing to the super class.
+        processClickEvent(event.view, "showRooms");
     }
 
     /** Process a menu click event ... */

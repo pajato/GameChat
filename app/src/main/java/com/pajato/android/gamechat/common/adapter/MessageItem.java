@@ -71,7 +71,7 @@ public class MessageItem {
         // Flag the message as having been seen by this room member by removing the key from the
         // unread list.
         String accountId = AccountManager.instance.getCurrentAccountId();
-        List<String> unreadList = message.unreadList;
+        List<String> unreadList = message.unseenList;
         if (unreadList != null && unreadList.contains(accountId)) {
             // The message is still marked new.  Change it to "seen" by removing this User from the
             // list of Users who have not yet read the message and persist it.

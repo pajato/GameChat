@@ -56,6 +56,5 @@
     <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
     <string name="signInButtonText">Sign in to teach, learn and have fun with friends and family.</string>
     <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
-    <string name="HamburgerMenuDesc">toolbar hamburger menu reference</string>
     <string name="SignedOutTitleText">Signed Out</string>
 </resources>

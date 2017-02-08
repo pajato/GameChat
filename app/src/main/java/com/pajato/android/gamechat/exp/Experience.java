@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +34,9 @@ public interface Experience {
 
     /** Return the experience group push key. */
     String getGroupKey();
+
+    /** Return the experience modification time. */
+    long getModTime();
 
     /** Return the experience room push key. */
     String getRoomKey();
@@ -64,4 +68,6 @@ public interface Experience {
     /** Provide a map of experience properties. */
     Map<String, Object> toMap();
 
+    /** Return the unseen list. */
+    List<String> getUnseenList();
 }

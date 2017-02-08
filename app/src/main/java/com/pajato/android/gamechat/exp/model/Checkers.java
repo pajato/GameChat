@@ -63,6 +63,12 @@ public class Checkers implements Experience {
 
     /** The experience type name. */
     public String type;
+    // TODO:
+    //
+    // figure this one out, but use a placeholder hack for now.
+
+    /** A list of users (by account identifier) in the room, that have not yet seen the message. */
+    public List<String> unseenList;
 
     /** The experience icon url. */
     public String url;
@@ -83,6 +89,7 @@ public class Checkers implements Experience {
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
+        this.unseenList = unseenList;
         state = ACTIVE;
         turn = true;
         type = checkersET.name();
@@ -134,8 +141,16 @@ public class Checkers implements Experience {
         return name;
     }
 
+    /** Return the experience modification time. */
+    @Exclude @Override public long getModTime() {
+        return modTime;
+    }
+
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
+
+    /** Return the unseen list. */
+    @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
