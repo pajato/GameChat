@@ -45,6 +45,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
@@ -279,19 +280,20 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return true;
     }
 
-    /** Proces a click event on the given view for an experience fragment. */
-    protected void processClickEvent(final View view) {
+    /** Process a click event on the given view for an experience fragment. */
+    protected void processClickEvent(final View view, final String tag) {
         // Grab the View ID and the floating action button and dimmer views.
-        FragmentType expType = null;
+        logEvent(String.format("onClick: (%s) with event {%s};", tag, view));
+        FragmentType expFragmentType = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
-                expType = tictactoe;
+                expFragmentType = tictactoe;
                 break;
             case R.id.IconCheckers:
-                expType = checkers;
+                expFragmentType = checkers;
                 break;
             case R.id.IconChess:
-                expType = chess;
+                expFragmentType = chess;
                 break;
             case R.drawable.ic_casino_black_24dp:
                 // And do it for the rooms option buttons.
@@ -309,8 +311,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 break;
         }
 
-        if (expType != null)
-            DispatchManager.instance.startNextFragment(getActivity(), expType);
+        if (expFragmentType != null)
+            DispatchManager.instance.startNextFragment(getActivity(), expFragmentType);
     }
 
     /** Process a button click that may be a experience list item click. */
@@ -325,12 +327,23 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case expGroup: // Drill into the rooms in group.
                 DispatchManager.instance.chainFragment(getActivity(), expRoomList, item);
                 break;
-            case expRoom: // Show the list of experiences in a room.
-                DispatchManager.instance.chainFragment(getActivity(), experienceList, item);
+            case expRoom: // Show the list of experiences in a room or the one experience.
+                Map<String, Experience> map =
+                        ExperienceManager.instance.expGroupMap.get(item.groupKey).get(item.roomKey);
+                FragmentType type = map.size() > 1 ? experienceList : getType(map, item);
+                DispatchManager.instance.chainFragment(getActivity(), type, item);
                 break;
             default:
                 break;
         }
+    }
+
+    /** Return the fragment type corresponding to the sole experience in the map. */
+    private FragmentType getType(@NonNull final Map<String, Experience> map, final ListItem item) {
+        // Extract the experience from the map and add the key to the item.
+        Experience experience = map.values().iterator().next();
+        item.key = experience.getExperienceKey();
+        return experience.getExperienceType().getFragmentType();
     }
 
     /** Set the name for a given player index. */

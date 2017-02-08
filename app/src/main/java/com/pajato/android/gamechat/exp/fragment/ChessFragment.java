@@ -87,8 +87,7 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
-        logEvent("onClick (chess)");
-        processClickEvent(event.view);
+        processClickEvent(event.view, "chess");
     }
 
     /** Handle a FAM or Snackbar Chess click event. */

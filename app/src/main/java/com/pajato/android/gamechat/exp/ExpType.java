@@ -18,9 +18,14 @@
 package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Chess;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
+
+import static com.pajato.android.gamechat.common.FragmentType.checkers;
+import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 
 /**
  * The games enum values associate games, modes, fragments and resources in a very flexible, concise
@@ -60,5 +65,18 @@ public enum ExpType {
         mTitleResId = titleId;
         mPrimaryIndex = primary;
         mSecondaryIndex = secondary;
+    }
+
+    /** Return the fragment type associated with this experience type. */
+    public FragmentType getFragmentType() {
+        switch (this) {
+            case checkersET:
+                return checkers;
+            case chessET:
+                return chess;
+            case tttET:
+                return tictactoe;
+        }
+        return null;
     }
 }
