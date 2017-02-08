@@ -121,8 +121,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // entry.  Detect and handle start a new game first.
         if (isPlayAgain(tag, TAG))
             handleNewGame();
-        else
-            handlePlayMode(((MenuEntry) tag).titleResId);
     }
 
     /** Handle a TTT board tile click. */

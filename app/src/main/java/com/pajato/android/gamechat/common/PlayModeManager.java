@@ -18,31 +18,53 @@
 package com.pajato.android.gamechat.common;
 
 import android.support.annotation.NonNull;
+import android.support.v7.widget.PopupMenu;
+import android.view.MenuItem;
+import android.view.View;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.UserItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Manages the game experience modes: such as playing against a local friend (non-User), the
- * computer or another online User.
+ * computer or another online User.  Also manages the play mode menu and related events and
+ * listeners.
  *
  * @author Paul Reilly
  */
 public enum PlayModeManager {
     instance;
 
-    // Public enums.
+    // Public instance variables
 
     /** Identifies the types of play. */
     public enum PlayModeType {computer, local, user}
 
+    // Protected instance variables
+
+    /** The current play mode popup menu for the experience being enjoyed. */
+    protected PopupMenu mPlayModePopup;
+
+    // Private  instance variables
+
+    /** The listener for menu item clicks on the play mode popup menu */
+    private PlayModeClickListener listener = new PlayModeClickListener();
+
     // Public instance methods.
+
+    public void dismissPlayModeMenu() {
+        if (mPlayModePopup != null)
+            mPlayModePopup.dismiss();
+    }
 
     /** Return null or a list of Users or rooms which the current user can access. */
     public List<ListItem> getListItemData(@NonNull final FragmentType type) {
@@ -55,6 +77,17 @@ public enum PlayModeManager {
         }
     }
 
+    /**
+     * Create and show the play mode popup menu. The popup menu must be created with the anchor in
+     * the current fragment layout, so it cannot be shared across fragments.
+     */
+    public void showPlayModeMenu(View anchorView) {
+        mPlayModePopup = new PopupMenu(anchorView.getContext(), anchorView);
+        mPlayModePopup.getMenuInflater().inflate(R.menu.player2_menu, mPlayModePopup.getMenu());
+        mPlayModePopup.setOnMenuItemClickListener(listener);
+        mPlayModePopup.show();
+    }
+
     // Private instance methods.
 
     /** Return a possibly empty list of Users the current User can access. */
@@ -62,11 +95,33 @@ public enum PlayModeManager {
         List<ListItem> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
         if (account == null || account.joinList.size() == 0)
-            return null;
+            return result;
         for (String groupKey : account.joinList)
             for (Account member : MemberManager.instance.getMemberList(groupKey))
                 if (!member.id.equals(account.id))
                     result.add(new ListItem(new UserItem(groupKey, member)));
         return result;
+    }
+
+    /** Menu item click listener for play-mode menu items */
+    private class PlayModeClickListener implements PopupMenu.OnMenuItemClickListener {
+        /** Just dispatch an event to any listeners */
+        public boolean onMenuItemClick(MenuItem item) {
+            PlayModeChangeEvent event;
+            switch (item.getItemId()) {
+                case R.id.playComputer:
+                    event = new PlayModeChangeEvent(PlayModeType.computer);
+                    break;
+                case R.id.playUser:
+                    event = new PlayModeChangeEvent(PlayModeType.user);
+                    break;
+                case R.id.playLocal:
+                default:
+                    event = new PlayModeChangeEvent(PlayModeType.local);
+                    break;
+            }
+            AppEventManager.instance.post(event);
+            return true;
+        }
     }
 }
