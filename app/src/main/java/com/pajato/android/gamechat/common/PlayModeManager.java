@@ -52,15 +52,16 @@ public enum PlayModeManager {
     // Protected instance variables
 
     /** The current play mode popup menu for the experience being enjoyed. */
-    protected PopupMenu mPlayModePopup;
+    private PopupMenu mPlayModePopup;
 
     // Private  instance variables
 
     /** The listener for menu item clicks on the play mode popup menu */
-    private PlayModeClickListener listener = new PlayModeClickListener();
+    private PlayModeClickListener mListener = new PlayModeClickListener();
 
     // Public instance methods.
 
+    /** Dismiss the play mode menu if it is not null */
     public void dismissPlayModeMenu() {
         if (mPlayModePopup != null)
             mPlayModePopup.dismiss();
@@ -84,7 +85,7 @@ public enum PlayModeManager {
     public void showPlayModeMenu(View anchorView) {
         mPlayModePopup = new PopupMenu(anchorView.getContext(), anchorView);
         mPlayModePopup.getMenuInflater().inflate(R.menu.player2_menu, mPlayModePopup.getMenu());
-        mPlayModePopup.setOnMenuItemClickListener(listener);
+        mPlayModePopup.setOnMenuItemClickListener(mListener);
         mPlayModePopup.show();
     }
 
