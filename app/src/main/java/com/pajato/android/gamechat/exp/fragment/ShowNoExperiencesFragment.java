@@ -24,6 +24,7 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
@@ -43,6 +44,12 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 public class ShowNoExperiencesFragment extends BaseExperienceFragment {
 
     // Public instance methods.
+
+    /** Process a given button click event looking for one on the game fab button. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        // Delegate the event to the base class.
+        processClickEvent(event.view, "showNoExperiences");
+    }
 
     /** Handle an experience list change event. */
     @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {

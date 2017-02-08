@@ -103,7 +103,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
-        processClickEvent(event.view);
+        processClickEvent(event.view, "tictactoe");
     }
 
     /** Handle a FAM or Snackbar TicTacToe click event. */

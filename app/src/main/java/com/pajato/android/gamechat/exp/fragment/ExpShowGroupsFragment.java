@@ -57,8 +57,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
-        logEvent("onClick (expShowGroups)");
-        processClickEvent(event.view);
+        processClickEvent(event.view, "expShowGroups");
     }
 
     /** Handle an experience list change event by dispatching again. */
