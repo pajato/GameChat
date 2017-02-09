@@ -24,7 +24,6 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.RoomItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ProfileRoomChangeHandler;
@@ -41,6 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 
 /**
@@ -80,7 +80,7 @@ public enum RoomManager {
         if (room.groupKey == null || room.key == null) return;
         String profilePath = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
         room.createTime = new Date().getTime();
-        DBUtils.instance.updateChildren(profilePath, room.toMap());
+        DBUtils.updateChildren(profilePath, room.toMap());
         setWatcher(room.groupKey, room.key);
     }
 
@@ -88,7 +88,7 @@ public enum RoomManager {
     public void updateRoomProfile(final Room room) {
         String path = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
         room.modTime = new Date().getTime();
-        DBUtils.instance.updateChildren(path, room.toMap());
+        DBUtils.updateChildren(path, room.toMap());
     }
 
     /** Return the "Me" room or null if there is no such room for one reason or another. */
@@ -132,7 +132,11 @@ public enum RoomManager {
                 result.add(new ListItem(date, dht.resId));
                 roomMap = MessageManager.instance.messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
-                    result.add(new ListItem(new RoomItem(groupKey, key)));
+                    Room room = RoomManager.instance.getRoomProfile(groupKey);
+                    Map<String, Integer> countMap = new HashMap<>();
+                    int count = DBUtils.getUnseenExperienceCount(key, countMap);
+                    String text = DBUtils.getText(countMap);
+                    result.add(new ListItem(chatRoom, groupKey, room.key, room.name, count, text));
                 }
             }
         }
@@ -174,7 +178,7 @@ public enum RoomManager {
     public void setWatcher(final String groupKey, final String roomKey) {
         // Determine if the room has a profile change watcher.  If so, abort, if not, then set one.
         String path = RoomManager.instance.getRoomProfilePath(groupKey, roomKey);
-        String name = DBUtils.instance.getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
+        String name = DBUtils.getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);

@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
@@ -104,7 +103,7 @@ public enum ExperienceManager {
             experience.setExperienceKey(getExperienceKey());
         String key = experience.getExperienceKey();
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, key);
-        DBUtils.instance.updateChildren(path, experience.toMap());
+        DBUtils.updateChildren(path, experience.toMap());
     }
 
     /** Return the number of experiences for the given type. */
@@ -175,7 +174,7 @@ public enum ExperienceManager {
     public void setWatcher(final String groupKey, final String roomKey) {
         // Obtain a room and set watchers on all the experience profiles in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
-        String name = DBUtils.instance.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
+        String name = DBUtils.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
         String path = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ExperiencesChangeHandler(name, path);
@@ -213,8 +212,8 @@ public enum ExperienceManager {
         switch (itemType) {
             case expGroup:
                 String name = GroupManager.instance.getGroupName(key);
-                count = getNewCount(key, countMap);
-                text = getGroupText(countMap);
+                count = DBUtils.getUnseenExperienceCount(key, countMap);
+                text = DBUtils.getText(countMap);
                 result.add(new ListItem(itemType, key, null, name, count, text));
                 break;
             case expRoom:
@@ -224,22 +223,6 @@ public enum ExperienceManager {
             default:
                 break;
         }
-    }
-
-    /** Return a textual list of rooms in the group indicating new items by bolding the name. */
-    private String getGroupText(@NonNull final Map<String, Integer> roomCountMap) {
-        // Process each room to determine if bolding is required.
-        StringBuilder textBuilder = new StringBuilder();
-        for (String roomKey : roomCountMap.keySet()) {
-            Room room = RoomManager.instance.getRoomProfile(roomKey);
-            if (textBuilder.length() != 0)
-                textBuilder.append(", ");
-            if (roomCountMap.get(roomKey) > 0)
-                textBuilder.append("<b>").append(room.getName()).append("</b>");
-            else
-                textBuilder.append(room.getName());
-        }
-        return textBuilder.toString();
     }
 
     /** Return a list of experience group items. */
@@ -260,25 +243,6 @@ public enum ExperienceManager {
         if (map == null)
             return result;
         processHeaders(result, ItemType.expRoom, map);
-        return result;
-    }
-
-    /** Return 0 or the number of new experiences in the given group. */
-    private int getNewCount(@NonNull final String key, @NonNull final Map<String, Integer> map) {
-        // Return the total number of new experiences in the joined rooms for the given group.
-        int result = 0;
-        if (!ExperienceManager.instance.expGroupMap.containsKey(key))
-            return result;
-        Set<Map.Entry<String, Map<String, Experience>>> expSet =
-                ExperienceManager.instance.expGroupMap.get(key).entrySet();
-        for (Map.Entry<String, Map<String, Experience>> roomMap : expSet) {
-            int roomNewCount = 0;
-            for (Experience experience : roomMap.getValue().values())
-                if (ExperienceManager.instance.isNew(experience))
-                    roomNewCount++;
-            map.put(roomMap.getKey(), roomNewCount);
-            result += roomNewCount;
-        }
         return result;
     }
 

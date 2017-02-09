@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.database.AccountManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -101,5 +102,11 @@ import java.util.Map;
         result.put("url", url);
 
         return result;
+    }
+
+    /** Return TRUE iff the message has not been seen by the current account holder. */
+    @Exclude public boolean isUnseen() {
+        String id = AccountManager.instance.getCurrentAccountId();
+        return id != null && unseenList != null && unseenList.contains(id);
     }
 }

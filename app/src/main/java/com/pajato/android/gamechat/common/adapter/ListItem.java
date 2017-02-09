@@ -28,12 +28,10 @@ import com.pajato.android.gamechat.exp.Experience;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.message;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
@@ -89,7 +87,7 @@ public class ListItem {
         expList ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
-        message,
+        message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
         resourceHeader ("Resource header with id: {%d}."),
         roomsHeader ("Rooms header with id: {%d}."),
         selectUser,
@@ -198,26 +196,15 @@ public class ListItem {
     }
 
     /** Build an instance for a given room list item. */
-    public ListItem(final MessageItem item) {
-        type = message;
-        groupKey = item.groupKey;
-        key = item.roomKey;
-        name = item.name;
+    public ListItem(final ItemType type, final String groupKey, final String roomKey,
+                    final String name, final String text, final String url) {
+        this.type = type;
+        this.groupKey = groupKey;
+        key = roomKey;
+        this.name = name;
         count = 0;
-        text = item.text;
-        url = item.url;
-        String format = "Message item with name {%s}, key: {%s}, count: {%s} and text {%s}.";
-        mDesc = String.format(Locale.US, format, name, key, count, text);
-    }
-
-    /** Build an instance for a given room list item. */
-    public ListItem(final RoomItem item) {
-        type = chatRoom;
-        groupKey = item.groupKey;
-        key = item.roomKey;
-        name = item.name;
-        count = item.count;
-        text = item.text;
+        this.text = text;
+        this.url = url;
     }
 
     /** Build an instance for a given contact list item. */
@@ -314,6 +301,8 @@ public class ListItem {
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case experience:
                 return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
+            case message:
+                return String.format(Locale.US, type.format, name, key, count, text);
             case inviteCommonRoom:
                 return String.format(Locale.US, type.format, name, text);
             case inviteRoom:

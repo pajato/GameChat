@@ -24,7 +24,7 @@ import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
-import com.pajato.android.gamechat.common.adapter.MessageItem;
+import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MessageListChangeHandler;
@@ -32,6 +32,8 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -112,7 +114,7 @@ public enum MessageManager {
 
         // Persist the message.
         path = String.format(Locale.US, MESSAGE_PATH, room.groupKey, room.key, key);
-        DBUtils.instance.updateChildren(path, message.toMap());
+        DBUtils.updateChildren(path, message.toMap());
     }
 
     /** Get a map of messages keyed by room push key in a given group. */
@@ -157,16 +159,10 @@ public enum MessageManager {
     /** Setup a Firebase child event listener for the messages in the given joined room. */
     public void setWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
-        String name = DBUtils.instance.getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
+        String name = DBUtils.getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new MessageListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
-    }
-
-    /** Persist the given message to reflect a change to the unread list. */
-    public void updateMessage(final String groupKey, final String roomKey, final Message message) {
-        String path = String.format(Locale.US, MESSAGE_PATH, groupKey, roomKey, message.key);
-        DBUtils.instance.updateChildren(path, message.toMap());
     }
 
     // Private instance methods.
@@ -194,12 +190,19 @@ public enum MessageManager {
             // Add the header item followed by all the room messages.
             DateHeaderType dht = types[index];
             List<Message> list = messageMap.get(dht);
-            if (list != null) {
-                result.add(new ListItem(date, dht.resId));
-                Collections.sort(list, new MessageComparator());
-                for (Message message : list) {
-                    result.add(new ListItem(new MessageItem(message)));
-                }
+            if (list == null)
+                return result;
+            result.add(new ListItem(date, dht.resId));
+            Collections.sort(list, new MessageComparator());
+            for (Message message : list) {
+                String groupKey = message.groupKey;
+                String roomKey = message.roomKey;
+                DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
+                String tStamp = dateFormat.format(new Date(message.createTime));
+                String name = String.format(Locale.getDefault(), "%s  %s", message.name, tStamp);
+                String text = message.text;
+                String url = message.url;
+                result.add(new ListItem(ItemType.message, groupKey, roomKey, name, text, url));
             }
         }
 
