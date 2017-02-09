@@ -29,13 +29,17 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.RoomItem;
+import com.pajato.android.gamechat.database.DBUtils;
+import com.pajato.android.gamechat.database.RoomManager;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -132,8 +136,13 @@ public abstract class BaseChatFragment extends BaseFragment {
             case chatGroupList: // A group list does not need an item.
                 return true;
             case messageList:   // The messages in a room require both the group and room keys.
-                RoomItem roomItem = new RoomItem(dispatcher.groupKey, dispatcher.roomKey);
-                mItem = new ListItem(roomItem);
+                String groupKey = dispatcher.groupKey;
+                String roomKey = dispatcher.roomKey;
+                String name = RoomManager.instance.getRoomName(roomKey);
+                Map<String, Integer> countMap = new HashMap<>();
+                int count = DBUtils.getUnseenMessageCount(groupKey, countMap);
+                String text = DBUtils.getText(countMap);
+                mItem = new ListItem(chatRoom, groupKey, roomKey, name, count, text);
                 return true;
             case createRoom:
             case joinRoom:

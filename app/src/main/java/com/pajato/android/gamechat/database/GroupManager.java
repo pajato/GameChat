@@ -25,7 +25,6 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.RoomItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.ProfileGroupChangeHandler;
@@ -46,6 +45,7 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
@@ -90,7 +90,7 @@ public enum GroupManager {
         if (group.key == null) return;
         String profilePath = String.format(Locale.US, GROUP_PROFILE_PATH, group.key);
         group.createTime = new Date().getTime();
-        DBUtils.instance.updateChildren(profilePath, group.toMap());
+        DBUtils.updateChildren(profilePath, group.toMap());
         setWatcher(group.key);
     }
 
@@ -203,7 +203,7 @@ public enum GroupManager {
     public void setWatcher(final String groupKey) {
         // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
         String path = GroupManager.instance.getGroupProfilePath(groupKey);
-        String name = DBUtils.instance.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
+        String name = DBUtils.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
         DatabaseRegistrar.instance.registerHandler(handler);
@@ -213,7 +213,7 @@ public enum GroupManager {
     public void updateGroupProfile(final Group group) {
         String path = String.format(Locale.US, GROUP_PROFILE_PATH, group.key);
         group.modTime = new Date().getTime();
-        DBUtils.instance.updateChildren(path, group.toMap());
+        DBUtils.updateChildren(path, group.toMap());
     }
 
     // Private instance methods.
@@ -224,7 +224,7 @@ public enum GroupManager {
         Map<String, Integer> roomCountMap = new HashMap<>();
         int count = getNewMessageCount(groupKey, roomCountMap);
         String text = getGroupText(roomCountMap);
-        result.add(new ListItem(chatGroup, groupKey, null, name != null ? name : "n/a", count, text));
+        result.add(new ListItem(chatGroup, groupKey, null, name, count, text));
     }
 
     /** Return a list of chat group or room items. */
@@ -283,12 +283,19 @@ public enum GroupManager {
 
     /** Return the normal case: more than one group. */
     private List<ListItem> getNoGroupsItemList() {
-        //
+        // Determine if the me room exists.  If not, about with an empty list, otherwise return a
+        // list of items from the me room.
         List<ListItem> result = new ArrayList<>();
         result.add(new ListItem(resourceHeader, R.string.NoGroupsHeaderText));
         Room room = RoomManager.instance.getMeRoom();
-        if (room != null)
-            result.add(new ListItem(new RoomItem(room.groupKey, room.key)));
+        if (room == null)
+            return result;
+
+        // Collect and return a list containing a single list item from the me room.
+        Map<String, Integer> unseenCountMap = new HashMap<>();
+        int count = DBUtils.getUnseenMessageCount(room.groupKey, unseenCountMap);
+        String text = DBUtils.getText(unseenCountMap);
+        result.add(new ListItem(chatRoom, room.groupKey, room.key, room.name, count, text));
         return result;
     }
 
