@@ -34,6 +34,8 @@ import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
+
 /**
  * Manages the game experience modes: such as playing against a local friend (non-User), the
  * computer or another online User.  Also manages the play mode menu and related events and
@@ -95,12 +97,14 @@ public enum PlayModeManager {
     private List<ListItem> getUserItems() {
         List<ListItem> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
-        if (account == null || account.joinList.size() == 0)
-            return result;
-        for (String groupKey : account.joinList)
-            for (Account member : MemberManager.instance.getMemberList(groupKey))
-                if (!member.id.equals(account.id))
-                    result.add(new ListItem(new UserItem(groupKey, member)));
+        if (!AccountManager.accountHasFriends(account))
+            // No users exist so create a header stating this.
+            result.add(new ListItem(resourceHeader, R.string.NoFriendsFound));
+        else
+            for (String groupKey : account.joinList)
+                for (Account member : MemberManager.instance.getMemberList(groupKey))
+                    if (!member.id.equals(account.id))
+                        result.add(new ListItem(new UserItem(groupKey, member)));
         return result;
     }
 

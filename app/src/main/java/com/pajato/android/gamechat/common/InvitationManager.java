@@ -128,12 +128,12 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         Account member = new Account(account);
         member.groupKey = groupKey;
         String path = MemberManager.instance.getMembersPath(groupKey, member.id);
-        DBUtils.instance.updateChildren(path, member.toMap());
+        DBUtils.updateChildren(path, member.toMap());
 
         // Finally add the invited account to the accepting group's profile member list.
         group.memberList.add(member.id);
         path = GroupManager.instance.getGroupProfilePath(groupKey);
-        DBUtils.instance.updateChildren(path, group.toMap());
+        DBUtils.updateChildren(path, group.toMap());
     }
 
     /** Clear the external app invitations map */
@@ -363,7 +363,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     if (member != null) {
                         member.joinList.add(event.key);
                         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, data.groupKey, member.id);
-                        DBUtils.instance.updateChildren(path, member.toMap());
+                        DBUtils.updateChildren(path, member.toMap());
                     }
 
                     // Post a message to the room announcing the user has joined
@@ -387,7 +387,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         // For the time being, put app invites in their own location in firebase to differentiate
         // them from invites for protected users.
         String invitePath = String.format(APP_INVITE_ID_PATH, id);
-        DBUtils.instance.updateChildren(invitePath, objMap);
+        DBUtils.updateChildren(invitePath, objMap);
         clearInvitationMap();
     }
 

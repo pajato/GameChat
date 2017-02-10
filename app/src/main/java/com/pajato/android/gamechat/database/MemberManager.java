@@ -63,7 +63,7 @@ public enum MemberManager {
     public void createMember(final Account member) {
         member.createTime = new Date().getTime();
         String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
-        DBUtils.instance.updateChildren(path, member.toMap());
+        DBUtils.updateChildren(path, member.toMap());
     }
 
     /** Return null or a group member using the current account holder's id and given group key. */
@@ -127,7 +127,7 @@ public enum MemberManager {
         // Obtain a room and set watchers on all the experiences in that room.
         // Determine if a handle already exists. Abort if so.  Register a new handler if not.
         String tag = String.format(Locale.US, "%s,%s", groupKey, memberKey);
-        String name = DBUtils.instance.getHandlerName(MEMBER_CHANGE_HANDLER, tag);
+        String name = DBUtils.getHandlerName(MEMBER_CHANGE_HANDLER, tag);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;
         String path = getMembersPath(groupKey, memberKey);
         DatabaseEventHandler handler;
@@ -139,7 +139,7 @@ public enum MemberManager {
     public void updateMember(final Account member) {
         String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
         member.modTime = new Date().getTime();
-        DBUtils.instance.updateChildren(path, member.toMap());
+        DBUtils.updateChildren(path, member.toMap());
     }
 
     /** Return a possibly empty list of members in the given group. */

@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.createGroup;
+import static com.pajato.android.gamechat.common.FragmentType.createGroupChat;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
@@ -87,7 +87,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createGroup, null);
+                DispatchManager.instance.chainFragment(getActivity(), createGroupChat, null);
                 break;
             case R.string.CreateRoomMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), createRoom, mItem);
