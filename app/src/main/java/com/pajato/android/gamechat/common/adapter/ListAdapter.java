@@ -344,4 +344,5 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             title = (TextView) itemView.findViewById(R.id.header);
         }
     }
+
 }
