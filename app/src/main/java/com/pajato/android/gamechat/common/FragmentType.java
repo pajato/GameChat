@@ -84,7 +84,7 @@ public enum FragmentType {
     expOffline (ExpShowOfflineFragment.class, expMain, R.layout.exp_offline),
     expRoomList (ExpShowRoomsFragment.class, expChain, R.layout.exp_none),
     expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out),
-    experienceList (ShowExperiencesFragment.class, expMain, R.layout.exp_none),
+    experienceList (ShowExperiencesFragment.class, expChain, R.layout.exp_list),
     joinRoom (JoinRoomsFragment.class, joinRoomTT, R.layout.chat_join_rooms),
     messageList (ShowMessagesFragment.class, chatChain, R.layout.chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),

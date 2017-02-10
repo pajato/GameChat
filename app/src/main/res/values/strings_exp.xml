@@ -12,6 +12,7 @@
     <string name="InviteFriendFromChat">Invite friends</string>
     <string name="InviteFriendNav">Invite friends</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
+    <string name="MyExperiencesToolbarTitle">My Games</string>
     <string name="MyRooms">Go To My Rooms</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>

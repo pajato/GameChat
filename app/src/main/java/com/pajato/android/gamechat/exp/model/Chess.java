@@ -102,7 +102,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         this.createTime = createTime;
         this.key = key;
         this.groupKey = groupKey;
-        this.modTime = 0;
+        this.modTime = createTime;
         this.level = level;
         this.name = name;
         this.owner = id;

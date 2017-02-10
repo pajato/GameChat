@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.adapter.ListItem;
@@ -42,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
@@ -80,6 +82,10 @@ public enum ExperienceManager {
 
     /** A map associating date header type values with lists of room push keys, by group. */
     private Map<String, Map<DateHeaderType, List<String>>> mDateHeaderRoomMap = new HashMap<>();
+
+    /** A map associating date header type values and experience push keys, by group and room. */
+    private Map<String, Map<String, Map<DateHeaderType, List<String>>>> mDateHeaderExpMap =
+            new HashMap<>();
 
     /** A map associating a group push key with it's most recent changed experience. */
     private Map<String, Experience> mGroupToRecentMap = new HashMap<>();
@@ -143,6 +149,11 @@ public enum ExperienceManager {
         }
     }
 
+    /** Return a list of experience list items. */
+    public List<ListItem> getListItemData(@NonNull final ListItem item) {
+        return getItemListExperiences(item);
+    }
+
     /** Handle a account change event by setting up or clearing variables. */
     @Subscribe public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
         // Determine if a User has been authenticated.  If so, do nothing, otherwise clear the
@@ -193,14 +204,6 @@ public enum ExperienceManager {
 
     // Private instance methods.
 
-    /** Return TRUE iff this experience has a new move that has not been seen. */
-    public boolean isNew(@NonNull final Experience experience) {
-        // Return true iff the account holder's id is on the unseen list.
-        List<String> unseenList = experience.getUnseenList();
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        return accountId == null || unseenList == null || unseenList.contains(accountId);
-    }
-
     // Private instance methods.
 
     /** Add a group list item for the given kind (chat message or game experience) and group. */
@@ -220,9 +223,45 @@ public enum ExperienceManager {
                 Room room = RoomManager.instance.getRoomProfile(key);
                 result.add(new ListItem(itemType, room.groupKey, room.key, room.name, count, null));
                 break;
+            case expList:
+                Experience exp = experienceMap.get(key);
+                String groupKey = exp.getGroupKey();
+                String roomKey = exp.getRoomKey();
+                ListItem item = new ListItem(itemType, groupKey, roomKey, exp.getName(), 0, null);
+                item.iconResId = getIconResId(exp.getExperienceType());
+                item.key= key;
+                result.add(item);
+                break;
             default:
                 break;
         }
+    }
+
+    /** Return the icon resource id corresponding to the given experience type. */
+    private int getIconResId(final ExpType type) {
+        switch (type) {
+            case checkersET:
+                return R.mipmap.ic_checkers;
+            case chessET:
+                return R.mipmap.ic_chess;
+            case tttET:
+            default:
+                return R.mipmap.ic_tictactoe_red;
+        }
+    }
+
+    /** Return a list of experience items for the group and room in the given item. */
+    private List<ListItem> getItemListExperiences(@NonNull final ListItem item) {
+        // Ensure that there are experience items to show.  Return an empty list if not.
+        List<ListItem> result = new ArrayList<>();
+        Map<DateHeaderType, List<String>> expMap;
+        Map<String, Map<DateHeaderType, List<String>>> roomMap;
+        roomMap = item.groupKey != null ? mDateHeaderExpMap.get(item.groupKey) : null;
+        expMap = roomMap != null && item.roomKey != null ? roomMap.get(item.roomKey) : null;
+        if (expMap == null || expMap.size() == 0)
+            return result;
+        processHeaders(result, ItemType.expList, expMap);
+        return result;
     }
 
     /** Return a list of experience group items. */
@@ -246,6 +285,14 @@ public enum ExperienceManager {
         return result;
     }
 
+    /** Return TRUE iff this experience has a new move that has not been seen. */
+    public boolean isNew(@NonNull final Experience experience) {
+        // Return true iff the account holder's id is on the unseen list.
+        List<String> unseenList = experience.getUnseenList();
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        return accountId == null || unseenList == null || unseenList.contains(accountId);
+    }
+
     /** Process all the headers for a given map to determine */
     private void processHeaders(final List<ListItem> result, ItemType itemType,
                                 final Map<DateHeaderType, List<String>> map) {
@@ -256,10 +303,37 @@ public enum ExperienceManager {
                 // Add the header item followed by all the items from the given map.
                 result.add(new ListItem(date, dht.resId));
                 for (String key : list)
-                    if (!(key.equals(AccountManager.instance.getMeGroupKey())))
-                        addItem(result, itemType, key);
+                    addItem(result, itemType, key);
             }
         }
+    }
+
+    /** Update the timestamp ordered map of experiences in a given group and room. */
+    private void updateExpMap(@NonNull final String groupKey, @NonNull final String roomKey,
+                              final long nowTimestamp) {
+        // Ensure that the group map exists for the given group key.
+        Map<String, Map<DateHeaderType, List<String>>> groupMap = mDateHeaderExpMap.get(groupKey);
+        if (groupMap == null) {
+            groupMap = new HashMap<>();
+            mDateHeaderExpMap.put(groupKey, groupMap);
+        }
+
+        // Ensure that the room map exists for the given room key.
+        Map<DateHeaderType, List<String>> roomMap;
+        roomMap = groupMap.get(roomKey);
+        if (roomMap == null) {
+            roomMap = new HashMap<>();
+            groupMap.put(roomKey, roomMap);
+        }
+
+        // Associate each experience in the given group and room with the correct timestamp.
+        Map<String, Map<String, Experience>> expRoomMap = expGroupMap.get(groupKey);
+        Set<Map.Entry<String, Experience>> entrySet =
+                expRoomMap != null ? expRoomMap.get(roomKey).entrySet() : null;
+        if (entrySet == null)
+            return;
+        for (Map.Entry<String, Experience> entry : entrySet)
+            updateMap(nowTimestamp, entry.getValue().getModTime(), entry.getKey(), roomMap);
     }
 
     /** Update the headers used to bracket the messages in the main list. */
@@ -276,8 +350,10 @@ public enum ExperienceManager {
         }
         mRoomToRecentMap.put(groupKey, roomMap);
 
-        // Update the group list headers for each group with at least one experience.
+        // Update the group list headers for each group and room with at least one experience.
         mDateHeaderGroupMap.clear();
+        mDateHeaderRoomMap.clear();
+        mDateHeaderExpMap.clear();
         long nowTimestamp = new Date().getTime();
         for (String key : mGroupToRecentMap.keySet())
             updateHeaders(key, nowTimestamp);
@@ -289,8 +365,8 @@ public enum ExperienceManager {
         // the time stamp from the most recent experience in the group.
         long groupTimestamp = mGroupToRecentMap.get(groupKey).getModTime();
         updateMap(nowTimestamp, groupTimestamp, groupKey, mDateHeaderGroupMap);
+
         // for all rooms in the group, update the mDateHeaderRoomMap
-        mDateHeaderRoomMap.clear();
         Map<String, Experience> map = mRoomToRecentMap.get(groupKey);
         for (String roomKey : map.keySet()) {
             long roomTimestamp = map.get(roomKey).getModTime();
@@ -299,6 +375,7 @@ public enum ExperienceManager {
             if (roomMap.size() == 0)
                 continue;
             mDateHeaderRoomMap.put(groupKey, roomMap);
+            updateExpMap(groupKey, roomKey, nowTimestamp);
         }
     }
 

@@ -95,14 +95,16 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             case resourceHeader:
             case roomsHeader:
                 return new HeaderViewHolder(getView(parent, R.layout.item_header));
+            case chatGroup:
+            case expGroup:
+                return new ItemListViewHolder(getView(parent, R.layout.item_with_tint));
             case contact:
                 return new ContactViewHolder(getView(parent, R.layout.item_contact));
-            case expGroup:
-            case chatGroup:
-                return new ItemListViewHolder(getView(parent, R.layout.item_group));
+            case expList:
+                return new ItemListViewHolder(getView(parent, R.layout.item_without_tint));
             case expRoom:
             case chatRoom:
-                return new ItemListViewHolder(getView(parent, R.layout.item_room));
+                return new ItemListViewHolder(getView(parent, R.layout.item_with_tint));
             case message:
                 return new ItemListViewHolder(getView(parent, R.layout.item_message));
             case selectableMember:
@@ -135,18 +137,19 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                     String name = holder.itemView.getContext().getResources().getString(id);
                     ((HeaderViewHolder) holder).title.setText(name);
                     break;
-                case expGroup:
-                case expRoom:
                 case chatGroup:
-                case message:
                 case chatRoom:
+                case expGroup:
+                case expList:
+                case expRoom:
+                case message:
+                case inviteRoom:
+                case inviteCommonRoom:
+                case inviteGroup:
                 case selectRoom:
                 case selectUser:
                 case selectableMember:
                 case selectableRoom:
-                case inviteRoom:
-                case inviteCommonRoom:
-                case inviteGroup:
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateHolder((ItemListViewHolder) holder, item);
@@ -184,21 +187,32 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Update the chat icon in the given holder based on the given item type. */
-    private void setChatIcon(final ItemListViewHolder holder, final ListItem item) {
+    private void setIcon(final ItemListViewHolder holder, final ListItem item) {
         Context context = holder.icon.getContext();
         switch (item.type) {
+            case expGroup:
+            case chatGroup:
+                holder.icon.setImageResource(R.drawable.vd_group_black_24px);
+                break;
+            case expRoom:
+            case chatRoom:
+                holder.icon.setImageResource(R.drawable.ic_casino_black_24dp);
+                break;
+            case expList:
+                holder.icon.setImageResource(item.iconResId);
+                break;
+            case message:
             case selectUser:
             case selectableMember:
-            case message:
                 // For a message, ensure that both the holder and the item have an icon value,
                 // and load the icon or default if not found at the specified URL.
-                if (holder.icon == null || item.url == null) return;
-                Uri imageUri = Uri.parse(item.url);
+                if (holder.icon == null || item.iconUrl == null) return;
+                Uri imageUri = Uri.parse(item.iconUrl);
                 if (imageUri != null) {
                     // There is an image to load.  Use Glide to do the heavy lifting.
                     holder.icon.setImageURI(imageUri);
                     Glide.with(context)
-                        .load(item.url)
+                        .load(item.iconUrl)
                         .transform(new NavigationManager.CircleTransform(context))
                         .into(holder.icon);
                 } else {
@@ -222,7 +236,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             holder.text.setVisibility(View.GONE);
         else
             holder.text.setText(CompatUtils.fromHtml(item.text));
-        setChatIcon(holder, item);
+        setIcon(holder, item);
         holder.itemView.setTag(item);
 
         // Set the new message count field, if necessary.
@@ -276,10 +290,10 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         /** Build an instance given the item view. */
         ItemListViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.chatName);
-            count = (TextView) itemView.findViewById(R.id.newCount);
-            text = (TextView) itemView.findViewById(R.id.chatText);
-            icon = (ImageView) itemView.findViewById(R.id.chatIcon);
+            name = (TextView) itemView.findViewById(R.id.Name);
+            count = (TextView) itemView.findViewById(R.id.Count);
+            text = (TextView) itemView.findViewById(R.id.Text);
+            icon = (ImageView) itemView.findViewById(R.id.ListItemIcon);
             setSelectorButton(itemView);
             if (button != null) {
                 button.setOnClickListener(selectorListener);

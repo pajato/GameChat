@@ -27,6 +27,7 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -155,11 +156,8 @@ public enum ToolbarManager {
     public void init(@NonNull final BaseFragment fragment, ListItem item,
                      final MenuItemType... menuEntries) {
         // Determine if the group name or the room name should be the title.
-        String title = item.key == null
-            ? GroupManager.instance.getGroupName(item.groupKey)
-            : RoomManager.instance.getRoomName(item.key);
-        String subtitle = item.key != null
-            ? GroupManager.instance.getGroupName(item.groupKey) : null;
+        String title = getTitle(fragment, item);
+        String subtitle = getSubtitle(item);
         init(fragment, title, subtitle, menuEntries);
     }
 
@@ -223,6 +221,42 @@ public enum ToolbarManager {
     }
 
     // Private instance methods.
+
+    /** Return a subtitle string for a given list item. */
+    private String getSubtitle(final ListItem item) {
+        // Ensure that the item is not empty.  Abort if so.  Otherwise case on the item type to get
+        // the value to return.
+        if (item == null)
+            return null;
+        switch (item.type) {
+            case expList:
+                return GroupManager.instance.getGroupName(item.groupKey);
+            default:
+                return item.key == null
+                        ? GroupManager.instance.getGroupName(item.groupKey)
+                        : RoomManager.instance.getRoomName(item.key);
+        }
+    }
+
+    /** Return a title string for a given list item. */
+    private String getTitle(@NonNull BaseFragment fragment, final ListItem item) {
+        // Ensure that the item is not empty.  Abort if so.  Otherwise case on the item type to get
+        // the value to return.
+        if (item == null)
+            return null;
+        switch (item.type) {
+            case expList:
+                // Determine if the group is the me group and give it special handling.
+                String meGroupKey = AccountManager.instance.getMeGroupKey();
+                if (meGroupKey != null && meGroupKey.equals(item.groupKey))
+                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
+                return RoomManager.instance.getRoomName(item.roomKey);
+            default:
+                return item.key == null
+                        ? GroupManager.instance.getGroupName(item.groupKey)
+                        : RoomManager.instance.getRoomName(item.key);
+        }
+    }
 
     /** Set the titles in the given toolbar using the given (possibly null) titles. */
     private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
