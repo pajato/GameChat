@@ -25,14 +25,14 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.FragmentType;
-import com.pajato.android.gamechat.common.PlayModeManager;
-import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
-import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.PlayModeManager;
+import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -53,6 +53,7 @@ import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -105,7 +106,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Log the event, update the FAB for this fragment, process the ad, determine if a list
         // adapter update needs be processed and set the toolbar titles.
         super.onResume();
-        FabManager.chat.init(this);
+        FabManager.game.init(this);
         if (mAdView != null)
             mAdView.resume();
         if (type != null)
@@ -129,6 +130,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
         // Ensure that the dispatcher is valid.  Abort if not.
         // TODO: might be better to show a toast or snackbar on error.
+        super.onSetup(context, dispatcher);
         if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
             return;
 
@@ -262,7 +264,26 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     /** Process the dispatcher to set up the experience fragment. */
     @Override protected boolean onDispatch(@NonNull final Context context,
                                            @NonNull final Dispatcher dispatcher) {
-        return true;
+        // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
+        // case signalling success.  If there are no valid cases signal failure.
+        if (dispatcher.type == null)
+            return false;
+        switch (type) {
+            case expGroupList:
+            case expRoomList: // A group list does not need an item.
+                return true;
+            case experienceList:
+                // The experiences in a room require both the group and room keys.
+                // Determine if the group is the me group and give it special handling.
+                String groupKey = dispatcher.groupKey;
+                String meGroupKey = AccountManager.instance.getMeGroupKey();
+                String roomKey = meGroupKey != null && meGroupKey.equals(groupKey)
+                        ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+                mItem = new ListItem(expList, groupKey, roomKey, null, 0, null);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /** Process a click event on the given view for an experience fragment. */
@@ -312,14 +333,20 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         if (!mActive || !(payload instanceof ListItem))
             return;
         ListItem item = (ListItem) payload;
+        FragmentType type;
         switch (item.type) {
             case expGroup: // Drill into the rooms in group.
                 DispatchManager.instance.chainFragment(getActivity(), expRoomList, item);
                 break;
+            case expList:
+                Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
+                type = exp != null ? exp.getExperienceType().getFragmentType() : null;
+                DispatchManager.instance.chainFragment(getActivity(), type, item);
+                break;
             case expRoom: // Show the list of experiences in a room or the one experience.
                 Map<String, Experience> map =
                         ExperienceManager.instance.expGroupMap.get(item.groupKey).get(item.roomKey);
-                FragmentType type = map.size() > 1 ? experienceList : getType(map, item);
+                type = map.size() > 1 ? experienceList : getType(map, item);
                 DispatchManager.instance.chainFragment(getActivity(), type, item);
                 break;
             default:

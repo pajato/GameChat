@@ -9,7 +9,7 @@
     android:layout_marginBottom="1dp"
     android:orientation="horizontal">
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/chatIcon"
+        android:id="@+id/ListItemIcon"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginStart="4dp"
@@ -22,13 +22,13 @@
         android:gravity="center_vertical"
         android:orientation="vertical">
         <TextView
-            android:id="@+id/chatText"
+            android:id="@+id/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceListItem"
             tools:text="A simple sample message that extends over two lines..."/>
         <TextView
-            android:id="@+id/chatName"
+            android:id="@+id/Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>

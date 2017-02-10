@@ -25,19 +25,19 @@ http://www.gnu.org/licenses
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="ChatListItemLayout">
+    <style name="ListItemLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:orientation">horizontal</item>
     </style>
 
-    <style name="ChatListItemImage">
+    <style name="ListItemImage">
         <item name="android:layout_width">36dp</item>
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_marginStart">16dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:contentDescription">@string/ListIconDesc</item>
+        <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
     <style name="ChatListItemSelector">
@@ -45,7 +45,7 @@ http://www.gnu.org/licenses
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:contentDescription">@string/ListIconDesc</item>
+        <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
     <style name="InviteRoomItemSelector">
@@ -53,7 +53,7 @@ http://www.gnu.org/licenses
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_marginStart">36dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:contentDescription">@string/ListIconDesc</item>
+        <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
     <style name="ChatListItemSelectorImage">
@@ -61,10 +61,10 @@ http://www.gnu.org/licenses
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_marginStart">4dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:contentDescription">@string/ListIconDesc</item>
+        <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
-    <style name="ChatListItemCount">
+    <style name="ListItemCount">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">8dp</item>
@@ -76,7 +76,7 @@ http://www.gnu.org/licenses
         <item name="android:paddingEnd">4dp</item>
     </style>
 
-    <style name="ChatListItemFooter">
+    <style name="ListItemFooter">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:layout_marginTop">8dp</item>
@@ -84,13 +84,13 @@ http://www.gnu.org/licenses
         <item name="android:background">@android:color/darker_gray</item>
     </style>
 
-    <style name="ChatListItemSubtitle">
+    <style name="ListItemSubtitle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
-    <style name="ChatListItemTitle">
+    <style name="ListItemTitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?android:attr/textAppearanceListItem</item>

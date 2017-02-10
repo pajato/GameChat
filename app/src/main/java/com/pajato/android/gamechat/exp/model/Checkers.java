@@ -83,13 +83,12 @@ public class Checkers implements Experience {
         this.createTime = createTime;
         this.key = key;
         this.groupKey = groupKey;
-        this.modTime = 0;
+        this.modTime = createTime;
         this.level = level;
         this.name = name;
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
-        this.unseenList = unseenList;
         state = ACTIVE;
         turn = true;
         type = checkersET.name();

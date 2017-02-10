@@ -50,6 +50,7 @@ import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
 
@@ -278,6 +279,8 @@ public abstract class BaseFragment extends Fragment {
                 return RoomManager.instance.getListItemData(item.groupKey);
             case expGroupList:  // Get the groups with experiences.
                 return ExperienceManager.instance.getListItemData();
+            case experienceList:  // Get the groups with experiences.
+                return ExperienceManager.instance.getListItemData(item);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
             case messageList:   // Get the data to be shown in a room.

@@ -84,7 +84,7 @@ public class ListItem {
         contactHeader ("Contact header with resource id: {%d}."),
         date ("Date header with resource id: {%d}."),
         expGroup ("Exp group item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
-        expList ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
+        expList ("Exp list item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
@@ -122,6 +122,12 @@ public class ListItem {
     /** The group (push) key, possibly null, used for many list items (groups, rooms, messages) */
     public String groupKey;
 
+    /** The item image resource id for dynamic images, as used with experiences. */
+    public int iconResId;
+
+    /** The URL for the item, possibly null, used for icons with contacts and chat list items. */
+    String iconUrl;
+
     /** The item (push) key, possibly null, either a room, member or experience key. */
     public String key;
 
@@ -148,9 +154,6 @@ public class ListItem {
 
     /** The item type, always non-null. */
     public ItemType type;
-
-    /** The URL for the item, possibly null, used for icons with contacts and chat list items. */
-    public String url;
 
     // Private instance variables.
 
@@ -183,7 +186,7 @@ public class ListItem {
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.url = url;
+        iconUrl = url;
     }
 
     /** Build an instance for a given room list item. */
@@ -197,14 +200,14 @@ public class ListItem {
 
     /** Build an instance for a given room list item. */
     public ListItem(final ItemType type, final String groupKey, final String roomKey,
-                    final String name, final String text, final String url) {
+                    final String name, final String text, final String iconUrl) {
         this.type = type;
         this.groupKey = groupKey;
         key = roomKey;
         this.name = name;
         count = 0;
         this.text = text;
-        this.url = url;
+        this.iconUrl = iconUrl;
     }
 
     /** Build an instance for a given contact list item. */
@@ -214,9 +217,9 @@ public class ListItem {
         key = item.memberKey;
         name = item.name;
         text = item.text;
-        url = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
-        mDesc = String.format(Locale.US, format, name, email, url);
+        iconUrl = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and iconUrl {%s}.";
+        mDesc = String.format(Locale.US, format, name, email, iconUrl);
     }
 
     /** Build an instance for a given selectable group. */
@@ -250,9 +253,9 @@ public class ListItem {
         key = item.memberKey;
         name = item.name;
         text = item.text;
-        url = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and url {%s}.";
-        mDesc = String.format(Locale.US, format, name, email, url);
+        iconUrl = item.url;
+        String format = "Member item with name {%s}, email: {%s}, and iconUrl {%s}.";
+        mDesc = String.format(Locale.US, format, name, email, iconUrl);
     }
 
     /** Build an instance for a room or common room invitation. */
@@ -288,7 +291,7 @@ public class ListItem {
             case chatRoom:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case contact:
-                return String.format(Locale.US, type.format, name, email, phone, url);
+                return String.format(Locale.US, type.format, name, email, phone, iconUrl);
             case contactHeader:
                 return String.format(Locale.US, type.format, nameResourceId);
             case date:
@@ -296,7 +299,7 @@ public class ListItem {
             case expGroup:
                 return String.format(Locale.US, type.format, name, key, count, text);
             case expList:
-                return String.format(Locale.US, type.format, name, key, count, text);
+                return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case expRoom:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case experience:

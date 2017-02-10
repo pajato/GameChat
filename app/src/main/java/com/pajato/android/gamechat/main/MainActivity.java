@@ -41,7 +41,12 @@ import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.JoinManager;
+import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -264,6 +269,18 @@ public class MainActivity extends BaseActivity
     @Override protected void onCreate(Bundle savedInstanceState) {
         // Deal with sign-in, set up the main layout, and initialize the app.
         super.onCreate(savedInstanceState);
+
+        // Enable the database managers to listen for database activity immediately upon starting
+        // the sign in page.
+        AppEventManager.instance.register(GroupManager.instance);
+        AppEventManager.instance.register(RoomManager.instance);
+        AppEventManager.instance.register(MessageManager.instance);
+        AppEventManager.instance.register(ExperienceManager.instance);
+        AppEventManager.instance.register(MemberManager.instance);
+        AppEventManager.instance.register(NavigationManager.instance);
+        AppEventManager.instance.register(InvitationManager.instance);
+
+        // Deal with initial sign in via the intro activity and normal processing.
         processIntroPage();
         setContentView(R.layout.activity_main);
         init();
@@ -372,7 +389,8 @@ public class MainActivity extends BaseActivity
         boolean skipIntro = intent.hasExtra(SKIP_INTRO_ACTIVITY_KEY);
         SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         boolean hasAccount = prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false);
-        if (skipIntro || hasAccount) return;
+        if (skipIntro || hasAccount)
+            return;
 
         // This is a fresh installation of the app.  Present the intro activity to get
         // things started, which will introduce the user to the app and provide a chance to

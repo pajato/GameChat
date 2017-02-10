@@ -131,7 +131,8 @@ public abstract class BaseChatFragment extends BaseFragment {
                                            @NonNull final Dispatcher dispatcher) {
         // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
         // case signalling success.  If there are no valid cases signal failure.
-        if (dispatcher.type == null) return false;
+        if (dispatcher.type == null)
+            return false;
         switch (type) {
             case chatGroupList: // A group list does not need an item.
                 return true;

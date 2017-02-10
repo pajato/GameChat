@@ -103,7 +103,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         this.createTime = createTime;
         this.key = key;
         this.groupKey = groupKey;
-        this.modTime = 0;
+        this.modTime = createTime;
         this.name = name;
         this.owner = id;
         this.players = players;

@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-    <LinearLayout style="@style/ChatListItemLayout" android:id="@+id/chatListItem">
-        <ImageView style="@style/ChatListItemImage" android:id="@+id/chatIcon"
+    <LinearLayout style="@style/ListItemLayout" android:id="@+id/ListItem">
+        <ImageView style="@style/ListItemImage" android:id="@+id/ListItemIcon"
             android:tint="@color/colorPrimaryDark"
-            android:contentDescription="@string/ListIconDesc"
-            app:srcCompat="@drawable/ic_casino_black_24dp" />
+            android:contentDescription="@string/ListItemIconDesc" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,14 +18,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-                <TextView style="@style/ChatListItemTitle" android:id="@+id/chatName"
+                <TextView style="@style/ListItemTitle" android:id="@+id/Name"
                     tools:text="General"/>
-                <TextView style="@style/ChatListItemCount" android:id="@+id/newCount"
+                <TextView style="@style/ListItemCount" android:id="@+id/Count"
                     tools:text="3 new"/>
             </LinearLayout>
-            <TextView style="@style/ChatListItemSubtitle" android:id="@+id/chatText"
+            <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
                 tools:text="TheShovel, ConnorTheWhiz, GrandPop" />
         </LinearLayout>
     </LinearLayout>
-    <View style="@style/ChatListItemFooter" />
+    <View style="@style/ListItemFooter" />
 </LinearLayout>
