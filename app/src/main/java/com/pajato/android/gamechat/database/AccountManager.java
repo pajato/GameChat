@@ -162,7 +162,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         long tStamp = account.createTime;
         account.groupKey = groupKey;
         path = String.format(Locale.US, ACCOUNT_PATH, account.id);
-        DBUtils.instance.updateChildren(path, account.toMap());
+        DBUtils.updateChildren(path, account.toMap());
 
         // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
         // database. This must be done after the new account has been added, because the database
@@ -171,7 +171,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             Map<String, Object> protectedUsers = new HashMap<>();
             protectedUsers.put(mChaperone, account.id);
             String protectedUserPath = String.format(PROTECTED_PATH, mChaperone);
-            DBUtils.instance.updateChildren(protectedUserPath, protectedUsers);
+            DBUtils.updateChildren(protectedUserPath, protectedUsers);
             mChaperone = null;
         }
 
@@ -182,24 +182,40 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         members.add(account.id);
         Group group = new Group(groupKey, account.id, null, tStamp, members, rooms);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
-        DBUtils.instance.updateChildren(path, group.toMap());
+        DBUtils.updateChildren(path, group.toMap());
 
         // Update the member entry in the default group.
         Account member = new Account(account);
         member.joinList.add(roomKey);
         member.groupKey = groupKey;
         path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.id);
-        DBUtils.instance.updateChildren(path, member.toMap());
+        DBUtils.updateChildren(path, member.toMap());
 
         // Update the "me" room profile on the database.
         String name = account.getDisplayName();
         Room room = new Room(roomKey, account.id, name, groupKey, tStamp, 0, ME);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
-        DBUtils.instance.updateChildren(path, room.toMap());
+        DBUtils.updateChildren(path, room.toMap());
 
         // Update the "me" room default message on the database.
         String text = DBUtils.instance.getResource(DBUtils.WELCOME_MESSAGE_KEY);
         MessageManager.instance.createMessage(text, SYSTEM, account, room);
+    }
+
+    /** Determine if the specified account belongs to any groups which have members */
+    public static boolean accountHasFriends(Account account) {
+        if (account == null)
+            return false;
+        if (account.joinList.size() == 0)
+            return false;
+        for (String groupKey : account.joinList) {
+            Group group = GroupManager.instance.getGroupProfile(groupKey);
+            if (group == null)
+                continue;
+            if (group.memberList.size() > 1) // don't count current account!
+                return true;
+        }
+        return false;
     }
 
     /** Return the database path to an experience for a given experience profile. */
@@ -428,7 +444,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public void updateAccount(final Account account) {
         String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         account.modTime = new Date().getTime();
-        DBUtils.instance.updateChildren(path, account.toMap());
+        DBUtils.updateChildren(path, account.toMap());
     }
 
     // Private classes

@@ -25,14 +25,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.PlayModeManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.FragmentType;
-import com.pajato.android.gamechat.common.PlayModeManager;
-import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
-import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -54,6 +53,7 @@ import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
+import static com.pajato.android.gamechat.common.PlayModeManager.PlayModeType.user;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -84,9 +84,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** The experience being enjoyed. */
     protected Experience mExperience;
-
-    /** The current play mode for the experience being enjoyed. */
-    protected PlayModeType mPlayMode;
 
     // Public constructors.
 
@@ -207,6 +204,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Handle a play mode selection change. */
     @Subscribe void handlePlayModeChange(PlayModeChangeEvent event) {
+        if (mExperience == null)
+            return;
         switch (event.type) {
             case computer:
             case local:
@@ -216,7 +215,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 // Handle selecting another User by chaining to the fragment that will select the
                 // User, copy the experience to a new room, and continue the game in that room with
                 // the current state.
-                ListItem listItem = new ListItem(mExperience, mPlayMode);
+                ListItem listItem = new ListItem(mExperience, user);
                 DispatchManager.instance.chainFragment(this.getActivity(), selectUser, listItem);
                 break;
             default:

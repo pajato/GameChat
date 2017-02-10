@@ -97,7 +97,7 @@ public enum JoinManager {
             return;
         member.joinList.add(room.key);
         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
-        DBUtils.instance.updateChildren(path, member.toMap());
+        DBUtils.updateChildren(path, member.toMap());
 
         // Post a message to the room announcing the user has joined
         String format = mMessageMap.get(R.string.HasJoinedMessage);
@@ -239,12 +239,12 @@ public enum JoinManager {
         room.addMember(account.id);
         room.addMember(memberKey);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
-        DBUtils.instance.updateChildren(path, room.toMap());
+        DBUtils.updateChildren(path, room.toMap());
 
         // Update and persist the group profile.
         group.roomList.add(roomKey);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
-        DBUtils.instance.updateChildren(path, group.toMap());
+        DBUtils.updateChildren(path, group.toMap());
 
         // Update the "me" room default message on the database.
         String format = "We have created a room for %s and %s to share private messages.";
@@ -267,7 +267,7 @@ public enum JoinManager {
         room.addMember(id);
         room.modTime = new Date().getTime();
         String path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
-        DBUtils.instance.updateChildren(path, room.toMap());
+        DBUtils.updateChildren(path, room.toMap());
         return room;
     }
 }
