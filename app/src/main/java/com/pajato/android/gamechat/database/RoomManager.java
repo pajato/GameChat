@@ -132,7 +132,7 @@ public enum RoomManager {
                 result.add(new ListItem(date, dht.resId));
                 roomMap = MessageManager.instance.messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
-                    Room room = RoomManager.instance.getRoomProfile(groupKey);
+                    Room room = RoomManager.instance.getRoomProfile(key);
                     Map<String, Integer> countMap = new HashMap<>();
                     int count = DBUtils.getUnseenExperienceCount(key, countMap);
                     String text = DBUtils.getText(countMap);
