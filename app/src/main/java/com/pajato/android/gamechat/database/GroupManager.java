@@ -147,8 +147,6 @@ public enum GroupManager {
         switch (groupMap.size()) {
             case 0:
                 return getNoGroupsItemList();
-            case 1:
-                //return getGroupRoomsItemList();
             default:
                 return getGroupsItemList();
         }
@@ -281,7 +279,7 @@ public enum GroupManager {
         return result;
     }
 
-    /** Return the normal case: more than one group. */
+    /** Return an empty list of items or the items from the me group. */
     private List<ListItem> getNoGroupsItemList() {
         // Determine if the me room exists.  If not, about with an empty list, otherwise return a
         // list of items from the me room.
@@ -294,8 +292,7 @@ public enum GroupManager {
         // Collect and return a list containing a single list item from the me room.
         Map<String, Integer> unseenCountMap = new HashMap<>();
         int count = DBUtils.getUnseenMessageCount(room.groupKey, unseenCountMap);
-        String text = DBUtils.getText(unseenCountMap);
-        result.add(new ListItem(chatRoom, room.groupKey, room.key, room.name, count, text));
+        result.add(new ListItem(chatRoom, room.groupKey, room.key, room.name, count, null));
         return result;
     }
 

@@ -93,11 +93,10 @@ public enum DBUtils {
         return result;
     }
 
+    /** Return the number of unseen messages and update the given map. */
     public static int getUnseenMessageCount(@NonNull final String groupKey,
                                             @NonNull final Map<String, Integer> map) {
         int result = 0;
-        if (!GroupManager.instance.groupMap.containsKey(groupKey))
-            return result;
         Set<Map.Entry<String, Map<String, Message>>> messageSet =
             MessageManager.instance.messageMap.get(groupKey).entrySet();
         for (Map.Entry<String, Map<String, Message>> roomMap : messageSet) {

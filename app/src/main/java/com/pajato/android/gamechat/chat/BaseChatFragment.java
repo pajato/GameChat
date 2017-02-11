@@ -81,7 +81,6 @@ public abstract class BaseChatFragment extends BaseFragment {
         // Log the event, update the FAB for this fragment, process the ad, determine if a list
         // adapter update needs be processed and set the toolbar titles.
         super.onResume();
-        FabManager.chat.init(this);
         if (mAdView != null)
             mAdView.resume();
         if (type != null)

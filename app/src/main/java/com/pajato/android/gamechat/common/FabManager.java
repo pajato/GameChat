@@ -89,12 +89,6 @@ public enum FabManager {
 
     // Public instance methods
 
-    /** Add the named floating action menu (FAM) to the cache. */
-    public void addMenu(@NonNull final String name, @NonNull final List<MenuEntry> menu) {
-        // Cache the menu, if one is provided.
-        if (name.length() != 0) mMenuMap.put(name, menu);
-    }
-
     /** Dismiss the menu associated with the given FAB button. */
     public void dismissMenu(@NonNull final Fragment fragment) {
         // Determine if the chat fragment is accessible.  If so, dismiss the FAM.
@@ -127,6 +121,7 @@ public enum FabManager {
         // Set the FAB state to closed by assuming an open FAM and dismissing it.
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
+        fab.setVisibility(View.VISIBLE);
         dismissMenu(fragment, layout);
     }
 
@@ -152,7 +147,8 @@ public enum FabManager {
         // error message will have been generated.  If it is accessible, apply the given visibility
         // state.
         View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
+        if (layout == null)
+            return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(state);
     }

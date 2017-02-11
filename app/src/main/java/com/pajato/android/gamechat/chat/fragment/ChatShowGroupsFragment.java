@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -133,15 +132,12 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             updateAdapterList();
     }
 
-    /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
+    /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
-        // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
-        // FAM is not and the FAM is set to the home chat menu; initialize the ad view; and set up
-        // the group list display.
+        // Use the super class to set up the list of groups and establish the FAB and it's menu.
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
-        FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
     /** Initialize ... */
