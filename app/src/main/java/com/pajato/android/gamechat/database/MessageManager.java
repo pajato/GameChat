@@ -138,8 +138,13 @@ public enum MessageManager {
     public List<ListItem> getListItemData(@NonNull final ListItem item) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
+        List<ListItem> result = new ArrayList<>();
+        if (item == null)
+            return result;
         String groupKey = item.groupKey;
-        String roomKey = item.key;
+        String roomKey = getRoomKey(item);
+        if (roomKey == null)
+            return result;
         return getItems(getMessageMap(getGroupMessages(groupKey).get(roomKey)));
     }
 
@@ -191,7 +196,7 @@ public enum MessageManager {
             DateHeaderType dht = types[index];
             List<Message> list = messageMap.get(dht);
             if (list == null)
-                return result;
+                continue;
             result.add(new ListItem(date, dht.resId));
             Collections.sort(list, new MessageComparator());
             for (Message message : list) {
@@ -207,6 +212,15 @@ public enum MessageManager {
         }
 
         return result;
+    }
+
+    /** Return null or a valid room key for the given item. */
+    private String getRoomKey(@NonNull final ListItem item) {
+        if (item.groupKey == null)
+            return null;
+        if (item.groupKey.equals(AccountManager.instance.getMeGroupKey()))
+            return AccountManager.instance.getMeRoomKey();
+        return item.roomKey != null ? item.roomKey : item.key;
     }
 
     /** Sort lists of messages after they've been sorted into date categories. */
