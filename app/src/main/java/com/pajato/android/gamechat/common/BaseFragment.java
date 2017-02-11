@@ -50,7 +50,6 @@ import java.util.Locale;
 
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
 

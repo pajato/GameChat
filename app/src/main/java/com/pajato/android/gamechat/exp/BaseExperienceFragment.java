@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.exp;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -182,6 +183,12 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // There is no signed in User.  Return one of the two sentinel values associated with being
         // either signed out or without access to a network.
         return NetworkManager.instance.isConnected() ? SIGNED_OUT_OWNER_ID : OFFLINE_OWNER_ID;
+    }
+
+    /** Return the given number of device independent pixels to a number of physical pixels. */
+    protected int getPixels(final int dp) {
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
     /** Return a name for the player by using the given account or a default. */

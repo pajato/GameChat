@@ -25,6 +25,7 @@ public class ChessBoard {
     private static final String CELL_ID = "cell";
 
     /** logcat TAG */
+    @SuppressWarnings("unused")
     private static final String TAG = ChessBoard.class.getSimpleName();
 
     public Map<String, ChessPiece> board;
