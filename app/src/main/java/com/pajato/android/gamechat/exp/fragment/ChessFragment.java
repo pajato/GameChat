@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -68,19 +69,25 @@ import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
  */
 public class ChessFragment extends BaseExperienceFragment {
 
-    // Chess Management Objects
-    private TextView mHighlightedTile;
-    private boolean mIsHighlighted = false;
-    private ArrayList<Integer> mPossibleMoves;
-
-    /** Visual layout of chess board objects */
-    private GridLayout grid;
+    // Public class constants.
 
     /** The lookup key for the FAB chess menu. */
     public static final String CHESS_FAM_KEY = "ChessFamKey";
 
-    /** logcat TAG */
+    /** Logcat TAG */
     private static final String TAG = ChessFragment.class.getSimpleName();
+
+    // Private instance variables.
+
+    // Chess Management Objects
+    private TextView mHighlightedTile;
+    private boolean mIsHighlighted = false;
+
+    /** Visual layout of chess board objects */
+    private GridLayout mGrid;
+
+    /** A click handler for the board tiles. */
+    private View.OnClickListener mTileClickHandler = new TileClickHandler();
 
     // Public instance methods.
 
@@ -137,11 +144,11 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     @Override public void onStart() {
-        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (mGrid).
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
-        grid = (GridLayout) mLayout.findViewById(board);
+        mGrid = (GridLayout) mLayout.findViewById(board);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -472,7 +479,7 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Handle a new chess game by resetting the board on a new game or a database reload. */
     private void startGame() {
         // Initialize the new board state.
-        grid.removeAllViews();
+        mGrid.removeAllViews();
         Chess model = (Chess) mExperience;
         if (model.board == null) model.board = new ChessBoard();
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
@@ -486,25 +493,22 @@ public class ChessFragment extends BaseExperienceFragment {
         model.secondaryKingSideRookHasMoved = false;
         model.secondaryKingHasMoved = false;
 
-        mPossibleMoves = new ArrayList<>();
+        // The total dp size of components other than the checker board.
+        final int TOOLBAR_PLUS_CONTROLS_HEIGHT = getPixels(132);
 
-        // Take the smaller of width/height to adjust for tablet (landscape) view and adjust for
-        // the player controls and FAB. TODO: the fab currently returns "top" value of 0...
-        int screenWidth = getActivity().findViewById(R.id.expFragmentContainer).getWidth();
-        ImageView v = (ImageView) getActivity().findViewById(R.id.player_1_icon);
-        int screenHeight = getActivity().findViewById(R.id.expFragmentContainer).getHeight()
-                - v.getBottom() - getActivity().findViewById(R.id.gameFab).getTop();
-
-        int sideSize = Math.min(screenWidth, screenHeight);
-        Log.d(TAG, "screen width=" + screenWidth + ", screen height=" + screenHeight);
-        int pieceSideLength = sideSize / 8;
-        Log.d(TAG, "using piece side length=" + pieceSideLength);
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        float pxHeight = displayMetrics.heightPixels;
+        float pxWidth = displayMetrics.widthPixels;
+        int boardHeight = Math.round(pxHeight) - TOOLBAR_PLUS_CONTROLS_HEIGHT;
+        int width = Math.round(pxWidth);
+        int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) - getPixels(32);
+        int cellSize = Math.min(boardWidth, boardHeight) / 8;
 
         // Go through and populate the GridLayout / board.
         for (int i = 0; i < 64; i++) {
-            TextView currentTile = makeBoardButton(i, pieceSideLength, model.board);
-            currentTile.setOnClickListener(new ChessClick());
-            grid.addView(currentTile);
+            TextView currentTile = makeBoardButton(i, cellSize, model.board);
+            currentTile.setOnClickListener(mTileClickHandler);
+            mGrid.addView(currentTile);
         }
 
         handleTurnChange(false);
@@ -525,13 +529,14 @@ public class ChessFragment extends BaseExperienceFragment {
         if (checkFinished(board)) return false;
         boolean hasChanged = false;
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        findPossibleMoves(highlightedIndex, mPossibleMoves, board);
+        List<Integer> possibleMoves = new ArrayList<>();
+        findPossibleMoves(highlightedIndex, possibleMoves, board);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
         if (mIsHighlighted) {
             handleTileBackground(highlightedIndex, mHighlightedTile);
 
-            for (int possiblePosition : mPossibleMoves) {
+            for (int possiblePosition : possibleMoves) {
                 // If the tile clicked is one of the possible positions, and it's the correct
                 // turn/piece combination, the piece moves there.
                 if (indexClicked == possiblePosition) {
@@ -539,7 +544,7 @@ public class ChessFragment extends BaseExperienceFragment {
                     handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
                     hasChanged = true;
                 }
-                handleTileBackground(possiblePosition, (TextView) grid.getChildAt(possiblePosition));
+                handleTileBackground(possiblePosition, (TextView) mGrid.getChildAt(possiblePosition));
             }
             mHighlightedTile = null;
 
@@ -547,8 +552,8 @@ public class ChessFragment extends BaseExperienceFragment {
         } else {
             mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.holo_red_dark));
-            for(int possiblePosition : mPossibleMoves) {
-                grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
+            for(int possiblePosition : possibleMoves) {
+                mGrid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
                         .getColor(getContext(), android.R.color.holo_red_light));
             }
         }
@@ -610,7 +615,8 @@ public class ChessFragment extends BaseExperienceFragment {
             currentTile.setBackgroundColor(ContextCompat.getColor(
                     getContext(), android.R.color.white));
         } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorLightGray));
+            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(),
+                    R.color.colorLightGray));
         }
     }
 
@@ -621,7 +627,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param possibleMoves a list of the possible moves available to the highlighted piece.
      * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
-    private void findPossibleMoves(final int highlightedIndex, final ArrayList<Integer> possibleMoves,
+    private void findPossibleMoves(final int highlightedIndex, final List<Integer> possibleMoves,
                                    ChessBoard board) {
         if (highlightedIndex < 0 || highlightedIndex > 64) {
             return;
@@ -676,7 +682,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Handle capturing pieces.
         if (capturesPiece) {
-            TextView capturedTile = (TextView) grid.getChildAt(indexClicked);
+            TextView capturedTile = (TextView) mGrid.getChildAt(indexClicked);
             capturedTile.setText(" ");
             board.delete(highlightedIndex);
         }
@@ -691,7 +697,7 @@ public class ChessFragment extends BaseExperienceFragment {
             board.add(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
-            TextView newLocation = (TextView) grid.getChildAt(indexClicked);
+            TextView newLocation = (TextView) mGrid.getChildAt(indexClicked);
             newLocation.setText(ChessPiece.getUnicodeText(board.getPieceType(indexClicked)));
 
             // Color the piece according to the player.
@@ -721,7 +727,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
             // Put a rook at the new rook position.
             board.add(rookFutureIndex, ChessPiece.PieceType.ROOK, player);
-            TextView futureRook = (TextView) grid.getChildAt(rookFutureIndex);
+            TextView futureRook = (TextView) mGrid.getChildAt(rookFutureIndex);
 
             // Handle the player-dependent pieces of the castle (color)
             futureRook.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
@@ -732,7 +738,7 @@ public class ChessFragment extends BaseExperienceFragment {
             }
 
             // Get rid of the old rook.
-            TextView previousRook = (TextView) grid.getChildAt(rookPrevIndex);
+            TextView previousRook = (TextView) mGrid.getChildAt(rookPrevIndex);
             previousRook.setText(" ");
             board.delete(rookPrevIndex);
         }
@@ -893,7 +899,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
             ChessBoard board = ((Chess) mExperience).board;
             board.add(position, pieceType, team);
-            TextView promotedPieceTile = (TextView) grid.getChildAt(position);
+            TextView promotedPieceTile = (TextView) mGrid.getChildAt(position);
             promotedPieceTile.setText(ChessPiece.getUnicodeText(pieceType));
             int color = team == ChessPiece.ChessTeam.PRIMARY ? R.color.colorPrimary: R.color.colorAccent;
             promotedPieceTile.setTextColor(ContextCompat.getColor(getContext(), color));
@@ -905,7 +911,7 @@ public class ChessFragment extends BaseExperienceFragment {
     /**
      * A View.OnClickListener that is called whenever a board tile is clicked.
      */
-    private class ChessClick implements View.OnClickListener {
+    private class TileClickHandler implements View.OnClickListener {
         @Override public void onClick(final View v) {
             int index = Integer.parseInt((String)v.getTag());
             ChessBoard board = ((Chess) mExperience).board;

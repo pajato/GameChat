@@ -23,18 +23,16 @@ http://www.gnu.org/licenses
 
     <include layout="@layout/exp_toolbar_game_inc" />
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/checkers_panel"
+    <android.support.constraint.ConstraintLayout android:id="@+id/checkers_panel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/white">
+        android:background="@color/colorLightBlue">
 
-        <TextView
-            android:id="@+id/wins"
+        <TextView android:id="@+id/wins"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:background="@color/colorLightBlue"
             android:text="@string/wins"
             android:textSize="14sp"
@@ -43,8 +41,7 @@ http://www.gnu.org/licenses
             app:layout_constraintTop_toTopOf="parent"
             tools:text="wins" />
 
-        <TextView
-            android:id="@+id/player1WinCount"
+        <TextView android:id="@+id/player1WinCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAlignment="center"
@@ -53,8 +50,7 @@ http://www.gnu.org/licenses
             app:layout_constraintCenterY_toCenterY="@id/wins"
             tools:text="0" />
 
-        <TextView
-            android:id="@+id/player2WinCount"
+        <TextView android:id="@+id/player2WinCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAlignment="center"
@@ -64,12 +60,11 @@ http://www.gnu.org/licenses
             tools:layout_editor_absoluteY="0dp"
             tools:text="0" />
 
-        <TextView
-            android:id="@+id/turn"
+        <TextView android:id="@+id/turn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:background="@color/colorLightBlue"
             android:text="@string/turn"
             android:textSize="14sp"
@@ -78,8 +73,7 @@ http://www.gnu.org/licenses
             app:layout_constraintTop_toBottomOf="@id/wins"
             tools:text="turn" />
 
-        <ImageView
-            android:id="@+id/player_1_icon"
+        <ImageView android:id="@+id/player_1_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
@@ -88,8 +82,7 @@ http://www.gnu.org/licenses
             app:layout_constraintCenterY_toCenterY="@id/turn"
             app:layout_constraintRight_toLeftOf="@+id/rightIndicator1" />
 
-        <TextView
-            android:id="@+id/leftIndicator1"
+        <TextView android:id="@+id/leftIndicator1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -101,8 +94,7 @@ http://www.gnu.org/licenses
             app:layout_constraintRight_toLeftOf="@+id/player_1_icon"
             app:layout_constraintTop_toTopOf="@+id/player_1_icon" />
 
-        <TextView
-            android:id="@+id/rightIndicator1"
+        <TextView android:id="@+id/rightIndicator1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -116,8 +108,7 @@ http://www.gnu.org/licenses
             app:layout_constraintRight_toLeftOf="@id/turn"
             app:layout_constraintTop_toTopOf="@+id/player_1_icon" />
 
-        <ImageView
-            android:id="@+id/player_2_icon"
+        <ImageView android:id="@+id/player_2_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
@@ -127,8 +118,7 @@ http://www.gnu.org/licenses
             app:layout_constraintCenterY_toCenterY="@+id/turn"
             app:layout_constraintLeft_toRightOf="@+id/leftIndicator2" />
 
-        <TextView
-            android:id="@+id/leftIndicator2"
+        <TextView android:id="@+id/leftIndicator2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -143,8 +133,7 @@ http://www.gnu.org/licenses
             app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
             app:layout_constraintTop_toTopOf="@+id/player_2_icon" />
 
-        <TextView
-            android:id="@+id/rightIndicator2"
+        <TextView android:id="@+id/rightIndicator2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -157,8 +146,7 @@ http://www.gnu.org/licenses
             app:layout_constraintLeft_toRightOf="@+id/player_2_icon"
             app:layout_constraintTop_toTopOf="@+id/player_2_icon" />
 
-        <TextView
-            android:id="@+id/winner"
+        <TextView android:id="@+id/winner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -171,19 +159,22 @@ http://www.gnu.org/licenses
             tools:text="Winner"
             tools:visibility="visible" />
 
-        <GridLayout
-            android:id="@+id/board"
+        <GridLayout android:id="@+id/board"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="68dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:columnCount="8"
             android:columnOrderPreserved="true"
             android:orientation="horizontal"
             android:rowCount="8"
             android:rowOrderPreserved="true"
+            android:background="@color/colorLightBlue"
             app:layout_constraintLeft_toLeftOf="@id/checkers_panel"
             app:layout_constraintRight_toRightOf="@id/checkers_panel"
-            app:layout_constraintTop_toBottomOf="@id/player_1_icon" />
+            app:layout_constraintTop_toBottomOf="@id/turn" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.design.widget.AppBarLayout>

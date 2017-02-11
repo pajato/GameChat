@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -71,6 +72,8 @@ import static com.pajato.android.gamechat.exp.model.Checkers.SECONDARY_WINS;
  */
 public class CheckersFragment extends BaseExperienceFragment {
 
+    // Public class constants.
+
     public static final String PRIMARY_PIECE = "pp";
     public static final String PRIMARY_KING = "pk";
     public static final String SECONDARY_PIECE = "sp";
@@ -79,18 +82,24 @@ public class CheckersFragment extends BaseExperienceFragment {
     public static final String KING_UNICODE = "\u26c1";
     public static final String PIECE_UNICODE = "\u26c0";
 
-    public TextView mHighlightedTile;
-    public boolean mIsHighlighted = false;
-    public ArrayList<Integer> mPossibleMoves;
-
-    /** Visual layout of checkers board objects */
-    private GridLayout grid;
-
     /** The lookup key for the FAB checkers menu. */
     public static final String CHECKERS_FAM_KEY = "CheckersFamKey";
 
-    /** logcat TAG */
+    /** Logcat TAG */
     private static final String TAG = CheckersFragment.class.getSimpleName();
+
+    // Public instance variables.
+
+    public TextView mHighlightedTile;
+    public boolean mIsHighlighted;
+
+    // Private instance variables.
+
+    /** Visual layout of checkers board objects */
+    private GridLayout mGrid;
+
+    /** A click handler for the board tiles. */
+    private View.OnClickListener mTileClickHandler = new TileClickHandler();
 
     // Public instance methods.
 
@@ -159,13 +168,13 @@ public class CheckersFragment extends BaseExperienceFragment {
     }
 
     @Override public void onStart() {
-        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (grid).
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (mGrid).
         super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
-        grid = (GridLayout) mLayout.findViewById(board);
+        mGrid = (GridLayout) mLayout.findViewById(board);
 
-        // Color the player icons.
+        // Color the player icons and create a tile click handler.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
         ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
@@ -439,15 +448,15 @@ public class CheckersFragment extends BaseExperienceFragment {
         return false;
     }
 
-    // Set up an image button which will be a cell in the game board
-    private TextView makeBoardButton(final int index, final int sideSize,
+    /** Set up an image button which will be a cell in the game board. */
+    private TextView makeBoardButton(final int index, final int cellSize,
                                      final Map<String, String> board, final String pieceType) {
         TextView currentTile = new TextView(getContext());
 
         // Set up the gridlayout params, so that each cell is functionally identical.
         GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-        param.height = sideSize;
-        param.width = sideSize;
+        param.height = cellSize;
+        param.width = cellSize;
         param.rightMargin = 0;
         param.topMargin = 0;
         param.setGravity(Gravity.CENTER);
@@ -458,7 +467,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         currentTile.setLayoutParams(param);
         String buttonTag = String.valueOf(index);
         currentTile.setTag(buttonTag);
-        float sp = sideSize / getResources().getDisplayMetrics().scaledDensity;
+        float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
         currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.8));
         currentTile.setTypeface(null, Typeface.BOLD);
         currentTile.setGravity(Gravity.CENTER);
@@ -509,41 +518,38 @@ public class CheckersFragment extends BaseExperienceFragment {
      * after loading a game board from the database.
      */
     private void startGame() {
-        grid.removeAllViews();
         Checkers model = (Checkers) mExperience;
         boolean isNewBoard = false;
         if (model.board == null) {
             isNewBoard = true;
             model.board = new HashMap<>();
         }
-
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        if (winner != null) winner.setText("");
+        if (winner != null)
+            winner.setText("");
 
-        mPossibleMoves = new ArrayList<>();
+        // The total dp size of components other than the checker board.
+        final int TOOLBAR_PLUS_CONTROLS_HEIGHT = getPixels(132);
 
-        // Take the smaller of width/height to adjust for tablet (landscape) view and adjust for
-        // the player controls and FAB. TODO: the fab currently returns "top" value of 0...
-        int screenWidth = getActivity().findViewById(R.id.expFragmentContainer).getWidth();
-        ImageView v = (ImageView) getActivity().findViewById(R.id.player_1_icon);
-        int screenHeight = getActivity().findViewById(R.id.expFragmentContainer).getHeight()
-                - v.getBottom() - getActivity().findViewById(R.id.gameFab).getTop();
-
-        int sideSize = Math.min(screenWidth, screenHeight);
-        Log.d(TAG, "screen width=" + screenWidth + ", screen height=" + screenHeight);
-        int pieceSideLength = sideSize / 8;
-        Log.d(TAG, "using piece side length=" + pieceSideLength);
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        float pxHeight = displayMetrics.heightPixels;
+        float pxWidth = displayMetrics.widthPixels;
+        int boardHeight = Math.round(pxHeight) - TOOLBAR_PLUS_CONTROLS_HEIGHT;
+        int width = Math.round(pxWidth);
+        int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) - getPixels(32);
+        int cellSize = Math.min(boardWidth, boardHeight) / 8;
 
         // Go through and populate the GridLayout / board.
+        mGrid.removeAllViews();
         for (int i = 0; i < 64; i++) {
             String pieceType = "";
             if(!isNewBoard) {
                 pieceType = model.board.get(String.valueOf(i));
                 if(pieceType == null) pieceType = "";
             }
-            TextView currentTile = makeBoardButton(i, pieceSideLength, model.board, pieceType);
-            currentTile.setOnClickListener(new CheckersClick());
-            grid.addView(currentTile);
+            TextView currentTile = makeBoardButton(i, cellSize, model.board, pieceType);
+            currentTile.setOnClickListener(mTileClickHandler);
+            mGrid.addView(currentTile);
         }
 
         handleTurnChange(false);
@@ -567,14 +573,15 @@ public class CheckersFragment extends BaseExperienceFragment {
         boolean turn = ((Checkers) mExperience).turn;
         String highlightedIdxTag = (String) mHighlightedTile.getTag();
         int highlightedIndex = Integer.parseInt(highlightedIdxTag);
-        findPossibleMoves(board, highlightedIndex, mPossibleMoves);
+        List<Integer> possibleMoves = new ArrayList<>();
+        findPossibleMoves(board, highlightedIndex, possibleMoves);
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
         if(mIsHighlighted) {
             mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.white));
 
-            for (int possiblePosition : mPossibleMoves) {
+            for (int possiblePosition : possibleMoves) {
                 // It is important to note for these algorithms that the Views at each index on the
                 // board have a tag equal to the string value of the index into the cell on the board.
                 if(possiblePosition != -1 && board.get(String.valueOf(possiblePosition)) == null) {
@@ -599,22 +606,21 @@ public class CheckersFragment extends BaseExperienceFragment {
                         }
                     }
                     // Clear the highlight off of all possible positions.
-                    grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
+                    mGrid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
                             .getColor(getContext(), android.R.color.white));
                 }
             }
             mHighlightedTile = null;
 
-        // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
         } else {
-            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
-                    android.R.color.holo_red_dark));
-            for(int possiblePosition : mPossibleMoves) {
-                if(possiblePosition != -1 && board.get(String.valueOf(possiblePosition)) == null) {
-                    grid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
-                            .getColor(getContext(), android.R.color.holo_red_light));
-                }
-            }
+            // Highlight the tile clicked and its potential move squares with red.
+            Context ctx = getContext();
+            int id = android.R.color.holo_red_dark;
+            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(ctx, id));
+            id = android.R.color.holo_red_light;
+            for(int position : possibleMoves)
+                if (position != -1 && board.get(String.valueOf(position)) == null)
+                    mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(ctx, id));
         }
 
         mIsHighlighted = !mIsHighlighted;
@@ -681,7 +687,7 @@ public class CheckersFragment extends BaseExperienceFragment {
      * @param jumpable the index of the tile that the piece can potentially jump to.
      */
     private void findJumpables(Map<String, String> board, final int highlightedIndex, final int jumpable,
-                               final ArrayList<Integer> movementOptions) {
+                               final List<Integer> movementOptions) {
         // Create the boolean calculations for each of our conditions.
         boolean withinBounds = jumpable < 64 && jumpable > -1;
         boolean emptySpace = board.get(String.valueOf(jumpable)) == null;
@@ -712,7 +718,7 @@ public class CheckersFragment extends BaseExperienceFragment {
      * @param highlightedIndex the index containing the highlighted piece.
      */
     private void findPossibleMoves(final Map<String, String> board, final int highlightedIndex,
-                                   final ArrayList<Integer> possibleMoves) {
+                                   final List<Integer> possibleMoves) {
         if(highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
@@ -794,7 +800,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         }
 
         // Find the new tile and give it a piece.
-        TextView newLoc = (TextView) grid.getChildAt(indexClicked);
+        TextView newLoc = (TextView) mGrid.getChildAt(indexClicked);
         if(board.get(indexClickedStr).equals(PRIMARY_KING) ||
                 board.get(indexClickedStr).equals(SECONDARY_KING)) {
             newLoc.setText(KING_UNICODE);
@@ -815,7 +821,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         boolean finishedJumping = true;
         if(capturesPiece) {
             int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
-            TextView capturedTile = (TextView) grid.getChildAt(pieceCapturedIndex);
+            TextView capturedTile = (TextView) mGrid.getChildAt(pieceCapturedIndex);
             capturedTile.setText(" " );
             String key = (String) capturedTile.getTag();
             if (board.containsKey(key))
@@ -854,7 +860,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
         TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
 
-        if(turn) {
+        if (turn) {
             playerOneLeft.setVisibility(View.VISIBLE);
             playerOneRight.setVisibility(View.VISIBLE);
             playerTwoLeft.setVisibility(View.INVISIBLE);
@@ -867,10 +873,8 @@ public class CheckersFragment extends BaseExperienceFragment {
         }
     }
 
-    /**
-     * A View.OnClickListener that is called whenever a board tile is clicked.
-     */
-    private class CheckersClick implements View.OnClickListener {
+    /** A View.OnClickListener that is called whenever a board tile is clicked. */
+    private class TileClickHandler implements View.OnClickListener {
         @Override public void onClick(final View v) {
             int index = Integer.parseInt((String)v.getTag());
             boolean changedBoard = false;
@@ -884,14 +888,13 @@ public class CheckersFragment extends BaseExperienceFragment {
                     changedBoard = showPossibleMoves(index, board);
                 }
             }
-            if(changedBoard) {
+            if (changedBoard)
                 // Save any changes that have been made to the database
                 ExperienceManager.instance.updateExperience(mExperience);
-            }
         }
     }
 
-        /** Return the home FAM used in the top level show games and show no games fragments. */
+    /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getCheckersMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));

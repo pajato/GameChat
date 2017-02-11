@@ -2,7 +2,7 @@ package com.pajato.android.gamechat.exp.model;
 
 import com.pajato.android.gamechat.exp.fragment.ChessPiece.ChessTeam;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static com.pajato.android.gamechat.exp.fragment.ChessPiece.PieceType.ROOK;
 
@@ -20,12 +20,11 @@ public class ChessHelper {
      * limited, and when the King of a side is captured, that side loses the game. A King can move
      * in any direction, but only a single square away. A King may move into the space of another
      * piece only if it is capturing that piece.
-     *
-     * @param threatRange the ArrayList that contains the threat range of the King.
+     *  @param threatRange the ArrayList that contains the threat range of the King.
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
-    static public void getKingThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
+    static public void getKingThreatRange(final List<Integer> threatRange, final int highlightedIndex,
                                           final ChessBoard board, final boolean[] castlingBooleans) {
         // Grab all the castling booleans and label them properly.
         final boolean primaryQueenSideRookHasMoved = castlingBooleans[0];
@@ -116,12 +115,11 @@ public class ChessHelper {
      * cardinal directions (up, down, left, and right), but cannot move past other pieces. A queen
      * may take the place of another piece if they are capturing. They functionally perform as a
      * combination Rook-Bishop.
-     *
-     * @param threatRange the ArrayList that contains the threat range of the Queen.
+     *  @param threatRange the ArrayList that contains the threat range of the Queen.
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing the board and the pieces located within.
      */
-    static public void getQueenThreatRange(final ArrayList<Integer> threatRange, final int
+    static public void getQueenThreatRange(final List<Integer> threatRange, final int
             highlightedIndex, final ChessBoard board) {
         getRookThreatRange(threatRange, highlightedIndex, board);
         getBishopThreatRange(threatRange, highlightedIndex, board);
@@ -132,12 +130,11 @@ public class ChessHelper {
      * locations a piece can enter without breaking the rules of chess. Bishops can move across
      * the diagonals (up/right, down/right, down/left, and up/right), but cannot move past other
      * pieces. A bishop can take the place of another piece if they are capturing it.
-     *
-     * @param threatRange the ArrayList that contains the threat range of the Bishop.
+     *  @param threatRange the ArrayList that contains the threat range of the Bishop.
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing the board and the pieces located within.
      */
-    static public void getBishopThreatRange(final ArrayList<Integer> threatRange, final int
+    static public void getBishopThreatRange(final List<Integer> threatRange, final int
             highlightedIndex, ChessBoard board) {
         boolean upLeft = true;
         boolean upRight = true;
@@ -233,13 +230,12 @@ public class ChessHelper {
      * Gets the "threat range" of the Pawn. A "threat range" is the full possible amount of
      * locations a piece can enter without breaking the rules of chess. Pawns can move forward
      * if there is no piece ahead of them, and diagonally forward if they are capturing a piece.
-     *
-     * @param threatRange the ArrayList that contains the threat range of the pawn.
+     *  @param threatRange the ArrayList that contains the threat range of the pawn.
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing the board and the pieces located within.
      */
-    static public void getPawnThreatRange(final ArrayList<Integer> threatRange, final int highlightedIndex,
-                                            final ChessBoard board) {
+    static public void getPawnThreatRange(final List<Integer> threatRange, final int highlightedIndex,
+                                          final ChessBoard board) {
         // Pawns move differently depending on the team they are on. First, handle the pawns that
         // move "up". These pawns are on the primary team.
         if (board.getTeam(highlightedIndex).equals(ChessTeam.PRIMARY)) {
@@ -302,12 +298,11 @@ public class ChessHelper {
      * Gets the "threat range" of the Knight. A "threat range" is the full possible amount of
      * locations a piece can enter without breaking the rules of chess. Knights must move in an
      * L shape: two squares in one direction and one in another. They can jump other pieces.
-     *
-     * @param threatRange the ArrayList that contains the threat range of the knight piece.
+     *  @param threatRange the ArrayList that contains the threat range of the knight piece.
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing the board and the pieces located within.
      */
-    static public void getKnightThreatRange(final ArrayList<Integer> threatRange, final int
+    static public void getKnightThreatRange(final List<Integer> threatRange, final int
             highlightedIndex, final ChessBoard board) {
         // Establish all possible movement options.
         int upUpLeft = highlightedIndex - 17;
@@ -355,7 +350,7 @@ public class ChessHelper {
      * @param highlightedIndex the index of the current piece.
      * @param board a HashMap representing the board and the pieces located within.
      */
-    static public void getRookThreatRange(final ArrayList<Integer> threatRange,
+    static public void getRookThreatRange(final List<Integer> threatRange,
                 final int highlightedIndex, final ChessBoard board) {
         // Set up our condition variables.
         boolean left = true;

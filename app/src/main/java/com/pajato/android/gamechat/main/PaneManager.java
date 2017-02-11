@@ -49,28 +49,32 @@ public enum PaneManager {
     // Private instance variables
 
     /** The repository for the pane fragments. */
-    private List<Fragment> fragmentList = new ArrayList<>();
+    private List<Fragment> mFragmentList = new ArrayList<>();
 
     /** The repository for the fragment titles. */
-    private List<String> titleList = new ArrayList<>();
+    private List<String> mTitleList = new ArrayList<>();
+
+    /** The flag indicating if the app is running on a smart-phone (FALSE) or on a tablet (TRUE). */
+    private boolean mIsTablet;
 
     // Public instance methods
 
     /** Initialize the two central panels in the app: chat and game/activity. */
     public void init(final AppCompatActivity context) {
         // Clear then add in the two main panels.
-        fragmentList.clear();
-        titleList.clear();
-        titleList.add(context.getString(R.string.ChatTitle));
-        titleList.add(context.getString(R.string.game));
-        fragmentList.add(new ChatEnvelopeFragment());
-        fragmentList.add(new ExpEnvelopeFragment());
+        mFragmentList.clear();
+        mTitleList.clear();
+        mTitleList.add(context.getString(R.string.ChatTitle));
+        mTitleList.add(context.getString(R.string.game));
+        mFragmentList.add(new ChatEnvelopeFragment());
+        mFragmentList.add(new ExpEnvelopeFragment());
 
         // Determine if a paging layout is active.
         ViewPager viewPager = (ViewPager) context.findViewById(R.id.viewpager);
         if (viewPager != null) {
             // The app is running on a smart phone.  Set up the adapter for the pager and force
             // orientation to portrait.
+            mIsTablet = false;
             viewPager.setAdapter(new GameChatPagerAdapter(context.getSupportFragmentManager(),
                     (ViewGroup) context.findViewById(R.id.page_monitor)));
             context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -79,11 +83,19 @@ public enum PaneManager {
 
         // The app is running on a tablet. Add the fragments to their containers and force
         // orientation to landscape.
+        mIsTablet = true;
         context.getSupportFragmentManager().beginTransaction()
-                .add(R.id.chat_container, fragmentList.get(CHAT_INDEX), "chat")
-                .add(R.id.game_container, fragmentList.get(GAME_INDEX), "game")
+                .add(R.id.chat_container, mFragmentList.get(CHAT_INDEX), "chat")
+                .add(R.id.game_container, mFragmentList.get(GAME_INDEX), "game")
                 .commit();
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    // Public instance methods.
+
+    /** Return TRUE iff the app is running on a tablet. */
+    public boolean isTablet() {
+        return mIsTablet;
     }
 
     // Nested classes
@@ -101,17 +113,17 @@ public enum PaneManager {
 
         /** Implement getItem() by using the fragment list. */
         @Override public Fragment getItem(int position) {
-            return fragmentList.get(position);
+            return mFragmentList.get(position);
         }
 
         /** Implement getCount() by using the fragment list size. */
         @Override public int getCount() {
-            return fragmentList.size();
+            return mFragmentList.size();
         }
 
         /** Implement getPageTitle() by using the title list. */
         @Override public CharSequence getPageTitle(int position) {
-            return titleList.get(position);
+            return mTitleList.get(position);
         }
 
         /** Update the Page Monitor for a given selected position. */
