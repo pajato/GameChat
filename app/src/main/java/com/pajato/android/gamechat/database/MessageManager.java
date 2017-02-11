@@ -139,8 +139,6 @@ public enum MessageManager {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         List<ListItem> result = new ArrayList<>();
-        if (item == null)
-            return result;
         String groupKey = item.groupKey;
         String roomKey = getRoomKey(item);
         if (roomKey == null)
