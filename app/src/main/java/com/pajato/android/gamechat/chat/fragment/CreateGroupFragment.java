@@ -113,12 +113,12 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Create and persist a member object to the database joined to the default room.
         Account member = new Account(account);
-        member.joinList.add(roomKey);
+        member.joinMap.put(roomKey, true);
         member.groupKey = groupKey;
         MemberManager.instance.createMember(member);
 
         // Update and persist the User account with the new joined list entry.
-        account.joinList.add(groupKey);
+        account.joinMap.put(groupKey, true);
         AccountManager.instance.updateAccount(account);
 
         // Post a welcome message to the default room from the owner.

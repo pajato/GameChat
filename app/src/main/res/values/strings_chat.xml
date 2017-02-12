@@ -16,6 +16,7 @@
     <string name="GroupsToolbarTitle">Groups with Messages</string>
     <string name="GroupMeToolbarTitle">My Chat Room</string>
     <string name="ListItemIconDesc">The list icon.</string>
+    <string name="ListItemLeaveIconDesc">The leave (exit) icon.</string>
     <string name="InsertEmoticon">Inserting an emoticon</string>
     <string name="InsertEmoticonDesc">Insert emoticon image button.</string>
     <string name="InsertMap">Inserting a map based on your location</string>

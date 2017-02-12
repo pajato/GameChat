@@ -93,9 +93,10 @@ public enum JoinManager {
 
         // Abort if the room wasn't returned or if the room has already been joined. Otherwise
         // update and persist the member join list.
-        if (room == null || member.joinList.contains(room.key))
+
+        if (room == null || member.joinMap.keySet().contains(room.key))
             return;
-        member.joinList.add(room.key);
+        member.joinMap.put(room.key, true);
         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
         DBUtils.updateChildren(path, member.toMap());
 
@@ -145,7 +146,8 @@ public enum JoinManager {
             Map<String, Account> map = MemberManager.instance.memberMap.get(groupKey);
             String id = AccountManager.instance.getCurrentAccountId();
             Account member = map != null && id != null ? map.get(id) : null;
-            if (member != null) result.addAll(member.joinList);
+            if (member != null)
+                result.addAll(member.joinMap.keySet());
         }
         return result;
     }

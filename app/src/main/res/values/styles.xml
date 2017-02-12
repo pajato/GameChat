@@ -40,6 +40,15 @@ http://www.gnu.org/licenses
         <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
+    <style name="ListItemOptionalEndImage">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:contentDescription">@string/ListItemIconDesc</item>
+    </style>
+
     <style name="ChatListItemSelector">
         <item name="android:layout_width">36dp</item>
         <item name="android:layout_height">36dp</item>

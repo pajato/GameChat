@@ -136,7 +136,7 @@ public enum GroupManager {
         if (item != null && item.groupKey != null)
             result.add(item.groupKey);
         if (result.isEmpty() && account != null)
-            result.addAll(account.joinList);
+            result.addAll(account.joinMap.keySet());
         return result;
     }
 
@@ -161,7 +161,7 @@ public enum GroupManager {
             // joined.
             if (event.account.groupKey != null)
                 setWatcher(event.account.groupKey);
-            for (String groupKey : event.account.joinList)
+            for (String groupKey : event.account.joinMap.keySet())
                 setWatcher(groupKey);
             return;
         }

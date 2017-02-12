@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MemberChangeHandler;
@@ -115,7 +116,7 @@ public enum MemberManager {
         // Determine if the payload is for the current account holder.  If so, set a message and
         // experience watcher on the joined rooms.
         if (event.member.id.equals(AccountManager.instance.getCurrentAccountId()))
-            for (String roomKey : event.member.joinList) {
+            for (String roomKey : event.member.joinMap.keySet()) {
                 RoomManager.instance.setWatcher(event.member.groupKey, roomKey);
                 MessageManager.instance.setWatcher(event.member.groupKey, roomKey);
                 ExperienceManager.instance.setWatcher(event.member.groupKey, roomKey);

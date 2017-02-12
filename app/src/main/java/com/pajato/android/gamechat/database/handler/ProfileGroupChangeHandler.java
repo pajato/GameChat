@@ -63,7 +63,8 @@ public class ProfileGroupChangeHandler extends DatabaseEventHandler implements V
     /** Deal with a canceled event by logging it. */
     @Override public void onCancelled(DatabaseError error) {
         // Failed to read value
-        Log.w(TAG, "Failed to read value.", error.toException());
+        String message = String.format("Failed to read value at path: %s", path);
+        Log.w(TAG, message, error.toException());
     }
 
 }

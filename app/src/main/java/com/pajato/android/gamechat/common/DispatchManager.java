@@ -209,7 +209,7 @@ public enum DispatchManager {
         FragmentType type = kind == chat ? chatOffline : expOffline;
         if (!NetworkManager.instance.isConnected()) return new Dispatcher(type);
         Account account = AccountManager.instance.getCurrentAccount();
-        int joinSize = account != null ? account.joinList.size() : -1;
+        int joinSize = account != null ? account.joinMap.size() : -1;
 
         // Case on the number of joined groups: -1 implies the User is signed out, 0 implies the me
         // room, 1 will use the rooms in that group, otherwise set up to show a list of groups.

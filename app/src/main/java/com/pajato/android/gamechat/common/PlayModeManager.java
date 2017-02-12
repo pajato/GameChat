@@ -34,6 +34,7 @@ import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
@@ -99,11 +100,12 @@ public enum PlayModeManager {
     private List<ListItem> getUserItems() {
         List<ListItem> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
-        if (!AccountManager.accountHasFriends(account))
+        if (!AccountManager.hasFriends(account))
             // No users exist so create a header stating this.
             result.add(new ListItem(resourceHeader, R.string.NoFriendsFound));
         else
-            for (String groupKey : account.joinList)
+            for (Map.Entry<String, Boolean> entry : account.joinMap.entrySet()) {
+                String groupKey = entry.getKey();
                 for (Account member : MemberManager.instance.getMemberList(groupKey))
                     if (!member.id.equals(account.id)) {
                         String nickName = member.getNickName();
@@ -112,6 +114,7 @@ public enum PlayModeManager {
                         String url = member.url;
                         result.add(new ListItem(selectUser, groupKey, member.id, name, text, url));
                     }
+            }
         return result;
     }
 

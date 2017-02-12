@@ -77,8 +77,8 @@ public enum FragmentType {
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
     checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, checkersET),
     chess (ChessFragment.class, expChain, R.layout.exp_checkers, chessET),
-    createGroupChat(CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
-    createGroupExp (CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
+    createChatGroup(CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
+    createExpGroup(CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
     createRoom (CreateRoomFragment.class, createRoomTT, R.layout.chat_create),
     expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
     expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_list),
@@ -153,14 +153,14 @@ public enum FragmentType {
             case chatOffline:
             case chatRoomList:
             case chatSignedOut:
-            case createGroupChat:
+            case createChatGroup:
             case createRoom:
             case joinRoom:
             case messageList:
             case selectChatGroupsRooms:
             case showNoJoinedRooms:
                 return chat;
-            case createGroupExp:
+            case createExpGroup:
             default:
                 return exp;
         }

@@ -42,7 +42,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.common.FragmentType.createGroupExp;
+import static com.pajato.android.gamechat.common.FragmentType.createExpGroup;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 
 /**
@@ -91,7 +91,7 @@ public class SelectUserFragment extends BaseExperienceFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createGroupExp, null);
+                DispatchManager.instance.chainFragment(getActivity(), createExpGroup, null);
                 break;
             case R.string.InviteFriendFromChat:
                 DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);

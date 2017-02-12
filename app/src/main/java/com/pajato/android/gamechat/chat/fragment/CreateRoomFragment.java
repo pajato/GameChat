@@ -102,7 +102,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
         GroupManager.instance.updateGroupProfile(mGroup);
 
         // Update and persist the member adding the new room to it's join list.
-        mMember.joinList.add(mRoom.key);
+        mMember.joinMap.put(mRoom.key, true);
         MemberManager.instance.updateMember(mMember);
 
         // Post a welcome message to the new room from the owner.

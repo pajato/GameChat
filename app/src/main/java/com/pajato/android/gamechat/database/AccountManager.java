@@ -61,6 +61,7 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -186,7 +187,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Update the member entry in the default group.
         Account member = new Account(account);
-        member.joinList.add(roomKey);
+        member.joinMap.put(roomKey, true);
         member.groupKey = groupKey;
         path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.id);
         DBUtils.updateChildren(path, member.toMap());
@@ -203,12 +204,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Determine if the specified account belongs to any groups which have members */
-    public static boolean accountHasFriends(Account account) {
+    public static boolean hasFriends(Account account) {
         if (account == null)
             return false;
-        if (account.joinList.size() == 0)
+        if (account.joinMap.size() == 0)
             return false;
-        for (String groupKey : account.joinList) {
+        for (String groupKey : account.joinMap.keySet()) {
             Group group = GroupManager.instance.getGroupProfile(groupKey);
             if (group == null)
                 continue;
@@ -276,6 +277,39 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return hasAccount() && mCurrentAccount.chaperone != null;
     }
 
+    /** Remove the current account from the specified group */
+    public void leaveGroup(Group group) {
+        // Start by making sure the account is in the group
+        if (!mCurrentAccount.joinMap.keySet().contains(group.key))
+            return;
+
+        // For any rooms in the group, delete the account from each room's memberIdList
+        for (String roomKey : group.roomList) {
+            Room room = RoomManager.instance.getRoomProfile(roomKey);
+            List<String> roomMembers = room.getMemberIdList();
+            if (roomMembers.contains(mCurrentAccountKey)) {
+                roomMembers.remove(mCurrentAccountKey);
+                room.setMemberIdList(roomMembers);
+                RoomManager.instance.updateRoomProfile(room);
+            }
+        }
+
+        // Delete corresponding entry from Group's 'members' list in database
+        String path = MemberManager.instance.getMembersPath(group.key, mCurrentAccountKey);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+
+        // Delete account from group profile "memberList"
+        List<String> groupMembers = group.memberList;
+        groupMembers.remove(mCurrentAccountKey);
+        group.memberList = groupMembers;
+        GroupManager.instance.updateGroupProfile(group);
+
+        // Delete group from the account join map - do this last as the database access rules for
+        // groups (and their children) depend on there being an entry in the account join map
+        mCurrentAccount.joinMap.remove(group.key);
+        AccountManager.instance.updateAccount(mCurrentAccount);
+    }
+
     /** Handle an account change by providing an authentication change on a sign in or sign out. */
     @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
         // Detect a sign in or sign out event.  If either is found, generate an authentication
@@ -291,7 +325,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         } else {
             // Detect a change to the account.  If found, set watchers on the joined groups.
             if (event.account != null)
-                for (String key : event.account.joinList)
+                for (String key : event.account.joinMap.keySet())
                     GroupManager.instance.setWatcher(key);
         }
 
@@ -330,6 +364,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String name = "accountChangeHandler";
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
+            Log.i(TAG, "authentication change with FirebaseUser: " + user.getDisplayName());
             // A User has signed in. Determine if an account change listener is registered.  If so,
             // abort.  If not, set one up.
             if (DatabaseRegistrar.instance.isRegistered(name))
@@ -337,6 +372,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
         } else {
+            Log.i(TAG, "authentication change with NULL FirebaseUser");
             // The User is signed out.  Notify the app of the sign out event.
             if (DatabaseRegistrar.instance.isRegistered(name)) {
                 DatabaseRegistrar.instance.unregisterHandler(name);
