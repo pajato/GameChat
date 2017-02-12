@@ -41,7 +41,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.SelectableGroupItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.GroupInviteData;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -69,6 +68,7 @@ import static android.app.Activity.RESULT_OK;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
@@ -421,7 +421,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         }
 
         for (Map.Entry<String, Group> entry : GroupManager.instance.groupMap.entrySet()) {
-            result.add(new ListItem(new SelectableGroupItem(entry.getKey())));
+            String name = GroupManager.instance.getGroupName(entry.getKey());
+            result.add(new ListItem(inviteGroup, entry.getKey(), name));
             List<Room> rooms = RoomManager.instance.getRooms(entry.getKey(), true);
             for (Room room : rooms) {
                 if (room.type == COMMON)
