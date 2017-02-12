@@ -231,10 +231,11 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        if (item.text == null || item.text.length() == 0)
-            holder.text.setVisibility(View.GONE);
-        else
-            holder.text.setText(CompatUtils.fromHtml(item.text));
+        if (holder.text != null)
+            if (item.text == null || item.text.length() == 0)
+                holder.text.setVisibility(View.GONE);
+            else
+                holder.text.setText(CompatUtils.fromHtml(item.text));
         setIcon(holder, item);
         holder.itemView.setTag(item);
 
