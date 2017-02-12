@@ -27,8 +27,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.SelectableMemberItem;
-import com.pajato.android.gamechat.common.adapter.SelectableRoomItem;
 import com.pajato.android.gamechat.common.model.Account;
 
 import java.util.ArrayList;
@@ -43,6 +41,8 @@ import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomsHeader;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.
@@ -176,7 +176,8 @@ public enum JoinManager {
                     }
                 }
                 if (!hasMemberRoom)
-                    items.add(new ListItem(new SelectableMemberItem(groupKey, member)));
+                    items.add(new ListItem(selectableMember, groupKey, member.getNickName(),
+                            GroupManager.instance.getGroupName(groupKey), member.url));
             }
         }
 
@@ -203,7 +204,9 @@ public enum JoinManager {
             result.add(new ListItem(roomsHeader, R.string.RoomsAvailableHeaderText));
             for (String roomKey : joinableRoomList) {
                 Room room = RoomManager.instance.roomMap.get(roomKey);
-                result.add(new ListItem(new SelectableRoomItem(room.groupKey, roomKey)));
+                String name = room.name;
+                String text = GroupManager.instance.getGroupName(room.groupKey);
+                result.add(new ListItem(selectableRoom, room.groupKey, roomKey, name, text));
             }
         }
         return result;

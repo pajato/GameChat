@@ -24,17 +24,19 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.common.adapter.UserItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 
 /**
  * Manages the game experience modes: such as playing against a local friend (non-User), the
@@ -103,8 +105,13 @@ public enum PlayModeManager {
         else
             for (String groupKey : account.joinList)
                 for (Account member : MemberManager.instance.getMemberList(groupKey))
-                    if (!member.id.equals(account.id))
-                        result.add(new ListItem(new UserItem(groupKey, member)));
+                    if (!member.id.equals(account.id)) {
+                        String nickName = member.getNickName();
+                        String name = String.format(Locale.US, "%s (%s)", nickName, member.email);
+                        String text = GroupManager.instance.getGroupName(groupKey);
+                        String url = member.url;
+                        result.add(new ListItem(selectUser, groupKey, member.id, name, text, url));
+                    }
         return result;
     }
 

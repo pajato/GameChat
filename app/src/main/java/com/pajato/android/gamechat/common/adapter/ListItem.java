@@ -30,11 +30,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableRoom;
 
 /**
  * Provides a POJO to encapsulate a number of recycler view list items.
@@ -90,18 +86,16 @@ public class ListItem {
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
         resourceHeader ("Resource header with id: {%d}."),
         roomsHeader ("Rooms header with id: {%d}."),
-        selectUser,
-        selectRoom,
-        selectableMember,
-        selectableRoom,
-        inviteGroup,
+        selectUser ("Member item with name {%s}, email: {%s}, and iconUrl {%s}."),
+        selectableMember ("Member item with name {%s}, email: {%s}, and iconUrl {%s}."),
+        selectableRoom ("Selectable room item with name {%s} and text: {%s}."),
+        inviteGroup ("Selectable group item with name {%s}."),
         inviteRoom ("Selectable room item with name {%s} and text: {%s}."),
         inviteCommonRoom ("Common room item with name {%s} and text: {%s}.");
 
         public String format;
 
-        ItemType() {}
-
+        /** Build an instance with a given format string. */
         ItemType(final String format) {
             this.format = format;
         }
@@ -155,11 +149,6 @@ public class ListItem {
     /** The item type, always non-null. */
     public ItemType type;
 
-    // Private instance variables.
-
-    /** A description of the item. */
-    private String mDesc;
-
     // Public constructors.
 
     /** Build an item instance for a group or room item. */
@@ -198,64 +187,28 @@ public class ListItem {
         key = exp.getExperienceKey();
     }
 
-    /** Build an instance for a given room list item. */
-    public ListItem(final ItemType type, final String groupKey, final String roomKey,
+    /** Build an instance for a room and selectable room or member list items. */
+    public ListItem(final ItemType type, final String groupKey, final String key,
                     final String name, final String text, final String iconUrl) {
         this.type = type;
         this.groupKey = groupKey;
-        key = roomKey;
+        this.key = key;
         this.name = name;
-        count = 0;
         this.text = text;
         this.iconUrl = iconUrl;
     }
 
-    /** Build an instance for a given contact list item. */
-    public ListItem(final SelectableMemberItem item) {
-        type = selectableMember;
-        groupKey = item.groupKey;
-        key = item.memberKey;
-        name = item.name;
-        text = item.text;
-        iconUrl = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and iconUrl {%s}.";
-        mDesc = String.format(Locale.US, format, name, email, iconUrl);
-    }
-
     /** Build an instance for a given selectable group. */
-    public ListItem(final SelectableGroupItem item) {
-        type = inviteGroup;
-        groupKey = item.groupKey;
-        key = item.groupKey;
-        name = item.name;
-        text = "";
-        String format = "Selectable group item with name {%s}.";
-        mDesc = String.format(Locale.US, format, name);
+    public ListItem(final ItemType type, final String groupKey, final String name) {
+        this(type, groupKey, groupKey, name, null, null);
         enabled = true;
     }
 
-    /** Build an instance for a given contact list item. */
-    public ListItem(final SelectableRoomItem item) {
-        type = selectableRoom;
-        groupKey = item.groupKey;
-        key = item.roomKey;
-        name = item.name;
-        text = item.text;
-        String format = "Selectable room item with name {%s} and text: {%s}.";
-        mDesc = String.format(Locale.US, format, name, text);
+    /** Build an instance for a selectable room list item. */
+    public ListItem(final ItemType type, final String groupKey, final String roomKey,
+                    final String name, final String text) {
+        this(type, groupKey, roomKey, name, text, null);
         enabled = true;
-    }
-
-    /** Build an instance for a given User item. */
-    public ListItem(@NonNull final UserItem item) {
-        type = selectUser;
-        groupKey = item.groupKey;
-        key = item.memberKey;
-        name = item.name;
-        text = item.text;
-        iconUrl = item.url;
-        String format = "Member item with name {%s}, email: {%s}, and iconUrl {%s}.";
-        mDesc = String.format(Locale.US, format, name, email, iconUrl);
     }
 
     /** Build an instance for a room or common room invitation. */
@@ -283,8 +236,6 @@ public class ListItem {
         // a description of the list item.
         if (type == null)
             return "Uninitialized list item.";
-        if (mDesc != null)
-            return mDesc;
         switch (type) {
             case chatGroup:
                 return String.format(Locale.US, type.format, name, key, count, text);
@@ -308,12 +259,20 @@ public class ListItem {
                 return String.format(Locale.US, type.format, name, key, count, text);
             case inviteCommonRoom:
                 return String.format(Locale.US, type.format, name, text);
+            case inviteGroup:
+                return String.format(Locale.US, type.format, name);
             case inviteRoom:
                 return String.format(Locale.US, type.format, name, text);
             case resourceHeader:
                 return String.format(Locale.US, type.format, nameResourceId);
             case roomsHeader:
                 return String.format(Locale.US, type.format, nameResourceId);
+            case selectableMember:
+                return String.format(Locale.US, type.format, name, email, iconUrl);
+            case selectableRoom:
+                return String.format(Locale.US, type.format, name, text);
+            case selectUser:
+                return String.format(Locale.US, type.format, name, email, iconUrl);
             default:
                 return String.format(Locale.US, "Un-described type: {%s}.", type);
         }

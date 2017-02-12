@@ -146,7 +146,6 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case inviteRoom:
                 case inviteCommonRoom:
                 case inviteGroup:
-                case selectRoom:
                 case selectUser:
                 case selectableMember:
                 case selectableRoom:
