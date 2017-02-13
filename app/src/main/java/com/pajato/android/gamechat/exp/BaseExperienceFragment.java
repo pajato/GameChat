@@ -54,6 +54,7 @@ import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.PlayModeManager.PlayModeType.user;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -268,12 +269,14 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         if (dispatcher.type == null)
             return false;
         switch (type) {
-            case expGroupList:
-            case expRoomList: // A group list does not need an item.
+            case expGroupList:  // A group list does not need an item.
+                return true;
+            case expRoomList:   // A room list needs an item.
+                mItem = new ListItem(expRoom, dispatcher.groupKey);
                 return true;
             case experienceList:
-                // The experiences in a room require both the group and room keys.
-                // Determine if the group is the me group and give it special handling.
+                // The experiences in a room require both the group and room keys.  Determine if the
+                // group is the me group and give it special handling.
                 String groupKey = dispatcher.groupKey;
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String roomKey = meGroupKey != null && meGroupKey.equals(groupKey)

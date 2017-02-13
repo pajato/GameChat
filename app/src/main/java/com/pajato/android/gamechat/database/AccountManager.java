@@ -252,23 +252,25 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Return null or the push key for the "me room" associated with the current account. */
     public String getMeRoomKey() {
         // Ensure that there is an account and a me group profile has been registered.  If not
-        // return null, otherwise return the me room push key.
+        // return null, otherwise return the me room push key which will be the only room in the Me
+        // group's room list.
         if (!hasAccount() || mGroup == null)
             return null;
         return mGroup.roomList.get(0);
     }
 
     /** Return TRUE iff there is a signed in User. */
-    public boolean hasAccount() { return mCurrentAccount != null; }
+    public boolean hasAccount() {
+        return mCurrentAccount != null;
+    }
 
     /** Handle initialization by setting up the Firebase required list of registered classes. */
     public void init(final List<String> classNameList) {
         // Setup the class map that drives enabling and disabling Firebase. Each of these classes
         // must be registered with the app event manager before Firebase can be enabled.  If any are
         // deregistered, Firebase will effectively be disabled.
-        for (String name : classNameList) {
+        for (String name : classNameList)
             mRegistrationClassNameMap.put(name, false);
-        }
     }
 
     /** Return true iff the current user is a restricted/protected user. */
@@ -366,7 +368,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Handle the me group profile change by obtaining the me room push key. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
         // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
-        // watchers and cache all but the me group.  The me group is handled by the account manager.
+        // watchers and cache all but the me group.  The me group is a read-only group and
+        // maintained in the account manager class.
         if (event.key == null || !event.key.equals(getMeGroupKey()))
             return;
         mGroup = event.group;

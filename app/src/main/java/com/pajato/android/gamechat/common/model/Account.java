@@ -85,7 +85,11 @@ import java.util.Map;
     /** The account identifier, the backend push key. */
     public /*final*/ String id;
 
-    /** A list of group or room push keys (depends on context) the account can join. */
+    /**
+     * In an account context, this is a list of group push keys for which the User is a member.
+     *
+     * In a member context, this is a list of room push keys the User has joined.
+     */
     public final List<String> joinList = new ArrayList<>();
 
     /** The modification timestamp. */
