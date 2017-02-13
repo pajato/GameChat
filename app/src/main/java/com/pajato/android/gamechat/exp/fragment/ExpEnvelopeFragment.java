@@ -91,7 +91,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         // The index represents an experience type.  Start the appropriate fragment after
         // dismissing the FAM.
         FabManager.game.dismissMenu(this);
-        DispatchManager.instance.startNextFragment(getActivity(), FragmentType.values()[index]);
+        DispatchManager.instance.chainFragment(getActivity(), FragmentType.values()[index]);
     }
 
     /** Handle a menu item selection. */
