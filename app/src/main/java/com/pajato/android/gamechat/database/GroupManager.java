@@ -202,7 +202,8 @@ public enum GroupManager {
         // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
         String path = GroupManager.instance.getGroupProfilePath(groupKey);
         String name = DBUtils.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            return;
         DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
