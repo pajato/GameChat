@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -59,9 +60,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
-import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -278,36 +279,34 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Remove the current account from the specified group */
-    public void leaveGroup(Group group) {
+    public void leaveGroup(Group group, Fragment fragment) {
         // Start by making sure the account is in the group
         if (!mCurrentAccount.joinMap.keySet().contains(group.key))
             return;
 
-        // For any rooms in the group, delete the account from each room's memberIdList
+        // Put a message in each room in the group, indicating that the current account has left.
+        // Then delete the account from the room's member list.
         for (String roomKey : group.roomList) {
             Room room = RoomManager.instance.getRoomProfile(roomKey);
             List<String> roomMembers = room.getMemberIdList();
             if (roomMembers.contains(mCurrentAccountKey)) {
-                roomMembers.remove(mCurrentAccountKey);
-                room.setMemberIdList(roomMembers);
-                RoomManager.instance.updateRoomProfile(room);
+                String format = fragment.getContext().getString(R.string.HasDepartedMessage);
+                String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+                MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
+                RoomManager.instance.leaveRoom(room);
             }
         }
 
         // Delete corresponding entry from Group's 'members' list in database
-        String path = MemberManager.instance.getMembersPath(group.key, mCurrentAccountKey);
-        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+        MemberManager.instance.removeMember(group.key, mCurrentAccountKey);
 
-        // Delete account from group profile "memberList"
-        List<String> groupMembers = group.memberList;
-        groupMembers.remove(mCurrentAccountKey);
-        group.memberList = groupMembers;
-        GroupManager.instance.updateGroupProfile(group);
+        // Delete account from group profile member list
+        GroupManager.instance.leaveGroup(group);
 
         // Delete group from the account join map - do this last as the database access rules for
         // groups (and their children) depend on there being an entry in the account join map
         mCurrentAccount.joinMap.remove(group.key);
-        AccountManager.instance.updateAccount(mCurrentAccount);
+        updateAccount(mCurrentAccount);
     }
 
     /** Handle an account change by providing an authentication change on a sign in or sign out. */

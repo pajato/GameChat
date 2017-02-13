@@ -192,6 +192,14 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
+    /** Remove a listener for experience changes in the given room */
+    public void removeWatcher(final String groupKey, final String roomKey) {
+        String name = DBUtils.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
+        String path = String.format(Locale.US, EXPERIENCES_PATH, groupKey, roomKey);
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            DatabaseRegistrar.instance.unregisterHandler(name);
+    }
+
     /** Move an experience from one room to another. */
     public void move(@NonNull final Experience experience, final String gKey, final String rKey) {
         //String srcGroupKey = experience.getGroupKey();

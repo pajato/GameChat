@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
@@ -179,10 +180,10 @@ public abstract class BaseChatFragment extends BaseFragment {
                     Group group = GroupManager.instance.getGroupProfile(item.groupKey);
                     if (group != null)
                         if (AccountManager.instance.getCurrentAccountId().equals(group.owner)) {
-                            // TODO: implement this!!
-                            // GroupManager.instance.deleteGroup();
+                            showFutureFeatureMessage(R.string.DeleteGroupMessage);
                         } else {
-                            AccountManager.instance.leaveGroup(group);
+                            AccountManager.instance.leaveGroup(group, this);
+                            DispatchManager.instance.startNextFragment(getActivity(), chat);
                         }
                 }
                 break;

@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -66,7 +67,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
         String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, "no list", event));
+        logEvent(String.format(Locale.US, format, event));
         if (mActive)
             updateAdapterList();
     }
@@ -120,6 +121,13 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             default:
                 break;
         }
+    }
+
+    @Subscribe public void onProfileRoomDelete(final ProfileRoomDeleteEvent event) {
+        String format = "onProfileRoomDelete with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
+        if (mActive)
+            updateAdapterList();
     }
 
     /** Initialize ... */
