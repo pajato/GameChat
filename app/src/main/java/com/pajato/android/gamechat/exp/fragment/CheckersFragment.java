@@ -187,10 +187,9 @@ public class CheckersFragment extends BaseExperienceFragment {
         List<Player> players = getDefaultPlayers(context, playerAccounts);
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
-
         long tStamp = new Date().getTime();
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tStamp));
+        String date = SimpleDateFormat.getDateTimeInstance().format(tStamp);
+        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, date);
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
