@@ -40,7 +40,7 @@ http://www.gnu.org/licenses
         <item name="android:contentDescription">@string/ListItemIconDesc</item>
     </style>
 
-    <style name="ListItemOptionalEndImage">
+    <style name="ListItemOptionalImage">
         <item name="android:layout_width">36dp</item>
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_marginStart">8dp</item>

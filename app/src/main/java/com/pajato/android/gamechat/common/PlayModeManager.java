@@ -100,7 +100,7 @@ public enum PlayModeManager {
     private List<ListItem> getUserItems() {
         List<ListItem> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
-        if (!AccountManager.hasFriends(account))
+        if (!AccountManager.hasSelectableMembers(account))
             // No users exist so create a header stating this.
             result.add(new ListItem(resourceHeader, R.string.NoFriendsFound));
         else

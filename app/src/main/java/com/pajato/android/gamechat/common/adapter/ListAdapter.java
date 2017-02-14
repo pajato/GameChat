@@ -68,8 +68,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     /** Click listener for selection widgets */
     private SelectorClickListener selectorListener = new SelectorClickListener();
 
-    /** Click listener for the optional end icon */
-    private IconCLickListener optIconListener = new IconCLickListener();
+    /** Click listener for the end icon */
+    private IconCLickListener endIconListener = new IconCLickListener();
 
     /** A format string for displaying unhandled cases. */
     private static final String UNHANDLED_FORMAT = "Unhandled item entry type: {%s}.";
@@ -195,12 +195,12 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         return result;
     }
 
-    /** Update the optional icon in the given holder based on the specified item */
-    private void setOptIcon(final ItemListViewHolder holder, final ListItem item) {
+    /** Update the end icon in the given holder based on the specified item */
+    private void setEndIcon(final ItemListViewHolder holder, final ListItem item) {
         switch (item.type) {
             case chatGroup:
             case expGroup:
-                // Set an optional icon ONLY if the group is not the 'me' group (user cannot leave
+                // Set an end icon ONLY if the group is not the 'me' group (user cannot leave
                 // or delete the 'me' group). If the group is owned by this account, set the
                 // delete icon, otherwise set the 'exit group' icon.
                 Group group = GroupManager.instance.getGroupProfile(item.groupKey);
@@ -295,7 +295,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             else
                 holder.text.setText(CompatUtils.fromHtml(item.text));
         setIcon(holder, item);
-        setOptIcon(holder, item);
+        setEndIcon(holder, item);
         holder.itemView.setTag(item);
 
         // Set the new message count field, if necessary.
@@ -338,7 +338,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         }
     }
 
-    /** Provide a handler for clicks on the (optional) icon */
+    /** Provide a handler for clicks on the end icon */
     private class IconCLickListener implements View.OnClickListener {
         public void onClick(View view) {
             // Post the click event to the app
@@ -362,9 +362,9 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             count = (TextView) itemView.findViewById(R.id.Count);
             text = (TextView) itemView.findViewById(R.id.Text);
             icon = (ImageView) itemView.findViewById(R.id.ListItemIcon);
-            optIcon = (ImageView) itemView.findViewById(R.id.optionalEndIcon);
+            optIcon = (ImageView) itemView.findViewById(R.id.endIcon);
             if (optIcon != null) {
-                optIcon.setOnClickListener(optIconListener);
+                optIcon.setOnClickListener(endIconListener);
             }
             setSelectorButton(itemView);
             if (button != null) {
