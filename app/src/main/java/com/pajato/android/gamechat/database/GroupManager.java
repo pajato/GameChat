@@ -205,6 +205,14 @@ public enum GroupManager {
         group.memberList = groupMembers;
         updateGroupProfile(group);
         groupMap.remove(group.key);
+        mGroupToLastNewMessageMap.remove(group.key);
+        // remove the group that is leaving from the date header type to group list map
+        for (ListItem.DateHeaderType dht : mDateHeaderTypeToGroupListMap.keySet()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            for(String groupKey : groupList)
+                if (groupKey.equals(group.key))
+                    groupList.remove(group.key);
+        }
         removeWatcher(group.key);
         AppEventManager.instance.post(new ProfileGroupDeleteEvent(group.key));
     }

@@ -22,7 +22,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Toast;
 
@@ -136,6 +138,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** A flag indicating that Firebase is enabled (registered) or not. */
     private boolean mIsFirebaseEnabled = false;
+
+    /** The repository for any messages needed. */
+    private SparseArray<String> mMessageMap = new SparseArray<>();
 
     /** A map tracking registrations from the key classed that are needed to enable Firebase. */
     private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
@@ -264,13 +269,18 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public boolean hasAccount() { return mCurrentAccount != null; }
 
     /** Handle initialization by setting up the Firebase required list of registered classes. */
-    public void init(final List<String> classNameList) {
+    public void init(final AppCompatActivity context, final List<String> classNameList) {
         // Setup the class map that drives enabling and disabling Firebase. Each of these classes
         // must be registered with the app event manager before Firebase can be enabled.  If any are
         // deregistered, Firebase will effectively be disabled.
         for (String name : classNameList) {
             mRegistrationClassNameMap.put(name, false);
         }
+
+        // Save any messages necessary later
+        mMessageMap.clear();
+        mMessageMap.put(R.string.HasDepartedMessage, context.getString(R.string.HasDepartedMessage));
+
     }
 
     /** Return true iff the current user is a restricted/protected user. */
@@ -279,7 +289,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Remove the current account from the specified group */
-    public void leaveGroup(Group group, Fragment fragment) {
+    public void leaveGroup(Group group) {
         // Start by making sure the account is in the group
         if (!mCurrentAccount.joinMap.keySet().contains(group.key))
             return;
@@ -290,7 +300,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             Room room = RoomManager.instance.getRoomProfile(roomKey);
             List<String> roomMembers = room.getMemberIdList();
             if (roomMembers.contains(mCurrentAccountKey)) {
-                String format = fragment.getContext().getString(R.string.HasDepartedMessage);
+                String format = mMessageMap.get(R.string.HasDepartedMessage);
                 String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
                 MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
                 RoomManager.instance.leaveRoom(room);

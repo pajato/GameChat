@@ -140,13 +140,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             updateAdapterList();
     }
 
-    @Subscribe public void onProfileRoomDelete(final ProfileRoomDeleteEvent event) {
-        String format = "onProfileRoomDelete with event {%s}";
-        logEvent(String.format(Locale.US, format, event));
-        if (mActive)
-            updateAdapterList();
-    }
-
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Use the super class to set up the list of groups and establish the FAB and it's menu.

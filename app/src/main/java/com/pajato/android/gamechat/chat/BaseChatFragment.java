@@ -18,8 +18,11 @@
 package com.pajato.android.gamechat.chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -177,13 +180,26 @@ public abstract class BaseChatFragment extends BaseFragment {
                 ListItem item = findItemDetails(view);
                 if (item != null) {
                     Log.i(TAG, "Found useful list item: " + item.toString());
-                    Group group = GroupManager.instance.getGroupProfile(item.groupKey);
+                    final Group group = GroupManager.instance.getGroupProfile(item.groupKey);
                     if (group != null)
                         if (AccountManager.instance.getCurrentAccountId().equals(group.owner)) {
                             showFutureFeatureMessage(R.string.DeleteGroupMessage);
                         } else {
-                            AccountManager.instance.leaveGroup(group, this);
-                            DispatchManager.instance.startNextFragment(getActivity(), chat);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            new AlertDialog.Builder(getActivity())
+                                    .setTitle("Leave Group?")
+                                    .setMessage(String.format("Do you want to leave %s?", group.name))
+                                    .setNegativeButton(android.R.string.cancel,
+                                            null) // dismisses by default
+                                    .setPositiveButton(android.R.string.ok,
+                                            new DialogInterface.OnClickListener() {
+                                        @Override public void onClick(DialogInterface dialog, int id) {
+                                            AccountManager.instance.leaveGroup(group);
+                                        }
+                                    })
+                                    .create()
+                                    .show();
+//                            DispatchManager.instance.startNextFragment(getActivity(), chat);
                         }
                 }
                 break;
