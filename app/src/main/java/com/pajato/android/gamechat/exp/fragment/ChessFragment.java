@@ -32,9 +32,10 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.NotificationManager;
-import com.pajato.android.gamechat.exp.model.Chess;
-import com.pajato.android.gamechat.exp.model.ChessBoard;
-import com.pajato.android.gamechat.exp.model.ChessHelper;
+import com.pajato.android.gamechat.exp.chess.Chess;
+import com.pajato.android.gamechat.exp.chess.ChessBoard;
+import com.pajato.android.gamechat.exp.chess.ChessHelper;
+import com.pajato.android.gamechat.exp.chess.ChessPiece;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -57,9 +58,10 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.cha
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
-import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
-import static com.pajato.android.gamechat.exp.model.Chess.PRIMARY_WINS;
-import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.active;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.pending;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.primary_wins;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.secondary_wins;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -209,8 +211,7 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     /** Return a possibly null list of chess player information. */
-    @Override
-    protected List<Account> getPlayers(final Dispatcher dispatcher) {
+    @Override protected List<Account> getPlayers(final Dispatcher dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -222,7 +223,8 @@ public class ChessFragment extends BaseExperienceFragment {
         // Determine the second account, if any, based on the room.
         String key = dispatcher.roomKey;
         Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        if (room == null) return players;
+        if (room == null)
+            return players;
 
         switch (type) {
             //case MEMBER:
@@ -267,25 +269,24 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /** Handle a new game by resetting the data model. */
     private void handleNewGame() {
-        // Ensure that the data model exists and is valid.
+        // Ensure that the data model exists and is valid.  If not, abort with an error, otherwise
+        // reset the data model, update the database and clear the notification data.
         Chess model = getModel();
         if (model == null) {
             Log.e(TAG, "Null Chess data model.", new Throwable());
             return;
         }
-
-        // Reset the data model, update the database and clear the notification manager one-shot.
         model.board = null;
-        model.state = ACTIVE;
+        model.state = active;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Process a resumption by testing and waiting for the experience. */
     private void resume() {
-        if (getModel() == null) {
+        if (getModel() == null)
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
-        } else {
+        else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
             updateUiFromExperience();
@@ -347,13 +348,13 @@ public class ChessFragment extends BaseExperienceFragment {
         // Generate a message string appropriate for a win or tie, or nothing if the game is active.
         String message = null;
         switch (model.state) {
-            case Chess.PRIMARY_WINS:
-            case Chess.SECONDARY_WINS:
+            case primary_wins:
+            case secondary_wins:
                 String name = model.getWinningPlayerName();
                 String format = getString(R.string.WinMessageFormat);
                 message = String.format(Locale.getDefault(), format, name);
                 break;
-            case Chess.TIE:
+            case tie:
                 message = getString(R.string.StalemateMessage);
                 break;
             default:
@@ -361,7 +362,8 @@ public class ChessFragment extends BaseExperienceFragment {
                 break;
         }
         // Determine if the game has ended (winner or time). Abort if not.
-        if (message == null) return;
+        if (message == null)
+            return;
 
         // Update the UI to celebrate the winner or a tie and update the database game state to
         // pending.
@@ -369,7 +371,7 @@ public class ChessFragment extends BaseExperienceFragment {
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
-        model.state = Chess.PENDING;
+        model.state = pending;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
@@ -399,18 +401,18 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     /**
-     * Set up an image button which will be a cell in the game board
-     * @param index index into the board for the cell we want to add
-     * @param sideSize size to use for width and height of the new item to add to the board
-     * @param board a ChessBoard object representing the game board (0->63) the piece type at that location.
+     * Set up a text view cell on the game board at a given board index.
+     *
+     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
+     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
+     * @param board A standard checkerboard containing 64 squares indexed by 0 to 63.
      */
-    private TextView makeBoardButton(final int index, final int sideSize, final ChessBoard board) {
-        TextView currentTile = new TextView(getContext());
-
+    private TextView makeBoardButton(final int index, final int cellSize, final ChessBoard board) {
         // Set up the gridlayout params, so that each cell is functionally identical.
+        TextView currentTile = new TextView(getContext());
         GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-        param.height = sideSize;
-        param.width = sideSize;
+        param.height = cellSize;
+        param.width = cellSize;
         param.rightMargin = 0;
         param.topMargin = 0;
         param.setGravity(Gravity.CENTER);
@@ -420,10 +422,10 @@ public class ChessFragment extends BaseExperienceFragment {
         // Set up the tile-specific information.
         currentTile.setLayoutParams(param);
         currentTile.setTag(String.valueOf(index));
-        float sp = sideSize / getResources().getDisplayMetrics().scaledDensity;
+        float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
         currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
         currentTile.setGravity(Gravity.CENTER);
-        currentTile.setText(" ");
+        currentTile.setText("");
         handleTileBackground(index, currentTile);
 
         // Handle the chess starting piece positions.
@@ -516,7 +518,8 @@ public class ChessFragment extends BaseExperienceFragment {
     private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
         // If the game is over, we don't need to do anything, so return.  Otherwise find the
         // possible moves for the selected piece.
-        if (checkFinished(board)) return false;
+        if (checkFinished(board))
+            return false;
         boolean hasChanged = false;
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         List<Integer> possibleMoves = new ArrayList<>();
@@ -567,7 +570,7 @@ public class ChessFragment extends BaseExperienceFragment {
         if (!board.containsSecondaryKing()) {
             NotificationManager.instance.notifyGameDone(this, "Game Over! Player 1 Wins!");
             if(model != null) {
-                model.state = PRIMARY_WINS;
+                model.state = primary_wins;
                 model.setWinCount();
             }
             return true;
@@ -575,7 +578,7 @@ public class ChessFragment extends BaseExperienceFragment {
         if (!board.containsPrimaryKing()) {
             NotificationManager.instance.notifyGameDone(this, "Game Over! Player 2 Wins!");
             if(model != null) {
-                model.state = SECONDARY_WINS;
+                model.state = secondary_wins;
                 model.setWinCount();
             }
             return true;
