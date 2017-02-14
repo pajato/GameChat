@@ -1,4 +1,21 @@
-package com.pajato.android.gamechat.exp.fragment;
+/*
+ * Copyright (C) 2017 Pajato Technologies, Inc.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
+package com.pajato.android.gamechat.exp.chess;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -24,16 +41,16 @@ public class ChessPiece {
     private static final String UC_KING = "\u2654";
 
     // Unicode value for queen
-    static final String UC_QUEEN = "\u2655";
+    public static final String UC_QUEEN = "\u2655";
 
     // Unicode value for bishop
-    static final String UC_BISHOP = "\u2657";
+    public static final String UC_BISHOP = "\u2657";
 
     // Unicode value for knight
-    static final String UC_KNIGHT = "\u2658";
+    public static final String UC_KNIGHT = "\u2658";
 
     // Unicode value for rook
-    static final String UC_ROOK = "\u2656";
+    public static final String UC_ROOK = "\u2656";
 
     // Unicode value for pawn
     private static final String UC_PAWN = "\u2659";
@@ -48,12 +65,12 @@ public class ChessPiece {
     @SuppressWarnings("unused") public ChessPiece() {}
 
     /** Constructor requires a piece and team specified, provided as constants in the class. */
-    public ChessPiece(final PieceType piece, final ChessTeam team) {
-        this.pieceType = piece;
-        this.teamId = team;
+    public ChessPiece(final PieceType pieceType, final ChessTeam teamId) {
+        this.pieceType = pieceType;
+        this.teamId = teamId;
     }
 
-    boolean isTeamPiece(final PieceType p, final ChessTeam t) {
+    public boolean isTeamPiece(final PieceType p, final ChessTeam t) {
         return (this.getPiece().equals(p) && this.getTeam().equals(t));
     }
 
@@ -82,7 +99,7 @@ public class ChessPiece {
      * @return a drawable ID that corresponds to the parameter.
      */
     @Exclude
-    static String getUnicodeText(final PieceType pieceType) {
+    public static String getUnicodeText(final PieceType pieceType) {
         String ucText;
         switch(pieceType) {
             case KING: ucText = UC_KING;
