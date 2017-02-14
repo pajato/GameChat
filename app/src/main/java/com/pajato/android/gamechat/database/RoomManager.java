@@ -121,10 +121,11 @@ public enum RoomManager {
         return rooms;
     }
 
-    /** Get the data as a set of room items for a given group key. */
+    /** Get the data as a set of joined room items for a given group key. */
     public List<ListItem> getListItemData(final String groupKey) {
         // Generate a list of items to render in the chat group list by extracting the items based
         // on the date header type ordering.
+        String accountId = AccountManager.instance.getCurrentAccountId();
         List<ListItem> result = new ArrayList<>();
         Map<String, Map<String, Message>> roomMap;
         for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
@@ -135,6 +136,8 @@ public enum RoomManager {
                 roomMap = MessageManager.instance.messageMap.get(groupKey);
                 for (String key : roomMap.keySet()) {
                     Room room = RoomManager.instance.getRoomProfile(key);
+                    if (room == null || !room.getMemberIdList().contains(accountId))
+                        continue;
                     Map<String, Integer> countMap = new HashMap<>();
                     DBUtils.getUnseenMessageCount(room.groupKey, countMap);
                     int count = countMap.containsKey(room.key) ? countMap.get(room.key) : 0;

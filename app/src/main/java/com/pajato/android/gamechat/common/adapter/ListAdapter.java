@@ -35,9 +35,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.main.CompatUtils;
@@ -46,6 +48,8 @@ import com.pajato.android.gamechat.main.NavigationManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages or experiences
@@ -203,13 +207,36 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 if (group == null) {
                     String format = "Found null group profile for group %s";
                     Log.e(TAG, String.format(format, item.groupKey));
-                    return;
+                    break;
                 }
-                if (group.owner.equals(AccountManager.instance.getCurrentAccountId())) {
+                // No icon for 'me' group
+                if (group.key.equals(AccountManager.instance.getMeGroupKey()))
+                    break;
+                // Set leave or delete icon
+                holder.optIcon.setTag(item);
+                if (group.owner.equals(AccountManager.instance.getCurrentAccountId()))
                     holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
-                } else {
+                else
                     holder.optIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
+                break;
+            case chatRoom:
+            case expRoom:
+                Room room = RoomManager.instance.getRoomProfile(item.roomKey);
+                if (room == null) {
+                    String format = "Found null room profile for room %s";
+                    Log.e(TAG, String.format(format, item.roomKey));
+                    break;
                 }
+                // No icon for 'me' room
+                if (room.type == ME)
+                    break;
+                // Set leave or delete icon
+                holder.optIcon.setTag(item);
+                if (room.owner.equals(AccountManager.instance.getCurrentAccountId()))
+                    holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
+                else
+                    holder.optIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
+                break;
             default:
                 // ignore other types
                 break;
