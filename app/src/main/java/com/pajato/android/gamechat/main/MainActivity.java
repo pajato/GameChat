@@ -150,7 +150,7 @@ public class MainActivity extends BaseActivity
                 String format = getString(R.string.JoinedGroupsMessage);
                 message = String.format(Locale.US, format, event.groupName);
             }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -365,7 +365,7 @@ public class MainActivity extends BaseActivity
         list.add(this.getClass().getName());
         list.add(ChatEnvelopeFragment.class.getName());
         list.add(ExpEnvelopeFragment.class.getName());
-        AccountManager.instance.init(list);
+        AccountManager.instance.init(this, list);
         CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 
         // Finish initializing the important manager modules.

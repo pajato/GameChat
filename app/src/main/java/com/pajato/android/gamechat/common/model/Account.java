@@ -34,10 +34,10 @@ import java.util.Map;
  * FirebaseUser) is the source for the base level information for an Account: identifier, email
  * address, full name and photo URL.
  *
- * In the GameChat account context, the class provides a list (named 'joinList') of group
+ * In the GameChat account context, the class provides a map (named 'joinMap') of group
  * identifiers for which the account holder is a member.
  *
- * In the GameChat group member context, the class provides a list ('joinList') of room identifiers
+ * In the GameChat group member context, the class provides a list ('joinMap') of room identifiers
  * which the member holder has joined.  In this context, the email address and the FirebaseUser
  * provided identifier are and will remain identical to the the values provided by the FirebaseUser
  * object they come from.  The full name (display name) and the photo url may be changed at will.
@@ -86,11 +86,11 @@ import java.util.Map;
     public /*final*/ String id;
 
     /**
-     * In an account context, this is a list of group push keys for which the User is a member.
-     *
-     * In a member context, this is a list of room push keys the User has joined.
+     * In an account context, this is a map of group push keys for which the User is a member.
+     * In a member context, this is a map of room push keys the User has joined. The value is
+     * always 'true' for now (this is a placeholder to help avoid use of lists in Firebase.
      */
-    public final List<String> joinList = new ArrayList<>();
+    public final Map<String, Boolean> joinMap = new HashMap<>();
 
     /** The modification timestamp. */
     public long modTime;
@@ -157,7 +157,7 @@ import java.util.Map;
         result.put("chaperone", chaperone);
         result.put("protectedUsers", protectedUsers);
         result.put("groupKey", groupKey);
-        result.put("joinList", joinList);
+        result.put("joinMap", joinMap);
         result.put("id", id);
         result.put("modTime", modTime);
         result.put("nickname", nickname);

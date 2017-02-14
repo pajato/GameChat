@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MemberChangeHandler;
@@ -106,26 +107,51 @@ public enum MemberManager {
         // Update the member in the local caches, creating the caches as necessary and ensure that
         // the event payload is well formed.  Abort if not, otherwise cache the member account.
         Map<String, Account> map = memberMap.get(event.member.groupKey);
-        if (map == null) map = new HashMap<>();
+        if (map == null)
+            map = new HashMap<>();
         String id = event.member != null ? event.member.id : null;
-        if (id == null || event.member.groupKey == null) return;
+        if (id == null || event.member.groupKey == null)
+            return;
         map.put(event.member.id, event.member);
         memberMap.put(event.member.groupKey, map);
 
         // Determine if the payload is for the current account holder.  If so, set a message and
         // experience watcher on the joined rooms.
         if (event.member.id.equals(AccountManager.instance.getCurrentAccountId()))
-            for (String roomKey : event.member.joinList) {
+            for (String roomKey : event.member.joinMap.keySet()) {
                 RoomManager.instance.setWatcher(event.member.groupKey, roomKey);
                 MessageManager.instance.setWatcher(event.member.groupKey, roomKey);
                 ExperienceManager.instance.setWatcher(event.member.groupKey, roomKey);
             }
     }
 
+    /** Remove a member from a group and remove any watcher on that member */
+    public void removeMember(final String groupKey, final String memberKey) {
+        // Remove the member from the database
+        String path = MemberManager.instance.getMembersPath(groupKey, memberKey);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+
+        // Remove the member from the group in the member map
+        Account member = memberMap.get(groupKey).remove(memberKey);
+        removeWatcher(groupKey, memberKey);
+        for (String roomKey : member.joinMap.keySet()) {
+            RoomManager.instance.removeWatcher(roomKey);
+            MessageManager.instance.removeWatcher(roomKey);
+            ExperienceManager.instance.removeWatcher(roomKey);
+        }
+    }
+
+    /** Remove the watcher for the specified member in the specified group */
+    public void removeWatcher(final String groupKey, final String memberKey) {
+        String tag = String.format(Locale.US, "%s,%s", groupKey, memberKey);
+        String name = DBUtils.getHandlerName(MEMBER_CHANGE_HANDLER, tag);
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            DatabaseRegistrar.instance.unregisterHandler(name);
+    }
+
     /** Setup a listener for member changes in the given account. */
     public void setWatcher(final String groupKey, final String memberKey) {
-        // Obtain a room and set watchers on all the experiences in that room.
-        // Determine if a handle already exists. Abort if so.  Register a new handler if not.
+        // Obtain a member; if a handler exists for it, abort. Otherwise, register a new handler.
         String tag = String.format(Locale.US, "%s,%s", groupKey, memberKey);
         String name = DBUtils.getHandlerName(MEMBER_CHANGE_HANDLER, tag);
         if (DatabaseRegistrar.instance.isRegistered(name)) return;

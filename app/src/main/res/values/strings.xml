@@ -1,9 +1,11 @@
 <resources>
     <string name="CreateRestrictedUserTitle">Create Protected User</string>
+    <string name="DeleteGroupMessage">Delete Group</string>
     <string name="GridRoomIconRed">Red room icon</string>
     <string name="GridRoomIconBlue">Blue room icon</string>
     <string name="GridRoomIconGray">Gray room icon</string>
     <string name="GridRoomIconGreen">Green room icon</string>
+    <string name="HasDepartedMessage">%s has left</string>
     <string name="HasJoinedMessage">%s has joined</string>
     <string name="InviteTitle">Invite Friends to GameChat</string>
     <string name="InviteMessage">You should check out GameChat</string>

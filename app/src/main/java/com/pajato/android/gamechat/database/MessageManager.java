@@ -159,11 +159,20 @@ public enum MessageManager {
         messageMap.clear();
     }
 
+    /** Remove the listener for messages in the specified room */
+    public void removeWatcher(final String roomKey) {
+        String name = DBUtils.getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
+        if (DatabaseRegistrar.instance.isRegistered(name)) {
+            DatabaseRegistrar.instance.unregisterHandler(name);
+        }
+    }
+
     /** Setup a Firebase child event listener for the messages in the given joined room. */
     public void setWatcher(final String groupKey, final String roomKey) {
         // There is an active account.  Register it.
         String name = DBUtils.getHandlerName(MESSAGE_LIST_CHANGE_HANDLER, roomKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            return;
         DatabaseEventHandler handler = new MessageListChangeHandler(name, groupKey, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }

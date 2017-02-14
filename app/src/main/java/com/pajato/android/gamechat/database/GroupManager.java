@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -136,7 +137,7 @@ public enum GroupManager {
         if (item != null && item.groupKey != null)
             result.add(item.groupKey);
         if (result.isEmpty() && account != null)
-            result.addAll(account.joinList);
+            result.addAll(account.joinMap.keySet());
         return result;
     }
 
@@ -161,7 +162,7 @@ public enum GroupManager {
             // joined.
             if (event.account.groupKey != null)
                 setWatcher(event.account.groupKey);
-            for (String groupKey : event.account.joinList)
+            for (String groupKey : event.account.joinMap.keySet())
                 setWatcher(groupKey);
             return;
         }
@@ -194,6 +195,32 @@ public enum GroupManager {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
         updateGroupHeaders(event.message);
         AppEventManager.instance.post(new ChatListChangeEvent());
+    }
+
+    /** The current account is leaving the specified group */
+    public void leaveGroup(Group group) {
+        List<String> groupMembers = group.memberList;
+        groupMembers.remove(AccountManager.instance.getCurrentAccountId());
+        group.memberList = groupMembers;
+        updateGroupProfile(group);
+        groupMap.remove(group.key);
+        mGroupToLastNewMessageMap.remove(group.key);
+        // remove the group that is leaving from the date header type to group list map
+        for (ListItem.DateHeaderType dht : mDateHeaderTypeToGroupListMap.keySet()) {
+            List<String> groupList = mDateHeaderTypeToGroupListMap.get(dht);
+            for(String groupKey : groupList)
+                if (groupKey.equals(group.key))
+                    groupList.remove(group.key);
+        }
+        removeWatcher(group.key);
+        AppEventManager.instance.post(new ProfileGroupDeleteEvent(group.key));
+    }
+
+    /** Remove the database listener for the specified group profile */
+    public void removeWatcher(final String groupKey) {
+        String name = DBUtils.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            DatabaseRegistrar.instance.unregisterHandler(name);
     }
 
     /** Setup a database listener for the group profile. */

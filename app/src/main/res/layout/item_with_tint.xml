@@ -9,16 +9,18 @@
             android:tint="@color/colorPrimaryDark"
             android:contentDescription="@string/ListItemIconDesc" />
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView style="@style/ListItemTitle" android:id="@+id/Name"
+                    android:layout_weight="1"
                     tools:text="General"/>
                 <TextView style="@style/ListItemCount" android:id="@+id/Count"
                     tools:text="3 new"/>
@@ -26,6 +28,9 @@
             <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
                 tools:text="TheShovel, ConnorTheWhiz, GrandPop" />
         </LinearLayout>
+        <ImageView style="@style/ListItemOptionalEndImage" android:id="@+id/optionalEndIcon"
+            android:tint="@color/colorPrimaryDark"
+            android:contentDescription="@string/ListItemLeaveIconDesc" />
     </LinearLayout>
     <View style="@style/ListItemFooter" />
 </LinearLayout>

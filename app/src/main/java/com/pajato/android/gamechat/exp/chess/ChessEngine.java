@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 /**
  * Provides a class to support playing chess alone, against another User and against the computer.
  *
- * Termiology:
+ * Terminology:
  *
  * Active: refers to the player (or one of his/her pieces) whose turn it is to make a move.
  * Passive: refers to the player (or one of his/her pieces) who has just made a move.

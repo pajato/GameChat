@@ -30,6 +30,7 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.createGroupChat;
+import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
@@ -65,7 +66,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
         String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, "no list", event));
+        logEvent(String.format(Locale.US, format, event));
         if (mActive)
             updateAdapterList();
     }
@@ -86,7 +87,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createGroupChat, null);
+                DispatchManager.instance.chainFragment(getActivity(), createChatGroup, null);
                 break;
             case R.string.CreateRoomMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), createRoom, mItem);
@@ -119,6 +120,13 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             default:
                 break;
         }
+    }
+
+    @Subscribe public void onProfileRoomDelete(final ProfileRoomDeleteEvent event) {
+        String format = "onProfileRoomDelete with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
+        if (mActive)
+            updateAdapterList();
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */

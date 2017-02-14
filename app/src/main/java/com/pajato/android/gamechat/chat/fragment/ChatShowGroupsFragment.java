@@ -32,6 +32,7 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.createGroupChat;
+import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
@@ -79,7 +80,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createGroupChat, null);
+                DispatchManager.instance.chainFragment(getActivity(), createChatGroup, null);
                 break;
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, null);
@@ -98,7 +99,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 AccountManager.instance.signIn(getContext());
                 break;
             default:
-                // ...
                 break;
         }
     }
@@ -127,7 +127,14 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         // Determine if this fragment cares about chat list changes.  If so, update the list
         // content.
         String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, "no list", event));
+        logEvent(String.format(Locale.US, format, event));
+        if (mActive)
+            updateAdapterList();
+    }
+
+    @Subscribe public void onProfileGroupDelete(final ProfileGroupDeleteEvent event) {
+        String format = "onProfileGroupDelete with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
         if (mActive)
             updateAdapterList();
     }
@@ -171,7 +178,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         Account account = AccountManager.instance.getCurrentAccount();
         if (account == null)
             return R.string.app_name;
-        if (account.joinList.size() > 0)
+        if (account.joinMap.size() > 0)
             return R.string.GroupsToolbarTitle;
         return R.string.GroupMeToolbarTitle;
     }
