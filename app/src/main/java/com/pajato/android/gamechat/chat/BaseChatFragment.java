@@ -187,8 +187,8 @@ public abstract class BaseChatFragment extends BaseFragment {
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                             new AlertDialog.Builder(getActivity())
-                                    .setTitle("Leave Group?")
-                                    .setMessage(String.format("Do you want to leave %s?", group.name))
+                                    .setTitle(getString(R.string.LeaveGroupTitle))
+                                    .setMessage(String.format(getString(R.string.LeaveGroupMessage), group.name))
                                     .setNegativeButton(android.R.string.cancel,
                                             null) // dismisses by default
                                     .setPositiveButton(android.R.string.ok,
