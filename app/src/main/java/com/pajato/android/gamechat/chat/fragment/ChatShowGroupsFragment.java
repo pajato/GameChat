@@ -33,7 +33,6 @@ import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
-import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.PaneManager;
 

@@ -36,7 +36,6 @@ import com.bumptech.glide.Glide;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
-import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -47,8 +46,6 @@ import com.pajato.android.gamechat.main.NavigationManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 
 /**
  * Provide a recycler view adapter to handle showing a list of rooms with messages or experiences

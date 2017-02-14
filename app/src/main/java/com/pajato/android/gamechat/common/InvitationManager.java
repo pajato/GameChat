@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static android.R.attr.key;
 import static android.app.Activity.RESULT_OK;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;

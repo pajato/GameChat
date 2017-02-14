@@ -172,7 +172,7 @@ public enum RoomManager {
         updateRoomProfile(room);
         // Remove the room from the room map and remove the watcher
         roomMap.remove(room.key);
-        removeWatcher(room.groupKey, room.key);
+        removeWatcher(room.key);
         AppEventManager.instance.post(new ProfileRoomDeleteEvent(room.key));
     }
 
@@ -190,13 +190,13 @@ public enum RoomManager {
     }
 
     /** Remove database listener for the room profile and experience profiles in the room */
-    public void removeWatcher(final String groupKey, final String roomKey) {
+    public void removeWatcher(final String roomKey) {
         // Determine if the room has a profile change watcher.  If so, remove it.
         String name = DBUtils.getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
         // Remove handler if one is registered
         if (DatabaseRegistrar.instance.isRegistered((name)))
             DatabaseRegistrar.instance.unregisterHandler(name);
-        ExperienceManager.instance.removeWatcher(groupKey, roomKey);
+        ExperienceManager.instance.removeWatcher(roomKey);
     }
 
     /** Setup database listeners for the room profile and the experience profiles in the room. */

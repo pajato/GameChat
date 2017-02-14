@@ -25,11 +25,9 @@ import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MemberChangeHandler;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
-import com.pajato.android.gamechat.exp.Experience;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -137,9 +135,9 @@ public enum MemberManager {
         Account member = memberMap.get(groupKey).remove(memberKey);
         removeWatcher(groupKey, memberKey);
         for (String roomKey : member.joinMap.keySet()) {
-            RoomManager.instance.removeWatcher(groupKey, roomKey);
+            RoomManager.instance.removeWatcher(roomKey);
             MessageManager.instance.removeWatcher(roomKey);
-            ExperienceManager.instance.removeWatcher(groupKey, roomKey);
+            ExperienceManager.instance.removeWatcher(roomKey);
         }
     }
 
