@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.v4.view.ViewPager;
-import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -130,13 +129,6 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             updateAdapterList();
     }
 
-    /** Initialize ... */
-    @Override public void onStart() {
-        super.onStart();
-        ToolbarManager.instance.init(this, mItem, game, search);
-        FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
-    }
-
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the group name only; ensure that the FAB is visible, the
@@ -145,8 +137,16 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, CHAT_ROOM_FAM_KEY);
-        FabManager.chat.setVisibility(this, View.VISIBLE);
     }
+
+    /** Initialize ... */
+    @Override public void onStart() {
+        super.onStart();
+        ToolbarManager.instance.init(this, mItem, game, search);
+        FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
+    }
+
+    // Private instance methods.
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getRoomMenu() {

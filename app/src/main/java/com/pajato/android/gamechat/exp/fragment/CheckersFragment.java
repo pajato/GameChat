@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -30,6 +29,7 @@ import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Checkers;
@@ -52,7 +52,6 @@ import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorLightGray;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
-import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
@@ -96,7 +95,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     // Private instance variables.
 
     /** Visual layout of checkers board objects */
-    private GridLayout mGrid;
+    private Checkerboard mBoard = new Checkerboard();
 
     /** A click handler for the board tiles. */
     private View.OnClickListener mTileClickHandler = new TileClickHandler();
@@ -168,11 +167,11 @@ public class CheckersFragment extends BaseExperienceFragment {
     }
 
     @Override public void onStart() {
-        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (mGrid).
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
-        mGrid = (GridLayout) mLayout.findViewById(board);
+        mBoard.init(this); // = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons and create a tile click handler.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
@@ -188,10 +187,9 @@ public class CheckersFragment extends BaseExperienceFragment {
         List<Player> players = getDefaultPlayers(context, playerAccounts);
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
-
         long tStamp = new Date().getTime();
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tStamp));
+        String date = SimpleDateFormat.getDateTimeInstance().format(tStamp);
+        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, date);
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
@@ -468,7 +466,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         String buttonTag = String.valueOf(index);
         currentTile.setTag(buttonTag);
         float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
-        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.8));
+        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
         currentTile.setTypeface(null, Typeface.BOLD);
         currentTile.setGravity(Gravity.CENTER);
 
@@ -528,28 +526,19 @@ public class CheckersFragment extends BaseExperienceFragment {
         if (winner != null)
             winner.setText("");
 
-        // The total dp size of components other than the checker board.
-        final int TOOLBAR_PLUS_CONTROLS_HEIGHT = getPixels(132);
-
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        float pxHeight = displayMetrics.heightPixels;
-        float pxWidth = displayMetrics.widthPixels;
-        int boardHeight = Math.round(pxHeight) - TOOLBAR_PLUS_CONTROLS_HEIGHT;
-        int width = Math.round(pxWidth);
-        int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) - getPixels(32);
-        int cellSize = Math.min(boardWidth, boardHeight) / 8;
-
         // Go through and populate the GridLayout / board.
-        mGrid.removeAllViews();
+        mBoard.reset();
+        int cellSize = mBoard.getCellSize();
         for (int i = 0; i < 64; i++) {
             String pieceType = "";
-            if(!isNewBoard) {
+            if (!isNewBoard) {
                 pieceType = model.board.get(String.valueOf(i));
-                if(pieceType == null) pieceType = "";
+                if (pieceType == null)
+                    pieceType = "";
             }
             TextView currentTile = makeBoardButton(i, cellSize, model.board, pieceType);
             currentTile.setOnClickListener(mTileClickHandler);
-            mGrid.addView(currentTile);
+            mBoard.addCell(currentTile);
         }
 
         handleTurnChange(false);
@@ -606,8 +595,7 @@ public class CheckersFragment extends BaseExperienceFragment {
                         }
                     }
                     // Clear the highlight off of all possible positions.
-                    mGrid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
-                            .getColor(getContext(), android.R.color.white));
+                    mBoard.setHighlight(getContext(), possiblePosition, android.R.color.white);
                 }
             }
             mHighlightedTile = null;
@@ -620,7 +608,7 @@ public class CheckersFragment extends BaseExperienceFragment {
             id = android.R.color.holo_red_light;
             for(int position : possibleMoves)
                 if (position != -1 && board.get(String.valueOf(position)) == null)
-                    mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(ctx, id));
+                    mBoard.setHighlight(ctx, position, id);
         }
 
         mIsHighlighted = !mIsHighlighted;
@@ -800,7 +788,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         }
 
         // Find the new tile and give it a piece.
-        TextView newLoc = (TextView) mGrid.getChildAt(indexClicked);
+        TextView newLoc = mBoard.getCell(indexClicked);
         if(board.get(indexClickedStr).equals(PRIMARY_KING) ||
                 board.get(indexClickedStr).equals(SECONDARY_KING)) {
             newLoc.setText(KING_UNICODE);
@@ -821,7 +809,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         boolean finishedJumping = true;
         if(capturesPiece) {
             int pieceCapturedIndex = (indexClicked + highlightedIndex) / 2;
-            TextView capturedTile = (TextView) mGrid.getChildAt(pieceCapturedIndex);
+            TextView capturedTile = mBoard.getCell(pieceCapturedIndex);
             capturedTile.setText(" " );
             String key = (String) capturedTile.getTag();
             if (board.containsKey(key))

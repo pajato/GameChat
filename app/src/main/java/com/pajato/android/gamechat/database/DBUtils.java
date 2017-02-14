@@ -93,7 +93,7 @@ public enum DBUtils {
         return result;
     }
 
-    /** Return the number of unseen messages and update the given map. */
+    /** Return the number of unseen messages in a given group and update the given map. */
     public static int getUnseenMessageCount(@NonNull final String groupKey,
                                             @NonNull final Map<String, Integer> map) {
         int result = 0;

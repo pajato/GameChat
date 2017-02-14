@@ -164,7 +164,13 @@ public class ListItem {
     }
 
     /** Build a header instance for a given resource id. */
-    public ListItem(final ItemType type, int resId) {
+    public ListItem(final ItemType type, final String groupKey) {
+        this.type = type;
+        this.groupKey = groupKey;
+    }
+
+    /** Build a header instance for a given resource id. */
+    public ListItem(final ItemType type, final int resId) {
         this.type = type;
         nameResourceId = resId;
     }

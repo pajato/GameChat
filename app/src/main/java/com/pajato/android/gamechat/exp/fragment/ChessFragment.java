@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -30,11 +29,13 @@ import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.NotificationManager;
-import com.pajato.android.gamechat.exp.model.Chess;
-import com.pajato.android.gamechat.exp.model.ChessBoard;
-import com.pajato.android.gamechat.exp.model.ChessHelper;
+import com.pajato.android.gamechat.exp.chess.Chess;
+import com.pajato.android.gamechat.exp.chess.ChessBoard;
+import com.pajato.android.gamechat.exp.chess.ChessHelper;
+import com.pajato.android.gamechat.exp.chess.ChessPiece;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -50,7 +51,6 @@ import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
-import static com.pajato.android.gamechat.R.id.board;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
@@ -58,9 +58,10 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.cha
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
-import static com.pajato.android.gamechat.exp.model.Chess.ACTIVE;
-import static com.pajato.android.gamechat.exp.model.Chess.PRIMARY_WINS;
-import static com.pajato.android.gamechat.exp.model.Chess.SECONDARY_WINS;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.active;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.pending;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.primary_wins;
+import static com.pajato.android.gamechat.exp.chess.Chess.State.secondary_wins;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -84,7 +85,7 @@ public class ChessFragment extends BaseExperienceFragment {
     private boolean mIsHighlighted = false;
 
     /** Visual layout of chess board objects */
-    private GridLayout mGrid;
+    private Checkerboard mBoard = new Checkerboard();
 
     /** A click handler for the board tiles. */
     private View.OnClickListener mTileClickHandler = new TileClickHandler();
@@ -144,11 +145,11 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     @Override public void onStart() {
-        // Setup the FAM, add a new game item to the overflow menu, and obtain the board (mGrid).
+        // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
-        mGrid = (GridLayout) mLayout.findViewById(board);
+        mBoard.init(this);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -210,8 +211,7 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     /** Return a possibly null list of chess player information. */
-    @Override
-    protected List<Account> getPlayers(final Dispatcher dispatcher) {
+    @Override protected List<Account> getPlayers(final Dispatcher dispatcher) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -223,7 +223,8 @@ public class ChessFragment extends BaseExperienceFragment {
         // Determine the second account, if any, based on the room.
         String key = dispatcher.roomKey;
         Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        if (room == null) return players;
+        if (room == null)
+            return players;
 
         switch (type) {
             //case MEMBER:
@@ -268,25 +269,24 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /** Handle a new game by resetting the data model. */
     private void handleNewGame() {
-        // Ensure that the data model exists and is valid.
+        // Ensure that the data model exists and is valid.  If not, abort with an error, otherwise
+        // reset the data model, update the database and clear the notification data.
         Chess model = getModel();
         if (model == null) {
             Log.e(TAG, "Null Chess data model.", new Throwable());
             return;
         }
-
-        // Reset the data model, update the database and clear the notification manager one-shot.
         model.board = null;
-        model.state = ACTIVE;
+        model.state = active;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Process a resumption by testing and waiting for the experience. */
     private void resume() {
-        if (getModel() == null) {
+        if (getModel() == null)
             // Disable the layout and startup the spinner.
             mLayout.setVisibility(View.GONE);
-        } else {
+        else {
             // Start the game and update the views using the current state of the experience.
             mLayout.setVisibility(View.VISIBLE);
             updateUiFromExperience();
@@ -348,13 +348,13 @@ public class ChessFragment extends BaseExperienceFragment {
         // Generate a message string appropriate for a win or tie, or nothing if the game is active.
         String message = null;
         switch (model.state) {
-            case Chess.PRIMARY_WINS:
-            case Chess.SECONDARY_WINS:
+            case primary_wins:
+            case secondary_wins:
                 String name = model.getWinningPlayerName();
                 String format = getString(R.string.WinMessageFormat);
                 message = String.format(Locale.getDefault(), format, name);
                 break;
-            case Chess.TIE:
+            case tie:
                 message = getString(R.string.StalemateMessage);
                 break;
             default:
@@ -362,7 +362,8 @@ public class ChessFragment extends BaseExperienceFragment {
                 break;
         }
         // Determine if the game has ended (winner or time). Abort if not.
-        if (message == null) return;
+        if (message == null)
+            return;
 
         // Update the UI to celebrate the winner or a tie and update the database game state to
         // pending.
@@ -370,14 +371,15 @@ public class ChessFragment extends BaseExperienceFragment {
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
-        model.state = Chess.PENDING;
+        model.state = pending;
         ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final Chess model) {
         // Determine if the model has any pieces to put on the board.  If not reset the board.
-        if (model.board == null) startGame();
+        if (model.board == null)
+            startGame();
    }
 
     /** Update the UI using the current experience state from the database. */
@@ -399,18 +401,18 @@ public class ChessFragment extends BaseExperienceFragment {
     }
 
     /**
-     * Set up an image button which will be a cell in the game board
-     * @param index index into the board for the cell we want to add
-     * @param sideSize size to use for width and height of the new item to add to the board
-     * @param board a ChessBoard object representing the game board (0->63) the piece type at that location.
+     * Set up a text view cell on the game board at a given board index.
+     *
+     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
+     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
+     * @param board A standard checkerboard containing 64 squares indexed by 0 to 63.
      */
-    private TextView makeBoardButton(final int index, final int sideSize, final ChessBoard board) {
-        TextView currentTile = new TextView(getContext());
-
+    private TextView makeBoardButton(final int index, final int cellSize, final ChessBoard board) {
         // Set up the gridlayout params, so that each cell is functionally identical.
+        TextView currentTile = new TextView(getContext());
         GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-        param.height = sideSize;
-        param.width = sideSize;
+        param.height = cellSize;
+        param.width = cellSize;
         param.rightMargin = 0;
         param.topMargin = 0;
         param.setGravity(Gravity.CENTER);
@@ -420,10 +422,10 @@ public class ChessFragment extends BaseExperienceFragment {
         // Set up the tile-specific information.
         currentTile.setLayoutParams(param);
         currentTile.setTag(String.valueOf(index));
-        float sp = sideSize / getResources().getDisplayMetrics().scaledDensity;
-        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.8));
+        float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
+        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
         currentTile.setGravity(Gravity.CENTER);
-        currentTile.setText(" ");
+        currentTile.setText("");
         handleTileBackground(index, currentTile);
 
         // Handle the chess starting piece positions.
@@ -479,11 +481,12 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Handle a new chess game by resetting the board on a new game or a database reload. */
     private void startGame() {
         // Initialize the new board state.
-        mGrid.removeAllViews();
         Chess model = (Chess) mExperience;
-        if (model.board == null) model.board = new ChessBoard();
+        if (model.board == null)
+            model.board = new ChessBoard();
         TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        if (winner != null) winner.setText("");
+        if (winner != null)
+            winner.setText("");
 
         // Reset the castling booleans.
         model.primaryQueenSideRookHasMoved = false;
@@ -493,26 +496,15 @@ public class ChessFragment extends BaseExperienceFragment {
         model.secondaryKingSideRookHasMoved = false;
         model.secondaryKingHasMoved = false;
 
-        // The total dp size of components other than the checker board.
-        final int TOOLBAR_PLUS_CONTROLS_HEIGHT = getPixels(132);
-
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        float pxHeight = displayMetrics.heightPixels;
-        float pxWidth = displayMetrics.widthPixels;
-        int boardHeight = Math.round(pxHeight) - TOOLBAR_PLUS_CONTROLS_HEIGHT;
-        int width = Math.round(pxWidth);
-        int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) - getPixels(32);
-        int cellSize = Math.min(boardWidth, boardHeight) / 8;
-
         // Go through and populate the GridLayout / board.
+        mBoard.reset();
+        int cellSize = mBoard.getCellSize();
         for (int i = 0; i < 64; i++) {
             TextView currentTile = makeBoardButton(i, cellSize, model.board);
             currentTile.setOnClickListener(mTileClickHandler);
-            mGrid.addView(currentTile);
+            mBoard.addCell(currentTile);
         }
-
         handleTurnChange(false);
-
     }
 
     /**
@@ -526,7 +518,8 @@ public class ChessFragment extends BaseExperienceFragment {
     private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
         // If the game is over, we don't need to do anything, so return.  Otherwise find the
         // possible moves for the selected piece.
-        if (checkFinished(board)) return false;
+        if (checkFinished(board))
+            return false;
         boolean hasChanged = false;
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
         List<Integer> possibleMoves = new ArrayList<>();
@@ -544,7 +537,7 @@ public class ChessFragment extends BaseExperienceFragment {
                     handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
                     hasChanged = true;
                 }
-                handleTileBackground(possiblePosition, (TextView) mGrid.getChildAt(possiblePosition));
+                handleTileBackground(possiblePosition, mBoard.getCell(possiblePosition));
             }
             mHighlightedTile = null;
 
@@ -552,10 +545,8 @@ public class ChessFragment extends BaseExperienceFragment {
         } else {
             mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
                     android.R.color.holo_red_dark));
-            for(int possiblePosition : possibleMoves) {
-                mGrid.getChildAt(possiblePosition).setBackgroundColor(ContextCompat
-                        .getColor(getContext(), android.R.color.holo_red_light));
-            }
+            for(int possiblePosition : possibleMoves)
+                mBoard.setHighlight(getContext(), possiblePosition, android.R.color.holo_red_light);
         }
 
         mIsHighlighted = !mIsHighlighted;
@@ -579,7 +570,7 @@ public class ChessFragment extends BaseExperienceFragment {
         if (!board.containsSecondaryKing()) {
             NotificationManager.instance.notifyGameDone(this, "Game Over! Player 1 Wins!");
             if(model != null) {
-                model.state = PRIMARY_WINS;
+                model.state = primary_wins;
                 model.setWinCount();
             }
             return true;
@@ -587,7 +578,7 @@ public class ChessFragment extends BaseExperienceFragment {
         if (!board.containsPrimaryKing()) {
             NotificationManager.instance.notifyGameDone(this, "Game Over! Player 2 Wins!");
             if(model != null) {
-                model.state = SECONDARY_WINS;
+                model.state = secondary_wins;
                 model.setWinCount();
             }
             return true;
@@ -682,7 +673,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Handle capturing pieces.
         if (capturesPiece) {
-            TextView capturedTile = (TextView) mGrid.getChildAt(indexClicked);
+            TextView capturedTile = mBoard.getCell(indexClicked);
             capturedTile.setText(" ");
             board.delete(highlightedIndex);
         }
@@ -697,7 +688,7 @@ public class ChessFragment extends BaseExperienceFragment {
             board.add(indexClicked, highlightedPiece);
 
             // Find the new tile and give it a piece.
-            TextView newLocation = (TextView) mGrid.getChildAt(indexClicked);
+            TextView newLocation = mBoard.getCell(indexClicked);
             newLocation.setText(ChessPiece.getUnicodeText(board.getPieceType(indexClicked)));
 
             // Color the piece according to the player.
@@ -727,7 +718,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
             // Put a rook at the new rook position.
             board.add(rookFutureIndex, ChessPiece.PieceType.ROOK, player);
-            TextView futureRook = (TextView) mGrid.getChildAt(rookFutureIndex);
+            TextView futureRook = mBoard.getCell(rookFutureIndex);
 
             // Handle the player-dependent pieces of the castle (color)
             futureRook.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
@@ -738,7 +729,7 @@ public class ChessFragment extends BaseExperienceFragment {
             }
 
             // Get rid of the old rook.
-            TextView previousRook = (TextView) mGrid.getChildAt(rookPrevIndex);
+            TextView previousRook = mBoard.getCell(rookPrevIndex);
             previousRook.setText(" ");
             board.delete(rookPrevIndex);
         }
@@ -899,7 +890,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
             ChessBoard board = ((Chess) mExperience).board;
             board.add(position, pieceType, team);
-            TextView promotedPieceTile = (TextView) mGrid.getChildAt(position);
+            TextView promotedPieceTile = mBoard.getCell(position);
             promotedPieceTile.setText(ChessPiece.getUnicodeText(pieceType));
             int color = team == ChessPiece.ChessTeam.PRIMARY ? R.color.colorPrimary: R.color.colorAccent;
             promotedPieceTile.setTextColor(ContextCompat.getColor(getContext(), color));

@@ -147,7 +147,7 @@ public enum GroupManager {
         // group rooms) or more than one group (a set of groups).
         switch (groupMap.size()) {
             case 0:
-                return getNoGroupsItemList();
+                return getMeGroupItemList();
             default:
                 return getGroupsItemList();
         }
@@ -175,20 +175,19 @@ public enum GroupManager {
 
     /** Handle a joined group profile change by updating the map and ensuring watchers are set. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
-        // watchers and cache all but the me group.  The me group is handled by the account manager.
+        // Ensure that the group profile key and the group profile exist.  Abort if neither does,
+        // otherwise set watchers on all the room profiles in the group and cache the group profile
+        // as long as the group is not the me group.  The me group profile is handled by the account
+        // manager.
         String groupKey = event.key;
         if (groupKey == null || event.group == null)
             return;
         for (String key : event.group.memberList)
             MemberManager.instance.setWatcher(groupKey, key);
-        if (!groupKey.equals(AccountManager.instance.getMeGroupKey())) {
+        if (!groupKey.equals(AccountManager.instance.getMeGroupKey()))
             groupMap.put(event.key, event.group);
-            // if this isn't the me group, add watchers for all the rooms
-            for (String roomKey : event.group.roomList) {
-                RoomManager.instance.setWatcher(groupKey, roomKey);
-            }
-        }
+        for (String roomKey : event.group.roomList)
+            RoomManager.instance.setWatcher(groupKey, roomKey);
     }
 
     /** Handle a message change event by adding the message into the correct room list.  */
@@ -229,7 +228,8 @@ public enum GroupManager {
         // Determine if the group has a profile change watcher.  If so, abort, if not, then set one.
         String path = GroupManager.instance.getGroupProfilePath(groupKey);
         String name = DBUtils.getHandlerName(GROUP_PROFILE_CHANGE_HANDLER, groupKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            return;
         DatabaseEventHandler handler = new ProfileGroupChangeHandler(name, path, groupKey);
         DatabaseRegistrar.instance.registerHandler(handler);
     }
@@ -252,6 +252,13 @@ public enum GroupManager {
         result.add(new ListItem(chatGroup, groupKey, null, name, count, text));
     }
 
+    /** Add a group list item for the given kind (chat message or game experience) and group. */
+    private void addItem(@NonNull final List<ListItem> result, @NonNull final Room room) {
+        Map<String, Integer> unseenCountMap = new HashMap<>();
+        int count = DBUtils.getUnseenMessageCount(room.groupKey, unseenCountMap);
+        result.add(new ListItem(chatRoom, room.groupKey, room.key, room.name, count, null));
+    }
+
     /** Return a list of chat group or room items. */
     private List<ListItem> getGroupsItemList() {
         // Generate a list of items to render in the chat group list by extracting the items based
@@ -265,6 +272,11 @@ public enum GroupManager {
                 for (String groupKey : groupList)
                     if(!(groupKey.equals(AccountManager.instance.getMeGroupKey())))
                         addItem(result, groupKey);
+                    else {
+                        Room room = RoomManager.instance.getMeRoom();
+                        if (room != null)
+                            addItem(result, room);
+                    }
             }
         }
         return result;
@@ -307,29 +319,19 @@ public enum GroupManager {
     }
 
     /** Return an empty list of items or the items from the me group. */
-    private List<ListItem> getNoGroupsItemList() {
-        // Determine if the me room exists.  If not, about with an empty list, otherwise return a
+    private List<ListItem> getMeGroupItemList() {
+        // Determine if the me room exists.  If not, return with an empty list, otherwise return a
         // list of items from the me room.
         List<ListItem> result = new ArrayList<>();
         result.add(new ListItem(resourceHeader, R.string.NoGroupsHeaderText));
         Room room = RoomManager.instance.getMeRoom();
-        if (room == null)
-            return result;
-
-        // Collect and return a list containing a single list item from the me room.
-        Map<String, Integer> unseenCountMap = new HashMap<>();
-        int count = DBUtils.getUnseenMessageCount(room.groupKey, unseenCountMap);
-        result.add(new ListItem(chatRoom, room.groupKey, room.key, room.name, count, null));
+        if (room != null)
+            addItem(result, room);
         return result;
     }
 
     /** Update the headers used to bracket the messages in the main list. */
     private void updateGroupHeaders(final Message message) {
-        // Filter out me room messages.
-        Account account = AccountManager.instance.getCurrentAccount();
-        if (message.groupKey.equals(account.groupKey))
-            return;
-
         // Add the new message to be the last message emanating from
         // the given group.  Then rebuild the lists of date header type to group list associations.
         mGroupToLastNewMessageMap.put(message.groupKey, message);

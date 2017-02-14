@@ -136,9 +136,9 @@ public enum RoomManager {
                 for (String key : roomMap.keySet()) {
                     Room room = RoomManager.instance.getRoomProfile(key);
                     Map<String, Integer> countMap = new HashMap<>();
-                    int count = DBUtils.getUnseenExperienceCount(key, countMap);
-                    String text = DBUtils.getText(countMap);
-                    result.add(new ListItem(chatRoom, groupKey, room.key, room.name, count, text));
+                    int count = DBUtils.getUnseenMessageCount(room.groupKey, countMap);
+                    count = countMap.containsKey(room.key) ? countMap.get(room.key) : 0;
+                    result.add(new ListItem(chatRoom, groupKey, room.key, room.name, count, null));
                 }
             }
         }
@@ -177,8 +177,7 @@ public enum RoomManager {
     }
 
     /** Handle a account change event by setting up or clearing variables. */
-    @Subscribe
-    public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
+    @Subscribe public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
         // Determine if a User has been authenticated.  If so, do nothing, otherwise clear the
         // message list for the logged out User.
         if (event.account != null) return;

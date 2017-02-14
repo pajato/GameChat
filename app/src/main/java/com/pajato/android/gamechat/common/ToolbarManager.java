@@ -245,6 +245,8 @@ public enum ToolbarManager {
         if (item == null)
             return null;
         switch (item.type) {
+            case chatGroup:
+                return fragment.getString(R.string.RoomsToolbarTitle);
             case expList:
                 // Determine if the group is the me group and give it special handling.
                 String meGroupKey = AccountManager.instance.getMeGroupKey();

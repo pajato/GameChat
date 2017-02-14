@@ -86,8 +86,9 @@ import java.util.Map;
     public /*final*/ String id;
 
     /**
-     * A map of group or room push keys (depending on the context) that the account has joined.  The
-     * value is always 'true' for now (this is a placeholder to help avoid use of lists in Firebase.
+     * In an account context, this is a map of group push keys for which the User is a member.
+     * In a member context, this is a map of room push keys the User has joined. The value is
+     * always 'true' for now (this is a placeholder to help avoid use of lists in Firebase.
      */
     public final Map<String, Boolean> joinMap = new HashMap<>();
 

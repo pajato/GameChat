@@ -1,9 +1,10 @@
-package com.pajato.android.gamechat.exp.model;
+package com.pajato.android.gamechat.exp.chess;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.Player;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +19,8 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
  */
 @IgnoreExtraProperties public class Chess implements Experience {
 
-    // State values.
-    public final static int ACTIVE = 0;
-    public final static int PRIMARY_WINS = 1;
-    public final static int SECONDARY_WINS = 2;
-    public final static int TIE = 3;
-    public final static int PENDING = 4;
+    /** The set of state constants for a chess game. */
+    public enum State {active, check, pending, primary_wins, secondary_wins, tie}
 
     /**
      * A map of board position (0->63) to piece object.
@@ -58,7 +55,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     public String roomKey;
 
     /** The game state. */
-    public int state;
+    public State state;
 
     /** The current turn. */
     public boolean turn;
@@ -108,7 +105,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
-        state = ACTIVE;
+        state = State.active;
         turn = true;
         type = chessET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
@@ -122,8 +119,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude
-    @Override public Map<String, Object> toMap() {
+    @Exclude @Override public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("board", board);
         result.put("createTime", createTime);
@@ -135,7 +131,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         result.put("owner", owner);
         result.put("players", players);
         result.put("roomKey", roomKey);
-        result.put("state", state);
+        result.put("state", state.name());
         result.put("turn", turn);
         result.put("type", type);
         result.put("unseenList", unseenList);
@@ -182,6 +178,11 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
+    /** Set the state given a string value. */
+    public void setState(final String value) {
+        state = value != null ? State.valueOf(value) : null;
+    }
+
     /** Return the unseen list. */
     @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 
@@ -208,10 +209,10 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     /** Update the win count based on the current state. */
     @Exclude @Override public void setWinCount() {
         switch (state) {
-            case PRIMARY_WINS:
+            case primary_wins:
                 players.get(0).winCount++;
                 break;
-            case SECONDARY_WINS:
+            case secondary_wins:
                 players.get(1).winCount++;
                 break;
             default:
@@ -228,15 +229,15 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     /** Return the winning player's name or null if the game is active or ended in a tie. */
     @Exclude public String getWinningPlayerName() {
         switch (state) {
-            case PRIMARY_WINS:
+            case primary_wins:
                 // Assumes 'primary' player is at index 0
                 return players.get(0).name;
-            case SECONDARY_WINS:
+            case secondary_wins:
                 // Assumes 'primary' player is at index 1
                 return players.get(1).name;
-            case ACTIVE:
-            case TIE:
-            case PENDING:
+            case active:
+            case tie:
+            case pending:
             default:
                 return null;
         }

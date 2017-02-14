@@ -49,11 +49,6 @@ public enum DatabaseRegistrar {
 
     // Public instance methods.
 
-    /** Return a handler registered with the given name, null if one is not found. */
-    public DatabaseEventHandler getHandler(final String name) {
-        return mHandlerMap.get(name);
-    }
-
     /** Return TRUE iff the a handler with the given name is registered. */
     public boolean isRegistered(String name) {
         return mHandlerMap.containsKey(name);
@@ -88,7 +83,7 @@ public enum DatabaseRegistrar {
         // Walk the set of registered handlers to remove them.  Leave them cached for possible reuse.
         DatabaseReference database;
         DatabaseEventHandler handler;
-        Log.d(TAG, "Unregistering all handlers.");
+        Log.d(TAG, "Unregister all handlers.");
         for (String name : mHandlerMap.keySet()) {
             handler = mHandlerMap.get(name);
             database = FirebaseDatabase.getInstance().getReference(handler.path);
@@ -100,7 +95,7 @@ public enum DatabaseRegistrar {
     /** Unregister a named listener. */
     public void unregisterHandler(final String name) {
         // Determine if there is a handler registered by the given name.
-        Log.d(TAG, String.format(Locale.US, "Unregistering handler with name {%s}.", name));
+        Log.d(TAG, String.format(Locale.US, "Unregister handler with name {%s}.", name));
         DatabaseEventHandler handler = mHandlerMap.get(name);
         if (handler != null) {
             // There is.  Remove it as a listener but keep it cached for possible reuse.
