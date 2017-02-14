@@ -211,7 +211,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Determine if the specified account belongs to any groups which have members */
-    public static boolean hasFriends(Account account) {
+    public static boolean hasSelectableMembers(Account account) {
         if (account == null)
             return false;
         if (account.joinMap.size() == 0)
