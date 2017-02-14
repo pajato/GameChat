@@ -136,8 +136,8 @@ public enum RoomManager {
                 for (String key : roomMap.keySet()) {
                     Room room = RoomManager.instance.getRoomProfile(key);
                     Map<String, Integer> countMap = new HashMap<>();
-                    int count = DBUtils.getUnseenMessageCount(room.groupKey, countMap);
-                    count = countMap.containsKey(room.key) ? countMap.get(room.key) : 0;
+                    DBUtils.getUnseenMessageCount(room.groupKey, countMap);
+                    int count = countMap.containsKey(room.key) ? countMap.get(room.key) : 0;
                     result.add(new ListItem(chatRoom, groupKey, room.key, room.name, count, null));
                 }
             }
