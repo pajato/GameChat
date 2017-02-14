@@ -49,6 +49,8 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
+import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -209,7 +211,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Determine if the specified account belongs to any groups which have members */
-    public static boolean hasFriends(Account account) {
+    public static boolean hasSelectableMembers(Account account) {
         if (account == null)
             return false;
         if (account.joinMap.size() == 0)
@@ -317,6 +319,30 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // groups (and their children) depend on there being an entry in the account join map
         mCurrentAccount.joinMap.remove(group.key);
         updateAccount(mCurrentAccount);
+
+        AppEventManager.instance.post(new ProfileGroupDeleteEvent(group.key));
+    }
+
+    /** Remove the current group from the specified room */
+    public void leaveRoom(Room room) {
+        if (!room.getMemberIdList().contains(mCurrentAccountKey))
+            return;
+        // The account has joined the room, so now un-join it. Start by putting a message in the
+        // room indicating the account has departed.
+        String format = mMessageMap.get(R.string.HasDepartedMessage);
+        String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+        MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
+        RoomManager.instance.leaveRoom(room);
+
+        // Remove the room from the group member joinMap
+        Account member = MemberManager.instance.getMember(room.groupKey);
+        if (member != null) {
+            member.joinMap.remove(room.key);
+            MemberManager.instance.updateMember(member);
+        }
+
+        AppEventManager.instance.post(new ProfileRoomDeleteEvent(room.key));
+
     }
 
     /** Handle an account change by providing an authentication change on a sign in or sign out. */

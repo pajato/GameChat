@@ -167,6 +167,8 @@ public enum FabManager {
 
     /** Ensure that the FAB is being shown. */
     public void show(@NonNull final Fragment fragment) {
+        if (fragment instanceof BaseFragment && !((BaseFragment) fragment).mActive)
+            return;
         View layout = getFragmentLayout(fragment);
         if (layout == null) return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);

@@ -127,10 +127,6 @@ public enum MemberManager {
 
     /** Remove a member from a group and remove any watcher on that member */
     public void removeMember(final String groupKey, final String memberKey) {
-        // Remove the member from the database
-        String path = MemberManager.instance.getMembersPath(groupKey, memberKey);
-        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
-
         // Remove the member from the group in the member map
         Account member = memberMap.get(groupKey).remove(memberKey);
         removeWatcher(groupKey, memberKey);
@@ -139,6 +135,10 @@ public enum MemberManager {
             MessageManager.instance.removeWatcher(roomKey);
             ExperienceManager.instance.removeWatcher(roomKey);
         }
+
+        // Remove the member from the database
+        String path = MemberManager.instance.getMembersPath(groupKey, memberKey);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
     }
 
     /** Remove the watcher for the specified member in the specified group */

@@ -213,7 +213,6 @@ public enum GroupManager {
                     groupList.remove(group.key);
         }
         removeWatcher(group.key);
-        AppEventManager.instance.post(new ProfileGroupDeleteEvent(group.key));
     }
 
     /** Remove the database listener for the specified group profile */
@@ -288,6 +287,8 @@ public enum GroupManager {
         StringBuilder textBuilder = new StringBuilder();
         for (String roomKey : roomCountMap.keySet()) {
             Room room = RoomManager.instance.getRoomProfile(roomKey);
+            if (room == null)
+                continue;
             if (textBuilder.length() != 0)
                 textBuilder.append(", ");
             if (roomCountMap.get(roomKey) > 0)
