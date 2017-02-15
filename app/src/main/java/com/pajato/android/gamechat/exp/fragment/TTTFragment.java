@@ -334,7 +334,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
         return menu;
     }
