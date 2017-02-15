@@ -177,6 +177,14 @@ public enum MessageManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
+    /** Update a message on the database. */
+    public void updateMessage(Message message) {
+        String groupKey = message.groupKey;
+        String roomKey = message.roomKey;
+        String path = String.format(Locale.US, MESSAGE_PATH, groupKey, roomKey, message.key);
+        DBUtils.updateChildren(path, message.toMap());
+    }
+
     // Private instance methods.
 
     /** Return the date header type most closely associated with the given message timestamp. */
@@ -217,7 +225,6 @@ public enum MessageManager {
                 result.add(new ListItem(ItemType.message, groupKey, roomKey, name, text, url));
             }
         }
-
         return result;
     }
 

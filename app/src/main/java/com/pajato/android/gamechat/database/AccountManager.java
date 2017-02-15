@@ -276,7 +276,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     public void init(final AppCompatActivity context, final List<String> classNameList) {
         // Setup the class map that drives enabling and disabling Firebase. Each of these classes
         // must be registered with the app event manager before Firebase can be enabled.  If any are
-        // deregistered, Firebase will effectively be disabled.
+        // unregistered, Firebase will effectively be disabled.
         for (String name : classNameList)
             mRegistrationClassNameMap.put(name, false);
 
@@ -358,14 +358,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
         } else {
-            // Detect a change to the account.  If found, set watchers on the joined groups.
+            // Detect a change to the account.  If found, set watchers on the me group and the
+            // joined groups.
             if (event.account != null)
                 for (String key : event.account.joinMap.keySet())
                     GroupManager.instance.setWatcher(key);
         }
 
         // Check for protected user data and update the account if there are any.
-        if(event.account != null) {
+        if (event.account != null) {
             DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
                     .child(String.format(AccountManager.PROTECTED_PATH, mCurrentAccount.id));
 
@@ -436,9 +437,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Handle the me group profile change by obtaining the me room push key. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // Ensure that the group profile key and the group exist.  Abort if not, otherwise set
-        // watchers and cache all but the me group.  The me group is a read-only group and
-        // maintained in the account manager class.
+        // Ensure that the event group profile key and group exist.  Abort if not, otherwise set
+        // watchers on and cache the me group.
         if (event.key == null || !event.key.equals(getMeGroupKey()))
             return;
         mGroup = event.group;
@@ -459,7 +459,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             if (!value) {
                 // If the account manager is currently listening for account changes, make it stop.
                 if (mIsFirebaseEnabled) {
-                    Log.d(TAG, "Unregistering the AccountManager from Firebase.");
+                    Log.d(TAG, "Unregister the AccountManager from Firebase.");
                     FirebaseAuth.getInstance().removeAuthStateListener(this);
                     mIsFirebaseEnabled = false;
                 }
