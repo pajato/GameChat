@@ -102,7 +102,7 @@ public enum PlayModeManager {
         Account account = AccountManager.instance.getCurrentAccount();
         if (!AccountManager.hasSelectableMembers(account))
             // No users exist so create a header stating this.
-            result.add(new ListItem(resourceHeader, R.string.NoFriendsFound));
+            result.add(new ListItem(resourceHeader, R.string.NoUsersFound));
         else
             for (Map.Entry<String, Boolean> entry : account.joinMap.entrySet()) {
                 String groupKey = entry.getKey();

@@ -26,11 +26,14 @@ import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
@@ -63,6 +66,12 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
             default:
                 break;
         }
+    }
+    @Subscribe public void onExperienceDelete(final ExperienceDeleteEvent event) {
+        String format = "onExperienceDelete with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
+        if (mActive)
+            updateAdapterList();
     }
 
     /** Handle a menu item selection. */

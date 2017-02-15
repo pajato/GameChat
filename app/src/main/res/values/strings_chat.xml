@@ -11,12 +11,14 @@
     <string name="ChatSignedOutMessageText">GameChat is much more fun when you can chat with your family and friends.</string>
     <string name="ChatTitle">Chat</string>
     <string name="DefaultRoomName">Common</string>
+    <string name="DeleteConfirmMessage">Do you want to delete %s?</string>
+    <string name="DeleteExperienceTitle">Delete Experience?</string>
     <string name="FutureFeature">is a future feature. Volunteer by sending feedback using the Help &amp; Feedback menu item.</string>
     <string name="Group">Group</string>
     <string name="GroupsToolbarTitle">Groups with Messages</string>
     <string name="GroupMeToolbarTitle">My Chat Room</string>
-    <string name="LeaveGroupTitle">Leave Group?</string>
     <string name="LeaveConfirmMessage">Do you want to leave %s?</string>
+    <string name="LeaveGroupTitle">Leave Group?</string>
     <string name="LeaveRoomTitle">Leave Room?</string>
     <string name="ListItemIconDesc">The list icon.</string>
     <string name="ListItemLeaveIconDesc">The leave (exit) icon.</string>
