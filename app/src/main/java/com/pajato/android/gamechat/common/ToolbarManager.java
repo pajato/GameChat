@@ -36,6 +36,7 @@ import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import static android.view.Menu.NONE;
+import static com.pajato.android.gamechat.common.FragmentType.messageList;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -248,6 +249,7 @@ public enum ToolbarManager {
             case chatGroup:
                 return fragment.getString(R.string.RoomsToolbarTitle);
             case expList:
+            case chatRoom:
                 // Determine if the group is the me group and give it special handling.
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 if (meGroupKey != null && meGroupKey.equals(item.groupKey))

@@ -76,7 +76,7 @@ import java.util.Map;
     /** Build a default Message using all the parameters. */
     public Message(final String key, final String owner, final String name, final String url,
                    final long createTime, final String text, final int type,
-                   final List<String> unreadList) {
+                   final List<String> unseenList) {
         this.createTime = createTime;
         this.key = key;
         this.modTime = 0;
@@ -85,7 +85,7 @@ import java.util.Map;
         this.text = text;
         this.type = type;
         this.url = url;
-        this.unseenList = unreadList;
+        this.unseenList = unseenList;
     }
 
     /** Provide a default map for a Firebase create/update. */

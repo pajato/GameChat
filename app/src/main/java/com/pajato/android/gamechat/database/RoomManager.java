@@ -207,7 +207,8 @@ public enum RoomManager {
         // Determine if the room has a profile change watcher.  If so, abort, if not, then set one.
         String path = getRoomProfilePath(groupKey, roomKey);
         String name = DBUtils.getHandlerName(ROOM_PROFILE_LIST_CHANGE_HANDLER, roomKey);
-        if (DatabaseRegistrar.instance.isRegistered(name)) return;
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            return;
         DatabaseEventHandler handler = new ProfileRoomChangeHandler(name, path, roomKey);
         DatabaseRegistrar.instance.registerHandler(handler);
         ExperienceManager.instance.setWatcher(groupKey, roomKey);

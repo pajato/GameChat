@@ -28,19 +28,19 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
@@ -145,10 +145,8 @@ public abstract class BaseChatFragment extends BaseFragment {
                 String groupKey = dispatcher.groupKey;
                 String roomKey = dispatcher.roomKey;
                 String name = RoomManager.instance.getRoomName(roomKey);
-                Map<String, Integer> countMap = new HashMap<>();
-                int count = DBUtils.getUnseenMessageCount(groupKey, countMap);
-                String text = DBUtils.getText(countMap);
-                mItem = new ListItem(chatRoom, groupKey, roomKey, name, count, text);
+                markMessagesSeen(groupKey, roomKey);
+                mItem = new ListItem(chatRoom, groupKey, roomKey, name, 0, null);
                 return true;
             case createRoom:
             case joinRoom:
@@ -160,6 +158,19 @@ public abstract class BaseChatFragment extends BaseFragment {
             default:
                 return false;
         }
+    }
+
+    /** Ensure that all the messages in a given room are marked as seen by the account holder. */
+    private void markMessagesSeen(@NonNull final String groupKey, @NonNull final String roomKey) {
+        List<Message> list = MessageManager.instance.getMessageList(groupKey, roomKey);
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        if (list == null || list.size() == 0 || accountId == null)
+            return;
+        for (Message message : list)
+            if (message.unseenList.contains(accountId)) {
+                message.unseenList.remove(accountId);
+                MessageManager.instance.updateMessage(message);
+            }
     }
 
     /** Process a click event by either toggling the FAB or handling a list item click. */

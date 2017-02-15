@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -136,13 +137,16 @@ public class MessageListChangeHandler extends DatabaseEventHandler implements Ch
     /** Process the change by updating the database list and notifying the app. */
     private void process(final DataSnapshot snapshot, final int type) {
         // Abort if the data snapshot does not exist.
-        if (!snapshot.exists()) return;
+        if (!snapshot.exists())
+            return;
 
-        // A snapshot exists.  Extract the message and determine if it has been handled already.  If
-        // not, then case on the change type and notify the app.
+        // A snapshot exists.  Extract the message, update field values, and determine if the
+        // message has been handled already.  If not, handle the change type and notify the app.
         Message message = snapshot.getValue(Message.class);
         message.groupKey = mGroupKey;
         message.roomKey = mRoomKey;
+        if (message.unseenList == null)
+            message.unseenList = new ArrayList<>();
         Map<String, Message> messageMap = getMessageMap();
         switch (type) {
             case NEW:

@@ -67,6 +67,10 @@ public class Dispatcher {
         if (type == null || item == null)
             return;
         switch (type) {
+            case messageList:
+                groupKey = item.groupKey;
+                roomKey = item.roomKey;
+                break;
             case selectUser:
                 if (item.key != null) {
                     experiencePayload = ExperienceManager.instance.experienceMap.get(item.key);

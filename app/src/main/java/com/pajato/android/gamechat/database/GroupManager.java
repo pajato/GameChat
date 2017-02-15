@@ -33,7 +33,6 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.MessageChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
-import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -193,7 +192,7 @@ public enum GroupManager {
     /** Handle a message change event by adding the message into the correct room list.  */
     @Subscribe public void onMessageListChange(@NonNull final MessageChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
-        updateGroupHeaders(event.message);
+        updateDateHeaderMap(event.message);
         AppEventManager.instance.post(new ChatListChangeEvent());
     }
 
@@ -332,7 +331,7 @@ public enum GroupManager {
     }
 
     /** Update the headers used to bracket the messages in the main list. */
-    private void updateGroupHeaders(final Message message) {
+    private void updateDateHeaderMap(final Message message) {
         // Add the new message to be the last message emanating from
         // the given group.  Then rebuild the lists of date header type to group list associations.
         mGroupToLastNewMessageMap.put(message.groupKey, message);
