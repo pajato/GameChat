@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies LLC.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see http://www.gnu.org/licenses
+ */
+
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
@@ -6,9 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
-import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
@@ -67,6 +81,7 @@ import static com.pajato.android.gamechat.exp.chess.Chess.State.secondary_wins;
  * A simple Chess game for use in GameChat.
  *
  * @author Bryan Scott
+ * @author Paul Michael Reilly
  */
 public class ChessFragment extends BaseExperienceFragment {
 
@@ -400,82 +415,6 @@ public class ChessFragment extends BaseExperienceFragment {
         setState(model);
     }
 
-    /**
-     * Set up a text view cell on the game board at a given board index.
-     *
-     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
-     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
-     * @param board A standard checkerboard containing 64 squares indexed by 0 to 63.
-     */
-    private TextView makeBoardButton(final int index, final int cellSize, final ChessBoard board) {
-        // Set up the gridlayout params, so that each cell is functionally identical.
-        TextView currentTile = new TextView(getContext());
-        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-        param.height = cellSize;
-        param.width = cellSize;
-        param.rightMargin = 0;
-        param.topMargin = 0;
-        param.setGravity(Gravity.CENTER);
-
-        // Set up the tile-specific information.
-        currentTile.setLayoutParams(param);
-        currentTile.setTag(String.valueOf(index));
-        float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
-        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
-        currentTile.setGravity(Gravity.CENTER);
-        currentTile.setText("");
-        handleTileBackground(index, currentTile);
-
-        // Handle the chess starting piece positions.
-        boolean containsSecondaryPlayerPiece = index < 16;
-        boolean containsPrimaryPlayerPiece = index > 47;
-        boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
-        ChessPiece.ChessTeam team;
-
-        // If the tile is meant to contain a board piece at the start of play, give it a piece.
-        if (containsPiece) {
-            if (containsPrimaryPlayerPiece) {
-                team = ChessPiece.ChessTeam.PRIMARY;
-                currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-            } else {
-                team = ChessPiece.ChessTeam.SECONDARY;
-                currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-            }
-            switch(index) {
-                default:
-                    board.add(index, ChessPiece.PieceType.PAWN, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.PAWN));
-                    break;
-                case 0: case 7:
-                case 56: case 63:
-                    board.add(index, ChessPiece.PieceType.ROOK, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
-                    break;
-                case 1: case 6:
-                case 57: case 62:
-                    board.add(index, ChessPiece.PieceType.KNIGHT, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KNIGHT));
-                    break;
-                case 2: case 5:
-                case 58: case 61:
-                    board.add(index, ChessPiece.PieceType.BISHOP, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.BISHOP));
-                    break;
-                case 3:
-                case 59:
-                    board.add(index, ChessPiece.PieceType.QUEEN, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.QUEEN));
-                    break;
-                case 4:
-                case 60:
-                    board.add(index, ChessPiece.PieceType.KING, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KING));
-            }
-        }
-
-        return currentTile;
-    }
-
     /** Handle a new chess game by resetting the board on a new game or a database reload. */
     private void startGame() {
         // Initialize the new board state.
@@ -498,7 +437,7 @@ public class ChessFragment extends BaseExperienceFragment {
         mBoard.reset();
         int cellSize = mBoard.getCellSize();
         for (int i = 0; i < 64; i++) {
-            TextView currentTile = makeBoardButton(i, cellSize, model.board);
+            TextView currentTile = mBoard.getCellView(getContext(), i, cellSize, model.board);
             currentTile.setOnClickListener(mTileClickHandler);
             mBoard.addCell(currentTile);
         }
@@ -525,7 +464,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // If a highlighted tile exists, we remove the highlight on it and its movement options.
         if (mIsHighlighted) {
-            handleTileBackground(highlightedIndex, mHighlightedTile);
+            mBoard.handleTileBackground(getContext(), highlightedIndex, mHighlightedTile);
 
             for (int possiblePosition : possibleMoves) {
                 // If the tile clicked is one of the possible positions, and it's the correct
@@ -535,7 +474,8 @@ public class ChessFragment extends BaseExperienceFragment {
                     handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
                     hasChanged = true;
                 }
-                handleTileBackground(possiblePosition, mBoard.getCell(possiblePosition));
+                TextView tile = mBoard.getCell(possiblePosition);
+                mBoard.handleTileBackground(getContext(), possiblePosition, tile);
             }
             mHighlightedTile = null;
 
@@ -591,31 +531,6 @@ public class ChessFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
         return menu;
-    }
-
-    /**
-     * A utility method that facilitates keeping the board's checker pattern in place throughout the
-     * highlighting and de-highlighting process. It accepts a tile and sets its background to white
-     * or dark grey, depending on its location in the board.
-     *
-     * @param index the index of the tile, used to determine the color of the background.
-     * @param currentTile the tile whose color we are changing.
-     */
-    private void handleTileBackground(final int index, final TextView currentTile) {
-        // Handle the checkerboard positions (where 'checkerboard' means the background pattern).
-        boolean isEven = (index % 2 == 0);
-        boolean isOdd = (index % 2 == 1);
-        boolean evenRowEvenColumn = ((index / 8) % 2 == 0) && isEven;
-        boolean oddRowOddColumn = ((index / 8) % 2 == 1) && isOdd;
-
-        // Create the checkerboard pattern on the button backgrounds.
-        if (evenRowEvenColumn || oddRowOddColumn) {
-            currentTile.setBackgroundColor(ContextCompat.getColor(
-                    getContext(), android.R.color.white));
-        } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(),
-                    R.color.colorLightGray));
-        }
     }
 
     /**
