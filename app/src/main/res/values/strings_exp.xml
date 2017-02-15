@@ -13,9 +13,10 @@
     <string name="InviteFriendNav">Invite friends</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyExperiencesToolbarTitle">My Games</string>
-    <string name="NoFriendsFound">No Available Users</string>
+    <string name="NoExperiencesMessage">You have no experiences</string>
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
+    <string name="NoUsersFound">No Available Users</string>
     <string name="PlayAgain">Play again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
