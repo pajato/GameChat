@@ -416,8 +416,6 @@ public class ChessFragment extends BaseExperienceFragment {
         param.rightMargin = 0;
         param.topMargin = 0;
         param.setGravity(Gravity.CENTER);
-        param.rowSpec = GridLayout.spec(index / 8);
-        param.columnSpec = GridLayout.spec(index % 8);
 
         // Set up the tile-specific information.
         currentTile.setLayoutParams(param);

@@ -79,8 +79,12 @@ public class Checkerboard {
 
     /** Remove all cells from the board. */
     public void reset() {
+        // There appears to be a bug with GridLayout in that if the row and column counts are not
+        // specified, an illegal argument exception can occur, so explicitly set the row and column
+        // counts.
         mGrid.removeAllViews();
-
+        mGrid.setRowCount(8);
+        mGrid.setColumnCount(8);
     }
 
     /** Set the highlight at a given position using a given color resource id. */
