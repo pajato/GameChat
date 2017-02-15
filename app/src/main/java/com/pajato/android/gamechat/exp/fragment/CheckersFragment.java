@@ -1,14 +1,28 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies LLC.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see http://www.gnu.org/licenses
+ */
+
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -46,11 +60,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static android.R.color.white;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
-import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
-import static com.pajato.android.gamechat.R.color.colorLightGray;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.R.id.player_1_icon;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
@@ -423,105 +434,6 @@ public class CheckersFragment extends BaseExperienceFragment {
         setState(model);
     }
 
-    // Determine if the particular cell is in an even row and even column or an odd row and odd
-    // column. This will determine the background color for the cell.
-    private boolean isEvenEvenOrOddOdd(int index, boolean isEven) {
-        if (isEven) {
-            return (index / 8) % 2 == 0;
-        } else {
-            return (index / 8) % 2 == 1;
-        }
-    }
-
-    // Determine if the particular cell contains a piece for player 2 (secondary color)
-    private boolean containsSecondaryPiece(int index, boolean isEven) {
-        if ((-1 < index && index < 8) && isEven) { // first (top) row
-            return true;
-        } else if ((7 < index && index < 16) && !isEven) { // second row
-            return true;
-        } else if ((15 < index && index < 24) && isEven) { // third row
-            return true;
-        }
-        return false;
-    }
-
-    // Determine if the particular cell contains a piece for player 1 (primary color)
-    private boolean containsPrimaryPiece(int index, boolean isEven) {
-        if ((39 < index && index < 48) && !isEven) { // first (top) row
-            return true;
-        } else if ((47 < index && index < 56) &&  isEven) { // second row
-            return true;
-        } else if ((55 < index && index < 64) && !isEven) { // third row
-            return true;
-        }
-        return false;
-    }
-
-    /** Set up an image button which will be a cell in the game board. */
-    private TextView makeBoardButton(final int index, final int cellSize,
-                                     final Map<String, String> board, final String pieceType) {
-        TextView currentTile = new TextView(getContext());
-
-        // Set up the gridlayout params, so that each cell is functionally identical.
-        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-        param.height = cellSize;
-        param.width = cellSize;
-        param.rightMargin = 0;
-        param.topMargin = 0;
-        param.setGravity(Gravity.CENTER);
-        param.rowSpec = GridLayout.spec(index / 8);
-        param.columnSpec = GridLayout.spec(index % 8);
-
-        // Set up the Tile-specific information.
-        currentTile.setLayoutParams(param);
-        String buttonTag = String.valueOf(index);
-        currentTile.setTag(buttonTag);
-        float sp = cellSize / getResources().getDisplayMetrics().scaledDensity;
-        currentTile.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
-        currentTile.setTypeface(null, Typeface.BOLD);
-        currentTile.setGravity(Gravity.CENTER);
-
-        // Create the checkerboard pattern on the button backgrounds.
-        boolean isEven = index % 2 == 0;
-        if (isEvenEvenOrOddOdd(index, isEven)) {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), white));
-            currentTile.setText(" ");
-        } else {
-            currentTile.setBackgroundColor(ContextCompat.getColor(getContext(), colorLightGray));
-            currentTile.setText(" ");
-        }
-
-        // If the tile is meant to contain a board piece at the start of play, give it a piece.
-        if (containsSecondaryPiece(index, isEven) ||
-                (pieceType.equals(SECONDARY_PIECE) || pieceType.equals(SECONDARY_KING))) {
-            if (pieceType.equals(SECONDARY_KING)) {
-                currentTile.setText(KING_UNICODE);
-            } else {
-                currentTile.setText(PIECE_UNICODE);
-            }
-            currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-            if(pieceType.equals(SECONDARY_KING)) {
-                board.put(buttonTag, SECONDARY_KING);
-            } else {
-                board.put(buttonTag, SECONDARY_PIECE);
-            }
-        } else if (containsPrimaryPiece(index, isEven) ||
-                (pieceType.equals(PRIMARY_PIECE) || pieceType.equals(PRIMARY_KING))) {
-            if (pieceType.equals(PRIMARY_KING)) {
-                currentTile.setText(KING_UNICODE);
-            } else {
-                currentTile.setText(PIECE_UNICODE);
-            }
-            currentTile.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-            if(pieceType.equals(PRIMARY_KING)) {
-                board.put(buttonTag, PRIMARY_KING);
-            } else {
-                board.put(buttonTag, PRIMARY_PIECE);
-            }
-        }
-        return currentTile;
-    }
-
     /**
      * Handles starting game of checkers, resetting the board either for a new game or a restart
      * after loading a game board from the database.
@@ -547,9 +459,9 @@ public class CheckersFragment extends BaseExperienceFragment {
                 if (pieceType == null)
                     pieceType = "";
             }
-            TextView currentTile = makeBoardButton(i, cellSize, model.board, pieceType);
-            currentTile.setOnClickListener(mTileClickHandler);
-            mBoard.addCell(currentTile);
+            TextView tile = mBoard.getCellView(getContext(), i, cellSize, model.board, pieceType);
+            tile.setOnClickListener(mTileClickHandler);
+            mBoard.addCell(tile);
         }
 
         handleTurnChange(false);

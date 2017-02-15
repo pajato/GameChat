@@ -1,16 +1,48 @@
+/*
+ * Copyright (C) 2016 Pajato Technologies LLC.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see http://www.gnu.org/licenses
+ */
+
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.exp.chess.ChessBoard;
+import com.pajato.android.gamechat.exp.chess.ChessPiece;
 import com.pajato.android.gamechat.main.PaneManager;
 
+import java.util.Map;
+
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
+import static com.pajato.android.gamechat.R.color.colorLightGray;
 import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.KING_UNICODE;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.PIECE_UNICODE;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.PRIMARY_KING;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.PRIMARY_PIECE;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.SECONDARY_KING;
+import static com.pajato.android.gamechat.exp.fragment.CheckersFragment.SECONDARY_PIECE;
 
 /**
  * Provide a checkerboard class to be used for chess and checkers.
@@ -54,6 +86,115 @@ public class Checkerboard {
         return (TextView) mGrid.getChildAt(position);
     }
 
+    /**
+     * Set up a text view cell on the chess game board at a given index.
+     *
+     * @param context The fragment context used to obtain resources.
+     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
+     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
+     * @param board The chess board model.
+     */
+    public TextView getCellView(final Context context, final int index, final int cellSize,
+                                final ChessBoard board) {
+        // Create the tile, ...
+        TextView currentTile = getCellView(context, index, cellSize);
+
+        // Handle the chess starting piece positions.
+        boolean containsSecondaryPlayerPiece = index < 16;
+        boolean containsPrimaryPlayerPiece = index > 47;
+        boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
+        ChessPiece.ChessTeam team;
+
+        // If the tile is meant to contain a board piece at the start of play, give it a piece.
+        if (containsPiece) {
+            if (containsPrimaryPlayerPiece) {
+                team = ChessPiece.ChessTeam.PRIMARY;
+                currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+            } else {
+                team = ChessPiece.ChessTeam.SECONDARY;
+                currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+            }
+            switch(index) {
+                default:
+                    board.add(index, ChessPiece.PieceType.PAWN, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.PAWN));
+                    break;
+                case 0: case 7:
+                case 56: case 63:
+                    board.add(index, ChessPiece.PieceType.ROOK, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
+                    break;
+                case 1: case 6:
+                case 57: case 62:
+                    board.add(index, ChessPiece.PieceType.KNIGHT, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KNIGHT));
+                    break;
+                case 2: case 5:
+                case 58: case 61:
+                    board.add(index, ChessPiece.PieceType.BISHOP, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.BISHOP));
+                    break;
+                case 3:
+                case 59:
+                    board.add(index, ChessPiece.PieceType.QUEEN, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.QUEEN));
+                    break;
+                case 4:
+                case 60:
+                    board.add(index, ChessPiece.PieceType.KING, team);
+                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KING));
+            }
+        }
+        return currentTile;
+    }
+
+    /**
+     * Set up a text view cell on the checkers game board at a given index.
+     *
+     * @param context The fragment context used to obtain resources.
+     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
+     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
+     * @param board The checkers board model.
+     * @param pieceType The checkers piece for the cell.
+     */
+    public TextView getCellView(final Context context, final int index, final int cellSize,
+                                final Map<String, String> board, final String pieceType) {
+        // Create the basic cell view and apply the checkerboard pattern to the cell.  Then set up
+        // the bolded checkers pieces where they belong.
+        TextView currentTile = getCellView(context, index, cellSize);
+        currentTile.setTypeface(null, Typeface.BOLD);
+        boolean isEven = index % 2 == 0;
+        String buttonTag = String.valueOf(index);
+        if (containsSecondaryPiece(index, isEven) ||
+                (pieceType.equals(SECONDARY_PIECE) || pieceType.equals(SECONDARY_KING))) {
+            if (pieceType.equals(SECONDARY_KING)) {
+                currentTile.setText(KING_UNICODE);
+            } else {
+                currentTile.setText(PIECE_UNICODE);
+            }
+            currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+            if(pieceType.equals(SECONDARY_KING)) {
+                board.put(buttonTag, SECONDARY_KING);
+            } else {
+                board.put(buttonTag, SECONDARY_PIECE);
+            }
+        } else if (containsPrimaryPiece(index, isEven) ||
+                (pieceType.equals(PRIMARY_PIECE) || pieceType.equals(PRIMARY_KING))) {
+            if (pieceType.equals(PRIMARY_KING)) {
+                currentTile.setText(KING_UNICODE);
+            } else {
+                currentTile.setText(PIECE_UNICODE);
+            }
+            currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+            if(pieceType.equals(PRIMARY_KING)) {
+                board.put(buttonTag, PRIMARY_KING);
+            } else {
+                board.put(buttonTag, PRIMARY_PIECE);
+            }
+        }
+        return currentTile;
+    }
+
     /** Return the size of the board cell on this device. */
     public int getCellSize() {
         return mCellSize;
@@ -77,6 +218,29 @@ public class Checkerboard {
         mCellSize = Math.min(boardWidth, boardHeight) / 8;
     }
 
+    /**
+     * A utility method that facilitates keeping the board's checker pattern in place throughout the
+     * highlighting and de-highlighting process. It accepts a tile and sets its background to white
+     * or dark grey, depending on its location in the board.
+     *
+     * @param context The fragment context used to obtain resources.
+     * @param index the index of the tile, used to determine the color of the background.
+     * @param tile the tile whose color we are changing.
+     */
+    public void handleTileBackground(final Context context, final int index, final TextView tile) {
+        // Handle the checkerboard positions (where 'checkerboard' means the background pattern).
+        boolean isEven = (index % 2 == 0);
+        boolean isOdd = (index % 2 == 1);
+        boolean evenRowEvenColumn = ((index / 8) % 2 == 0) && isEven;
+        boolean oddRowOddColumn = ((index / 8) % 2 == 1) && isOdd;
+
+        // Create the checkerboard pattern on the button backgrounds.
+        if (evenRowEvenColumn || oddRowOddColumn)
+            tile.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));
+        else
+            tile.setBackgroundColor(ContextCompat.getColor(context, colorLightGray));
+    }
+
     /** Remove all cells from the board. */
     public void reset() {
         // There appears to be a bug with GridLayout in that if the row and column counts are not
@@ -93,6 +257,52 @@ public class Checkerboard {
     }
 
     // Private instance methods.
+
+    // Determine if the particular cell contains a piece for player 2 (secondary color)
+    private boolean containsSecondaryPiece(int index, boolean isEven) {
+        if ((-1 < index && index < 8) && isEven) { // first (top) row
+            return true;
+        } else if ((7 < index && index < 16) && !isEven) { // second row
+            return true;
+        } else if ((15 < index && index < 24) && isEven) { // third row
+            return true;
+        }
+        return false;
+    }
+
+    // Determine if the particular cell contains a piece for player 1 (primary color)
+    private boolean containsPrimaryPiece(int index, boolean isEven) {
+        if ((39 < index && index < 48) && !isEven) { // first (top) row
+            return true;
+        } else if ((47 < index && index < 56) &&  isEven) { // second row
+            return true;
+        } else if ((55 < index && index < 64) && !isEven) { // third row
+            return true;
+        }
+        return false;
+    }
+
+    /** Return a text view representing a cell at a given index of a given size. */
+    private TextView getCellView(final Context context, final int index, final int cellSize) {
+        // Set up the gridlayout params, so that each cell is functionally identical.
+        TextView cellView = new TextView(context);
+        GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+        param.height = cellSize;
+        param.width = cellSize;
+        param.rightMargin = 0;
+        param.topMargin = 0;
+        param.setGravity(Gravity.CENTER);
+
+        // Set up the cell specific information.
+        cellView.setLayoutParams(param);
+        cellView.setTag(String.valueOf(index));
+        float sp = cellSize / context.getResources().getDisplayMetrics().scaledDensity;
+        cellView.setTextSize(COMPLEX_UNIT_SP, (float)(sp * 0.9));
+        cellView.setGravity(Gravity.CENTER);
+        cellView.setText("");
+        handleTileBackground(context, index, cellView);
+        return cellView;
+    }
 
     /** Return the number of physical pixels for a given number of device independent pixels. */
     private int getPixels(final DisplayMetrics metrics, final int dp) {
