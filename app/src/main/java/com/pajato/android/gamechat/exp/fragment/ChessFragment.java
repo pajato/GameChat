@@ -586,6 +586,15 @@ public class ChessFragment extends BaseExperienceFragment {
         return false;
     }
 
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getChessMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
+        return menu;
+    }
+
     /**
      * A utility method that facilitates keeping the board's checker pattern in place throughout the
      * highlighting and de-highlighting process. It accepts a tile and sets its background to white
@@ -921,16 +930,6 @@ public class ChessFragment extends BaseExperienceFragment {
                 ExperienceManager.instance.updateExperience(mExperience);
             }
         }
-    }
-
-    /** Return the home FAM used in the top level show games and show no games fragments. */
-    private List<MenuEntry> getChessMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
-        return menu;
     }
 
 }

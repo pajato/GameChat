@@ -262,6 +262,17 @@ public class CheckersFragment extends BaseExperienceFragment {
         return result;
     }
 
+    // Private instance methods.
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getCheckersMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_checkers));
+        return menu;
+    }
+
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
     private String getDoneMessage(final Checkers model) {
         // Determine if there is a winner.  If not, return the "tie" message.
@@ -880,16 +891,6 @@ public class CheckersFragment extends BaseExperienceFragment {
                 // Save any changes that have been made to the database
                 ExperienceManager.instance.updateExperience(mExperience);
         }
-    }
-
-    /** Return the home FAM used in the top level show games and show no games fragments. */
-    private List<MenuEntry> getCheckersMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getTintEntry(R.string.MyRooms, R.drawable.ic_casino_black_24dp));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_checkers));
-        return menu;
     }
 
 }
