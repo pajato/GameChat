@@ -72,6 +72,10 @@ public class SelectChatInviteFragment extends BaseChatFragment {
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
+            case R.id.chatFab:
+                // It is a chat fab button.  Toggle the state.
+                FabManager.chat.toggle(this);
+                break;
             default:
                 processSelection(event.view);
                 break;
