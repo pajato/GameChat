@@ -18,13 +18,17 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Group;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
@@ -36,6 +40,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import com.pajato.android.gamechat.main.NetworkManager;
@@ -57,6 +62,8 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expLi
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.room;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
@@ -308,6 +315,10 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 showFutureFeatureMessage(R.string.FutureSelectRooms);
                 FabManager.game.dismissMenu(this);
                 break;
+            case R.id.endIcon:
+                // Click on the end item icon
+                processEndIconClick(view);
+                break;
             case R.id.gameFab:
                 // If the click is on the fab, we have to handle if it's open or closed.
                 FabManager.game.toggle(this);
@@ -325,6 +336,41 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
         if (expFragmentType != null)
             DispatchManager.instance.chainFragment(getActivity(), expFragmentType);
+    }
+
+    /** Process the end icon click */
+    private void processEndIconClick(final View view) {
+        if (!(view.getTag() instanceof ListItem))
+            return;
+        ListItem item = (ListItem) view.getTag();
+        switch (item.type) {
+            case expList:
+                handleDeleteExperienceClick(item);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void handleDeleteExperienceClick(final ListItem item) {
+        Log.i(TAG, "Got here...");
+        final Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
+        if (exp == null)
+            return;
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.DeleteExperienceTitle))
+                .setMessage(String.format(getString(R.string.DeleteConfirmMessage),
+                        exp.getName()))
+                .setNegativeButton(android.R.string.cancel, null) // dismiss
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                ExperienceManager.instance.deleteExperience(item);
+                            }
+                        })
+                .create()
+                .show();
     }
 
     /** Process a button click that may be a experience list item click. */

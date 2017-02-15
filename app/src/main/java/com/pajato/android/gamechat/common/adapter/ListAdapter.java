@@ -237,6 +237,18 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 else
                     holder.optIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
                 break;
+            case expList:
+                Room expRoom = RoomManager.instance.getRoomProfile(item.roomKey);
+                if (expRoom == null) {
+                    String format = "Found null room profile for room %s";
+                    Log.e(TAG, String.format(format, item.roomKey));
+                    break;
+                }
+                if (expRoom.owner.equals(AccountManager.instance.getCurrentAccountId())) {
+                    holder.optIcon.setTag(item);
+                    holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
+                }
+                break;
             default:
                 // ignore other types
                 break;

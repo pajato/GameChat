@@ -32,6 +32,8 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ExpListChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
+import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -45,8 +47,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static android.R.attr.type;
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
+import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 
 /**
  * Provide a class to manage the experience database objects.
@@ -110,6 +115,35 @@ public enum ExperienceManager {
         String key = experience.getExperienceKey();
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, key);
         DBUtils.updateChildren(path, experience.toMap());
+    }
+
+    public void deleteExperience(final ListItem item) {
+        // Delete experience from database
+        String path = String.format(Locale.US, EXPERIENCE_PATH, item.groupKey, item.roomKey, item.key);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+
+        // Delete experience from various lists
+        experienceMap.remove(item.key);
+        Map<String, Map<DateHeaderType, List<String>>> groupMap = mDateHeaderExpMap.get(item.groupKey);
+        Map<DateHeaderType, List<String>> roomMap = groupMap.get(item.roomKey);
+        List<String> newExperienceList = new ArrayList<>(); // make a modifiable copy
+        for (ListItem.DateHeaderType dht : roomMap.keySet()) {
+            List<String> experiences = roomMap.get(dht);
+            newExperienceList = experiences;
+            for(String experienceKey : experiences)
+                if (experienceKey.equals(item.key))
+                    newExperienceList.remove(item.key);
+            roomMap.put(dht, newExperienceList);
+        }
+        Map<String, Experience> recentExpMap = mRoomToRecentMap.get(item.groupKey);
+        for(Map.Entry entry : recentExpMap.entrySet())
+            if (entry.getValue().equals(item.key))
+                recentExpMap.remove(entry.getKey().toString());
+
+        removeWatcher(item.key);
+
+        AppEventManager.instance.post(new ExperienceDeleteEvent(item.key));
+
     }
 
     /** Return the number of experiences for the given type. */
@@ -267,7 +301,7 @@ public enum ExperienceManager {
         expMap = roomMap != null && item.roomKey != null ? roomMap.get(item.roomKey) : null;
         if (expMap == null || expMap.size() == 0)
             return result;
-        processHeaders(result, ItemType.expList, expMap);
+        processHeaders(result, expList, expMap);
         return result;
     }
 
