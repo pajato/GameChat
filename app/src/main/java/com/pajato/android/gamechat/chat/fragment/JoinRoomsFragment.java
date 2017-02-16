@@ -86,6 +86,10 @@ public class JoinRoomsFragment extends BaseChatFragment {
             case R.id.selector:
                 processSelection(event, (CheckBox) event.view);
                 break;
+            case R.id.chatFab:
+                // It is a chat fab button.  Toggle the state.
+                FabManager.chat.toggle(this);
+                break;
             default:
                 break;
         }
