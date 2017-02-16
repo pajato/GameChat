@@ -178,7 +178,8 @@ public enum JoinManager {
                     }
                 }
                 if (!hasMemberRoom)
-                    items.add(new ListItem(selectableMember, groupKey, member.getNickName(),
+                    items.add(new ListItem(selectableMember, groupKey, member.id,
+                            member.getNickName(),
                             GroupManager.instance.getGroupName(groupKey), member.url));
             }
         }
