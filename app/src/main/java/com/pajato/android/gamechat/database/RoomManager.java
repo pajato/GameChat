@@ -208,8 +208,7 @@ public enum RoomManager {
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
         roomMap.put(event.key, event.room);
-        // If the owner of this room is this account or is one of this account's protected users,
-        // then we need to set watchers on all the members in the room (for use when deleting).
+        // Set watchers on all the members in the room (for use when deleting)
         for (String memberId : event.room.getMemberIdList())
             MemberManager.instance.setWatcher(event.room.groupKey, memberId);
     }
