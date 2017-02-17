@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.exp.chess;
+package com.pajato.android.gamechat.exp.checkers;
 
 import android.graphics.Typeface;
 
@@ -29,47 +29,43 @@ import java.util.Map;
 /**
  * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
  */
-@IgnoreExtraProperties public class ChessPiece {
+@IgnoreExtraProperties public class CheckersPiece {
 
     /** Provide constants for chess pieces that use unicode values for the glyph. */
     public enum PieceType {
         NONE (""),
-        KING ("\u2654"),
-        QUEEN ("\u2655"),
-        BISHOP ("\u2657"),
-        KNIGHT ("\u2658"),
-        ROOK ("\u2656"),
-        PAWN ("\u2659");
+        KING ("\u26c1"),
+        PIECE ("\u26c0");
 
         public String text;
         public int typeface;
 
         PieceType(final String text) {
             this.text = text;
-            typeface = Typeface.NORMAL;
+            typeface = Typeface.BOLD;
         }
    }
 
-    /** The chess piece type. */
+    /** The checkers piece type for this piece. */
     private PieceType mPieceType;
 
-    /** The chess team. */
+    /** The checkers team for this piece. */
     private Team mTeam;
 
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    @SuppressWarnings("unused") public ChessPiece() {}
+    @SuppressWarnings("unused") public CheckersPiece() {}
 
     /** Constructor requires a piece and team specified, provided as constants in the class. */
-    ChessPiece(final PieceType pieceType, final Team team) {
+    CheckersPiece(final PieceType pieceType, final Team team) {
         mPieceType = pieceType;
         mTeam = team;
     }
 
     // Public instance methods.
 
-    /** Return TRUE iff this piece is of the given type is playing for the given team. */
+    /** ... */
     public boolean isTeamPiece(final PieceType p, final Team t) {
         return (mPieceType.equals(p) && mTeam.equals(t));
     }
@@ -78,11 +74,11 @@ import java.util.Map;
     public Map<String, Object> toMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("pieceType", mPieceType.name());
-        result.put("team", mTeam.name());
+        result.put("teamId", mTeam.name());
         return result;
     }
 
-    public PieceType getPieceType() {
+    PieceType getPieceType() {
         return mPieceType;
     }
 

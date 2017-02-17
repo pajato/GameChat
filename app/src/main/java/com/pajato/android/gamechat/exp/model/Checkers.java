@@ -148,6 +148,9 @@ public class Checkers implements Experience {
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
+    /** Return the room push key. */
+    @Exclude @Override public boolean getTurn() { return turn; }
+
     /** Return the unseen list. */
     @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 

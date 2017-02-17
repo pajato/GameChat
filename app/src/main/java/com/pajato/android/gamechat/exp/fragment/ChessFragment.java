@@ -47,6 +47,7 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.NotificationManager;
+import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.chess.ChessBoard;
 import com.pajato.android.gamechat.exp.chess.ChessHelper;
@@ -76,6 +77,9 @@ import static com.pajato.android.gamechat.exp.chess.Chess.State.active;
 import static com.pajato.android.gamechat.exp.chess.Chess.State.pending;
 import static com.pajato.android.gamechat.exp.chess.Chess.State.primary_wins;
 import static com.pajato.android.gamechat.exp.chess.Chess.State.secondary_wins;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.KING;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.PAWN;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -164,7 +168,7 @@ public class ChessFragment extends BaseExperienceFragment {
         super.onStart();
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
-        mBoard.init(this);
+        mBoard.init(this, mTileClickHandler);
 
         // Color the Player Icons.
         ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
@@ -392,9 +396,12 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /** Set up the game board based on the data model state. */
     private void setGameBoard(@NonNull final Chess model) {
-        // Determine if the model has any pieces to put on the board.  If not reset the board.
+        // Determine if the model has any pieces to put on the board.  If not reset the board model.
         if (model.board == null)
-            startGame();
+            model.board = new ChessBoard(getContext(), model, mBoard);
+        else
+            mBoard.setBoardFromModel(getContext(), model.board);
+        handleTurnChangeNew(false);
    }
 
     /** Update the UI using the current experience state from the database. */
@@ -413,35 +420,6 @@ public class ChessFragment extends BaseExperienceFragment {
         setPlayerIcons(model.turn);
         setGameBoard(model);
         setState(model);
-    }
-
-    /** Handle a new chess game by resetting the board on a new game or a database reload. */
-    private void startGame() {
-        // Initialize the new board state.
-        Chess model = (Chess) mExperience;
-        if (model.board == null)
-            model.board = new ChessBoard();
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        if (winner != null)
-            winner.setText("");
-
-        // Reset the castling booleans.
-        model.primaryQueenSideRookHasMoved = false;
-        model.primaryKingSideRookHasMoved = false;
-        model.primaryKingHasMoved = false;
-        model.secondaryQueenSideRookHasMoved = false;
-        model.secondaryKingSideRookHasMoved = false;
-        model.secondaryKingHasMoved = false;
-
-        // Go through and populate the GridLayout / board.
-        mBoard.reset();
-        int cellSize = mBoard.getCellSize();
-        for (int i = 0; i < 64; i++) {
-            TextView currentTile = mBoard.getCellView(getContext(), i, cellSize, model.board);
-            currentTile.setOnClickListener(mTileClickHandler);
-            mBoard.addCell(currentTile);
-        }
-        handleTurnChange(false);
     }
 
     /**
@@ -541,7 +519,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
      */
     private void findPossibleMoves(final int highlightedIndex, final List<Integer> possibleMoves,
-                                   ChessBoard board) {
+                                   final ChessBoard board) {
         if (highlightedIndex < 0 || highlightedIndex > 64) {
             return;
         }
@@ -550,7 +528,7 @@ public class ChessFragment extends BaseExperienceFragment {
         possibleMoves.clear();
         ChessPiece.PieceType highlightedPieceType = board.getPieceType(highlightedIndex);
 
-        switch(highlightedPieceType) {
+        switch (highlightedPieceType) {
             case PAWN:
                 ChessHelper.getPawnThreatRange(possibleMoves, highlightedIndex, board);
                 break;
@@ -575,7 +553,6 @@ public class ChessFragment extends BaseExperienceFragment {
                         castlingBooleans);
                 break;
         }
-
     }
 
     /**
@@ -586,12 +563,12 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param capturesPiece true if move captures pieces
      * @param board a ChessBoard object
      */
-    private void handleMovement(final ChessPiece.ChessTeam player, final int indexClicked,
+    private void handleMovement(final Team player, final int indexClicked,
                                 final boolean capturesPiece, ChessBoard board) {
         // Reset the highlighted tile's image.
         mHighlightedTile.setText(" ");
         int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        ChessPiece highlightedPiece = board.retrieve(highlightedIndex);
+        ChessPiece highlightedPiece = board.getPiece(highlightedIndex);
 
         // Handle capturing pieces.
         if (capturesPiece) {
@@ -602,31 +579,25 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Check to see if our pawn can becomes another piece and put its value into the board map.
 
-        if (indexClicked < 8 && highlightedPiece.isTeamPiece(ChessPiece.PieceType.PAWN, ChessPiece.ChessTeam.PRIMARY)) {
-            promotePawn(indexClicked, ChessPiece.ChessTeam.PRIMARY);
-        } else if (indexClicked > 55 && highlightedPiece.isTeamPiece(ChessPiece.PieceType.PAWN, ChessPiece.ChessTeam.SECONDARY)) {
-            promotePawn(indexClicked, ChessPiece.ChessTeam.SECONDARY);
+        if (indexClicked < 8 && highlightedPiece.isTeamPiece(PAWN, Team.PRIMARY)) {
+            promotePawn(indexClicked, Team.PRIMARY);
+        } else if (indexClicked > 55 && highlightedPiece.isTeamPiece(PAWN, Team.SECONDARY)) {
+            promotePawn(indexClicked, Team.SECONDARY);
         } else {
+            // Add the clicked piece to the new position, set both the text and color values using
+            // the source values.
             board.add(indexClicked, highlightedPiece);
-
-            // Find the new tile and give it a piece.
-            TextView newLocation = mBoard.getCell(indexClicked);
-            newLocation.setText(ChessPiece.getUnicodeText(board.getPieceType(indexClicked)));
-
-            // Color the piece according to the player.
-            if (player.equals(ChessPiece.ChessTeam.PRIMARY)) {
-                newLocation.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-            } else if (player.equals(ChessPiece.ChessTeam.SECONDARY)) {
-                newLocation.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-            }
+            TextView view = mBoard.getCell(indexClicked);
+            view.setText(board.getDefaultText(indexClicked));
+            view.setTextColor(board.getDefaultColor(indexClicked));
         }
 
         // Handle the movement of the Rook for Castling
         boolean castlingKingSide = indexClicked == highlightedIndex + 2;
         boolean castlingQueenSide = indexClicked == highlightedIndex - 3;
-        boolean isCastling = highlightedPiece.getPiece().equals(ChessPiece.PieceType.KING) &&
+        boolean isCastling = highlightedPiece.getPieceType() == KING &&
                 (castlingKingSide || castlingQueenSide);
-        if(isCastling) {
+        if (isCastling) {
             int rookPrevIndex;
             int rookFutureIndex;
             // Handle the side-dependent pieces of the castle (king-side vs queen-side)
@@ -639,38 +610,34 @@ public class ChessFragment extends BaseExperienceFragment {
             }
 
             // Put a rook at the new rook position.
-            board.add(rookFutureIndex, ChessPiece.PieceType.ROOK, player);
+            board.add(rookFutureIndex, ROOK, player);
             TextView futureRook = mBoard.getCell(rookFutureIndex);
 
             // Handle the player-dependent pieces of the castle (color)
-            futureRook.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
-            if (player.equals(ChessPiece.ChessTeam.PRIMARY)) {
-                futureRook.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-            } else if (player.equals(ChessPiece.ChessTeam.SECONDARY)) {
-                futureRook.setTextColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-            }
+            futureRook.setText(board.getDefaultText(rookFutureIndex));
+            futureRook.setTextColor(board.getDefaultColor(rookFutureIndex));
 
             // Get rid of the old rook.
             TextView previousRook = mBoard.getCell(rookPrevIndex);
-            previousRook.setText(" ");
+            previousRook.setText("");
             board.delete(rookPrevIndex);
         }
 
         // Handle the Castling Booleans.
-        ChessPiece currentPiece = board.retrieve(highlightedIndex);
+        ChessPiece currentPiece = board.getPiece(highlightedIndex);
         Chess model = (Chess) mExperience;
         if (currentPiece != null) {
-            if (currentPiece.isTeamPiece(ChessPiece.PieceType.KING, ChessPiece.ChessTeam.PRIMARY)) {
+            if (currentPiece.isTeamPiece(KING, Team.PRIMARY)) {
                 model.primaryKingHasMoved = true;
-            } else if (currentPiece.isTeamPiece(ChessPiece.PieceType.KING, ChessPiece.ChessTeam.SECONDARY)) {
+            } else if (currentPiece.isTeamPiece(KING, Team.SECONDARY)) {
                 model.secondaryKingHasMoved = true;
-            } else if (currentPiece.isTeamPiece(ChessPiece.PieceType.ROOK, ChessPiece.ChessTeam.PRIMARY)) {
+            } else if (currentPiece.isTeamPiece(ROOK, Team.PRIMARY)) {
                 if (highlightedIndex == 0) {
                     model.primaryQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 7) {
                     model.primaryKingSideRookHasMoved = true;
                 }
-            } else if (currentPiece.isTeamPiece(ChessPiece.PieceType.ROOK, ChessPiece.ChessTeam.SECONDARY)) {
+            } else if (currentPiece.isTeamPiece(ROOK, Team.SECONDARY)) {
                 if (highlightedIndex == 56) {
                     model.secondaryQueenSideRookHasMoved = true;
                 } else if (highlightedIndex == 63) {
@@ -681,37 +648,8 @@ public class ChessFragment extends BaseExperienceFragment {
 
         // Delete the piece's previous location and end the turn.
         board.delete(highlightedIndex);
-        handleTurnChange(true);
+        handleTurnChangeNew(true);
         checkFinished(board);
-    }
-
-    /**
-     * Handles changing the turn and turn indicator.
-     * @param switchPlayer if false, just set up the UI views but don't switch the player turn.
-     */
-    private void handleTurnChange(final boolean switchPlayer) {
-        boolean turn = ((Chess) mExperience).turn;
-        if(switchPlayer) {
-            turn = ((Chess) mExperience).toggleTurn();
-        }
-
-        // Handle the TextViews that serve as our turn indicator.
-        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
-        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.rightIndicator1);
-        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
-        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
-
-        if(turn) {
-            playerOneLeft.setVisibility(View.VISIBLE);
-            playerOneRight.setVisibility(View.VISIBLE);
-            playerTwoLeft.setVisibility(View.INVISIBLE);
-            playerTwoRight.setVisibility(View.INVISIBLE);
-        } else {
-            playerOneLeft.setVisibility(View.INVISIBLE);
-            playerOneRight.setVisibility(View.INVISIBLE);
-            playerTwoLeft.setVisibility(View.VISIBLE);
-            playerTwoRight.setVisibility(View.VISIBLE);
-        }
     }
 
     /**
@@ -720,7 +658,7 @@ public class ChessFragment extends BaseExperienceFragment {
      * @param position the position of the pawn when it is promoted.
      * @param team the team the pawn belongs to.
      */
-    private void promotePawn(final int position, final ChessPiece.ChessTeam team) {
+    private void promotePawn(final int position, final Team team) {
         // Generate an AlertDialog via the AlertDialog Builder
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setTitle(getString(R.string.PromotePawnMsg))
@@ -729,7 +667,7 @@ public class ChessFragment extends BaseExperienceFragment {
         AlertDialog pawnChooser = alertDialogBuilder.create();
         pawnChooser.show();
 
-        int color = (team == ChessPiece.ChessTeam.PRIMARY) ? ContextCompat.getColor(getContext(),
+        int color = (team == Team.PRIMARY) ? ContextCompat.getColor(getContext(),
                 R.color.colorPrimary) : ContextCompat.getColor(getContext(), R.color.colorAccent);
 
         // Change the Dialog's Icon color.
@@ -742,7 +680,7 @@ public class ChessFragment extends BaseExperienceFragment {
         TextView queenIcon = (TextView) pawnChooser.findViewById(R.id.queen_icon);
         TextView queenText = (TextView) pawnChooser.findViewById(R.id.queen_text);
         if(queenIcon != null && queenText != null) {
-            queenIcon.setText(ChessPiece.UC_QUEEN);
+            queenIcon.setText(ChessPiece.PieceType.QUEEN.text);
             queenIcon.setTextColor(color);
             queenIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             queenText.setOnClickListener(new Promoter(position, team, pawnChooser));
@@ -751,7 +689,7 @@ public class ChessFragment extends BaseExperienceFragment {
         TextView bishopIcon = (TextView) pawnChooser.findViewById(R.id.bishop_icon);
         TextView bishopText = (TextView) pawnChooser.findViewById(R.id.bishop_text);
         if(bishopIcon != null && bishopText != null) {
-            bishopIcon.setText(ChessPiece.UC_BISHOP);
+            bishopIcon.setText(ChessPiece.PieceType.BISHOP.text);
             bishopIcon.setTextColor(color);
             bishopIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             bishopText.setOnClickListener(new Promoter(position, team, pawnChooser));
@@ -760,7 +698,7 @@ public class ChessFragment extends BaseExperienceFragment {
         TextView knightIcon = (TextView) pawnChooser.findViewById(R.id.knight_icon);
         TextView knightText = (TextView) pawnChooser.findViewById(R.id.knight_text);
         if(knightIcon != null && knightText != null) {
-            knightIcon.setText(ChessPiece.UC_KNIGHT);
+            knightIcon.setText(ChessPiece.PieceType.KNIGHT.text);
             knightIcon.setTextColor(color);
             knightIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             knightText.setOnClickListener(new Promoter(position, team, pawnChooser));
@@ -769,7 +707,7 @@ public class ChessFragment extends BaseExperienceFragment {
         TextView rookIcon = (TextView) pawnChooser.findViewById(R.id.rook_icon);
         TextView rookText = (TextView) pawnChooser.findViewById(R.id.rook_text);
         if(rookIcon != null && rookText != null) {
-            rookIcon.setText(ChessPiece.UC_ROOK);
+            rookIcon.setText(ROOK.text);
             rookIcon.setTextColor(color);
             rookIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             rookText.setOnClickListener(new Promoter(position, team, pawnChooser));
@@ -779,9 +717,9 @@ public class ChessFragment extends BaseExperienceFragment {
     private class Promoter implements View.OnClickListener {
         AlertDialog mDialog;
         int position;
-        ChessPiece.ChessTeam team;
+        Team team;
 
-        Promoter(final int indexClicked, final ChessPiece.ChessTeam teamNumber, AlertDialog dialog) {
+        Promoter(final int indexClicked, final Team teamNumber, AlertDialog dialog) {
             position = indexClicked;
             team = teamNumber;
             mDialog = dialog;
@@ -806,16 +744,15 @@ public class ChessFragment extends BaseExperienceFragment {
                     break;
                 case R.id.rook_icon:
                 case R.id.rook_text:
-                    pieceType = ChessPiece.PieceType.ROOK;
+                    pieceType = ROOK;
                     break;
             }
 
             ChessBoard board = ((Chess) mExperience).board;
             board.add(position, pieceType, team);
             TextView promotedPieceTile = mBoard.getCell(position);
-            promotedPieceTile.setText(ChessPiece.getUnicodeText(pieceType));
-            int color = team == ChessPiece.ChessTeam.PRIMARY ? R.color.colorPrimary: R.color.colorAccent;
-            promotedPieceTile.setTextColor(ContextCompat.getColor(getContext(), color));
+            promotedPieceTile.setText(board.getDefaultText(position));
+            promotedPieceTile.setTextColor(board.getDefaultColor(position));
 
             mDialog.dismiss();
         }
@@ -833,12 +770,12 @@ public class ChessFragment extends BaseExperienceFragment {
                 changedBoard = showPossibleMoves(index, board);
                 mHighlightedTile = null;
             } else {
-                if (board.retrieve(index) != null) {
+                if (board.getPiece(index) != null) {
                     mHighlightedTile = (TextView) v;
                     changedBoard = showPossibleMoves(index, board);
                 }
             }
-            if(changedBoard) {
+            if (changedBoard) {
                 // Save any changes that have been made to the database
                 ExperienceManager.instance.updateExperience(mExperience);
             }

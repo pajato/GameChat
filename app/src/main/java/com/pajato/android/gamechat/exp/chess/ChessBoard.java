@@ -17,11 +17,25 @@
 
 package com.pajato.android.gamechat.exp.chess;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
+import com.google.firebase.database.Exclude;
+import com.pajato.android.gamechat.exp.Board;
+import com.pajato.android.gamechat.exp.Checkerboard;
+import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType;
-import com.pajato.android.gamechat.exp.chess.ChessPiece.ChessTeam;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.BISHOP;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.KING;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.KNIGHT;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.PAWN;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.QUEEN;
+import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
 
 /**
  * Provide a POJO representing a Chess board and methods to modify the board. The basic board is
@@ -34,9 +48,13 @@ import java.util.Map;
  * So, this class is essentially a wrapper around a HashMap which handles the conversion of an
  * integer index to a string and provides some convenience methods to determine piece type and team
  * for a given cell on the board.
+ *
+ * @author Sandy Scott
+ * @author Paul Michael Reilly
  */
+public class ChessBoard implements Board {
 
-public class ChessBoard {
+    // Private class constants.
 
     private static final String CELL_ID = "cell";
 
@@ -44,22 +62,35 @@ public class ChessBoard {
     @SuppressWarnings("unused")
     private static final String TAG = ChessBoard.class.getSimpleName();
 
-    public Map<String, ChessPiece> board;
+    // Public instance variables.
 
-    private String makeCellId(final int index) {
-        return CELL_ID + String.valueOf(index);
+    /** The database model for a chess board. */
+    private Map<String, ChessPiece> pieces = new HashMap<>();
+
+    // Public constructors.
+
+    /** Build the no-arg instance for Firebase. */
+    @SuppressWarnings("unused") public ChessBoard() {}
+
+    /** Build a default instance with an empty pieces. */
+    public ChessBoard(@NonNull final Context context, final Chess model, final Checkerboard board) {
+        // Create a new board model and reset the castling booleans.
+        //model.board = this;
+        model.primaryQueenSideRookHasMoved = false;
+        model.primaryKingSideRookHasMoved = false;
+        model.primaryKingHasMoved = false;
+        model.secondaryQueenSideRookHasMoved = false;
+        model.secondaryKingSideRookHasMoved = false;
+        model.secondaryKingHasMoved = false;
+
+        // Initialize the text on each piece for the start of a game.
+        for (int index = 0; index < 16; index++)
+            board.initBoardModel(context, index, this);
+        for (int index = 48; index < 64; index++)
+            board.initBoardModel(context, index, this);
     }
 
-    /** Provide a default map for a Firebase create/update. */
-    public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("board", board);
-        return result;
-    }
-
-    public ChessBoard() {
-        board = new HashMap<>();
-    }
+    // Public instance methods.
 
     /**
      * Add a piece to the board
@@ -67,8 +98,8 @@ public class ChessBoard {
      * @param type piece type
      * @param team the team
      */
-    public void add(final int index, final PieceType type, final ChessTeam team) {
-        board.put(makeCellId(index), new ChessPiece(type, team));
+    public void add(final int index, final PieceType type, final Team team) {
+        pieces.put(CELL_ID + String.valueOf(index), new ChessPiece(type, team));
     }
 
     /**
@@ -77,36 +108,7 @@ public class ChessBoard {
      * @param p the piece to add
      */
     public void add(final int index, final ChessPiece p) {
-        board.put(makeCellId(index), p);
-    }
-
-    /**
-     * Get a piece from the board at the specified index.
-     * @return ChessPiece at the specified cell index or null if none.
-     */
-    public ChessPiece retrieve(final int index) {
-        return board.get(makeCellId(index));
-    }
-
-    /**
-     * Remove a piece from the board at the specified index.
-     * @param index index into the board (valid indices are 0->63).
-     * @return the removed piece
-     */
-    public ChessPiece delete(final int index) {
-        return board.remove(makeCellId(index));
-    }
-
-    public boolean containsPiece(final int index) {
-        return (board.get(makeCellId(index)) == null);
-    }
-
-    /**
-     * Determine if specified piece type for the specified team is at the cell location indicates
-     * @return true if the primary king is at the specified index
-     */
-    private boolean cellHasTeamPiece(final int index, PieceType type, ChessTeam team) {
-        return getPieceType(index).equals(type) && getTeam(index).equals(team);
+        pieces.put(CELL_ID + String.valueOf(index), p);
     }
 
     /**
@@ -115,7 +117,7 @@ public class ChessBoard {
      */
     public boolean containsPrimaryKing() {
         for (int i = 0; i < 64; i++) {
-            if (cellHasTeamPiece(i, PieceType.KING, ChessTeam.PRIMARY)) {
+            if (cellHasTeamPiece(i, KING, Team.PRIMARY)) {
                 return true;
             }
         }
@@ -128,11 +130,51 @@ public class ChessBoard {
      */
     public boolean containsSecondaryKing() {
         for (int i = 0; i < 64; i++) {
-            if (cellHasTeamPiece(i, PieceType.KING, ChessTeam.SECONDARY)) {
+            if (cellHasTeamPiece(i, KING, Team.SECONDARY)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /** ... */
+    public boolean containsPiece(final int index) {
+        return (pieces.get(CELL_ID + String.valueOf(index)) == null);
+    }
+
+    /**
+     * Remove a piece from the board at the specified index.
+     * @param index index into the board (valid indices are 0->63).
+     * @return the removed piece
+     */
+    public ChessPiece delete(final int index) {
+        return pieces.remove(CELL_ID + String.valueOf(index));
+    }
+
+    /** Implement the Board interface to return the default piece text color at a given position. */
+    @Override public int getDefaultColor(final int position) {
+        Team team = getTeam(position);
+        if (team == null)
+            return Team.NONE.color;
+        return team.color;
+    }
+
+    /** Implement the Board interface to return the default piece text value at a given position. */
+    @Override public String getDefaultText(final int position) {
+        PieceType type = getPieceType(position);
+        if (type == null)
+            return PieceType.NONE.text;
+        return type.text;
+    }
+
+    /** Return a set of position keys representing active pieces on the board. */
+    @Exclude @Override public Set<String> getKeySet() {
+        return pieces.keySet();
+    }
+
+    /** Return null or a chess piece at a given index. */
+    public ChessPiece getPiece(final int index) {
+        return pieces.get(CELL_ID + String.valueOf(index));
     }
 
     /**
@@ -141,25 +183,111 @@ public class ChessBoard {
      * @return the piece type for the piece at the specified location or empty string ("") if none
      */
     public PieceType getPieceType(final int index) {
-        ChessPiece p = board.get(makeCellId(index));
+        ChessPiece p = pieces.get(CELL_ID + String.valueOf(index));
         if (p == null) {
             return PieceType.NONE;
         } else {
-            return p.getPiece();
+            return p.getPieceType();
         }
     }
 
-    /**
-     * Return the team id for the piece at the specified index.
-     * TODO: Refactor the ChessFragment, ChessHelper & friends to use the enum value, not an int!!
-     * @param index index into the board (valid indices are 0->63).
-     * @return the team for any piece at the specified location or -1 if none
-     */
-    public ChessTeam getTeam(final int index) {
-        ChessPiece p = board.get(makeCellId(index));
+    /** Provide a getter for the piece map to satisfy Firebase. */
+    @SuppressWarnings("unused") public Map<String, ChessPiece> getPieces() {
+        return pieces;
+    }
+
+    /** Implement the interface to return -1 or a position corresponding to a given cell key. */
+    @Override public int getPosition(@NonNull final String key) {
+        try {
+            return Integer.parseInt(key.substring(CELL_ID.length()));
+        } catch (NumberFormatException exc) {
+            return -1;
+        }
+    }
+
+    /** Return null or the team associated with the piece at the given position. */
+    public Team getTeam(final int index) {
+        ChessPiece p = pieces.get(CELL_ID + String.valueOf(index));
         if (p == null) {
-            return ChessTeam.NONE;
+            return Team.NONE;
         }
         return p.getTeam();
+    }
+
+    /** Implement the interface to the typeface corresponding to a given cell key. */
+    @Override public int getTypeface(final int position) {
+        ChessPiece piece = pieces.get(CELL_ID + String.valueOf(position));
+        if (piece == null)
+            return PieceType.NONE.typeface;
+        return piece.getPieceType().typeface;
+    }
+
+    /** Implement the Board interface to setup the default piece at a given position. */
+    @Override public void setDefault(final int position) {
+        String cellId = "cell" + String.valueOf(position);
+        switch (position) {
+            case 0: case 7:     // Handle the secondary team (black) rooks.
+                pieces.put(cellId, new ChessPiece(ROOK, Team.SECONDARY));
+                break;
+            case 1: case 6:     // Handle the secondary team (black) knights.
+                pieces.put(cellId, new ChessPiece(KNIGHT, Team.SECONDARY));
+                break;
+            case 2: case 5:     // Handle the secondary team (black) bishops.
+                pieces.put(cellId, new ChessPiece(BISHOP, Team.SECONDARY));
+                break;
+            case 3:             // Handle the secondary team (black) queen.
+                pieces.put(cellId, new ChessPiece(QUEEN, Team.SECONDARY));
+                break;
+            case 4:             // Handle the secondary team (black) king.
+                pieces.put(cellId, new ChessPiece(KING, Team.SECONDARY));
+                break;
+            case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+                // Handle the secondary team (black) pawns.
+                pieces.put(cellId, new ChessPiece(PAWN, Team.SECONDARY));
+                break;
+            case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55:
+                // Handle the primary team (white) pawns.
+                pieces.put(cellId, new ChessPiece(PAWN, Team.PRIMARY));
+                break;
+            case 56: case 63:   // Handle the primary team (white) rooks.
+                pieces.put(cellId, new ChessPiece(ROOK, Team.PRIMARY));
+                break;
+            case 57: case 62:   // Handle the primary team (white) knights.
+                pieces.put(cellId, new ChessPiece(KNIGHT, Team.PRIMARY));
+                break;
+            case 58: case 61:   // Handle the primary team (white) bishops.
+                pieces.put(cellId, new ChessPiece(BISHOP, Team.PRIMARY));
+                break;
+            case 59:            // Handle the primary team (white) queen.
+                pieces.put(cellId, new ChessPiece(QUEEN, Team.PRIMARY));
+                break;
+            case 60:            // Handle the primary team (white) king.
+                pieces.put(cellId, new ChessPiece(KING, Team.PRIMARY));
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Provide a setter for the piece map to satisfy Firebase. */
+    @SuppressWarnings("unused") public void setPieces(final Map<String, ChessPiece> pieceMap) {
+        pieces = pieceMap;
+    }
+
+    /** Provide a default map for a Firebase create/update. */
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("pieces", pieces);
+        return result;
+    }
+
+    // Private instance methods.
+
+    /**
+     * Determine if specified piece type for the specified team is at the cell location indicates
+     * @return true if the primary king is at the specified index
+     */
+    private boolean cellHasTeamPiece(final int index, PieceType type, Team team) {
+        return getPieceType(index).equals(type) && getTeam(index).equals(team);
     }
 }

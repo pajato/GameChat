@@ -226,6 +226,32 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
+    /** Handle changing the turn and turn indicator for a given turn state. */
+    protected void handleTurnChangeNew(final boolean switchPlayer) {
+        boolean turn = mExperience.getTurn();
+        if (switchPlayer) {
+            turn = mExperience.toggleTurn();
+        }
+
+        // Handle the TextViews that serve as our turn indicator.
+        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
+        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.rightIndicator1);
+        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
+        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
+
+        if(turn) {
+            playerOneLeft.setVisibility(View.VISIBLE);
+            playerOneRight.setVisibility(View.VISIBLE);
+            playerTwoLeft.setVisibility(View.INVISIBLE);
+            playerTwoRight.setVisibility(View.INVISIBLE);
+        } else {
+            playerOneLeft.setVisibility(View.INVISIBLE);
+            playerOneRight.setVisibility(View.INVISIBLE);
+            playerTwoLeft.setVisibility(View.VISIBLE);
+            playerTwoRight.setVisibility(View.VISIBLE);
+        }
+    }
+
     /**
      * Return TRUE if this experience is in the "me" group. If either the 'me' group key or the
      * current experience group key is null, return true (assume we're in the 'me' situation).
@@ -332,6 +358,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         if (expFragmentType != null)
             DispatchManager.instance.chainFragment(getActivity(), expFragmentType);
     }
+
+    // Private instance methods.
 
     /** Process the end icon click */
     private void processEndIconClick(final View view) {

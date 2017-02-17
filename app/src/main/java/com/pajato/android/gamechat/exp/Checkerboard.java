@@ -23,13 +23,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
-import com.pajato.android.gamechat.exp.chess.ChessBoard;
-import com.pajato.android.gamechat.exp.chess.ChessPiece;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.Map;
@@ -84,68 +83,6 @@ public class Checkerboard {
     /** Return the cell at a given position. */
     public TextView getCell(final int position) {
         return (TextView) mGrid.getChildAt(position);
-    }
-
-    /**
-     * Set up a text view cell on the chess game board at a given index.
-     *
-     * @param context The fragment context used to obtain resources.
-     * @param index The board's cell index (0 - 63, top left to bottom right, the primary square.)
-     * @param cellSize The width and height value (in pixels) of the cell being added to the board.
-     * @param board The chess board model.
-     */
-    public TextView getCellView(final Context context, final int index, final int cellSize,
-                                final ChessBoard board) {
-        // Create the tile, ...
-        TextView currentTile = getCellView(context, index, cellSize);
-
-        // Handle the chess starting piece positions.
-        boolean containsSecondaryPlayerPiece = index < 16;
-        boolean containsPrimaryPlayerPiece = index > 47;
-        boolean containsPiece = containsPrimaryPlayerPiece || containsSecondaryPlayerPiece;
-        ChessPiece.ChessTeam team;
-
-        // If the tile is meant to contain a board piece at the start of play, give it a piece.
-        if (containsPiece) {
-            if (containsPrimaryPlayerPiece) {
-                team = ChessPiece.ChessTeam.PRIMARY;
-                currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
-            } else {
-                team = ChessPiece.ChessTeam.SECONDARY;
-                currentTile.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-            }
-            switch(index) {
-                default:
-                    board.add(index, ChessPiece.PieceType.PAWN, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.PAWN));
-                    break;
-                case 0: case 7:
-                case 56: case 63:
-                    board.add(index, ChessPiece.PieceType.ROOK, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.ROOK));
-                    break;
-                case 1: case 6:
-                case 57: case 62:
-                    board.add(index, ChessPiece.PieceType.KNIGHT, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KNIGHT));
-                    break;
-                case 2: case 5:
-                case 58: case 61:
-                    board.add(index, ChessPiece.PieceType.BISHOP, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.BISHOP));
-                    break;
-                case 3:
-                case 59:
-                    board.add(index, ChessPiece.PieceType.QUEEN, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.QUEEN));
-                    break;
-                case 4:
-                case 60:
-                    board.add(index, ChessPiece.PieceType.KING, team);
-                    currentTile.setText(ChessPiece.getUnicodeText(ChessPiece.PieceType.KING));
-            }
-        }
-        return currentTile;
     }
 
     /**
@@ -218,6 +155,38 @@ public class Checkerboard {
         mCellSize = Math.min(boardWidth, boardHeight) / 8;
     }
 
+    /** Initialize the checkerboard by finding the grid layout and computing the cell size. */
+    public void init(@NonNull BaseFragment fragment, final View.OnClickListener handler) {
+        mGrid = (GridLayout) fragment.getActivity().findViewById(board);
+        if (mGrid == null)
+            return;
+
+        // Reset the grid layout.
+        // There appears to be a bug with GridLayout in that if the row and column counts are not
+        // specified, an illegal argument exception can occur, so explicitly set the row and column
+        // counts.
+        mGrid.removeAllViews();
+        mGrid.setRowCount(8);
+        mGrid.setColumnCount(8);
+        int cellSize = getCellSize(fragment);
+        for (int i = 0; i < 64; i++) {
+            TextView currentTile = getCellView(fragment.getContext(), i, cellSize);
+            currentTile.setOnClickListener(handler);
+            addCell(currentTile);
+        }
+    }
+
+    /** Initialize the given board model to install the default (start) piece at the given index. */
+    public void initBoardModel(final Context context, final int index, final Board model) {
+        // Create the view representing the checkerboard tile and setup the pieces on the board for
+        // the start of the game.
+        TextView cellView = getCell(index);
+        model.setDefault(index);
+        cellView.setText(model.getDefaultText(index));
+        cellView.setTextColor(ContextCompat.getColor(context, model.getDefaultColor(index)));
+        cellView.setTypeface(null, model.getTypeface(index));
+    }
+
     /**
      * A utility method that facilitates keeping the board's checker pattern in place throughout the
      * highlighting and de-highlighting process. It accepts a tile and sets its background to white
@@ -251,6 +220,21 @@ public class Checkerboard {
         mGrid.setColumnCount(8);
     }
 
+    /** Set the text on the displayed board based on the database model. */
+    public void setBoardFromModel(@NonNull final Context context, final Board model) {
+        for (int index = 0; index < 64; index++)
+            getCell(index).setText("");
+        for (String key : model.getKeySet()) {
+            int position = model.getPosition(key);
+            if (position == -1)
+                continue;
+            TextView view = (TextView) mGrid.getChildAt(position);
+            view.setText(model.getDefaultText(position));
+            view.setTextColor(ContextCompat.getColor(context, model.getDefaultColor(position)));
+            view.setTypeface(null, model.getTypeface(position));
+        }
+    }
+
     /** Set the highlight at a given position using a given color resource id. */
     public void setHighlight(Context context, int position, final int colorResId) {
         mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(context, colorResId));
@@ -280,6 +264,22 @@ public class Checkerboard {
             return true;
         }
         return false;
+    }
+
+    /** Return the computed cell size based on the device size provided by the given fragment. */
+    private int getCellSize(@NonNull final BaseFragment fragment) {
+        // Establish the cell size for the checkerboard.
+        DisplayMetrics metrics = fragment.getContext().getResources().getDisplayMetrics();
+        final float pxHeight = metrics.heightPixels;
+        final float pxWidth = metrics.widthPixels;
+        final int unavailableHeight = CONTROLS_HEIGHT + FAB_HEIGHT +
+                (PaneManager.instance.isTablet() ? TABLET_HEIGHT : SMART_PHONE_HEIGHT);
+        final int unavailableWidth = 32;
+        final int boardHeight = Math.round(pxHeight) - getPixels(metrics, unavailableHeight);
+        final int width = Math.round(pxWidth);
+        final int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) -
+                getPixels(metrics, unavailableWidth);
+        return Math.min(boardWidth, boardHeight) / 8;
     }
 
     /** Return a text view representing a cell at a given index of a given size. */

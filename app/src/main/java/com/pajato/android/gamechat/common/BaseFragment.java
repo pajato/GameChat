@@ -199,6 +199,15 @@ public abstract class BaseFragment extends Fragment {
         return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId, ordinal));
     }
 
+    /** Return -1 or the integer valud corresponding to the given string. */
+    protected int getInt(final String value) {
+        try {
+            return value != null ? Integer.parseInt(value) : -1;
+        } catch (NumberFormatException exc) {
+            return -1;
+        }
+    }
+
     /** Return a menu entry for with given title and icon resource items. */
     protected MenuEntry getNoTintEntry(final int titleId, final int iconId) {
         return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId));
