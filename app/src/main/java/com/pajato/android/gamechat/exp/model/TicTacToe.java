@@ -170,6 +170,9 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         return roomKey;
     }
 
+    /** Return the room push key. */
+    @Exclude @Override public boolean getTurn() { return turn; }
+
     /** Return the unseen list. */
     @Exclude @Override public List<String> getUnseenList() { return unseenList; }
 
@@ -219,7 +222,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     }
 
     /** Toggle the turn state. */
-    @Exclude public boolean toggleTurn() {
+    @Exclude @Override public boolean toggleTurn() {
         turn = !turn;
         return turn;
     }

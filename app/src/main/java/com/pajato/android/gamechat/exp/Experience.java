@@ -41,6 +41,9 @@ public interface Experience {
     /** Return the experience room push key. */
     String getRoomKey();
 
+    /** Return the current player turn. */
+    boolean getTurn();
+
     /** Return the experience push key. */
     String getExperienceKey();
 
@@ -67,6 +70,9 @@ public interface Experience {
 
     /** Provide a map of experience properties. */
     Map<String, Object> toMap();
+
+    /** Toggle the turn for the players. */
+    boolean toggleTurn();
 
     /** Return the unseen list. */
     List<String> getUnseenList();

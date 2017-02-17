@@ -178,6 +178,9 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
+    /** Return the room push key. */
+    @Exclude @Override public boolean getTurn() { return turn; }
+
     /** Set the state given a string value. */
     public void setState(final String value) {
         state = value != null ? State.valueOf(value) : null;
@@ -221,7 +224,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     }
 
     /** Toggle the turn state. */
-    @Exclude public boolean toggleTurn() {
+    @Exclude @Override public boolean toggleTurn() {
         turn = !turn;
         return turn;
     }
