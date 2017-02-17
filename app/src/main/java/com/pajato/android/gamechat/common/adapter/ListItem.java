@@ -84,6 +84,7 @@ public class ListItem {
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
+        protectedUserList("Protected user list item with name {%s}, e-mail {%s}, iconUrl {%s} and key {%s}."),
         resourceHeader ("Resource header with id: {%d}."),
         roomsHeader ("Rooms header with id: {%d}."),
         selectUser ("Member item with name {%s}, email: {%s}, and iconUrl {%s}."),
@@ -269,6 +270,8 @@ public class ListItem {
                 return String.format(Locale.US, type.format, name);
             case inviteRoom:
                 return String.format(Locale.US, type.format, name, text);
+            case protectedUserList:
+                return String.format(Locale.US, type.format, name, email, iconUrl, key);
             case resourceHeader:
                 return String.format(Locale.US, type.format, nameResourceId);
             case roomsHeader:

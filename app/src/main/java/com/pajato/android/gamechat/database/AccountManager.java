@@ -115,6 +115,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private class constants.
 
+    /** The account change handler base name */
+    private static final String ACCOUNT_CHANGE_HANDLER = "accountChangeHandler";
+
     /** The database path to an account profile. */
     private static final String ACCOUNT_PATH = "/accounts/%s/";
 
@@ -156,9 +159,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = database.child(path).push().getKey();
 
-        // Check for a chaperone account. If one exists, update this account and leave breadcrumbs
-        // for the chaperone. Due to the authentication rules, this can't be done until after the
-        // new account is created (as only authorized accounts can access the database).
+        // Check for a chaperone account. If one exists, update this account.
         if (mChaperone != null && !mChaperone.equals(account.id)) {
             account.chaperone = mChaperone;
             account.type = AccountType.restricted.name();
@@ -172,9 +173,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         path = String.format(Locale.US, ACCOUNT_PATH, account.id);
         DBUtils.updateChildren(path, account.toMap());
 
-        // Leave the breadcrumbs for the chaperone in the form of an invitation note in the
-        // database. This must be done after the new account has been added, because the database
-        // authorization rules don't allow non-authorized users to have access.
+        // Leave the breadcrumbs for the chaperone account in the database. This must be done after
+        // the new account has been added, because the database authorization rules don't allow
+        // non-authorized users to have access.
         if (mChaperone != null && !mChaperone.equals(account.id)) {
             Map<String, Object> protectedUsers = new HashMap<>();
             protectedUsers.put(mChaperone, account.id);
@@ -342,7 +343,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
 
         AppEventManager.instance.post(new ProfileRoomDeleteEvent(room.key));
-
     }
 
     /** Handle an account change by providing an authentication change on a sign in or sign out. */
@@ -365,6 +365,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     GroupManager.instance.setWatcher(key);
         }
 
+        // Set watchers on any existing protected user accounts
+        for (String pUserId : mCurrentAccount.protectedUsers)
+            ProtectedUserManager.instance.setWatcher(pUserId);
+
         // Check for protected user data and update the account if there are any.
         if (event.account != null) {
             DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
@@ -381,6 +385,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                         return;
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
                         account.protectedUsers.add((String) data.getValue());
+                        ProtectedUserManager.instance.setWatcher((String) data.getValue());
                         data.getRef().removeValue();
                     }
                     AccountManager.instance.updateAccount(account);
@@ -397,7 +402,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
         // Determine if this state represents a User signing in or signing out.
-        String name = "accountChangeHandler";
+        String name = ACCOUNT_CHANGE_HANDLER;
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             Log.i(TAG, "authentication change with FirebaseUser: " + user.getDisplayName());
@@ -510,6 +515,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     Log.d(TAG, "Log out is complete.");
                 }
             });
+    }
+
+    public void stopListeningForAuthChanges() {
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
     /** Update the given account on the database. */

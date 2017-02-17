@@ -46,6 +46,7 @@ import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
@@ -279,11 +280,17 @@ public class MainActivity extends BaseActivity
         AppEventManager.instance.register(MemberManager.instance);
         AppEventManager.instance.register(NavigationManager.instance);
         AppEventManager.instance.register(InvitationManager.instance);
+        AppEventManager.instance.register(ProtectedUserManager.instance);
 
         // Deal with initial sign in via the intro activity and normal processing.
         processIntroPage();
         setContentView(R.layout.activity_main);
         init();
+    }
+
+    @Override public void onStop() {
+        super.onStop();
+        AccountManager.instance.stopListeningForAuthChanges();
     }
 
     // Private instance methods.

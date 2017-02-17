@@ -36,7 +36,6 @@ import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
 
 import static android.view.Menu.NONE;
-import static com.pajato.android.gamechat.common.FragmentType.messageList;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -96,6 +95,7 @@ public enum ToolbarManager {
         expMoveTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        managePUsersTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         selectInviteTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         none ();
 

@@ -86,6 +86,24 @@ public enum RoomManager {
         setWatcher(room.groupKey, room.key);
     }
 
+    /**
+     * Delete a room. Remove the room key from all members. Remove the room from the room map,
+     * remove the watcher and remove the room value from Firebase.
+     */
+    public void deleteRoom(final Room room) {
+        for (String memberId : room.getMemberIdList()) {
+            Account member = MemberManager.instance.getMember(room.groupKey, memberId);
+            if (member != null && member.joinMap.containsKey(room.key)) {
+                member.joinMap.remove(room.key);
+                MemberManager.instance.updateMember(member);
+            }
+        }
+        roomMap.remove(room.key);
+        removeWatcher(room.key);
+        String path = getRoomProfilePath(room.groupKey, room.key);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+    }
+
     /** Update the given room profile on the database. */
     public void updateRoomProfile(final Room room) {
         String path = String.format(Locale.US, ROOM_PROFILE_PATH, room.groupKey, room.key);
@@ -190,6 +208,10 @@ public enum RoomManager {
     /** Handle a room profile change by updating the map. */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
         roomMap.put(event.key, event.room);
+        // If the owner of this room is this account or is one of this account's protected users,
+        // then we need to set watchers on all the members in the room (for use when deleting).
+        for (String memberId : event.room.getMemberIdList())
+            MemberManager.instance.setWatcher(event.room.groupKey, memberId);
     }
 
     /** Remove database listener for the room profile and experience profiles in the room */

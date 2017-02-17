@@ -123,6 +123,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ItemListViewHolder(getView(parent, R.layout.item_join_room));
             case selectUser:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_user));
+            case protectedUserList:
+                return new ItemListViewHolder(getView(parent, R.layout.item_protected_user));
             case inviteCommonRoom:
             case inviteRoom:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_invites_room));
@@ -156,6 +158,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case inviteRoom:
                 case inviteCommonRoom:
                 case inviteGroup:
+                case protectedUserList:
                 case selectUser:
                 case selectableMember:
                 case selectableRoom:
@@ -213,11 +216,18 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 if (group.key.equals(AccountManager.instance.getMeGroupKey()))
                     break;
                 // Set leave or delete icon
-                holder.optIcon.setTag(item);
+                holder.endIcon.setTag(item);
                 if (group.owner.equals(AccountManager.instance.getCurrentAccountId()))
-                    holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
+                    holder.endIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
                 else
-                    holder.optIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
+                    holder.endIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
+                break;
+            case protectedUserList:
+                // Set end icons - in this case there are two
+                holder.endIcon.setTag(item);
+                holder.veryEndIcon.setTag(item);
+                holder.endIcon.setImageResource(R.drawable.ic_call_made_black_24dp);
+                holder.veryEndIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
                 break;
             case chatRoom:
             case expRoom:
@@ -231,11 +241,11 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 if (room.type == ME)
                     break;
                 // Set leave or delete icon
-                holder.optIcon.setTag(item);
+                holder.endIcon.setTag(item);
                 if (room.owner.equals(AccountManager.instance.getCurrentAccountId()))
-                    holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
+                    holder.endIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
                 else
-                    holder.optIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
+                    holder.endIcon.setImageResource(R.drawable.ic_exit_to_app_black_24dp);
                 break;
             case expList:
                 Room expRoom = RoomManager.instance.getRoomProfile(item.roomKey);
@@ -245,8 +255,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                     break;
                 }
                 if (expRoom.owner.equals(AccountManager.instance.getCurrentAccountId())) {
-                    holder.optIcon.setTag(item);
-                    holder.optIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
+                    holder.endIcon.setTag(item);
+                    holder.endIcon.setImageResource(R.drawable.ic_delete_forever_black_24dp);
                 }
                 break;
             default:
@@ -269,6 +279,22 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
             case expList:
                 holder.icon.setImageResource(item.iconResId);
+                break;
+            case protectedUserList:
+                if (item.iconUrl == null) {
+                    holder.icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                } else {
+                    Uri imageUri = Uri.parse(item.iconUrl);
+                    if (imageUri != null) {
+                        // There is an image to load.  Use Glide to do the heavy lifting.
+                        holder.icon.setImageURI(imageUri);
+                        Glide.with(context)
+                                .load(item.iconUrl)
+                                .transform(new NavigationManager.CircleTransform(context))
+                                .into(holder.icon);
+                    } else
+                        holder.icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                }
                 break;
             case message:
             case selectUser:
@@ -364,7 +390,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         TextView count;
         TextView text;
         ImageView icon;
-        ImageView optIcon;
+        ImageView endIcon;
+        ImageView veryEndIcon;
         Button button;
 
         /** Build an instance given the item view. */
@@ -374,9 +401,13 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             count = (TextView) itemView.findViewById(R.id.Count);
             text = (TextView) itemView.findViewById(R.id.Text);
             icon = (ImageView) itemView.findViewById(R.id.ListItemIcon);
-            optIcon = (ImageView) itemView.findViewById(R.id.endIcon);
-            if (optIcon != null) {
-                optIcon.setOnClickListener(endIconListener);
+            endIcon = (ImageView) itemView.findViewById(R.id.endIcon);
+            veryEndIcon = (ImageView) itemView.findViewById(R.id.veryEndIcon);
+            if (endIcon != null) {
+                endIcon.setOnClickListener(endIconListener);
+            }
+            if (veryEndIcon != null) {
+                veryEndIcon.setOnClickListener(endIconListener);
             }
             setSelectorButton(itemView);
             if (button != null) {

@@ -80,7 +80,7 @@ public enum MemberManager {
         return map.get(account.id);
     }
 
-    /** Return null or a group member using the current account holder's id and given group key. */
+    /** Return null or a group member using the specified account id and given group key. */
     public Account getMember(@NonNull final String groupKey, @NonNull final String memberKey) {
         // Determine if there is an expected member account in the given group.  Abort if not.
         // Return the account if so.
