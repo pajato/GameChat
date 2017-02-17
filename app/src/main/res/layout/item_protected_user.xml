@@ -14,7 +14,8 @@ Public License for more details.
 
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
---><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -30,20 +31,18 @@ http://www.gnu.org/licenses
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView style="@style/ListItemTitle" android:id="@+id/Name"
-                    android:layout_weight="1"
-                    tools:text="General"/>
-                <TextView style="@style/ListItemCount" android:id="@+id/Count"
-                    tools:text="3 new"/>
-            </LinearLayout>
+            <TextView style="@style/ListItemTitle" android:id="@+id/Name"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="Kid One"/>
             <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
-                tools:text="TheShovel, ConnorTheWhiz, GrandPop" />
+                tools:text="kid@pajato.com" />
         </LinearLayout>
         <ImageView style="@style/ListItemOptionalImage" android:id="@+id/endIcon"
+            android:tint="@color/colorPrimaryDark"
+            android:contentDescription="@string/ListItemLeaveIconDesc" />
+        <ImageView style="@style/ListItemOptionalImage" android:id="@+id/veryEndIcon"
             android:tint="@color/colorPrimaryDark"
             android:contentDescription="@string/ListItemLeaveIconDesc" />
     </LinearLayout>

@@ -23,7 +23,6 @@ import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.pajato.android.gamechat.common.FragmentType.createExpGroup;
+import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 
 /**
@@ -96,15 +96,13 @@ public class SelectUserFragment extends BaseExperienceFragment {
             case R.string.InviteFriendFromChat:
                 DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 break;
-            case R.string.CreateRestrictedUserTitle:
+            case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.getCurrentAccount().chaperone != null) {
-                    String protectedWarning = "Protected Users cannot make other Protected Users.";
+                    String protectedWarning = "Protected Users cannot manage other Protected Users.";
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                AccountManager.instance.mChaperone = AccountManager.instance.getCurrentAccountId();
-                FirebaseAuth.getInstance().signOut();
-                AccountManager.instance.signIn(getContext());
+                DispatchManager.instance.chainFragment(getActivity(), protectedUsers, null);
                 break;
             default:
                 break;
@@ -134,8 +132,8 @@ public class SelectUserFragment extends BaseExperienceFragment {
         if (!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle,
                     R.drawable.ic_group_add_black_24dp));
-            menu.add(getTintEntry(R.string.CreateRestrictedUserTitle,
-                    R.drawable.ic_person_add_black_24px));
+            menu.add(getTintEntry(R.string.ManageRestrictedUserTitle,
+                    R.drawable.ic_verified_user_black_24dp));
         }
         menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));
         return menu;

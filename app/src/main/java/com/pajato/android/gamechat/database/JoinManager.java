@@ -93,7 +93,6 @@ public enum JoinManager {
 
         // Abort if the room wasn't returned or if the room has already been joined. Otherwise
         // update and persist the member join list.
-
         if (room == null || member.joinMap.keySet().contains(room.key))
             return;
         member.joinMap.put(room.key, true);

@@ -42,6 +42,7 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 
@@ -291,6 +292,8 @@ public abstract class BaseFragment extends Fragment {
                 return ExperienceManager.instance.getListItemData(item);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
+            case protectedUsers:
+                return ProtectedUserManager.instance.getProtectedUsersItemData();
             case messageList:   // Get the data to be shown in a room.
                 return MessageManager.instance.getListItemData(item);
             case selectExpGroupsRooms:

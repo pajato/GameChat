@@ -77,7 +77,7 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
 
     /** Return a partially populated account. The database manager will finish the job. */
     private Account getAccount(final FirebaseUser user) {
-        long tstamp = new Date().getTime();
+        long tStamp = new Date().getTime();
         Account account = new Account();
         account.id = user.getUid();
         account.email = user.getEmail();
@@ -85,14 +85,13 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
         account.url = getPhotoUrl(user);
         account.providerId = user.getProviderId();
         account.type = AccountManager.AccountType.standard.name();
-        account.createTime = tstamp;
-
+        account.createTime = tStamp;
         return account;
     }
 
     /** Obtain a suitable Uri to use for the User's icon. */
     private String getPhotoUrl(FirebaseUser user) {
-        // TODO: figure out how to handle a generated icon ala Inbox, Gmail and Hangouts.
+        // TODO: figure out how to handle a generated icon ala Inbox, GMail and Hangouts.
         Uri icon = user.getPhotoUrl();
         return icon != null ? icon.toString() : null;
     }

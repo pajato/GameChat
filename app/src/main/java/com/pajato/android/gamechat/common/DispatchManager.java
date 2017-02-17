@@ -189,6 +189,7 @@ public enum DispatchManager {
             case createRoom:
             case experienceList:
             case joinRoom:
+            case protectedUsers:
             case messageList:
             case selectChatGroupsRooms:
             case selectExpGroupsRooms:

@@ -21,7 +21,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -45,6 +44,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
+import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
 import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 
@@ -94,9 +94,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                AccountManager.instance.mChaperone = AccountManager.instance.getCurrentAccountId();
-                FirebaseAuth.getInstance().signOut();
-                AccountManager.instance.signIn(getContext());
+                DispatchManager.instance.chainFragment(getActivity(), protectedUsers, null);
                 break;
             case R.id.inviteFriends:
                 DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);

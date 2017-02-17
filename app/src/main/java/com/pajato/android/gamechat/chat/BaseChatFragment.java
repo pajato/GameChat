@@ -37,6 +37,7 @@ import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MessageManager;
+import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 
 import java.util.List;
@@ -96,6 +97,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 case chatRoomList:
                 case selectChatGroupsRooms:
                 case selectExpGroupsRooms:
+                case protectedUsers:
                 case messageList:   // Update the state of the list adapter.
                     updateAdapterList();
                     break;
@@ -150,6 +152,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 return true;
             case createRoom:
             case joinRoom:
+            case protectedUsers:
             case chatRoomList:  // The rooms in a group need the group key.
                 if (dispatcher.groupKey == null)
                     return false;
@@ -183,7 +186,8 @@ public abstract class BaseChatFragment extends BaseFragment {
                 FabManager.chat.toggle(this);
                 break;
             case R.id.endIcon:
-                // Click on the end item icon
+            case R.id.veryEndIcon:
+                // Click on the end (or very end) item icon
                 processEndIconClick(view);
                 break;
             default:
@@ -200,6 +204,13 @@ public abstract class BaseChatFragment extends BaseFragment {
             return;
         ListItem item = (ListItem) view.getTag();
         switch (item.type) {
+            case protectedUserList:
+                if (view.getId() == (R.id.veryEndIcon)) {
+                    processDeleteProtectedUserClick(item);
+                } else {
+                    processPromoteProtectedUserClick(item);
+                }
+                break;
             case expGroup:
             case chatGroup:
                 handleLeaveGroupClick(item);
@@ -213,6 +224,41 @@ public abstract class BaseChatFragment extends BaseFragment {
         }
     }
 
+    /** Handle click on item to promote a protected user */
+    private void processPromoteProtectedUserClick(final ListItem item) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.PromoteUserTitle)
+                .setMessage(String.format(getString(R.string.PromoteUserConfirm),
+                        item.name))
+                .setNegativeButton(android.R.string.cancel, null) // dismiss
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                ProtectedUserManager.instance.promoteUser(item.key);
+                            }
+                        })
+                .create()
+                .show();
+    }
+
+    /** Handle click on item to delete a protected user */
+    private void processDeleteProtectedUserClick(final ListItem item) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.DeleteUserTitle)
+                .setMessage(String.format(getString(R.string.DeleteUserConfirm),
+                        item.name))
+                .setNegativeButton(android.R.string.cancel, null) // dismiss
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                ProtectedUserManager.instance.deleteProtectedUser(item.key);
+                            }
+                        })
+                .create()
+                .show();
+    }
     /** Handle click on item to leave (or delete) group */
     private void handleLeaveGroupClick(final ListItem item) {
         final Group group = GroupManager.instance.getGroupProfile(item.groupKey);
