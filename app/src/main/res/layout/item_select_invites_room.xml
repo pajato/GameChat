@@ -18,8 +18,12 @@
             android:gravity="center_vertical"
             android:orientation="vertical">
             <TextView style="@style/ListItemTitle" android:id="@+id/Name"
+                android:ellipsize="end"
+                android:maxLines="1"
                 tools:text="Fred C. Jones"/>
             <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
+                android:ellipsize="end"
+                android:maxLines="1"
                 tools:text="The Jones Boys Group" />
         </LinearLayout>
     </LinearLayout>
