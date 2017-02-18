@@ -237,6 +237,8 @@ public enum JoinManager {
             return room;
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();
+        member.joinMap.put(roomKey, true);
+        MemberManager.instance.updateMember(member);
 
         // Build, update and persist a room object adding the two principals as members.
         long tStamp = new Date().getTime();
