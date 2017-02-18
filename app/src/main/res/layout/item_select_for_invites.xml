@@ -18,6 +18,8 @@
             android:gravity="center_vertical"
             android:orientation="vertical">
             <TextView style="@style/ListItemTitle" android:id="@+id/Name"
+                android:ellipsize="end"
+                android:maxLines="1"
                 tools:text="My Group Name"/>
         </LinearLayout>
     </LinearLayout>
