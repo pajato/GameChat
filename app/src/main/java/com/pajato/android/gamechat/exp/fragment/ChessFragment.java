@@ -131,6 +131,15 @@ public class ChessFragment extends BaseExperienceFragment {
         }
     }
 
+    /** Handle an experience posting event to see if this is a chess experience. */
+    @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
+        // Check the payload to see if this is not chess.  Abort if not, otherwise resume the game.
+        if (event.experience == null || event.experience.getExperienceType() != ExpType.chessET)
+            return;
+        mExperience = event.experience;
+        resume();
+    }
+
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         if (!this.mActive)
@@ -154,12 +163,12 @@ public class ChessFragment extends BaseExperienceFragment {
         }
     }
 
-    /** Handle an experience posting event to see if this is a chess experience. */
-    @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
-        // Check the payload to see if this is not chess.  Abort if not, otherwise resume the game.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.chessET)
-            return;
-        mExperience = event.experience;
+    /** Handle taking the foreground by updating the UI based on the current experience. */
+    @Override public void onResume() {
+        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
+        // present a spinner.  When an experience is posted by the app event manager, the game can
+        // be shown
+        super.onResume();
         resume();
     }
 
@@ -177,14 +186,7 @@ public class ChessFragment extends BaseExperienceFragment {
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
 
-    /** Handle taking the foreground by updating the UI based on the current experience. */
-    @Override public void onResume() {
-        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
-        // present a spinner.  When an experience is posted by the app event manager, the game can
-        // be shown
-        super.onResume();
-        resume();
-    }
+    // Protected instance methods.
 
     /** Return a default, partially populated, Chess experience. */
     @Override
@@ -209,24 +211,6 @@ public class ChessFragment extends BaseExperienceFragment {
         mExperience = model;
         if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
         else reportError(context, R.string.ErrorChessCreation, groupKey, roomKey);
-    }
-
-    /** Notify the user about an error and log it. */
-    private void reportError(final Context context, final int messageResId, String... args) {
-        // Let the User know that something is amiss.
-        String message = context.getString(messageResId);
-        NotificationManager.instance.notifyNoAction(this, message);
-
-        // Generate a logcat item casing on the given resource id.
-        String format;
-        switch (messageResId) {
-            case R.string.ErrorChessCreation:
-                format = "Failed to create a Chess experience with group/room keys: {%s/%s}";
-                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
-                break;
-            default:
-                break;
-        }
     }
 
     /** Return a possibly null list of chess player information. */
@@ -269,206 +253,7 @@ public class ChessFragment extends BaseExperienceFragment {
         return result;
     }
 
-    /** Return a done message text to show in a snackbar.  The given model provides the state. */
-    private String getDoneMessage(final Chess model) {
-        // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWinningPlayerName();
-        if (name == null) return getString(R.string.TieMessageNotification);
-
-        // There was a winner.  Return a congratulatory message.
-        String format = getString(R.string.WinMessageNotificationFormat);
-        return String.format(Locale.getDefault(), format, name);
-    }
-
-    /** Return the Chess model class, null if it does not exist. */
-    private Chess getModel() {
-        if (mExperience == null || !(mExperience instanceof Chess)) return null;
-        return (Chess) mExperience;
-    }
-
-    /** Handle a new game by resetting the data model. */
-    private void handleNewGame() {
-        // Ensure that the data model exists and is valid.  If not, abort with an error, otherwise
-        // reset the data model, update the database and clear the notification data.
-        Chess model = getModel();
-        if (model == null) {
-            Log.e(TAG, "Null Chess data model.", new Throwable());
-            return;
-        }
-        model.board = null;
-        model.state = active;
-        ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /** Process a resumption by testing and waiting for the experience. */
-    private void resume() {
-        if (getModel() == null)
-            // Disable the layout and startup the spinner.
-            mLayout.setVisibility(View.GONE);
-        else {
-            // Start the game and update the views using the current state of the experience.
-            mLayout.setVisibility(View.VISIBLE);
-            updateUiFromExperience();
-        }
-    }
-
-    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
-    private void setPlayerIcons(final boolean turn) {
-        // Alternate the decorations on each player symbol.
-        if (turn)
-            // Make player1's decorations the more prominent.
-            setPlayerIcons(R.id.leftIndicator1, R.id.rightIndicator1,
-                    R.id.leftIndicator2, R.id.rightIndicator2);
-        else
-            // Make player2's decorations the more prominent.
-            setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
-                    R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
-    /** Manage a particular player's symbol decorations. */
-    private void setPlayerIcons(final int largeLeft, final int largeRight,
-                                final int smallLeft, final int smallRight) {
-
-        // Collect all the pertinent textViews.
-        TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
-        TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
-        TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
-        TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
-
-        // Deal with the tvLarger symbol's decorations.
-        tvLargeLeft.setVisibility(View.VISIBLE);
-        tvLargeRight.setVisibility(View.VISIBLE);
-
-        // Deal with the tvSmall symbol's decorations.
-        tvSmallLeft.setVisibility(View.INVISIBLE);
-        tvSmallRight.setVisibility(View.INVISIBLE);
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerName(final int resId, final int index, final Chess model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
-        TextView name = (TextView) mLayout.findViewById(resId);
-        if (name == null) return;
-        name.setText(model.players.get(index).name);
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerWinCount(final int resId, final int index, final Chess model) {
-        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
-        // if it does.
-        TextView winCount = (TextView) mLayout.findViewById(resId);
-        if (winCount == null) return;
-        winCount.setText(String.valueOf(model.players.get(index).winCount));
-    }
-
-    /** Update the game state. */
-    private void setState(final Chess model) {
-        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
-        String message = null;
-        switch (model.state) {
-            case primary_wins:
-            case secondary_wins:
-                String name = model.getWinningPlayerName();
-                String format = getString(R.string.WinMessageFormat);
-                message = String.format(Locale.getDefault(), format, name);
-                break;
-            case tie:
-                message = getString(R.string.StalemateMessage);
-                break;
-            default:
-                // keep playing or waiting for a new game
-                break;
-        }
-        // Determine if the game has ended (winner or time). Abort if not.
-        if (message == null)
-            return;
-
-        // Update the UI to celebrate the winner or a tie and update the database game state to
-        // pending.
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        winner.setText(message);
-        winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
-        model.state = pending;
-        ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /** Set up the game board based on the data model state. */
-    private void setGameBoard(@NonNull final Chess model) {
-        // Determine if the model has any pieces to put on the board.  If not reset the board model.
-        if (model.board == null)
-            model.board = new ChessBoard(getContext(), model, mBoard);
-        else
-            mBoard.setBoardFromModel(getContext(), model.board);
-        handleTurnChangeNew(false);
-   }
-
-    /** Update the UI using the current experience state from the database. */
-    private void updateUiFromExperience() {
-        // Ensure that a valid experience exists.  Abort if not.
-        if (mExperience == null || !(mExperience instanceof Chess)) return;
-
-        // A valid experience is available. Use the data model to populate the UI and check if the
-        // game is finished.
-        Chess model = (Chess) mExperience;
-        setRoomName(mExperience);
-        setPlayerName(R.id.player1Name, 0, model);
-        setPlayerName(R.id.player2Name, 1, model);
-        setPlayerWinCount(R.id.player1WinCount, 0, model);
-        setPlayerWinCount(R.id.player2WinCount, 1, model);
-        setPlayerIcons(model.turn);
-        setGameBoard(model);
-        setState(model);
-    }
-
-    /**
-     * showPossibleMoves handles highlighting possible movement options of a clicked piece,
-     * then on a subsequent click it removes those highlights.
-     *
-     * @param indexClicked the index of the tile clicked.
-     * @param board a ChessBoard object
-     * @return true if we've made any updates that should be written to the database; false otherwise
-     */
-    private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
-        // If the game is over, we don't need to do anything, so return.  Otherwise find the
-        // possible moves for the selected piece.
-        if (checkFinished(board))
-            return false;
-        boolean hasChanged = false;
-        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        List<Integer> possibleMoves = new ArrayList<>();
-        findPossibleMoves(highlightedIndex, possibleMoves, board);
-
-        // If a highlighted tile exists, we remove the highlight on it and its movement options.
-        if (mIsHighlighted) {
-            mBoard.handleTileBackground(getContext(), highlightedIndex, mHighlightedTile);
-
-            for (int possiblePosition : possibleMoves) {
-                // If the tile clicked is one of the possible positions, and it's the correct
-                // turn/piece combination, the piece moves there.
-                if (indexClicked == possiblePosition) {
-                    boolean capturesPiece = board.containsPiece(indexClicked);
-                    handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
-                    hasChanged = true;
-                }
-                TextView tile = mBoard.getCell(possiblePosition);
-                mBoard.handleTileBackground(getContext(), possiblePosition, tile);
-            }
-            mHighlightedTile = null;
-
-        // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
-        } else {
-            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
-                    android.R.color.holo_red_dark));
-            for(int possiblePosition : possibleMoves)
-                mBoard.setHighlight(getContext(), possiblePosition, android.R.color.holo_red_light);
-        }
-
-        mIsHighlighted = !mIsHighlighted;
-
-        return hasChanged;
-    }
+    // Private instance methods.
 
     /**
      * Checks to see if the game is over or not by counting the primary / secondary kings are
@@ -500,15 +285,6 @@ public class ChessFragment extends BaseExperienceFragment {
             return true;
         }
         return false;
-    }
-
-    /** Return the home FAM used in the top level show games and show no games fragments. */
-    private List<MenuEntry> getChessMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
-        return menu;
     }
 
     /**
@@ -553,6 +329,46 @@ public class ChessFragment extends BaseExperienceFragment {
                         castlingBooleans);
                 break;
         }
+    }
+
+    /** Return the home FAM used in the top level show games and show no games fragments. */
+    private List<MenuEntry> getChessMenu() {
+        final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
+        return menu;
+    }
+
+    /** Return a done message text to show in a snackbar.  The given model provides the state. */
+    private String getDoneMessage(final Chess model) {
+        // Determine if there is a winner.  If not, return the "tie" message.
+        String name = model.getWinningPlayerName();
+        if (name == null) return getString(R.string.TieMessageNotification);
+
+        // There was a winner.  Return a congratulatory message.
+        String format = getString(R.string.WinMessageNotificationFormat);
+        return String.format(Locale.getDefault(), format, name);
+    }
+
+    /** Return the Chess model class, null if it does not exist. */
+    private Chess getModel() {
+        if (mExperience == null || !(mExperience instanceof Chess)) return null;
+        return (Chess) mExperience;
+    }
+
+    /** Handle a new game by resetting the data model. */
+    private void handleNewGame() {
+        // Ensure that the data model exists and is valid.  If not, abort with an error, otherwise
+        // reset the data model, update the database and clear the notification data.
+        Chess model = getModel();
+        if (model == null) {
+            Log.e(TAG, "Null Chess data model.", new Throwable());
+            return;
+        }
+        model.board = null;
+        model.state = active;
+        ExperienceManager.instance.updateExperience(mExperience);
     }
 
     /**
@@ -712,6 +528,194 @@ public class ChessFragment extends BaseExperienceFragment {
             rookIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
             rookText.setOnClickListener(new Promoter(position, team, pawnChooser));
         }
+    }
+
+    /** Notify the user about an error and log it. */
+    private void reportError(final Context context, final int messageResId, String... args) {
+        // Let the User know that something is amiss.
+        String message = context.getString(messageResId);
+        NotificationManager.instance.notifyNoAction(this, message);
+
+        // Generate a logcat item casing on the given resource id.
+        String format;
+        switch (messageResId) {
+            case R.string.ErrorChessCreation:
+                format = "Failed to create a Chess experience with group/room keys: {%s/%s}";
+                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Process a resumption by testing and waiting for the experience. */
+    private void resume() {
+        if (getModel() == null)
+            // Disable the layout and startup the spinner.
+            mLayout.setVisibility(View.GONE);
+        else {
+            // Start the game and update the views using the current state of the experience.
+            mLayout.setVisibility(View.VISIBLE);
+            updateUiFromExperience();
+        }
+    }
+
+    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
+    private void setPlayerIcons(final boolean turn) {
+        // Alternate the decorations on each player symbol.
+        if (turn)
+            // Make player1's decorations the more prominent.
+            setPlayerIcons(R.id.leftIndicator1, R.id.rightIndicator1,
+                    R.id.leftIndicator2, R.id.rightIndicator2);
+        else
+            // Make player2's decorations the more prominent.
+            setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
+                    R.id.leftIndicator1, R.id.rightIndicator1);
+    }
+
+    /** Manage a particular player's symbol decorations. */
+    private void setPlayerIcons(final int largeLeft, final int largeRight,
+                                final int smallLeft, final int smallRight) {
+
+        // Collect all the pertinent textViews.
+        TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
+        TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
+        TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
+        TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
+
+        // Deal with the tvLarger symbol's decorations.
+        tvLargeLeft.setVisibility(View.VISIBLE);
+        tvLargeRight.setVisibility(View.VISIBLE);
+
+        // Deal with the tvSmall symbol's decorations.
+        tvSmallLeft.setVisibility(View.INVISIBLE);
+        tvSmallRight.setVisibility(View.INVISIBLE);
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerName(final int resId, final int index, final Chess model) {
+        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
+        // does.
+        TextView name = (TextView) mLayout.findViewById(resId);
+        if (name == null) return;
+        name.setText(model.players.get(index).name);
+    }
+
+    /** Set the name for a given player index. */
+    private void setPlayerWinCount(final int resId, final int index, final Chess model) {
+        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
+        // if it does.
+        TextView winCount = (TextView) mLayout.findViewById(resId);
+        if (winCount == null) return;
+        winCount.setText(String.valueOf(model.players.get(index).winCount));
+    }
+
+    /** Update the game state. */
+    private void setState(final Chess model) {
+        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
+        String message = null;
+        switch (model.state) {
+            case primary_wins:
+            case secondary_wins:
+                String name = model.getWinningPlayerName();
+                String format = getString(R.string.WinMessageFormat);
+                message = String.format(Locale.getDefault(), format, name);
+                break;
+            case tie:
+                message = getString(R.string.StalemateMessage);
+                break;
+            default:
+                // keep playing or waiting for a new game
+                break;
+        }
+        // Determine if the game has ended (winner or time). Abort if not.
+        if (message == null)
+            return;
+
+        // Update the UI to celebrate the winner or a tie and update the database game state to
+        // pending.
+        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        winner.setText(message);
+        winner.setVisibility(View.VISIBLE);
+        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
+        model.state = pending;
+        ExperienceManager.instance.updateExperience(mExperience);
+    }
+
+    /** Set up the game board based on the data model state. */
+    private void setGameBoard(@NonNull final Chess model) {
+        // Determine if the model has any pieces to put on the board.  If not reset the board model.
+        if (model.board == null)
+            model.board = new ChessBoard(getContext(), model, mBoard);
+        else
+            mBoard.setBoardFromModel(getContext(), model.board);
+        handleTurnChangeNew(false);
+   }
+
+    /**
+     * showPossibleMoves handles highlighting possible movement options of a clicked piece,
+     * then on a subsequent click it removes those highlights.
+     *
+     * @param indexClicked the index of the tile clicked.
+     * @param board a ChessBoard object
+     * @return true if we've made any updates that should be written to the database; false otherwise
+     */
+    private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
+        // If the game is over, we don't need to do anything, so return.  Otherwise find the
+        // possible moves for the selected piece.
+        if (checkFinished(board))
+            return false;
+        boolean hasChanged = false;
+        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
+        List<Integer> possibleMoves = new ArrayList<>();
+        findPossibleMoves(highlightedIndex, possibleMoves, board);
+
+        // If a highlighted tile exists, we remove the highlight on it and its movement options.
+        if (mIsHighlighted) {
+            mBoard.handleTileBackground(getContext(), highlightedIndex, mHighlightedTile);
+
+            for (int possiblePosition : possibleMoves) {
+                // If the tile clicked is one of the possible positions, and it's the correct
+                // turn/piece combination, the piece moves there.
+                if (indexClicked == possiblePosition) {
+                    boolean capturesPiece = board.containsPiece(indexClicked);
+                    handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
+                    hasChanged = true;
+                }
+                TextView tile = mBoard.getCell(possiblePosition);
+                mBoard.handleTileBackground(getContext(), possiblePosition, tile);
+            }
+            mHighlightedTile = null;
+
+        // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
+        } else {
+            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
+                    android.R.color.holo_red_dark));
+            for(int possiblePosition : possibleMoves)
+                mBoard.setHighlight(getContext(), possiblePosition, android.R.color.holo_red_light);
+        }
+
+        mIsHighlighted = !mIsHighlighted;
+
+        return hasChanged;
+    }
+
+    /** Update the UI using the current experience state from the database. */
+    private void updateUiFromExperience() {
+        // Ensure that a valid experience exists.  Abort if not.
+        if (mExperience == null || !(mExperience instanceof Chess)) return;
+
+        // A valid experience is available. Use the data model to populate the UI and check if the
+        // game is finished.
+        Chess model = (Chess) mExperience;
+        setRoomName(mExperience);
+        setPlayerName(R.id.player1Name, 0, model);
+        setPlayerName(R.id.player2Name, 1, model);
+        setPlayerWinCount(R.id.player1WinCount, 0, model);
+        setPlayerWinCount(R.id.player2WinCount, 1, model);
+        setPlayerIcons(model.turn);
+        setGameBoard(model);
+        setState(model);
     }
 
     private class Promoter implements View.OnClickListener {
