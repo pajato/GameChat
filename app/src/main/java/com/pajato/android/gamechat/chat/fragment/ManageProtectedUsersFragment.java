@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
+import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -97,6 +98,13 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
                 break;
         }
 
+    }
+
+    /** Handle protected user deleted events by updating the adapter */
+    @Subscribe public void onProtectedUserDeleted(ProtectedUserDeleteEvent event) {
+        if (!mActive)
+            return;
+        updateAdapterList();
     }
 
     /** Handle protected user changed events by updating the adapter */

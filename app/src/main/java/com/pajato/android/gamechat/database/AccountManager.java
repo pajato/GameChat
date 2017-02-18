@@ -119,7 +119,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     private static final String ACCOUNT_CHANGE_HANDLER = "accountChangeHandler";
 
     /** The database path to an account profile. */
-    private static final String ACCOUNT_PATH = "/accounts/%s/";
+    public static final String ACCOUNT_PATH = "/accounts/%s/";
 
     /** The logcat tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
@@ -366,8 +366,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
 
         // Set watchers on any existing protected user accounts
-        for (String pUserId : mCurrentAccount.protectedUsers)
-            ProtectedUserManager.instance.setWatcher(pUserId);
+        if (mCurrentAccount != null)
+            for (String pUserId : mCurrentAccount.protectedUsers)
+                ProtectedUserManager.instance.setWatcher(pUserId);
 
         // Check for protected user data and update the account if there are any.
         if (event.account != null) {
