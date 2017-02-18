@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -28,6 +29,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.ProtectedUserChangeHandler;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
+import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -67,6 +69,10 @@ public enum ProtectedUserManager {
         if (protectedAccount == null)
             return;
 
+        // Delete the protected user's me group
+        String path = String.format(GroupManager.GROUPS_PATH + "%s", protectedAccount.groupKey);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+
         // Remove protected user account from all of its groups and rooms. If the protected user
         // owns a room, the room must be deleted. Otherwise, just remove the account from the room
         // member list.
@@ -92,9 +98,15 @@ public enum ProtectedUserManager {
                 group.memberList.remove(protectedAccount.id);
         }
 
+        mProtectedUserAccounts.remove(protectedAccount);
         parentAccount.protectedUsers.remove(accountId);
         removeWatcher(accountId);
+
+        path = String.format(AccountManager.ACCOUNT_PATH, accountId);
+        FirebaseDatabase.getInstance().getReference().child(path).removeValue();
+
         AccountManager.instance.updateAccount(parentAccount);
+        AppEventManager.instance.post(new ProtectedUserDeleteEvent(protectedAccount));
     }
 
     /** Get the account for a specified protected user key */
