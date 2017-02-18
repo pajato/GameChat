@@ -479,11 +479,12 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
      */
     private void startInvitationIntent(final FragmentActivity activity, final String groupName) {
         String msgText;
-        // invitation text is limited to 100 characters or less
+        int max = AppInviteInvitation.IntentBuilder.MAX_MESSAGE_LENGTH;
+        // invitation text is limited max size
         if (groupName != null) {
             msgText = String.format(activity.getString(R.string.InviteToGroupFormat), groupName);
-            if (msgText.length() > 100)
-                msgText = msgText.substring(0, 96) + "...";
+            if (msgText.length() > max)
+                msgText = msgText.substring(0, max-4) + "...";
         } else {
             msgText = activity.getString(R.string.InviteMessage);
         }
