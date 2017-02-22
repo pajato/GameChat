@@ -186,6 +186,16 @@ public enum ExperienceManager {
         return getItemListExperiences(item);
     }
 
+    /** Move an experience from one room to another. */
+    public void move(@NonNull final Experience experience, final String gKey, final String rKey) {
+        //String srcGroupKey = experience.getGroupKey();
+        //String srcRoomKey = experience.getRoomKey();
+        experience.setGroupKey(gKey);
+        experience.setRoomKey(rKey);
+        experience.setExperienceKey(null);
+        createExperience(experience);
+    }
+
     /** Handle a account change event by setting up or clearing variables. */
     @Subscribe public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
         // Determine if a User has been authenticated.  If so, do nothing, otherwise clear the
@@ -202,15 +212,11 @@ public enum ExperienceManager {
         AppEventManager.instance.post(new ExpListChangeEvent());
     }
 
-    /** Persist the given experience. */
-    public void updateExperience(final Experience experience) {
-        // Persist the experience.
-        experience.setModTime(new Date().getTime());
-        String groupKey = experience.getGroupKey();
-        String roomKey = experience.getRoomKey();
-        String expKey = experience.getExperienceKey();
-        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
-        FirebaseDatabase.getInstance().getReference().child(path).setValue(experience.toMap());
+    /** Remove a listener for experience changes in the given room */
+    public void removeWatcher(final String roomKey) {
+        String name = DBUtils.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
+        if (DatabaseRegistrar.instance.isRegistered(name))
+            DatabaseRegistrar.instance.unregisterHandler(name);
     }
 
     /** Setup a listener for experience changes in the given room. */
@@ -224,24 +230,16 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
-    /** Remove a listener for experience changes in the given room */
-    public void removeWatcher(final String roomKey) {
-        String name = DBUtils.getHandlerName(EXPERIENCE_LIST_CHANGE_HANDLER, roomKey);
-        if (DatabaseRegistrar.instance.isRegistered(name))
-            DatabaseRegistrar.instance.unregisterHandler(name);
+    /** Persist the given experience. */
+    public void updateExperience(final Experience experience) {
+        // Persist the experience.
+        experience.setModTime(new Date().getTime());
+        String groupKey = experience.getGroupKey();
+        String roomKey = experience.getRoomKey();
+        String expKey = experience.getExperienceKey();
+        String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
+        FirebaseDatabase.getInstance().getReference().child(path).setValue(experience.toMap());
     }
-
-    /** Move an experience from one room to another. */
-    public void move(@NonNull final Experience experience, final String gKey, final String rKey) {
-        //String srcGroupKey = experience.getGroupKey();
-        //String srcRoomKey = experience.getRoomKey();
-        experience.setGroupKey(gKey);
-        experience.setRoomKey(rKey);
-        experience.setExperienceKey(null);
-        createExperience(experience);
-    }
-
-    // Private instance methods.
 
     // Private instance methods.
 

@@ -17,19 +17,18 @@
 
 package com.pajato.android.gamechat.exp.checkers;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
 import com.pajato.android.gamechat.exp.Board;
-import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.Team;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.pajato.android.gamechat.exp.checkers.CheckersPiece.PieceType.PIECE;
+import static com.pajato.android.gamechat.exp.Team.PRIMARY;
+import static com.pajato.android.gamechat.exp.Team.SECONDARY;
 
 /**
  * Provide a POJO representing a Chess board and methods to modify the board. The basic board is
@@ -52,72 +51,29 @@ public class CheckersBoard implements Board {
     @SuppressWarnings("unused")
     private static final String TAG = CheckersBoard.class.getSimpleName();
 
-    public Map<String, CheckersPiece> pieceMap;
+    private Map<String, CheckersPiece> mPieceMap = new HashMap<>();
 
-    private String makeCellId(final int index) {
-        return CELL_ID + String.valueOf(index);
-    }
+    /** The currently selected piece's position. */
+    private int mSelectedPosition = -1;
 
     // Public constructors.
 
     /** Provide a no-arg constructor for Firebase. */
-    public CheckersBoard() {}
+    @SuppressWarnings("unused") public CheckersBoard() {}
 
-    /** Build an instance that initializes the underlying board. */
-    public CheckersBoard(@NonNull final Context context, final Checkerboard board) {
-        pieceMap = new HashMap<>();
-
-        // Initialize the text on each piece for the start of a game.
-        for (int index = 0; index < 24; index++)
-            board.initBoardModel(context, index, this);
-        for (int index = 40; index < 64; index++)
-            board.initBoardModel(context, index, this);
-
-    }
-
-    /**
-     * Add a piece to the board
-     * @param index index into the board (valid indices are 0->63).
-     * @param type piece type
-     * @param team the team
-     */
+    /** Add a piece of the given type and team to board at the given position. */
     public void add(final int index, final CheckersPiece.PieceType type, final Team team) {
-        pieceMap.put(makeCellId(index), new CheckersPiece(type, team));
+        mPieceMap.put(makeCellId(index), new CheckersPiece(type, team));
     }
 
-    /**
-     * Add the specified piece to the board at the indicated location
-     * @param index board cell index (valid indices are 0->63)
-     * @param p the piece to add
-     */
+    /** Add a particular piece to the board at the given position. */
     public void add(final int index, final CheckersPiece p) {
-        pieceMap.put(makeCellId(index), p);
+        mPieceMap.put(makeCellId(index), p);
     }
 
-    /**
-     * Convenience method to determine if the primary team's king is at the specified cell location
-     * @return true if the primary king is at the specified index
-     */
-    public boolean containsPrimaryKing() {
-        for (int i = 0; i < 64; i++) {
-            if (cellHasTeamPiece(i, CheckersPiece.PieceType.KING, Team.PRIMARY)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Convenience method to determine if the secondary team's king is at the specified cell location
-     * @return true if the secondary king is at the specified index
-     */
-    public boolean containsSecondaryKing() {
-        for (int i = 0; i < 64; i++) {
-            if (cellHasTeamPiece(i, CheckersPiece.PieceType.KING, Team.SECONDARY)) {
-                return true;
-            }
-        }
-        return false;
+    /** Implement the interface to clear the selected piece. */
+    @Override public void clearSelectedPiece() {
+        mSelectedPosition = -1;
     }
 
     /**
@@ -126,52 +82,23 @@ public class CheckersBoard implements Board {
      * @return the removed piece
      */
     public CheckersPiece delete(final int index) {
-        return pieceMap.remove(makeCellId(index));
-    }
-
-    /** Implement the Board interface to return the default piece text color at a given position. */
-    @Override public int getDefaultColor(final int position) {
-        Team team = getTeam(position);
-        if (team == null)
-            return Team.NONE.color;
-        return team.color;
-    }
-
-    /** Implement the Board interface to return the default piece text value at a given position. */
-    @Override public String getDefaultText(final int position) {
-        CheckersPiece.PieceType type = getPieceType(position);
-        if (type == null)
-            return CheckersPiece.PieceType.NONE.text;
-        return type.text;
+        return mPieceMap.remove(makeCellId(index));
     }
 
     /** Return a set of position keys representing active pieces on the board. */
     @Exclude @Override public Set<String> getKeySet() {
-        return pieceMap.keySet();
+        return mPieceMap.keySet();
     }
 
     /** Return a checkers piece given a board index. */
     public CheckersPiece getPiece(final int index) {
-        return pieceMap.get(makeCellId(index));
+        return mPieceMap.get(makeCellId(index));
     }
 
-    /** Return a checkers piece given a cell key. */
-    public CheckersPiece getPiece(final String key) {
-        return pieceMap.get(key);
-    }
-
-    /**
-     * Return the piece type for the piece at the specified index.
-     * @param index index into the board (valid indices are 0->63).
-     * @return the piece type for the piece at the specified location or empty string ("") if none
-     */
-    public CheckersPiece.PieceType getPieceType(final int index) {
-        CheckersPiece p = pieceMap.get(makeCellId(index));
-        if (p == null) {
-            return CheckersPiece.PieceType.NONE;
-        } else {
-            return p.getPieceType();
-        }
+    /** Provide a getter for the piece map to satisfy Firebase. */
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public Map<String, CheckersPiece> getPieces() {
+        return mPieceMap;
     }
 
     /** Implement the interface to return -1 or a position corresponding to a given cell key. */
@@ -183,61 +110,69 @@ public class CheckersBoard implements Board {
         }
     }
 
+    /** Implement the interface to return null or the selected piece. */
+    @Exclude @Override public CheckersPiece getSelectedPiece() {
+        return mSelectedPosition >= 0 ? getPiece(mSelectedPosition) : null;
+    }
+
+    /** Implement the interface to return -1 or the selected position. */
+    @Override public int getSelectedPosition() {
+        return mSelectedPosition;
+    }
+
     /**
      * Return the team id for the piece at the specified index.
      * TODO: Refactor the ChessFragment, ChessHelper & friends to use the enum value, not an int!!
      * @param index index into the board (valid indices are 0->63).
      * @return the team for any piece at the specified location or -1 if none
      */
-    public Team getTeam(final int index) {
-        CheckersPiece p = pieceMap.get(makeCellId(index));
+    @Exclude @Override public Team getTeam(final int index) {
+        CheckersPiece p = mPieceMap.get(makeCellId(index));
         if (p == null) {
             return Team.NONE;
         }
         return p.getTeam();
     }
 
-    /** Implement the interface to the typeface corresponding to a given cell key. */
-    @Override public int getTypeface(final int position) {
-        CheckersPiece piece = pieceMap.get(CELL_ID + String.valueOf(position));
-        if (piece == null)
-            return CheckersPiece.PieceType.NONE.typeface;
-        return piece.getPieceType().typeface;
+    /** Implement the interface by returning TRUE iff there is a piece at the given position. */
+    @Override public boolean hasPiece(final int position) {
+        return getPiece(position) != null;
     }
 
-    /**
-     * Determine if specified piece type for the specified team is at the cell location indicates
-     * @return true if the primary king is at the specified index
-     */
-    public boolean cellHasTeamPiece(final int index, CheckersPiece.PieceType type, Team team) {
-        return getPieceType(index).equals(type) && getTeam(index).equals(team);
+    /** Implement the interface to return TRUE iff there is a selected piece. */
+    @Override public boolean hasSelectedPiece() {
+        return mSelectedPosition >= 0;
     }
 
-    /** Implement the Board interface to setup the default piece at a given position. */
-    @Override public void setDefault(final int position) {
-        String cellId = "cell" + String.valueOf(position);
-        switch (position) {
-            case 0: case 2: case 4: case 6:
-            case 9: case 11: case 13: case 15:
-            case 16: case 18: case 20: case 22:
-                // Handle the secondary team (black) rooks.
-                pieceMap.put(cellId, new CheckersPiece(PIECE, Team.SECONDARY));
-                break;
-            case 40: case 42: case 44: case 46:
-            case 49: case 51: case 53: case 55:
-            case 56: case 58: case 60: case 62:
-                // Handle the primary team (white) pawns.
-                pieceMap.put(cellId, new CheckersPiece(PIECE, Team.PRIMARY));
-                break;
-            default:
-                break;
-        }
+    /** Initialize the board. */
+    public void init() {
+        // Set the pieces for each team.
+        setPiecesForTeam(SECONDARY, 1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23);
+        setPiecesForTeam(PRIMARY, 40, 42, 44, 46, 49, 51, 53, 55, 56, 58, 60, 62);
     }
 
-    /** Provide a default map for a Firebase create/update. */
-    public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("board", pieceMap);
-        return result;
+    /** Provide a setter for the piece map to satisfy Firebase. */
+    @SuppressWarnings("unused")
+    public void setPieces(final Map<String, CheckersPiece> pieceMap) {
+        mPieceMap = pieceMap;
+    }
+
+    /** Implement the interface to set the piece with the given index as the selected piece. */
+    @Override public void setSelectedPosition(final int position) {
+        mSelectedPosition = position;
+    }
+
+    // Private instance methods.
+
+    /** Generate a Firebase safe position key (not a pure integer). */
+    private String makeCellId(final int position) {
+        return CELL_ID + String.valueOf(position);
+    }
+
+    /** Initialize one more pieces of given type and team at the given indexed positions. */
+    private void setPiecesForTeam(final Team team, final int... positions) {
+        CheckersPiece piece = new CheckersPiece(CheckersPiece.PieceType.PIECE, team);
+        for (int position : positions)
+            mPieceMap.put(CELL_ID + String.valueOf(position), piece);
     }
 }

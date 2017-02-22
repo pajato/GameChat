@@ -1,4 +1,5 @@
 <resources>
+    <string name="CheckText">Check!</string>
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessImageDesc">Chess image.</string>
     <string name="ErrorCheckersCreation">Error: cannot create a Checkers experience</string>
@@ -51,4 +52,5 @@
     <string name="wins">wins</string>
     <string name="xValue">X</string>
     <string name="SelectUserListIcon">Select User</string>
+    <string name="PlayOutOfTurnMessageText">Please wait for your turn.</string>
 </resources>

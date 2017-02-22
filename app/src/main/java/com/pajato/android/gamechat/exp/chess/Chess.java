@@ -2,15 +2,19 @@ package com.pajato.android.gamechat.exp.chess;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.State;
 import com.pajato.android.gamechat.exp.model.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.exp.ExpType.chessET;
+import static com.pajato.android.gamechat.exp.State.active;
 
 /**
  *  Provide a Firebase model class for a chess game experience.
@@ -19,12 +23,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
  */
 @IgnoreExtraProperties public class Chess implements Experience {
 
-    /** The set of state constants for a chess game. */
-    public enum State {active, check, pending, primary_wins, secondary_wins, tie}
-
-    /**
-     * A map of board position (0->63) to piece object.
-     */
+    /** A map of board position (0->63) to piece object. */
     public ChessBoard board;
 
     /** The creation timestamp. */
@@ -64,7 +63,7 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     public String type;
 
     /** A list of users (by account identifier) in the room, that have not yet seen the message. */
-    public List<String> unseenList;
+    private List<String> unseenList = new ArrayList<>();
 
     /** The experience icon url. */
     public String url;
@@ -93,9 +92,10 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     @SuppressWarnings("unused") public Chess() {}
 
     /** Build a default Checkers using the given parameters and defaulting the rest. */
-    public Chess(final String key, final String id, final int level, final String name,
-                    final long createTime, final String groupKey, final String roomKey,
-                    final List<Player> players) {
+    public Chess(final ChessBoard board, final String key, final String id, final int level,
+                 final String name, final long createTime, final String groupKey,
+                 final String roomKey, final List<Player> players) {
+        this.board = board;
         this.createTime = createTime;
         this.key = key;
         this.groupKey = groupKey;
@@ -105,10 +105,12 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
-        state = State.active;
+        state = active;
         turn = true;
         type = chessET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_chess";
+        // TODO: convert the following into a map that is empty by default, something like:
+        // Map<Integer (default position), Boolean> castlingMap = new HashMap<>();
         primaryQueenSideRookHasMoved = false;
         primaryKingSideRookHasMoved = false;
         primaryKingHasMoved = false;
@@ -118,35 +120,15 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
     }
 
-    /** Provide a default map for a Firebase create/update. */
-    @Exclude @Override public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("board", board);
-        result.put("createTime", createTime);
-        result.put("key", key);
-        result.put("level", level);
-        result.put("groupKey", groupKey);
-        result.put("modTime", modTime);
-        result.put("name", name);
-        result.put("owner", owner);
-        result.put("players", players);
-        result.put("roomKey", roomKey);
-        result.put("state", state.name());
-        result.put("turn", turn);
-        result.put("type", type);
-        result.put("unseenList", unseenList);
-        result.put("url", url);
-        result.put("primaryQueenSideRookHasMoved", primaryQueenSideRookHasMoved);
-        result.put("primaryKingSideRookHasMoved", primaryKingSideRookHasMoved);
-        result.put("primaryKingHasMoved", primaryKingHasMoved);
-        result.put("secondaryQueenSideRookHasMoved", secondaryQueenSideRookHasMoved);
-        result.put("secondaryKingSideRookHasMoved", secondaryKingSideRookHasMoved);
-        result.put("secondaryKingHasMoved", secondaryKingHasMoved);
-        return result;
+    // Public instance methods.
+
+    /** Implement the interface by returning the chess board. */
+    @Override public Board getBoard() {
+        return board;
     }
 
     /** Return the create time to satisfy the Experience contract. */
-    @Override public long getCreateTime() {
+    @Exclude @Override public long getCreateTime() {
         return createTime;
     }
 
@@ -178,16 +160,47 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
     /** Return the room push key. */
     @Exclude @Override public String getRoomKey() { return roomKey; }
 
+    /** Implement the interface by returning the list of players. */
+    @Exclude @Override public List<Player> getPlayers() {
+        return players;
+    }
+
+    /** Return the state value for Firebase. */
+    public String getState() {
+        return state.name();
+    }
+
+    /** Implement the interface by returning the experience state. */
+    @Exclude @Override public State getStateType() {
+        return state;
+    }
+
     /** Return the room push key. */
     @Exclude @Override public boolean getTurn() { return turn; }
 
-    /** Set the state given a string value. */
-    public void setState(final String value) {
-        state = value != null ? State.valueOf(value) : null;
-    }
-
     /** Return the unseen list. */
     @Exclude @Override public List<String> getUnseenList() { return unseenList; }
+
+    /** Implement the interface by returning null or the winning player. */
+    @Exclude @Override public Player getWinningPlayer() {
+        switch (state) {
+            case primary_wins:
+                // Assumes 'primary' player is at index 0
+                return players.get(0);
+            case secondary_wins:
+                // Assumes 'primary' player is at index 1
+                return players.get(1);
+            default:
+                return null;
+        }
+    }
+
+    /** Set the experience key to satisfy the Experience contract. */
+    @Exclude @Override public void reset() {
+        board = new ChessBoard();
+        board.init();
+        state = active;
+    }
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
@@ -209,6 +222,16 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         modTime = value;
     }
 
+    /** Set the state given a string value. */
+    public void setState(final String value) {
+        state = value != null ? State.valueOf(value) : null;
+    }
+
+    /** Implement the interface by setting the experience state. */
+    @Exclude @Override public void setStateType(final State value) {
+        state = value;
+    }
+
     /** Update the win count based on the current state. */
     @Exclude @Override public void setWinCount() {
         switch (state) {
@@ -223,26 +246,36 @@ import static com.pajato.android.gamechat.exp.ExpType.chessET;
         }
     }
 
+    /** Provide a default map for a Firebase create/update. */
+    @Exclude @Override public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("board", board);
+        result.put("createTime", createTime);
+        result.put("key", key);
+        result.put("level", level);
+        result.put("groupKey", groupKey);
+        result.put("modTime", modTime);
+        result.put("name", name);
+        result.put("owner", owner);
+        result.put("players", players);
+        result.put("roomKey", roomKey);
+        result.put("state", getState());
+        result.put("turn", turn);
+        result.put("type", type);
+        result.put("unseenList", unseenList);
+        result.put("url", url);
+        result.put("primaryQueenSideRookHasMoved", primaryQueenSideRookHasMoved);
+        result.put("primaryKingSideRookHasMoved", primaryKingSideRookHasMoved);
+        result.put("primaryKingHasMoved", primaryKingHasMoved);
+        result.put("secondaryQueenSideRookHasMoved", secondaryQueenSideRookHasMoved);
+        result.put("secondaryKingSideRookHasMoved", secondaryKingSideRookHasMoved);
+        result.put("secondaryKingHasMoved", secondaryKingHasMoved);
+        return result;
+    }
+
     /** Toggle the turn state. */
     @Exclude @Override public boolean toggleTurn() {
         turn = !turn;
         return turn;
-    }
-
-    /** Return the winning player's name or null if the game is active or ended in a tie. */
-    @Exclude public String getWinningPlayerName() {
-        switch (state) {
-            case primary_wins:
-                // Assumes 'primary' player is at index 0
-                return players.get(0).name;
-            case secondary_wins:
-                // Assumes 'primary' player is at index 1
-                return players.get(1).name;
-            case active:
-            case tie:
-            case pending:
-            default:
-                return null;
-        }
     }
 }

@@ -17,9 +17,6 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.support.v4.view.ViewPager;
-import android.view.View;
-
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
@@ -27,11 +24,7 @@ import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
-import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.MenuItemEvent;
-import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -72,40 +65,6 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
         DispatchManager.instance.startNextFragment(getActivity(), exp);
-    }
-
-    /** Process a button click event with a tag value. */
-    @Subscribe public void onClick(final TagClickEvent event) {
-        Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof MenuEntry)) return;
-
-        // these aren't handled here so just return
-        if (((MenuEntry) payload).titleResId == R.string.InviteFriendFromChat) {
-            return;
-        }
-
-        // Process the payload assuming it is a valid fragment type index.  Abort if wrong.
-        int index = ((MenuEntry) payload).fragmentTypeIndex;
-        if (index < 0 || index > FragmentType.values().length) return;
-
-        // The index represents an experience type.  Start the appropriate fragment after
-        // dismissing the FAM.
-        FabManager.game.dismissMenu(this);
-        DispatchManager.instance.chainFragment(getActivity(), FragmentType.values()[index]);
-    }
-
-    /** Handle a menu item selection. */
-    @Subscribe public void onMenuItem(final MenuItemEvent event) {
-        // Case on the item resource id if there is one to be had.
-        switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                break;
-            default:
-                break;
-        }
     }
 
     /** Initialize the game fragment envelope. */

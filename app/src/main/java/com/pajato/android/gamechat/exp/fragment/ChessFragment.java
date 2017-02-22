@@ -18,21 +18,13 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
@@ -44,16 +36,11 @@ import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.Checkerboard;
-import com.pajato.android.gamechat.exp.ExpType;
-import com.pajato.android.gamechat.exp.NotificationManager;
-import com.pajato.android.gamechat.exp.Team;
+import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.chess.ChessBoard;
-import com.pajato.android.gamechat.exp.chess.ChessHelper;
-import com.pajato.android.gamechat.exp.chess.ChessPiece;
+import com.pajato.android.gamechat.exp.chess.ChessEngine;
 import com.pajato.android.gamechat.exp.model.Player;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -67,19 +54,11 @@ import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
-import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
-import static com.pajato.android.gamechat.exp.chess.Chess.State.active;
-import static com.pajato.android.gamechat.exp.chess.Chess.State.pending;
-import static com.pajato.android.gamechat.exp.chess.Chess.State.primary_wins;
-import static com.pajato.android.gamechat.exp.chess.Chess.State.secondary_wins;
-import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.KING;
-import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.PAWN;
-import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -91,23 +70,16 @@ public class ChessFragment extends BaseExperienceFragment {
 
     // Public class constants.
 
-    /** The lookup key for the FAB chess menu. */
+    /**
+     * The lookup key for the FAB chess menu.
+     */
     public static final String CHESS_FAM_KEY = "ChessFamKey";
 
-    /** Logcat TAG */
+    /** Logcat TAG. */
+    @SuppressWarnings("unused")
     private static final String TAG = ChessFragment.class.getSimpleName();
 
     // Private instance variables.
-
-    // Chess Management Objects
-    private TextView mHighlightedTile;
-    private boolean mIsHighlighted = false;
-
-    /** Visual layout of chess board objects */
-    private Checkerboard mBoard = new Checkerboard();
-
-    /** A click handler for the board tiles. */
-    private View.OnClickListener mTileClickHandler = new TileClickHandler();
 
     // Public instance methods.
 
@@ -119,57 +91,34 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
-        // Determine if this event is for this fragment.  Abort if not.
-        if (!mActive)
-            return;
-        Object tag = event.view.getTag();
-        if (isPlayAgain(tag, TAG)) {
-            // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
-            // setup a new game.
-            FabManager.game.dismissMenu(this);
-            handleNewGame();
-        }
+        // Delegate the event to the base class.
+        processTagClickEvent(event, "chess");
     }
 
     /** Handle an experience posting event to see if this is a chess experience. */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
-        // Check the payload to see if this is not chess.  Abort if not, otherwise resume the game.
-        if (event.experience == null || event.experience.getExperienceType() != ExpType.chessET)
-            return;
-        mExperience = event.experience;
-        resume();
+        // Delegate the event handling to the base class.
+        processExperienceChange(event);
     }
 
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
-        if (!this.mActive)
-            return;
-        // Case on the item resource id if there is one to be had.
-        switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.InviteFriendsOverflow:
-                if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
-                else
-                    InvitationManager.instance.extendGroupInvitation(getActivity(),
-                            mExperience.getGroupKey());
-                break;
-            case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                break;
-            default:
-                break;
-        }
+        // Delegate to the ?.
+        processMenuItemEvent(event);
     }
 
-    /** Handle taking the foreground by updating the UI based on the current experience. */
+    /**
+     * Handle taking the foreground by updating the UI based on the current experience.
+     */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
-        resume();
+        if (mExperience == null)
+            return;
+        ChessEngine.instance.init(mExperience, mBoard, mTileClickHandler);
+        ExpHelper.updateUiFromExperience(mExperience, mBoard);
     }
 
     @Override public void onStart() {
@@ -191,26 +140,41 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Return a default, partially populated, Chess experience. */
     @Override
     protected void createExperience(final Context context, final List<Account> playerAccounts) {
-        // Setup the default key, players, and name.
+        // Setup the default key, players, creation timestamp and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);
         String name1 = players.get(0).name;
         String name2 = players.get(1).name;
-
         long tStamp = new Date().getTime();
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tStamp));
+        String dateString = SimpleDateFormat.getDateTimeInstance().format(tStamp);
+        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, dateString);
 
-        // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
-        // object on the database.
+        // Set up the default board, group (Me Group) and room (Me Room) keys, the owner id and
+        // create the object on the database.
+        ChessBoard board = new ChessBoard();
+        board.init();
         String groupKey = AccountManager.instance.getMeGroupKey();
         String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
-        Chess model = new Chess(key, id, 0, name, tStamp, groupKey, roomKey, players);
+        Chess model = new Chess(board, key, id, 0, name, tStamp, groupKey, roomKey, players);
         mExperience = model;
-        if (groupKey != null && roomKey != null) ExperienceManager.instance.createExperience(model);
-        else reportError(context, R.string.ErrorChessCreation, groupKey, roomKey);
+        if (groupKey != null && roomKey != null)
+            ExperienceManager.instance.createExperience(model);
+        else
+            ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
+    }
+
+    /** Return a list of default Chess players. */
+    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+        List<Player> result = new ArrayList<>();
+        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String team = context.getString(R.string.primaryTeam);
+        result.add(new Player(name, "", team));
+        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        team = context.getString(R.string.secondaryTeam);
+        result.add(new Player(name, "", team));
+        return result;
     }
 
     /** Return a possibly null list of chess player information. */
@@ -237,101 +201,14 @@ public class ChessFragment extends BaseExperienceFragment {
                 // Only one online player.  Just return.
                 break;
         }
-
         return players;
-    }
-
-    /** Return a list of default Chess players. */
-    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
-        List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
-        String team = context.getString(R.string.primaryTeam);
-        result.add(new Player(name, "", team));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        team = context.getString(R.string.secondaryTeam);
-        result.add(new Player(name, "", team));
-        return result;
     }
 
     // Private instance methods.
 
     /**
-     * Checks to see if the game is over or not by counting the primary / secondary kings are
-     * on the board. If one is not on the board, then the other side wins.
-     * @param board a ChessBoard object
-     *
-     * @return true if the game is over, false otherwise.
+     * Return the home FAM used in the top level show games and show no games fragments.
      */
-    private boolean checkFinished(ChessBoard board) {
-        Chess model = getModel();
-        if (model == null) {
-            Log.e(TAG, "Null Chess data model.", new Throwable());
-        }
-        // Generate win conditions. If one side runs out of pieces, the other side wins.
-        if (!board.containsSecondaryKing()) {
-            NotificationManager.instance.notifyGameDone(this, "Game Over! Player 1 Wins!");
-            if(model != null) {
-                model.state = primary_wins;
-                model.setWinCount();
-            }
-            return true;
-        }
-        if (!board.containsPrimaryKing()) {
-            NotificationManager.instance.notifyGameDone(this, "Game Over! Player 2 Wins!");
-            if(model != null) {
-                model.state = secondary_wins;
-                model.setWinCount();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Locates the possible moves of the piece that is about to be highlighted.
-     *
-     * @param highlightedIndex the index containing the highlighted piece.
-     * @param possibleMoves a list of the possible moves available to the highlighted piece.
-     * @param board a HashMap representing an index on to board (0->63) the piece type at that location.
-     */
-    private void findPossibleMoves(final int highlightedIndex, final List<Integer> possibleMoves,
-                                   final ChessBoard board) {
-        if (highlightedIndex < 0 || highlightedIndex > 64) {
-            return;
-        }
-
-        Chess model = (Chess) mExperience;
-        possibleMoves.clear();
-        ChessPiece.PieceType highlightedPieceType = board.getPieceType(highlightedIndex);
-
-        switch (highlightedPieceType) {
-            case PAWN:
-                ChessHelper.getPawnThreatRange(possibleMoves, highlightedIndex, board);
-                break;
-            case ROOK:
-                ChessHelper.getRookThreatRange(possibleMoves, highlightedIndex, board);
-                break;
-            case KNIGHT:
-                ChessHelper.getKnightThreatRange(possibleMoves, highlightedIndex, board);
-                break;
-            case BISHOP:
-                ChessHelper.getBishopThreatRange(possibleMoves, highlightedIndex, board);
-                break;
-            case QUEEN:
-                ChessHelper.getQueenThreatRange(possibleMoves, highlightedIndex, board);
-                break;
-            case KING:
-                boolean[] castlingBooleans = { model.primaryQueenSideRookHasMoved,
-                        model.primaryKingSideRookHasMoved, model.primaryKingHasMoved,
-                        model.secondaryQueenSideRookHasMoved, model.secondaryKingSideRookHasMoved,
-                        model.secondaryKingHasMoved };
-                ChessHelper.getKingThreatRange(possibleMoves, highlightedIndex, board,
-                        castlingBooleans);
-                break;
-        }
-    }
-
-    /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getChessMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
@@ -339,451 +216,4 @@ public class ChessFragment extends BaseExperienceFragment {
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
         return menu;
     }
-
-    /** Return a done message text to show in a snackbar.  The given model provides the state. */
-    private String getDoneMessage(final Chess model) {
-        // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWinningPlayerName();
-        if (name == null) return getString(R.string.TieMessageNotification);
-
-        // There was a winner.  Return a congratulatory message.
-        String format = getString(R.string.WinMessageNotificationFormat);
-        return String.format(Locale.getDefault(), format, name);
-    }
-
-    /** Return the Chess model class, null if it does not exist. */
-    private Chess getModel() {
-        if (mExperience == null || !(mExperience instanceof Chess)) return null;
-        return (Chess) mExperience;
-    }
-
-    /** Handle a new game by resetting the data model. */
-    private void handleNewGame() {
-        // Ensure that the data model exists and is valid.  If not, abort with an error, otherwise
-        // reset the data model, update the database and clear the notification data.
-        Chess model = getModel();
-        if (model == null) {
-            Log.e(TAG, "Null Chess data model.", new Throwable());
-            return;
-        }
-        model.board = null;
-        model.state = active;
-        ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /**
-     * Handles the movement of the pieces.
-     *
-     * @param player indicates the current player (primary, secondary)
-     * @param indexClicked the index of the clicked tile and the new position of the piece.
-     * @param capturesPiece true if move captures pieces
-     * @param board a ChessBoard object
-     */
-    private void handleMovement(final Team player, final int indexClicked,
-                                final boolean capturesPiece, ChessBoard board) {
-        // Reset the highlighted tile's image.
-        mHighlightedTile.setText(" ");
-        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        ChessPiece highlightedPiece = board.getPiece(highlightedIndex);
-
-        // Handle capturing pieces.
-        if (capturesPiece) {
-            TextView capturedTile = mBoard.getCell(indexClicked);
-            capturedTile.setText(" ");
-            board.delete(highlightedIndex);
-        }
-
-        // Check to see if our pawn can becomes another piece and put its value into the board map.
-
-        if (indexClicked < 8 && highlightedPiece.isTeamPiece(PAWN, Team.PRIMARY)) {
-            promotePawn(indexClicked, Team.PRIMARY);
-        } else if (indexClicked > 55 && highlightedPiece.isTeamPiece(PAWN, Team.SECONDARY)) {
-            promotePawn(indexClicked, Team.SECONDARY);
-        } else {
-            // Add the clicked piece to the new position, set both the text and color values using
-            // the source values.
-            board.add(indexClicked, highlightedPiece);
-            TextView view = mBoard.getCell(indexClicked);
-            view.setText(board.getDefaultText(indexClicked));
-            view.setTextColor(board.getDefaultColor(indexClicked));
-        }
-
-        // Handle the movement of the Rook for Castling
-        boolean castlingKingSide = indexClicked == highlightedIndex + 2;
-        boolean castlingQueenSide = indexClicked == highlightedIndex - 3;
-        boolean isCastling = highlightedPiece.getPieceType() == KING &&
-                (castlingKingSide || castlingQueenSide);
-        if (isCastling) {
-            int rookPrevIndex;
-            int rookFutureIndex;
-            // Handle the side-dependent pieces of the castle (king-side vs queen-side)
-            if(castlingKingSide) {
-                rookPrevIndex = highlightedIndex + 3;
-                rookFutureIndex = highlightedIndex + 1;
-            } else {
-                rookPrevIndex = highlightedIndex - 4;
-                rookFutureIndex = highlightedIndex - 2;
-            }
-
-            // Put a rook at the new rook position.
-            board.add(rookFutureIndex, ROOK, player);
-            TextView futureRook = mBoard.getCell(rookFutureIndex);
-
-            // Handle the player-dependent pieces of the castle (color)
-            futureRook.setText(board.getDefaultText(rookFutureIndex));
-            futureRook.setTextColor(board.getDefaultColor(rookFutureIndex));
-
-            // Get rid of the old rook.
-            TextView previousRook = mBoard.getCell(rookPrevIndex);
-            previousRook.setText("");
-            board.delete(rookPrevIndex);
-        }
-
-        // Handle the Castling Booleans.
-        ChessPiece currentPiece = board.getPiece(highlightedIndex);
-        Chess model = (Chess) mExperience;
-        if (currentPiece != null) {
-            if (currentPiece.isTeamPiece(KING, Team.PRIMARY)) {
-                model.primaryKingHasMoved = true;
-            } else if (currentPiece.isTeamPiece(KING, Team.SECONDARY)) {
-                model.secondaryKingHasMoved = true;
-            } else if (currentPiece.isTeamPiece(ROOK, Team.PRIMARY)) {
-                if (highlightedIndex == 0) {
-                    model.primaryQueenSideRookHasMoved = true;
-                } else if (highlightedIndex == 7) {
-                    model.primaryKingSideRookHasMoved = true;
-                }
-            } else if (currentPiece.isTeamPiece(ROOK, Team.SECONDARY)) {
-                if (highlightedIndex == 56) {
-                    model.secondaryQueenSideRookHasMoved = true;
-                } else if (highlightedIndex == 63) {
-                    model.secondaryKingSideRookHasMoved = true;
-                }
-            }
-        }
-
-        // Delete the piece's previous location and end the turn.
-        board.delete(highlightedIndex);
-        handleTurnChangeNew(true);
-        checkFinished(board);
-    }
-
-    /**
-     * Handles the promotion of pawns once they reach the end of the board.
-     *
-     * @param position the position of the pawn when it is promoted.
-     * @param team the team the pawn belongs to.
-     */
-    private void promotePawn(final int position, final Team team) {
-        // Generate an AlertDialog via the AlertDialog Builder
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-        alertDialogBuilder.setTitle(getString(R.string.PromotePawnMsg))
-//                .setIcon(ChessPiece.getDrawableFor(PieceType.PAWN))
-                .setView(R.layout.pawn_dialog);
-        AlertDialog pawnChooser = alertDialogBuilder.create();
-        pawnChooser.show();
-
-        int color = (team == Team.PRIMARY) ? ContextCompat.getColor(getContext(),
-                R.color.colorPrimary) : ContextCompat.getColor(getContext(), R.color.colorAccent);
-
-        // Change the Dialog's Icon color.
-        int alertIconId = getActivity().getResources().getIdentifier("android:id/icon", null, null);
-        ImageView alertIcon = (ImageView) pawnChooser.findViewById(alertIconId);
-        if(alertIcon != null) {
-            alertIcon.setColorFilter(color, SRC_ATOP);
-        }
-        // Setup the Queen Listeners and change color appropriate to the team.
-        TextView queenIcon = (TextView) pawnChooser.findViewById(R.id.queen_icon);
-        TextView queenText = (TextView) pawnChooser.findViewById(R.id.queen_text);
-        if(queenIcon != null && queenText != null) {
-            queenIcon.setText(ChessPiece.PieceType.QUEEN.text);
-            queenIcon.setTextColor(color);
-            queenIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
-            queenText.setOnClickListener(new Promoter(position, team, pawnChooser));
-        }
-        // Do the same for bishop.
-        TextView bishopIcon = (TextView) pawnChooser.findViewById(R.id.bishop_icon);
-        TextView bishopText = (TextView) pawnChooser.findViewById(R.id.bishop_text);
-        if(bishopIcon != null && bishopText != null) {
-            bishopIcon.setText(ChessPiece.PieceType.BISHOP.text);
-            bishopIcon.setTextColor(color);
-            bishopIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
-            bishopText.setOnClickListener(new Promoter(position, team, pawnChooser));
-        }
-        // And the same for knight.
-        TextView knightIcon = (TextView) pawnChooser.findViewById(R.id.knight_icon);
-        TextView knightText = (TextView) pawnChooser.findViewById(R.id.knight_text);
-        if(knightIcon != null && knightText != null) {
-            knightIcon.setText(ChessPiece.PieceType.KNIGHT.text);
-            knightIcon.setTextColor(color);
-            knightIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
-            knightText.setOnClickListener(new Promoter(position, team, pawnChooser));
-        }
-        // And finally, the same for rook.
-        TextView rookIcon = (TextView) pawnChooser.findViewById(R.id.rook_icon);
-        TextView rookText = (TextView) pawnChooser.findViewById(R.id.rook_text);
-        if(rookIcon != null && rookText != null) {
-            rookIcon.setText(ROOK.text);
-            rookIcon.setTextColor(color);
-            rookIcon.setOnClickListener(new Promoter(position, team, pawnChooser));
-            rookText.setOnClickListener(new Promoter(position, team, pawnChooser));
-        }
-    }
-
-    /** Notify the user about an error and log it. */
-    private void reportError(final Context context, final int messageResId, String... args) {
-        // Let the User know that something is amiss.
-        String message = context.getString(messageResId);
-        NotificationManager.instance.notifyNoAction(this, message);
-
-        // Generate a logcat item casing on the given resource id.
-        String format;
-        switch (messageResId) {
-            case R.string.ErrorChessCreation:
-                format = "Failed to create a Chess experience with group/room keys: {%s/%s}";
-                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
-                break;
-            default:
-                break;
-        }
-    }
-
-    /** Process a resumption by testing and waiting for the experience. */
-    private void resume() {
-        if (getModel() == null)
-            // Disable the layout and startup the spinner.
-            mLayout.setVisibility(View.GONE);
-        else {
-            // Start the game and update the views using the current state of the experience.
-            mLayout.setVisibility(View.VISIBLE);
-            updateUiFromExperience();
-        }
-    }
-
-    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
-    private void setPlayerIcons(final boolean turn) {
-        // Alternate the decorations on each player symbol.
-        if (turn)
-            // Make player1's decorations the more prominent.
-            setPlayerIcons(R.id.leftIndicator1, R.id.rightIndicator1,
-                    R.id.leftIndicator2, R.id.rightIndicator2);
-        else
-            // Make player2's decorations the more prominent.
-            setPlayerIcons(R.id.leftIndicator2, R.id.rightIndicator2,
-                    R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
-    /** Manage a particular player's symbol decorations. */
-    private void setPlayerIcons(final int largeLeft, final int largeRight,
-                                final int smallLeft, final int smallRight) {
-
-        // Collect all the pertinent textViews.
-        TextView tvLargeLeft = (TextView) getActivity().findViewById(largeLeft);
-        TextView tvLargeRight = (TextView) getActivity().findViewById(largeRight);
-        TextView tvSmallLeft = (TextView) getActivity().findViewById(smallLeft);
-        TextView tvSmallRight = (TextView) getActivity().findViewById(smallRight);
-
-        // Deal with the tvLarger symbol's decorations.
-        tvLargeLeft.setVisibility(View.VISIBLE);
-        tvLargeRight.setVisibility(View.VISIBLE);
-
-        // Deal with the tvSmall symbol's decorations.
-        tvSmallLeft.setVisibility(View.INVISIBLE);
-        tvSmallRight.setVisibility(View.INVISIBLE);
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerName(final int resId, final int index, final Chess model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
-        TextView name = (TextView) mLayout.findViewById(resId);
-        if (name == null) return;
-        name.setText(model.players.get(index).name);
-    }
-
-    /** Set the name for a given player index. */
-    private void setPlayerWinCount(final int resId, final int index, final Chess model) {
-        // Ensure that the win count text view exists. Abort if not.  Set the value from the model
-        // if it does.
-        TextView winCount = (TextView) mLayout.findViewById(resId);
-        if (winCount == null) return;
-        winCount.setText(String.valueOf(model.players.get(index).winCount));
-    }
-
-    /** Update the game state. */
-    private void setState(final Chess model) {
-        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
-        String message = null;
-        switch (model.state) {
-            case primary_wins:
-            case secondary_wins:
-                String name = model.getWinningPlayerName();
-                String format = getString(R.string.WinMessageFormat);
-                message = String.format(Locale.getDefault(), format, name);
-                break;
-            case tie:
-                message = getString(R.string.StalemateMessage);
-                break;
-            default:
-                // keep playing or waiting for a new game
-                break;
-        }
-        // Determine if the game has ended (winner or time). Abort if not.
-        if (message == null)
-            return;
-
-        // Update the UI to celebrate the winner or a tie and update the database game state to
-        // pending.
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
-        winner.setText(message);
-        winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
-        model.state = pending;
-        ExperienceManager.instance.updateExperience(mExperience);
-    }
-
-    /** Set up the game board based on the data model state. */
-    private void setGameBoard(@NonNull final Chess model) {
-        // Determine if the model has any pieces to put on the board.  If not reset the board model.
-        if (model.board == null)
-            model.board = new ChessBoard(getContext(), model, mBoard);
-        else
-            mBoard.setBoardFromModel(getContext(), model.board);
-        handleTurnChangeNew(false);
-   }
-
-    /**
-     * showPossibleMoves handles highlighting possible movement options of a clicked piece,
-     * then on a subsequent click it removes those highlights.
-     *
-     * @param indexClicked the index of the tile clicked.
-     * @param board a ChessBoard object
-     * @return true if we've made any updates that should be written to the database; false otherwise
-     */
-    private boolean showPossibleMoves(final int indexClicked, ChessBoard board) {
-        // If the game is over, we don't need to do anything, so return.  Otherwise find the
-        // possible moves for the selected piece.
-        if (checkFinished(board))
-            return false;
-        boolean hasChanged = false;
-        int highlightedIndex = Integer.parseInt((String) mHighlightedTile.getTag());
-        List<Integer> possibleMoves = new ArrayList<>();
-        findPossibleMoves(highlightedIndex, possibleMoves, board);
-
-        // If a highlighted tile exists, we remove the highlight on it and its movement options.
-        if (mIsHighlighted) {
-            mBoard.handleTileBackground(getContext(), highlightedIndex, mHighlightedTile);
-
-            for (int possiblePosition : possibleMoves) {
-                // If the tile clicked is one of the possible positions, and it's the correct
-                // turn/piece combination, the piece moves there.
-                if (indexClicked == possiblePosition) {
-                    boolean capturesPiece = board.containsPiece(indexClicked);
-                    handleMovement(board.getTeam(highlightedIndex), indexClicked, capturesPiece, board);
-                    hasChanged = true;
-                }
-                TextView tile = mBoard.getCell(possiblePosition);
-                mBoard.handleTileBackground(getContext(), possiblePosition, tile);
-            }
-            mHighlightedTile = null;
-
-        // Otherwise, we need to highlight the tile clicked and its potential move squares with red.
-        } else {
-            mHighlightedTile.setBackgroundColor(ContextCompat.getColor(getContext(),
-                    android.R.color.holo_red_dark));
-            for(int possiblePosition : possibleMoves)
-                mBoard.setHighlight(getContext(), possiblePosition, android.R.color.holo_red_light);
-        }
-
-        mIsHighlighted = !mIsHighlighted;
-
-        return hasChanged;
-    }
-
-    /** Update the UI using the current experience state from the database. */
-    private void updateUiFromExperience() {
-        // Ensure that a valid experience exists.  Abort if not.
-        if (mExperience == null || !(mExperience instanceof Chess)) return;
-
-        // A valid experience is available. Use the data model to populate the UI and check if the
-        // game is finished.
-        Chess model = (Chess) mExperience;
-        setRoomName(mExperience);
-        setPlayerName(R.id.player1Name, 0, model);
-        setPlayerName(R.id.player2Name, 1, model);
-        setPlayerWinCount(R.id.player1WinCount, 0, model);
-        setPlayerWinCount(R.id.player2WinCount, 1, model);
-        setPlayerIcons(model.turn);
-        setGameBoard(model);
-        setState(model);
-    }
-
-    private class Promoter implements View.OnClickListener {
-        AlertDialog mDialog;
-        int position;
-        Team team;
-
-        Promoter(final int indexClicked, final Team teamNumber, AlertDialog dialog) {
-            position = indexClicked;
-            team = teamNumber;
-            mDialog = dialog;
-        }
-
-        @Override public void onClick(final View v) {
-            int id = v.getId();
-            ChessPiece.PieceType pieceType;
-            switch (id) {
-                default:
-                case R.id.queen_icon:
-                case R.id.queen_text:
-                    pieceType = ChessPiece.PieceType.QUEEN;
-                    break;
-                case R.id.bishop_icon:
-                case R.id.bishop_text:
-                    pieceType = ChessPiece.PieceType.BISHOP;
-                    break;
-                case R.id.knight_icon:
-                case R.id.knight_text:
-                    pieceType = ChessPiece.PieceType.KNIGHT;
-                    break;
-                case R.id.rook_icon:
-                case R.id.rook_text:
-                    pieceType = ROOK;
-                    break;
-            }
-
-            ChessBoard board = ((Chess) mExperience).board;
-            board.add(position, pieceType, team);
-            TextView promotedPieceTile = mBoard.getCell(position);
-            promotedPieceTile.setText(board.getDefaultText(position));
-            promotedPieceTile.setTextColor(board.getDefaultColor(position));
-
-            mDialog.dismiss();
-        }
-    }
-
-    /**
-     * A View.OnClickListener that is called whenever a board tile is clicked.
-     */
-    private class TileClickHandler implements View.OnClickListener {
-        @Override public void onClick(final View v) {
-            int index = Integer.parseInt((String)v.getTag());
-            ChessBoard board = ((Chess) mExperience).board;
-            boolean changedBoard = false;
-            if (mHighlightedTile != null) {
-                changedBoard = showPossibleMoves(index, board);
-                mHighlightedTile = null;
-            } else {
-                if (board.getPiece(index) != null) {
-                    mHighlightedTile = (TextView) v;
-                    changedBoard = showPossibleMoves(index, board);
-                }
-            }
-            if (changedBoard) {
-                // Save any changes that have been made to the database
-                ExperienceManager.instance.updateExperience(mExperience);
-            }
-        }
-    }
-
 }

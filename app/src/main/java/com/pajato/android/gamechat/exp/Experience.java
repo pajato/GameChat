@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp;
 
+import com.pajato.android.gamechat.exp.model.Player;
+
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +31,17 @@ import java.util.Map;
  */
 public interface Experience {
 
+    /** Return the board, if any, associated with the experience. */
+    Board getBoard();
+
     /** Return the experience create time. */
     long getCreateTime();
+
+    /** Return the experience push key. */
+    String getExperienceKey();
+
+    /** Return the experience type. */
+    ExpType getExperienceType();
 
     /** Return the experience group push key. */
     String getGroupKey();
@@ -38,20 +49,26 @@ public interface Experience {
     /** Return the experience modification time. */
     long getModTime();
 
+    /** Return the experience name. */
+    String getName();
+
+    /** Return the list of players for this experience. */
+    List<Player> getPlayers();
+
     /** Return the experience room push key. */
     String getRoomKey();
+
+    /** Return the experience state. */
+    State getStateType();
 
     /** Return the current player turn. */
     boolean getTurn();
 
-    /** Return the experience push key. */
-    String getExperienceKey();
+    /** Return the unseen list. */
+    List<String> getUnseenList();
 
-    /** Return the experience name. */
-    String getName();
-
-    /** Return the experience type. */
-    ExpType getExperienceType();
+    /** Reset an experience. */
+    void reset();
 
     /** Set the experience push key. */
     void setExperienceKey(String key);
@@ -65,15 +82,18 @@ public interface Experience {
     /** Set the modification timestamp. */
     void setModTime(long value);
 
+    /** Set the experience state. */
+    void setStateType(State value);
+
     /** Set the win count. */
     void setWinCount();
+
+    /** Get the winning player. */
+    Player getWinningPlayer();
 
     /** Provide a map of experience properties. */
     Map<String, Object> toMap();
 
     /** Toggle the turn for the players. */
     boolean toggleTurn();
-
-    /** Return the unseen list. */
-    List<String> getUnseenList();
 }

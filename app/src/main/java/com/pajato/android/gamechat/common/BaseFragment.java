@@ -196,8 +196,7 @@ public abstract class BaseFragment extends Fragment {
 
     /** Return a menu entry for a given title and icon id, and a given fragment type. */
     protected MenuEntry getEntry(final int titleId, final int iconId, final FragmentType type) {
-        int ordinal = type.ordinal();
-        return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId, ordinal));
+        return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId, type));
     }
 
     /** Return a menu entry for with given title and icon resource items. */

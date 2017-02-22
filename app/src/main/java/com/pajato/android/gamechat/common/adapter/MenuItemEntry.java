@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.common.adapter;
 
+import com.pajato.android.gamechat.common.FragmentType;
+
 /**
  * Provide a POJO to encapsulate a menu item to be added to a recycler view.
  *
@@ -27,7 +29,7 @@ public class MenuItemEntry {
     // Package private instance variables.
 
     /** The fragment type associated with the menu item, if any. */
-    int fragmentTypeIndex;
+    FragmentType fragmentType;
 
     /** The menu item icon resource id. */
     int iconResId;
@@ -45,17 +47,16 @@ public class MenuItemEntry {
 
     /** Build an instance for the given type, title, icon resource ids and fragment type index. */
     public MenuItemEntry(final int type, final int titleResId, final int iconResId,
-                         final int fragmentTypeIndex) {
+                         final FragmentType fragmentType) {
         this.type = type;
         this.titleResId = titleResId;
         this.iconResId = iconResId;
-        this.fragmentTypeIndex = fragmentTypeIndex;
+        this.fragmentType = fragmentType;
     }
 
     public MenuItemEntry(final int type, final int titleResId, final int iconResId) {
         this.type = type;
         this.titleResId = titleResId;
         this.iconResId = iconResId;
-        fragmentTypeIndex = -1;
     }
 }

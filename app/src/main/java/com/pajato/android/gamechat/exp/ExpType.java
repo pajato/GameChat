@@ -19,6 +19,8 @@ package com.pajato.android.gamechat.exp;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.exp.checkers.CheckersEngine;
+import com.pajato.android.gamechat.exp.chess.ChessEngine;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
@@ -76,6 +78,19 @@ public enum ExpType {
                 return chess;
             case tttET:
                 return tictactoe;
+        }
+        return null;
+    }
+
+    /** Return the fragment type associated with this experience type. */
+    public Engine getEngine() {
+        switch (this) {
+            case checkersET:
+                return CheckersEngine.instance;
+            case chessET:
+                return ChessEngine.instance;
+            case tttET:
+                return null;
         }
         return null;
     }

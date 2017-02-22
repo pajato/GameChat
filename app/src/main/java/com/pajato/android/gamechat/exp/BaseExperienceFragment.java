@@ -21,10 +21,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
@@ -32,15 +33,19 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.PlayModeManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ExperienceChangeEvent;
+import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.main.NetworkManager;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -52,6 +57,7 @@ import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
+import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.PlayModeManager.PlayModeType.user;
@@ -85,8 +91,14 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Private instance variables.
 
+    /** Visual layout of chess board objects. */
+    protected Checkerboard mBoard = new Checkerboard();
+
     /** The experience being enjoyed. */
     protected Experience mExperience;
+
+    /** A click handler for the board tiles. */
+    protected TileClickHandler mTileClickHandler = new TileClickHandler();
 
     // Public constructors.
 
@@ -226,32 +238,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
-    /** Handle changing the turn and turn indicator for a given turn state. */
-    protected void handleTurnChangeNew(final boolean switchPlayer) {
-        boolean turn = mExperience.getTurn();
-        if (switchPlayer) {
-            turn = mExperience.toggleTurn();
-        }
-
-        // Handle the TextViews that serve as our turn indicator.
-        TextView playerOneLeft = (TextView) mLayout.findViewById(R.id.leftIndicator1);
-        TextView playerOneRight = (TextView) mLayout.findViewById(R.id.rightIndicator1);
-        TextView playerTwoLeft = (TextView) mLayout.findViewById(R.id.leftIndicator2);
-        TextView playerTwoRight = (TextView) mLayout.findViewById(R.id.rightIndicator2);
-
-        if(turn) {
-            playerOneLeft.setVisibility(View.VISIBLE);
-            playerOneRight.setVisibility(View.VISIBLE);
-            playerTwoLeft.setVisibility(View.INVISIBLE);
-            playerTwoRight.setVisibility(View.INVISIBLE);
-        } else {
-            playerOneLeft.setVisibility(View.INVISIBLE);
-            playerOneRight.setVisibility(View.INVISIBLE);
-            playerTwoLeft.setVisibility(View.VISIBLE);
-            playerTwoRight.setVisibility(View.VISIBLE);
-        }
-    }
-
     /**
      * Return TRUE if this experience is in the "me" group. If either the 'me' group key or the
      * current experience group key is null, return true (assume we're in the 'me' situation).
@@ -267,14 +253,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             return true;
         }
         return meGroupKey.equals(mExperience.getGroupKey());
-    }
-
-    /** Return TRUE iff the User has requested to play again. */
-    protected boolean isPlayAgain(final Object tag, final String className) {
-        // Determine if the given tag is the class name, i.e. a snackbar action request to play
-        // again.
-        return ((tag instanceof String && className.equals(tag)) ||
-                (tag instanceof MenuEntry && ((MenuEntry) tag).titleResId == R.string.PlayAgain));
     }
 
     /** Log a lifecycle event that has no bundle. */
@@ -359,40 +337,51 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             DispatchManager.instance.chainFragment(getActivity(), expFragmentType);
     }
 
-    // Private instance methods.
-
-    /** Process the end icon click */
-    private void processEndIconClick(final View view) {
-        if (!(view.getTag() instanceof ListItem))
+    /** Process an experience change event by ... */
+    protected void processExperienceChange(@NonNull final ExperienceChangeEvent event) {
+        // Determine of this is an inactive fragment, the event has an empty experience or a
+        // different type of experience . If so, abort, otherwise continue processing the event
+        // experience.
+        if (!mActive || event.experience == null ||
+            event.experience.getExperienceType() != type.expType)
             return;
-        ListItem item = (ListItem) view.getTag();
-        switch (item.type) {
-            case expList:
-                verifyDeleteExperience(item);
+
+        // Determine if this experience is waiting to be initialized.  If so, do it using the
+        // experience from the event.  If not, just continue to initialize the engine and start
+        // updating the UI from the data model.
+        logEvent("experienceChange");
+        if (mExperience == null)
+            mExperience = event.experience;
+        Engine engine = mExperience.getExperienceType().getEngine();
+        if (engine == null)
+            return;
+        engine.init(mExperience, mBoard, mTileClickHandler);
+        ExpHelper.updateUiFromExperience(mExperience, mBoard);
+    }
+
+    /** Handle a menu item click from the toolbar or overflow menu. */
+    protected void processMenuItemEvent(final MenuItemEvent event) {
+        if (!this.mActive)
+            return;
+        // Case on the item resource id if there is one to be had.
+        FragmentActivity activity = getActivity();
+        switch (event.item != null ? event.item.getItemId() : -1) {
+            case R.string.InviteFriendsOverflow:
+                String groupKey = mExperience.getGroupKey();
+                if (isInMeGroup())
+                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms, null);
+                else
+                    InvitationManager.instance.extendGroupInvitation(activity, groupKey);
+                break;
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) activity.findViewById(R.id.viewpager);
+                if (viewPager != null)
+                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 break;
             default:
                 break;
         }
-    }
-
-    private void verifyDeleteExperience(final ListItem item) {
-        final Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
-        if (exp == null)
-            return;
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.DeleteExperienceTitle))
-                .setMessage(String.format(getString(R.string.DeleteConfirmMessage),
-                        exp.getName()))
-                .setNegativeButton(android.R.string.cancel, null) // dismiss
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                ExperienceManager.instance.deleteExperience(item);
-                            }
-                        })
-                .create()
-                .show();
     }
 
     /** Process a button click that may be a experience list item click. */
@@ -424,6 +413,70 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
+    /** Process a tag click event on a given view by logging the event and handling the payload. */
+    protected void processTagClickEvent(final TagClickEvent event, final String name) {
+        // Determine if this event is for this fragment.  Abort if not, otherwise process a FAM
+        // entry click.
+        logEvent(String.format("onClick: (%s) with event {%s};", name, event.view));
+        if (!mActive)
+            return;
+        Object tag = event.view.getTag();
+        if (tag instanceof MenuEntry)
+            processFamItem((MenuEntry) tag, name);
+    }
+
+    // Private instance methods.
+
+    /** Process the end icon click */
+    private void processEndIconClick(final View view) {
+        if (!(view.getTag() instanceof ListItem))
+            return;
+        ListItem item = (ListItem) view.getTag();
+        switch (item.type) {
+            case expList:
+                verifyDeleteExperience(item);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Process a FAM menu entry click. */
+    private void processFamItem(final MenuEntry entry, final String name) {
+        // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
+        // setup a new game or play a different game.
+        FabManager.game.dismissMenu(this);
+        switch(entry.titleResId) {
+            case R.string.PlayAgain: // Play a new game.
+                ExpHelper.handleNewGame(name, mExperience);
+                break;
+            default: // Play a different game.
+                FragmentActivity activity = getActivity();
+                DispatchManager.instance.startNextFragment(activity, entry.fragmentType, mItem);
+                break;
+        }
+    }
+
+    private void verifyDeleteExperience(final ListItem item) {
+        final Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
+        if (exp == null)
+            return;
+        new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.DeleteExperienceTitle))
+                .setMessage(String.format(getString(R.string.DeleteConfirmMessage),
+                        exp.getName()))
+                .setNegativeButton(android.R.string.cancel, null) // dismiss
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                ExperienceManager.instance.deleteExperience(item);
+                            }
+                        })
+                .create()
+                .show();
+    }
+
     /** Return the fragment type corresponding to the sole experience in the map. */
     private FragmentType getType(@NonNull final Map<String, Experience> map, final ListItem item) {
         // Extract the experience from the map and add the key to the item.
@@ -431,15 +484,4 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         item.key = experience.getExperienceKey();
         return experience.getExperienceType().getFragmentType();
     }
-
-    /** Set the name for a given player index. */
-    protected void setRoomName(final Experience model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
-        TextView name = (TextView) mLayout.findViewById(R.id.roomName);
-        if (name == null)
-            return;
-        name.setText(RoomManager.instance.getRoomName(model.getRoomKey()));
-    }
-
 }

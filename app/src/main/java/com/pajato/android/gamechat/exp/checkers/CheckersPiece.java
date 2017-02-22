@@ -21,18 +21,17 @@ import android.graphics.Typeface;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.exp.GameType;
+import com.pajato.android.gamechat.exp.Piece;
 import com.pajato.android.gamechat.exp.Team;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
  */
-@IgnoreExtraProperties public class CheckersPiece {
+@IgnoreExtraProperties class CheckersPiece implements Piece {
 
     /** Provide constants for chess pieces that use unicode values for the glyph. */
-    public enum PieceType {
+    enum PieceType implements GameType {
         NONE (""),
         KING ("\u26c1"),
         PIECE ("\u26c0");
@@ -47,7 +46,7 @@ import java.util.Map;
    }
 
     /** The checkers piece type for this piece. */
-    private PieceType mPieceType;
+    private PieceType pieceType;
 
     /** The checkers team for this piece. */
     private Team mTeam;
@@ -59,36 +58,55 @@ import java.util.Map;
 
     /** Constructor requires a piece and team specified, provided as constants in the class. */
     CheckersPiece(final PieceType pieceType, final Team team) {
-        mPieceType = pieceType;
+        this.pieceType = pieceType;
         mTeam = team;
     }
 
     // Public instance methods.
 
-    /** ... */
-    public boolean isTeamPiece(final PieceType p, final Team t) {
-        return (mPieceType.equals(p) && mTeam.equals(t));
+    /** Return the piece type for this piece. */
+    @Exclude @Override public PieceType getPieceType() {
+        return pieceType;
     }
 
-    /** Provide a default map for a Firebase create/update. */
-    public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("pieceType", mPieceType.name());
-        result.put("teamId", mTeam.name());
-        return result;
+    /** Implement the interface by returning the name associated with the piece. */
+    public String getName() {
+        return pieceType.name();
     }
 
-    PieceType getPieceType() {
-        return mPieceType;
+    /** Implement the interface by returning the (unicode) text associated with the piece. */
+    @Override public String getText() {
+        return pieceType.text;
     }
 
-    public Team getTeam() {
+    /** Implement the interface by returning the team associated with the piece. */
+    @Override public Team getTeam() {
         return mTeam;
     }
 
+    /** Implement the interface by returning the typeface associated with the piece. */
+    @Override public int getTypeface() {
+        return pieceType.typeface;
+    }
+
+    /** Implement the interface by returning TRUE iff this piece is of the given type and team. */
+    @Exclude @Override public boolean isPiece(final GameType p, final Team t) {
+        return (p instanceof PieceType && pieceType.equals(p) && mTeam.equals(t));
+    }
+
+    /** Implement the interface by returning TRUE iff this piece is of the given type and team. */
+    @Exclude @Override public boolean isType(final GameType type) {
+        return type instanceof PieceType && pieceType.equals(type);
+    }
+
+    public void setName(final String value) {
+        pieceType = PieceType.valueOf(value);
+    }
+
     /** Provide a setter for Firebase. */
-    @SuppressWarnings("unused") public void setPieceType(final String pieceName) {
-        mPieceType = PieceType.valueOf(pieceName);
+    @SuppressWarnings("unused")
+    @Exclude public void setPieceType(final String pieceName) {
+        pieceType = PieceType.valueOf(pieceName);
     }
 
     /** Provide a setter for Firebase. */
