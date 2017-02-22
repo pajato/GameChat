@@ -17,37 +17,47 @@
 
 package com.pajato.android.gamechat.exp;
 
-import android.support.annotation.NonNull;
-
-import com.pajato.android.gamechat.exp.chess.ChessPiece;
-
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Provide an interface for which two-player game experience boards are expected to satisfy. Chess
  * and Checkers are the first two games to use (implement) this interface.
  *
- * @author Paul Michael Reilly
+ * @author Paul Michael Reilly on 2/17/2017
  */
 
 public interface Board {
 
-    /** Return the default color for the piece at the given position. */
-    int getDefaultColor(int position);
+    /** Clear the selected piece. */
+    void clearSelectedPiece();
 
-    /** Return the default text value for the piece at the given position. */
-    String getDefaultText(int position);
+    /** Return and remove the piece at the given position from the board. */
+    Piece delete(int position);
 
     /** Return a set of position keys in the board model. */
     Set<String> getKeySet();
 
+    /** Return the team associated with the piece at the given position. */
+    Team getTeam(final int position);
+
+    /** Return the piece. */
+    Piece getPiece(final int position);
+
     /** Return -1 or the board position corresponding to a given key. */
     int getPosition(final String key);
 
-    /** Return null or the unicode text associated with a piece with a given position. */
-    int getTypeface(int position);
+    /** Return null or the currently selected piece. */
+    Piece getSelectedPiece();
 
-    /** Setup the piece at the given position for the start of a game. */
-    void setDefault(int position);
+    /** Return -1 or the selected position. */
+    int getSelectedPosition();
+
+    /** Return TRUE iff there is a piece at the given position. */
+    boolean hasPiece(final int position);
+
+    /** Return TRUE iff there is a currently selected piece. */
+    boolean hasSelectedPiece();
+
+    /** Set the selected position to the given position. */
+    void setSelectedPosition(int position);
 }

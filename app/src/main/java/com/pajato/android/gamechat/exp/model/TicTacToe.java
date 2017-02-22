@@ -19,9 +19,12 @@ package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.State;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +90,7 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     public String type;
 
     /** A list of joined users (by account id), who have not yet seen the experience. */
-    public List<String> unseenList;
+    private List<String> unseenList = new ArrayList<>();
 
     /** The experience icon url. */
     public String url;
@@ -112,6 +115,13 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         turn = true;
         type = tttET.name();
         url = "android.resource://com.pajato.android.gamechat/drawable/ic_tictactoe_red";
+    }
+
+    // Public instance methods.
+
+    /** Implement the interface by returning null (for a non-compliant board.) */
+    @Override public Board getBoard() {
+        return null;
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -174,7 +184,26 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     @Exclude @Override public boolean getTurn() { return turn; }
 
     /** Return the unseen list. */
-    @Exclude @Override public List<String> getUnseenList() { return unseenList; }
+    @Override public List<String> getUnseenList() { return unseenList; }
+
+    /** Return the winning player's name or null if the game is active or ended in a tie. */
+    @Exclude public String getWinningPlayerName() {
+        switch (state) {
+            case X_WINS:
+                return players.get(0).name;
+            case O_WINS:
+                return players.get(1).name;
+            case ACTIVE:
+            case TIE:
+            default:
+                return null;
+        }
+    }
+
+    /** Implement the interface by returning null. */
+    @Exclude @Override public State getStateType() {
+        return null;
+    }
 
     /** Return the value associated with the current player: 1 == X, 2 == O. */
     @Exclude public int getSymbolValue() {
@@ -187,6 +216,14 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         return turn ? players.get(0).symbol : players.get(1).symbol;
     }
 
+    /** Implement the interface by returning null. */
+    @Exclude @Override public Player getWinningPlayer() {
+        return null;
+    }
+
+    /** Implement the interface by providing a nop. */
+    @Exclude @Override public void reset() {}
+
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
         this.key = key;
@@ -197,6 +234,11 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         this.groupKey = key;
     }
 
+    /** Return a list of players for this experience. */
+    @Exclude @Override public List<Player> getPlayers() {
+        return players;
+    }
+
     /** Set the room key to satisfy the Experience contract. */
     @Exclude @Override public void setRoomKey(final String key) {
         this.roomKey = key;
@@ -205,6 +247,15 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     /** Set the modification timestamp. */
     @Exclude @Override public void setModTime(final long value) {
         modTime = value;
+    }
+
+    /** Implement the interface by providing a nop. */
+    @Exclude @Override public void setStateType(final State value) {}
+
+    /** Provide a mutator for Firebase. */
+    @SuppressWarnings("unused")
+    public void setUnseenList(final List<String> unseenList) {
+        this.unseenList = unseenList;
     }
 
     /** Update the win count based on the current state. */
@@ -225,19 +276,5 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     @Exclude @Override public boolean toggleTurn() {
         turn = !turn;
         return turn;
-    }
-
-    /** Return the winning player's name or null if the game is active or ended in a tie. */
-    @Exclude public String getWinningPlayerName() {
-        switch (state) {
-            case X_WINS:
-                return players.get(0).name;
-            case O_WINS:
-                return players.get(1).name;
-            case ACTIVE:
-            case TIE:
-            default:
-                return null;
-        }
     }
 }

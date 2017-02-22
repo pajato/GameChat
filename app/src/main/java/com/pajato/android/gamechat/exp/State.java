@@ -24,14 +24,17 @@ import com.pajato.android.gamechat.R;
  *
  * @author Paul Michael Reilly on 2/17/2017
  */
-public enum Team {
-    NONE (R.color.white),
-    PRIMARY (R.color.colorPrimary),
-    SECONDARY (R.color.colorAccent);
+public enum State {
+    active (-1),
+    check (R.string.CheckText),
+    primary_wins (R.string.WinMessageFormat),
+    secondary_wins (R.string.WinMessageFormat),
+    tie (R.string.TieMessage),
+    pending (-1);
 
-    public int color;
+    public int resId;
 
-    Team(final int color) {
-        this.color = color;
+    State(int resId) {
+        this.resId = resId;
     }
 }

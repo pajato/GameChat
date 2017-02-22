@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.common.adapter;
 
+import com.pajato.android.gamechat.common.FragmentType;
+
 import java.util.Locale;
 
 /**
@@ -34,10 +36,10 @@ public class MenuEntry {
     // Public and package private instance variables.
 
     /** A description of the item. */
-    String desc;
+    private String mDescription;
 
     /** The fragment type associated with the menu item, if any. */
-    public int fragmentTypeIndex;
+    public FragmentType fragmentType;
 
     /** The menu item icon resource id. */
     int iconResId;
@@ -58,10 +60,10 @@ public class MenuEntry {
         type = entry.type;
         iconResId = entry.iconResId;
         titleResId = entry.titleResId;
-        fragmentTypeIndex = entry.fragmentTypeIndex;
+        fragmentType = entry.fragmentType;
         url = entry.url;
         String format = "Menu item with title resource id {%s} and url {%s}.";
-        desc = String.format(Locale.US, format, titleResId, url);
+        mDescription = String.format(Locale.US, format, titleResId, url);
     }
 
     /** Build an instance for a given menu item. */
@@ -69,7 +71,14 @@ public class MenuEntry {
         type = MENU_HEADER_TYPE;
         titleResId = entry.titleResId;
         String format = "Menu header with title resource id {%s}.";
-        desc = String.format(Locale.US, format, titleResId);
+        mDescription = String.format(Locale.US, format, titleResId);
+    }
+
+    // Public instance methods.
+
+    /** Return a description of the object. */
+    @Override public String toString() {
+        return mDescription;
     }
 
 }

@@ -44,6 +44,7 @@ import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
@@ -119,7 +120,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
         // The event is either a snackbar action (start a new game) or a menu (FAM or Player2)
         // entry.  Detect and handle start a new game first.
-        if (isPlayAgain(tag, TAG))
+        if (ExpHelper.isPlayAgain(tag, TAG))
             handleNewGame();
     }
 
@@ -569,7 +570,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // A valid experience is available. Use the data model to populate the UI and check if the
         // game is finished.
         TicTacToe model = (TicTacToe) mExperience;
-        setRoomName(mExperience);
+        ExpHelper.setRoomName(mExperience);
         setPlayerName(R.id.player1Name, 0, model);
         setPlayerName(R.id.player2Name, 1, model);
         setPlayerWinCount(R.id.player1WinCount, 0, model);

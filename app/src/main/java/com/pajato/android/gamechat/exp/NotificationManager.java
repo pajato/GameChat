@@ -46,9 +46,7 @@ import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.exp
 public enum NotificationManager {
     instance;
 
-    enum NotifyType {
-        chat, experience
-    }
+    public enum NotifyType {chat, experience}
 
     // Public instance methods.
 
@@ -84,6 +82,12 @@ public enum NotificationManager {
     }
 
     /** Put up a snackbar for the given experience fragment and resource string. */
+    public void notifyNoAction(final Fragment fragment, final int resId, final NotifyType type) {
+        String message = fragment.getContext().getString(resId);
+        showSnackbar(fragment, message, null, null, type);
+    }
+
+    /** Put up a snackbar for the given experience fragment and resource string. */
     public void notify(final Fragment fragment, final int resId) {
         String message = fragment.getContext().getString(resId);
         notifyNoAction(fragment, message);
@@ -91,7 +95,7 @@ public enum NotificationManager {
 
     /** Show a snackbar message. If actionText is null, use a short duration with no action. */
     private void showSnackbar(@NonNull final Fragment fragment, @NonNull final String message,
-                              final String actionText, @NonNull View.OnClickListener listener,
+                              final String actionText, final View.OnClickListener listener,
                               NotifyType type) {
         // Ensure that the fragment is attached and has a view.  Abort if it does not.
         if (fragment.getView() == null)
@@ -101,7 +105,8 @@ public enum NotificationManager {
             snackbar = Snackbar.make(fragment.getView(), message, Snackbar.LENGTH_SHORT);
         } else {
             snackbar = Snackbar.make(fragment.getView(), message, Snackbar.LENGTH_LONG);
-            snackbar.setAction(actionText, listener);
+            if (listener != null)
+                snackbar.setAction(actionText, listener);
         }
 
         // Use a primary color background with white text for the snackbar and hide the FAB button
