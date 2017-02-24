@@ -114,6 +114,7 @@ public enum ChessEngine implements Engine {
             return;
         mModel = (Chess) model;
         mBoard = board;
+        board.init(ExpHelper.getBaseFragment(model), handler);
         handler.setModel(model);
     }
 

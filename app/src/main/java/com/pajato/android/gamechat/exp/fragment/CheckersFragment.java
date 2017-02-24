@@ -213,8 +213,8 @@ public class CheckersFragment extends BaseExperienceFragment {
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getCheckersMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        //menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        //menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_checkers));
         return menu;
     }

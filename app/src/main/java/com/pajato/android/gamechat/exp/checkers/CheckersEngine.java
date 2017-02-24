@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.exp.checkers;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.Engine;
+import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.TileClickHandler;
@@ -105,6 +106,7 @@ public enum CheckersEngine implements Engine {
             return;
         mModel = (Checkers) model;
         mBoard = board;
+        board.init(ExpHelper.getBaseFragment(model), handler);
         handler.setModel(model);
     }
 
