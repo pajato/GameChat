@@ -69,9 +69,6 @@ public enum CredentialsManager {
     /** The application preferences store. */
     private SharedPreferences mPrefs;
 
-    /** The logcat tag. */
-    private static final String TAG = CredentialsManager.class.getSimpleName();
-
     // Public instance methods
 
     /** Return credentials for a given User account by email address, null on no account. */

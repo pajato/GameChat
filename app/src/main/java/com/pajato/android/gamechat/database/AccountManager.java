@@ -34,8 +34,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
@@ -163,6 +161,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Public instance methods
 
+    /** Create a new protected user account and automatically join it to the specified groups */
     public void createProtectedAccount(@NonNull final String email, @NonNull final String name,
                                        @NonNull final String password,
                                        @NonNull List<String> groupKeys) {
@@ -216,6 +215,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Failed to create user " + email + "(" + name + ")");
+                        // TODO: deal with these errors
 //                        if (e instanceof FirebaseAuthWeakPasswordException) {
 //                            // Password too weak
 //                            mPasswordInput.setError(getResources().getQuantityString(

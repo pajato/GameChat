@@ -143,7 +143,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (dispatcher.type == null)
             return false;
         switch (type) {
-            case createProtectedUser: // TODO: this may need to be changed!!!
+            case createProtectedUser:
             case groupsForProtectedUser:
             case chatGroupList: // A group list does not need an item.
                 return true;

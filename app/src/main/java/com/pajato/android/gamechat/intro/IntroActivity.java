@@ -44,7 +44,6 @@ import com.pajato.android.gamechat.R;
 
 import java.util.Arrays;
 
-import static android.R.attr.format;
 import static android.view.animation.AnimationUtils.loadAnimation;
 
 /**

@@ -1,6 +1,5 @@
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -22,9 +21,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.R.id.emailEditText;
-import static com.pajato.android.gamechat.R.id.nameEditText;
-import static com.pajato.android.gamechat.R.id.passwordEditText;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 

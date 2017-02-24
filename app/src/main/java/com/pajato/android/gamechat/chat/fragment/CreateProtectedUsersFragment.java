@@ -34,8 +34,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.R.id.create_button_finish;
