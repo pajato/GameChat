@@ -90,6 +90,7 @@ public enum ToolbarManager {
         chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         chatMain (R.drawable.ic_more_vert_white_24dp),
         createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        createPUserTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         expMain (R.drawable.ic_more_vert_white_24dp),
         expMoveTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),

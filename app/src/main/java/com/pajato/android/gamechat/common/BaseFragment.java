@@ -282,6 +282,8 @@ public abstract class BaseFragment extends Fragment {
                 return ExperienceManager.instance.getListItemData(item);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
+            case groupsForProtectedUser:
+                return GroupManager.instance.getGroupsOnlyListItemData();
             case protectedUsers:
                 return ProtectedUserManager.instance.getProtectedUsersItemData();
             case messageList:   // Get the data to be shown in a room.
@@ -293,6 +295,7 @@ public abstract class BaseFragment extends Fragment {
                 return PlayModeManager.instance.getListItemData(type);
             case selectUser:    // Get all the visible Users for the current account holder.
                 return PlayModeManager.instance.getListItemData(type);
+            case createProtectedUser: // no list data for create protected user
             default:
                 return null;
         }

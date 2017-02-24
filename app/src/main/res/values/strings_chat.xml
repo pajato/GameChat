@@ -1,6 +1,9 @@
 <resources>
     <string name="AddGroupDesc">Create Group menu button</string>
     <string name="AddMembers">Invite members</string>
+    <string name="AllowGroupTitle">Allow Access To Groups</string>
+    <string name="ButtonNext">NEXT</string>
+    <string name="ButtonFinish">FINISH</string>
     <string name="ClearSelectionsMenuTitle">Clear Selections</string>
     <string name="CreateGroupMenuTitle">Create Group</string>
     <string name="CreateGroupNameHint">Type group name</string>Title">
@@ -15,6 +18,8 @@
     <string name="DeleteExperienceTitle">Delete Experience?</string>
     <string name="DeleteUserTitle">Delete Protected User</string>
     <string name="DeleteUserConfirm">Are you sure you want to delete %s?</string>
+    <string name="EmailHint">Email (does not need to be a real email account)</string>
+    <string name="EmailInvalidMessage">Invalid email format</string>
     <string name="FutureFeature">is a future feature. Volunteer by sending feedback using the Help &amp; Feedback menu item.</string>
     <string name="Group">Group</string>
     <string name="GroupsToolbarTitle">Groups with Messages</string>
@@ -43,6 +48,8 @@
     <string name="NoProtectedUsersHeaderText">You have no protected users.</string>
     <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="NoSelectableItemsHeaderText">No Groups or Rooms to select</string>
+    <string name="PasswordHint">Password</string>
+    <string name="PasswordInvalidMessage">Password must be more than 6 characters</string>
     <string name="PickForInvitationTitle">Room Invitations</string>
     <string name="PromoteUserConfirm">Do you want to promote %s to be a standard (non-protected) user?</string>
     <string name="PromoteUserTitle">Promote Protected User</string>
@@ -59,6 +66,7 @@
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
     <string name="TakeVideoDesc">Take a video image button.</string>
+    <string name="UserNameHint">First and Last Name</string>
     <string name="WelcomeMessageText">Welcome to your private messages. Use this space to take notes and stash files. Enjoy!</string>
     <string name="editMessageHint">Type a message</string>
 </resources>

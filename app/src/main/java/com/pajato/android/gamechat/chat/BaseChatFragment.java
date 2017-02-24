@@ -92,14 +92,16 @@ public abstract class BaseChatFragment extends BaseFragment {
             mAdView.resume();
         if (type != null)
             switch (type) {
-                case joinRoom:
                 case chatGroupList:
                 case chatRoomList:
+                case createProtectedUser:
+                case groupsForProtectedUser:
+                case joinRoom:
+                case messageList:
+                case protectedUsers:
                 case selectChatGroupsRooms:
                 case selectExpGroupsRooms:
-                case protectedUsers:
-                case messageList:   // Update the state of the list adapter.
-                    updateAdapterList();
+                    updateAdapterList();   // Update the state of the list adapter.
                     break;
                 default:            // Ignore all other fragments.
                     break;
@@ -141,6 +143,8 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (dispatcher.type == null)
             return false;
         switch (type) {
+            case createProtectedUser: // TODO: this may need to be changed!!!
+            case groupsForProtectedUser:
             case chatGroupList: // A group list does not need an item.
                 return true;
             case messageList:   // The messages in a room require both the group and room keys.

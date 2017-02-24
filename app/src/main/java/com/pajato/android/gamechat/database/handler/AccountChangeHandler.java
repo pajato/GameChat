@@ -63,7 +63,8 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
             // The account does not exist.  Create it now, ensuring there really is a User.
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             account = user != null ? getAccount(user) : null;
-            if (account != null) AccountManager.instance.createAccount(account);
+            if (account != null)
+                AccountManager.instance.createAccount(account);
         }
     }
 
@@ -83,7 +84,6 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
         account.email = user.getEmail();
         account.displayName = user.getDisplayName();
         account.url = getPhotoUrl(user);
-        account.providerId = user.getProviderId();
         account.type = AccountManager.AccountType.standard.name();
         account.createTime = tStamp;
         return account;

@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +38,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 
 import java.util.Arrays;
 
+import static android.R.attr.format;
 import static android.view.animation.AnimationUtils.loadAnimation;
 
 /**
@@ -67,11 +70,25 @@ public class IntroActivity extends AppCompatActivity {
 
     // Protected instance methods.
 
-    /** Handle the sign in activity result, if any. */
+    /**
+     * Handle the sign in activity result. If the sign-in completes with an "OK status, this
+     * intro activity is done so return to the main activity with an "OK" status.
+     */
     @Override protected void onActivityResult(final int requestCode, final int resultCode,
                                               final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
+            IdpResponse response = IdpResponse.fromResultIntent(intent);
+            if (response != null) {
+                String format = "Sign in completed with provider type: %s, e-mail: %s, secret: %s, token: %s";
+                Log.i(IntroActivity.class.getSimpleName(),
+                        String.format(format, response.getProviderType(), response.getEmail(),
+                                response.getIdpSecret(), response.getIdpToken()));
+                intent.putExtra("provider", response.getProviderType());
+                intent.putExtra("email", response.getEmail());
+                intent.putExtra("secret", response.getIdpSecret());
+                intent.putExtra("token", response.getIdpToken());
+            }
             // Pass the intent obtained from the sign in activity through to the calling intent.
             setResult(RESULT_OK, intent);
             finish();

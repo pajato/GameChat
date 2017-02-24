@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with Gam
 http://www.gnu.org/licenses
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.pajato.android.gamechat">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,6 +28,7 @@ http://www.gnu.org/licenses
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        tools:replace="android:supportsRtl"
         android:theme="@style/AppTheme"
         android:name="android.support.multidex.MultiDexApplication">
         <provider

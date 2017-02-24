@@ -1,4 +1,5 @@
 <resources>
+    <string name="AccessToGroupsTitle">Allow Access to Groups</string>
     <string name="CreateRestrictedUserTitle">Create Protected User</string>
     <string name="DeleteGroupMessage">Delete Group</string>
     <string name="DeleteRoomMessage">Delete Room</string>

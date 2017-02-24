@@ -31,11 +31,12 @@ http://www.gnu.org/licenses
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical"
             android:orientation="vertical">
-            <TextView style="@style/ListItemTitle" android:id="@+id/Name"
-                android:layout_weight="1"
+            <TextView
+                android:id="@+id/Name"
+                style="@style/ListItemTitle"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="Kid One"/>
+                tools:text="Kid One" />
             <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
                 tools:text="kid@pajato.com" />
         </LinearLayout>

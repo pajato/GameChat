@@ -98,9 +98,6 @@ import java.util.Map;
     /** The account nickname.  Defaults to the first name. */
     public String nickname;
 
-    /** The account provider id, a string like "google.com". */
-    public String providerId;
-
     /** The account type. */
     public String type;
 
@@ -121,7 +118,6 @@ import java.util.Map;
         chaperone = account.chaperone;
         id = account.id;
         modTime = 0;
-        providerId = account.providerId;
         type = account.type;
         url = account.url;
     }
@@ -161,7 +157,6 @@ import java.util.Map;
         result.put("id", id);
         result.put("modTime", modTime);
         result.put("nickname", nickname);
-        result.put("providerId", providerId);
         result.put("type", type);
         result.put("url", url);
 

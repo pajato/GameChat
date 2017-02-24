@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
@@ -35,8 +36,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.FragmentType.createProtectedUser;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -60,7 +61,6 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
      */
     @Subscribe
     public void onClick(final ClickEvent event) {
-        logEvent(String.format(Locale.US, "onClick (join rooms) event: {%s}.", event));
         if (event == null || event.view == null)
             return;
 
@@ -85,19 +85,16 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateRestrictedUserTitle:
-                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
+                if (AccountManager.instance.isRestricted()) {
                     String protectedWarning = "Protected Users cannot make other Protected Users.";
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                AccountManager.instance.mChaperone = AccountManager.instance.getCurrentAccountId();
-                FirebaseAuth.getInstance().signOut();
-                AccountManager.instance.signIn(getContext());
+                DispatchManager.instance.chainFragment(getActivity(), createProtectedUser, null);
                 break;
             default:
                 break;
         }
-
     }
 
     /** Handle protected user deleted events by updating the adapter */

@@ -153,7 +153,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_casino_black_24dp));
         menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.ic_casino_black_24dp));
-        if(AccountManager.instance.getCurrentAccount().chaperone == null) {
+        if(!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         }
         menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));

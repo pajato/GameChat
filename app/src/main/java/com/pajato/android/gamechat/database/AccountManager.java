@@ -29,10 +29,15 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -50,6 +55,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
+import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 
@@ -127,7 +133,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     // Public instance variables.
 
     /** The standard User (id) associated with this restricted User, if the User is restricted. */
-    public String mChaperone;
+    public String currentChaperone;
+
+    /** This may not get applied to the Firebase account prior to creating the "me" room */
+    public String protectedUserName;
 
     // Private instance variables
 
@@ -149,7 +158,83 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** A map tracking registrations from the key classed that are needed to enable Firebase. */
     private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
 
+    /** A list of group push keys to be used by a newly created protected user account */
+    public List<String> protectedUserGroupKeys = new ArrayList<>();
+
     // Public instance methods
+
+    public void createProtectedAccount(@NonNull final String email, @NonNull final String name,
+                                       @NonNull final String password,
+                                       @NonNull List<String> groupKeys) {
+        // Remember the desired group keys and the chaperone account key
+        protectedUserGroupKeys.addAll(groupKeys);
+        currentChaperone = AccountManager.instance.getCurrentAccountId();
+        protectedUserName = name;
+        FirebaseAuth.getInstance().signOut(); // Sign out from chaperone account
+
+        // Create the Firebase user with email and password credentials
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // TODO: how to notify user??
+                        Log.e(TAG, "Error creating user!");
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        // Set display name
+                        UserProfileChangeRequest changeNameRequest =
+                                new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(name)
+// TODO: How to deal with the photo URL?
+//                                        .setPhotoUri(mUser.getPhotoUri())
+                                        .build();
+
+                        final FirebaseUser user = authResult.getUser();
+                        user.updateProfile(changeNameRequest)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e(TAG, "Error setting display name");
+                                    }
+                                })
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        // TODO: This executes even if the name change fails, since
+                                        // the account creation succeeded and we want to save
+                                        // the credential to SmartLock (if enabled).
+                                        AccountManager.instance.mCurrentAccount.displayName = name;
+                                        AccountManager.instance.updateAccount(mCurrentAccount);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Failed to create user " + email + "(" + name + ")");
+//                        if (e instanceof FirebaseAuthWeakPasswordException) {
+//                            // Password too weak
+//                            mPasswordInput.setError(getResources().getQuantityString(
+//                                    R.plurals.error_weak_password, R.integer.min_password_length));
+//                        } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
+//                            // Email address is malformed
+//                            mEmailInput.setError(getString(R.string.invalid_email_address));
+//                        } else if (e instanceof FirebaseAuthUserCollisionException) {
+//                            // Collision with existing user email, it should be very hard for
+//                            // the user to even get to this error due to CheckEmailFragment.
+//                            mEmailInput.setError(getString(R.string.error_user_collision));
+//                        } else {
+//                            // General error message, this branch should not be invoked but
+//                            // covers future API changes
+//                            mEmailInput.setError(getString(R.string.email_account_creation_error));
+//                        }
+                    }
+                });
+    }
 
     /** Create and persist an account to the database. */
     public void createAccount(@NonNull Account account) {
@@ -160,9 +245,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String roomKey = database.child(path).push().getKey();
 
         // Check for a chaperone account. If one exists, update this account.
-        if (mChaperone != null && !mChaperone.equals(account.id)) {
-            account.chaperone = mChaperone;
+        if (currentChaperone != null && !currentChaperone.equals(account.id)) {
+            account.chaperone = currentChaperone;
+            if (account.displayName == null || account.displayName.equals("")) {
+                account.displayName = protectedUserName;
+                protectedUserName = null;
+            }
             account.type = AccountType.restricted.name();
+            for (String key : protectedUserGroupKeys)
+                account.joinMap.put(key, true);
         } else
             // This User has a standard account.
             account.type = AccountType.standard.name();
@@ -176,12 +267,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Leave the breadcrumbs for the chaperone account in the database. This must be done after
         // the new account has been added, because the database authorization rules don't allow
         // non-authorized users to have access.
-        if (mChaperone != null && !mChaperone.equals(account.id)) {
+        if (currentChaperone != null && !currentChaperone.equals(account.id)) {
             Map<String, Object> protectedUsers = new HashMap<>();
-            protectedUsers.put(mChaperone, account.id);
-            String protectedUserPath = String.format(PROTECTED_PATH, mChaperone);
+            protectedUsers.put(currentChaperone, account.id);
+            String protectedUserPath = String.format(PROTECTED_PATH, currentChaperone);
             DBUtils.updateChildren(protectedUserPath, protectedUsers);
-            mChaperone = null;
+            currentChaperone = null;
         }
 
         // Update and persist the group profile.
@@ -192,6 +283,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         Group group = new Group(groupKey, account.id, null, tStamp, members, rooms);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
         DBUtils.updateChildren(path, group.toMap());
+
+        // For pre-populated joined groups, add watchers (this can be the case for a protected user)
+        for (String joinGroupKey : account.joinMap.keySet())
+            GroupManager.instance.setWatcher(joinGroupKey);
 
         // Update the member entry in the default group.
         Account member = new Account(account);
@@ -284,6 +379,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Save any messages necessary later
         mMessageMap.clear();
         mMessageMap.put(R.string.HasDepartedMessage, context.getString(R.string.HasDepartedMessage));
+        mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
     }
 
     /** Return true iff the current user is a restricted/protected user. */
@@ -348,9 +444,19 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Handle an account change by providing an authentication change on a sign in or sign out. */
     @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
         // Detect a sign in or sign out event.  If either is found, generate an authentication
-        // change event on the account.
+        // change event on the account.  It is also possible to get a new account event without
+        // first getting a sign out event (this has been observed when we are switching to a
+        // protected user).
         String id = event.account != null ? event.account.id : null;
         String cid = mCurrentAccountKey;
+        if (cid != null && id != null && !cid.equals(id)) {
+            cid = null;
+            // we have swapped to a new account without first getting the sign out so simulate
+            // the logout by sending events with a null account
+            AppEventManager.instance.post(new AuthenticationChangeEvent(null));
+            AppEventManager.instance.post(new AuthenticationChangeHandled(null));
+        }
+
         if ((cid == null && id != null) || (cid != null && id == null)) {
             // An authentication change has taken place.  Let the app know.
             mCurrentAccountKey = id;
@@ -358,7 +464,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             AppEventManager.instance.post(new AuthenticationChangeEvent(event.account));
             AppEventManager.instance.post(new AuthenticationChangeHandled(event.account));
         } else {
-            // Detect a change to the account.  If found, set watchers on the me group and the
+            // Detect a change to the account.  If found, set watchers on the me group and any
             // joined groups.
             if (event.account != null)
                 for (String key : event.account.joinMap.keySet())
@@ -403,23 +509,33 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
         // Determine if this state represents a User signing in or signing out.
-        String name = ACCOUNT_CHANGE_HANDLER;
         FirebaseUser user = auth.getCurrentUser();
+        // A user has signed in. Ensure an account change listener is registered.
         if (user != null) {
-            Log.i(TAG, "authentication change with FirebaseUser: " + user.getDisplayName());
-            // A User has signed in. Determine if an account change listener is registered.  If so,
-            // abort.  If not, set one up.
-            if (DatabaseRegistrar.instance.isRegistered(name))
-                return;
+            if (user.getDisplayName() == null)
+                Log.i(TAG, "authentication change with FirebaseUser: " + user.getEmail());
+            else
+                Log.i(TAG, "authentication change with FirebaseUser: " + user.getDisplayName());
+
+            // If there is a previous account UID and we have a listener registered for it, get
+            // rid of it. First send an account change event indicating the change to unregistered.
+            if (mCurrentAccountKey != null && !mCurrentAccountKey.equals("") &&
+                    !mCurrentAccountKey.equals(user.getUid())) {
+                AppEventManager.instance.post(new AccountChangeEvent(null));
+                DatabaseRegistrar.instance.unregisterHandler(
+                        DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, mCurrentAccountKey));
+            }
+
+            // Register a handler for the current user account
+            String name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, user.getUid());
             String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
         } else {
             Log.i(TAG, "authentication change with NULL FirebaseUser");
-            // The User is signed out.  Notify the app of the sign out event.
-            if (DatabaseRegistrar.instance.isRegistered(name)) {
-                DatabaseRegistrar.instance.unregisterHandler(name);
-                AppEventManager.instance.post(new AccountChangeEvent(null));
-            }
+            String name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, mCurrentAccountKey);
+            // The user is signed out so remove the listener and notify the app.
+            DatabaseRegistrar.instance.unregisterHandler(name);
+            AppEventManager.instance.post(new AccountChangeEvent(null));
         }
     }
 
@@ -443,12 +559,56 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Handle the me group profile change by obtaining the me room push key. */
     @Subscribe public void onGroupProfileChange(@NonNull final ProfileGroupChangeEvent event) {
-        // Ensure that the event group profile key and group exist.  Abort if not, otherwise set
-        // watchers on and cache the me group.
-        if (event.key == null || !event.key.equals(getMeGroupKey()))
+        // Ensure that the event group profile key exists
+        if (event.key == null)
             return;
-        mGroup = event.group;
-        RoomManager.instance.setWatcher(mGroup.key, mGroup.roomList.get(0));
+        // Cache the me group and set a watcher on its room
+        if (event.key.equals(getMeGroupKey())) {
+            mGroup = event.group;
+            RoomManager.instance.setWatcher(mGroup.key, mGroup.roomList.get(0));
+        }
+        // In the case of a protected user, there may be pre-populated items in the join map, so
+        // create members and add room watchers.
+        if (isRestricted() && mCurrentAccount.joinMap.containsKey(event.key) &&
+                !event.group.memberList.contains(mCurrentAccountKey)) {
+            Account member = new Account(mCurrentAccount);
+            if (event.group.roomList == null)
+                event.group.roomList = new ArrayList<>();
+            for (String roomKey : event.group.roomList) {
+                Room room = RoomManager.instance.getRoomProfile(roomKey);
+                member.joinMap.put(roomKey, true);
+                if (room != null) {
+                    List<String> roomMembers = room.getMemberIdList();
+                    roomMembers.add(getCurrentAccountId());
+                    // Add a message stating the user has joined
+                    String format = mMessageMap.get(R.string.HasJoinedMessage);
+                    String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+                    MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
+                    RoomManager.instance.updateRoomProfile(room);
+                }
+            }
+            member.groupKey = event.key;
+            MemberManager.instance.createMember(member);
+            event.group.memberList.add(mCurrentAccountKey);
+            GroupManager.instance.updateGroupProfile(event.group);
+        }
+    }
+
+    @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
+        // If the current account is protected and has been joined to a group, but is not yet in
+        // the common room member list, make sure to add it.
+        if (!isRestricted() || event.key == null || event.room == null)
+            return;
+        if (getCurrentAccount().joinMap.containsKey(event.room.groupKey) &&
+            !event.room.getMemberIdList().contains(getCurrentAccountId())) {
+            List<String> roomMembers = event.room.getMemberIdList();
+            roomMembers.add(getCurrentAccountId());
+            // Add a message stating the user has joined
+            String format = mMessageMap.get(R.string.HasJoinedMessage);
+            String text = String.format(Locale.getDefault(), format, getCurrentAccount().getDisplayName());
+            MessageManager.instance.createMessage(text, STANDARD, getCurrentAccount(), event.room);
+            RoomManager.instance.updateRoomProfile(event.room);
+        }
     }
 
     /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
@@ -481,14 +641,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Handle a sign in with the given credentials. */
+    /** Handle a sign in with the given credentials. Currently only used by BaseTest. */
     public void signIn(final Activity activity, final String login, final String pass) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         SignInCompletionHandler handler = new SignInCompletionHandler(activity, login);
         auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
     }
 
-    /** Sign in using the saved User account. */
+    /** Sign in using the Firebase intent. */
     public void signIn(final Context context) {
         // Get an instance of AuthUI based on the default app, and build an intent.
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
@@ -516,10 +676,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     Log.d(TAG, "Log out is complete.");
                 }
             });
-    }
-
-    public void stopListeningForAuthChanges() {
-        FirebaseAuth.getInstance().removeAuthStateListener(this);
     }
 
     /** Update the given account on the database. */
