@@ -2,6 +2,7 @@ package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -14,7 +15,9 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.exp.model.Player;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -52,36 +55,6 @@ public class ExpHelper {
         ExperienceManager.instance.updateExperience(experience);
     }
 
-    /** Handle changing the turn and turn indicator for a given turn state. */
-    public static void handleTurnChange(final Experience model, final boolean switchPlayer) {
-        // Ensure that there is a valid layout for the base fragment.  Abort if not, otherwise
-        // process the data model turn property.
-        View layout = ExpHelper.getBaseFragment(model).getView();
-        if (layout == null)
-            return;
-        boolean turn = model.getTurn();
-        if (switchPlayer)
-            turn = model.toggleTurn();
-
-        // Handle the TextViews that serve as the turn indicator.
-        TextView playerOneLeft = (TextView) layout.findViewById(R.id.leftIndicator1);
-        TextView playerOneRight = (TextView) layout.findViewById(R.id.rightIndicator1);
-        TextView playerTwoLeft = (TextView) layout.findViewById(R.id.leftIndicator2);
-        TextView playerTwoRight = (TextView) layout.findViewById(R.id.rightIndicator2);
-
-        if (turn) {
-            playerOneLeft.setVisibility(View.VISIBLE);
-            playerOneRight.setVisibility(View.VISIBLE);
-            playerTwoLeft.setVisibility(View.INVISIBLE);
-            playerTwoRight.setVisibility(View.INVISIBLE);
-        } else {
-            playerOneLeft.setVisibility(View.INVISIBLE);
-            playerOneRight.setVisibility(View.INVISIBLE);
-            playerTwoLeft.setVisibility(View.VISIBLE);
-            playerTwoRight.setVisibility(View.VISIBLE);
-        }
-    }
-
     /** Return TRUE if this experience is in the "me" group. */
     @SuppressWarnings("unused")
     public static boolean isInMeGroup(final Experience experience) {
@@ -99,6 +72,23 @@ public class ExpHelper {
         // again.
         return ((tag instanceof String && className.equals(tag)) ||
                 (tag instanceof MenuEntry && ((MenuEntry) tag).titleResId == R.string.PlayAgain));
+    }
+
+    /** Process a tile click to establish or clear the selected position and the possible moves. */
+    static void processTileClick(final int position, @NonNull final Experience model,
+                                 @NonNull final Engine engine) {
+        // Determine if a selection is active.  If so, and the click occurred on a possible move
+        // position then handle the move.  Otherwise start a move by marking the selected
+        // position and establishing the possible moves.
+        List<Integer> possibleMoves = model.getBoard().getPossibleMoves();
+        if (model.getBoard().hasSelectedPiece())
+            if (possibleMoves.contains(position))
+                // Handle the move to deal with cases like castling, captures, and pawn promotion.
+                engine.handleMove(position);
+            else
+                engine.startMove(position);
+        else
+            engine.startMove(position);
     }
 
     /** Notify the user about an error and log it. */
@@ -132,27 +122,37 @@ public class ExpHelper {
 
     // Private class methods.
 
-    /** Return a done message text to show in a snackbar.  The given model provides the state. */
-    private static String getDoneMessage(final Experience model) {
-        // Determine if there is a winner.  If not, return the "tie" message.
-        String name = model.getWinningPlayer().name;
-        String format = name != null ? getString(model, R.string.WinMessageNotificationFormat)
-                : null;
-        String message = format != null ? String.format(Locale.getDefault(), format, name) : null;
-        return message != null ? message : getString(model, R.string.TieMessageNotification);
-    }
-
-    private static String getString(final Experience model, final int resId) {
-        BaseFragment fragment = getBaseFragment(model);
-        Context context = fragment != null ? fragment.getContext() : null;
-        return context != null ? context.getString(resId) : null;
-    }
-
     private static TextView getTextView(final Experience model, final int resId) {
         BaseFragment fragment = getBaseFragment(model);
         View layout = fragment != null ? fragment.getView() : null;
         return layout != null ? (TextView) layout.findViewById(resId) : null;
 
+    }
+
+    /** Set the virtual board (UI) from the data model. */
+    private static void setBoard(@NonNull final Context context, @NonNull final Experience model,
+                                 @NonNull final Checkerboard board) {
+        // Reset all the cells to showing empty text with correct highlighting from the data model.
+        int selectedPosition = model.getBoard().getSelectedPosition();
+        if (selectedPosition != -1)
+            board.handleTileBackground(context, selectedPosition);
+        for (int index = 0; index < 64; index++) {
+            board.getCell(index).setText("");
+            board.handleTileBackground(context, index);
+        }
+        board.setHighlight(context, selectedPosition, model.getBoard().getPossibleMoves());
+
+        // Add the pieces from the data model.
+        for (String key : model.getBoard().getKeySet()) {
+            int position = model.getBoard().getPosition(key);
+            if (position == -1)
+                continue;
+            TextView view = board.getCell(position);
+            Piece piece = model.getBoard().getPiece(position);
+            view.setText(piece.getText());
+            view.setTextColor(ContextCompat.getColor(context, piece.getTeam().color));
+            view.setTypeface(null, piece.getTypeface());
+        }
     }
 
     /** Set the name for a given player index. */
@@ -165,6 +165,42 @@ public class ExpHelper {
         name.setText(model.getPlayers().get(index).name);
     }
 
+    /** Set the given visibility state on the give list of identifiers. */
+    private static void setVisibility(final Experience model, final int state, final int... ids) {
+        for (int resId : ids) {
+            TextView view = getTextView(model, resId);
+            if (view != null)
+                view.setVisibility(state);
+        }
+    }
+
+    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
+    private static void setPlayerControls(final Experience model) {
+        // Alternate the decorations on each player symbol.
+        // Handle the TextViews that serve as the turn indicator.
+        if (model.getTurn()) {
+            // Make the primary team's decorations the more prominent.
+            setVisibility(model, View.VISIBLE, R.id.leftIndicator1, R.id.rightIndicator1);
+            setVisibility(model, View.INVISIBLE, R.id.leftIndicator2, R.id.rightIndicator2);
+        } else {
+            // Make the secondary team's decorations the more prominent.
+            setVisibility(model, View.INVISIBLE, R.id.leftIndicator1, R.id.rightIndicator1);
+            setVisibility(model, View.VISIBLE, R.id.leftIndicator2, R.id.rightIndicator2);
+        }
+    }
+
+    /** Update the game state. */
+    private static void setState(final Experience model) {
+        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
+        State state = model != null ? model.getStateType() : null;
+        TextView status = getTextView(model, R.id.status);
+        if (state == null || status == null)
+            return;
+        Player winningPlayer = model.getWinningPlayer();
+        String message = state.getMessage(getBaseFragment(model).getContext(), winningPlayer);
+        status.setText(message);
+    }
+
     /** Set the name for a given player index. */
     private static void setWinCount(final int resId, final int index, final Experience model) {
         // Ensure that the win count text view exists. Abort if not.  Set the value from the model
@@ -175,99 +211,22 @@ public class ExpHelper {
         winCount.setText(String.valueOf(model.getPlayers().get(index).winCount));
     }
 
-    /** Handle the turn indicator management by manipulating the turn icon size and decorations. */
-    private static void setPlayerIcons(final Experience model) {
-        // Alternate the decorations on each player symbol.
-        if (model == null)
-            return;
-        if (model.getTurn())
-            // Make player1's decorations the more prominent.
-            setPlayerIcons(model, R.id.leftIndicator1, R.id.rightIndicator1,
-                    R.id.leftIndicator2, R.id.rightIndicator2);
-        else
-            // Make player2's decorations the more prominent.
-            setPlayerIcons(model, R.id.leftIndicator2, R.id.rightIndicator2,
-                    R.id.leftIndicator1, R.id.rightIndicator1);
-    }
-
-    /** Manage a particular player's symbol decorations. */
-    private static void setPlayerIcons(@NonNull final Experience model, final int largeLeft,
-                                       final int largeRight, final int smallLeft,
-                                       final int smallRight) {
-        // Collect all the pertinent textViews.
-        TextView tvLargeLeft = getTextView(model, largeLeft);
-        TextView tvLargeRight = getTextView(model, largeRight);
-        TextView tvSmallLeft = getTextView(model, smallLeft);
-        TextView tvSmallRight = getTextView(model, smallRight);
-        if (tvLargeLeft == null || tvLargeRight == null || tvSmallLeft == null
-                || tvSmallRight == null)
-            return;
-
-        // Deal with the tvLarger symbol's decorations.
-        tvLargeLeft.setVisibility(View.VISIBLE);
-        tvLargeRight.setVisibility(View.VISIBLE);
-
-        // Deal with the tvSmall symbol's decorations.
-        tvSmallLeft.setVisibility(View.INVISIBLE);
-        tvSmallRight.setVisibility(View.INVISIBLE);
-    }
-
-    /** Update the game state. */
-    private static void setState(final Experience model) {
-        // Generate a message string appropriate for a win or tie, or nothing if the game is active.
-        if (model == null)
-            return;
-        String message = null;
-        State state = model.getStateType();
-        switch (state) {
-            case primary_wins:
-            case secondary_wins:
-                String name = model.getWinningPlayer().name;
-                String format = name != null ? getString(model, state.resId) : null;
-                message = format != null ? String.format(Locale.getDefault(), format, name) : null;
-                break;
-            case check:
-            case tie:
-                message = getString(model, state.resId);
-                break;
-            default:
-                // keep playing or waiting for a new game
-                break;
-        }
-        // Determine if the game has ended (winner or time). Abort if not.
-        if (message == null)
-            return;
-
-        // Update the UI to celebrate the winner or a tie and update the database game state to
-        // pending.
-        TextView winner = getTextView(model, R.id.winner);
-        if (winner == null)
-            return;
-        winner.setText(message);
-        winner.setVisibility(View.VISIBLE);
-        NotificationManager.instance.notifyGameDone(getBaseFragment(model), getDoneMessage(model));
-        model.setStateType(State.pending);
-        ExperienceManager.instance.updateExperience(model);
-    }
-
     /** Update the UI using the current experience state from the database. */
     public static void updateUiFromExperience(final Experience model, final Checkerboard board) {
-        // Ensure that a valid experience exists.  Abort if not.
+        // Obtain a context to use to update the UI.  Abort if unable to do so.
         BaseFragment fragment = getBaseFragment(model);
         Context context = fragment != null ? fragment.getContext() : null;
         if (context == null)
             return;
 
-        // A valid experience is available. Use the data model to populate the UI and check if the
-        // game is finished.
+        // A valid experience is available. Use the data model to populate the UI.
         setRoomName(model);
         setPlayerName(R.id.player1Name, 0, model);
         setPlayerName(R.id.player2Name, 1, model);
         setWinCount(R.id.player1WinCount, 0, model);
         setWinCount(R.id.player2WinCount, 1, model);
-        setPlayerIcons(model);
-        if (board != null)
-            board.setBoardFromModel(context, model.getBoard());
+        setPlayerControls(model);
+        setBoard(context, model, board);
         setState(model);
     }
 }

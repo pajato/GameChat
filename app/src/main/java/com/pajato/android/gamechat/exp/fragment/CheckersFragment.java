@@ -36,9 +36,7 @@ import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpHelper;
-import com.pajato.android.gamechat.exp.TileClickHandler;
 import com.pajato.android.gamechat.exp.checkers.CheckersBoard;
 import com.pajato.android.gamechat.exp.checkers.CheckersEngine;
 import com.pajato.android.gamechat.exp.model.Checkers;
@@ -66,7 +64,9 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 /**
  * A simple Checkers game for use in GameChat.
  *
- * @author Bryan Scott
+ * @author Bryan Scott on 8/3/16
+ * @author Paul Michael Reilly on 9/26/16
+ * @author Sandy Scott on 1/12/17
  */
 public class CheckersFragment extends BaseExperienceFragment {
 
@@ -86,19 +86,6 @@ public class CheckersFragment extends BaseExperienceFragment {
     /** Logcat TAG */
     @SuppressWarnings("unused")
     private static final String TAG = CheckersFragment.class.getSimpleName();
-
-    // Public instance variables.
-
-    //public TextView mHighlightedTile;
-    //public boolean mIsHighlighted;
-
-    // Private instance variables.
-
-    /** Visual layout of checkers board objects */
-    private Checkerboard mBoard = new Checkerboard();
-
-    /** A click handler for the board tiles. */
-    private TileClickHandler mTileClickHandler = new TileClickHandler();
 
     // Public instance methods.
 

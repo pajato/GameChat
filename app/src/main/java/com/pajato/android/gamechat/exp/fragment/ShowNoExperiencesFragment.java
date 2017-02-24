@@ -27,6 +27,7 @@ import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -49,6 +50,12 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
         processClickEvent(event.view, "showNoExperiences");
+    }
+
+    /** Handle a FAM or Snackbar Chess click event. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Delegate the event to the base class.
+        processTagClickEvent(event, "chess");
     }
 
     /** Handle an experience list change event. */

@@ -19,7 +19,8 @@ import static com.pajato.android.gamechat.exp.State.active;
 /**
  *  Provide a Firebase model class for a chess game experience.
  *
- *  @author Sandy Scott on 12/30/16.
+ * @author Paul Michael Reilly on 10/1/16
+ * @author Sandy Scott on 12/30/16.
  */
 @IgnoreExtraProperties public class Chess implements Experience {
 
@@ -200,6 +201,7 @@ import static com.pajato.android.gamechat.exp.State.active;
         board = new ChessBoard();
         board.init();
         state = active;
+        turn = true;
     }
 
     /** Set the experience key to satisfy the Experience contract. */

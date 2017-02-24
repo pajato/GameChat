@@ -94,6 +94,11 @@ import com.pajato.android.gamechat.exp.Team;
         return (p instanceof PieceType && pieceType.equals(p) && mTeam.equals(t));
     }
 
+    /** Implement the interface to return TRUE iff this piece belongs to the given team. */
+    @Exclude @Override public boolean isTeam(final Team team) {
+        return mTeam == team;
+    }
+
     /** Implement the interface by returning TRUE iff this piece is of the given type and team. */
     @Exclude @Override public boolean isType(final GameType type) {
         return type instanceof PieceType && pieceType.equals(type);

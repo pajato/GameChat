@@ -31,10 +31,12 @@ import java.util.Map;
 /**
  * A simple P.O.J.O. class that keeps track of a chess pieces type and the team it is on.
  */
-@IgnoreExtraProperties public class ChessPiece implements Piece {
+@IgnoreExtraProperties
+@SuppressWarnings("WeakerAccess")
+public class ChessPiece implements Piece {
 
     /** Provide constants for chess pieces that use unicode values for the glyph. */
-    public enum PieceType implements GameType {
+    enum PieceType implements GameType {
         NONE (""),
         KING ("\u2654"),
         QUEEN ("\u2655"),
@@ -106,6 +108,11 @@ import java.util.Map;
     /** Implement the interface by returning TRUE iff this piece is of the given type and team. */
     @Override public boolean isPiece(final GameType p, final Team t) {
         return p instanceof PieceType && mPieceType.equals(p) && mTeam.equals(t);
+    }
+
+    /** Implement the interface to return TRUE iff this piece belongs to the given team. */
+    @Exclude @Override public boolean isTeam(final Team team) {
+        return mTeam == team;
     }
 
     /** Implement the interface by returning TRUE iff this piece is of the given type and team. */

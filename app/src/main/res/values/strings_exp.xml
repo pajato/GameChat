@@ -53,4 +53,5 @@
     <string name="xValue">X</string>
     <string name="SelectUserListIcon">Select User</string>
     <string name="PlayOutOfTurnMessageText">Please wait for your turn.</string>
+    <string name="CheckMateText">Checkmate!</string>
 </resources>

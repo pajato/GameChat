@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.exp.chess;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -33,13 +32,17 @@ import com.pajato.android.gamechat.exp.Engine;
 import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.NotificationManager;
+import com.pajato.android.gamechat.exp.Piece;
 import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.TileClickHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
+import static com.pajato.android.gamechat.exp.State.active;
+import static com.pajato.android.gamechat.exp.State.check;
 import static com.pajato.android.gamechat.exp.State.primary_wins;
 import static com.pajato.android.gamechat.exp.State.secondary_wins;
 import static com.pajato.android.gamechat.exp.Team.PRIMARY;
@@ -67,46 +70,66 @@ public enum ChessEngine implements Engine {
     /** The underlying UI board model class. */
     private Checkerboard mBoard;
 
-    /** A flag remembering if possible moves are showing. */
-    private boolean mIsShowingPossibleMoves = false;
-
     /** The experience model class. */
     private Chess mModel;
 
-    // Public constructors.
-
     // Public instance methods.
 
+    /** Handle a move of the selected piece to the given position. */
+    @Override public void handleMove(final int position) {
+        // Determine if the clicked position is a capture.  If so, remove the piece at the position.
+        boolean isCapture = mModel.board.hasPiece(position);
+        if (isCapture)
+            mModel.board.delete(position);
+
+        // Deal with pawn promotion and castling.
+        Team team = mModel.board.getSelectedPiece().getTeam();
+        ChessPiece piece = mModel.board.getSelectedPiece();
+        if (piece.isType(PAWN) && (position < 8 || position > 55))
+            promotePawn(position, team);
+        else
+            mModel.board.add(position, mModel.board.getSelectedPiece());
+        handleCastling(position);
+
+        // Wrap up the move by ...
+        int selectedPosition = mModel.board.getSelectedPosition();
+        mModel.board.delete(selectedPosition);
+        mModel.board.clearSelectedPiece();
+        mModel.board.getPossibleMoves().clear();
+
+        // Test to see if the move is a win or draw or puts the opposing King in check and update
+        // the database.
+        if (!checkFinished()) {
+            team = mModel.turn ? SECONDARY : PRIMARY;
+            mModel.setStateType(isInCheck(team) ? check : active);
+        }
+        mModel.toggleTurn();
+        ExperienceManager.instance.updateExperience(mModel);
+    }
+
     /** Establish the experience model (chess) and board for this handler. */
-    public void init(final Experience model, final Checkerboard board,
-                     final TileClickHandler handler) {
+    @Override public void init(final Experience model, final Checkerboard board,
+                               final TileClickHandler handler) {
         if (!(model instanceof Chess))
             return;
         mModel = (Chess) model;
         mBoard = board;
-        handler.init(model);
+        handler.setModel(model);
     }
 
-    @Override public void processTileClick(final int position) {
-        boolean changedBoard;
-        if (mModel.board.hasSelectedPiece()) {
-            changedBoard = showPossibleMoves(position);
-            mModel.board.clearSelectedPiece();
-        } else {
-            if (mModel.board.hasPiece(position))
-                mModel.board.setSelectedPosition(position);
-                changedBoard = showPossibleMoves(position);
-        }
-        if (changedBoard)
+    /** Start a move by marking the given position as the selected position and get a move list. */
+    @Override public void startMove(final int position) {
+        // Ignore clicks on invalid positions.  If the position represents a valid piece then
+        // mark it as the selected piece and get a list of possible move positions that exclude
+        // the possibility of putting the moving player into check.
+        if (mModel.board.hasPiece(position)) {
+            mModel.board.setSelectedPosition(position);
+            mModel.board.getPossibleMoves().clear();
+            List<Integer> possibleMoves = getPossibleMoves(position);
+            removeCheckExposingMoves(possibleMoves);
+            mModel.board.getPossibleMoves().addAll(possibleMoves);
             ExperienceManager.instance.updateExperience(mModel);
-    }
-
-    /** Return true iff the active player is in check. */
-    @SuppressWarnings("unused")
-    public boolean isInCheck(@NonNull final Chess model) {
-        // Determine if any passive piece now threatens the active king.
-        // TODO: implement...
-        return false;
+        }
     }
 
     // Private instance methods.
@@ -114,22 +137,35 @@ public enum ChessEngine implements Engine {
     /** Check to see if the game is over or not by counting the kings on the board. */
     private boolean checkFinished() {
         // Generate win conditions. If one side runs out of pieces, the other side wins.
-        String message;
-        if (!mModel.board.containsSecondaryKing()) {
-            message = "Game Over! Player 1 Wins!";
+        if (!mModel.board.containsKing(Team.SECONDARY)) {
             mModel.state = primary_wins;
             mModel.setWinCount();
-        } else if (!mModel.board.containsPrimaryKing()) {
-            message = "Game Over! Player 2 Wins!";
+        } else if (!mModel.board.containsKing(Team.PRIMARY)) {
             mModel.state = secondary_wins;
             mModel.setWinCount();
         } else
             return false;
 
         // A side has won. Generate a suitable message.
-        BaseFragment fragment = ExpHelper.getBaseFragment(mModel);
-        NotificationManager.instance.notifyGameDone(fragment, message);
+        // TODO: is the following OK?
+        if (mModel.state.isWin() || mModel.state.isTie()) {
+            String doneMessage = getDoneMessage();
+            BaseFragment fragment = ExpHelper.getBaseFragment(mModel);
+            NotificationManager.instance.notifyGameDone(fragment, doneMessage);
+            //mModel.setStateType(State.pending);
+        }
         return true;
+    }
+
+    /** Return a done message text to show in a snackbar.  The given model provides the state. */
+    private String getDoneMessage() {
+        // Determine if there is a winner.  If not, return the "tie" message.
+        BaseFragment fragment = ExpHelper.getBaseFragment(mModel);
+        String name = mModel.getWinningPlayer().name;
+        int resId = R.string.WinMessageNotificationFormat;
+        String format = name != null ? fragment.getString(resId): null;
+        String message = format != null ? String.format(Locale.getDefault(), format, name) : null;
+        return message != null ? message : fragment.getString(R.string.TieMessageNotification);
     }
 
     /** Returns a list of possible moves for a highlighted piece at a given position. */
@@ -222,59 +258,24 @@ public enum ChessEngine implements Engine {
                 mModel.secondaryKingSideRookHasMoved = true;
     }
 
-
-    /** Handles the movement of the pieces. */
-    private void handleMovement(final int indexClicked, final boolean capturesPiece) {
-        // Handle capturing pieces clearing the cell and removing the piece from the data model.
-        mBoard.getCell(indexClicked).setText("");
-        if (capturesPiece)
-            mModel.board.delete(indexClicked);
-
-        // Check to see if our pawn can becomes another piece and put its value into the board map.
-        if (indexClicked < 8 && mModel.board.getSelectedPiece().isPiece(PAWN, PRIMARY)) {
-            promotePawn(indexClicked, PRIMARY);
-        } else if (indexClicked > 55 && mModel.board.getSelectedPiece().isPiece(PAWN, SECONDARY)) {
-            promotePawn(indexClicked, SECONDARY);
-        } else {
-            // Add the clicked piece to the new position, set both the text and color values using
-            // the source values.
-            mModel.board.add(indexClicked, mModel.board.getSelectedPiece());
-            TextView view = mBoard.getCell(indexClicked);
-            view.setText(mModel.board.getPiece(indexClicked).getText());
-            view.setTextColor(mModel.board.getTeam(indexClicked).color);
-        }
-
-        // Handle castling ....
-        handleCastling(indexClicked);
-
-        // Delete the piece's previous location and end the turn.
-        int position = mModel.board.getSelectedPosition();
-        mModel.board.delete(position);
-        ExpHelper.handleTurnChange(mModel, true);
-        checkFinished();
-    }
-
-    /** Return TRUE iff the given clicked position is a possible move for the selected position. */
-    private boolean handleSelection(final int clickedPosition, final List<Integer> possibleMoves) {
-        // Set the background of the selected position
-        boolean result = false;
-        Context context = ExpHelper.getBaseFragment(mModel).getContext();
-        int selectedPosition = mModel.board.getSelectedPosition();
-        mBoard.handleTileBackground(context, selectedPosition);
-
-        // Set the background of the possible moves.
-        for (int possiblePosition : possibleMoves) {
-            // If the tile clicked is one of the possible positions, and it's the correct
-            // turn/piece combination, the piece moves there.
-            if (clickedPosition == possiblePosition) {
-                boolean isCapture = mModel.board.containsPiece(clickedPosition);
-                handleMovement(clickedPosition, isCapture);
-                result = true;
+    /** Return true iff the given team's King is in check. */
+    private boolean isInCheck(final Team team) {
+        // Determine if the given team's King is now in check.  Check all pieces on opposing team to
+        // see if any of them threaten the King.  Get each player piece from the data model
+        // filtering out the passive player's pieces.  Get the possible moves for each of these
+        // pieces to see if the passive King can be captured.  If so return true.
+        for (String key : mModel.board.getKeySet()) {
+            int position = mModel.board.getPosition(key);
+            if (mModel.board.getPiece(position).isTeam(team))
+                continue;
+            List<Integer> possibleMoves = getPossibleMoves(position);
+            for (int possiblePosition : possibleMoves) {
+                Piece piece = mModel.board.getPiece(possiblePosition);
+                if (piece != null && piece.isPiece(KING, team))
+                    return true;
             }
-            mBoard.handleTileBackground(context, possiblePosition);
         }
-        mModel.board.clearSelectedPiece();
-        return result;
+        return false;
     }
 
     /** Handles the promotion of a pawn at the given position for the given team. */
@@ -334,28 +335,40 @@ public enum ChessEngine implements Engine {
         }
     }
 
-    /** Return TRUE iff the board has changed as the result of a legal move. */
-    private boolean showPossibleMoves(final int clickedPosition) {
-        // If the game is over, we don't need to do anything, so return.  Otherwise find the
-        // possible moves for the selected piece.
-        if (checkFinished())
-            return false;
-        boolean result = false;
-        List<Integer> possibleMoves = getPossibleMoves(mModel.board.getSelectedPosition());
+    /** Remove any possible moves that would result in placing the active King in check. */
+    private void removeCheckExposingMoves(final List<Integer> possibleMoves) {
+        // Collect the rejected moves for removal after all possible positions have been tested.
+        List<Integer> exposedMoves = new ArrayList<>();
+        for (int possiblePosition : possibleMoves)
+            if (testForCheck(possiblePosition))
+                exposedMoves.add(possiblePosition);
+        for (int position : exposedMoves)
+            possibleMoves.remove(Integer.valueOf(position));
+    }
 
-        // If the possible moves are showing, then remove the highlight from them as well as the
-        // selected position, otherwise mark the clicked position as selected and highlight it
-        // and the possible moves accordingly.
-        if (mIsShowingPossibleMoves)
-            result = handleSelection(clickedPosition, possibleMoves);
-        else {
-            mModel.board.setSelectedPosition(clickedPosition);
-            Context context = ExpHelper.getBaseFragment(mModel).getContext();
-            mBoard.setHighlight(context, clickedPosition, possibleMoves);
-        }
+    /** Return true if moving the selected piece to the given position would expose a check. */
+    private boolean testForCheck(final int position) {
+        // Move the selected piece to the possible move and test to see if the associated King
+        // would be in check.  First, save any displaced piece information.
+        boolean result;
+        ChessBoard board = mModel.board;
+        int savedSelectedPosition = board.getSelectedPosition();
+        ChessPiece savedSelectedPiece = board.delete(savedSelectedPosition);
+        ChessPiece savedMovePiece = board.hasPiece(position) ? board.getPiece(position) : null;
 
-        // Toggle the state of the "is showing possible moves" flag and return the result.
-        mIsShowingPossibleMoves = !mIsShowingPossibleMoves;
+        // Add the selected piece to the move position, clear it from the board and test for check.
+        board.add(position, savedSelectedPiece);
+        board.clearSelectedPiece();
+        Team team = savedSelectedPiece.getTeam();
+        result = isInCheck(team);
+
+        // Restore the moved pieces.
+        if (savedMovePiece != null)
+            board.add(position, savedMovePiece);
+        else
+            board.delete(position);
+        board.add(savedSelectedPosition, savedSelectedPiece);
+        board.setSelectedPosition(savedSelectedPosition);
         return result;
     }
 

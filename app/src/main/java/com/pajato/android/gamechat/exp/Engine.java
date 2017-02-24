@@ -29,15 +29,9 @@ public interface Engine {
     /** Initialize this engine. */
     void init(Experience model, Checkerboard board, TileClickHandler handler);
 
-    /**
-     * Process a tile click event on a game board by selecting a piece at the click position
-     * (when there is not a piece already selected) and highlighting the possible places to
-     * which the selected piece can be moved.  When there is a selected piece, the clicked piece
-     * will become the new location for the selected piece if it is highlighted (a valid move),
-     * otherwise the clicked piece becomes the new selection.
-     *
-     * @param position The selected position if there is not one already selected, or the
-     *                 position to move the selected piece.
-     */
-    void processTileClick(int position);
+    /** Handle a move of the selected piece to the given position. */
+    void handleMove(int position);
+
+    /** Start a move using the given position as the selected position. */
+    void startMove(int position);
 }

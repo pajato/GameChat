@@ -80,7 +80,7 @@ public enum ContactManager {
         return result;
     }
 
-    /** Get permissions to access contacts. Not used, but could be added to MainActivity init */
+    /** Get permissions to access contacts. Not used, but could be added to MainActivity setModel */
     public void init(@NonNull final AppCompatActivity context) {
         getPermission(context);
     }

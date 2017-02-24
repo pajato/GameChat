@@ -399,7 +399,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Clear the board, the winner text, the board evaluation support and all current X's and
         // O's.
         if (model.board != null) model.board.clear();
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        TextView winner = (TextView) mLayout.findViewById(R.id.status);
         if (winner != null) winner.setText("");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -535,7 +535,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
         // Update the UI to celebrate the winner or a tie and update the database game state to
         // pending.
-        TextView winner = (TextView) mLayout.findViewById(R.id.winner);
+        TextView winner = (TextView) mLayout.findViewById(R.id.status);
         winner.setText(message);
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
