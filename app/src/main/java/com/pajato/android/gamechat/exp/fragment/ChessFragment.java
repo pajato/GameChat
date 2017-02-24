@@ -209,8 +209,8 @@ public class ChessFragment extends BaseExperienceFragment {
      */
     private List<MenuEntry> getChessMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        //menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
+        //menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
         return menu;
     }
