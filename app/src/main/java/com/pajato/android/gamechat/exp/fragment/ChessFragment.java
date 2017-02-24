@@ -79,8 +79,6 @@ public class ChessFragment extends BaseExperienceFragment {
     @SuppressWarnings("unused")
     private static final String TAG = ChessFragment.class.getSimpleName();
 
-    // Private instance variables.
-
     // Public instance methods.
 
     /** Process a given button click event looking for one on the game fab button. */

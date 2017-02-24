@@ -34,7 +34,7 @@ public class TileClickHandler implements View.OnClickListener {
     // Private instance variables.
 
     /** The experience model class. */
-    private Experience mExperience;
+    private Experience mModel;
 
     // Public instance methods.
 
@@ -43,11 +43,8 @@ public class TileClickHandler implements View.OnClickListener {
         // Detect a player playing out of turn.  If so, notify politely with a snackbar and
         // abort.
         int position = Integer.parseInt((String)v.getTag());
-        Board modelBoard = mExperience.getBoard();
-        Team team = modelBoard.getTeam(position);
-        boolean turn = mExperience.getTurn();
-        if ((team == Team.PRIMARY && !turn) || (team == Team.SECONDARY && turn)) {
-            FragmentType fragmentType = mExperience.getExperienceType().getFragmentType();
+        if (isPlayingOutOfTurn(position)) {
+            FragmentType fragmentType = mModel.getExperienceType().getFragmentType();
             BaseFragment fragment = DispatchManager.instance.getFragment(fragmentType);
             int id = R.string.PlayOutOfTurnMessageText;
             NotificationManager.instance.notifyNoAction(fragment, id, experience);
@@ -55,14 +52,28 @@ public class TileClickHandler implements View.OnClickListener {
         }
 
         // Let the game engine process the click.
-        Engine engine = mExperience.getExperienceType().getEngine();
+        Engine engine = mModel.getExperienceType().getEngine();
         if (engine == null)
             return;
-        engine.processTileClick(position);
+        ExpHelper.processTileClick(position, mModel, engine);
     }
 
     /** Establish the model for this handler. */
-    public void init(final Experience experience) {
-        mExperience = experience;
+    public void setModel(final Experience model) {
+        mModel = model;
+    }
+
+    // Private instance methods.
+
+    /** Return TRUE iff the piece selected is from the other team and not being captured. */
+    private boolean isPlayingOutOfTurn(final int position) {
+        // Ensure that the piece played is correct according to the turn or is being captured.
+        // If so, return false, otherwise true.
+        Board board = mModel.getBoard();
+        Team team = board.getTeam(position);
+        boolean turn = mModel.getTurn();
+        boolean isOwnPlayer = (team == Team.PRIMARY && turn) || (team == Team.SECONDARY && !turn);
+        boolean isCapture = !isOwnPlayer && board.isHighlighted(position);
+        return !isOwnPlayer && !isCapture;
     }
 }

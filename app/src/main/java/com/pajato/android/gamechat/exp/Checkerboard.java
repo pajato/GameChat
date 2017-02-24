@@ -91,7 +91,7 @@ public class Checkerboard {
     }
 
     /** Set the background for the tile at the given position. */
-    public void handleTileBackground(final Context context, final int position) {
+    void handleTileBackground(final Context context, final int position) {
         // Handle the checkerboard positions (where 'checkerboard' means the background pattern).
         boolean isEven = (position % 2 == 0);
         boolean isOdd = (position % 2 == 1);
@@ -129,25 +129,10 @@ public class Checkerboard {
             tile.setBackgroundColor(ContextCompat.getColor(context, colorLightGray));
     }
 
-    /** Set the text on the displayed board based on the database model. */
-    void setBoardFromModel(@NonNull final Context context, final Board model) {
-        for (int index = 0; index < 64; index++)
-            getCell(index).setText("");
-        for (String key : model.getKeySet()) {
-            int position = model.getPosition(key);
-            if (position == -1)
-                continue;
-            TextView view = (TextView) mGrid.getChildAt(position);
-            Piece piece = model.getPiece(position);
-            view.setText(piece.getText());
-            view.setTextColor(ContextCompat.getColor(context, piece.getTeam().color));
-            view.setTypeface(null, piece.getTypeface());
-        }
-    }
-
     /** Set the highlight at a given position using a given color resource id. */
-    public void setHighlight(Context context, int position, List<Integer> possibleMoves) {
-        setHighlight(context, position, android.R.color.holo_red_dark);
+    void setHighlight(Context context, int position, List<Integer> possibleMoves) {
+        if (position != -1)
+            setHighlight(context, position, android.R.color.holo_red_dark);
         for (int possiblePosition : possibleMoves)
             if (possiblePosition != -1)
                 setHighlight(context, possiblePosition, android.R.color.holo_red_light);

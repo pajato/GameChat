@@ -26,6 +26,9 @@ public interface Piece {
     /** Return TRUE iff the piece is of the given type and team. */
     boolean isPiece(GameType type, Team team);
 
+    /** Return TRUE iff the team of the piece matches the given team. */
+    boolean isTeam(Team team);
+
     /** Return TRUE iff the type of the piece matches the given type. */
     boolean isType(GameType type);
 }

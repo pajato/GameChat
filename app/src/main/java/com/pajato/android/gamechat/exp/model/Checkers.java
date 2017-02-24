@@ -194,6 +194,7 @@ public class Checkers implements Experience {
         board = new CheckersBoard();
         board.init();
         state = active;
+        turn = true;
     }
 
     /** Set the experience key to satisfy the Experience contract. */

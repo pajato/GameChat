@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -46,6 +47,9 @@ public interface Board {
     /** Return -1 or the board position corresponding to a given key. */
     int getPosition(final String key);
 
+    /** Return a list of possible moves. */
+    List<Integer> getPossibleMoves();
+
     /** Return null or the currently selected piece. */
     Piece getSelectedPiece();
 
@@ -57,6 +61,9 @@ public interface Board {
 
     /** Return TRUE iff there is a currently selected piece. */
     boolean hasSelectedPiece();
+
+    /** Return true iff the piece is highlighted. */
+    boolean isHighlighted(int position);
 
     /** Set the selected position to the given position. */
     void setSelectedPosition(int position);

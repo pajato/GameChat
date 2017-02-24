@@ -20,10 +20,14 @@ package com.pajato.android.gamechat.exp.checkers;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.Team;
+import com.pajato.android.gamechat.exp.checkers.CheckersPiece.PieceType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,19 +35,23 @@ import static com.pajato.android.gamechat.exp.Team.PRIMARY;
 import static com.pajato.android.gamechat.exp.Team.SECONDARY;
 
 /**
- * Provide a POJO representing a Chess board and methods to modify the board. The basic board is
+ * Provide a POJO representing a checkers board and methods to modify the board. The basic board is
  * a HashMap of board cell index (0->63) to ChessPiece (which contains team and piece type).
  *
  * Since Firebase has some difficulty with integer-based key values for a HashMap (even if they are
- * String representations in Java), the key to our HashMap will have "index" prepended to the cell
+ * String representations in Java), the key to our HashMap will have "cell" prepended to the cell
  * index value, so that Firebase cannot ever interpret it as an integer.
  *
  * So, this class is essentially a wrapper around a HashMap which handles the conversion of an
  * integer index to a string and provides some convenience methods to determine piece type and team
  * for a given cell on the board.
+ *
+ * @author Sandy Scott on 1/9/2017
+ * @author Paul Michael Reilly on 2/17/2017
  */
+@IgnoreExtraProperties public class CheckersBoard implements Board {
 
-public class CheckersBoard implements Board {
+    // Private class constants.
 
     private static final String CELL_ID = "cell";
 
@@ -51,7 +59,12 @@ public class CheckersBoard implements Board {
     @SuppressWarnings("unused")
     private static final String TAG = CheckersBoard.class.getSimpleName();
 
+    // Private instance variables.
+
     private Map<String, CheckersPiece> mPieceMap = new HashMap<>();
+
+    /** The list of highlighted positions.  These reflect possible moves. */
+    private List<Integer> mPossibleMoves = new ArrayList<>();
 
     /** The currently selected piece's position. */
     private int mSelectedPosition = -1;
@@ -61,8 +74,10 @@ public class CheckersBoard implements Board {
     /** Provide a no-arg constructor for Firebase. */
     @SuppressWarnings("unused") public CheckersBoard() {}
 
+    // Public instance methods.
+
     /** Add a piece of the given type and team to board at the given position. */
-    public void add(final int index, final CheckersPiece.PieceType type, final Team team) {
+    public void add(final int index, final PieceType type, final Team team) {
         mPieceMap.put(makeCellId(index), new CheckersPiece(type, team));
     }
 
@@ -76,12 +91,8 @@ public class CheckersBoard implements Board {
         mSelectedPosition = -1;
     }
 
-    /**
-     * Remove a piece from the board at the specified index.
-     * @param index index into the board (valid indices are 0->63).
-     * @return the removed piece
-     */
-    public CheckersPiece delete(final int index) {
+    /** Implement the interface by returning and removing the piece at the given position. */
+    @Override public CheckersPiece delete(final int index) {
         return mPieceMap.remove(makeCellId(index));
     }
 
@@ -90,9 +101,16 @@ public class CheckersBoard implements Board {
         return mPieceMap.keySet();
     }
 
-    /** Return a checkers piece given a board index. */
-    public CheckersPiece getPiece(final int index) {
+    /** Return null or a checkers piece at a given index. */
+    @Exclude public CheckersPiece getPiece(final int index) {
         return mPieceMap.get(makeCellId(index));
+    }
+
+    /** Return null or the type of the piece at the given position. */
+    @SuppressWarnings("unused, WeakerAccess")
+    @Exclude public PieceType getPieceType(final int position) {
+        CheckersPiece p = mPieceMap.get(CELL_ID + String.valueOf(position));
+        return p == null ? PieceType.NONE : p.getPieceType();
     }
 
     /** Provide a getter for the piece map to satisfy Firebase. */
@@ -110,6 +128,12 @@ public class CheckersBoard implements Board {
         }
     }
 
+    /** Provide a getter for the list of possible moves to satisfy Firebase. */
+    @SuppressWarnings("unused, WeakerAccess")
+    public List<Integer> getPossibleMoves() {
+        return mPossibleMoves != null ? mPossibleMoves : new ArrayList<Integer>();
+    }
+
     /** Implement the interface to return null or the selected piece. */
     @Exclude @Override public CheckersPiece getSelectedPiece() {
         return mSelectedPosition >= 0 ? getPiece(mSelectedPosition) : null;
@@ -120,27 +144,19 @@ public class CheckersBoard implements Board {
         return mSelectedPosition;
     }
 
-    /**
-     * Return the team id for the piece at the specified index.
-     * TODO: Refactor the ChessFragment, ChessHelper & friends to use the enum value, not an int!!
-     * @param index index into the board (valid indices are 0->63).
-     * @return the team for any piece at the specified location or -1 if none
-     */
+    /** Return null or the team associated with the piece at the given position. */
     @Exclude @Override public Team getTeam(final int index) {
         CheckersPiece p = mPieceMap.get(makeCellId(index));
-        if (p == null) {
-            return Team.NONE;
-        }
-        return p.getTeam();
+        return p == null ? Team.NONE : p.getTeam();
     }
 
     /** Implement the interface by returning TRUE iff there is a piece at the given position. */
-    @Override public boolean hasPiece(final int position) {
+   @Exclude @Override public boolean hasPiece(final int position) {
         return getPiece(position) != null;
     }
 
     /** Implement the interface to return TRUE iff there is a selected piece. */
-    @Override public boolean hasSelectedPiece() {
+    @Exclude @Override public boolean hasSelectedPiece() {
         return mSelectedPosition >= 0;
     }
 
@@ -151,10 +167,21 @@ public class CheckersBoard implements Board {
         setPiecesForTeam(PRIMARY, 40, 42, 44, 46, 49, 51, 53, 55, 56, 58, 60, 62);
     }
 
+    /** Implement the interface to return TRUE iff the given piece position is highlighted. */
+    @Exclude @Override public boolean isHighlighted(final int position) {
+        return mPossibleMoves != null && mPossibleMoves.contains(position);
+    }
+
     /** Provide a setter for the piece map to satisfy Firebase. */
     @SuppressWarnings("unused")
     public void setPieces(final Map<String, CheckersPiece> pieceMap) {
         mPieceMap = pieceMap;
+    }
+
+    /** Provide a setter for the possible moves to satisfy Firebase. */
+    @SuppressWarnings("unused")
+    public void setPossibleMoves(final List<Integer> possibleMoves) {
+        mPossibleMoves = possibleMoves;
     }
 
     /** Implement the interface to set the piece with the given index as the selected piece. */
@@ -171,7 +198,7 @@ public class CheckersBoard implements Board {
 
     /** Initialize one more pieces of given type and team at the given indexed positions. */
     private void setPiecesForTeam(final Team team, final int... positions) {
-        CheckersPiece piece = new CheckersPiece(CheckersPiece.PieceType.PIECE, team);
+        CheckersPiece piece = new CheckersPiece(PieceType.PIECE, team);
         for (int position : positions)
             mPieceMap.put(CELL_ID + String.valueOf(position), piece);
     }

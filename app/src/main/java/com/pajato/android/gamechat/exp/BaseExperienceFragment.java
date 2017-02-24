@@ -275,6 +275,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         if (dispatcher.type == null)
             return false;
         switch (type) {
+            case chess:
+            case checkers:
+            case tictactoe:
             case expGroupList:  // A group list does not need an item.
                 return true;
             case expRoomList:   // A room list needs an item.

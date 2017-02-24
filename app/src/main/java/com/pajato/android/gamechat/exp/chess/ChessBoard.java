@@ -25,7 +25,9 @@ import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,11 +41,11 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.QUEEN;
 import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
 
 /**
- * Provide a POJO representing a Chess board and methods to modify the board. The basic board is
+ * Provide a POJO representing a chess board and methods to modify the board. The basic board is
  * a HashMap of board cell index (0->63) to ChessPiece (which contains team and piece type).
  *
  * Since Firebase has some difficulty with integer-based key values for a HashMap (even if they are
- * String representations in Java), the key to our HashMap will have "index" prepended to the cell
+ * String representations in Java), the key to our HashMap will have "cell" prepended to the cell
  * index value, so that Firebase cannot ever interpret it as an integer.
  *
  * So, this class is essentially a wrapper around a HashMap which handles the conversion of an
@@ -71,6 +73,9 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
     /** The currently selected piece's position. */
     private int mSelectedPosition = -1;
 
+    /** The list of highlighted positions.  These reflect possible moves. */
+    private List<Integer> mPossibleMoves = new ArrayList<>();
+
     // Public constructors.
 
     /** Build the no-arg instance for Firebase. */
@@ -93,25 +98,12 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
         mSelectedPosition = -1;
     }
 
-    /** Return TRUE iff the board contains a primary king. */
-    boolean containsPrimaryKing() {
+    /** Return TRUE iff the board contains a king for the given team. */
+    boolean containsKing(final Team team) {
         for (int i = 0; i < 64; i++)
-            if (cellHasTeamPiece(i, KING, PRIMARY))
+            if (cellHasTeamPiece(i, KING, team))
                 return true;
         return false;
-    }
-
-    /** Return TRUE iff the board contains a secondary king. */
-    boolean containsSecondaryKing() {
-        for (int i = 0; i < 64; i++)
-            if (cellHasTeamPiece(i, KING, SECONDARY))
-                return true;
-        return false;
-    }
-
-    /** Return TRUE iff the board contains a piece at the given position. */
-    boolean containsPiece(final int position) {
-        return (mPieceMap.get(CELL_ID + String.valueOf(position)) == null);
     }
 
     /** Implement the interface by returning and removing the piece at the given position. */
@@ -132,14 +124,11 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
     /** Return null or the type of the piece at the given position. */
     @Exclude PieceType getPieceType(final int position) {
         ChessPiece p = mPieceMap.get(CELL_ID + String.valueOf(position));
-        if (p == null)
-            return PieceType.NONE;
-        else
-            return p.getPieceType();
+        return p == null ? PieceType.NONE : p.getPieceType();
     }
 
     /** Provide a getter for the piece map to satisfy Firebase. */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("unused, WeakerAccess")
     public Map<String, ChessPiece> getPieces() {
         return mPieceMap;
     }
@@ -153,6 +142,12 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
         }
     }
 
+    /** Provide a getter for the list of possible moves to satisfy Firebase. */
+    @SuppressWarnings("unused, WeakerAccess")
+    public List<Integer> getPossibleMoves() {
+        return mPossibleMoves != null ? mPossibleMoves : new ArrayList<Integer>();
+    }
+
     /** Implement the interface to return null or the selected piece. */
     @Exclude @Override public ChessPiece getSelectedPiece() {
         return mSelectedPosition >= 0 ? getPiece(mSelectedPosition) : null;
@@ -164,12 +159,9 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
     }
 
     /** Return null or the team associated with the piece at the given position. */
-    @Exclude public Team getTeam(final int index) {
+    @Exclude @Override public Team getTeam(final int index) {
         ChessPiece p = mPieceMap.get(CELL_ID + String.valueOf(index));
-        if (p == null) {
-            return Team.NONE;
-        }
-        return p.getTeam();
+        return p == null ? Team.NONE : p.getTeam();
     }
 
     /** Implement the interface by returning TRUE iff there is a piece at the given position. */
@@ -189,10 +181,21 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
         setPiecesForTeamUsingOffsets(PRIMARY, 56, 48);
     }
 
+    /** Implement the interface to return TRUE iff the given piece position is highlighted. */
+    @Exclude @Override public boolean isHighlighted(final int position) {
+        return mPossibleMoves != null && mPossibleMoves.contains(position);
+    }
+
     /** Provide a setter for the piece map to satisfy Firebase. */
     @SuppressWarnings("unused")
     public void setPieces(final Map<String, ChessPiece> pieceMap) {
         mPieceMap = pieceMap;
+    }
+
+    /** Provide a setter for the possible moves to satisfy Firebase. */
+    @SuppressWarnings("unused")
+    public void setPossibleMoves(final List<Integer> possibleMoves) {
+        mPossibleMoves = possibleMoves;
     }
 
     /** Implement the interface to set the piece with the given index as the selected piece. */

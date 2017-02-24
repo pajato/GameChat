@@ -17,15 +17,9 @@
 
 package com.pajato.android.gamechat.exp.checkers;
 
-import android.content.Context;
-import android.support.v4.content.ContextCompat;
-import android.widget.TextView;
-
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.Engine;
-import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.Team;
 import com.pajato.android.gamechat.exp.TileClickHandler;
@@ -58,45 +52,73 @@ public enum CheckersEngine implements Engine {
     /** The underlying UI board model class. */
     private Checkerboard mBoard;
 
-    /** A flag remembering if possible moves are showing. */
-    private boolean mIsShowingPossibleMoves = false;
-
     /** The experience model class. */
     private Checkers mModel;
 
-
-    // Public constructors.
-
     // Public instance methods.
 
+    /** Handle a move of the selected piece to the given position. */
+    @Override public void handleMove(final int position) {
+        // Check to see if our piece becomes a king piece and put its value into the board.
+        CheckersPiece selectedPiece = mModel.board.getSelectedPiece();
+        if (position < 8 && selectedPiece.isPiece(PIECE, PRIMARY))
+            mModel.board.add(position, KING, PRIMARY);
+        else if (position > 55 && selectedPiece.isPiece(PIECE, SECONDARY))
+            mModel.board.add(position, KING, SECONDARY);
+        else
+            mModel.board.add(position, selectedPiece);
+
+        // Determine if the clicked position is a capture.  If so, remove the piece at the position.
+        int selectedPosition = mModel.board.getSelectedPosition();
+        boolean finishedJumping = true;
+        if ((position > 9 + selectedPosition) || (position < selectedPosition - 9)) {
+            int pieceCapturedIndex = (position + selectedPosition) / 2;
+            mBoard.getCell(pieceCapturedIndex).setText("");
+            if (mModel.board.hasPiece(pieceCapturedIndex))
+                mModel.board.delete(pieceCapturedIndex);
+
+            // If there are no more jumps, change turns. If there is at least one jump left, don't.
+            List<Integer> possibleJumps = getPossibleMoves(position);
+            for (int possiblePosition: possibleJumps) {
+                if(possiblePosition != -1 && (possiblePosition > 9 + position
+                        || (possiblePosition < position - 9))) {
+                    finishedJumping = false;
+                }
+            }
+        }
+
+        // Test to see if the move is a win or draw and update the database.
+        if (finishedJumping) {
+            mModel.board.delete(selectedPosition);
+            mModel.board.clearSelectedPiece();
+            mModel.board.getPossibleMoves().clear();
+            mModel.toggleTurn();
+        }
+        checkFinished();
+        ExperienceManager.instance.updateExperience(mModel);
+    }
+
     /** Establish the experience model (chess) and board for this handler. */
-    public void init(final Experience model, final Checkerboard board,
-                     final TileClickHandler handler) {
+    @Override public void init(final Experience model, final Checkerboard board,
+                               final TileClickHandler handler) {
         if (!(model instanceof Checkers))
             return;
         mModel = (Checkers) model;
         mBoard = board;
-        handler.init(model);
+        handler.setModel(model);
     }
 
-    /** Handle a click on the checkers board by ... */
-    @Override public void processTileClick(final int position) {
-        // Ensure that the experience model exists.  Abort if not, otherwise handle either a
-        // piece selection or a piece move.
-        if (mModel == null || mBoard == null)
-            return;
-        boolean changedBoard = false;
-        if (mModel.board.hasSelectedPiece()) {
-            changedBoard = showPossibleMoves(position);
-            mModel.board.clearSelectedPiece();
-        } else {
-            if (mModel.board.hasPiece(position)) {
-                mModel.board.setSelectedPosition(position);
-                changedBoard = showPossibleMoves(position);
-            }
-        }
-        if (changedBoard)
+    /** Start a move by marking the given position as the selected position and get a move list. */
+    @Override public void startMove(final int position) {
+        // Ignore clicks on invalid positions.  If the position represents a valid piece then
+        // mark it as the selected piece and get a list of possible move positions that exclude
+        // the possibility of putting the moving player into check.
+        if (mModel.board.hasPiece(position)) {
+            mModel.board.setSelectedPosition(position);
+            mModel.board.getPossibleMoves().clear();
+            mModel.board.getPossibleMoves().addAll(getPossibleMoves(position));
             ExperienceManager.instance.updateExperience(mModel);
+        }
     }
 
     // Private instance methods.
@@ -180,7 +202,7 @@ public enum CheckersEngine implements Engine {
             findJumpables(highlightedIndex, downLeft + 7, result);
             downLeft = -1;
         }
-        if(mModel.board.getPiece(downRight) != null) {
+        if (mModel.board.getPiece(downRight) != null) {
             findJumpables(highlightedIndex, downRight + 9, result);
             downRight = -1;
         }
@@ -196,101 +218,4 @@ public enum CheckersEngine implements Engine {
             result.add(downRight);
         return result;
     }
-
-    /** Handle the movement of the selected and highlighted positions. */
-    private void handleMovement(final int positionClicked, final boolean isCapture) {
-        // Check to see if our piece becomes a king piece and put its value into the board.
-        CheckersPiece selectedPiece = mModel.board.getSelectedPiece();
-        if (positionClicked < 8 && selectedPiece.isPiece(PIECE, PRIMARY))
-            mModel.board.add(positionClicked, KING, PRIMARY);
-        else if (positionClicked > 55 && selectedPiece.isPiece(PIECE, SECONDARY))
-            mModel.board.add(positionClicked, KING, SECONDARY);
-        else
-            mModel.board.add(positionClicked, selectedPiece);
-
-        // Set the text, typeface, and color the new cell.
-        TextView cell = mBoard.getCell(positionClicked);
-        CheckersPiece piece = mModel.board.getPiece(positionClicked);
-        cell.setText(piece.getText());
-        cell.setTypeface(null, piece.getTypeface());
-        Context context = ExpHelper.getBaseFragment(mModel).getContext();
-        int colorResId = mModel.turn ? R.color.colorPrimary : R.color.colorAccent;
-        cell.setTextColor(ContextCompat.getColor(context, colorResId));
-
-        // Handle capturing pieces.
-        boolean finishedJumping = true;
-        int selectedPosition = mModel.board.getSelectedPosition();
-        if (isCapture) {
-            int pieceCapturedIndex = (positionClicked + selectedPosition) / 2;
-            mBoard.getCell(pieceCapturedIndex).setText("");
-            if (mModel.board.hasPiece(pieceCapturedIndex))
-                mModel.board.delete(pieceCapturedIndex);
-
-            // If there are no more jumps, change turns. If there is at least one jump left, don't.
-            List<Integer> possibleJumps = getPossibleMoves(positionClicked);
-            for(int possiblePosition: possibleJumps) {
-                if(possiblePosition != -1 && (possiblePosition > 9 + positionClicked
-                        || (possiblePosition < positionClicked - 9))) {
-                    finishedJumping = false;
-                }
-            }
-        }
-
-        mModel.board.delete(selectedPosition);
-        mBoard.getCell(selectedPosition).setText("");
-        ExpHelper.handleTurnChange(mModel, finishedJumping);
-        checkFinished();
-    }
-
-    private boolean handleSelection(final int clickedPosition, List<Integer> possibleMoves) {
-        // Set the background of the selected position
-        boolean result = false;
-        Context context = ExpHelper.getBaseFragment(mModel).getContext();
-        int selectedPosition = mModel.board.getSelectedPosition();
-        mBoard.handleTileBackground(context, selectedPosition);
-
-        // Set the background of the possible moves, ignoring specially marked positions or
-        // positions with no pieces on them.
-        for (int possiblePosition : possibleMoves) {
-            // If the tile clicked is one of the possible positions, and it's the correct
-            // turn/piece combination, the piece moves there.
-            if (clickedPosition == possiblePosition) {
-                boolean isCapture = (clickedPosition > 9 + selectedPosition) ||
-                        (clickedPosition < selectedPosition - 9);
-                handleMovement(clickedPosition, isCapture);
-                result = true;
-            }
-            mBoard.handleTileBackground(context, possiblePosition);
-        }
-        mModel.board.clearSelectedPiece();
-        mBoard.getCell(selectedPosition).setText("");
-        return result;
-    }
-
-    /** Return TRUE iff the board has changed as the result of a legal move. */
-    private boolean showPossibleMoves(final int clickedPosition) {
-        // If the game is over, we don't need to do anything.
-        if (checkFinished()) {
-            return false;
-        }
-
-        boolean result = false;
-        int selectedPosition = mModel.board.getSelectedPosition();
-        List<Integer> possibleMoves = getPossibleMoves(selectedPosition);
-
-        // If a highlighted tile exists, we remove the highlight on it and its movement options.
-        if (mIsShowingPossibleMoves)
-            result = handleSelection(clickedPosition, possibleMoves);
-        else {
-            mModel.board.setSelectedPosition(clickedPosition);
-            Context context = ExpHelper.getBaseFragment(mModel).getContext();
-            mBoard.setHighlight(context, clickedPosition, possibleMoves);
-        }
-
-        mIsShowingPossibleMoves = !mIsShowingPossibleMoves;
-
-        return result;
-    }
-
-    // Private inner classes.
 }
