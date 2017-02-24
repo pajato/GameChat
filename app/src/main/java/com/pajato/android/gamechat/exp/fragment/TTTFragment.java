@@ -333,8 +333,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getTTTMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
+        //menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
+        //menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
         return menu;
     }
