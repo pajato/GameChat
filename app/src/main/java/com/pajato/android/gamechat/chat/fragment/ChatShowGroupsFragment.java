@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.v4.view.ViewPager;
+import android.view.View;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
@@ -89,7 +90,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
                 break;
             case R.string.ManageRestrictedUserTitle:
-                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
+                if (AccountManager.instance.isRestricted()) {
                     String protectedWarning = "Protected Users cannot make other Protected Users.";
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
@@ -143,6 +144,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, CHAT_GROUP_FAM_KEY);
+        FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
     /** Initialize ... */

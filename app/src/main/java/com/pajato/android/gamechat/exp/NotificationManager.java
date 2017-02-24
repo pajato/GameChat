@@ -140,17 +140,19 @@ public enum NotificationManager {
         }
 
         @Override public void onDismissed(final Snackbar snackbar, final int event) {
-            if (mType == chat)
-                FabManager.chat.show(mFragment);
-            else
-                FabManager.game.show(mFragment);
+            if (mType == chat) {
+                FabManager.chat.setVisibility(mFragment, View.VISIBLE);
+            }
+            else {
+                FabManager.game.setVisibility(mFragment, View.VISIBLE);
+             }
         }
 
         @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
             if (mType == chat)
-                FabManager.chat.hide(mFragment);
+                FabManager.chat.setVisibility(mFragment, View.INVISIBLE);
             else
-                FabManager.game.hide(mFragment);
+                FabManager.game.setVisibility(mFragment, View.INVISIBLE);
         }
     }
 

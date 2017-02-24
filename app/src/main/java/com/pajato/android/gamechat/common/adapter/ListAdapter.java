@@ -115,6 +115,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             case expRoom:
             case chatRoom:
                 return new ItemListViewHolder(getView(parent, R.layout.item_with_tint));
+            case groupList:
+                return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
             case message:
                 return new ItemListViewHolder(getView(parent, R.layout.item_message));
             case selectableMember:
@@ -154,6 +156,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case expGroup:
                 case expList:
                 case expRoom:
+                case groupList:
                 case message:
                 case inviteRoom:
                 case inviteCommonRoom:
@@ -279,6 +282,9 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
             case expList:
                 holder.icon.setImageResource(item.iconResId);
+                break;
+            case groupList:
+                holder.icon.setImageResource(R.drawable.vd_group_black_24px);
                 break;
             case protectedUserList:
                 if (item.iconUrl == null) {

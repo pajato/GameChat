@@ -245,6 +245,10 @@ public class MainActivity extends BaseActivity
             String key = ACCOUNT_AVAILABLE_KEY;
             editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
             editor.apply();
+            // Look for the login result information and cache it
+            CredentialsManager.instance.saveCredentials(intent.getStringExtra("provider"),
+                    intent.getStringExtra("email"), intent.getStringExtra("secret"),
+                    intent.getStringExtra("token"));
         } else if (requestCode == RC_INVITE) {
             // Hand off to invitation manager as quickly as possible
             Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + resultCode);
@@ -286,11 +290,6 @@ public class MainActivity extends BaseActivity
         processIntroPage();
         setContentView(R.layout.activity_main);
         init();
-    }
-
-    @Override public void onStop() {
-        super.onStop();
-        AccountManager.instance.stopListeningForAuthChanges();
     }
 
     // Private instance methods.

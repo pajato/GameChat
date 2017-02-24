@@ -103,8 +103,7 @@ public enum DispatchManager {
 
     /** Return null or the fragment associated with the given type, creating it as needed. */
     public BaseFragment getFragment(final FragmentType type) {
-        // Ensure that a fragment is created and cached.  If so, return it, otherwise attempt to do
-        // so.
+        // If a fragment is created, return it.  Otherwise create, cache and return it.
         BaseFragment result = mFragmentMap.get(type);
         return result == null ? getFragmentInstance(type) : result;
     }
@@ -186,8 +185,10 @@ public enum DispatchManager {
                 return new Dispatcher(type);
 
             case chatRoomList:
+            case createProtectedUser:
             case createRoom:
             case experienceList:
+            case groupsForProtectedUser:
             case joinRoom:
             case protectedUsers:
             case messageList:

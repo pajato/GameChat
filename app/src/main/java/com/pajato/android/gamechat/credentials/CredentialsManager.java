@@ -80,7 +80,7 @@ public enum CredentialsManager {
         // Case on the provider type.
         switch (credentials.provider) {
             case GoogleAuthProvider.PROVIDER_ID:
-                return GoogleAuthProvider.getCredential(credentials.secret, null);
+                return GoogleAuthProvider.getCredential(credentials.token, null);
             case FacebookAuthProvider.PROVIDER_ID:
                 return FacebookAuthProvider.getCredential(credentials.secret);
             case TwitterAuthProvider.PROVIDER_ID:
@@ -100,9 +100,10 @@ public enum CredentialsManager {
     }
 
     /** Save a set of credentials to the preferences store. */
-    public void saveCredentials(final String provider, final String email, final String secret) {
+    public void saveCredentials(final String provider, final String email, final String secret,
+                                final String token) {
         // Cache the credentials.
-        Credentials credentials = new Credentials(provider, email, secret);
+        Credentials credentials = new Credentials(provider, email, secret, token);
         mCredentialsMap.put(email, credentials);
 
         // Persist the credentials.

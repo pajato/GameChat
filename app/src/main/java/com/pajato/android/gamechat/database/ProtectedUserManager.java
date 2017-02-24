@@ -16,6 +16,7 @@
  */
 package com.pajato.android.gamechat.database;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
@@ -26,8 +27,10 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.credentials.Credentials;
 import com.pajato.android.gamechat.database.handler.ProtectedUserChangeHandler;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
 import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
 
@@ -48,6 +51,9 @@ public enum ProtectedUserManager {
 
     /** The logcat tag. */
     private static final String TAG = ProtectedUserManager.class.getSimpleName();
+
+    /** Credentials saved while creating a new protected user */
+    private Credentials emailCredentials;
 
     /** The protected users associated with the current account */
     private List<Account> mProtectedUserAccounts = new ArrayList<>();
@@ -143,6 +149,21 @@ public enum ProtectedUserManager {
         }
     }
 
+    /** Set in-flight credentials (saved while creating a new protected user */
+    public void setEMailCredentials(final String email, final String name, final String password,
+                                    final boolean isKnown) {
+        emailCredentials = new Credentials(email, name, password, isKnown);
+    }
+
+    /** Get in-flight credentials (saved while creating a new protected user */
+    public Credentials getEMailCredentials() {
+        return emailCredentials;
+    }
+
+    public void removeEMailCredentials() {
+        emailCredentials = null;
+    }
+
     /** Return a list of protected user account items */
     public List<ListItem> getProtectedUsersItemData() {
         List<ListItem> result = new ArrayList<>();
@@ -158,13 +179,20 @@ public enum ProtectedUserManager {
         return result;
     }
 
+    /** Handle a account change event by clearing the protected user accounts list. */
+    @Subscribe public void onAuthenticationChange(@NonNull final AuthenticationChangeEvent event) {
+        mProtectedUserAccounts.clear();
+    }
+
+
     /** Keep track of protected users that belong to the current account */
     @Subscribe public void onProtectedUserChange(ProtectedUserChangeEvent event) {
         if (!AccountManager.instance.getCurrentAccount().protectedUsers.contains(event.account.id))
             return;
         if (!event.account.chaperone.equals(AccountManager.instance.getCurrentAccountId()))
             return;
-        mProtectedUserAccounts.add(event.account);
+        if (!mProtectedUserAccounts.contains(event.account))
+            mProtectedUserAccounts.add(event.account);
     }
 
     /**

@@ -97,7 +97,7 @@ public class SelectUserFragment extends BaseExperienceFragment {
                 DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
                 break;
             case R.string.ManageRestrictedUserTitle:
-                if (AccountManager.instance.getCurrentAccount().chaperone != null) {
+                if (AccountManager.instance.isRestricted()) {
                     String protectedWarning = "Protected Users cannot manage other Protected Users.";
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;

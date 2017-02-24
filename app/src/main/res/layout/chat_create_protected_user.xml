@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/border">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/create_button_finish"
+            android:layout_gravity="center|end"
+            android:onClick="onClick"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:enabled="false"
+            android:text="@string/ButtonFinish" />
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/email_layout"
+        style="@style/CreateUserTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4sp"
+        android:paddingTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="12sp"
+        app:errorTextAppearance="@style/CreateUserErrorText">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/EmailHint"
+            android:inputType="textEmailAddress" />
+
+        <RelativeLayout
+            android:id="@+id/email_next_btn_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                style="@style/IntroTheme.Button"
+                android:id="@+id/email_next_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:layout_alignParentEnd="true"
+                android:text="@string/ButtonNext"/>
+        </RelativeLayout>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/name_layout"
+        android:visibility="invisible"
+        style="@style/CreateUserTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4sp"
+        android:paddingTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="12sp"
+        app:errorTextAppearance="@style/CreateUserErrorText">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/nameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:hint="@string/UserNameHint"
+            android:inputType="textPersonName"
+            android:textCursorDrawable="@null"
+            android:textSize="16sp" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/password_layout"
+        android:visibility="invisible"
+        style="@style/CreateUserTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4sp"
+        android:paddingTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="12sp"
+        app:passwordToggleEnabled="true"
+        app:errorTextAppearance="@style/CreateUserErrorText">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:hint="@string/PasswordHint"
+            android:textSize="16sp"
+            android:inputType="textPassword" />
+
+        <RelativeLayout
+            android:id="@+id/pwd_next_btn_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                style="@style/IntroTheme.Button"
+                android:id="@+id/pwd_next_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:layout_alignParentEnd="true"
+                android:text="@string/ButtonNext"/>
+        </RelativeLayout>
+
+    </android.support.design.widget.TextInputLayout>
+
+</LinearLayout>

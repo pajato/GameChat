@@ -47,6 +47,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.groupList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
@@ -149,6 +150,16 @@ public enum GroupManager {
                 return getMeGroupItemList();
             default:
                 return getGroupsItemList();
+        }
+    }
+
+    /** Get a list of groups without any headers */
+    public List<ListItem> getGroupsOnlyListItemData() {
+        switch (groupMap.size()) {
+            case 0:
+                return new ArrayList<>();
+            default:
+                return getGroupsOnlyItemList();
         }
     }
 
@@ -276,6 +287,15 @@ public enum GroupManager {
                             addItem(result, room);
                     }
             }
+        }
+        return result;
+    }
+
+    /** Return a list of chat groups only - no rooms and no headers */
+    private List<ListItem> getGroupsOnlyItemList() {
+        List<ListItem> result = new ArrayList<>();
+        for (Group group : groupMap.values()) {
+            result.add(new ListItem(groupList, group.key, group.name));
         }
         return result;
     }
