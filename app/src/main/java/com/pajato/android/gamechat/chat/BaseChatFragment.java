@@ -47,6 +47,7 @@ import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.groupList;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -93,6 +94,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (type != null)
             switch (type) {
                 case chatGroupList:
+                case chatMembersList:
                 case chatRoomList:
                 case createProtectedUser:
                 case groupsForProtectedUser:
@@ -153,6 +155,16 @@ public abstract class BaseChatFragment extends BaseFragment {
                 String name = RoomManager.instance.getRoomName(roomKey);
                 markMessagesSeen(groupKey, roomKey);
                 mItem = new ListItem(chatRoom, groupKey, roomKey, name, 0, null);
+                return true;
+            case chatMembersList:
+                if (dispatcher.groupKey == null)
+                    return false;
+                Group group = GroupManager.instance.getGroupProfile(dispatcher.groupKey);
+                String groupName = null;
+                if (group != null) {
+                    groupName = group.name;
+                }
+                mItem = new ListItem(groupList, dispatcher.groupKey, groupName);
                 return true;
             case createRoom:
             case joinRoom:

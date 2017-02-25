@@ -117,6 +117,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ItemListViewHolder(getView(parent, R.layout.item_with_tint));
             case groupList:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
+            case member:
+                return new ContactViewHolder(getView(parent, R.layout.item_contact));
             case message:
                 return new ItemListViewHolder(getView(parent, R.layout.item_message));
             case selectableMember:
@@ -143,6 +145,10 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         ListItem item = mList.get(position);
         if (item != null) {
             switch (item.type) {
+                case contact:
+                case member:
+                    updateContactHolder((ContactViewHolder) holder, item);
+                    break;
                 case date:
                 case resourceHeader:
                 case roomsHeader:
@@ -360,6 +366,27 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         settableButton.setChecked(item.selected);
         holder.button.setEnabled(getEnableState(item));
         holder.button.setTag(item);
+    }
+
+    /** Use the item passed to update the specified contact view holder */
+    private void updateContactHolder(ContactViewHolder holder, final ListItem item) {
+        holder.name.setText(item.name);
+        holder.email.setText(item.email);
+        Context context = holder.icon.getContext();
+        if (item.iconUrl == null) {
+            holder.icon.setImageResource(R.drawable.ic_account_circle_black_48dp);
+        } else {
+            Uri imageUri = Uri.parse(item.iconUrl);
+            if (imageUri != null) {
+                // There is an image to load.  Use Glide to do the heavy lifting.
+                holder.icon.setImageURI(imageUri);
+                Glide.with(context)
+                        .load(item.iconUrl)
+                        .transform(new NavigationManager.CircleTransform(context))
+                        .into(holder.icon);
+            } else
+                holder.icon.setImageResource(R.drawable.ic_account_circle_black_48dp);
+        }
     }
 
     /** Return TRUE iff the given item's selector button should be enabled. */

@@ -40,11 +40,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.common.FragmentType.chatMembersList;
 import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.members;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * Provide a fragment to handle the display of the rooms available to the current user.  This is the
@@ -97,8 +101,8 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 break;
             case R.string.InviteFriendFromChat:
                 InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
+                break;
             default:
-                // ...
                 break;
         }
     }
@@ -116,6 +120,9 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 break;
             case R.string.MenuItemSearch:
                 showFutureFeatureMessage(R.string.MenuItemSearch);
+                break;
+            case R.string.MembersMenuItem:
+                DispatchManager.instance.chainFragment(getActivity(), chatMembersList, mItem);
                 break;
             default:
                 break;
@@ -142,7 +149,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, mItem, game, search);
+        ToolbarManager.instance.init(this, mItem, game, search, members, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 

@@ -22,6 +22,7 @@ import android.support.annotation.NonNull;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowGroupsFragment;
+import com.pajato.android.gamechat.chat.fragment.ChatShowMembersFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowOfflineFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ChatShowSignedOutFragment;
@@ -53,18 +54,11 @@ import com.pajato.android.gamechat.exp.fragment.TTTFragment;
 
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatChain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createGroupTT;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createPUserTT;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.createRoomTT;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expChain;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMain;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.expMoveTT;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.joinRoomTT;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.managePUsersTT;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.none;
-import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.selectInviteTT;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.standardBlack;
+import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.standardWhite;
 import static com.pajato.android.gamechat.exp.ExpType.checkersET;
 import static com.pajato.android.gamechat.exp.ExpType.chessET;
 import static com.pajato.android.gamechat.exp.ExpType.tttET;
@@ -77,37 +71,37 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
 public enum FragmentType {
     chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope),
     chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list),
+    chatMembersList (ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
-    chatRoomList (ChatShowRoomsFragment.class, chatChain, R.layout.chat_list),
+    chatRoomList (ChatShowRoomsFragment.class, standardWhite, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
-    checkers (CheckersFragment.class, expChain, R.layout.exp_checkers, checkersET),
-    chess (ChessFragment.class, expChain, R.layout.exp_checkers, chessET),
-    createChatGroup(CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
-    createExpGroup(CreateGroupFragment.class, createGroupTT, R.layout.chat_create),
-    createProtectedUser(CreateProtectedUsersFragment.class, createPUserTT,
+    checkers (CheckersFragment.class, standardWhite, R.layout.exp_checkers, checkersET),
+    chess (ChessFragment.class, standardWhite, R.layout.exp_checkers, chessET),
+    createChatGroup(CreateGroupFragment.class, standardBlack, R.layout.chat_create),
+    createExpGroup(CreateGroupFragment.class, standardBlack, R.layout.chat_create),
+    createProtectedUser(CreateProtectedUsersFragment.class, standardBlack,
             R.layout.chat_create_protected_user),
-    createRoom (CreateRoomFragment.class, createRoomTT, R.layout.chat_create),
+    createRoom (CreateRoomFragment.class, standardBlack, R.layout.chat_create),
     expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
     expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_list),
     expOffline (ExpShowOfflineFragment.class, expMain, R.layout.exp_offline),
-    expRoomList (ExpShowRoomsFragment.class, expChain, R.layout.exp_none),
+    expRoomList (ExpShowRoomsFragment.class, standardWhite, R.layout.exp_none),
     expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out),
-    experienceList (ShowExperiencesFragment.class, expChain, R.layout.exp_list),
-    groupsForProtectedUser(SelectGroupsFragment.class, createPUserTT, R.layout.chat_select_groups),
-    joinRoom (JoinRoomsFragment.class, joinRoomTT, R.layout.chat_join_rooms),
-    protectedUsers (ManageProtectedUsersFragment.class, managePUsersTT,
+    experienceList (ShowExperiencesFragment.class, standardWhite, R.layout.exp_list),
+    groupsForProtectedUser(SelectGroupsFragment.class, standardBlack, R.layout.chat_select_groups),
+    joinRoom (JoinRoomsFragment.class, standardBlack, R.layout.chat_join_rooms),
+    protectedUsers (ManageProtectedUsersFragment.class, standardBlack,
             R.layout.chat_protected_users),
-    messageList (ShowMessagesFragment.class, chatChain, R.layout.chat_messages),
+    messageList (ShowMessagesFragment.class, standardWhite, R.layout.chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
-    selectChatGroupsRooms(SelectChatInviteFragment.class,
-            selectInviteTT, R.layout.select_for_invite),
-    selectExpGroupsRooms (SelectExpInviteFragment.class,
-            selectInviteTT, R.layout.select_for_invite),
-    selectRoom (SelectRoomFragment.class, expMoveTT, R.layout.exp_select_user),
-    selectUser (SelectUserFragment.class, expMoveTT, R.layout.exp_select_user),
-    showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, chatChain, R.layout.chat_no_joined_rooms),
-    tictactoe (TTTFragment.class, expChain, R.layout.exp_ttt, tttET);
+    selectChatGroupsRooms(SelectChatInviteFragment.class, standardBlack,
+            R.layout.select_for_invite),
+    selectExpGroupsRooms (SelectExpInviteFragment.class, standardBlack, R.layout.select_for_invite),
+    selectRoom (SelectRoomFragment.class, standardBlack, R.layout.exp_select_user),
+    selectUser (SelectUserFragment.class, standardBlack, R.layout.exp_select_user),
+    showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, standardWhite, R.layout.chat_no_joined_rooms),
+    tictactoe (TTTFragment.class, standardWhite, R.layout.exp_ttt, tttET);
 
     // Public instance variables.
 
@@ -164,6 +158,7 @@ public enum FragmentType {
             case chatGroupList:
             case chatOffline:
             case chatRoomList:
+            case chatMembersList:
             case chatSignedOut:
             case createChatGroup:
             case createProtectedUser:

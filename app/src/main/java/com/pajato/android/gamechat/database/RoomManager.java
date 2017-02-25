@@ -163,7 +163,6 @@ public enum RoomManager {
                 }
             }
         }
-
         return result;
     }
 
