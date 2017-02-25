@@ -58,6 +58,7 @@ public enum ToolbarManager {
         helpAndFeedback (R.string.MenuItemHelpAndFeedback, 55, NEVER, -1), // should always be included
         invite (R.string.InviteFriendsOverflow, 20, IF_ROOM, R.drawable.ic_share_white_24dp),
         search (R.string.MenuItemSearch, 20, IF_ROOM, R.drawable.ic_search_white_24px),
+        members (R.string.MembersMenuItem, 30, NEVER, -1),
         settings (R.string.MenuItemSettings, 0, NEVER, -1); // should always be included
 
         // Instance variables.
@@ -87,17 +88,11 @@ public enum ToolbarManager {
 
     /** The toolbar types. */
     public enum ToolbarType {
-        chatChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         chatMain (R.drawable.ic_more_vert_white_24dp),
-        createGroupTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        createPUserTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        createRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         expMain (R.drawable.ic_more_vert_white_24dp),
-        expMoveTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        expChain (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
-        joinRoomTT (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        managePUsersTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
-        selectInviteTT(R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        // Define 'standard' toolbar to have the overflow (three vertical dots) and back arrow
+        standardBlack (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
+        standardWhite (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         none ();
 
         // Instance variables.
@@ -128,11 +123,6 @@ public enum ToolbarManager {
             this.navigationIconResourceId = navigationIconResourceId;
         }
     }
-
-    // Private class constants.
-
-    ///** The logcat tag. */
-    //private static final String TAG = ToolbarManager.class.getSimpleName();
 
     // Private instance variables.
 

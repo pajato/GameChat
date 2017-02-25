@@ -31,6 +31,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.member;
 
 /**
  * Provides a POJO to encapsulate a number of recycler view list items.
@@ -84,6 +85,7 @@ public class ListItem {
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
         groupList ("Group item with name {%s} and key: {%s}"),
+        member ("Member item with name {%s}, key: {%s}, email: {%s} and iconUrl {%s}"),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
         protectedUserList("Protected user list item with name {%s}, e-mail {%s}, iconUrl {%s} and key {%s}."),
         resourceHeader ("Resource header with id: {%d}."),
@@ -177,6 +179,14 @@ public class ListItem {
         nameResourceId = resId;
     }
 
+    /** Build an instance for a member item */
+    public ListItem(final String name, final String email, final String url) {
+        this.type = member;
+        this.name = name;
+        this.email = email;
+        iconUrl = url;
+    }
+
     /** Build an instance for a contact item. */
     public ListItem(final String name, final String email, final String phone, final String url) {
         type = contact;
@@ -265,6 +275,8 @@ public class ListItem {
                 return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
             case groupList:
                 return String.format(Locale.US, type.format, name, groupKey);
+            case member:
+                return String.format(Locale.US, type.format, name, email, iconUrl);
             case message:
                 return String.format(Locale.US, type.format, name, key, count, text);
             case inviteCommonRoom:

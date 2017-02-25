@@ -82,21 +82,16 @@ public class SelectGroupsFragment extends BaseChatFragment {
         }
     }
 
-    /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
+    /** Ensure that the FAB is not visible. Disable the 'finish' button. */
     @Override public void onResume() {
-        // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
-        // FAM is not and the FAM is set to the home chat menu.
         super.onResume();
         FabManager.chat.setVisibility(this, View.INVISIBLE);
-
         TextView finish = (TextView) getActivity().findViewById(R.id.button_finish);
         finish.setEnabled(false);
     }
 
     /** Set up toolbar and FAM */
     @Override public void onStart() {
-        // Establish the create type, the list type, setup the toolbar and turn off the access
-        // control.
         super.onStart();
         int titleResId = R.string.AccessToGroupsTitle;
         ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);

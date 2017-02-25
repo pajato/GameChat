@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.handler.DatabaseEventHandler;
 import com.pajato.android.gamechat.database.handler.MemberChangeHandler;
@@ -87,6 +88,17 @@ public enum MemberManager {
         Map<String, Account> map = memberMap.get(groupKey);
         if (memberMap == null) return null;
         return map.get(memberKey);
+    }
+
+    /** Get a list of member items for a given group key. */
+    public List<ListItem> getMemberListItemData(final String groupKey) {
+        // Generate a list of items to render in the member list
+        List<ListItem> result = new ArrayList<>();
+        Map<String, Account> groupMembers = memberMap.get(groupKey);
+        for (Account account : groupMembers.values()) {
+            result.add(new ListItem(account.getDisplayName(), account.email, account.url));
+        }
+        return result;
     }
 
     /** Return the path to the group members for the given group and member keys. */
