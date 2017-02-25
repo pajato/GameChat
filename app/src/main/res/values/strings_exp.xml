@@ -26,7 +26,6 @@
     <string name="PlayModeUserMenuTitle">Play another user</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
-    <string name="MembersMenuItem">Members</string>
     <string name="SelectRoomToolbarTitle">Select Room</string>
     <string name="SelectUserToolbarTitle">Select User</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>

@@ -41,6 +41,7 @@
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
+    <string name="MembersMenuItem">Members</string>
     <string name="MembersToolbarTitle">Members of %s</string>
     <string name="NoGroupsHeaderText">Welcome to GameChat!</string>
     <string name="NoJoinableRoomsHeaderText">No Available Rooms or Members</string>

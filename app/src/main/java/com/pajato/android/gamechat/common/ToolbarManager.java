@@ -144,7 +144,7 @@ public enum ToolbarManager {
         init(fragment, null, null, menuEntries);
     }
 
-    /** Initialize the toolbar for a given fragment, list item and menu entries. get here for chat show rooms */
+    /** Initialize the toolbar for a given fragment, list item and menu entries. */
     public void init(@NonNull final BaseFragment fragment, ListItem item,
                      final MenuItemType... menuEntries) {
         // Determine if the group name or the room name should be the title.
