@@ -53,8 +53,6 @@ import java.util.Locale;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
-import static com.pajato.android.gamechat.common.FragmentType.checkers;
-import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;

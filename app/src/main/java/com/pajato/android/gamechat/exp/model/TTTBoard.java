@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.exp.model;
 
-import com.pajato.android.gamechat.exp.Board;
-
 import java.util.HashMap;
 import java.util.Map;
 

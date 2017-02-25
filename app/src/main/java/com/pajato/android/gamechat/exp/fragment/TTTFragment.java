@@ -60,8 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.checkers;
-import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
