@@ -29,6 +29,8 @@ import com.pajato.android.gamechat.exp.model.Checkers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.exp.State.primary_wins;
+import static com.pajato.android.gamechat.exp.State.secondary_wins;
 import static com.pajato.android.gamechat.exp.Team.PRIMARY;
 import static com.pajato.android.gamechat.exp.Team.SECONDARY;
 import static com.pajato.android.gamechat.exp.checkers.CheckersPiece.PieceType.KING;
@@ -81,8 +83,8 @@ public enum CheckersEngine implements Engine {
             // If there are no more jumps, change turns. If there is at least one jump left, don't.
             List<Integer> possibleJumps = getPossibleMoves(position);
             for (int possiblePosition: possibleJumps) {
-                if(possiblePosition != -1 && (possiblePosition > 9 + position
-                        || (possiblePosition < position - 9))) {
+                if (possiblePosition != -1 && ((possiblePosition > 9 + position) ||
+                                               (possiblePosition < position - 9))) {
                     finishedJumping = false;
                 }
             }
@@ -94,9 +96,24 @@ public enum CheckersEngine implements Engine {
             mModel.board.clearSelectedPiece();
             mModel.board.getPossibleMoves().clear();
             mModel.toggleTurn();
+            if (noMovesAvailable())
+                mModel.setStateType(mModel.turn ? secondary_wins : primary_wins);
         }
         checkFinished();
         ExperienceManager.instance.updateExperience(mModel);
+    }
+
+    /** Test for the case where a play has been made and the other team has no moves. */
+    private boolean noMovesAvailable() {
+        // Establish the team being scrutinized and check for at least one move from all the players
+        // on that team.
+        Team team = mModel.turn ? PRIMARY : SECONDARY;
+        for (String key : mModel.board.getKeySet()) {
+            int position = mModel.board.getPosition(key);
+            if (mModel.board.getTeam(position) == team && getPossibleMoves(position).size() != 0)
+                return false;
+        }
+        return true;
     }
 
     /** Establish the experience model (chess) and board for this handler. */
