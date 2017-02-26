@@ -140,7 +140,7 @@ import java.util.Map;
         if (nickname != null)
             return nickname;
         if (displayName != null)
-            return getPrefix(displayName, " ");
+            return displayName;
         return getPrefix(email, "@");
     }
 

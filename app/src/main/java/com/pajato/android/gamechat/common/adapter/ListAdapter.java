@@ -313,7 +313,10 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
             case selectableMember:
                 // For a message, ensure that both the holder and the item have an icon value,
                 // and load the icon or default if not found at the specified URL.
-                if (holder.icon == null || item.iconUrl == null) return;
+                if (holder.icon == null || item.iconUrl == null) {
+                    holder.icon.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                    return;
+                }
                 Uri imageUri = Uri.parse(item.iconUrl);
                 if (imageUri != null) {
                     // There is an image to load.  Use Glide to do the heavy lifting.
