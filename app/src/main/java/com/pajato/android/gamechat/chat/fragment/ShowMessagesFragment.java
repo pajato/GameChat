@@ -31,6 +31,7 @@ import android.widget.EditText;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
@@ -47,9 +48,11 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.common.FragmentType.roomMembersList;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.members;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.model.JoinState.JoinType.chat;
@@ -121,6 +124,9 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
             case R.string.MenuItemSearch:
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;
+            case R.string.MembersMenuItem:
+                DispatchManager.instance.chainFragment(getActivity(), roomMembersList, mItem);
+                break;
             default:
                 break;
         }
@@ -143,7 +149,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Setup the toolbar. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+        ToolbarManager.instance.init(this, mItem, helpAndFeedback, members, game, search, invite, settings);
     }
 
     // Private instance methods.

@@ -91,13 +91,23 @@ public enum MemberManager {
     }
 
     /** Get a list of member items for a given group key. */
-    public List<ListItem> getMemberListItemData(final String groupKey) {
+    public List<ListItem> getGroupMemberListItemData(final String groupKey) {
         // Generate a list of items to render in the member list
         List<ListItem> result = new ArrayList<>();
         Map<String, Account> groupMembers = memberMap.get(groupKey);
-        for (Account account : groupMembers.values()) {
-            result.add(new ListItem(account.getDisplayName(), account.email, account.url));
-        }
+        for (Account member : groupMembers.values())
+            result.add(new ListItem(member.getDisplayName(), member.email, member.url));
+        return result;
+    }
+
+    /** Get a list of member items for a given room key. */
+    public List<ListItem> getRoomMemberListItemData(final String groupKey, final String roomKey) {
+        // Generate a list of items to render in the member list
+        List<ListItem> result = new ArrayList<>();
+        Map<String, Account> groupMembers = memberMap.get(groupKey);
+        for (Account member : groupMembers.values())
+            if (member.joinMap.containsKey(roomKey))
+                result.add(new ListItem(member.getDisplayName(), member.email, member.url));
         return result;
     }
 

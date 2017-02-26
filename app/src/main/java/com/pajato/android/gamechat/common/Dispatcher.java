@@ -77,6 +77,11 @@ public class Dispatcher {
                     this.type.expType = experiencePayload.getExperienceType();
                 }
                 break;
+            case roomMembersList:
+                groupKey = item.groupKey;
+                key = item.roomKey;
+                roomKey = item.roomKey;
+                break;
             default:
                 groupKey = item.groupKey;
                 roomKey = item.key;

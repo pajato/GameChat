@@ -48,6 +48,7 @@ import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.groupList;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomList;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -94,13 +95,14 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (type != null)
             switch (type) {
                 case chatGroupList:
-                case chatMembersList:
                 case chatRoomList:
                 case createProtectedUser:
+                case groupMembersList:
                 case groupsForProtectedUser:
                 case joinRoom:
                 case messageList:
                 case protectedUsers:
+                case roomMembersList:
                 case selectChatGroupsRooms:
                 case selectExpGroupsRooms:
                     updateAdapterList();   // Update the state of the list adapter.
@@ -156,14 +158,16 @@ public abstract class BaseChatFragment extends BaseFragment {
                 markMessagesSeen(groupKey, roomKey);
                 mItem = new ListItem(chatRoom, groupKey, roomKey, name, 0, null);
                 return true;
-            case chatMembersList:
+            case roomMembersList:
+                if (dispatcher.groupKey == null || dispatcher.roomKey == null)
+                    return false;
+                String roomName = RoomManager.instance.getRoomName(dispatcher.roomKey);
+                mItem = new ListItem(roomList, dispatcher.groupKey, dispatcher.roomKey, roomName);
+                return true;
+            case groupMembersList:
                 if (dispatcher.groupKey == null)
                     return false;
-                Group group = GroupManager.instance.getGroupProfile(dispatcher.groupKey);
-                String groupName = null;
-                if (group != null) {
-                    groupName = group.name;
-                }
+                String groupName = GroupManager.instance.getGroupName(dispatcher.groupKey);
                 mItem = new ListItem(groupList, dispatcher.groupKey, groupName);
                 return true;
             case createRoom:

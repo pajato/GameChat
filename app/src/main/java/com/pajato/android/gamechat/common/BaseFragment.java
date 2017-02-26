@@ -283,8 +283,6 @@ public abstract class BaseFragment extends Fragment {
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.
                 return GroupManager.instance.getListItemData();
-            case chatMembersList: // Get the data to be shown in a list of members.
-                return MemberManager.instance.getMemberListItemData(item.groupKey);
             case chatRoomList:  // Get the data to be show in a list of rooms.
                 return RoomManager.instance.getListItemData(item.groupKey);
             case expGroupList:  // Get the groups with experiences.
@@ -293,12 +291,16 @@ public abstract class BaseFragment extends Fragment {
                 return ExperienceManager.instance.getListItemData(item);
             case joinRoom:      // Get the candidate list of rooms and members.
                 return JoinManager.instance.getListItemData(item);
+            case groupMembersList: // Get the data to be shown in a list of group members.
+                return MemberManager.instance.getGroupMemberListItemData(item.groupKey);
             case groupsForProtectedUser:
                 return GroupManager.instance.getGroupsOnlyListItemData();
             case protectedUsers:
                 return ProtectedUserManager.instance.getProtectedUsersItemData();
             case messageList:   // Get the data to be shown in a room.
                 return MessageManager.instance.getListItemData(item);
+            case roomMembersList: // Get the data to be shown in a list of room members.
+                return MemberManager.instance.getRoomMemberListItemData(item.groupKey, item.roomKey);
             case selectExpGroupsRooms:
             case selectChatGroupsRooms: // Get the group and room selections.
                 return InvitationManager.instance.getListItemData();
