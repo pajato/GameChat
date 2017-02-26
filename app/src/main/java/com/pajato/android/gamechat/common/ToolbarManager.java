@@ -34,8 +34,11 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.main.MainActivity;
 import com.pajato.android.gamechat.main.NavigationManager;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import static android.view.Menu.NONE;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -187,6 +190,9 @@ public enum ToolbarManager {
 
     /** Add a menu item to the toolbar's action menu. */
     private void addMenuItem(@NonNull final Toolbar toolbar, @NonNull final MenuItemType type) {
+        // Never add 'chat' or 'game' menu items on a tablet
+        if (PaneManager.instance.isTablet() && (type == chat || type == game))
+            return;
         // Ensure that the menu item can be added.  Abort if not, otherwise add the fully populated
         // item.
         Menu menu = toolbar.getMenu();
@@ -240,11 +246,14 @@ public enum ToolbarManager {
             case chatGroup:
                 return fragment.getString(R.string.RoomsToolbarTitle);
             case expList:
+                // Determine if the group is the me group and give it special handling.
+                if (AccountManager.instance.isMeGroup(item.groupKey))
+                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
+                return RoomManager.instance.getRoomName(item.roomKey);
             case chatRoom:
                 // Determine if the group is the me group and give it special handling.
-                String meGroupKey = AccountManager.instance.getMeGroupKey();
-                if (meGroupKey != null && meGroupKey.equals(item.groupKey))
-                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
+                if (AccountManager.instance.isMeGroup(item.groupKey))
+                    return fragment.getString(R.string.GroupMeToolbarTitle);
                 return RoomManager.instance.getRoomName(item.roomKey);
             default:
                 return item.key == null
