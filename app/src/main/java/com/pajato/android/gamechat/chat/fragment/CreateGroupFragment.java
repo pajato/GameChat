@@ -101,12 +101,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
             new AlertDialog.Builder(getActivity())
                     .setTitle(String.format(getString(R.string.GroupExistsTitle), mGroup.name))
                     .setMessage(String.format(getString(R.string.GroupExistsMessage), mGroup.name))
-                    .setNegativeButton(android.R.string.cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface d, int id) {
-                                }
-                            })
+                    .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
                                 @Override

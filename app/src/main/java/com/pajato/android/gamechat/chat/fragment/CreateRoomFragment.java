@@ -101,12 +101,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
             new AlertDialog.Builder(getActivity())
                     .setTitle(String.format(getString(R.string.RoomExistsTitle), mRoom.name))
                     .setMessage(String.format(getString(R.string.RoomExistsMessage), mRoom.name))
-                    .setNegativeButton(android.R.string.cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface d, int id) {
-                                }
-                            })
+                    .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
                                 @Override
