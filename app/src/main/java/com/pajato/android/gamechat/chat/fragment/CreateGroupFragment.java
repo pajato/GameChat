@@ -31,6 +31,7 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
@@ -113,12 +114,12 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Create and persist a member object to the database joined to the default room.
         Account member = new Account(account);
-        member.joinMap.put(roomKey, true);
+        member.joinMap.put(roomKey, new JoinState());
         member.groupKey = groupKey;
         MemberManager.instance.createMember(member);
 
         // Update and persist the User account with the new joined list entry.
-        account.joinMap.put(groupKey, true);
+        account.joinMap.put(groupKey, new JoinState());
         AccountManager.instance.updateAccount(account);
 
         // Post a welcome message to the default room from the owner.

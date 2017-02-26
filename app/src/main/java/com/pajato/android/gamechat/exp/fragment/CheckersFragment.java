@@ -58,6 +58,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.cha
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
 
 /**
  * A simple Checkers game for use in GameChat.
@@ -111,6 +112,12 @@ public class CheckersFragment extends BaseExperienceFragment {
         processMenuItemEvent(event);
     }
 
+    /** Deal with the fragment's lifecycle by marking the join inactive. */
+    @Override public void onPause() {
+        super.onPause();
+        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+    }
+
     /** Handle taking the foreground by updating the UI based on the current experience. */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
@@ -119,6 +126,7 @@ public class CheckersFragment extends BaseExperienceFragment {
         super.onResume();
         if (mExperience == null)
             return;
+        setJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
         CheckersEngine.instance.init(mExperience, mBoard, mTileClickHandler);
         ExpHelper.updateUiFromExperience(mExperience, mBoard);
     }

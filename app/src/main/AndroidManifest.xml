@@ -64,6 +64,9 @@ http://www.gnu.org/licenses
         <activity
             android:name=".intro.IntroActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <service android:name=".main.MainService"
+            android:exported="false">
+        </service>
         <service
             android:name=".main.GameChatMessagingService"
             android:exported="false">

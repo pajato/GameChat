@@ -25,6 +25,7 @@ import android.view.View;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MemberManager;
@@ -104,7 +105,7 @@ public enum PlayModeManager {
             // No users exist so create a header stating this.
             result.add(new ListItem(resourceHeader, R.string.NoUsersFound));
         else
-            for (Map.Entry<String, Boolean> entry : account.joinMap.entrySet()) {
+            for (Map.Entry<String, JoinState> entry : account.joinMap.entrySet()) {
                 String groupKey = entry.getKey();
                 for (Account member : MemberManager.instance.getMemberList(groupKey))
                     if (!member.id.equals(account.id)) {
