@@ -52,6 +52,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.chat;
 
 /**
  * Display the chat associated with the room selected by the current logged in User.
@@ -125,11 +126,18 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         }
     }
 
+    /** Deal with the fragment's lifecycle by marking the join inactive. */
+    @Override public void onPause() {
+        super.onPause();
+        clearJoinState(mItem.groupKey, mItem.roomKey, chat);
+    }
+
     /** Deal with the fragment's lifecycle by managing the FAB. */
     @Override public void onResume() {
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
         FabManager.chat.setVisibility(this, View.GONE);
+        setJoinState(mItem.groupKey, mItem.roomKey, chat);
     }
 
     /** Setup the toolbar. */

@@ -57,6 +57,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.cha
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -103,6 +104,12 @@ public class ChessFragment extends BaseExperienceFragment {
         processMenuItemEvent(event);
     }
 
+    /** Deal with the fragment's lifecycle by marking the join inactive. */
+    @Override public void onPause() {
+        super.onPause();
+        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+    }
+
     /**
      * Handle taking the foreground by updating the UI based on the current experience.
      */
@@ -113,6 +120,7 @@ public class ChessFragment extends BaseExperienceFragment {
         super.onResume();
         if (mExperience == null)
             return;
+        setJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
         ChessEngine.instance.init(mExperience, mBoard, mTileClickHandler);
         ExpHelper.updateUiFromExperience(mExperience, mBoard);
     }

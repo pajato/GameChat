@@ -28,6 +28,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.JoinState;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,7 +96,7 @@ public enum JoinManager {
         // update and persist the member join list.
         if (room == null || member.joinMap.keySet().contains(room.key))
             return;
-        member.joinMap.put(room.key, true);
+        member.joinMap.put(room.key, new JoinState());
         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
         DBUtils.updateChildren(path, member.toMap());
 
@@ -237,7 +238,7 @@ public enum JoinManager {
             return room;
         String path = String.format(Locale.US, RoomManager.ROOMS_PATH, groupKey);
         String roomKey = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();
-        member.joinMap.put(roomKey, true);
+        member.joinMap.put(roomKey, new JoinState());
         MemberManager.instance.updateMember(member);
 
         // Build, update and persist a room object adding the two principals as members.

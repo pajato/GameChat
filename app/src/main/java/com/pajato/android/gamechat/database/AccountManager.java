@@ -45,6 +45,7 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -253,7 +254,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             }
             account.type = AccountType.restricted.name();
             for (String key : protectedUserGroupKeys)
-                account.joinMap.put(key, true);
+                account.joinMap.put(key, new JoinState());
         } else
             // This User has a standard account.
             account.type = AccountType.standard.name();
@@ -290,7 +291,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
         // Update the member entry in the default group.
         Account member = new Account(account);
-        member.joinMap.put(roomKey, true);
+        member.joinMap.put(roomKey, new JoinState());
         member.groupKey = groupKey;
         path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.id);
         DBUtils.updateChildren(path, member.toMap());
@@ -576,7 +577,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 event.group.roomList = new ArrayList<>();
             for (String roomKey : event.group.roomList) {
                 Room room = RoomManager.instance.getRoomProfile(roomKey);
-                member.joinMap.put(roomKey, true);
+                member.joinMap.put(roomKey, new JoinState());
                 if (room != null) {
                     List<String> roomMembers = room.getMemberIdList();
                     roomMembers.add(getCurrentAccountId());

@@ -43,6 +43,7 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.GroupInviteData;
+import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.GroupManager;
@@ -122,7 +123,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
         // The account holder has been invited to join the given group.  Do so by adding the group
         // key to the account join list and create a copy of the account as a member of the group.
-        account.joinMap.put(groupKey, true);
+        account.joinMap.put(groupKey, new JoinState());
         AccountManager.instance.updateAccount(account);
         Account member = new Account(account);
         member.groupKey = groupKey;
@@ -270,11 +271,11 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
 
             // Create and persist a member object to the database and join to the specified rooms
             Account member = new Account(currAccount);
-            member.joinMap.put(data.commonRoomKey, true);
+            member.joinMap.put(data.commonRoomKey, new JoinState());
             if (data.rooms == null)
                 data.rooms = new ArrayList<>();
             for (String roomKey : data.rooms) {
-                member.joinMap.put(roomKey, true);
+                member.joinMap.put(roomKey, new JoinState());
             }
             member.groupKey = changedGroup.key;
             MemberManager.instance.createMember(member);
@@ -338,7 +339,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                     // Update the member within the group to include this room
                     Account member = MemberManager.instance.getMember(data.groupKey);
                     if (member != null) {
-                        member.joinMap.put(event.key, true);
+                        member.joinMap.put(event.key, new JoinState());
                         String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, data.groupKey, member.id);
                         DBUtils.updateChildren(path, member.toMap());
                     }
@@ -508,7 +509,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 mInviteMap.get(key).addedToCommRoomMemberList = true;
                 mInviteMap.get(key).addedToGroupMemberList = true;
             } else {
-                account.joinMap.put(key, true);
+                account.joinMap.put(key, new JoinState());
                 accountChanged = true;
                 mInviteMap.get(key).addedToAccountJoinList = true;
             }

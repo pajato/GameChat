@@ -65,6 +65,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.cha
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
 import static com.pajato.android.gamechat.exp.ExpType.tttET;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
@@ -162,12 +163,19 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         resume();
     }
 
+    /** Deal with the fragment's lifecycle by marking the join inactive. */
+    @Override public void onPause() {
+        super.onPause();
+        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+    }
+
     /** Handle taking the foreground by updating the UI based on the current experience. */
     @Override public void onResume() {
         // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
         // present a spinner.  When an experience is posted by the app event manager, the game can
         // be shown
         super.onResume();
+        setJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
         resume();
     }
 

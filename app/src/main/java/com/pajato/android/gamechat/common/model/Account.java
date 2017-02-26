@@ -86,11 +86,15 @@ import java.util.Map;
     public /*final*/ String id;
 
     /**
-     * In an account context, this is a map of group push keys for which the User is a member.
-     * In a member context, this is a map of room push keys the User has joined. The value is
-     * always 'true' for now (this is a placeholder to help avoid use of lists in Firebase.
+     * In an account context, this is a map of group push keys for which the User is a member.  In a
+     * member context, this is a map of room push keys the User has joined. The value is one of:
+     * "inactive", "chat", "experience", "active" where "inactive" means the app is not in the
+     * foreground or the User is not in the room at all; the other three choices indicated that the
+     * app is running in the foreground, "chat" indicates presence in the chat room, "exp" indicates
+     * presence with a game, and "active" indicates presence in both the chat room and with an
+     * experience.
      */
-    public final Map<String, Boolean> joinMap = new HashMap<>();
+    public final Map<String, JoinState> joinMap = new HashMap<>();
 
     /** The modification timestamp. */
     public long modTime;

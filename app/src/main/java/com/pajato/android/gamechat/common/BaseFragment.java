@@ -38,6 +38,10 @@ import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.adapter.MenuItemEntry;
+import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.common.model.JoinState;
+import com.pajato.android.gamechat.common.model.JoinState.JoinType;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.JoinManager;
@@ -54,6 +58,10 @@ import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_TINT_TYPE;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.active;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.chat;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
+import static com.pajato.android.gamechat.common.model.JoinState.JoinType.inactive;
 
 /**
  * Provide a base class to support common artifacts shared between chat and game fragments, and to
@@ -304,4 +312,45 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    /** Clear the joint state using the given value which must be one of 'chat' or 'exp'. */
+    protected void clearJoinState(final String gKey, final String rKey, final JoinType value) {
+        // Ensure that the member exists, has a state value, and that the value is valid.  If
+        // not, then abort.
+        String id = AccountManager.instance.getCurrentAccountId();
+        Account member = id != null ? MemberManager.instance.getMember(gKey, id) : null;
+        JoinState state = member != null ? member.joinMap.get(rKey) : null;
+        JoinType type = state != null ? state.getType() : null;
+        if (type == null || value == inactive|| value == active)
+            return;
+
+        // Clear the given value from the join state and update the member join state on the
+        // database.
+        if (type == active && value == exp)
+            state.setType(chat);
+        else if (type == active && value == chat)
+            state.setType(exp);
+        else
+            state.setType(inactive);
+        MemberManager.instance.updateMember(member);
+    }
+
+    /** Set the join state using the given value which must be one of 'chat' or 'exp'. */
+    protected void setJoinState(final String groupKey, final String roomKey, final JoinType value) {
+        // Ensure that the member exists, that the value is valid, and that the current member join
+        // state is neither 'active' or the given value.  If not, abort, otherwise set the state to
+        // the given value and update the member on the database.
+        String id = AccountManager.instance.getCurrentAccountId();
+        Account member = id != null ? MemberManager.instance.getMember(groupKey, id) : null;
+        JoinState state = member != null ? member.joinMap.get(roomKey) : null;
+        JoinType type = state != null ? state.getType() : null;
+        if (type == null || type == active || type == value)
+            return;
+
+        //
+        if (type == inactive)
+            state.setType(value);
+        else
+            state.setType(active);
+        MemberManager.instance.updateMember(member);
+    }
 }
