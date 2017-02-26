@@ -22,7 +22,6 @@ http://www.gnu.org/licenses
     android:orientation="vertical">
     <LinearLayout style="@style/ListItemLayout" android:id="@+id/ListItem">
         <ImageView style="@style/ListItemImage" android:id="@+id/ListItemIcon"
-            android:tint="@color/colorPrimaryDark"
             android:contentDescription="@string/ListItemIconDesc" />
         <LinearLayout
             android:layout_width="0dp"
