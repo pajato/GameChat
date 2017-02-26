@@ -17,15 +17,16 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.view.Gravity;
-import android.widget.Toast;
+import android.support.v7.app.AlertDialog;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -37,6 +38,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.NotificationManager;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -91,26 +93,31 @@ public class CreateRoomFragment extends BaseCreateFragment {
     // Protected instance methods.
 
     /** Save the room being created to the Firebase realtime database. */
-    @Override protected boolean save(@NonNull Account account) {
+    @Override
+    protected boolean save(@NonNull final Account account, final boolean ignoreDupName) {
         // Determine if the specified name is unique within the current group's rooms
-        Group group = GroupManager.instance.getGroupProfile(mGroup.key);
-        if (group == null) {
+        if (GroupManager.instance.groupHasRoomName(mGroup.key, mRoom.name) && !ignoreDupName) {
             dismissKeyboard();
-            abort(getString(R.string.InvalidGroupError));
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(String.format(getString(R.string.RoomExistsTitle), mRoom.name))
+                    .setMessage(String.format(getString(R.string.RoomExistsMessage), mRoom.name))
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                }
+                            })
+                    .setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                    save(account, true);
+                                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                                }
+                            })
+                    .create()
+                    .show();
             return false;
-        }
-        for (String roomKey : group.roomList) {
-            Room room = RoomManager.instance.getRoomProfile(roomKey);
-            if (room == null)
-                continue;
-            if (room.name.equals(mRoom.name)) {
-                dismissKeyboard();
-                String warning = String.format(getString(R.string.RoomExistsMessage), mRoom.name);
-                Toast t = Toast.makeText(getActivity(), warning, Toast.LENGTH_SHORT);
-                t.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
-                t.show();
-                return false;
-            }
         }
 
         // Persist the configured room.

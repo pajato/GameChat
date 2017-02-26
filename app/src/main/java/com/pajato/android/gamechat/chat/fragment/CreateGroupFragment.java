@@ -17,18 +17,19 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.view.Gravity;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -44,6 +45,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -92,20 +94,30 @@ public class CreateGroupFragment extends BaseCreateFragment {
     }
 
     /** Save the group being created to the Firebase real-time database. */
-    @Override protected boolean save(@NonNull Account account) {
+    @Override protected boolean save(@NonNull final Account account, final boolean ignoreDupName) {
         // Determine if the specified name is unique within the current user's groups
-        for (String groupKey : AccountManager.instance.getCurrentAccount().joinMap.keySet()) {
-            Group group = GroupManager.instance.getGroupProfile(groupKey);
-            if (group == null)
-                continue;
-            if (group.name.equals(mGroup.name)) {
-                dismissKeyboard();
-                String warning = String.format(getString(R.string.GroupExistsMessage), mGroup.name);
-                Toast t = Toast.makeText(getActivity(), warning, Toast.LENGTH_SHORT);
-                t.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
-                t.show();
-                return false;
-            }
+        if (AccountManager.instance.hasGroupWithName(mGroup.name) && !ignoreDupName) {
+            dismissKeyboard();
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(String.format(getString(R.string.GroupExistsTitle), mGroup.name))
+                    .setMessage(String.format(getString(R.string.GroupExistsMessage), mGroup.name))
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                }
+                            })
+                    .setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                    save(account, true);
+                                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                                }
+                            })
+                    .create()
+                    .show();
+            return false;
         }
 
         // Generate push keys for new group and it's default room; set the self reference key and

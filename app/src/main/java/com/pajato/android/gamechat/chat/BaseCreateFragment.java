@@ -71,11 +71,9 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
             case R.id.SaveButton: // Validate and persist the group, and be done with the activity.
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) {
-                    if (save(account))
-                        // don't dispatch back to chat unless save was successful
+                    if (save(account, false))
                         DispatchManager.instance.startNextFragment(getActivity(), chat);
-                }
-                else {
+                } else {
                     dismissKeyboard();
                     abort(getString(R.string.InvalidAccountError));
                 }
@@ -134,7 +132,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
     }
 
     /** The save operation for a given account. Return true if successful. */
-    abstract protected boolean save(final Account account);
+    abstract protected boolean save(final Account account, final boolean ignoreDuplicateName);
 
     /** Set the name of the managed object. */
     abstract protected void setName(final String value);

@@ -307,6 +307,20 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         MessageManager.instance.createMessage(text, SYSTEM, account, room);
     }
 
+    /** Determine if the current account has a group with the specified name */
+    public boolean hasGroupWithName(String name) {
+        if (mCurrentAccount == null)
+            return false;
+        for (String groupKey : mCurrentAccount.joinMap.keySet()) {
+            Group group = GroupManager.instance.getGroupProfile(groupKey);
+            if (group == null)
+                continue;
+            if (group.name.equals(name))
+                return true;
+        }
+        return false;
+    }
+
     /** Determine if the specified account belongs to any groups which have members */
     public static boolean hasSelectableMembers(Account account) {
         if (account == null)
