@@ -314,7 +314,7 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    /** Clear the joint state using the given value which must be one of 'chat' or 'exp'. */
+    /** Clear the join state using the given value which must be one of 'chat' or 'exp'. */
     protected void clearJoinState(final String gKey, final String rKey, final JoinType value) {
         // Ensure that the member exists, has a state value, and that the value is valid.  If
         // not, then abort.

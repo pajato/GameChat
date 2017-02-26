@@ -354,6 +354,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return hasAccount() ? mCurrentAccount.groupKey : null;
     }
 
+    /** Test whether the specified group key is the 'me' group for the current account */
+    public boolean isMeGroup(String groupKey) {
+        return hasAccount() &&
+                (mCurrentAccount.groupKey != null && (mCurrentAccount.groupKey.equals(groupKey)));
+    }
+
     /** Return null or the push key for the "me room" associated with the current account. */
     public String getMeRoomKey() {
         // Ensure that there is an account and a me group profile has been registered.  If not
