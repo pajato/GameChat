@@ -84,7 +84,8 @@ public class ListItem {
         expList ("Exp list item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
-        groupList ("Group item with name {%s} and key: {%s}"),
+        groupList("Group item with name {%s} and key: {%s}"),
+        roomList("Room item with name {%s}, key: {%s} and group key: {%s}"),
         member ("Member item with name {%s}, key: {%s}, email: {%s} and iconUrl {%s}"),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
         protectedUserList("Protected user list item with name {%s}, e-mail {%s}, iconUrl {%s} and key {%s}."),
@@ -216,6 +217,15 @@ public class ListItem {
         this.iconUrl = iconUrl;
     }
 
+    /** Build an instance for a room */
+    public ListItem(final ItemType type, final String groupKey, final String roomKey,
+                    final String name) {
+        this.type = type;
+        this.groupKey = groupKey;
+        this.roomKey = roomKey;
+        this.name = name;
+    }
+
     /** Build an instance for a given selectable group. */
     public ListItem(final ItemType type, final String groupKey, final String name) {
         this(type, groupKey, groupKey, name, null, null);
@@ -275,6 +285,8 @@ public class ListItem {
                 return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
             case groupList:
                 return String.format(Locale.US, type.format, name, groupKey);
+            case roomList:
+                return String.format(Locale.US, type.format, name, roomKey, groupKey);
             case member:
                 return String.format(Locale.US, type.format, name, email, iconUrl);
             case message:

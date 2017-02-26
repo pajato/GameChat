@@ -71,7 +71,6 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
 public enum FragmentType {
     chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope),
     chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list),
-    chatMembersList (ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
     chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
     chatRoomList (ChatShowRoomsFragment.class, standardWhite, R.layout.chat_list),
     chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
@@ -88,6 +87,7 @@ public enum FragmentType {
     expRoomList (ExpShowRoomsFragment.class, standardWhite, R.layout.exp_none),
     expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out),
     experienceList (ShowExperiencesFragment.class, standardWhite, R.layout.exp_list),
+    groupMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
     groupsForProtectedUser(SelectGroupsFragment.class, standardBlack, R.layout.chat_select_groups),
     joinRoom (JoinRoomsFragment.class, standardBlack, R.layout.chat_join_rooms),
     protectedUsers (ManageProtectedUsersFragment.class, standardBlack,
@@ -95,6 +95,7 @@ public enum FragmentType {
     messageList (ShowMessagesFragment.class, standardWhite, R.layout.chat_messages),
     noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
+    roomMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
     selectChatGroupsRooms(SelectChatInviteFragment.class, standardBlack,
             R.layout.select_for_invite),
     selectExpGroupsRooms (SelectExpInviteFragment.class, standardBlack, R.layout.select_for_invite),
@@ -158,15 +159,16 @@ public enum FragmentType {
             case chatGroupList:
             case chatOffline:
             case chatRoomList:
-            case chatMembersList:
             case chatSignedOut:
             case createChatGroup:
             case createProtectedUser:
             case createRoom:
+            case groupMembersList:
             case groupsForProtectedUser:
             case joinRoom:
             case messageList:
             case protectedUsers:
+            case roomMembersList:
             case selectChatGroupsRooms:
             case showNoJoinedRooms:
                 return chat;

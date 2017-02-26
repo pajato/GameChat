@@ -183,15 +183,16 @@ public enum DispatchManager {
             case chess:
             case tictactoe:     // Handle an experience dispatch providing a type.
                 return new Dispatcher(type);
-            case chatMembersList:
             case chatRoomList:
             case createProtectedUser:
             case createRoom:
             case experienceList:
+            case groupMembersList:
             case groupsForProtectedUser:
             case joinRoom:
             case protectedUsers:
             case messageList:
+            case roomMembersList:
             case selectChatGroupsRooms:
             case selectExpGroupsRooms:
             case selectRoom:
