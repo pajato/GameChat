@@ -1,6 +1,7 @@
 <resources>
     <string name="AddGroupDesc">Create Group menu button</string>
     <string name="AddMembers">Invite members</string>
+    <string name="AbortError">Error: %s Aborting</string>
     <string name="ButtonNext">NEXT</string>
     <string name="ButtonFinish">FINISH</string>
     <string name="ClearSelectionsMenuTitle">Clear Selections</string>
@@ -21,6 +22,8 @@
     <string name="EmailInvalidMessage">Invalid email format</string>
     <string name="FutureFeature">is a future feature. Volunteer by sending feedback using the Help &amp; Feedback menu item.</string>
     <string name="Group">Group</string>
+    <string name="GroupExistsMessage">You already have a group named %s. Do you want to continue anyway?</string>
+    <string name="GroupExistsTitle">Group %s already exists!</string>
     <string name="GroupsToolbarTitle">Groups with Messages</string>
     <string name="GroupMeToolbarTitle">My Chat Room</string>
     <string name="LeaveConfirmMessage">Do you want to leave %s?</string>
@@ -34,6 +37,7 @@
     <string name="InsertMapDesc">Insert map image button.</string>
     <string name="InsertPhoto">Inserting a photo from your device</string>
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
+    <string name="InvalidAccountError">The User account does not exist.</string>
     <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinedOneRoom">You have joined the %1$s room in group %2$s</string>
@@ -55,6 +59,8 @@
     <string name="PromoteUserConfirm">Do you want to promote %s to be a standard (non-protected) user?</string>
     <string name="PromoteUserTitle">Promote Protected User</string>
     <string name="ProtectedUsersTitle">Your Protected Users</string>
+    <string name="RoomExistsMessage">There is already a room named %s. Do you want to continue anyway?</string>
+    <string name="RoomExistsTitle">Room %s already exists!</string>
     <string name="RoomListIcon">The room list icon.</string>
     <string name="RoomsAvailableHeaderText">Rooms</string>
     <string name="RoomsToolbarTitle">Rooms with Messages</string>

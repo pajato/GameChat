@@ -17,7 +17,9 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -27,6 +29,7 @@ import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -42,6 +45,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -90,7 +94,27 @@ public class CreateGroupFragment extends BaseCreateFragment {
     }
 
     /** Save the group being created to the Firebase real-time database. */
-    @Override protected void save(@NonNull Account account) {
+    @Override protected boolean save(@NonNull final Account account, final boolean ignoreDupName) {
+        // Determine if the specified name is unique within the current user's groups
+        if (AccountManager.instance.hasGroupWithName(mGroup.name) && !ignoreDupName) {
+            dismissKeyboard();
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(String.format(getString(R.string.GroupExistsTitle), mGroup.name))
+                    .setMessage(String.format(getString(R.string.GroupExistsMessage), mGroup.name))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                    save(account, true);
+                                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                                }
+                            })
+                    .create()
+                    .show();
+            return false;
+        }
+
         // Generate push keys for new group and it's default room; set the self reference key and
         // the owner field values on the group.
         String groupKey = GroupManager.instance.getGroupKey();
@@ -128,6 +152,8 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the group.
         NotificationManager.instance.notifyGroupCreate(this, mGroup.key, mGroup.name);
+
+        return true;
     }
 
     /** Set the name of the managed object conditionally to the given value. */

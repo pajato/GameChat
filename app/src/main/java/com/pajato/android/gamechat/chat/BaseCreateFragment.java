@@ -70,13 +70,13 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             case R.id.SaveButton: // Validate and persist the group, and be done with the activity.
                 Account account = AccountManager.instance.getCurrentAccount();
-                if (account != null)
-                    save(account);
-                else {
+                if (account != null) {
+                    if (save(account, false))
+                        DispatchManager.instance.startNextFragment(getActivity(), chat);
+                } else {
                     dismissKeyboard();
-                    abort("The User account does not exist.  Aborting.");
+                    abort(getString(R.string.InvalidAccountError));
                 }
-                DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
 
             case R.id.ClearNameButton: // Clear the group name edit text field.
@@ -121,7 +121,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     /** Log and present a toast message to the User. */
     protected void abort(final String message) {
-        String abortMessage = String.format("Error: (create %s): %s", mCreateType, message);
+        String abortMessage = String.format(getString(R.string.AbortError), message);
         logEvent(abortMessage);
         Toast.makeText(getActivity(), abortMessage, Toast.LENGTH_LONG).show();
     }
@@ -131,8 +131,8 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
         return "";
     }
 
-    /** The save operation for a given account. */
-    abstract protected void save(final Account account);
+    /** The save operation for a given account. Return true if successful. */
+    abstract protected boolean save(final Account account, final boolean ignoreDuplicateName);
 
     /** Set the name of the managed object. */
     abstract protected void setName(final String value);
@@ -171,14 +171,11 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
         /** Make sure that the hint is restored when necessary and that the name is unique. */
         @Override public void afterTextChanged(Editable s) {
             if (mEditText.getText().length() == 0) {
-                // Restore the hint and disable the save button.
-                //restoreHint();
+                // Disable the save button.
                 mSaveButton.setTextColor(mDisabledColor);
                 mSaveButton.setEnabled(false);
             } else {
-                // TODO: determine if the group name is unique.
-                // Render the save button enabled with the primary dark color and update the
-                // group.
+                // Enable the save button and update the group.
                 mSaveButton.setEnabled(true);
                 mSaveButton.setTextColor(mEnabledColor);
                 setName(mEditText.getText().toString());

@@ -141,6 +141,18 @@ public enum GroupManager {
         return result;
     }
 
+    public boolean groupHasRoomName(final String groupKey, final String roomName) {
+        Group group = getGroupProfile(groupKey);
+        if (group == null)
+            return false;
+        for (String roomKey : group.roomList) {
+            Room room = RoomManager.instance.getRoomProfile(roomKey);
+            if (room.name.equals(roomName))
+                return true;
+        }
+        return false;
+    }
+
     /** Get the data as a set of list items for all groups. */
     public List<ListItem> getListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of

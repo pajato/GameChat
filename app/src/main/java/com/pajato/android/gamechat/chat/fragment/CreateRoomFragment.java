@@ -17,13 +17,16 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -35,6 +38,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.NotificationManager;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -89,7 +93,28 @@ public class CreateRoomFragment extends BaseCreateFragment {
     // Protected instance methods.
 
     /** Save the room being created to the Firebase realtime database. */
-    @Override protected void save(@NonNull Account account) {
+    @Override
+    protected boolean save(@NonNull final Account account, final boolean ignoreDupName) {
+        // Determine if the specified name is unique within the current group's rooms
+        if (GroupManager.instance.groupHasRoomName(mGroup.key, mRoom.name) && !ignoreDupName) {
+            dismissKeyboard();
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(String.format(getString(R.string.RoomExistsTitle), mRoom.name))
+                    .setMessage(String.format(getString(R.string.RoomExistsMessage), mRoom.name))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface d, int id) {
+                                    save(account, true);
+                                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                                }
+                            })
+                    .create()
+                    .show();
+            return false;
+        }
+
         // Persist the configured room.
         mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
         mRoom.addMember(account.id);
@@ -112,6 +137,8 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the room.
         NotificationManager.instance.notifyRoomCreate(this, mRoom.key, mRoom.name);
+
+        return true;
     }
 
     /** Set the room name conditionally to the given value. */
