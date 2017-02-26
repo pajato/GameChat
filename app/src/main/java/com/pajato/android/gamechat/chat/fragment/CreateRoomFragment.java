@@ -18,6 +18,8 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
@@ -89,7 +91,28 @@ public class CreateRoomFragment extends BaseCreateFragment {
     // Protected instance methods.
 
     /** Save the room being created to the Firebase realtime database. */
-    @Override protected void save(@NonNull Account account) {
+    @Override protected boolean save(@NonNull Account account) {
+        // Determine if the specified name is unique within the current group's rooms
+        Group group = GroupManager.instance.getGroupProfile(mGroup.key);
+        if (group == null) {
+            dismissKeyboard();
+            abort(getString(R.string.InvalidGroupError));
+            return false;
+        }
+        for (String roomKey : group.roomList) {
+            Room room = RoomManager.instance.getRoomProfile(roomKey);
+            if (room == null)
+                continue;
+            if (room.name.equals(mRoom.name)) {
+                dismissKeyboard();
+                String warning = String.format(getString(R.string.RoomExistsMessage), mRoom.name);
+                Toast t = Toast.makeText(getActivity(), warning, Toast.LENGTH_SHORT);
+                t.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
+                t.show();
+                return false;
+            }
+        }
+
         // Persist the configured room.
         mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
         mRoom.addMember(account.id);
@@ -112,6 +135,8 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the room.
         NotificationManager.instance.notifyRoomCreate(this, mRoom.key, mRoom.name);
+
+        return true;
     }
 
     /** Set the room name conditionally to the given value. */

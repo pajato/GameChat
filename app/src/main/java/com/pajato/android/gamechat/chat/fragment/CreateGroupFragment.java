@@ -18,9 +18,11 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
@@ -90,7 +92,22 @@ public class CreateGroupFragment extends BaseCreateFragment {
     }
 
     /** Save the group being created to the Firebase real-time database. */
-    @Override protected void save(@NonNull Account account) {
+    @Override protected boolean save(@NonNull Account account) {
+        // Determine if the specified name is unique within the current user's groups
+        for (String groupKey : AccountManager.instance.getCurrentAccount().joinMap.keySet()) {
+            Group group = GroupManager.instance.getGroupProfile(groupKey);
+            if (group == null)
+                continue;
+            if (group.name.equals(mGroup.name)) {
+                dismissKeyboard();
+                String warning = String.format(getString(R.string.GroupExistsMessage), mGroup.name);
+                Toast t = Toast.makeText(getActivity(), warning, Toast.LENGTH_SHORT);
+                t.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
+                t.show();
+                return false;
+            }
+        }
+
         // Generate push keys for new group and it's default room; set the self reference key and
         // the owner field values on the group.
         String groupKey = GroupManager.instance.getGroupKey();
@@ -128,6 +145,8 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Give the user a snackbar message offering to join friends to the group.
         NotificationManager.instance.notifyGroupCreate(this, mGroup.key, mGroup.name);
+
+        return true;
     }
 
     /** Set the name of the managed object conditionally to the given value. */
