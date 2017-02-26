@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,7 +24,6 @@ import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.pajato.android.gamechat.R;
@@ -154,17 +152,6 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
 
     // Private instance methods.
 
-    /** Dismiss the virtual keyboard in response to a click on the given view. */
-    private void hideSoftKeyBoard(final View view) {
-        // Determine if the keyboard is active before dismissing it.
-        final String SERVICE = Context.INPUT_METHOD_SERVICE;
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(SERVICE);
-        if(imm.isAcceptingText()) {
-            // The virtual keyboard is active.  Dismiss it.
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
-
     /** Initialize the edit text field. */
     private void initEditText(@NonNull final View layout) {
         // Set up the edit text field and the send button.
@@ -184,7 +171,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         if (account == null || editText == null) {
             // Something is wrong.  Log it and tell the User.
             Snackbar.make(view, "Software error: could not send message!", Snackbar.LENGTH_LONG);
-            hideSoftKeyBoard(view);
+            dismissKeyboard();
             return;
         }
 
@@ -196,7 +183,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         MessageManager.instance.createMessage(text, STANDARD, account, room);
         editText.setText("");
         Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
-        hideSoftKeyBoard(view);
+        dismissKeyboard();
     }
 
     // Private inner classes.

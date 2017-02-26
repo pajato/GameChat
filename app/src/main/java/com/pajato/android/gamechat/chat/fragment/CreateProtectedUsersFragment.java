@@ -9,7 +9,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -35,7 +34,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
-import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.R.id.create_button_finish;
 import static com.pajato.android.gamechat.R.id.emailEditText;
 import static com.pajato.android.gamechat.R.id.email_next_button;
@@ -255,15 +253,6 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
                             })
                     .addOnSuccessListener(getActivity(), new EmailOnSuccessListener());
         }
-    }
-
-    /** Dismiss the keyboard if necessary */
-    private void dismissKeyboard() {
-        // Dismiss the Keyboard and return to the previous fragment.
-        InputMethodManager manager;
-        manager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
-        if (manager.isAcceptingText() && getActivity().getCurrentFocus() != null)
-            manager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 
     /** Enable (or disable) the 'finish' button in the toolbar */

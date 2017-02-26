@@ -24,6 +24,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
@@ -71,8 +72,10 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null)
                     save(account);
-                else
+                else {
+                    dismissKeyboard();
                     abort("The User account does not exist.  Aborting.");
+                }
                 DispatchManager.instance.startNextFragment(getActivity(), chat);
                 break;
 
@@ -118,8 +121,9 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     /** Log and present a toast message to the User. */
     protected void abort(final String message) {
-        logEvent(String.format(Locale.US, "Error: (create %s): %s.", mCreateType, message));
-        // TODO: throw up a toast or snackbar.
+        String abortMessage = String.format("Error: (create %s): %s", mCreateType, message);
+        logEvent(abortMessage);
+        Toast.makeText(getActivity(), abortMessage, Toast.LENGTH_LONG).show();
     }
 
     /** Return a default name. */

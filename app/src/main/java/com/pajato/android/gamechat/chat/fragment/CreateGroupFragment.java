@@ -17,10 +17,8 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
@@ -42,7 +40,6 @@ import com.pajato.android.gamechat.exp.NotificationManager;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import static android.content.Context.INPUT_METHOD_SERVICE;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -127,11 +124,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
         MessageManager.instance.createMessage(text, STANDARD, account, room);
 
         // Dismiss the Keyboard and return to the previous fragment.
-        Activity activity = getActivity();
-        InputMethodManager manager;
-        manager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
-        if (manager.isAcceptingText() && activity.getCurrentFocus() != null)
-            manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        dismissKeyboard();
 
         // Give the user a snackbar message offering to join friends to the group.
         NotificationManager.instance.notifyGroupCreate(this, mGroup.key, mGroup.name);

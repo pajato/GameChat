@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -54,6 +55,7 @@ import com.pajato.android.gamechat.event.AppEventManager;
 import java.util.List;
 import java.util.Locale;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.MenuEntry.MENU_ITEM_NO_TINT_TYPE;
@@ -334,6 +336,15 @@ public abstract class BaseFragment extends Fragment {
         else
             state.setType(inactive);
         MemberManager.instance.updateMember(member);
+    }
+
+    /** Dismiss the keyboard if necessary */
+    protected void dismissKeyboard() {
+        // Determine if the keyboard is active before dismissing it.
+        InputMethodManager manager;
+        manager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+        if (manager.isAcceptingText() && getActivity().getCurrentFocus() != null)
+            manager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 
     /** Set the join state using the given value which must be one of 'chat' or 'exp'. */
