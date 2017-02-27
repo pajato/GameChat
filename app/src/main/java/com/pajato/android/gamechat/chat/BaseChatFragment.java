@@ -27,11 +27,10 @@ import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Message;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
-import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -140,46 +139,41 @@ public abstract class BaseChatFragment extends BaseFragment {
     }
 
     /** Return TRUE iff the fragment setup is handled successfully. */
-    @Override protected boolean onDispatch(@NonNull final Context context,
-                                           @NonNull final Dispatcher dispatcher) {
+    @Override protected void onDispatch(@NonNull final Context context) {
         // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
         // case signalling success.  If there are no valid cases signal failure.
-        if (dispatcher.type == null)
-            return false;
+        if (mDispatcher.type == null)
+            return;
         switch (type) {
-            case createProtectedUser:
-            case groupsForProtectedUser:
-            case chatGroupList: // A group list does not need an item.
-                return true;
             case messageList:   // The messages in a room require both the group and room keys.
-                String groupKey = dispatcher.groupKey;
-                String roomKey = dispatcher.roomKey;
+                String groupKey = mDispatcher.groupKey;
+                String roomKey = mDispatcher.roomKey;
                 String name = RoomManager.instance.getRoomName(roomKey);
                 markMessagesSeen(groupKey, roomKey);
                 mItem = new ListItem(chatRoom, groupKey, roomKey, name, 0, null);
-                return true;
+                break;
             case roomMembersList:
-                if (dispatcher.groupKey == null || dispatcher.roomKey == null)
-                    return false;
-                String roomName = RoomManager.instance.getRoomName(dispatcher.roomKey);
-                mItem = new ListItem(roomList, dispatcher.groupKey, dispatcher.roomKey, roomName);
-                return true;
+                if (mDispatcher.groupKey == null || mDispatcher.roomKey == null)
+                    return;
+                String roomName = RoomManager.instance.getRoomName(mDispatcher.roomKey);
+                mItem = new ListItem(roomList, mDispatcher.groupKey, mDispatcher.roomKey, roomName);
+                break;
             case groupMembersList:
-                if (dispatcher.groupKey == null)
-                    return false;
-                String groupName = GroupManager.instance.getGroupName(dispatcher.groupKey);
-                mItem = new ListItem(groupList, dispatcher.groupKey, groupName);
-                return true;
+                if (mDispatcher.groupKey == null)
+                    return;
+                String groupName = GroupManager.instance.getGroupName(mDispatcher.groupKey);
+                mItem = new ListItem(groupList, mDispatcher.groupKey, groupName);
+                break;
             case createRoom:
             case joinRoom:
             case protectedUsers:
             case chatRoomList:  // The rooms in a group need the group key.
-                if (dispatcher.groupKey == null)
-                    return false;
-                mItem = new ListItem(chatGroup, dispatcher.groupKey, null, null, 0, null);
-                return true;
+                if (mDispatcher.groupKey == null)
+                    return;
+                mItem = new ListItem(chatGroup, mDispatcher.groupKey, null, null, 0, null);
+                break;
             default:
-                return false;
+                break;
         }
     }
 

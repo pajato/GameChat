@@ -17,11 +17,25 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import static com.pajato.android.gamechat.common.FragmentType.experienceList;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
+import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
 
 public class ExpShowRoomsFragment extends BaseExperienceFragment {
 
@@ -31,9 +45,32 @@ public class ExpShowRoomsFragment extends BaseExperienceFragment {
         processClickEvent(event.view, "expShowRooms");
     }
 
+    /** Handle a FAM or Snackbar click event. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Delegate the event to the base class.
+        processTagClickEvent(event, "chess");
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        FabManager.game.setImage(R.drawable.ic_add_white_24dp);
+        FabManager.game.init(this, GAME_HOME_FAM_KEY);
+    }
+
     /** Initialize the fragment by setting in the FAB. */
     @Override public void onStart() {
+        // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
+        // initialize the FAM.
         super.onStart();
-        FabManager.game.init(this);
+        if (mDispatcher.expFragmentType == null) {
+            FabManager.game.init(this);
+            ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+            return;
+        }
+
+        // Handle a pass-through by handing off to the experience list fragment.
+        mDispatcher.type = experienceList;
+        DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
+        mItem = new ListItem(expRoom, mDispatcher.groupKey, null, null, 0, null);
     }
 }

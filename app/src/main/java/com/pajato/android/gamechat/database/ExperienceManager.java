@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
 import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
@@ -144,23 +143,13 @@ public enum ExperienceManager {
 
     }
 
-    /** Return the number of experiences for the given type. */
-    public List<Experience> getExperienceList(FragmentType type) {
-        // First approximation is to generate the count brute force.
-        List<Experience> result = new ArrayList<>();
-        for (Experience exp : experienceMap.values()) {
-            if (exp.getExperienceType() == type.expType) result.add(exp);
-        }
-        return result;
-    }
-
     /** Return a room push key to use with a subsequent room object persistence. */
     public String getExperienceKey() {
         return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
     }
 
     /** Get the data as a set of list items for all groups. */
-    public List<ListItem> getListItemData() {
+    private List<ListItem> getGroupListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
         // group rooms) or more than one group (a set of groups).
         List<ListItem> result = new ArrayList<>();
@@ -169,10 +158,11 @@ public enum ExperienceManager {
             case 1:             // Get the experiences from the rooms in the joined group that have
                                 // experiences and the me room if it has any experiences.
                 String roomKey = expGroupMap.keySet().iterator().next();
-                String meRoomKey = AccountManager.instance.getMeGroupKey();
+                String meGroupKey = AccountManager.instance.getMeGroupKey();
+                String meRoomKey = AccountManager.instance.getMeRoomKey();
                 result.addAll(getItemListRooms(roomKey));
                 if (!roomKey.equals(meRoomKey))
-                    result.addAll(getItemListRooms(meRoomKey));
+                    result.addAll(getItemListRooms(meGroupKey));
                 return result;
             default:
                 result.addAll(getItemListGroups());
@@ -181,9 +171,24 @@ public enum ExperienceManager {
         }
     }
 
-    /** Return a list of experience list items. */
-    public List<ListItem> getListItemData(@NonNull final ListItem item) {
-        return getItemListExperiences(item);
+    /** Return a list of items showing the rooms in a given group. */
+    private List<ListItem> getRoomListItemData(@NonNull final String groupKey) {
+        List<ListItem> result = new ArrayList<>();
+        result.addAll(getItemListRooms(groupKey));
+        return result;
+    }
+
+    /** Return a list of items based on the given item. */
+    public List<ListItem> getListItemData(final ListItem item) {
+        // If item is null return a list of groups with experiences.  If item has both a group
+        // and room key return a list of experiences in that room.  If item only has a group key
+        // return a list of rooms with experiences from that group.
+        if (item == null || item.groupKey == null)
+            return getGroupListItemData();
+        else if (item.roomKey != null)
+            return getItemListExperiences(item);
+        else
+            return getRoomListItemData(item.groupKey);
     }
 
     /** Move an experience from one room to another. */

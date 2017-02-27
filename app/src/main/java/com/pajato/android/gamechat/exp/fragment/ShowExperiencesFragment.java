@@ -24,10 +24,12 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -42,6 +44,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
@@ -56,6 +59,12 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
         processClickEvent(event.view, "expShowExperiences");
     }
 
+    /** Handle a FAM or Snackbar click event. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Delegate the event to the base class.
+        processTagClickEvent(event, "exp list");
+    }
+
     /** Handle an experience list change event by dispatching again. */
     @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {
         switch (event.changeType) {
@@ -67,6 +76,8 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
                 break;
         }
     }
+
+    /** Handle a deleted experience by updating the recycler adapter list. */
     @Subscribe public void onExperienceDelete(final ExperienceDeleteEvent event) {
         String format = "onExperienceDelete with event {%s}";
         logEvent(String.format(Locale.US, format, event));
@@ -111,8 +122,19 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
 
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
+        // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
+        // initialize the FAB manager and set up the toolbar.
         super.onStart();
-        FabManager.game.init(this);
-        ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+        if (mDispatcher.expFragmentType == null) {
+            FabManager.game.init(this);
+            ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+            return;
+        }
+
+        // Handle a pass through by handing to the target fragment type while leaving an item object
+        // in place for a back press or exit from the experience back to the experience list display.
+        mDispatcher.type = mDispatcher.expFragmentType;
+        DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
+        mItem = new ListItem(expList, mDispatcher.groupKey, mDispatcher.roomKey, null, 0, null);
     }
 }

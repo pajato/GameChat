@@ -28,12 +28,14 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
+import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -58,6 +60,12 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
         processClickEvent(event.view, "expShowGroups");
+    }
+
+    /** Handle a FAM or Snackbar click event. */
+    @Subscribe public void onClick(final TagClickEvent event) {
+        // Delegate the event to the base class.
+        processTagClickEvent(event, "chess");
     }
 
     /** Handle an experience list change event by dispatching again. */
@@ -106,9 +114,19 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
 
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
+        // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
+        // set up the toolbar.
         super.onStart();
-        int titleResId = getTitleResId();
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, invite, settings);
+        if (mDispatcher.expFragmentType == null) {
+            int titleResId = getTitleResId();
+            ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, invite, settings);
+            return;
+        }
+
+        // Handle a pass through by handing off to the experience room list fragment.
+        mDispatcher.type = expRoomList;
+        DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
+        mItem = null;
     }
 
     /** Return the toolbar title resource id to use. */
@@ -117,6 +135,6 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
         // toolbar title, otherwise use a rooms toolbar title.
         if (ExperienceManager.instance.expGroupMap.size() > 1)
             return R.string.ExpGroupsToolbarTitle;
-        return R.string.ExpRoomsToolbarTitle;
+        return R.string.MyGameRoomToolbarTitle;
     }
 }

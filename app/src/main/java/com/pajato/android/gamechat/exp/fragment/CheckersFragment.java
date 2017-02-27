@@ -38,7 +38,6 @@ import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.checkers.CheckersBoard;
-import com.pajato.android.gamechat.exp.checkers.CheckersEngine;
 import com.pajato.android.gamechat.exp.model.Checkers;
 import com.pajato.android.gamechat.exp.model.Player;
 
@@ -94,10 +93,10 @@ public class CheckersFragment extends BaseExperienceFragment {
         processClickEvent(event.view, "checkers");
     }
 
-    /** Handle a FAM or Snackbar Checkers click event. */
+    /** Handle a FAM or Snackbar click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, "chess");
+        processTagClickEvent(event, "checkers");
     }
 
     /** Handle an experience posting event to see if this is a checkers experience. */
@@ -115,7 +114,8 @@ public class CheckersFragment extends BaseExperienceFragment {
     /** Deal with the fragment's lifecycle by marking the join inactive. */
     @Override public void onPause() {
         super.onPause();
-        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+        if (mExperience != null)
+            clearJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
     }
 
     /** Handle taking the foreground by updating the UI based on the current experience. */
@@ -127,13 +127,13 @@ public class CheckersFragment extends BaseExperienceFragment {
         if (mExperience == null)
             return;
         setJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
-        CheckersEngine.instance.init(mExperience, mBoard, mTileClickHandler);
-        ExpHelper.updateUiFromExperience(mExperience, mBoard);
+        resumeExperience();
     }
 
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
+        mDispatcher.expFragmentType = null;
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         mBoard.init(this, mTileClickHandler); // = (GridLayout) mLayout.findViewById(board);
