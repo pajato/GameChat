@@ -49,6 +49,7 @@ import java.util.Set;
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
@@ -169,8 +170,9 @@ public enum ExperienceManager {
 
     /** Update an experience in the database after its model has been reset */
     @Subscribe void handleExperienceResetEvent(ExperienceResetEvent event) {
-        Experience experience = ExperienceManager.instance.getExperience(event.experienceKey);
-        ExperienceManager.instance.updateExperience(experience);
+        Experience experience = experienceMap.get(event.experienceKey);
+        if (experience != null)
+            ExperienceManager.instance.updateExperience(experience);
     }
 
     /** Get the data as a set of list items for all groups. */
