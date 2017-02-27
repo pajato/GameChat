@@ -1,7 +1,14 @@
 package com.pajato.android.gamechat.exp.model;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
@@ -189,12 +196,28 @@ public class Checkers implements Experience {
         }
     }
 
-    /** Set the experience key to satisfy the Experience contract. */
-    @Exclude @Override public void reset() {
-        board = new CheckersBoard();
-        board.init();
-        state = active;
-        turn = true;
+    /** Reset the game if its done, otherwise confirm first. Return true if reset is complete. */
+    @Exclude @Override public boolean reset(BaseFragment fragment) {
+        if (state.isDone()) {
+            resetModel();
+            return true;
+        }
+        final String key = this.key;
+        new AlertDialog.Builder(fragment.getActivity())
+                .setTitle(fragment.getString(R.string.ResetGameTitle))
+                .setMessage(fragment.getString(R.string.ResetGameMessage))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                resetModel();
+                                AppEventManager.instance.post(new ExperienceResetEvent(key));
+                            }
+                        })
+                .create()
+                .show();
+        return false;
     }
 
     /** Set the experience key to satisfy the Experience contract. */
@@ -252,4 +275,15 @@ public class Checkers implements Experience {
         turn = !turn;
         return turn;
     }
+
+    // Private instance methods
+
+    /** Clear the board and reset the state and turn values */
+    private void resetModel() {
+        board = new CheckersBoard();
+        board.init();
+        state = active;
+        turn = true;
+    }
+
 }

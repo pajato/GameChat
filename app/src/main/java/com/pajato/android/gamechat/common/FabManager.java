@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.support.design.widget.FloatingActionButton.SIZE_MINI;
+import static android.support.design.widget.FloatingActionButton.SIZE_NORMAL;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.pajato.android.gamechat.common.FabManager.State.opened;
 
@@ -104,8 +106,8 @@ public enum FabManager {
         fab.setVisibility(View.GONE);
     }
 
-    /** Initialize the fab state. */
-    public void init(final Fragment fragment) {
+    /** Initialize the FAB. Set size to small FAB for games to small; all others use normal .*/
+    public void init(@NonNull final BaseFragment fragment) {
         // Ensure that the layout and the recycler views exist. Abort quietly if they do not.
         View layout = getFragmentLayout(fragment);
         RecyclerView recyclerView;
@@ -122,11 +124,21 @@ public enum FabManager {
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
         fab.setVisibility(View.VISIBLE);
+        switch (fragment.type) {
+            case chess:
+            case checkers:
+            case tictactoe:
+                setGameFAB(fragment);
+                break;
+            default:
+                setSizeNormal(fragment);
+                break;
+        }
         dismissMenu(fragment, layout);
     }
 
     /** Initialize to use the given fragment and FAM. */
-    public void init(final Fragment fragment, final String name) {
+    public void init(@NonNull final BaseFragment fragment, final String name) {
         this.init(fragment);
         mDefaultMenuName = name;
     }
@@ -139,6 +151,20 @@ public enum FabManager {
         // Cache the menu and make it the default.
         mMenuMap.put(name, menu);
         mDefaultMenuName = name;
+    }
+
+    /** Set FAB to small size */
+    public void setSizeSmall(@NonNull final Fragment fragment) {
+        View layout = getFragmentLayout(fragment);
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        fab.setSize(SIZE_MINI);
+    }
+
+    /** Set FAB to normal size */
+    public void setSizeNormal(@NonNull final Fragment fragment) {
+        View layout = getFragmentLayout(fragment);
+        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        fab.setSize(SIZE_NORMAL);
     }
 
     /** Set the FAB state. */
@@ -261,6 +287,12 @@ public enum FabManager {
         Throwable stack = new Throwable();
         Log.e(TAG, String.format(Locale.US, format, fragment), stack);
         return null;
+    }
+
+    /** Convenience method to set the FAB for a game (small size and "reset" icon) */
+    private void setGameFAB(@NonNull final BaseFragment fragment) {
+        setSizeSmall(fragment);
+        setImage(R.drawable.ic_refresh_white_24dp);
     }
 
     /** Set the current FAM using the cached item with the given name. */

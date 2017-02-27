@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.exp;
 
+import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.exp.model.Player;
 
 import java.util.List;
@@ -68,7 +69,7 @@ public interface Experience {
     List<String> getUnseenList();
 
     /** Reset an experience. */
-    void reset();
+    boolean reset(BaseFragment fragment);
 
     /** Set the experience push key. */
     void setExperienceKey(String key);

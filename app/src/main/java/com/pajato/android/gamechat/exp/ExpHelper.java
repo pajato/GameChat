@@ -51,8 +51,8 @@ public class ExpHelper {
             Log.e(TAG, String.format(Locale.US, "Null %s data model.", name));
             return;
         }
-        experience.reset();
-        ExperienceManager.instance.updateExperience(experience);
+        if (experience.reset(getBaseFragment(experience)))
+            ExperienceManager.instance.updateExperience(experience);
     }
 
     /** Return TRUE if this experience is in the "me" group. */

@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
@@ -221,8 +222,12 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
         return null;
     }
 
-    /** Implement the interface by providing a nop. */
-    @Exclude @Override public void reset() {}
+    /** Always reset the game. Return true to indicate reset completed. */
+    @Exclude @Override public boolean reset(BaseFragment fragment) {
+        board = new TTTBoard();
+        state = ACTIVE;
+        return true;
+    }
 
     /** Set the experience key to satisfy the Experience contract. */
     @Exclude @Override public void setExperienceKey(final String key) {
