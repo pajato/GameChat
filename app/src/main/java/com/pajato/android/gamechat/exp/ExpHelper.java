@@ -51,7 +51,7 @@ public class ExpHelper {
             Log.e(TAG, String.format(Locale.US, "Null %s data model.", name));
             return;
         }
-        experience.reset();
+        experience.reset(getBaseFragment(experience));
         ExperienceManager.instance.updateExperience(experience);
     }
 

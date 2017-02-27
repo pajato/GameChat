@@ -103,7 +103,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
-        processClickEvent(event.view, "tictactoe");
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Handle a FAM or Snackbar TicTacToe click event. */
@@ -338,13 +338,9 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         return ACTIVE;
     }
 
-    /** Return the home FAM used in the top level show games and show no games fragments. */
+    /** Return the FAM menu (empty) - the FAB operates as a button here. */
     private List<MenuEntry> getTTTMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        //menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        //menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_tictactoe_red));
-        return menu;
+        return new ArrayList<>();
     }
 
     /** Handle a click on a given tile by updating the value on the tile and start the next turn. */

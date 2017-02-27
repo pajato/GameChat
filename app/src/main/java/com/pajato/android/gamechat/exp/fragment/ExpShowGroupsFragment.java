@@ -65,7 +65,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
     /** Handle a FAM or Snackbar click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, "chess");
+        processTagClickEvent(event, "expShowGroups");
     }
 
     /** Handle an experience list change event by dispatching again. */

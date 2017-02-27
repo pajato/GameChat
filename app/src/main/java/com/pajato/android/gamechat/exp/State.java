@@ -60,6 +60,11 @@ public enum State {
         }
     }
 
+    /** Return TRUE if the game is "done" - either checkmate, or a winner or a tie is declared */
+    public boolean isDone() {
+        return (isWin() || isTie() || this == checkMate);
+    }
+
     /** Return TRUE iff one of the players wins. */
     public boolean isWin() {
         return this == primary_wins || this == secondary_wins;

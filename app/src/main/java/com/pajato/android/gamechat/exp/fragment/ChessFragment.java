@@ -82,13 +82,13 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Process a given button click event looking for one on the game fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Delegate the event to the base class.
-        processClickEvent(event.view, "chess");
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, "chess");
+        processTagClickEvent(event, this.type.name());
     }
 
     /** Handle an experience posting event to see if this is a chess experience. */
@@ -99,7 +99,7 @@ public class ChessFragment extends BaseExperienceFragment {
 
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
-        // Delegate to the ?.
+        // Delegate to BaseExperienceFragment (super class)
         processMenuItemEvent(event);
     }
 
@@ -209,14 +209,8 @@ public class ChessFragment extends BaseExperienceFragment {
 
     // Private instance methods.
 
-    /**
-     * Return the home FAM used in the top level show games and show no games fragments.
-     */
+    /** Return the FAM menu (empty) - the FAB operates as a button here. */
     private List<MenuEntry> getChessMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        //menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
-        //menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
-        menu.add(getNoTintEntry(R.string.PlayAgain, R.mipmap.ic_chess));
-        return menu;
+        return new ArrayList<>();
     }
 }

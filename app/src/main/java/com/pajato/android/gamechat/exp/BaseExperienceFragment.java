@@ -315,8 +315,17 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 processEndIconClick(view);
                 break;
             case R.id.gameFab:
-                // If the click is on the fab, we have to handle if it's open or closed.
-                FabManager.game.toggle(this);
+                // Click on the FAB: for games, start a new game. Otherwise, handle open or close.
+                switch (this.type) {
+                    case chess:
+                    case checkers:
+                    case tictactoe:
+                        ExpHelper.handleNewGame(this.type.name(), mExperience);
+                        return; // Return here to avoid the dispatch below...
+                    default:
+                        FabManager.game.toggle(this);
+                        break;
+                }
                 break;
             case R.id.player2Name:
                 logEvent("Got a player 2 control click event.");
@@ -435,13 +444,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Process a FAM menu entry click. */
     private void processFamItem(final MenuEntry entry, final String name) {
-        // Dismiss the FAB (assuming it was the source of the click --- being wrong is ok, and
-        // setup a new game or play a different game.
+        // Dismiss the FAB and dispatch
         FabManager.game.dismissMenu(this);
         switch(entry.titleResId) {
-            case R.string.PlayAgain: // Play a new game.
-                ExpHelper.handleNewGame(name, mExperience);
-                break;
             default: // Dispatch to the game fragment ensuring chaining is coherent.
                 FragmentActivity activity = getActivity();
                 Dispatcher dispatcher = new Dispatcher(expGroupList, entry.fragmentType);

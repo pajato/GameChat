@@ -126,7 +126,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
     @Override public void onResume() {
         super.onResume();
         FabManager.chat.setImage(R.drawable.ic_check_white_24dp);
-        FabManager.chat.init(this);
+        FabManager.chat.init(this, CHAT_SELECTION_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 

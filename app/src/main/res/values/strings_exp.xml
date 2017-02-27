@@ -19,7 +19,7 @@
     <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
     <string name="NoUsersFound">No Available Users</string>
-    <string name="PlayAgain">Play again</string>
+    <string name="PlayAgain">Restart Game</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
     <string name="PlayModeComputerMenuTitle">Play the computer</string>
@@ -27,6 +27,8 @@
     <string name="PlayModeUserMenuTitle">Play another user</string>
     <string name="PlayTicTacToe">Play Tic-Tac-Toe</string>
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
+    <string name="ResetGameTitle">Restart Game?</string>
+    <string name="ResetGameMessage">Restarting this game will clear the board and any previous moves. Do you really want to restart this game?</string>
     <string name="SelectRoomToolbarTitle">Select Room</string>
     <string name="SelectUserToolbarTitle">Select User</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>

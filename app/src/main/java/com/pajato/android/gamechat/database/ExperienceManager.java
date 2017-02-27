@@ -32,6 +32,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ExpListChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
+import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -146,6 +147,17 @@ public enum ExperienceManager {
     /** Return a room push key to use with a subsequent room object persistence. */
     public String getExperienceKey() {
         return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
+    }
+
+    /** Return the experience based on it's push key */
+    public Experience getExperience(String key) {
+        return experienceMap.get(key);
+    }
+
+    /** Update an experience in the database after its model has been reset */
+    @Subscribe void handleExperienceResetEvent(ExperienceResetEvent event) {
+        Experience experience = ExperienceManager.instance.getExperience(event.experienceKey);
+        ExperienceManager.instance.updateExperience(experience);
     }
 
     /** Get the data as a set of list items for all groups. */

@@ -1,9 +1,9 @@
 package com.pajato.android.gamechat.event;
 
 /**
- * Provides an event class indicating that an experience has been deleted.
+ * Provides an event class indicating that an experience model has been reset.
  */
-public class ExperienceDeleteEvent {
+public class ExperienceResetEvent {
 
     // Public instance variables.
 
@@ -11,7 +11,7 @@ public class ExperienceDeleteEvent {
     public final String experienceKey;
 
     /** Build the event */
-    public ExperienceDeleteEvent(final String key) {
+    public ExperienceResetEvent(final String key) {
         this.experienceKey = key;
     }
 }
