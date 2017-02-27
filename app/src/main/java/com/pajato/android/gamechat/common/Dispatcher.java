@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.common;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 
 /**
@@ -33,8 +34,8 @@ public class Dispatcher {
 
     // Public instance variables.
 
-    /** The experience target fragment type. */
-    public FragmentType expFragmentType;
+    /** The experience target type. */
+    public ExpType expType;
 
     /** The experience payload. */
     public Experience experiencePayload;
@@ -67,6 +68,13 @@ public class Dispatcher {
         if (type == null || item == null)
             return;
         switch (type) {
+            case checkers:
+            case chess:
+            case tictactoe:
+                groupKey = item.groupKey;
+                roomKey = item.roomKey;
+                key = item.key;
+                break;
             case messageList:
                 groupKey = item.groupKey;
                 roomKey = item.roomKey;
@@ -90,9 +98,9 @@ public class Dispatcher {
     }
 
     /** Build an instance providing a fragment type and a target (experience) fragment type. */
-    public Dispatcher(final FragmentType type, final FragmentType expFragmentType) {
+    public Dispatcher(final FragmentType type, final ExpType expType) {
         this.type = type;
-        this.expFragmentType = expFragmentType;
+        this.expType = expType;
         groupKey = AccountManager.instance.getMeGroupKey();
         roomKey = AccountManager.instance.getMeRoomKey();
     }
