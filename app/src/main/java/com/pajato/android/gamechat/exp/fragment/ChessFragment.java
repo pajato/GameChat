@@ -39,7 +39,6 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.chess.ChessBoard;
-import com.pajato.android.gamechat.exp.chess.ChessEngine;
 import com.pajato.android.gamechat.exp.model.Player;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -107,7 +106,8 @@ public class ChessFragment extends BaseExperienceFragment {
     /** Deal with the fragment's lifecycle by marking the join inactive. */
     @Override public void onPause() {
         super.onPause();
-        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+        if (mExperience != null)
+            clearJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
     }
 
     /**
@@ -121,13 +121,13 @@ public class ChessFragment extends BaseExperienceFragment {
         if (mExperience == null)
             return;
         setJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
-        ChessEngine.instance.init(mExperience, mBoard, mTileClickHandler);
-        ExpHelper.updateUiFromExperience(mExperience, mBoard);
+        resumeExperience();
     }
 
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
+        mDispatcher.expFragmentType = null;
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         mBoard.init(this, mTileClickHandler);
@@ -142,8 +142,7 @@ public class ChessFragment extends BaseExperienceFragment {
     // Protected instance methods.
 
     /** Return a default, partially populated, Chess experience. */
-    @Override
-    protected void createExperience(final Context context, final List<Account> playerAccounts) {
+    @Override protected void createExperience(final Context context, final List<Account> playerAccounts) {
         // Setup the default key, players, creation timestamp and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);

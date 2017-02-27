@@ -55,6 +55,7 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
@@ -115,54 +116,52 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Log the lifecycle event and resume showing ads. */
     @Override public void onResume() {
-        // Log the event, update the FAB for this fragment, process the ad, determine if a list
-        // adapter update needs be processed and set the toolbar titles.
+        // Ensure that the type exists and that this is not a pass-through fragment.  In either
+        // case abort.
         super.onResume();
+        if (type == null || mDispatcher == null || mDispatcher.expFragmentType != null)
+            return;
+
+        // Initialize the FAB manager, set up ads and the list adapter.
         FabManager.game.init(this);
         if (mAdView != null)
             mAdView.resume();
-        if (type != null)
-            switch (type) {
-                case expGroupList:
-                case expRoomList:
-                case experienceList: // Update the state of the list adapter.
-                    updateAdapterList();
-                    break;
-                default:        // Ignore all other fragments.
-                    break;
-            }
+        switch (type) {
+            case expGroupList:
+            case expRoomList:
+            case experienceList: // Update the state of the list adapter.
+                updateAdapterList();
+                break;
+            default:        // Ignore all other fragments.
+                break;
+        }
     }
 
-    /**
-     * Provide a default implementation for setting up an experience.  There are two scenarios
-     * where an experience fragment needs to be set up.  First, when a User asks to start a game,
-     * like tictactoe or checkers, and a game of that type has been cached or needs to be created.
-     * Second, when at startup, it is discovered that there is a single experience to be shown.
-     */
+    /** Handle an experience fragment setup by establishing the experience to run. */
     @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
-        // Ensure that the dispatcher is valid.  Abort if not.
-        // TODO: might be better to show a toast or snackbar on error.
+        // Ensure that the dispatcher and the dispatcher type exist, and ensure that this setup
+        // is for a true experience fragment.  If not, then abort, otherwise use the dispatcher
+        // to establish the experience to run.
+        // TODO: might be better to show a toast or snackbar on error, or even file a bug report!
         super.onSetup(context, dispatcher);
         if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
             return;
 
-        // At this point there are three choices: 1) the dispatcher contains an experience, 2) the
-        // dispatcher contains an experience key, or 3) the dispatcher contains the type of
-        // experience which needs to be created using the given context.  experience to use with the
-        // fragment being created.
-        mExperience = dispatcher.experiencePayload != null
-                ? dispatcher.experiencePayload
-                : ExperienceManager.instance.experienceMap.get(dispatcher.key);
-        if (mExperience == null)
+        // Establish the experience for this fragment to manage, creating it if necessary.
+        if (dispatcher.experiencePayload != null)
+            mExperience = dispatcher.experiencePayload;
+        else if (dispatcher.key != null)
+            mExperience = ExperienceManager.instance.experienceMap.get(dispatcher.key);
+        else
             createExperience(context, getPlayers(dispatcher));
     }
 
-    /** Handle the setup for the mode control. */
+    /** Handle ad setup for experience fragments. */
     @Override public void onStart() {
-        // Provide a loading indicator, enable the options menu, layout the fragment, set up the ad
-        // view and the listeners for backend data changes.
+        // Ensure that this is not a pass-through fragment.  If not, then initialize ads.
         super.onStart();
-        initAdView(mLayout);
+        if (mAdView != null && mLayout != null && type != null && type.expType == null)
+            initAdView(mLayout);
     }
 
     // Protected instance methods.
@@ -268,32 +267,26 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Process the dispatcher to set up the experience fragment. */
-    @Override protected boolean onDispatch(@NonNull final Context context,
-                                           @NonNull final Dispatcher dispatcher) {
-        // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
-        // case signalling success.  If there are no valid cases signal failure.
-        if (dispatcher.type == null)
-            return false;
+    @Override protected void onDispatch(@NonNull final Context context) {
+        // Ensure that the type is valid and that the fragment is not being used as a
+        // pass-through.  Abort if either is not the case, otherwise handle each possible case.
+        if (mDispatcher.type == null || mDispatcher.expFragmentType != null)
+            return;
         switch (type) {
-            case chess:
-            case checkers:
-            case tictactoe:
-            case expGroupList:  // A group list does not need an item.
-                return true;
             case expRoomList:   // A room list needs an item.
-                mItem = new ListItem(expRoom, dispatcher.groupKey);
-                return true;
+                mItem = new ListItem(expRoom, mDispatcher.groupKey);
+                break;
             case experienceList:
                 // The experiences in a room require both the group and room keys.  Determine if the
                 // group is the me group and give it special handling.
-                String groupKey = dispatcher.groupKey;
+                String groupKey = mDispatcher.groupKey;
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String roomKey = meGroupKey != null && meGroupKey.equals(groupKey)
-                        ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+                        ? AccountManager.instance.getMeRoomKey() : mDispatcher.roomKey;
                 mItem = new ListItem(expList, groupKey, roomKey, null, 0, null);
-                return true;
+                break;
             default:
-                return false;
+                break;
         }
     }
 
@@ -345,8 +338,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Determine of this is an inactive fragment, the event has an empty experience or a
         // different type of experience . If so, abort, otherwise continue processing the event
         // experience.
-        if (!mActive || event.experience == null ||
-            event.experience.getExperienceType() != type.expType)
+        ExpType expType = event.experience != null ? event.experience.getExperienceType() : null;
+        if (!mActive || expType == null || expType != type.expType)
             return;
 
         // Determine if this experience is waiting to be initialized.  If so, do it using the
@@ -355,11 +348,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         logEvent("experienceChange");
         if (mExperience == null)
             mExperience = event.experience;
-        Engine engine = mExperience.getExperienceType().getEngine();
-        if (engine == null)
-            return;
-        engine.init(mExperience, mBoard, mTileClickHandler);
-        ExpHelper.updateUiFromExperience(mExperience, mBoard);
+        resumeExperience();
     }
 
     /** Handle a menu item click from the toolbar or overflow menu. */
@@ -453,11 +442,21 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.string.PlayAgain: // Play a new game.
                 ExpHelper.handleNewGame(name, mExperience);
                 break;
-            default: // Play a different game.
+            default: // Dispatch to the game fragment ensuring chaining is coherent.
                 FragmentActivity activity = getActivity();
-                DispatchManager.instance.startNextFragment(activity, entry.fragmentType, mItem);
+                Dispatcher dispatcher = new Dispatcher(expGroupList, entry.fragmentType);
+                DispatchManager.instance.startNextFragment(activity, dispatcher);
                 break;
         }
+    }
+
+    /** Resume the current fragment experience. */
+    protected void resumeExperience() {
+        Engine engine = mExperience.getExperienceType().getEngine();
+        if (engine == null)
+            return;
+        engine.init(mExperience, mBoard, mTileClickHandler);
+        ExpHelper.updateUiFromExperience(mExperience, mBoard);
     }
 
     private void verifyDeleteExperience(final ListItem item) {

@@ -4,6 +4,7 @@
     <string name="AbortError">Error: %s Aborting</string>
     <string name="ButtonNext">NEXT</string>
     <string name="ButtonFinish">FINISH</string>
+    <string name="ChatGroupsToolbarTitle">Groups with Messages</string>
     <string name="ClearSelectionsMenuTitle">Clear Selections</string>
     <string name="CreateGroupMenuTitle">Create Group</string>
     <string name="CreateGroupNameHint">Type group name</string>Title">
@@ -24,7 +25,6 @@
     <string name="Group">Group</string>
     <string name="GroupExistsMessage">You already have a group named %s. Do you want to continue anyway?</string>
     <string name="GroupExistsTitle">Group %s already exists!</string>
-    <string name="GroupsToolbarTitle">Groups with Messages</string>
     <string name="GroupMeToolbarTitle">My Chat Room</string>
     <string name="LeaveConfirmMessage">Do you want to leave %s?</string>
     <string name="LeaveGroupTitle">Leave Group?</string>

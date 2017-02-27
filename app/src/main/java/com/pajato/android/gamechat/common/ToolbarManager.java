@@ -93,6 +93,7 @@ public enum ToolbarManager {
     public enum ToolbarType {
         chatMain (R.drawable.ic_more_vert_white_24dp),
         expMain (R.drawable.ic_more_vert_white_24dp),
+
         // Define 'standard' toolbar to have the overflow (three vertical dots) and back arrow
         standardBlack (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         standardWhite (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
@@ -243,9 +244,12 @@ public enum ToolbarManager {
         if (item == null)
             return null;
         switch (item.type) {
+            case expGroup:
+                return fragment.getString(R.string.ExpGroupsToolbarTitle);
             case chatGroup:
-                return fragment.getString(R.string.RoomsToolbarTitle);
+                return fragment.getString(R.string.ChatGroupsToolbarTitle);
             case expList:
+            case expRoom:
                 // Determine if the group is the me group and give it special handling.
                 if (AccountManager.instance.isMeGroup(item.groupKey))
                     return fragment.getString(R.string.MyExperiencesToolbarTitle);

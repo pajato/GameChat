@@ -133,7 +133,8 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Deal with the fragment's lifecycle by marking the join inactive. */
     @Override public void onPause() {
         super.onPause();
-        clearJoinState(mItem.groupKey, mItem.roomKey, chat);
+        if (mItem != null)
+            clearJoinState(mItem.groupKey, mItem.roomKey, chat);
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */

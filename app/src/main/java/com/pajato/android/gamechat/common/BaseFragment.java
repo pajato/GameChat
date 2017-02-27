@@ -93,6 +93,9 @@ public abstract class BaseFragment extends Fragment {
     /** An ad view to be conditionally shown at the top of the view. */
     protected AdView mAdView;
 
+    /** The dispatcher information. */
+    protected Dispatcher mDispatcher;
+
     /** The item information passed from the parent fragment. */
     protected ListItem mItem;
 
@@ -179,10 +182,9 @@ public abstract class BaseFragment extends Fragment {
 
     /** Provide a means to setup the fragment once it has been created. */
     public void onSetup(Context context, Dispatcher dispatcher) {
-        if (!onDispatch(context, dispatcher)) {
-            // The dispatch failed. Log it, toast it or some such.
-            Log.d(TAG, "onDispatch failed ...");
-        }
+        // Save the dispatcher information for processing by the started fragment.
+        mDispatcher = dispatcher;
+        onDispatch(context);
     }
 
     /** Log the lifecycle event. */
@@ -235,8 +237,8 @@ public abstract class BaseFragment extends Fragment {
     /** Provide a logger to show the given message. */
     protected abstract void logEvent(String message);
 
-    /** Delegate the setup to the subclasses. */
-    protected abstract boolean onDispatch(Context context, Dispatcher dispatcher);
+    /** Delegate the dispatch setup to the subclasses. */
+    protected abstract void onDispatch(Context context);
 
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */
     protected void showFutureFeatureMessage(final int resourceId) {
@@ -282,13 +284,14 @@ public abstract class BaseFragment extends Fragment {
 
     /** Return null or a list to be displayed by a list adapter for a given fragment type. */
     private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
+        // TODO: this has gotten too ugly.  Fix it!
         switch (type) {
             case chatGroupList: // Get the data to be shown in a list of groups.
                 return GroupManager.instance.getListItemData();
-            case chatRoomList:  // Get the data to be show in a list of rooms.
+            case chatRoomList:    // Get the data to be shown in a list of rooms.
                 return RoomManager.instance.getListItemData(item.groupKey);
-            case expGroupList:  // Get the groups with experiences.
-                return ExperienceManager.instance.getListItemData();
+            case expGroupList:    // Get the groups with experiences.
+            case expRoomList:     // Get the rooms with experiences.
             case experienceList:  // Get the groups with experiences.
                 return ExperienceManager.instance.getListItemData(item);
             case joinRoom:      // Get the candidate list of rooms and members.
@@ -310,7 +313,6 @@ public abstract class BaseFragment extends Fragment {
                 return PlayModeManager.instance.getListItemData(type);
             case selectUser:    // Get all the visible Users for the current account holder.
                 return PlayModeManager.instance.getListItemData(type);
-            case createProtectedUser: // no list data for create protected user
             default:
                 return null;
         }

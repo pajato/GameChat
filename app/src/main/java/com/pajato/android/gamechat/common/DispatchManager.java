@@ -25,6 +25,7 @@ import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;
@@ -72,6 +73,23 @@ public enum DispatchManager {
         chainFragment(context, type, null);
     }
 
+    /** Chain to a fragment using the given dispatcher. */
+    public void chainFragment(final FragmentActivity context, final Dispatcher dispatcher) {
+        BaseFragment fragment = getFragment(dispatcher.type);
+        if (fragment == null)
+            return;
+
+        // Setup the fragment using the dispatcher and chain to the fragment such that the back
+        // arrow and a back press return to the originating fragment.
+        fragment.onSetup(context, dispatcher);
+        FragmentManager manager = context.getSupportFragmentManager();
+        FragmentManager.enableDebugLogging(true);
+        manager.beginTransaction()
+            .replace(dispatcher.type.getEnvelopeId(), fragment)
+            .addToBackStack(dispatcher.type.toString())
+            .commit();
+    }
+
     /**
      * Attach a drill down fragment identified by a type, creating that fragment as necessary.
      *
@@ -86,20 +104,9 @@ public enum DispatchManager {
         if (type == null)
             return;
         Dispatcher dispatcher = getDispatcher(type, item);
-        BaseFragment fragment = getFragment(type);
-        if (fragment == null)
-            return;
-
-        // Setup the fragment using the dispatcher and chain to the fragment such that the back
-        // arrow and a back press return to the originating fragment.
-        fragment.onSetup(context, dispatcher);
-        FragmentManager manager = context.getSupportFragmentManager();
-        FragmentManager.enableDebugLogging(true);
-        manager.beginTransaction()
-                .replace(type.getEnvelopeId(), fragment)
-                .addToBackStack(type.toString())
-                .commit();
+        chainFragment(context, dispatcher);
     }
+
 
     /** Return null or the fragment associated with the given type, creating it as needed. */
     public BaseFragment getFragment(final FragmentType type) {
@@ -175,7 +182,7 @@ public enum DispatchManager {
      * @param item The chat list item carrying the group key.
      */
     private Dispatcher getDispatcher(final FragmentType type, final ListItem item) {
-        // Determine if the dispatcher should be generate based on the kind, in which case a
+        // Determine if the dispatcher should be generated based on the kind, in which case a
         // suitable dispatcher will be returned, otherwise set up an experience dispatcher based
         // on the given type.
         switch (type) {
@@ -246,7 +253,7 @@ public enum DispatchManager {
     }
 
     /** Return true iff a fragment for the given experience is started. */
-    private boolean startNextFragment(final FragmentActivity context, final Dispatcher dispatcher) {
+    public boolean startNextFragment(final FragmentActivity context, final Dispatcher dispatcher) {
         // Ensure that the fragment exists, creating it as necessary, based on the dispatcher type.
         // If not, abort, signalling false.  Otherwise, setup the fragment using the dispatcher and
         // use the fragment support manager to initiate the lifecycle on the fragment.

@@ -55,7 +55,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
     /** Handle a FAM or Snackbar Chess click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, "chess");
+        processTagClickEvent(event, "no experiences");
     }
 
     /** Handle an experience list change event. */

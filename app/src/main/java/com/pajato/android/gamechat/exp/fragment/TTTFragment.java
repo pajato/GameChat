@@ -166,7 +166,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     /** Deal with the fragment's lifecycle by marking the join inactive. */
     @Override public void onPause() {
         super.onPause();
-        clearJoinState(mItem.groupKey, mItem.roomKey, exp);
+        if (mExperience != null)
+            clearJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
     }
 
     /** Handle taking the foreground by updating the UI based on the current experience. */
@@ -183,6 +184,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     @Override public void onStart() {
         // Initialize the FAB/FAM and the toolbar.
         super.onStart();
+        mDispatcher.expFragmentType = null;
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         FabManager.game.init(this);
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
