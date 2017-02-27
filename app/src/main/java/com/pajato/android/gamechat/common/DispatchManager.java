@@ -184,31 +184,8 @@ public enum DispatchManager {
     private Dispatcher getDispatcher(final FragmentType type, final ListItem item) {
         // Determine if the dispatcher should be generated based on the kind, in which case a
         // suitable dispatcher will be returned, otherwise set up an experience dispatcher based
-        // on the given type.
-        switch (type) {
-            case checkers:
-            case chess:
-            case tictactoe:     // Handle an experience dispatch providing a type.
-                return new Dispatcher(type);
-            case chatRoomList:
-            case createProtectedUser:
-            case createRoom:
-            case experienceList:
-            case groupMembersList:
-            case groupsForProtectedUser:
-            case joinRoom:
-            case protectedUsers:
-            case messageList:
-            case roomMembersList:
-            case selectChatGroupsRooms:
-            case selectExpGroupsRooms:
-            case selectRoom:
-            case selectUser:    // Handle a chat dispatch providing both a type and an item.
-                return new Dispatcher(type, item);
-
-            default:            // Handle all the other types in the normal fashion.
-                return getDispatcher(type.getKind());
-        }
+        // on the given type and item.
+        return item != null ? new Dispatcher(type, item) : getDispatcher(type.getKind());
     }
 
     /** Return a dispatcher object based on the current message list state. */
