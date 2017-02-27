@@ -99,6 +99,12 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             case R.id.inviteFriends:
                 DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
                 break;
+            case R.id.settings:
+                showFutureFeatureMessage(R.string.MenuItemSettings);
+                break;
+            case R.id.helpAndFeedback:
+                showFutureFeatureMessage(R.string.MenuItemHelpAndFeedback);
+                break;
             default:
                 break;
         }
