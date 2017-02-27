@@ -161,8 +161,9 @@ public enum ExperienceManager {
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String meRoomKey = AccountManager.instance.getMeRoomKey();
                 result.addAll(getItemListRooms(roomKey));
-                if (!roomKey.equals(meRoomKey))
-                    result.addAll(getItemListRooms(meGroupKey));
+                if (roomKey.equals(meRoomKey) || roomKey.equals(meGroupKey))
+                    return result;
+                result.addAll(getItemListRooms(meGroupKey));
                 return result;
             default:
                 result.addAll(getItemListGroups());
