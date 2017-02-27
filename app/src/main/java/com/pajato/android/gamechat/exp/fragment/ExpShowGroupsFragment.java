@@ -117,7 +117,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
         // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
         // set up the toolbar.
         super.onStart();
-        if (mDispatcher.expFragmentType == null) {
+        if (mDispatcher.expType == null) {
             int titleResId = getTitleResId();
             ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, invite, settings);
             return;

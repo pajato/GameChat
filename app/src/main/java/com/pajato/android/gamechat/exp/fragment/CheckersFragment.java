@@ -133,7 +133,7 @@ public class CheckersFragment extends BaseExperienceFragment {
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
-        mDispatcher.expFragmentType = null;
+        mDispatcher.expType = null;
         FabManager.game.setMenu(CHECKERS_FAM_KEY, getCheckersMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         mBoard.init(this, mTileClickHandler); // = (GridLayout) mLayout.findViewById(board);
@@ -173,45 +173,6 @@ public class CheckersFragment extends BaseExperienceFragment {
             ExperienceManager.instance.createExperience(model);
         else
             ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
-    }
-
-    /** Return a list of default Checkers players. */
-    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
-        List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
-        String team = context.getString(R.string.primaryTeam);
-        result.add(new Player(name, "", team));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        team = context.getString(R.string.secondaryTeam);
-        result.add(new Player(name, "", team));
-        return result;
-    }
-
-    /** Return a possibly null list of player information for a checkers experience. */
-    protected List<Account> getPlayers(final Dispatcher dispatcher) {
-        // Determine if this is an offline experience in which no accounts are provided.
-        Account player1 = AccountManager.instance.getCurrentAccount();
-        if (player1 == null) return null;
-
-        // This is an online experience.  Use the current signed in User as the first player.
-        List<Account> players = new ArrayList<>();
-        players.add(player1);
-
-        // Determine the second account, if any, based on the room.
-        String key = dispatcher.roomKey;
-        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        if (room == null) return players;
-
-        switch (type) {
-            //case MEMBER:
-            // Handle another User by providing their account.
-            //    break;
-            default:
-                // Only one online player.  Just return.
-                break;
-        }
-
-        return players;
     }
 
     // Private instance methods.

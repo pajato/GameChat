@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
@@ -40,15 +41,18 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -119,7 +123,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Ensure that the type exists and that this is not a pass-through fragment.  In either
         // case abort.
         super.onResume();
-        if (type == null || mDispatcher == null || mDispatcher.expFragmentType != null)
+        if (type == null || mDispatcher == null || mDispatcher.expType != null)
             return;
 
         // Initialize the FAB manager, set up ads and the list adapter.
@@ -142,17 +146,14 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Ensure that the dispatcher and the dispatcher type exist, and ensure that this setup
         // is for a true experience fragment.  If not, then abort, otherwise use the dispatcher
         // to establish the experience to run.
-        // TODO: might be better to show a toast or snackbar on error, or even file a bug report!
         super.onSetup(context, dispatcher);
         if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
             return;
-
-        // Establish the experience for this fragment to manage, creating it if necessary.
-        if (dispatcher.experiencePayload != null)
-            mExperience = dispatcher.experiencePayload;
-        else if (dispatcher.key != null)
-            mExperience = ExperienceManager.instance.experienceMap.get(dispatcher.key);
-        else
+        String groupKey = dispatcher.groupKey;
+        String roomKey = dispatcher.roomKey;
+        ExpType expType = dispatcher.expType;
+        mExperience = ExperienceManager.instance.getExperience(groupKey, roomKey, expType);
+        if (mExperience == null)
             createExperience(context, getPlayers(dispatcher));
     }
 
@@ -166,9 +167,47 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Protected instance methods.
 
-    /** Provide a base implementation that will result in no players, i.e. an error. */
+    /** Return a list of default two-player game players. */
+    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
+        // TODO: make this part of an interface implementation.
+        List<Player> result = new ArrayList<>();
+        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String team = context.getString(R.string.primaryTeam);
+        result.add(new Player(name, "", team));
+        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        team = context.getString(R.string.secondaryTeam);
+        result.add(new Player(name, "", team));
+        return result;
+    }
+
+    /** Return a possibly empty list of player information for a two-player game experience. */
     protected List<Account> getPlayers(final Dispatcher dispatcher) {
-        return null;
+        // TODO: make this an interface implementation...
+        // Determine if this is an offline experience in which no accounts are provided.
+        Account player1 = AccountManager.instance.getCurrentAccount();
+        if (player1 == null)
+            return null;
+
+        // This is an online experience.  Use the current signed in User as the first player and
+        // determine from the play mode how to get the second player.
+        List<Account> players = new ArrayList<>();
+        players.add(player1);
+        String key = dispatcher.roomKey;
+        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
+        if (room == null || key.equals(AccountManager.instance.getMeRoomKey()))
+            return players;
+
+        // Obtain the second player from the other room...
+        switch (type) {
+            // TODO: flesh this out...
+            //case MEMBER:
+            // Handle another User by providing their account.
+            //    break;
+            default:
+                // Only one online player.  Just return.
+                break;
+        }
+        return players;
     }
 
     /** Provide a base implementation that does nothing. */
@@ -270,7 +309,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     @Override protected void onDispatch(@NonNull final Context context) {
         // Ensure that the type is valid and that the fragment is not being used as a
         // pass-through.  Abort if either is not the case, otherwise handle each possible case.
-        if (mDispatcher.type == null || mDispatcher.expFragmentType != null)
+        if (mDispatcher.type == null || mDispatcher.expType != null)
             return;
         switch (type) {
             case expRoomList:   // A room list needs an item.
@@ -404,9 +443,15 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 DispatchManager.instance.chainFragment(getActivity(), type, item);
                 break;
             case expRoom: // Show the list of experiences in a room or the one experience.
-                Map<String, Experience> map =
-                        ExperienceManager.instance.expGroupMap.get(item.groupKey).get(item.roomKey);
-                type = map.size() > 1 ? experienceList : getType(map, item);
+                Map<String, Map<String, Experience>> groupMap;
+                Map<String, Experience> roomMap;
+                String key = item.groupKey;
+                groupMap = key != null ? ExperienceManager.instance.expGroupMap.get(key) : null;
+                key = groupMap != null && item.roomKey != null ? item.roomKey : null;
+                roomMap = key != null ? groupMap.get(key) : null;
+                if (roomMap == null || roomMap.size() == 0)
+                    return;
+                type = roomMap.size() > 1 ? experienceList : getType(roomMap, item);
                 DispatchManager.instance.chainFragment(getActivity(), type, item);
                 break;
             default:
@@ -449,7 +494,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         switch(entry.titleResId) {
             default: // Dispatch to the game fragment ensuring chaining is coherent.
                 FragmentActivity activity = getActivity();
-                Dispatcher dispatcher = new Dispatcher(expGroupList, entry.fragmentType);
+                Dispatcher dispatcher = new Dispatcher(expGroupList, entry.fragmentType.expType);
                 DispatchManager.instance.startNextFragment(activity, dispatcher);
                 break;
         }

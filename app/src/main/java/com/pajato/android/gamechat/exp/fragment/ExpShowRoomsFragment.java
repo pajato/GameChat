@@ -62,7 +62,7 @@ public class ExpShowRoomsFragment extends BaseExperienceFragment {
         // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
         // initialize the FAM.
         super.onStart();
-        if (mDispatcher.expFragmentType == null) {
+        if (mDispatcher.expType == null) {
             FabManager.game.init(this);
             ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
             return;

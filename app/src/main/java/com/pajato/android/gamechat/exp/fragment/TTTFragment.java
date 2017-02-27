@@ -184,7 +184,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     @Override public void onStart() {
         // Initialize the FAB/FAM and the toolbar.
         super.onStart();
-        mDispatcher.expFragmentType = null;
+        mDispatcher.expType = null;
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         FabManager.game.init(this);
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);

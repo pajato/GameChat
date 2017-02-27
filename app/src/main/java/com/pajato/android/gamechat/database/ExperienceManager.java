@@ -144,14 +144,27 @@ public enum ExperienceManager {
 
     }
 
-    /** Return a room push key to use with a subsequent room object persistence. */
+    /** Return an experience push key to use with a subsequent room object persistence. */
     public String getExperienceKey() {
         return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
     }
 
-    /** Return the experience based on it's push key */
-    public Experience getExperience(String key) {
-        return experienceMap.get(key);
+    /** Return null or an experience of the given type from the given group and room. */
+    public Experience getExperience(@NonNull final String groupKey, @NonNull final String roomKey,
+                                    @NonNull final ExpType expType) {
+        // Determine if there are any experiences in the given room.  If not, return null.
+        Map<String, Map<String, Experience>> groupMap = expGroupMap.get(groupKey);
+        Map<String, Experience> roomMap;
+        roomMap = groupMap != null ? groupMap.get(roomKey) : null;
+        if (roomMap == null || roomMap.size() == 0)
+            return null;
+
+        // Return the first experience of the given type in the room.  This imposes a one experience
+        // per type per room model which seems reasonable.
+        for (Experience experience : roomMap.values())
+            if (experience.getExperienceType() == expType)
+                return experience;
+        return null;
     }
 
     /** Update an experience in the database after its model has been reset */

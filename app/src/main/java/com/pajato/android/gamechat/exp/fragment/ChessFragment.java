@@ -110,13 +110,11 @@ public class ChessFragment extends BaseExperienceFragment {
             clearJoinState(mExperience.getGroupKey(), mExperience.getRoomKey(), exp);
     }
 
-    /**
-     * Handle taking the foreground by updating the UI based on the current experience.
-     */
+    /** Update the UI for the chess experience while running in the foreground. */
     @Override public void onResume() {
-        // Determine if there is an experience ready to be enjoyed.  If not, hide the layout and
-        // present a spinner.  When an experience is posted by the app event manager, the game can
-        // be shown
+        // Determine if there is an experience ready to be enjoyed.  If not, then chill out.  When
+        // an experience is posted by the app event manager, the game will be shown.  Otherwise mark
+        // the room has having been joined (active join state) and show the game.
         super.onResume();
         if (mExperience == null)
             return;
@@ -127,7 +125,7 @@ public class ChessFragment extends BaseExperienceFragment {
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
-        mDispatcher.expFragmentType = null;
+        mDispatcher.expType = null;
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         mBoard.init(this, mTileClickHandler);
@@ -166,45 +164,6 @@ public class ChessFragment extends BaseExperienceFragment {
             ExperienceManager.instance.createExperience(model);
         else
             ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
-    }
-
-    /** Return a list of default Chess players. */
-    protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
-        List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
-        String team = context.getString(R.string.primaryTeam);
-        result.add(new Player(name, "", team));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        team = context.getString(R.string.secondaryTeam);
-        result.add(new Player(name, "", team));
-        return result;
-    }
-
-    /** Return a possibly null list of chess player information. */
-    @Override protected List<Account> getPlayers(final Dispatcher dispatcher) {
-        // Determine if this is an offline experience in which no accounts are provided.
-        Account player1 = AccountManager.instance.getCurrentAccount();
-        if (player1 == null) return null;
-
-        // This is an online experience.  Use the current signed in User as the first player.
-        List<Account> players = new ArrayList<>();
-        players.add(player1);
-
-        // Determine the second account, if any, based on the room.
-        String key = dispatcher.roomKey;
-        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        if (room == null)
-            return players;
-
-        switch (type) {
-            //case MEMBER:
-            // Handle another User by providing their account.
-            //    break;
-            default:
-                // Only one online player.  Just return.
-                break;
-        }
-        return players;
     }
 
     // Private instance methods.

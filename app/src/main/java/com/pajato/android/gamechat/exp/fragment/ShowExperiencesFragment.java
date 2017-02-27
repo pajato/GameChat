@@ -125,7 +125,7 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
         // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
         // initialize the FAB manager and set up the toolbar.
         super.onStart();
-        if (mDispatcher.expFragmentType == null) {
+        if (mDispatcher.expType == null) {
             FabManager.game.init(this);
             ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
             return;
@@ -133,7 +133,7 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
 
         // Handle a pass through by handing to the target fragment type while leaving an item object
         // in place for a back press or exit from the experience back to the experience list display.
-        mDispatcher.type = mDispatcher.expFragmentType;
+        mDispatcher.type = mDispatcher.expType.getFragmentType();
         DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
         mItem = new ListItem(expList, mDispatcher.groupKey, mDispatcher.roomKey, null, 0, null);
     }
