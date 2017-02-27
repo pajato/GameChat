@@ -178,6 +178,12 @@ public class MainActivity extends BaseActivity
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 AccountManager.instance.signOut(this);
                 break;
+            case R.id.switchAccount:
+                // Post a toast message indicating this is a future feature
+                String prefix = getString(R.string.MenuItemSwitchAccount);
+                String suffix = getString(R.string.FutureFeature);
+                CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
             default:
                 // Ignore everything else.
                 break;

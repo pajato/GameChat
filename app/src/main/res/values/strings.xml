@@ -19,10 +19,9 @@
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemFeedback">Feedback</string>
     <string name="MenuItemLearnMore">Learn More</string>
-    <string name="MenuItemManageGroups">Manage groups</string>
-    <string name="MenuItemManageRooms">Manage rooms</string>
     <string name="MenuItemSearch">Search</string>
     <string name="MenuItemSettings">Settings</string>
+    <string name="MenuItemSwitchAccount">Switch account</string>
     <string name="SignInMessageText">Use the \u2630 menu in the toolbar to sign in.</string>
     <string name="SignedOutToolbarTitle">Signed Out</string>
     <string name="SwitchToChat">Switch to Chat</string>
@@ -45,7 +44,6 @@
     <string name="intro_levels_message">Relaxed games for teaching and learning as well as competitive levels for serious players</string>
     <string name="intro_levels_title">Levels</string>
     <string name="intro_page_circle">\u25CF</string>
-    <string name="manage_accounts">Manage Accounts</string>
     <string name="nav_header_label_android_studio">Android Studio</string>
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
     <string name="navigation_drawer_action_close">Close navigation drawer</string>

@@ -8,8 +8,4 @@
         android:id="@+id/helpAndFeedback"
         android:title="@string/MenuItemHelpAndFeedback"
         android:icon="@drawable/vd_help_black_24px"/>
-    <item
-        android:id="@+id/inviteFriends"
-        android:title="@string/InviteFriendNav"
-        android:icon="@drawable/ic_share_black_24dp"/>
 </menu>

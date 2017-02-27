@@ -14,28 +14,14 @@
             </group>
         </menu>
     </item>
-    <item android:title="@string/navigation_drawer_account_management">
-        <menu>
-            <group>
-                <item
-                    android:id="@+id/manageProtectedUsers"
-                    android:title="@string/ManageRestrictedUserTitle"
-                    android:icon="@drawable/ic_verified_user_black_24dp" />
-                <item
-                    android:id="@+id/manageAccounts"
-                    android:title="@string/manage_accounts"
-                    android:icon="@drawable/vd_login_2" />
-                <item
-                    android:id="@+id/manageGroups"
-                    android:title="@string/MenuItemManageGroups"
-                    android:icon="@drawable/vd_group_black_24px"/>
-                <item
-                    android:id="@+id/manageRooms"
-                    android:title="@string/MenuItemManageRooms"
-                    android:icon="@drawable/ic_casino_black_24dp"/>
-            </group>
-        </menu>
-    </item>
+    <item
+        android:id="@+id/manageProtectedUsers"
+        android:title="@string/ManageRestrictedUserTitle"
+        android:icon="@drawable/ic_verified_user_black_24dp" />
+    <item
+        android:id="@+id/inviteFriends"
+        android:title="@string/InviteFriendNav"
+        android:icon="@drawable/ic_share_black_24dp"/>
     <group android:orderInCategory="100">
         <item android:title=""/>
         <item android:title=""/>
