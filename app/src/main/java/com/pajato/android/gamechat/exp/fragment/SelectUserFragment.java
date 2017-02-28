@@ -91,10 +91,10 @@ public class SelectUserFragment extends BaseExperienceFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createExpGroup, null);
+                DispatchManager.instance.chainFragment(getActivity(), createExpGroup);
                 break;
             case R.string.InviteFriendFromChat:
-                DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
+                DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
                 break;
             case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.isRestricted()) {
@@ -102,7 +102,7 @@ public class SelectUserFragment extends BaseExperienceFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                DispatchManager.instance.chainFragment(getActivity(), protectedUsers, null);
+                DispatchManager.instance.chainFragment(getActivity(), protectedUsers);
                 break;
             default:
                 break;

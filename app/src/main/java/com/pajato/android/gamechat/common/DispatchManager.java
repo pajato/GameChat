@@ -69,7 +69,7 @@ public enum DispatchManager {
      * @param type The type of the fragment to drill into.  One will be created if necessary.
      */
     public void chainFragment(final FragmentActivity context, final FragmentType type) {
-        chainFragment(context, type, null);
+        chainFragment(context, type, new ListItem());
     }
 
     /** Chain to a fragment using the given dispatcher. */
@@ -149,26 +149,6 @@ public enum DispatchManager {
         if (type == null)
             return false;
         Dispatcher dispatcher = getDispatcher(type, null);
-        return dispatcher.type != null && startNextFragment(context, dispatcher);
-    }
-
-    /**
-     * Start the next fragment of a given type as indicated by the current app state.  The fragment
-     * type will determine the dispatch kind.
-     *
-     * @param context The activity that will attach to the next fragment.
-     * @param type The fragment type, which determines the dispatch kind.
-     * @param item A template containing payload data to pass along with the UI views.
-     *
-     * @return TRUE iff the next fragment is started.
-     */
-    public boolean startNextFragment(final FragmentActivity context, final FragmentType type,
-                                     final ListItem item) {
-        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
-        // dispatcher if so.
-        if (type == null)
-            return false;
-        Dispatcher dispatcher = getDispatcher(type, item);
         return dispatcher.type != null && startNextFragment(context, dispatcher);
     }
 

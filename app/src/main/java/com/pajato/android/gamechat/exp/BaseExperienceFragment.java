@@ -377,8 +377,10 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 break;
         }
 
-        if (expFragmentType != null)
-            DispatchManager.instance.chainFragment(getActivity(), expFragmentType);
+        // Chain to the game experience, if one was found.
+        if (expFragmentType != null) {
+            dispatchToGame(getActivity(), expFragmentType);
+        }
     }
 
     /** Process an experience change event by ... */
@@ -409,7 +411,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.string.InviteFriendsOverflow:
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms, null);
+                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(activity, groupKey);
                 break;
@@ -468,10 +470,21 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             return;
         Object tag = event.view.getTag();
         if (tag instanceof MenuEntry)
-            processFamItem((MenuEntry) tag, name);
+            processFamItem((MenuEntry) tag);
     }
 
     // Private instance methods.
+
+    /** Dispatch to the indicated game fragment type */
+    private void dispatchToGame(FragmentActivity activity, FragmentType type) {
+        boolean doChain = type == expGroupList || type == expRoomList || type == experienceList;
+        FragmentType nextType = doChain ? type : expGroupList;
+        Dispatcher dispatcher = new Dispatcher(nextType, type.expType);
+        if (doChain)
+            DispatchManager.instance.chainFragment(activity, dispatcher);
+        else
+            DispatchManager.instance.startNextFragment(activity, dispatcher);
+    }
 
     /** Process the end icon click */
     private void processEndIconClick(final View view) {
@@ -488,23 +501,10 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Process a FAM menu entry click. */
-    private void processFamItem(final MenuEntry entry, final String name) {
+    private void processFamItem(final MenuEntry entry) {
         // Dismiss the FAB and dispatch
         FabManager.game.dismissMenu(this);
-        switch(entry.titleResId) {
-            default: // Dispatch to the game fragment ensuring chaining is coherent.
-                FragmentActivity activity = getActivity();
-                boolean doChain;
-                doChain = type == expGroupList || type == expRoomList || type == experienceList;
-                FragmentType nextType = doChain ? entry.fragmentType : expGroupList;
-                Dispatcher dispatcher = new Dispatcher(nextType, entry.fragmentType.expType);
-                if (doChain)
-                    DispatchManager.instance.chainFragment(getActivity(), dispatcher);
-                else {
-                    DispatchManager.instance.startNextFragment(activity, dispatcher);
-                }
-                break;
-        }
+        dispatchToGame(getActivity(), entry.fragmentType);
     }
 
     /** Resume the current fragment experience. */

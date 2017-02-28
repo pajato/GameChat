@@ -138,7 +138,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         switch (event.item != null ? event.item.getItemId() : -1) {
             case R.string.InviteFriendsOverflow:
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms, null);
+                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());

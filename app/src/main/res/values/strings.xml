@@ -9,7 +9,7 @@
     <string name="GridRoomIconGreen">Green room icon</string>
     <string name="HasDepartedMessage">%s has left</string>
     <string name="HasJoinedMessage">%s has joined</string>
-    <string name="InviteTitle">Invite Friends to GameChat</string>
+    <string name="InviteTitle">Invite Friends</string>
     <string name="InviteMessage">You should check out GameChat</string>
     <string name="InviteToGroupFormat">You are invited to join my GameChat group: %s</string>
     <string name="InviteFriendMessage">Invite friends</string>

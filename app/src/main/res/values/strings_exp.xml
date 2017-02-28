@@ -16,7 +16,7 @@
     <string name="MyExperiencesToolbarTitle">My Games</string>
     <string name="MyGameRoomToolbarTitle">My Game Room</string>
     <string name="NoExperiencesMessage">You have no experiences</string>
-    <string name="NoGamesMessageText">You have no games to view or play.  Use the button below to create one or join other rooms to play or watch ongoing games.</string>
+    <string name="NoGamesMessageText">You currently have no games. Select a game button to create one, or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
     <string name="NoUsersFound">No Available Users</string>
     <string name="PlayAgain">Play Again</string>

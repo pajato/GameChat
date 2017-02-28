@@ -89,7 +89,7 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                DispatchManager.instance.chainFragment(getActivity(), createProtectedUser, null);
+                DispatchManager.instance.chainFragment(getActivity(), createProtectedUser);
                 break;
             default:
                 break;

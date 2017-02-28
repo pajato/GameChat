@@ -34,9 +34,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
-import static com.pajato.android.gamechat.R.id.create_button_finish;
-import static com.pajato.android.gamechat.R.id.emailEditText;
-import static com.pajato.android.gamechat.R.id.email_next_button;
 import static com.pajato.android.gamechat.common.FragmentType.groupsForProtectedUser;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -137,7 +134,7 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
         if (event == null || event.view == null)
             return;
         switch (event.view.getId()) {
-            case create_button_finish:
+            case R.id.create_button_finish:
             case R.id.pwd_next_button:
                 TextInputLayout mailLayout =
                         (TextInputLayout) activity.findViewById(R.id.email_layout);
@@ -148,12 +145,12 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
                             getUserName(), getPassword(), accountIsKnown);
                     // Dismiss the Keyboard and return to the previous fragment.
                     dismissKeyboard();
-                    DispatchManager.instance.chainFragment(getActivity(), groupsForProtectedUser, null);
+                    DispatchManager.instance.chainFragment(getActivity(), groupsForProtectedUser);
                 }
                 break;
-            case email_next_button:
+            case R.id.email_next_button:
                 final TextInputEditText editText =
-                        (TextInputEditText) activity.findViewById(emailEditText);
+                        (TextInputEditText) activity.findViewById(R.id.emailEditText);
                 if (isValidEmailFormat(editText.getText().toString())) {
                     setEmailError(false);
                     checkEmailAccountExists(editText.getText().toString());
@@ -226,7 +223,7 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
         ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
 
         final TextInputEditText editText =
-                (TextInputEditText) getActivity().findViewById(emailEditText);
+                (TextInputEditText) getActivity().findViewById(R.id.emailEditText);
         editText.addTextChangedListener(new EmailTextWatcher());
 
         final TextInputEditText passwordText =
