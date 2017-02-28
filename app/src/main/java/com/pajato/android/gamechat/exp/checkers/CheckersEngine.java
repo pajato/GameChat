@@ -90,30 +90,20 @@ public enum CheckersEngine implements Engine {
             }
         }
 
-        // Test to see if the move is a win or draw and update the database.
-        if (finishedJumping) {
-            mModel.board.delete(selectedPosition);
-            mModel.board.clearSelectedPiece();
-            mModel.board.getPossibleMoves().clear();
+        // Test to see if jumping is finished.  If not, then start another move, otherwise change
+        // turns, look for a finished state and update the database.
+        mModel.board.clearSelectedPiece();
+        mModel.board.getPossibleMoves().clear();
+        mModel.board.delete(selectedPosition);
+        if (!finishedJumping)
+            startMove(position);
+        else {
             mModel.toggleTurn();
             if (noMovesAvailable())
                 mModel.setStateType(mModel.turn ? secondary_wins : primary_wins);
+            checkFinished();
         }
-        checkFinished();
         ExperienceManager.instance.updateExperience(mModel);
-    }
-
-    /** Test for the case where a play has been made and the other team has no moves. */
-    private boolean noMovesAvailable() {
-        // Establish the team being scrutinized and check for at least one move from all the players
-        // on that team.
-        Team team = mModel.turn ? PRIMARY : SECONDARY;
-        for (String key : mModel.board.getKeySet()) {
-            int position = mModel.board.getPosition(key);
-            if (mModel.board.getTeam(position) == team && getPossibleMoves(position).size() != 0)
-                return false;
-        }
-        return true;
     }
 
     /** Establish the experience model (chess) and board for this handler. */
@@ -236,5 +226,18 @@ public enum CheckersEngine implements Engine {
         if (downRight != -1)
             result.add(downRight);
         return result;
+    }
+
+    /** Test for the case where a play has been made and the other team has no moves. */
+    private boolean noMovesAvailable() {
+        // Establish the team being scrutinized and check for at least one move from all the players
+        // on that team.
+        Team team = mModel.turn ? PRIMARY : SECONDARY;
+        for (String key : mModel.board.getKeySet()) {
+            int position = mModel.board.getPosition(key);
+            if (mModel.board.getTeam(position) == team && getPossibleMoves(position).size() != 0)
+                return false;
+        }
+        return true;
     }
 }

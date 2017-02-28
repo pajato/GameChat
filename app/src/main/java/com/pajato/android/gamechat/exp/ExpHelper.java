@@ -212,7 +212,7 @@ public class ExpHelper {
     }
 
     /** Update the UI using the current experience state from the database. */
-    public static void updateUiFromExperience(final Experience model, final Checkerboard board) {
+    static void updateUiFromExperience(final Experience model, final Checkerboard board) {
         // Obtain a context to use to update the UI.  Abort if unable to do so.
         BaseFragment fragment = getBaseFragment(model);
         Context context = fragment != null ? fragment.getContext() : null;
