@@ -168,6 +168,9 @@ public class ListItem {
         this.text = text;
     }
 
+    /** Build an empty list item */
+    public ListItem() {}
+
     /** Build a header instance for a given resource id. */
     public ListItem(final ItemType type, final String groupKey) {
         this.type = type;

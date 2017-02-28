@@ -148,7 +148,7 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
                             getUserName(), getPassword(), accountIsKnown);
                     // Dismiss the Keyboard and return to the previous fragment.
                     dismissKeyboard();
-                    DispatchManager.instance.chainFragment(getActivity(), groupsForProtectedUser, null);
+                    DispatchManager.instance.chainFragment(getActivity(), groupsForProtectedUser);
                 }
                 break;
             case email_next_button:

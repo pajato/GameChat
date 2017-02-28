@@ -377,8 +377,18 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 break;
         }
 
-        if (expFragmentType != null)
-            DispatchManager.instance.chainFragment(getActivity(), expFragmentType);
+        // Chain to the game experience, if one was found.
+        if (expFragmentType != null) {
+            boolean doChain;
+            doChain = type == expGroupList || type == expRoomList || type == experienceList;
+            FragmentType nextType = doChain ? expFragmentType : expGroupList;
+            Dispatcher dispatcher = new Dispatcher(nextType, expFragmentType.expType);
+            if (doChain)
+                DispatchManager.instance.chainFragment(getActivity(), dispatcher);
+            else {
+                DispatchManager.instance.startNextFragment(getActivity(), dispatcher);
+            }
+        }
     }
 
     /** Process an experience change event by ... */
@@ -409,7 +419,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.string.InviteFriendsOverflow:
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms, null);
+                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(activity, groupKey);
                 break;
@@ -468,7 +478,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             return;
         Object tag = event.view.getTag();
         if (tag instanceof MenuEntry)
-            processFamItem((MenuEntry) tag, name);
+            processFamItem((MenuEntry) tag);
     }
 
     // Private instance methods.
@@ -488,7 +498,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Process a FAM menu entry click. */
-    private void processFamItem(final MenuEntry entry, final String name) {
+    private void processFamItem(final MenuEntry entry) {
         // Dismiss the FAB and dispatch
         FabManager.game.dismissMenu(this);
         switch(entry.titleResId) {

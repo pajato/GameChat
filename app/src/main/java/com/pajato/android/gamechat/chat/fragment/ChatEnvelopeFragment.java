@@ -94,10 +94,10 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                DispatchManager.instance.chainFragment(getActivity(), protectedUsers, null);
+                DispatchManager.instance.chainFragment(getActivity(), protectedUsers);
                 break;
             case R.id.inviteFriends:
-                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms, null);
+                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms);
                 break;
             case R.id.settings:
                 showFutureFeatureMessage(R.string.MenuItemSettings);
