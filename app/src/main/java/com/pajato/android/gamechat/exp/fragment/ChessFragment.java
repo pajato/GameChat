@@ -22,15 +22,12 @@ import android.support.v4.content.ContextCompat;
 import android.widget.ImageView;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;

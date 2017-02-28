@@ -37,9 +37,6 @@ public class Dispatcher {
     /** The experience target type. */
     public ExpType expType;
 
-    /** The experience payload. */
-    public Experience experiencePayload;
-
     /** The group key. */
     public String groupKey;
 
@@ -81,8 +78,8 @@ public class Dispatcher {
                 break;
             case selectUser:
                 if (item.key != null) {
-                    experiencePayload = ExperienceManager.instance.experienceMap.get(item.key);
-                    this.type.expType = experiencePayload.getExperienceType();
+                    Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
+                    this.type.expType = exp.getExperienceType();
                 }
                 break;
             case roomMembersList:

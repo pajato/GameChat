@@ -25,7 +25,6 @@ import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;

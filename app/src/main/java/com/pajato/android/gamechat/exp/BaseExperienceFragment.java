@@ -151,7 +151,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             return;
         String groupKey = dispatcher.groupKey;
         String roomKey = dispatcher.roomKey;
-        ExpType expType = dispatcher.expType;
+        ExpType expType = dispatcher.expType != null ? dispatcher.expType : type.expType;
         mExperience = ExperienceManager.instance.getExperience(groupKey, roomKey, expType);
         if (mExperience == null)
             createExperience(context, getPlayers(dispatcher));
@@ -494,8 +494,15 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         switch(entry.titleResId) {
             default: // Dispatch to the game fragment ensuring chaining is coherent.
                 FragmentActivity activity = getActivity();
-                Dispatcher dispatcher = new Dispatcher(expGroupList, entry.fragmentType.expType);
-                DispatchManager.instance.startNextFragment(activity, dispatcher);
+                boolean doChain;
+                doChain = type == expGroupList || type == expRoomList || type == experienceList;
+                FragmentType nextType = doChain ? entry.fragmentType : expGroupList;
+                Dispatcher dispatcher = new Dispatcher(nextType, entry.fragmentType.expType);
+                if (doChain)
+                    DispatchManager.instance.chainFragment(getActivity(), dispatcher);
+                else {
+                    DispatchManager.instance.startNextFragment(activity, dispatcher);
+                }
                 break;
         }
     }
