@@ -379,15 +379,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
         // Chain to the game experience, if one was found.
         if (expFragmentType != null) {
-            boolean doChain;
-            doChain = type == expGroupList || type == expRoomList || type == experienceList;
-            FragmentType nextType = doChain ? expFragmentType : expGroupList;
-            Dispatcher dispatcher = new Dispatcher(nextType, expFragmentType.expType);
-            if (doChain)
-                DispatchManager.instance.chainFragment(getActivity(), dispatcher);
-            else {
-                DispatchManager.instance.startNextFragment(getActivity(), dispatcher);
-            }
+            dispatchToGame(getActivity(), expFragmentType);
         }
     }
 
@@ -483,6 +475,17 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Private instance methods.
 
+    /** Dispatch to the indicated game fragment type */
+    private void dispatchToGame(FragmentActivity activity, FragmentType type) {
+        boolean doChain = type == expGroupList || type == expRoomList || type == experienceList;
+        FragmentType nextType = doChain ? type : expGroupList;
+        Dispatcher dispatcher = new Dispatcher(nextType, type.expType);
+        if (doChain)
+            DispatchManager.instance.chainFragment(activity, dispatcher);
+        else
+            DispatchManager.instance.startNextFragment(activity, dispatcher);
+    }
+
     /** Process the end icon click */
     private void processEndIconClick(final View view) {
         if (!(view.getTag() instanceof ListItem))
@@ -501,20 +504,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     private void processFamItem(final MenuEntry entry) {
         // Dismiss the FAB and dispatch
         FabManager.game.dismissMenu(this);
-        switch(entry.titleResId) {
-            default: // Dispatch to the game fragment ensuring chaining is coherent.
-                FragmentActivity activity = getActivity();
-                boolean doChain;
-                doChain = type == expGroupList || type == expRoomList || type == experienceList;
-                FragmentType nextType = doChain ? entry.fragmentType : expGroupList;
-                Dispatcher dispatcher = new Dispatcher(nextType, entry.fragmentType.expType);
-                if (doChain)
-                    DispatchManager.instance.chainFragment(getActivity(), dispatcher);
-                else {
-                    DispatchManager.instance.startNextFragment(activity, dispatcher);
-                }
-                break;
-        }
+        dispatchToGame(getActivity(), entry.fragmentType);
     }
 
     /** Resume the current fragment experience. */
