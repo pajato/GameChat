@@ -132,8 +132,8 @@ public enum PaneManager {
             super.setPrimaryItem(container, position, object);
             // Walk the list of child nodes to set the size of the selected page circle icon to
             // be twice the size of an unselected page circle icon.
-            final float LARGE = 30.0f;
-            final float SMALL = 15.0f;
+            final float LARGE = 28.0f;
+            final float SMALL = 14.0f;
             int count = mPageMonitor.getChildCount();
             for (int index = 0; index < count; index++) {
                 TextView child = (TextView) mPageMonitor.getChildAt(index);
