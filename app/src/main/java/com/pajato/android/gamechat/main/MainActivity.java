@@ -20,10 +20,10 @@ package com.pajato.android.gamechat.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
@@ -56,13 +55,11 @@ import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
+import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -220,12 +217,21 @@ public class MainActivity extends BaseActivity
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         // Case on the menu id to handle the item.
         switch (event.item.getItemId()) {
-            case R.id.helpAndFeedback:
-                SupportManager.instance.sendFeedback(this, "GameChat Feedback");
-                AppEventManager.instance.cancel(event);
+            case R.string.MenuItemHelpAndFeedback:
+                HelpManager.instance.launchHelp(this);
+                break;
+            case R.string.SwitchToChat:
+                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
+                ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                break;
+            case R.string.SwitchToExp:
+                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
+                viewPager = (ViewPager) findViewById(R.id.viewpager);
+                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
             case R.id.fileBugReport:
-                handleBugReport(event);
+                SupportManager.instance.handleBugReport(this, event);
                 break;
             default:
                 // Handle all other events by logging a message for now.
@@ -299,74 +305,6 @@ public class MainActivity extends BaseActivity
     }
 
     // Private instance methods.
-
-    /** Return "about" information: a string describing the app and it's version information. */
-    private String getAbout() {
-        final String format = "GameChat %s-%d Bug Report";
-        final String name = BuildConfig.VERSION_NAME;
-        final int code = BuildConfig.VERSION_CODE;
-        return String.format(Locale.US, format, name, code);
-    }
-
-    /** Return null if the given bitmap cannot be saved or the file path it has been saved to. */
-    private String getBitmapPath(final Bitmap bitmap) {
-        // Create the image file on internal storage.  Abort if the subdirectories cannot be
-        // created.
-        FileOutputStream outputStream;
-        File dir = new File(getFilesDir(), "images");
-        if (!dir.exists() && !dir.mkdirs()) return null;
-
-        // Flush the bitmap to the image file as a stream and return the result.
-        File imageFile = new File(dir, "screenshot.png");
-        Log.d(TAG, String.format(Locale.US, "Image file path is {%s}", imageFile.getPath()));
-        try {
-            outputStream = new FileOutputStream(imageFile);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            outputStream.flush();
-
-            outputStream.close();
-        } catch (IOException exc) {
-            Log.e(TAG, exc.getMessage(), exc);
-            return null;
-        }
-
-        return imageFile.getPath();
-    }
-
-    /** Return the file where logcat data has been placed, null if no data is available. */
-    private String getLogcatPath() {
-        // Capture the current state of the logcat file.
-        File dir = new File(getFilesDir(), "logcat");
-        if (!dir.exists() && !dir.mkdirs()) return null;
-
-        File outputFile = new File(dir, "logcat.txt");
-        try {
-            Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
-        } catch (IOException exc) {
-            Log.e(TAG, exc.getMessage(), exc);
-            return null;
-        }
-
-        Log.d(TAG, String.format("File size is %d.", outputFile.length()));
-        Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
-
-        return outputFile.getPath();
-    }
-
-    /** Handle a bug report by performing a screen capture, grabbing logcat and sending email. */
-    private void handleBugReport(final MenuItemEvent event) {
-        // Capture the screen (with any luck, sans menu.), send the message and cancel event
-        // propagation.
-        View rootView = getWindow().getDecorView().getRootView();
-        rootView.setDrawingCacheEnabled(true);
-        List<String> attachments = new ArrayList<>();
-        String path = getBitmapPath(rootView.getDrawingCache());
-        if (path != null) attachments.add(path);
-        path = getLogcatPath();
-        if (path != null) attachments.add(path);
-        SupportManager.instance.sendFeedback(this, getAbout(), "Extra information: ", attachments);
-        AppEventManager.instance.cancel(event);
-    }
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {

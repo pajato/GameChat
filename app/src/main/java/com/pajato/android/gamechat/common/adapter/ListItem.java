@@ -30,6 +30,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.helpArticle;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.member;
 
@@ -85,6 +86,8 @@ public class ListItem {
         expRoom ("Exp room item with name {%s}, group, room: {%s, %s}, count: {%s}, text {%s}."),
         experience ("Experience item with group/room/exp keys {%s/%s/%s} and mode {%s}."),
         groupList("Group item with name {%s} and key: {%s}"),
+        helpArticle("Help article with name {%s} and path {%s}"),
+        helpHeader("Help header with name {%s}"),
         roomList("Room item with name {%s}, key: {%s} and group key: {%s}"),
         member ("Member item with name {%s}, key: {%s}, email: {%s} and iconUrl {%s}"),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
@@ -148,7 +151,7 @@ public class ListItem {
     /** The item selection state. */
     public boolean selected;
 
-    /** The list of rooms or groups with messages to show, or the text of a message. */
+    /** The list of rooms or groups with messages to show, or the text of a message, or the path */
     public String text;
 
     /** The item type, always non-null. */
@@ -181,6 +184,13 @@ public class ListItem {
     public ListItem(final ItemType type, final int resId) {
         this.type = type;
         nameResourceId = resId;
+    }
+
+    /** Build an instance for a help article with a name and path */
+    public ListItem(final String name, final String path) {
+        this.type = helpArticle;
+        this.name = name;
+        this.text = path;
     }
 
     /** Build an instance for a member item */
@@ -288,6 +298,10 @@ public class ListItem {
                 return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
             case groupList:
                 return String.format(Locale.US, type.format, name, groupKey);
+            case helpArticle:
+                return String.format(Locale.US, type.format, name, text);
+            case helpHeader:
+                return String.format(Locale.US, type.format, name, text);
             case roomList:
                 return String.format(Locale.US, type.format, name, roomKey, groupKey);
             case member:

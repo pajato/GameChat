@@ -213,11 +213,6 @@ public abstract class BaseFragment extends Fragment {
     }
 
     /** Return a menu entry for with given title and icon resource items. */
-    protected MenuEntry getNoTintEntry(final int titleId, final int iconId) {
-        return new MenuEntry(new MenuItemEntry(MENU_ITEM_NO_TINT_TYPE, titleId, iconId));
-    }
-
-    /** Return a menu entry for with given title and icon resource items. */
     protected MenuEntry getTintEntry(final int titleId, final int iconId) {
         return new MenuEntry(new MenuItemEntry(MENU_ITEM_TINT_TYPE, titleId, iconId));
     }

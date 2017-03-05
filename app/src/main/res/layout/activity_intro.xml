@@ -59,20 +59,9 @@ http://www.gnu.org/licenses
         android:layout_marginRight="10dp"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="@string/signInButtonText"
-            android:gravity="center"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:id="@+id/register_button"/>
-
         <Button
             style="@style/IntroTheme.Button"
+            android:id="@+id/introSignInButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="doSignIn"

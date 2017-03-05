@@ -255,7 +255,7 @@ public enum JoinManager {
         DBUtils.updateChildren(path, group.toMap());
 
         // Update the "me" room default message on the database.
-        String format = "We have created a room for %s and %s to share private messages.";
+        String format = "A room has been created for %s and %s to share private messages.";
         String accountName = account.getDisplayName();
         String memberName = member.getDisplayName();
         String text = String.format(Locale.getDefault(), format, accountName, memberName);

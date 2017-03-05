@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Toast;
 
@@ -34,7 +33,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -91,7 +89,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 break;
             case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.isRestricted()) {
-                    String protectedWarning = "Protected Users cannot make other Protected Users.";
+                    String protectedWarning = getString(R.string.CannotManageProtectedUser);
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
@@ -108,11 +106,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             return;
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.SwitchToExp:
-                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                break;
             case R.string.MenuItemSearch:
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;

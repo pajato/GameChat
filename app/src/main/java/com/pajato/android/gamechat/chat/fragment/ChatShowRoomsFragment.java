@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.support.v4.view.ViewPager;
-
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -32,7 +30,6 @@ import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -113,11 +110,6 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             return;
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.SwitchToExp:
-                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                break;
             case R.string.MenuItemSearch:
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;

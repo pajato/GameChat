@@ -117,6 +117,10 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ItemListViewHolder(getView(parent, R.layout.item_with_tint));
             case groupList:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
+            case helpArticle:
+                return new HelpListViewHolder(getView(parent, R.layout.item_help_article));
+            case helpHeader:
+                return new HeaderViewHolder(getView(parent, R.layout.item_help_header));
             case member:
                 return new ContactViewHolder(getView(parent, R.layout.item_contact));
             case message:
@@ -152,6 +156,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case date:
                 case resourceHeader:
                 case roomsHeader:
+                case helpHeader:
                     // The header item types simply update the section title.
                     int id = item.nameResourceId;
                     String name = holder.itemView.getContext().getResources().getString(id);
@@ -174,6 +179,13 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateHolder((ItemListViewHolder) holder, item);
+                    break;
+                case helpArticle:
+                    HelpListViewHolder hh = (HelpListViewHolder) holder;
+                    hh.title.setText(item.name);
+                    hh.title.setTag(item);
+                    hh.icon.setImageResource(R.drawable.content_newspaper_black_24dp);
+                    hh.icon.setTag(item);
                     break;
                 default:
                     Log.e(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
@@ -291,6 +303,9 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
             case groupList:
                 holder.icon.setImageResource(R.drawable.vd_group_black_24px);
+                break;
+            case helpArticle:
+                holder.icon.setImageResource(R.drawable.content_newspaper_black_24dp);
                 break;
             case protectedUserList:
                 if (item.iconUrl == null) {
@@ -460,6 +475,22 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return;
             button.setVisibility(View.GONE);
             button = (Button) itemView.findViewById(R.id.altSelector);
+        }
+    }
+
+    /** Provide a view holder for a help list item */
+    private class HelpListViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        TextView title;
+        ImageView icon;
+
+        /** Build an instance given the item view. */
+        HelpListViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.title);
+            icon = (ImageView) itemView.findViewById(R.id.ListItemIcon);
         }
     }
 

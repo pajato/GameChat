@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.support.v4.view.ViewPager;
-
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
@@ -31,7 +29,6 @@ import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -39,7 +36,7 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
@@ -98,12 +95,6 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
                 break;
-            case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null)
-                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                break;
             default:
                 break;
         }
@@ -127,7 +118,7 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
         super.onStart();
         if (mDispatcher.expType == null) {
             FabManager.game.init(this);
-            ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+            ToolbarManager.instance.init(this, mItem, helpAndFeedback, chat, search, invite, settings);
             return;
         }
 

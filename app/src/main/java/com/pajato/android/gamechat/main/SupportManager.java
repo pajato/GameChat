@@ -19,11 +19,19 @@ package com.pajato.android.gamechat.main;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import com.pajato.android.gamechat.BuildConfig;
+import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.MenuItemEvent;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +44,7 @@ import static android.support.v4.content.FileProvider.getUriForFile;
  *
  * @author Paul Michael Reilly
  */
-enum SupportManager {
+public enum SupportManager {
     instance;
 
     // Private class constants.
@@ -46,16 +54,25 @@ enum SupportManager {
 
     // Public instance methods
 
-    /** Send email on a given subject to the support address. */
-    public void sendFeedback(final Activity activity, final String subject) {
-        // Send the message using the given subject and an empty list of attachments.
-        sendFeedback(activity, subject, "Message: ", new ArrayList<String>());
-    }
-
-    /** Send email to the support address with a subject and zero or more attachments. */
-    public void sendFeedback(final Activity activity, final String subject,
-                             final List<String> attachments) {
-        sendFeedback(activity, subject, "Message: ", attachments);
+    /** Send email with a given subject and body text to the support address. */
+    public void sendFeedback(final Activity activity, final String subject, final String body,
+                             final String bitmapPath, final String logCatPath) {
+        // Set up the intent with the main extras.
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        intent.setType("message/rfc822");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"support@pajato.com"});
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, body != null ? body : "no message");
+        ArrayList<Uri> uriList = new ArrayList<>();
+        uriList.add(getUriForFile(activity, "com.pajato.fileprovider", new File(bitmapPath)));
+        uriList.add(getUriForFile(activity, "com.pajato.fileprovider", new File(logCatPath)));
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
+        // Start the mailer activity of choice.
+        try {
+            activity.startActivity(Intent.createChooser(intent, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(activity, "No email clients are installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /** Send email with a given subject and body text to the support address. */
@@ -64,9 +81,9 @@ enum SupportManager {
         // Set up the intent with the main extras.
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.setType("message/rfc822");
-        intent.putExtra(Intent.EXTRA_EMAIL  , new String[] {"support@pajato.com"});
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"support@pajato.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT   , body != null ? body : "no message");
+        intent.putExtra(Intent.EXTRA_TEXT, body != null ? body : "no message");
 
         // Add the attachment extras.
         ArrayList<Uri> uriList = new ArrayList<>();
@@ -84,5 +101,73 @@ enum SupportManager {
             Toast.makeText(activity, "No email clients are installed.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /** Return the file where logcat data has been placed, null if no data is available. */
+    public String getLogcatPath(final Activity activity) {
+        // Capture the current state of the logcat file.
+        File dir = new File(activity.getFilesDir(), "logcat");
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        File outputFile = new File(dir, "logcat.txt");
+        try {
+            Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
+        } catch (IOException exc) {
+            Log.e(TAG, exc.getMessage(), exc);
+            return null;
+        }
+
+        Log.d(TAG, String.format("File size is %d.", outputFile.length()));
+        Log.d(TAG, String.format("File path is {%s}.", outputFile.getPath()));
+
+        return outputFile.getPath();
+    }
+
+    /** Return null if the given bitmap cannot be saved or the file path it has been saved to. */
+    public String getBitmapPath(final Bitmap bitmap, final Activity activity) {
+        // Create the image file on internal storage.  Abort if the subdirectories cannot be
+        // created.
+        FileOutputStream outputStream;
+        File dir = new File(activity.getFilesDir(), "images");
+        if (!dir.exists() && !dir.mkdirs()) return null;
+
+        // Flush the bitmap to the image file as a stream and return the result.
+        File imageFile = new File(dir, "screenshot.png");
+        Log.d(TAG, String.format(Locale.US, "Image file path is {%s}", imageFile.getPath()));
+        try {
+            outputStream = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException exc) {
+            Log.e(TAG, exc.getMessage(), exc);
+            return null;
+        }
+        return imageFile.getPath();
+    }
+
+    /** Return "about" information: a string describing the app and it's version information. */
+    public String getAbout() {
+        final String format = "GameChat %s-%d Bug Report";
+        final String name = BuildConfig.VERSION_NAME;
+        final int code = BuildConfig.VERSION_CODE;
+        return String.format(Locale.US, format, name, code);
+    }
+
+    /** Handle a bug report by performing a screen capture, grabbing logcat and sending email. */
+    public void handleBugReport(final Activity activity, final MenuItemEvent event) {
+        // Capture the screen (with any luck, sans menu.), send the message and cancel event
+        // propagation.
+        View rootView = activity.getWindow().getDecorView().getRootView();
+        rootView.setDrawingCacheEnabled(true);
+        List<String> attachments = new ArrayList<>();
+        String path = SupportManager.instance.getBitmapPath(rootView.getDrawingCache(), activity);
+        if (path != null) attachments.add(path);
+        path = SupportManager.instance.getLogcatPath(activity);
+        if (path != null) attachments.add(path);
+        SupportManager.instance.sendFeedback(activity, SupportManager.instance.getAbout(),
+                "Extra information: ", attachments);
+        AppEventManager.instance.cancel(event);
+    }
+
 
 }

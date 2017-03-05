@@ -26,16 +26,24 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/emptyListMessage"
-        android:padding="24dp"
+        android:padding="32dp"
         android:text="@string/ChatSignedOutMessageText"
         android:textAlignment="center"
         android:textSize="24sp" />
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/emptyListMessage2"
-        android:text="@string/SignInMessageText"
-        android:padding="24dp"
-        android:textAlignment="center"
-        android:textSize="24sp" />
+        android:layout_weight="10"
+        android:paddingTop="20dp">
+        <Button
+            style="@style/IntroTheme.Button"
+            android:id="@+id/signIn"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="@string/sign_in"/>
+
+    </RelativeLayout>
+
 </LinearLayout>

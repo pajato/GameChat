@@ -17,13 +17,9 @@
 
 package com.pajato.android.gamechat.intro;
 
-import android.animation.ObjectAnimator;
-import android.animation.StateListAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
@@ -95,17 +91,9 @@ public class IntroActivity extends AppCompatActivity {
     }
     /** Create the intro activity to highlight some features and provide a get started operation. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
-        // Establish the activity state and set up the intro layout enhancing the experience for
-        // Lollipop and follow on devices by enabling elevated animation.
+        // Establish the activity state and set up the intro layout
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final StateListAnimator animator = new StateListAnimator();
-            final TextView button = (TextView) findViewById(R.id.register_button);
-            addState(animator, android.R.attr.state_pressed, button, 2.0f, 4.0f);
-            addState(animator, -1, button, 4.0f, 2.0f);
-            button.setStateListAnimator(animator);
-        }
 
         // Set up icon switching animation.
         ImageView topImage1 = (ImageView) findViewById(R.id.icon_image1);
@@ -124,18 +112,6 @@ public class IntroActivity extends AppCompatActivity {
     }
 
     // Private instance methods.
-
-    /** Add an animation state to a given state list animator.  Only called on Lollipop. */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void addState(final StateListAnimator animator, final int viewStateId, final View view,
-                          final float... heights) {
-        // Animate the Z property on the given view over the given heights for 200 milliseconds.
-        final int DURATION = 200;
-        final String PROP = "z";
-        int [] viewState = viewStateId != -1 ? new int[] {viewStateId} : new int[] {};
-        ObjectAnimator viewAnimator = ObjectAnimator.ofFloat(view, PROP, heights);
-        animator.addState(viewState, viewAnimator.setDuration(DURATION));
-    }
 
     /** Finish the intro screen and handle the given mode in a new activity. */
     private Intent getAuthIntent(final String mode) {
