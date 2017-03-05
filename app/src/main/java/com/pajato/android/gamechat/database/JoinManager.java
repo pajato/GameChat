@@ -65,6 +65,8 @@ public enum JoinManager {
     public void init(final AppCompatActivity context) {
         mMessageMap.clear();
         mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
+        mMessageMap.put(R.string.JoinMemberRoomMessage,
+                context.getString(R.string.JoinMemberRoomMessage));
     }
 
     /** Join the current account holder to a room specified by a given item. */
@@ -255,7 +257,7 @@ public enum JoinManager {
         DBUtils.updateChildren(path, group.toMap());
 
         // Update the "me" room default message on the database.
-        String format = "We have created a room for %s and %s to share private messages.";
+        String format = mMessageMap.get(R.string.JoinMemberRoomMessage);
         String accountName = account.getDisplayName();
         String memberName = member.getDisplayName();
         String text = String.format(Locale.getDefault(), format, accountName, memberName);

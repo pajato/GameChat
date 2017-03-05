@@ -29,7 +29,7 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
-import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
@@ -64,7 +64,7 @@ public class ExpShowRoomsFragment extends BaseExperienceFragment {
         super.onStart();
         if (mDispatcher.expType == null) {
             FabManager.game.init(this);
-            ToolbarManager.instance.init(this, mItem, helpAndFeedback, game, search, invite, settings);
+            ToolbarManager.instance.init(this, mItem, helpAndFeedback, chat, search, invite, settings);
             return;
         }
 

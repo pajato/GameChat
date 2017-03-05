@@ -17,26 +17,21 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.view.View;
-import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
 import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
-import com.pajato.android.gamechat.event.TagClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.common.FragmentType.createProtectedUser;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -67,31 +62,6 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             default:
                 processClickEvent(event.view, "manageProtectedUsers");
-                break;
-        }
-    }
-
-    /**
-     * Process a FAM menu click event
-     */
-    @Subscribe
-    public void onClick(final TagClickEvent event) {
-        Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof MenuEntry)) return;
-
-        // The event represents a menu entry.  Close the FAM and case on the title id.
-        FabManager.chat.dismissMenu(this);
-        MenuEntry entry = (MenuEntry) payload;
-        switch (entry.titleResId) {
-            case R.string.CreateRestrictedUserTitle:
-                if (AccountManager.instance.isRestricted()) {
-                    String protectedWarning = "Protected Users cannot make other Protected Users.";
-                    Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
-                    break;
-                }
-                DispatchManager.instance.chainFragment(getActivity(), createProtectedUser);
-                break;
-            default:
                 break;
         }
     }
@@ -135,9 +105,7 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
 
     /** Get the FAM menu contents */
     private List<MenuEntry> getSelectionMenu() {
-        final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getTintEntry(R.string.CreateRestrictedUserTitle, R.drawable.ic_create_black_24dp));
-        return menu;
+        return new ArrayList<>();
     }
 
 }

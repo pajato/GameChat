@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
@@ -27,8 +26,6 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
-import com.pajato.android.gamechat.event.MenuItemEvent;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -51,22 +48,6 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // On the first chat list change event, attempt to present another fragment based on the
         // chat list change.
         DispatchManager.instance.startNextFragment(this.getActivity(), chat);
-    }
-
-    /** Handle a menu item selection. */
-    @Subscribe public void onMenuItem(final MenuItemEvent event) {
-        if (!this.mActive)
-            return;
-        // Case on the item resource id if there is one to be had.
-        switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.SwitchToExp:
-                // If the toolbar game icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
-                break;
-            default:
-                break;
-        }
     }
 
     /** Handle the setup for the groups panel. */

@@ -36,6 +36,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.help.HelpManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -90,7 +91,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 // Ensure that the current user is not a protected user. Then, start the process of
                 // adding a protected user.
                 if (AccountManager.instance.isRestricted()) {
-                    String protectedWarning = "Protected Users cannot make other Protected Users.";
+                    String protectedWarning = getString(R.string.CannotManageProtectedUser);
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
@@ -103,7 +104,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 showFutureFeatureMessage(R.string.MenuItemSettings);
                 break;
             case R.id.helpAndFeedback:
-                showFutureFeatureMessage(R.string.MenuItemHelpAndFeedback);
+                HelpManager.instance.launchHelp(getActivity());
                 break;
             default:
                 break;

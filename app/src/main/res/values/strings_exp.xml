@@ -13,10 +13,10 @@
     <string name="InviteFriendFromChat">Invite friends</string>
     <string name="InviteFriendNav">Invite friends</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
-    <string name="MyExperiencesToolbarTitle">My Games</string>
-    <string name="MyGameRoomToolbarTitle">My Game Room</string>
+    <string name="MyExperiencesToolbarTitle">Your Games</string>
+    <string name="MyGameRoomToolbarTitle">Your Game Room</string>
     <string name="NoExperiencesMessage">You have no experiences</string>
-    <string name="NoGamesMessageText">You currently have no games. Select a game button to create one, or join other rooms to play or watch ongoing games.</string>
+    <string name="NoGamesMessageText">Select a game button to create a game, or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
     <string name="NoUsersFound">No Available Users</string>
     <string name="PlayAgain">Play Again</string>

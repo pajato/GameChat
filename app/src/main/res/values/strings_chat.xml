@@ -5,6 +5,8 @@
     <string name="ButtonNext">NEXT</string>
     <string name="ButtonFinish">FINISH</string>
     <string name="ChatGroupsToolbarTitle">Groups with Messages</string>
+    <string name="CannotMakeProtectedUser">Protected Users cannot create other Protected Users</string>
+    <string name="CannotManageProtectedUser">Protected Users cannot manage other Protected Users</string>
     <string name="ClearSelectionsMenuTitle">Clear Selections</string>
     <string name="CreateGroupMenuTitle">Create Group</string>
     <string name="CreateGroupNameHint">Type group name</string>Title">
@@ -12,7 +14,7 @@
     <string name="CreateRoomNameHint">Type room name</string>
     <string name="CreateRoomPrivate">Private</string>
     <string name="CreateRoomPublic">Public</string>
-    <string name="ChatSignedOutMessageText">GameChat is much more fun when you can chat with your family and friends.</string>
+    <string name="ChatSignedOutMessageText">Sign in to chat with your family and friends.</string>
     <string name="ChatTitle">Chat</string>
     <string name="DefaultRoomName">Common</string>
     <string name="DeleteConfirmMessage">Do you want to delete %s?</string>
@@ -25,7 +27,11 @@
     <string name="Group">Group</string>
     <string name="GroupExistsMessage">You already have a group named %s. Do you want to continue anyway?</string>
     <string name="GroupExistsTitle">Group %s already exists!</string>
-    <string name="GroupMeToolbarTitle">My Chat Room</string>
+    <string name="GroupMeToolbarTitle">Your Chat Room</string>
+    <string name="HelpTitle">GameChat Help</string>
+    <string name="HelpMostPopularTitle">Most Popular</string>
+    <string name="HelpRecentTitle">Recently Viewed</string>
+    <string name="HelpAllTitle">Browse All Articles</string>
     <string name="LeaveConfirmMessage">Do you want to leave %s?</string>
     <string name="LeaveGroupTitle">Leave Group?</string>
     <string name="LeaveRoomTitle">Leave Room?</string>
@@ -42,6 +48,7 @@
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinedOneRoom">You have joined the %1$s room in group %2$s</string>
     <string name="JoinedMultiRooms">You have joined rooms: %1$s in group %2$s</string>
+    <string name="JoinMemberRoomMessage">A room has been created for %1$s and %2$s to share private messages.</string>
     <string name="JoinRoomsMenuTitle">Join Rooms</string>
     <string name="MembersAvailableHeaderText">Members</string>
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
@@ -69,11 +76,13 @@
     <string name="SelectRoomsMenuTitle">Select All Rooms</string>
     <string name="SetCreateIconFeature">Setting the create group or room icon</string>
     <string name="SetCreateIconDesc">Set the group or room icon</string>
+    <string name="SendFeedback">Send feedback</string>
     <string name="TakePicture">Inserting a picture using your camera</string>
     <string name="TakePictureDesc">Take a camera picture image button.</string>
     <string name="TakeVideo">Inserting a video from your camera</string>
     <string name="TakeVideoDesc">Take a video image button.</string>
     <string name="UserNameHint">First and Last Name</string>
     <string name="WelcomeMessageText">Welcome to your private messages. Use this space to take notes and stash files. Enjoy!</string>
+    <string name="YourGroupTitle">Your Group Name</string>
     <string name="editMessageHint">Type a message</string>
 </resources>

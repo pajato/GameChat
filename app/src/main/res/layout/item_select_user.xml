@@ -25,7 +25,7 @@
             <TextView style="@style/ListItemSubtitle" android:id="@+id/Text"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="My Group Name"/>
+                tools:text="@string/YourGroupTitle"/>
         </LinearLayout>
     </LinearLayout>
     <View style="@style/ListItemFooter" />

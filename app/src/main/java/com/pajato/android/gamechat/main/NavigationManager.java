@@ -62,12 +62,16 @@ public enum NavigationManager {
     /** Return true iff the navigation drawer was open and is now closed. */
     public boolean closeDrawerIfOpen(final Activity activity) {
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (isDrawerOpen(activity)) {
             drawer.closeDrawer(GravityCompat.START);
             return true;
         }
-
         return false;
+    }
+
+    public boolean isDrawerOpen(final Activity activity) {
+        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        return drawer.isDrawerOpen(GravityCompat.START);
     }
 
     /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type.*/

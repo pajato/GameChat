@@ -22,7 +22,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -48,7 +47,6 @@ import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.NetworkManager;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -62,6 +60,7 @@ import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
+import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
@@ -426,12 +425,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 else
                     InvitationManager.instance.extendGroupInvitation(activity, groupKey);
                 break;
-            case R.string.SwitchToChat:
-                // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) activity.findViewById(R.id.viewpager);
-                if (viewPager != null)
-                    viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                break;
             default:
                 break;
         }
@@ -486,15 +479,25 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Private instance methods.
 
-    /** Dispatch to the indicated game fragment type */
+    /** Dispatch to the game indicated by the given type */
     private void dispatchToGame(FragmentActivity activity, FragmentType type) {
-        boolean doChain = type == expGroupList || type == expRoomList || type == experienceList;
-        FragmentType nextType = doChain ? type : expGroupList;
-        Dispatcher dispatcher = new Dispatcher(nextType, type.expType);
-        if (doChain)
+        if (this.type != noExperiences) {
+            Dispatcher dispatcher = new Dispatcher(getNextType(type), type.expType);
             DispatchManager.instance.chainFragment(activity, dispatcher);
-        else
+        }
+        else {
+            Dispatcher dispatcher = new Dispatcher(expGroupList, type.expType);
             DispatchManager.instance.startNextFragment(activity, dispatcher);
+        }
+    }
+
+    /** Determine the 'next' type for dispatch chaining */
+    private FragmentType getNextType(final FragmentType nextType) {
+        if (this.type == expGroupList)
+            return expRoomList;
+        if (this.type == expRoomList)
+            return experienceList;
+        return nextType;
     }
 
     /** Process the end icon click */

@@ -67,6 +67,11 @@ http://www.gnu.org/licenses
         <service android:name=".main.MainService"
             android:exported="false">
         </service>
+
+        <activity android:name=".help.HelpActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+
         <service
             android:name=".main.GameChatMessagingService"
             android:exported="false">

@@ -1,0 +1,16 @@
+{
+  "articles": [
+    {
+      "name": "Using Protected Users",
+      "path": "file:///android_asset/misc/protectedUsers.html"
+    },
+    {
+      "name": "Creating Groups",
+      "path": "file:///android_asset/misc/creatingGroups.html"
+    },
+    {
+      "name": "Invitations",
+      "path": "file:///android_asset/misc/invitations.html"
+    }
+  ]
+}

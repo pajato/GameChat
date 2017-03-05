@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
+import static com.pajato.android.gamechat.common.FragmentType.createProtectedUser;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
@@ -196,8 +198,21 @@ public abstract class BaseChatFragment extends BaseFragment {
         logEvent(String.format("onClick: (%s) with event {%s};", tag, view));
         switch (view.getId()) {
             case R.id.chatFab:
-                // It is a chat fab button.  Toggle the state.
-                FabManager.chat.toggle(this);
+                // Handle the no-menu case for protected users
+                switch (this.type) {
+                    case protectedUsers:
+                        if (AccountManager.instance.isRestricted()) {
+                            String protectedWarning = getString(R.string.CannotMakeProtectedUser);
+                            Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        DispatchManager.instance.chainFragment(getActivity(), createProtectedUser);
+                        break;
+                    default:
+                        // It is a chat fab button.  Toggle the state.
+                        FabManager.chat.toggle(this);
+                        break;
+                }
                 break;
             case R.id.endIcon:
             case R.id.veryEndIcon:

@@ -39,6 +39,7 @@ import com.pajato.android.gamechat.main.PaneManager;
 import static android.view.Menu.NONE;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -93,8 +94,7 @@ public enum ToolbarManager {
     public enum ToolbarType {
         chatMain (R.drawable.ic_more_vert_white_24dp),
         expMain (R.drawable.ic_more_vert_white_24dp),
-
-        // Define 'standard' toolbar to have the overflow (three vertical dots) and back arrow
+        // Define 'standard' toolbars to have the overflow (three vertical dots) and back arrow
         standardBlack (R.drawable.ic_more_vert_black_24dp, R.drawable.ic_arrow_back_black_24dp),
         standardWhite (R.drawable.ic_more_vert_white_24dp, R.drawable.ic_arrow_back_white_24dp),
         none ();
@@ -247,6 +247,9 @@ public enum ToolbarManager {
             case expGroup:
                 return fragment.getString(R.string.ExpGroupsToolbarTitle);
             case chatGroup:
+                if (fragment.type == chatRoomList) {
+                    return fragment.getString(R.string.RoomsToolbarTitle);
+                }
                 return fragment.getString(R.string.ChatGroupsToolbarTitle);
             case expList:
             case expRoom:
