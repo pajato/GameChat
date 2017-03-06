@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
+import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 
@@ -78,22 +79,22 @@ public class MainActivity extends BaseActivity
 
     // Public class constants.
 
+    /** The preferences file name. */
+    public static final String PREFS = "GameChatPrefs";
+
+    /** The invite activity request code. */
+    public static final int RC_INVITE = 2;
+
     /** ... */
     public static final String SKIP_INTRO_ACTIVITY_KEY = "skipIntroActivityKey";
 
     /** The test user name key. */
     public static final String TEST_USER_KEY = "testUserKey";
 
-    /** The invite activity request code. */
-    public static final int RC_INVITE = 2;
-
     // Private class constants.
 
     /** The logcat tag constant. */
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    /** The preferences file name. */
-    private static final String PREFS = "GameChatPrefs";
 
     /** The Intro activity request code. */
     private static final int RC_INTRO = 1;
@@ -241,45 +242,30 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    // Protected instance methods
-
-    /** Process the result from the Intro activity. */
-    @Override protected void onActivityResult(final int requestCode, final int resultCode,
-                                              final Intent intent) {
-        // Ensure that the request code and the result are valid.
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == RC_INTRO && resultCode == RESULT_OK) {
-            // The request code is valid and the result is good.  Update the account available flag
-            // based on the result from the intro activity intent data.
-            SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            String uid = intent.getStringExtra(Intent.EXTRA_TEXT);
-            String key = ACCOUNT_AVAILABLE_KEY;
-            editor.putBoolean(key, intent.getBooleanExtra(key, uid != null));
-            editor.apply();
-            // Look for the login result information and cache it
-            CredentialsManager.instance.saveCredentials(intent.getStringExtra("provider"),
-                    intent.getStringExtra("email"), intent.getStringExtra("secret"),
-                    intent.getStringExtra("token"));
-        } else if (requestCode == RC_INVITE) {
-            // Hand off to invitation manager as quickly as possible
-            Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + resultCode);
-            InvitationManager.instance.onInvitationResult(resultCode, intent);
-        }
-    }
-
     /** Process the result from a request for a permission */
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
-                                                     @NonNull  int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CONTACTS: {
-                // Hand off to contact manager
-                ContactManager.instance.onRequestContactsResult(this, permissions, grantResults);
-                break;
-            }
-            default:
-                break;
-        }
+                                                     @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CONTACTS)
+            ContactManager.instance.onRequestContactsResult(this, permissions, grantResults);
+    }
+
+    // Protected instance methods
+
+    /** Process the result from the intro or invite activities. */
+    @Override
+    protected void onActivityResult(final int request, final int result, final Intent intent) {
+        // Handle a result from either the intro activity or the invite activity.
+        super.onActivityResult(request, result, intent);
+        if (result != RESULT_OK)
+            logFailedResult(request, intent);
+        else if (request == RC_INVITE) {
+            // Invite activity result; process in the invitation manager.
+            Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + result);
+            InvitationManager.instance.onInvitationResult(result, intent);
+        } else if (request == RC_INTRO)
+            // Intro activity result: Update the account data based on the result from the intro
+            // activity intent data.
+            saveAccountData(intent);
     }
 
     /** Set up the app per the characteristics of the running device. */
@@ -318,6 +304,10 @@ public class MainActivity extends BaseActivity
         AccountManager.instance.init(this, list);
         CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 
+        // TODO: figure out where this needs to be after it is working.
+        Intent serviceIntent = new Intent(this, MainService.class);
+        startService(serviceIntent);
+
         // Finish initializing the important manager modules.
         DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
@@ -329,6 +319,24 @@ public class MainActivity extends BaseActivity
         // Register the first of many app event listeners.
         AppEventManager.instance.register(AccountManager.instance);
         AppEventManager.instance.register(this);
+    }
+
+    /** Provide a logcat message about a failed result. */
+    private void logFailedResult(int request, Intent intent) {
+        String requester;
+        switch (request) {
+            case RC_INTRO:
+                requester = "IntroActivity";
+                break;
+            case RC_INVITE:
+                requester = "InvitationActivity";
+                break;
+            default:
+                requester = "Unknown";
+                break;
+        }
+        String format = "onActivityResult: %s, FAILED, \nIntent: %s";
+        Log.d(TAG, String.format(Locale.US, format, requester, intent.toString()));
     }
 
     /** Determine if the intro screen needs to be presented and do so. */
@@ -347,6 +355,18 @@ public class MainActivity extends BaseActivity
         // sign in.
         Intent introIntent = new Intent(this, IntroActivity.class);
         startActivityForResult(introIntent, RC_INTRO);
+    }
+
+    /** Handle the intro activity result by saving the account availability information. */
+    private void saveAccountData(@NonNull final Intent intent) {
+        Log.d(TAG, "onActivityResult: IntroActivity, SUCCESS");
+        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        boolean hasAccount = intent.getStringExtra(EMAIL_KEY) != null;
+        editor.putBoolean(ACCOUNT_AVAILABLE_KEY, hasAccount);
+        editor.apply();
+        if (hasAccount)
+            CredentialsManager.instance.saveCredentials(intent, prefs);
     }
 
     // Protected inner classes.
