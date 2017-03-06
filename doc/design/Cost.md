@@ -1,4 +1,4 @@
-# App Developmet Cost Estimate
+# App Development Cost Estimate
 
 This [blog post](https://yalantis.com/blog/cost-of-mobile-messaging-app-development-types-kpis-landscape-recommended-approach-and-cost-of-development/) led to the following cost estimates (using mean values) for the chat portion of GameChat:
 
