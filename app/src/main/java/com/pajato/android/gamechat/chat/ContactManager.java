@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -38,10 +37,13 @@ import android.util.Log;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import static android.Manifest.permission.READ_CONTACTS;
 import static android.provider.ContactsContract.Contacts.CONTENT_URI;
 import static android.provider.ContactsContract.Contacts.HAS_PHONE_NUMBER;
 import static android.provider.ContactsContract.Contacts.Photo.CONTENT_DIRECTORY;
@@ -87,8 +89,7 @@ public enum ContactManager {
 
     /** Check for and if necessary ask user for permission to access contacts */
     public void getPermission(@NonNull final Activity context) {
-        int permissionCheck = ContextCompat.checkSelfPermission(context,
-                Manifest.permission.READ_CONTACTS);
+        int permissionCheck = ContextCompat.checkSelfPermission(context, READ_CONTACTS);
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             // we can proceed
             fetchContacts(context);
@@ -96,28 +97,31 @@ public enum ContactManager {
         }
 
         // ask the user for permission (assume no explanation is needed)
-        ActivityCompat.requestPermissions(context,
-                new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS);
+        ActivityCompat.requestPermissions(context, new String[]{READ_CONTACTS}, REQUEST_CONTACTS);
     }
 
     /** Handle response from request for permission to access contacts. Return true on success. */
-    public boolean onRequestContactsResult(Activity context, @SuppressWarnings("unused") String permissions[],
-                                             int[] grantResults) {
+    public boolean onRequestContactsResult(final Activity context, final String permissions[],
+                                           final int[] grantResults) {
         // If request is cancelled, the result arrays are empty.
-        if (grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        String format = "onRequestContactsResult: context {%s}, permissions %s, results {%s}.";
+        String permissionsList = Arrays.toString(permissions);
+        String grantResultsList = Arrays.toString(grantResults);
+        Log.d(TAG, String.format(Locale.US, format, context, permissionsList, grantResultsList));
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             fetchContacts(context);
             return true;
-        } else if (grantResults.length <= 0) {
-            // How to disable the functionality that depends on this permission.
+        }
+
+        // Invalid response: disable the functionality that depends on this permission.
+        if (grantResults.length <= 0) {
             Log.e(TAG, "grantResults length is invalid; cannot access contacts");
             return false;
-        } else {
-            // permission denied, boo! Disable the
-            // functionality that depends on this permission.
-            Log.w(TAG, "Permission denied for contacts access");
-            return false;
         }
+
+        // Permission denied! Disable the functionality that depends on this permission.
+        Log.w(TAG, "Permission denied for contacts access");
+        return false;
     }
 
     // Private instance methods.
