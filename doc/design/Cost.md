@@ -17,7 +17,7 @@ The first three phases lead up to the Alpha Test milestone.  The maintenance pha
 
 # Revenue Estimate
 
-The revenue model is conservative and based on a tiny market penetration (one ten-thousandth of 1%) with a life-span of 20 years (most good softare has a 30 year life-span and a much higher market penetration).
+The revenue model is conservative and based on a tiny market penetration (one ten-thousandth of 1%) with a life-span of 20 years (most good software has a 30 year life-span and a much higher market penetration).
 
 * Market: 1.5B Users
 * Target: 0.0001% Penetration/Year @ 5$/year -> $75K/year
