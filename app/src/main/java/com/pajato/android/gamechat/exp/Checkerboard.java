@@ -55,13 +55,27 @@ public class Checkerboard {
     /** The amount of vertical space allocated for the player controls. */
     private static final int CONTROLS_HEIGHT = 112;
 
-    /** The amount of vertical space allocated to the FAB control. */
-    private static final int FAB_HEIGHT= 88 + 16;
+    /**
+     * The amount of vertical space allocated to the mini FAB control, which consists of three
+     * parts: the (implicit) top margin for the FAB control, the FAB icon size and the bottom
+     * margin.
+     */
+    private static final int FAB_HEIGHT = 48 + 40 + 16;
 
     // Private instance variables.
 
+    /** The size, in pixels, of the checkerboard cells to use on this device. */
+    private int mCellSize;
+
     /** The GridLayout used to build the checkerboard UI. */
     private GridLayout mGrid;
+
+    // Public constructor.
+
+    /** Build an instance to establish the cell size for a given context. */
+    Checkerboard(final Context context) {
+        mCellSize = getCellSize(context);
+    }
 
     // Public instance methods.
 
@@ -83,9 +97,8 @@ public class Checkerboard {
         mGrid.removeAllViews();
         mGrid.setRowCount(8);
         mGrid.setColumnCount(8);
-        int cellSize = getCellSize(fragment);
         for (int i = 0; i < 64; i++) {
-            TextView currentTile = getCellView(fragment.getContext(), i, cellSize);
+            TextView currentTile = getCellView(fragment.getContext(), i, mCellSize);
             currentTile.setOnClickListener(handler);
             mGrid.addView(currentTile);
         }
@@ -141,20 +154,18 @@ public class Checkerboard {
 
     // Private instance methods.
 
-    /** Return the computed cell size based on the device size provided by the given fragment. */
-    private int getCellSize(@NonNull final BaseFragment fragment) {
+    /** Return the computed cell size based on the device size provided by the given context. */
+    private int getCellSize(@NonNull final Context context) {
         // Establish the cell size for the checkerboard.
-        DisplayMetrics metrics = fragment.getContext().getResources().getDisplayMetrics();
-        final float pxHeight = metrics.heightPixels;
-        final float pxWidth = metrics.widthPixels;
-        final int unavailableHeight = CONTROLS_HEIGHT + FAB_HEIGHT +
-                (PaneManager.instance.isTablet() ? TABLET_HEIGHT : SMART_PHONE_HEIGHT);
-        final int unavailableWidth = 32;
-        final int boardHeight = Math.round(pxHeight) - getPixels(metrics, unavailableHeight);
-        final int width = Math.round(pxWidth);
-        final int boardWidth = (PaneManager.instance.isTablet() ? width / 2 : width) -
-                getPixels(metrics, unavailableWidth);
-        return Math.min(boardWidth, boardHeight) / 8;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int dipsHeight = getDips(metrics, metrics.heightPixels);
+        final int dipsWidth = getDips(metrics, metrics.widthPixels);
+        final int toolbarDps = PaneManager.instance.isTablet() ? TABLET_HEIGHT : SMART_PHONE_HEIGHT;
+        final int unavailableHeight = CONTROLS_HEIGHT + FAB_HEIGHT + toolbarDps;
+        final int boardHeight = dipsHeight - unavailableHeight;
+        final int boardWidth = (PaneManager.instance.isTablet() ? dipsWidth / 2 : dipsWidth) - 32;
+        boolean useWidth = boardHeight > boardWidth;
+        return Math.round((useWidth ? boardWidth : boardHeight) / 8) * Math.round(metrics.density);
     }
 
     /** Return a text view representing a cell at a given index of a given size. */
@@ -179,15 +190,16 @@ public class Checkerboard {
         return cellView;
     }
 
-    /** Return the number of physical pixels for a given number of device independent pixels. */
-    private int getPixels(final DisplayMetrics metrics, final int dp) {
-        return Math.round(dp * (metrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
     /** Set the highlight at a given position using a given color resource id. */
     private void setHighlight(Context context, int position, final int colorResId) {
         Log.i(Checkerboard.class.getSimpleName(), "Set highlight on position: " + position +
                 ", color resource id: " + colorResId + ", with context: " + context.toString());
         mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(context, colorResId));
+    }
+
+    private int getDips(final DisplayMetrics metrics, final int px) {
+        // float dp = px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return (px * DisplayMetrics.DENSITY_DEFAULT) / metrics.densityDpi;
+
     }
 }

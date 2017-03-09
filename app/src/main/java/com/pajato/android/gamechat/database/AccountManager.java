@@ -78,7 +78,8 @@ import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTER
  * first time sign-in result, creating and persisting a profile on this device and switching
  * accounts.
  *
- * @author Paul Michael Reilly
+ * @author Paul Michael Reilly on 5/26/16
+ * @author Sandy Scott on 1/20/17
  */
 public enum AccountManager implements FirebaseAuth.AuthStateListener {
     instance;
@@ -109,6 +110,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** A key used to access account available data. */
     public static final String ACCOUNT_AVAILABLE_KEY = "accountAvailable";
 
+    /** The account change handler base name */
+    public static final String ACCOUNT_CHANGE_HANDLER = "accountChangeHandler";
+
+    /** The database path to an account profile. */
+    public static final String ACCOUNT_PATH = "/accounts/%s/";
+
     /** The sentinel value to use for indicating an offline cached database object owner. */
     public static final String SIGNED_OUT_OWNER_ID = "signedOutOwnerId";
 
@@ -120,12 +127,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private class constants.
 
-    /** The account change handler base name */
-    private static final String ACCOUNT_CHANGE_HANDLER = "accountChangeHandler";
-
-    /** The database path to an account profile. */
-    public static final String ACCOUNT_PATH = "/accounts/%s/";
-
     /** The logcat tag. */
     private static final String TAG = AccountManager.class.getSimpleName();
 
@@ -136,6 +137,9 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** This may not get applied to the Firebase account prior to creating the "me" room */
     public String protectedUserName;
+
+    /** A list of group push keys to be used by a newly created protected user account */
+    public List<String> protectedUserGroupKeys = new ArrayList<>();
 
     // Private instance variables
 
@@ -156,9 +160,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** A map tracking registrations from the key classed that are needed to enable Firebase. */
     private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
-
-    /** A list of group push keys to be used by a newly created protected user account */
-    public List<String> protectedUserGroupKeys = new ArrayList<>();
 
     // Public instance methods
 
@@ -323,9 +324,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Determine if the specified account belongs to any groups which have members */
     public static boolean hasSelectableMembers(Account account) {
-        if (account == null)
-            return false;
-        if (account.joinMap.size() == 0)
+        if (account == null || account.joinMap.size() == 0)
             return false;
         for (String groupKey : account.joinMap.keySet()) {
             Group group = GroupManager.instance.getGroupProfile(groupKey);
@@ -531,8 +530,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
         // Determine if this state represents a User signing in or signing out.
         FirebaseUser user = auth.getCurrentUser();
-        // A user has signed in. Ensure an account change listener is registered.
         if (user != null) {
+            // A user has signed in. Ensure an account change listener is registered.
             if (user.getDisplayName() == null)
                 Log.i(TAG, "authentication change with FirebaseUser: " + user.getEmail());
             else

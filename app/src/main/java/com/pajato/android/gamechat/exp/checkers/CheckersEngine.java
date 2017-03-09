@@ -146,85 +146,65 @@ public enum CheckersEngine implements Engine {
     }
 
     /** Finds the "jumpable" pieces that the piece at the given position could capture. */
-    private void findJumpables(final int position, final int jumpablePosition,
-                               final List<Integer> movementOptions) {
-        // Create the boolean calculations for each of our conditions.
-        boolean emptySpace = mModel.board.getPiece(jumpablePosition) == null;
-        boolean breaksBorders = (position % 8 == 1 && jumpablePosition % 8 == 7)
-                || (position % 8 == 6 && jumpablePosition % 8 == 0);
-        boolean jumpsAlly;
-
-        // Check if the piece being jumped is an ally piece.
-        CheckersPiece highlightedPiece = mModel.board.getPiece(position);
-        int jumpedIndex = (position + jumpablePosition) / 2;
-        CheckersPiece jumpedPiece = mModel.board.getPiece(jumpedIndex);
-        jumpsAlly = highlightedPiece.getTeam() == jumpedPiece.getTeam();
-        if (emptySpace && !breaksBorders && !jumpsAlly)
-            movementOptions.add(jumpablePosition);
+    private void findJumpables(final List<Integer> possibleMoves, final int position,
+                               final int basePosition, final int offset) {
+        // Ensure that the base position contains a piece and check to see if the piece being
+        // jumped is an ally and is on the board.
+        int jumpPosition = basePosition + offset;
+        if (mModel.board.hasPiece(basePosition)) {
+            boolean breaksBorders = jumpPosition < 0 || jumpPosition > 63
+                    || (position % 8 == 1 && jumpPosition % 8 == 7)
+                    || (position % 8 == 6 && jumpPosition % 8 == 0);
+            CheckersPiece highlightedPiece = mModel.board.getPiece(position);
+            int jumpedIndex = (position + jumpPosition) / 2;
+            CheckersPiece jumpedPiece = mModel.board.getPiece(jumpedIndex);
+            boolean jumpsAlly = highlightedPiece.getTeam() == jumpedPiece.getTeam();
+            if (!mModel.board.hasPiece(jumpPosition) && !breaksBorders && !jumpsAlly)
+                possibleMoves.add(jumpPosition);
+        } else if (basePosition > -1 && basePosition < 64)
+            possibleMoves.add(basePosition);
     }
 
     /**
      * Locates the possible moves of the piece that is about to be highlighted.
      *
-     * @param highlightedIndex the index containing the highlighted piece.
+     * @param position the index containing the highlighted piece.
      */
-    private List<Integer> getPossibleMoves(final int highlightedIndex) {
+    private List<Integer> getPossibleMoves(final int position) {
         List<Integer> result = new ArrayList<>();
-        CheckersPiece highlightedPiece = mModel.board.getPiece(highlightedIndex);
-        //String highlightedPieceType = board.get(String.valueOf(highlightedIndex));
+        CheckersPiece highlightedPiece = mModel.board.getPiece(position);
+        //String highlightedPieceType = board.get(String.valueOf(position));
 
         // Get the possible positions, post-move, for the piece.
-        int upLeft = highlightedIndex - 9;
-        int upRight = highlightedIndex - 7;
-        int downLeft = highlightedIndex + 7;
-        int downRight = highlightedIndex + 9;
+        int upLeft = position - 9;
+        int upRight = position - 7;
+        int downLeft = position + 7;
+        int downRight = position + 9;
 
         // Handle vertical edges of the board and non-king pieces.
-        if (highlightedIndex / 8 == 0 || highlightedPiece.isPiece(PIECE, SECONDARY)) {
+        if (position / 8 == 0 || highlightedPiece.isPiece(PIECE, SECONDARY)) {
             upLeft = -1;
             upRight = -1;
-        } else if (highlightedIndex / 8 == 7 || highlightedPiece.isPiece(PIECE, PRIMARY)) {
+        } else if (position / 8 == 7 || highlightedPiece.isPiece(PIECE, PRIMARY)) {
             downLeft = -1;
             downRight = -1;
         }
 
         // Handle horizontal edges of the board.
-        if (highlightedIndex % 8 == 0) {
+        if (position % 8 == 0) {
             upLeft = -1;
             downLeft = -1;
-        } else if( highlightedIndex % 8 == 7) {
+        } else if( position % 8 == 7) {
             upRight = -1;
             downRight = -1;
         }
 
         // Handle tiles that already contain other pieces. You can jump over enemy pieces,
         // but not allied pieces.
-        if (mModel.board.getPiece(upLeft) != null) {
-            findJumpables(highlightedIndex, upLeft - 9, result);
-            upLeft = -1;
-        }
-        if (mModel.board.getPiece(upRight) != null) {
-            findJumpables(highlightedIndex, upRight - 7, result);
-            upRight = -1;
-        }
-        if (mModel.board.getPiece(downLeft) != null) {
-            findJumpables(highlightedIndex, downLeft + 7, result);
-            downLeft = -1;
-        }
-        if (mModel.board.getPiece(downRight) != null) {
-            findJumpables(highlightedIndex, downRight + 9, result);
-            downRight = -1;
-        }
-
-        // Put the values in our int array to return
-        if (upLeft != -1)
-            result.add(upLeft);
-        if (upRight != -1)
-            result.add(upRight);
-        if (downLeft != -1)
-            result.add(downLeft);
-        if (downRight != -1)
-            result.add(downRight);
+        findJumpables(result, position, upLeft, -9);
+        findJumpables(result, position, upRight, -7);
+        findJumpables(result, position, downLeft, 7);
+        findJumpables(result, position, downRight, 9);
         return result;
     }
 

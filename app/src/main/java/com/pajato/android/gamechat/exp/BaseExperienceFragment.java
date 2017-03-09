@@ -75,6 +75,8 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRo
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
+import static com.pajato.android.gamechat.exp.ExpType.checkersET;
+import static com.pajato.android.gamechat.exp.ExpType.chessET;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_OWNER_ID;
 
@@ -102,7 +104,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     // Private instance variables.
 
     /** Visual layout of chess board objects. */
-    protected Checkerboard mBoard = new Checkerboard();
+    protected Checkerboard mBoard;
 
     /** The experience being enjoyed. */
     protected Experience mExperience;
@@ -164,17 +166,26 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     /** Handle an experience fragment setup by establishing the experience to run. */
     @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
         // Ensure that the dispatcher and the dispatcher type exist, and ensure that this setup
-        // is for a true experience fragment.  If not, then abort, otherwise use the dispatcher
-        // to establish the experience to run.
+        // is for a true experience fragment.  If not, abort.
         super.onSetup(context, dispatcher);
         if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
             return;
+
+        // Use the dispatcher to set up the fragment to run.  If the type is a game type, set up the
+        // checkerboard.
         String groupKey = dispatcher.groupKey;
         String roomKey = dispatcher.roomKey;
         ExpType expType = dispatcher.expType != null ? dispatcher.expType : type.expType;
-        mExperience = ExperienceManager.instance.getExperience(groupKey, roomKey, expType);
-        if (mExperience == null)
-            createExperience(context, getPlayers(roomKey));
+        if (expType != null && (expType == chessET || expType == checkersET))
+            mBoard = new Checkerboard(context);
+
+        // Determine if an experience of the given type is available in the given room.  Use if
+        // if so, otherwise create one now.
+        if (expType != null) {
+            mExperience = ExperienceManager.instance.getExperience(groupKey, roomKey, expType);
+            if (mExperience == null && dispatcher.expType != null)
+                createExperience(context, getPlayers(roomKey));
+        }
     }
 
     /** Handle ad setup for experience fragments. */

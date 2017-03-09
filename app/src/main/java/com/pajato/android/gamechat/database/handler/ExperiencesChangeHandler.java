@@ -137,6 +137,7 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
     /** Process the change by updating the database list and notifying the app. */
     private void process(final DataSnapshot snapshot, final int type) {
         // Validate the snapshot and the experience.  Abort if either is invalid.
+        Log.d(TAG, "Processing a data snapshot.");
         Experience experience = snapshot.exists() ? getExperience(snapshot) : null;
         Map<String, Experience> expMap = experience != null ? getExpMap(experience) : null;
         if (expMap == null) return;

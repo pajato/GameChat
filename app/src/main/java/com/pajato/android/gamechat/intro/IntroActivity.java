@@ -35,12 +35,15 @@ import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
-import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 
 import java.util.Arrays;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
+import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
+import static com.pajato.android.gamechat.credentials.CredentialsManager.PROVIDER_KEY;
+import static com.pajato.android.gamechat.credentials.CredentialsManager.SECRET_KEY;
+import static com.pajato.android.gamechat.credentials.CredentialsManager.TOKEN_KEY;
 
 /**
  * Provide an intro activity ala Telegram.
@@ -79,10 +82,10 @@ public class IntroActivity extends AppCompatActivity {
                 Log.i(IntroActivity.class.getSimpleName(),
                         String.format(format, response.getProviderType(), response.getEmail(),
                                 response.getIdpSecret(), response.getIdpToken()));
-                intent.putExtra("provider", response.getProviderType());
-                intent.putExtra("email", response.getEmail());
-                intent.putExtra("secret", response.getIdpSecret());
-                intent.putExtra("token", response.getIdpToken());
+                intent.putExtra(PROVIDER_KEY, response.getProviderType());
+                intent.putExtra(EMAIL_KEY, response.getEmail());
+                intent.putExtra(SECRET_KEY, response.getIdpSecret());
+                intent.putExtra(TOKEN_KEY, response.getIdpToken());
             }
             // Pass the intent obtained from the sign in activity through to the calling intent.
             setResult(RESULT_OK, intent);
@@ -124,7 +127,7 @@ public class IntroActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
-        intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
+        //intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
         Intent intent = intentBuilder.build();
         intent.putExtra(mode, true);
         return intent;
@@ -245,30 +248,30 @@ public class IntroActivity extends AppCompatActivity {
                 // Animate the transition by saving the current item and setting the fade in and
                 // fade out images,
                 mLastPagePosition = mPager.getCurrentItem();
-                final ImageView fadeoutImage;
-                final ImageView fadeinImage;
+                final ImageView fadeOutImage;
+                final ImageView fadeInImage;
                 if (mTopImage1.getVisibility() == View.VISIBLE) {
-                    fadeoutImage = mTopImage1;
-                    fadeinImage = mTopImage2;
+                    fadeOutImage = mTopImage1;
+                    fadeInImage = mTopImage2;
                 } else {
-                    fadeoutImage = mTopImage2;
-                    fadeinImage = mTopImage1;
+                    fadeOutImage = mTopImage2;
+                    fadeInImage = mTopImage1;
                 }
 
-                // Initialize the fadein and fadeout images.
-                fadeinImage.bringToFront();
-                fadeinImage.setImageResource(Pages.values()[mLastPagePosition].iconId);
-                fadeinImage.clearAnimation();
-                fadeoutImage.clearAnimation();
+                // Initialize the fade-in and fadeout images.
+                fadeInImage.bringToFront();
+                fadeInImage.setImageResource(Pages.values()[mLastPagePosition].iconId);
+                fadeInImage.clearAnimation();
+                fadeOutImage.clearAnimation();
 
                 // Animate the icon switching.
                 Context context = mPager.getContext();
                 Animation outAnimation = loadAnimation(context, R.anim.icon_fade_out);
-                outAnimation.setAnimationListener(new AnimationHandler(null, fadeoutImage));
+                outAnimation.setAnimationListener(new AnimationHandler(null, fadeOutImage));
                 Animation inAnimation = loadAnimation(context, R.anim.icon_fade_in);
-                inAnimation.setAnimationListener(new AnimationHandler(fadeinImage, null));
-                fadeoutImage.startAnimation(outAnimation);
-                fadeinImage.startAnimation(inAnimation);
+                inAnimation.setAnimationListener(new AnimationHandler(fadeInImage, null));
+                fadeOutImage.startAnimation(outAnimation);
+                fadeInImage.startAnimation(inAnimation);
             }
         }
     }
@@ -278,21 +281,21 @@ public class IntroActivity extends AppCompatActivity {
 
         // Private instance variables.
 
-        /** The fadein image. */
-        private final ImageView mFadeinImage;
+        /** The fade-in image. */
+        private final ImageView mFadeInImage;
 
         /** The fadeout image. */
         private final ImageView mFadeoutImage;
 
         /** Build the animation handler. */
-        AnimationHandler(final ImageView fadeinImage, final ImageView fadeoutImage) {
-            mFadeinImage = fadeinImage;
+        AnimationHandler(final ImageView fadeInImage, final ImageView fadeoutImage) {
+            mFadeInImage = fadeInImage;
             mFadeoutImage = fadeoutImage;
         }
 
-        /** Implement the start of animation only if there is a fadein image. */
+        /** Implement the start of animation only if there is a fade-in image. */
         @Override public void onAnimationStart(final Animation animation) {
-            if (mFadeinImage != null) mFadeinImage.setVisibility(View.VISIBLE);
+            if (mFadeInImage != null) mFadeInImage.setVisibility(View.VISIBLE);
         }
 
         /** Implement the end of animation only if there is a fadeout image. */

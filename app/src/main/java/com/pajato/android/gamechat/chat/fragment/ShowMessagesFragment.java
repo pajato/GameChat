@@ -172,7 +172,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         // The account and the edit text field exist.  Persist the message to the database and
         // inform the User that the message has been sent.
         String text = editText.getText().toString();
-        String roomKey = mItem.key;
+        String roomKey = mItem.roomKey;
         Room room = RoomManager.instance.getRoomProfile(roomKey);
         MessageManager.instance.createMessage(text, STANDARD, account, room);
         editText.setText("");

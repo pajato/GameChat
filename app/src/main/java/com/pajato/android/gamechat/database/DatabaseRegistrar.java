@@ -56,7 +56,7 @@ public enum DatabaseRegistrar {
 
     /** Register a given value event listener. */
     public void registerHandler(final DatabaseEventHandler handler) {
-        // Determine if there is already a listener registered with this name.
+        // Remove any previously registered handlers of the same name.
         String name = handler.name;
         Log.d(TAG, String.format(Locale.US, "Registering handler with name {%s}.", name));
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(handler.path);
