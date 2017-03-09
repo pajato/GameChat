@@ -235,6 +235,11 @@ public class Checkers implements Experience {
         modTime = value;
     }
 
+    /** Set the experience name */
+    @Exclude @Override public void setName(final String name) {
+        this.name = name;
+    }
+
     /** Set the room key to satisfy the Experience contract. */
     @Exclude @Override public void setRoomKey(final String key) {
         this.roomKey = key;

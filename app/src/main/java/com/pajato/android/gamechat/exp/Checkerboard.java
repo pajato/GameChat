@@ -21,6 +21,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.GridLayout;
@@ -185,6 +186,8 @@ public class Checkerboard {
 
     /** Set the highlight at a given position using a given color resource id. */
     private void setHighlight(Context context, int position, final int colorResId) {
+        Log.i(Checkerboard.class.getSimpleName(), "Set highlight on position: " + position +
+                ", color resource id: " + colorResId + ", with context: " + context.toString());
         mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(context, colorResId));
     }
 }

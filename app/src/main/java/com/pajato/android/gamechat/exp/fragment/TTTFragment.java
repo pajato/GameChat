@@ -29,7 +29,6 @@ import android.widget.TextView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.DispatchManager;
-import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
@@ -51,7 +50,6 @@ import com.pajato.android.gamechat.exp.model.TicTacToe;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -202,12 +200,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Setup the default key, players, and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);
-        String name1 = players.get(0).name;
-        String name2 = players.get(1).name;
-
         long tStamp = new Date().getTime();
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2,
-                SimpleDateFormat.getDateTimeInstance().format(tStamp));
+        String name = createTwoPlayerName(players, tStamp);
 
         // Set up the default group (Me Group) and room (Me Room) keys, the owner id and create the
         // object on the database.
@@ -226,17 +220,23 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         List<Player> result = new ArrayList<>();
         String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String accountId = null;
         String symbol = context.getString(R.string.xValue);
-        result.add(new Player(name, symbol, ""));
+        if (players.size() >= 1)
+            accountId = players.get(0).id;
+        result.add(new Player(name, symbol, "", accountId));
         name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
         symbol = context.getString(R.string.oValue);
-        result.add(new Player(name, symbol, ""));
-
+        if (players.size() >= 2)
+            accountId = players.get(1).id;
+        else
+            accountId = null;
+        result.add(new Player(name, symbol, "", accountId));
         return result;
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    @Override protected List<Account> getPlayers(final Dispatcher dispatcher) {
+    @Override protected List<Account> getPlayers(final String roomKey) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;
@@ -246,8 +246,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         players.add(player1);
 
         // Determine the second account, if any, based on the room.
-        String key = dispatcher.roomKey;
-        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
+        Room room = roomKey != null ? RoomManager.instance.roomMap.get(roomKey) : null;
         if (room == null) return players;
 
         switch (type) {
@@ -484,8 +483,12 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
         // does.
         TextView name = (TextView) mLayout.findViewById(resId);
-        if (name == null) return;
+        if (name == null)
+            return;
         name.setText(model.players.get(index).name);
+        // If there is a user assigned, don't allow click (no popup menu in this case)
+        if (model.players.get(index).id != null && !model.players.get(index).id.equals(""))
+            name.setClickable(false);
     }
 
     /** Set the sigil (X or O) for a given player. */

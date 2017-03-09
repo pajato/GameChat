@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -37,9 +38,13 @@ import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.PlayModeManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.JoinManager;
+import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -50,7 +55,9 @@ import com.pajato.android.gamechat.main.NetworkManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -62,11 +69,10 @@ import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
-import static com.pajato.android.gamechat.common.FragmentType.selectUser;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
-import static com.pajato.android.gamechat.common.PlayModeManager.PlayModeType.user;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
@@ -111,6 +117,21 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Public instance methods.
 
+    /** Create a name for a 2-player experience. */
+    public String createTwoPlayerName(List<Player> playerList, long timeStamp) {
+        List<Player> players = playerList == null ? mExperience.getPlayers() : playerList;
+        long tStamp = timeStamp > 0 ? new Date().getTime() : timeStamp;
+        if (players.size() != 2)
+            return String.format(Locale.US, "%s game on %s",
+                    getString(mExperience.getExperienceType().displayNameResId), tStamp);
+        return String.format(Locale.US, "%s vs %s on %s", players.get(0).name, players.get(1).name,
+                SimpleDateFormat.getDateTimeInstance().format(tStamp));
+    }
+
+    public Experience getExperience() {
+        return mExperience;
+    }
+
     /** Be sure to dismiss the play mode menu, if one is present */
     @Override public void onPause() {
         super.onPause();
@@ -153,7 +174,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         ExpType expType = dispatcher.expType != null ? dispatcher.expType : type.expType;
         mExperience = ExperienceManager.instance.getExperience(groupKey, roomKey, expType);
         if (mExperience == null)
-            createExperience(context, getPlayers(dispatcher));
+            createExperience(context, getPlayers(roomKey));
     }
 
     /** Handle ad setup for experience fragments. */
@@ -166,21 +187,33 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     // Protected instance methods.
 
+    /** Provide a base implementation that does nothing. */
+    protected void createExperience(final Context context, final List<Account> playerAccounts) {
+        // Very quietly do nothing.
+    }
+
     /** Return a list of default two-player game players. */
     protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         // TODO: make this part of an interface implementation.
         List<Player> result = new ArrayList<>();
         String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        String accountId = null;
+        if (players.size() >= 1)
+            accountId = players.get(0).id;
         String team = context.getString(R.string.primaryTeam);
-        result.add(new Player(name, "", team));
+        result.add(new Player(name, "", team, accountId));
         name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        if (players.size() >= 2)
+            accountId = players.get(1).id;
+        else
+            accountId = null;
         team = context.getString(R.string.secondaryTeam);
-        result.add(new Player(name, "", team));
+        result.add(new Player(name, "", team, accountId));
         return result;
     }
 
     /** Return a possibly empty list of player information for a two-player game experience. */
-    protected List<Account> getPlayers(final Dispatcher dispatcher) {
+    protected List<Account> getPlayers(final String roomKey) {
         // TODO: make this an interface implementation...
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
@@ -191,9 +224,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // determine from the play mode how to get the second player.
         List<Account> players = new ArrayList<>();
         players.add(player1);
-        String key = dispatcher.roomKey;
-        Room room = key != null ? RoomManager.instance.roomMap.get(key) : null;
-        if (room == null || key.equals(AccountManager.instance.getMeRoomKey()))
+        Room room = roomKey != null ? RoomManager.instance.roomMap.get(roomKey) : null;
+        if (room == null || roomKey.equals(AccountManager.instance.getMeRoomKey()))
             return players;
 
         // Obtain the second player from the other room...
@@ -207,11 +239,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 break;
         }
         return players;
-    }
-
-    /** Provide a base implementation that does nothing. */
-    protected void createExperience(final Context context, final List<Account> playerAccounts) {
-        // Very quietly do nothing.
     }
 
     /** Return either a null placeholder key value or a sentinel value as the experience key. */
@@ -255,24 +282,50 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Handle a play mode selection change. */
-    @Subscribe void handlePlayModeChange(PlayModeChangeEvent event) {
-        if (mExperience == null)
+    @Subscribe public void handlePlayModeChange(PlayModeChangeEvent event) {
+        if (!mActive || mExperience == null || !(event.view instanceof TextView))
             return;
-        switch (event.type) {
-            case computer:
-            case local:
-                showFutureFeatureMessage(R.string.FutureSelectModes);
-                break;
-            case user:
-                // Handle selecting another User by chaining to the fragment that will select the
-                // User, copy the experience to a new room, and continue the game in that room with
-                // the current state.
-                ListItem listItem = new ListItem(mExperience, user);
-                DispatchManager.instance.chainFragment(this.getActivity(), selectUser, listItem);
-                break;
-            default:
-                break;
+        String menuItemText = ((TextView) event.view).getText().toString();
+        if (menuItemText.equals(getActivity().getString(R.string.PlayModeComputerMenuTitle))) {
+            showFutureFeatureMessage(R.string.PlayModeComputerMenuTitle);
+            PlayModeManager.instance.closePlayModeMenu();
+            return;
         }
+        if (menuItemText.equals(getActivity().getString(R.string.PlayModeLocalMenuTitle))) {
+            // TODO: do we allow switch BACK to local if something else is ongoing? NO
+            PlayModeManager.instance.closePlayModeMenu();
+            return;
+        }
+        Object payload = event.view.getTag();
+        if (payload == null || !(payload instanceof PlayModeMenuEntry))
+            return;
+        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
+        // Handle selecting another User by chaining to the fragment that will select the
+        // User, copy the experience to a new room, and continue the game in that room with
+        // the current state.
+        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
+        if (member == null)
+            return;
+        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
+        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
+                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
+                member.url);
+        ListItem expListItem = new ListItem(mExperience);
+        JoinManager.instance.joinRoom(selectUserListItem);
+
+        List<Player> players = mExperience.getPlayers();
+        for (Player p : players) {
+            if (p.id == null) {
+                p.id = member.id;
+                p.name = member.getNickName();
+                break;
+            }
+        }
+        mExperience.setName(createTwoPlayerName(mExperience.getPlayers(),
+                mExperience.getCreateTime()));
+        ExperienceManager.instance.move(mExperience, entry.groupKey, selectUserListItem.roomKey);
+        ExperienceManager.instance.deleteExperience(expListItem);
+        PlayModeManager.instance.closePlayModeMenu();
     }
 
     /**
@@ -366,8 +419,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 }
                 break;
             case R.id.player2Name:
-                logEvent("Got a player 2 control click event.");
-                PlayModeManager.instance.showPlayModeMenu(view);
+                PlayModeManager.instance.togglePlayModeMenu(getActivity(), view);
                 break;
             default:
                 // Determine if the button click was generated by a group view or room view drill

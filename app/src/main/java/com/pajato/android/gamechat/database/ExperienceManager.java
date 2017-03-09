@@ -49,7 +49,6 @@ import java.util.Set;
 import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType.old;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.experience;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
@@ -182,15 +181,18 @@ public enum ExperienceManager {
         List<ListItem> result = new ArrayList<>();
         switch (expGroupMap.size()) {
             case 0:
-            case 1:             // Get the experiences from the rooms in the joined group that have
-                                // experiences and the me room if it has any experiences.
-                String roomKey = expGroupMap.keySet().iterator().next();
+                // No experiences - can we ever get here?
+                String rKey = expGroupMap.keySet().iterator().next();
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String meRoomKey = AccountManager.instance.getMeRoomKey();
-                result.addAll(getItemListRooms(roomKey));
-                if (roomKey.equals(meRoomKey) || roomKey.equals(meGroupKey))
+                result.addAll(getItemListRooms(rKey));
+                if (rKey.equals(meRoomKey) || rKey.equals(meGroupKey))
                     return result;
                 result.addAll(getItemListRooms(meGroupKey));
+                return result;
+            case 1: // Get only the experiences from rooms in the joined group that have experiences
+                String roomKey = expGroupMap.keySet().iterator().next();
+                result.addAll(getItemListRooms(roomKey));
                 return result;
             default:
                 result.addAll(getItemListGroups());
@@ -291,7 +293,7 @@ public enum ExperienceManager {
                 break;
             case expRoom:
                 Room room = RoomManager.instance.getRoomProfile(key);
-                result.add(new ListItem(itemType, room.groupKey, room.key, room.name, count, null));
+                result.add(new ListItem(itemType, room.groupKey, room.key, room.getName(), count, null));
                 break;
             case expList:
                 Experience exp = experienceMap.get(key);

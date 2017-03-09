@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
-import com.pajato.android.gamechat.common.PlayModeManager.PlayModeType;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.exp.Experience;
 
@@ -139,9 +138,6 @@ public class ListItem {
     /** The item name resource identifier. */
     int nameResourceId;
 
-    /** The experience play mode type for this item. */
-    private PlayModeType playMode;
-
     /** The contact phone number. */
     private String phone;
 
@@ -210,13 +206,12 @@ public class ListItem {
         iconUrl = url;
     }
 
-    /** Build an instance for a given room list item. */
-    public ListItem(@NonNull final Experience exp, final PlayModeType playMode) {
+    /** Build an instance for a given experience */
+    public ListItem(@NonNull final Experience exp) {
         type = experience;
-        this.playMode = playMode;
-        groupKey = exp.getGroupKey();
-        roomKey = exp.getRoomKey();
-        key = exp.getExperienceKey();
+        this.groupKey = exp.getGroupKey();
+        this.roomKey = exp.getRoomKey();
+        this.key = exp.getExperienceKey();
     }
 
     /** Build an instance for a room and selectable room or member list items. */
@@ -295,7 +290,7 @@ public class ListItem {
             case expRoom:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case experience:
-                return String.format(Locale.US, type.format, groupKey, roomKey, key, playMode);
+                return String.format(Locale.US, type.format, groupKey, roomKey, key);
             case groupList:
                 return String.format(Locale.US, type.format, name, groupKey);
             case helpArticle:

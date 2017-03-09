@@ -40,11 +40,9 @@ import com.pajato.android.gamechat.exp.model.Player;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
@@ -141,11 +139,8 @@ public class ChessFragment extends BaseExperienceFragment {
         // Setup the default key, players, creation timestamp and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);
-        String name1 = players.get(0).name;
-        String name2 = players.get(1).name;
         long tStamp = new Date().getTime();
-        String dateString = SimpleDateFormat.getDateTimeInstance().format(tStamp);
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, dateString);
+        String name = createTwoPlayerName(players, tStamp);
 
         // Set up the default board, group (Me Group) and room (Me Room) keys, the owner id and
         // create the object on the database.

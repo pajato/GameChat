@@ -77,6 +77,9 @@ public interface Experience {
     /** Set the experience group key. */
     void setGroupKey(String gKey);
 
+    /** Set the experience name. */
+    void setName(String name);
+
     /** Set the room key. */
     void setRoomKey(String key);
 

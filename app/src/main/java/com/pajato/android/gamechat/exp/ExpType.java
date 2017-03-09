@@ -36,9 +36,12 @@ import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
  * @author Paul Michael Reilly
  */
 public enum ExpType {
-    checkersET(Checkers.class, R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2),
-    chessET(Chess.class, R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2),
-    tttET(TicTacToe.class, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue);
+    checkersET(Checkers.class, R.mipmap.ic_checkers, R.string.PlayCheckers, R.string.player1, R.string.player2,
+            R.string.CheckersDisplayName),
+    chessET(Chess.class, R.mipmap.ic_chess, R.string.PlayChess, R.string.player1, R.string.player2,
+            R.string.ChessDisplayName),
+    tttET(TicTacToe.class, R.mipmap.ic_tictactoe_red, R.string.PlayTicTacToe, R.string.xValue, R.string.oValue,
+            R.string.TicTacToeDisplayName);
 
     // Instance variables.
 
@@ -57,16 +60,20 @@ public enum ExpType {
     /** The game title resource id. */
     int mTitleResId;
 
+    /** The display name resource id */
+    public int displayNameResId;
+
     // Constructor.
 
     /** Build an instance given the online, local and computer opponent fragment indexes. */
     ExpType(final Class expClass, final int iconId, final int titleId, final int primary,
-            final int secondary) {
+            final int secondary, final int displayNameResId) {
         experienceClass = expClass;
         mIconResId = iconId;
         mTitleResId = titleId;
         mPrimaryIndex = primary;
         mSecondaryIndex = secondary;
+        this.displayNameResId = displayNameResId;
     }
 
     /** Return the fragment type associated with this experience type. */
@@ -94,4 +101,5 @@ public enum ExpType {
         }
         return null;
     }
+
 }

@@ -40,11 +40,9 @@ import com.pajato.android.gamechat.exp.model.Player;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
@@ -150,11 +148,8 @@ public class CheckersFragment extends BaseExperienceFragment {
         // Setup the default key, players, and name.
         String key = getExperienceKey();
         List<Player> players = getDefaultPlayers(context, playerAccounts);
-        String name1 = players.get(0).name;
-        String name2 = players.get(1).name;
         long tStamp = new Date().getTime();
-        String date = SimpleDateFormat.getDateTimeInstance().format(tStamp);
-        String name = String.format(Locale.US, "%s vs %s on %s", name1, name2, date);
+        String name = createTwoPlayerName(players, tStamp);
 
         // Set up the default board, group (Me Group) and room (Me Room) keys, the owner id and
         // create the object on the database.
@@ -164,13 +159,16 @@ public class CheckersFragment extends BaseExperienceFragment {
         String roomKey = AccountManager.instance.getMeRoomKey();
         String id = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
-        Checkers model = new Checkers(board, key, id, 0, name, tStamp, groupKey, roomKey, players);
+        Checkers model = new Checkers(board, key, id, 0, name, tStamp, groupKey,
+                roomKey, players);
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
         else
             ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
+
+
 
     // Private instance methods.
 

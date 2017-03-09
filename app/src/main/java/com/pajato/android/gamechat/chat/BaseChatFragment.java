@@ -324,7 +324,7 @@ public abstract class BaseChatFragment extends BaseFragment {
             new AlertDialog.Builder(getActivity())
                     .setTitle(getString(R.string.LeaveRoomTitle))
                     .setMessage(String.format(getString(R.string.LeaveConfirmMessage),
-                            room.name))
+                            room.getName()))
                     .setNegativeButton(android.R.string.cancel, null) // dismiss
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
