@@ -236,7 +236,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     }
 
     /** Return a possibly null list of player information for a two participant experience. */
-    @Override protected List<Account> getPlayers(final String roomKey) {
+    @Override public List<Account> getPlayers(final String roomKey) {
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
         if (player1 == null) return null;

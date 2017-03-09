@@ -35,8 +35,13 @@ import com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +64,6 @@ public enum PlayModeManager {
 
     // Public instance variables
 
-    /** Identifies the types of play. */
-    public enum PlayModeType {computer, local, user}
-
     // Protected instance variables
 
     /** The current play mode menu for the experience being enjoyed. */
@@ -78,6 +80,41 @@ public enum PlayModeManager {
     public void dismissPlayModeMenu() {
         if (mPlayModePopupWindow != null)
             mPlayModePopupWindow.dismiss();
+    }
+
+    /** Handle a use selection in the play mode menu */
+    public void handlePlayModeUserSelection(View view, BaseExperienceFragment fragment) {
+        Object payload = view.getTag();
+        if (payload == null || !(payload instanceof PlayModeMenuEntry))
+            return;
+        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
+        // Handle selecting another User by chaining to the fragment that will select the
+        // User, copy the experience to a new room, and continue the game in that room with
+        // the current state.
+        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
+        if (member == null)
+            return;
+        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
+        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
+                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
+                member.url);
+        Experience experience = fragment.getExperience();
+        ListItem expListItem = new ListItem(experience);
+        JoinManager.instance.joinRoom(selectUserListItem);
+
+        List<Player> players = fragment.getExperience().getPlayers();
+        for (Player p : players) {
+            if (p.id == null) {
+                p.id = member.id;
+                p.name = member.getNickName();
+                break;
+            }
+        }
+        fragment.getExperience().setName(fragment.createTwoPlayerName(experience.getPlayers(),
+                experience.getCreateTime()));
+        ExperienceManager.instance.move(experience, entry.groupKey, selectUserListItem.roomKey);
+        ExperienceManager.instance.deleteExperience(expListItem);
+        PlayModeManager.instance.closePlayModeMenu();
     }
 
     /** Return null or a list of Users or rooms which the current user can access. */

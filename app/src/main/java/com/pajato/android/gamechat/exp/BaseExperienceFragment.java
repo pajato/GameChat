@@ -38,13 +38,9 @@ import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.PlayModeManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
-import com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.JoinManager;
-import com.pajato.android.gamechat.database.MemberManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -72,7 +68,6 @@ import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRoo
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
 import static com.pajato.android.gamechat.exp.ExpType.checkersET;
@@ -128,6 +123,11 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                     getString(mExperience.getExperienceType().displayNameResId), tStamp);
         return String.format(Locale.US, "%s vs %s on %s", players.get(0).name, players.get(1).name,
                 SimpleDateFormat.getDateTimeInstance().format(tStamp));
+    }
+
+    /** Get the experience */
+    public Experience getExperience() {
+        return mExperience;
     }
 
     /** Be sure to dismiss the play mode menu, if one is present */
@@ -220,7 +220,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Return a possibly empty list of player information for a two-player game experience. */
-    protected List<Account> getPlayers(final String roomKey) {
+    public List<Account> getPlayers(final String roomKey) {
         // TODO: make this an interface implementation...
         // Determine if this is an offline experience in which no accounts are provided.
         Account player1 = AccountManager.instance.getCurrentAccount();
@@ -302,36 +302,38 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             PlayModeManager.instance.closePlayModeMenu();
             return;
         }
-        Object payload = event.view.getTag();
-        if (payload == null || !(payload instanceof PlayModeMenuEntry))
-            return;
-        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
-        // Handle selecting another User by chaining to the fragment that will select the
-        // User, copy the experience to a new room, and continue the game in that room with
-        // the current state.
-        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
-        if (member == null)
-            return;
-        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
-        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
-                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
-                member.url);
-        ListItem expListItem = new ListItem(mExperience);
-        JoinManager.instance.joinRoom(selectUserListItem);
+        PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
 
-        List<Player> players = mExperience.getPlayers();
-        for (Player p : players) {
-            if (p.id == null) {
-                p.id = member.id;
-                p.name = member.getNickName();
-                break;
-            }
-        }
-        mExperience.setName(createTwoPlayerName(mExperience.getPlayers(),
-                mExperience.getCreateTime()));
-        ExperienceManager.instance.move(mExperience, entry.groupKey, selectUserListItem.roomKey);
-        ExperienceManager.instance.deleteExperience(expListItem);
-        PlayModeManager.instance.closePlayModeMenu();
+//        Object payload = event.view.getTag();
+//        if (payload == null || !(payload instanceof PlayModeMenuEntry))
+//            return;
+//        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
+//        // Handle selecting another User by chaining to the fragment that will select the
+//        // User, copy the experience to a new room, and continue the game in that room with
+//        // the current state.
+//        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
+//        if (member == null)
+//            return;
+//        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
+//        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
+//                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
+//                member.url);
+//        ListItem expListItem = new ListItem(mExperience);
+//        JoinManager.instance.joinRoom(selectUserListItem);
+//
+//        List<Player> players = mExperience.getPlayers();
+//        for (Player p : players) {
+//            if (p.id == null) {
+//                p.id = member.id;
+//                p.name = member.getNickName();
+//                break;
+//            }
+//        }
+//        mExperience.setName(createTwoPlayerName(mExperience.getPlayers(),
+//                mExperience.getCreateTime()));
+//        ExperienceManager.instance.move(mExperience, entry.groupKey, selectUserListItem.roomKey);
+//        ExperienceManager.instance.deleteExperience(expListItem);
+//        PlayModeManager.instance.closePlayModeMenu();
     }
 
     /**
