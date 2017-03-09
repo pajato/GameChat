@@ -168,8 +168,6 @@ public class CheckersFragment extends BaseExperienceFragment {
             ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
 
-
-
     // Private instance methods.
 
     /** Return the FAM menu (empty) - the FAB operates as a button here. */

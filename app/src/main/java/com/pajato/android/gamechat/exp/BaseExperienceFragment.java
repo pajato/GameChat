@@ -299,7 +299,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             return;
         }
         if (menuItemText.equals(getActivity().getString(R.string.PlayModeLocalMenuTitle))) {
-            // TODO: do we allow switch BACK to local if something else is ongoing? NO
             PlayModeManager.instance.closePlayModeMenu();
             return;
         }
