@@ -3,7 +3,7 @@ package com.pajato.android.gamechat.event;
 import android.view.View;
 
 /**
- * Provides an event class indicating that the a play mode menu click has occurred.
+ * Provides an event class indicating that a play mode menu click has occurred.
  */
 public class PlayModeClickEvent {
 

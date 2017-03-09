@@ -130,10 +130,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 SimpleDateFormat.getDateTimeInstance().format(tStamp));
     }
 
-    public Experience getExperience() {
-        return mExperience;
-    }
-
     /** Be sure to dismiss the play mode menu, if one is present */
     @Override public void onPause() {
         super.onPause();
