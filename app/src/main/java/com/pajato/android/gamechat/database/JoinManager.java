@@ -79,6 +79,7 @@ public enum JoinManager {
 
         // Case on the item type to handle joining an existing public room or a new private room.
         switch (item.type) {
+            case experience:
             case selectUser:
             case selectableMember:
                 // Create and persist the private chat room and get it's push key.
@@ -256,7 +257,7 @@ public enum JoinManager {
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
         DBUtils.updateChildren(path, group.toMap());
 
-        // Update the "me" room default message on the database.
+        // Update the room default message on the database.
         String format = mMessageMap.get(R.string.JoinMemberRoomMessage);
         String accountName = account.getDisplayName();
         String memberName = member.getDisplayName();

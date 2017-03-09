@@ -14,7 +14,7 @@
     <string name="InviteToGroupFormat">You are invited to join my GameChat group: %s</string>
     <string name="InviteFriendMessage">Invite friends</string>
     <string name="ItemCreatedMessage">%s is created</string>
-    <string name="ManageRestrictedUserTitle">Manage Protected Users</string>
+    <string name="ManageRestrictedUserTitle">Protected Users</string>
     <string name="MenuItemFileBugReport">File Bug Report</string>
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemFeedback">Feedback</string>

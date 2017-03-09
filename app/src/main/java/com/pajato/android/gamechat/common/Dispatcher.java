@@ -19,9 +19,7 @@ package com.pajato.android.gamechat.common;
 
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.ExpType;
-import com.pajato.android.gamechat.exp.Experience;
 
 /**
  * The fragment dispatcher provides mediation between the experience or chat managers and the main
@@ -75,12 +73,6 @@ public class Dispatcher {
             case messageList:
                 groupKey = item.groupKey;
                 roomKey = item.roomKey;
-                break;
-            case selectUser:
-                if (item.key != null) {
-                    Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
-                    this.type.expType = exp.getExperienceType();
-                }
                 break;
             case roomMembersList:
                 groupKey = item.groupKey;

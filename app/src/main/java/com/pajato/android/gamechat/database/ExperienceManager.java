@@ -290,7 +290,7 @@ public enum ExperienceManager {
                 break;
             case expRoom:
                 Room room = RoomManager.instance.getRoomProfile(key);
-                result.add(new ListItem(itemType, room.groupKey, room.key, room.name, count, null));
+                result.add(new ListItem(itemType, room.groupKey, room.key, room.getName(), count, null));
                 break;
             case expList:
                 Experience exp = experienceMap.get(key);

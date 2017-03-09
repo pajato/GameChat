@@ -306,8 +306,6 @@ public abstract class BaseFragment extends Fragment {
                 return InvitationManager.instance.getListItemData();
             case selectRoom:    // Get all the visible rooms for the current players.
                 return PlayModeManager.instance.getListItemData(type);
-            case selectUser:    // Get all the visible Users for the current account holder.
-                return PlayModeManager.instance.getListItemData(type);
             default:
                 return null;
         }

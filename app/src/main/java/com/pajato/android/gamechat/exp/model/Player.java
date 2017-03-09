@@ -26,6 +26,9 @@ public class Player {
     /** The player's display name. */
     public String name;
 
+    /** The player account id; may be null if player is local friend or computer */
+    public String id;
+
     /** The player's symbol (either X or O for tictactoe - not used for chessET or checkersET). */
     public String symbol;
 
@@ -41,19 +44,22 @@ public class Player {
     public Player() {}
 
     /** Build a default game player using all the parameters. */
-    public Player(final String name, final String symbol, final String team) {
+    public Player(final String name, final String symbol, final String team, final String id) {
         this.name = name;
         this.symbol = symbol;
         this.winCount = 0;
         this.team = team;
+        this.id = id;
     }
 
     /** Build an instance accepting Object values for all fields. */
-    public Player(final Object name, final Object symbol, final Object winCount, final Object team) {
+    public Player(final Object name, final Object symbol, final Object winCount, final Object team,
+                  final String id) {
         this.name = name instanceof String ? (String) name : "anonymous";
         this.symbol = symbol instanceof String ? (String) symbol : "?";
         this.team = team instanceof String ? (String) team : "?";
         this.winCount = winCount instanceof Integer ? (Integer) winCount : 0;
+        this.id = id;
     }
 
     /** Provide a default map for a Firebase create/update. */
@@ -63,6 +69,7 @@ public class Player {
         result.put("symbol", symbol);
         result.put("team", team);
         result.put("winCount", winCount);
+        result.put("id", id);
         return result;
     }
 

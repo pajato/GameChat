@@ -47,7 +47,6 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
 import com.pajato.android.gamechat.exp.fragment.SelectExpInviteFragment;
 import com.pajato.android.gamechat.exp.fragment.SelectRoomFragment;
-import com.pajato.android.gamechat.exp.fragment.SelectUserFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
@@ -100,7 +99,6 @@ public enum FragmentType {
             R.layout.select_for_invite),
     selectExpGroupsRooms (SelectExpInviteFragment.class, standardBlack, R.layout.select_for_invite),
     selectRoom (SelectRoomFragment.class, standardBlack, R.layout.exp_select_user),
-    selectUser (SelectUserFragment.class, standardBlack, R.layout.exp_select_user),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, standardWhite, R.layout.chat_no_joined_rooms),
     tictactoe (TTTFragment.class, standardWhite, R.layout.exp_ttt, tttET);
 

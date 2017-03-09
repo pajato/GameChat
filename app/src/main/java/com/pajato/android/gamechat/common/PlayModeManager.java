@@ -17,26 +17,38 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.PopupMenu;
-import android.view.MenuItem;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupWindow;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.common.adapter.PlayModeMenuAdapter;
+import com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MemberManager;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.PlayModeChangeEvent;
+import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.model.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.widget.LinearLayout.VERTICAL;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 
@@ -52,32 +64,63 @@ public enum PlayModeManager {
 
     // Public instance variables
 
-    /** Identifies the types of play. */
-    public enum PlayModeType {computer, local, user}
-
     // Protected instance variables
 
-    /** The current play mode popup menu for the experience being enjoyed. */
-    private PopupMenu mPlayModePopup;
-
-    // Private  instance variables
-
-    /** The listener for menu item clicks on the play mode popup menu */
-    private PlayModeClickListener mListener = new PlayModeClickListener();
+    /** The current play mode menu for the experience being enjoyed. */
+    private PopupWindow mPlayModePopupWindow;
 
     // Public instance methods.
 
+    /** Close the play-mode popup window */
+    public void closePlayModeMenu() {
+        mPlayModePopupWindow.dismiss();
+    }
+
     /** Dismiss the play mode menu if it is not null */
     public void dismissPlayModeMenu() {
-        if (mPlayModePopup != null)
-            mPlayModePopup.dismiss();
+        if (mPlayModePopupWindow != null)
+            mPlayModePopupWindow.dismiss();
+    }
+
+    /** Handle a use selection in the play mode menu */
+    public void handlePlayModeUserSelection(View view, BaseExperienceFragment fragment) {
+        Object payload = view.getTag();
+        if (payload == null || !(payload instanceof PlayModeMenuEntry))
+            return;
+        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
+        // Handle selecting another User by chaining to the fragment that will select the
+        // User, copy the experience to a new room, and continue the game in that room with
+        // the current state.
+        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
+        if (member == null)
+            return;
+        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
+        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
+                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
+                member.url);
+        Experience experience = fragment.getExperience();
+        ListItem expListItem = new ListItem(experience);
+        JoinManager.instance.joinRoom(selectUserListItem);
+
+        List<Player> players = fragment.getExperience().getPlayers();
+        for (Player p : players) {
+            if (p.id == null) {
+                p.id = member.id;
+                p.name = member.getNickName();
+                break;
+            }
+        }
+        fragment.getExperience().setName(fragment.createTwoPlayerName(experience.getPlayers(),
+                experience.getCreateTime()));
+        ExperienceManager.instance.move(experience, entry.groupKey, selectUserListItem.roomKey);
+        ExperienceManager.instance.deleteExperience(expListItem);
+        PlayModeManager.instance.closePlayModeMenu();
     }
 
     /** Return null or a list of Users or rooms which the current user can access. */
     public List<ListItem> getListItemData(@NonNull final FragmentType type) {
         switch(type) {
             case selectRoom:
-            case selectUser:
                 return getUserItems();
             default:
                 return null;
@@ -88,14 +131,59 @@ public enum PlayModeManager {
      * Create and show the play mode popup menu. The popup menu must be created with the anchor in
      * the current fragment layout, so it cannot be shared across fragments.
      */
-    public void showPlayModeMenu(View anchorView) {
-        mPlayModePopup = new PopupMenu(anchorView.getContext(), anchorView);
-        mPlayModePopup.getMenuInflater().inflate(R.menu.player2_menu, mPlayModePopup.getMenu());
-        mPlayModePopup.setOnMenuItemClickListener(mListener);
-        mPlayModePopup.show();
+    public void showPlayModeMenu(Activity activity, View anchorView) {
+        ViewGroup viewGroup = (ViewGroup) activity.findViewById(R.id.gamePaneLayout);
+        View popupLayout = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.playmode_menu_layout,
+                viewGroup, false);
+        View view = popupLayout.findViewById(R.id.ItemList);
+        if (view == null)
+            return;
+        RecyclerView recycler = (RecyclerView) view;
+
+        // Initialize the recycler view.
+        PlayModeMenuAdapter adapter = new PlayModeMenuAdapter();
+        recycler.setAdapter(adapter);
+        Context context = popupLayout.getContext();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
+        recycler.setLayoutManager(layoutManager);
+        recycler.setItemAnimator(new DefaultItemAnimator());
+
+        // Inject the list of users into the recycler view
+        adapter.clearEntries();
+        List<PlayModeMenuEntry> menuEntries = getMenuItems(activity);
+        adapter.addEntries(menuEntries);
+        adapter.notifyDataSetChanged();
+        mPlayModePopupWindow = new PopupWindow(popupLayout, RecyclerView.LayoutParams.WRAP_CONTENT, // anchorView.getWidth(),
+                RecyclerView.LayoutParams.WRAP_CONTENT);
+        mPlayModePopupWindow.showAsDropDown(anchorView);
+    }
+
+    /** Toggle the display of the play mode menu. */
+    public void togglePlayModeMenu(Activity activity, View anchorView) {
+        if (mPlayModePopupWindow != null && mPlayModePopupWindow.isShowing())
+            closePlayModeMenu();
+        else
+            showPlayModeMenu(activity, anchorView);
     }
 
     // Private instance methods.
+
+    private List<PlayModeMenuEntry> getMenuItems(Activity activity) {
+        List<PlayModeMenuEntry> result = new ArrayList<>();
+        result.add(new PlayModeMenuEntry(activity.getString(R.string.PlayModeLocalMenuTitle), null, null));
+        result.add(new PlayModeMenuEntry(activity.getString(R.string.PlayModeComputerMenuTitle), null, null));
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null)
+            return result;
+        for (String groupKey : account.joinMap.keySet()) {
+            List<Account> accountList = MemberManager.instance.getMemberList(groupKey);
+            for(Account member : accountList) {
+                if (!account.id.equals(member.id))
+                    result.add(new PlayModeMenuEntry(member.getDisplayName(), member.id, groupKey));
+            }
+        }
+        return result;
+    }
 
     /** Return a possibly empty list of Users the current User can access. */
     private List<ListItem> getUserItems() {
@@ -117,27 +205,5 @@ public enum PlayModeManager {
                     }
             }
         return result;
-    }
-
-    /** Menu item click listener for play-mode menu items */
-    private class PlayModeClickListener implements PopupMenu.OnMenuItemClickListener {
-        /** Just dispatch an event to any listeners */
-        public boolean onMenuItemClick(MenuItem item) {
-            PlayModeChangeEvent event;
-            switch (item.getItemId()) {
-                case R.id.playComputer:
-                    event = new PlayModeChangeEvent(PlayModeType.computer);
-                    break;
-                case R.id.playUser:
-                    event = new PlayModeChangeEvent(PlayModeType.user);
-                    break;
-                case R.id.playLocal:
-                default:
-                    event = new PlayModeChangeEvent(PlayModeType.local);
-                    break;
-            }
-            AppEventManager.instance.post(event);
-            return true;
-        }
     }
 }
