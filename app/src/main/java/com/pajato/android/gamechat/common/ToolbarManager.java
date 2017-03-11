@@ -251,8 +251,11 @@ public enum ToolbarManager {
                     return fragment.getString(R.string.RoomsToolbarTitle);
                 }
                 return fragment.getString(R.string.ChatGroupsToolbarTitle);
-            case expList:
             case expRoom:
+                if (AccountManager.instance.isMeGroup(item.groupKey))
+                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
+                return fragment.getString(R.string.ExpRoomsToolbarTitle);
+            case expList:
                 // Determine if the group is the me group and give it special handling.
                 if (AccountManager.instance.isMeGroup(item.groupKey))
                     return fragment.getString(R.string.MyExperiencesToolbarTitle);
