@@ -31,7 +31,6 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
@@ -66,11 +65,12 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
     }
 
     /** Handle an experience list change event by dispatching again. */
-    @Subscribe public void onExperienceListChangeEvent(ExperienceChangeEvent event) {
+    @Subscribe public void onExperienceChangeEvent(ExperienceChangeEvent event) {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                DispatchManager.instance.startNextFragment(getActivity(), exp);
+                if (mActive)
+                    updateAdapterList();
                 break;
             default:
                 break;

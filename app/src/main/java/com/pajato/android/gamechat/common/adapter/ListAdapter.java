@@ -81,6 +81,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     /** Add items to the adapter's main list. */
     public void addItems(final List<ListItem> items) {
+        if (items == null)
+            return;
         // Add all the items after clearing the current ones.
         mList.addAll(items);
         notifyDataSetChanged();

@@ -336,7 +336,7 @@ public enum ExperienceManager {
         return result;
     }
 
-    /** Return a list of experience group items. */
+    /** Return a list of experience group items, excluding the 'me' group */
     private List<ListItem> getItemListGroups() {
         // Generate a list of items to render in the group list by extracting the items based
         // on the date header type ordering.
@@ -365,20 +365,27 @@ public enum ExperienceManager {
         return accountId == null || unseenList == null || unseenList.contains(accountId);
     }
 
-    /** Process all the headers for a given map to determine */
+    /** Process all headers and associated items for a given map. Exclude the 'me' group. */
     private void processHeaders(final List<ListItem> result, ItemType itemType,
                                 final Map<DateHeaderType, List<String>> map) {
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
         // Walk through the set of date header types to collect the list items.
         for (ListItem.DateHeaderType dht : ListItem.DateHeaderType.values()) {
             List<String> list = map.get(dht);
             if (list != null && list.size() > 0) {
-                // Add the header item followed by all the items from the given map.
-                result.add(new ListItem(date, dht.resId));
+                // Add the header item followed by all the items from the given map.  However, if
+                // the only item in the list is the 'me' group, don't include either the header or
+                // the group item (we only show the 'me' room, never the 'me' group.
+                if(list.size() > 1 || !list.get(0).equals(meGroupKey))
+                    result.add(new ListItem(date, dht.resId));
                 for (String key : list)
-                    addItem(result, itemType, key);
+                    // Don't include the me group
+                    if (!key.equals(meGroupKey))
+                        // Add relevant items based on itemType
+                        addItem(result, itemType, key);
             }
         }
-    }
+     }
 
     /** Update the timestamp ordered map of experiences in a given group and room. */
     private void updateExpMap(@NonNull final String groupKey, @NonNull final String roomKey,

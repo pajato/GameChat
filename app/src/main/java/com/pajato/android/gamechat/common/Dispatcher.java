@@ -79,6 +79,10 @@ public class Dispatcher {
                 key = item.roomKey;
                 roomKey = item.roomKey;
                 break;
+            case experienceList:
+                groupKey = item.groupKey;
+                roomKey = item.roomKey;
+                break;
             default:
                 groupKey = item.groupKey;
                 roomKey = item.key;

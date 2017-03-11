@@ -42,6 +42,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ExpListChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
@@ -130,6 +131,28 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         return mExperience;
     }
 
+    /** Handle a play mode selection change. */
+    @Subscribe public void handlePlayModeChange(PlayModeChangeEvent event) {
+        if (!mActive || mExperience == null || !(event.view instanceof TextView))
+            return;
+        String menuItemText = ((TextView) event.view).getText().toString();
+        if (menuItemText.equals(getActivity().getString(R.string.PlayModeComputerMenuTitle))) {
+            showFutureFeatureMessage(R.string.PlayModeComputerMenuTitle);
+            PlayModeManager.instance.closePlayModeMenu();
+            return;
+        }
+        if (menuItemText.equals(getActivity().getString(R.string.PlayModeLocalMenuTitle))) {
+            PlayModeManager.instance.closePlayModeMenu();
+            return;
+        }
+        PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
+    }
+
+    @Subscribe public void onExperienceListChange(ExpListChangeEvent event) {
+        if (mActive)
+            updateAdapterList();
+    }
+
     /** Be sure to dismiss the play mode menu, if one is present */
     @Override public void onPause() {
         super.onPause();
@@ -164,8 +187,18 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Ensure that the dispatcher and the dispatcher type exist, and ensure that this setup
         // is for a true experience fragment.  If not, abort.
         super.onSetup(context, dispatcher);
-        if (dispatcher == null || dispatcher.type == null || dispatcher.type.expType == null)
+        if (dispatcher == null || dispatcher.type == null)
             return;
+        switch (dispatcher.type) {
+            case expGroupList:
+            case expRoomList:
+            case experienceList:
+                break;
+            default:
+                if (dispatcher.type.expType == null)
+                    return;
+                break;
+        }
 
         // Use the dispatcher to set up the fragment to run.  If the type is a game type, set up the
         // checkerboard.
@@ -286,54 +319,6 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
         // There is an account so return it.
         return players.get(index);
-    }
-
-    /** Handle a play mode selection change. */
-    @Subscribe public void handlePlayModeChange(PlayModeChangeEvent event) {
-        if (!mActive || mExperience == null || !(event.view instanceof TextView))
-            return;
-        String menuItemText = ((TextView) event.view).getText().toString();
-        if (menuItemText.equals(getActivity().getString(R.string.PlayModeComputerMenuTitle))) {
-            showFutureFeatureMessage(R.string.PlayModeComputerMenuTitle);
-            PlayModeManager.instance.closePlayModeMenu();
-            return;
-        }
-        if (menuItemText.equals(getActivity().getString(R.string.PlayModeLocalMenuTitle))) {
-            PlayModeManager.instance.closePlayModeMenu();
-            return;
-        }
-        PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
-
-//        Object payload = event.view.getTag();
-//        if (payload == null || !(payload instanceof PlayModeMenuEntry))
-//            return;
-//        PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
-//        // Handle selecting another User by chaining to the fragment that will select the
-//        // User, copy the experience to a new room, and continue the game in that room with
-//        // the current state.
-//        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
-//        if (member == null)
-//            return;
-//        String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
-//        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
-//                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
-//                member.url);
-//        ListItem expListItem = new ListItem(mExperience);
-//        JoinManager.instance.joinRoom(selectUserListItem);
-//
-//        List<Player> players = mExperience.getPlayers();
-//        for (Player p : players) {
-//            if (p.id == null) {
-//                p.id = member.id;
-//                p.name = member.getNickName();
-//                break;
-//            }
-//        }
-//        mExperience.setName(createTwoPlayerName(mExperience.getPlayers(),
-//                mExperience.getCreateTime()));
-//        ExperienceManager.instance.move(mExperience, entry.groupKey, selectUserListItem.roomKey);
-//        ExperienceManager.instance.deleteExperience(expListItem);
-//        PlayModeManager.instance.closePlayModeMenu();
     }
 
     /**
