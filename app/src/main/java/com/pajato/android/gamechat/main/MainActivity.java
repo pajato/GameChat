@@ -18,12 +18,14 @@
 package com.pajato.android.gamechat.main;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -54,6 +56,7 @@ import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
+import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
 import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
@@ -240,6 +243,38 @@ public class MainActivity extends BaseActivity
                 Log.d(TAG, String.format(Locale.US, format, event.item.getTitle()));
                 break;
         }
+    }
+
+    @Subscribe public void onProtectedUserAuthFailureEvent(ProtectedUserAuthFailureEvent event) {
+        // Pop up an alert indicating the problem
+        String title = getString(R.string.AuthProtectedUserFailureTitle);
+        String userEmail = ProtectedUserManager.instance.getEMailCredentials().email;
+        String format = getString(R.string.AuthProtectedUserFailureMessage);
+        String message = String.format(Locale.US, format, userEmail, event.message);
+        showAlertDialog(title, message, false, null, true, null);
+    }
+
+    /** Show an alert dialog with "ok" and "cancel". */
+    public void showOkCancelDialog(final String title, final String message,
+                                   DialogInterface.OnClickListener cancelListener,
+                                   DialogInterface.OnClickListener okListener) {
+        showAlertDialog(title, message, true, cancelListener, true, okListener);
+    }
+
+    /** Show an alert dialog with cancel and/or ok button(s). */
+    public void showAlertDialog(final String title, final String message, boolean showCancel,
+                                DialogInterface.OnClickListener cancelListener, boolean showOk,
+                                DialogInterface.OnClickListener okListener) {
+        if (!showCancel && !showOk)
+            Log.e(TAG, "showAlertDialog called but no buttons are specified.");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).
+                setTitle(title).
+                setMessage(message);
+        if (showCancel)
+            builder.setNegativeButton(android.R.string.cancel, cancelListener);
+        if (showOk)
+            builder.setPositiveButton(android.R.string.ok, okListener);
+        builder.create().show();
     }
 
     /** Process the result from a request for a permission */

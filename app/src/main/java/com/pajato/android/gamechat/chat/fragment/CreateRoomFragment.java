@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseCreateFragment;
@@ -98,20 +97,15 @@ public class CreateRoomFragment extends BaseCreateFragment {
         // Determine if the specified name is unique within the current group's rooms
         if (GroupManager.instance.groupHasRoomName(mGroup.key, mRoom.name) && !ignoreDupName) {
             dismissKeyboard();
-            new AlertDialog.Builder(getActivity())
-                    .setTitle(String.format(getString(R.string.RoomExistsTitle), mRoom.name))
-                    .setMessage(String.format(getString(R.string.RoomExistsMessage), mRoom.name))
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface d, int id) {
-                                    save(account, true);
-                                    DispatchManager.instance.startNextFragment(getActivity(), chat);
-                                }
-                            })
-                    .create()
-                    .show();
+            String title = String.format(getString(R.string.RoomExistsTitle), mRoom.name);
+            String message = String.format(getString(R.string.RoomExistsMessage), mRoom.name);
+            DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface d, int id) {
+                    save(account, true);
+                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                }
+            };
+            showAlertDialog(title, message, null, okListener);
             return false;
         }
 

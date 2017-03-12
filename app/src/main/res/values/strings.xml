@@ -1,4 +1,9 @@
 <resources>
+    <string name="AuthFailureInvalidCredentials">Invalid credentials specified.</string>
+    <string name="AuthFailureInvalidUser">This user is no longer valid in the Firebase database.</string>
+    <string name="AuthSignInFailure">Sign in failed: %s</string>
+    <string name="AuthProtectedUserFailureTitle">Failed to authorize protected user</string>
+    <string name="AuthProtectedUserFailureMessage">Failed to authorize protected user %1$s due to error. %2$s</string>
     <string name="AccessToGroupsTitle">Allow Access to Groups</string>
     <string name="CreateRestrictedUserTitle">Create Protected User</string>
     <string name="DeleteGroupMessage">Delete Group</string>

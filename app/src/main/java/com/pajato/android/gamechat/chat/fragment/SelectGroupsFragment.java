@@ -51,9 +51,8 @@ public class SelectGroupsFragment extends BaseChatFragment {
                     Log.e(TAG, "Cannot create protected user: e-mail credentials are not set");
                     break;
                 }
-                ProtectedUserManager.instance.removeEMailCredentials();
                 AccountManager.instance.createProtectedAccount(credentials.email, credentials.name,
-                        credentials.secret, getGroupSelections());
+                        credentials.secret, credentials.accountIsKnown, getGroupSelections());
                 break;
             case R.id.selector:
                 // Checkbox click, just update the adapter

@@ -1,7 +1,6 @@
 package com.pajato.android.gamechat.exp.model;
 
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -203,20 +202,14 @@ public class Checkers implements Experience {
             return true;
         }
         final String key = this.key;
-        new AlertDialog.Builder(fragment.getActivity())
-                .setTitle(fragment.getString(R.string.ResetGameTitle))
-                .setMessage(fragment.getString(R.string.ResetGameMessage))
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                resetModel();
-                                AppEventManager.instance.post(new ExperienceResetEvent(key));
-                            }
-                        })
-                .create()
-                .show();
+        DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface d, int id) {
+                resetModel();
+                AppEventManager.instance.post(new ExperienceResetEvent(key));
+            }
+        };
+        fragment.showAlertDialog(fragment.getString(R.string.ResetGameTitle),
+                fragment.getString(R.string.ResetGameMessage), null, okListener);
         return false;
     }
 

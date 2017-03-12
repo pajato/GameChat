@@ -18,6 +18,7 @@
 package com.pajato.android.gamechat.common;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -51,6 +52,7 @@ import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.main.MainActivity;
 
 import java.util.List;
 import java.util.Locale;
@@ -360,5 +362,13 @@ public abstract class BaseFragment extends Fragment {
         else
             state.setType(active);
         MemberManager.instance.updateMember(member);
+    }
+
+    /** Show an alert dialog with "ok" and "cancel". */
+    public void showAlertDialog(final String title, final String message,
+                                   DialogInterface.OnClickListener cancelListener,
+                                   DialogInterface.OnClickListener okListener) {
+        MainActivity activity = (MainActivity) this.getActivity();
+        activity.showOkCancelDialog(title, message, cancelListener, okListener);
     }
 }

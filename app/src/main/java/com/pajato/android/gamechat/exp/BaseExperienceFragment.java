@@ -22,7 +22,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -568,20 +567,13 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         final Experience exp = ExperienceManager.instance.experienceMap.get(item.key);
         if (exp == null)
             return;
-        new AlertDialog.Builder(getActivity())
-                .setTitle(getString(R.string.DeleteExperienceTitle))
-                .setMessage(String.format(getString(R.string.DeleteConfirmMessage),
-                        exp.getName()))
-                .setNegativeButton(android.R.string.cancel, null) // dismiss
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                ExperienceManager.instance.deleteExperience(item);
-                            }
-                        })
-                .create()
-                .show();
+        String message = String.format(getString(R.string.DeleteConfirmMessage), exp.getName());
+        DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface d, int id) {
+                ExperienceManager.instance.deleteExperience(item);
+            }
+        };
+        showAlertDialog(getString(R.string.DeleteExperienceTitle), message, null, okListener);
     }
 
     /** Return the fragment type corresponding to the sole experience in the map. */
