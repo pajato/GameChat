@@ -98,15 +98,7 @@ public enum FabManager {
         if (layout != null) dismissMenu(fragment, layout);
     }
 
-    /** Ensure that the FAb is not being shown. */
-    public void hide(@NonNull final Fragment fragment) {
-        View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        fab.setVisibility(View.GONE);
-    }
-
-    /** Initialize the FAB. Set size to small FAB for games to small; all others use normal .*/
+    /** Initialize the FAB. Use small FAB size for game fragments; all others use normal size. */
     public void init(@NonNull final BaseFragment fragment) {
         // Ensure that the layout and the recycler views exist. Abort quietly if they do not.
         View layout = getFragmentLayout(fragment);

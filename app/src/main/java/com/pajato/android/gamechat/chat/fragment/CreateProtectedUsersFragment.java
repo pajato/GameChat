@@ -61,9 +61,8 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
     private class EmailOnSuccessListener implements OnSuccessListener<ProviderQueryResult> {
         @Override
         public void onSuccess(ProviderQueryResult result) {
-            RelativeLayout layout =
-                    (RelativeLayout) getActivity().
-                            findViewById(R.id.email_next_btn_layout);
+            int id = R.id.email_next_btn_layout;
+            RelativeLayout layout = (RelativeLayout) getActivity().findViewById(id);
             layout.setVisibility(View.GONE);
             List<String> providers = result.getProviders();
             if (providers == null || providers.isEmpty()) {

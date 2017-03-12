@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.common;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -88,32 +87,29 @@ public enum PlayModeManager {
         if (payload == null || !(payload instanceof PlayModeMenuEntry))
             return;
         PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
-        // Handle selecting another User by chaining to the fragment that will select the
-        // User, copy the experience to a new room, and continue the game in that room with
-        // the current state.
         Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
         if (member == null)
             return;
+        // Handle selecting another User by chaining to the fragment that will select the
+        // User, copy the experience to a new room, and continue the game in that room with
+        // the current state.
         String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
         ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
                 entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
                 member.url);
         Experience experience = fragment.getExperience();
-        ListItem expListItem = new ListItem(experience);
         JoinManager.instance.joinRoom(selectUserListItem);
-
-        List<Player> players = fragment.getExperience().getPlayers();
-        for (Player p : players) {
+        for (Player p : experience.getPlayers()) {
             if (p.id == null) {
                 p.id = member.id;
                 p.name = member.getNickName();
                 break;
             }
         }
-        fragment.getExperience().setName(fragment.createTwoPlayerName(experience.getPlayers(),
+        experience.setName(fragment.createTwoPlayerName(experience.getPlayers(),
                 experience.getCreateTime()));
         ExperienceManager.instance.move(experience, entry.groupKey, selectUserListItem.roomKey);
-        ExperienceManager.instance.deleteExperience(expListItem);
+        ExperienceManager.instance.deleteExperience(new ListItem(experience));
         PlayModeManager.instance.closePlayModeMenu();
     }
 
@@ -135,17 +131,14 @@ public enum PlayModeManager {
         ViewGroup viewGroup = (ViewGroup) activity.findViewById(R.id.gamePaneLayout);
         View popupLayout = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.playmode_menu_layout,
                 viewGroup, false);
-        View view = popupLayout.findViewById(R.id.ItemList);
-        if (view == null)
+        RecyclerView recycler = (RecyclerView) popupLayout.findViewById(R.id.ItemList);
+        if (recycler == null)
             return;
-        RecyclerView recycler = (RecyclerView) view;
 
         // Initialize the recycler view.
         PlayModeMenuAdapter adapter = new PlayModeMenuAdapter();
         recycler.setAdapter(adapter);
-        Context context = popupLayout.getContext();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context, VERTICAL, false);
-        recycler.setLayoutManager(layoutManager);
+        recycler.setLayoutManager(new LinearLayoutManager(popupLayout.getContext(), VERTICAL, false));
         recycler.setItemAnimator(new DefaultItemAnimator());
 
         // Inject the list of users into the recycler view

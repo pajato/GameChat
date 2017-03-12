@@ -34,6 +34,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
@@ -56,6 +58,7 @@ import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
+import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -165,7 +168,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Create a new protected user account and automatically join it to the specified groups */
     public void createProtectedAccount(@NonNull final String email, @NonNull final String name,
-                                       @NonNull final String password,
+                                       @NonNull final String password, final boolean accountIsKnown,
                                        @NonNull List<String> groupKeys) {
         // Remember the desired group keys and the chaperone account key
         protectedUserGroupKeys.addAll(groupKeys);
@@ -173,69 +176,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         protectedUserName = name;
         FirebaseAuth.getInstance().signOut(); // Sign out from chaperone account
 
-        // Create the Firebase user with email and password credentials
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // TODO: how to notify user??
-                        Log.e(TAG, "Error creating user!");
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        // Set display name
-                        UserProfileChangeRequest changeNameRequest =
-                                new UserProfileChangeRequest.Builder()
-                                        .setDisplayName(name)
-// TODO: How to deal with the photo URL?
-//                                        .setPhotoUri(mUser.getPhotoUri())
-                                        .build();
-
-                        final FirebaseUser user = authResult.getUser();
-                        user.updateProfile(changeNameRequest)
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.e(TAG, "Error setting display name");
-                                    }
-                                })
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        // TODO: This executes even if the name change fails, since
-                                        // the account creation succeeded and we want to save
-                                        // the credential to SmartLock (if enabled).
-                                        AccountManager.instance.mCurrentAccount.displayName = name;
-                                        AccountManager.instance.updateAccount(mCurrentAccount);
-                                    }
-                                });
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Failed to create user " + email + "(" + name + ")");
-                        // TODO: deal with these errors
-//                        if (e instanceof FirebaseAuthWeakPasswordException) {
-//                            // Password too weak
-//                            mPasswordInput.setError(getResources().getQuantityString(
-//                                    R.plurals.error_weak_password, R.integer.min_password_length));
-//                        } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
-//                            // Email address is malformed
-//                            mEmailInput.setError(getString(R.string.invalid_email_address));
-//                        } else if (e instanceof FirebaseAuthUserCollisionException) {
-//                            // Collision with existing user email, it should be very hard for
-//                            // the user to even get to this error due to CheckEmailFragment.
-//                            mEmailInput.setError(getString(R.string.error_user_collision));
-//                        } else {
-//                            // General error message, this branch should not be invoked but
-//                            // covers future API changes
-//                            mEmailInput.setError(getString(R.string.email_account_creation_error));
-//                        }
-                    }
-                });
+        // If the account is already known to exist in the database (based on previous check) then
+        // just sign in. Otherwise, create a new Firebase user.
+        if (accountIsKnown)
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnFailureListener(new AuthFailureListener());
+        else
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(new CreateSuccessListener(name))
+                    .addOnFailureListener(new AuthFailureListener());
     }
 
     /** Create and persist an account to the database. */
@@ -400,6 +349,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         mMessageMap.clear();
         mMessageMap.put(R.string.HasDepartedMessage, context.getString(R.string.HasDepartedMessage));
         mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
+        mMessageMap.put(R.string.AuthFailureInvalidCredentials,
+                context.getString(R.string.AuthFailureInvalidCredentials));
+        mMessageMap.put(R.string.AuthFailureInvalidUser,
+                context.getString(R.string.AuthFailureInvalidUser));
+        mMessageMap.put(R.string.AuthSignInFailure, context.getString(R.string.AuthSignInFailure));
     }
 
     /** Return true iff the current user is a restricted/protected user. */
@@ -707,16 +661,64 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     // Private classes
 
-    private class SignInCompletionHandler implements OnCompleteListener<AuthResult> {
+    /** A listener for account create success. */
+    private class CreateSuccessListener implements OnSuccessListener<AuthResult> {
+        String displayName;
+        CreateSuccessListener(String name) {
+            displayName = name;
+        }
+        @Override public void onSuccess(AuthResult authResult) {
+            // Set display name
+            // TODO: how to get the photo URL to use in the request '.setPhotoUri' method?
+            UserProfileChangeRequest changeNameRequest = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(displayName)
+                    .build();
+            final FirebaseUser user = authResult.getUser();
+            user.updateProfile(changeNameRequest)
+                    .addOnFailureListener(new AuthFailureListener())
+                    .addOnCompleteListener(new AuthCompleteListener(displayName));
+        }
+    }
 
+    /** A listener for authorization failure. */
+    private class AuthFailureListener implements OnFailureListener {
+        @Override public void onFailure(@NonNull Exception e) {
+            Log.e(TAG, "Error creating user: " + e.getMessage());
+            String message;
+            if (e instanceof FirebaseAuthInvalidCredentialsException)
+                message = mMessageMap.get(R.string.AuthFailureInvalidCredentials);
+            else if (e instanceof FirebaseAuthInvalidUserException)
+                message = mMessageMap.get(R.string.AuthFailureInvalidUser);
+            else
+                message = String.format(mMessageMap.get(R.string.AuthSignInFailure),
+                        e.getLocalizedMessage());
+            AppEventManager.instance.post(new ProtectedUserAuthFailureEvent(message));
+        }
+    }
+
+    /** A listener for authorization complete. */
+    private class AuthCompleteListener implements OnCompleteListener<Void> {
+        String displayName;
+        AuthCompleteListener(String name) {
+            displayName = name;
+        }
+        @Override public void onComplete(@NonNull Task<Void> task) {
+            // TODO: This executes even if the name change fails, since the account creation
+            // succeeded and we want to save the credential to SmartLock (if enabled).
+            AccountManager.instance.mCurrentAccount.displayName = displayName;
+            AccountManager.instance.updateAccount(mCurrentAccount);
+            ProtectedUserManager.instance.removeEMailCredentials();
+        }
+    }
+
+    /** Used only in test context */
+    private class SignInCompletionHandler implements OnCompleteListener<AuthResult> {
         Activity mActivity;
         String mLogin;
-
         SignInCompletionHandler(final Activity activity, final String login) {
             mActivity = activity;
             mLogin = login;
         }
-
         @Override public void onComplete(@NonNull Task<AuthResult> task) {
             if (!task.isSuccessful()) {
                 // Log and report a signin error.

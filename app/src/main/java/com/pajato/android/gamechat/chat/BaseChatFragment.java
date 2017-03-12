@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -255,39 +254,26 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Handle click on item to promote a protected user */
     private void processPromoteProtectedUserClick(final ListItem item) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.PromoteUserTitle)
-                .setMessage(String.format(getString(R.string.PromoteUserConfirm),
-                        item.name))
-                .setNegativeButton(android.R.string.cancel, null) // dismiss
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                ProtectedUserManager.instance.promoteUser(item.key);
-                            }
-                        })
-                .create()
-                .show();
+        String message = String.format(getString(R.string.PromoteUserConfirm), item.name);
+        DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface d, int id) {
+                ProtectedUserManager.instance.promoteUser(item.key);
+            }
+        };
+        showAlertDialog(getString(R.string.PromoteUserTitle), message, null, okListener);
     }
 
     /** Handle click on item to delete a protected user */
     private void processDeleteProtectedUserClick(final ListItem item) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.DeleteUserTitle)
-                .setMessage(String.format(getString(R.string.DeleteUserConfirm),
-                        item.name))
-                .setNegativeButton(android.R.string.cancel, null) // dismiss
-                .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                ProtectedUserManager.instance.deleteProtectedUser(item.key);
-                            }
-                        })
-                .create()
-                .show();
+        String message = String.format(getString(R.string.DeleteUserConfirm), item.name);
+        DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface d, int id) {
+                ProtectedUserManager.instance.deleteProtectedUser(item.key);
+            }
+        };
+        showAlertDialog(getString(R.string.DeleteUserTitle), message, null, okListener);
     }
+
     /** Handle click on item to leave (or delete) group */
     private void handleLeaveGroupClick(final ListItem item) {
         final Group group = GroupManager.instance.getGroupProfile(item.groupKey);
@@ -296,20 +282,13 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (AccountManager.instance.getCurrentAccountId().equals(group.owner))
             showFutureFeatureMessage(R.string.DeleteGroupMessage);
         else {
-            new AlertDialog.Builder(getActivity())
-                    .setTitle(getString(R.string.LeaveGroupTitle))
-                    .setMessage(String.format(getString(R.string.LeaveConfirmMessage),
-                            group.name))
-                    .setNegativeButton(android.R.string.cancel, null) // dismiss
-                    .setPositiveButton(android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface d, int id) {
-                                    AccountManager.instance.leaveGroup(group);
-                                }
-                    })
-                    .create()
-                    .show();
+            String message = String.format(getString(R.string.LeaveConfirmMessage), group.name);
+            DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface d, int id) {
+                    AccountManager.instance.leaveGroup(group);
+                }
+            };
+            showAlertDialog(getString(R.string.LeaveGroupTitle), message, null, okListener);
         }
     }
 
@@ -321,20 +300,13 @@ public abstract class BaseChatFragment extends BaseFragment {
         if (AccountManager.instance.getCurrentAccountId().equals(room.owner))
             showFutureFeatureMessage(R.string.DeleteRoomMessage);
         else {
-            new AlertDialog.Builder(getActivity())
-                    .setTitle(getString(R.string.LeaveRoomTitle))
-                    .setMessage(String.format(getString(R.string.LeaveConfirmMessage),
-                            room.getName()))
-                    .setNegativeButton(android.R.string.cancel, null) // dismiss
-                    .setPositiveButton(android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface d, int id) {
-                                    AccountManager.instance.leaveRoom(room);
-                                }
-                            })
-                    .create()
-                    .show();
+            String message = String.format(getString(R.string.LeaveConfirmMessage), room.getName());
+            DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+                @Override public void onClick(DialogInterface d, int id) {
+                    AccountManager.instance.leaveRoom(room);
+                }
+            };
+            showAlertDialog(getString(R.string.LeaveRoomTitle), message, null, okListener);
         }
     }
 
