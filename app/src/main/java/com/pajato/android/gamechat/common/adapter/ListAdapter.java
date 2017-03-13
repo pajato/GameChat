@@ -186,7 +186,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                     HelpListViewHolder hh = (HelpListViewHolder) holder;
                     hh.title.setText(item.name);
                     hh.title.setTag(item);
-                    hh.icon.setImageResource(R.drawable.content_newspaper_black_24dp);
+                    hh.icon.setImageResource(R.drawable.ic_content_newspaper_black_24dp);
                     hh.icon.setTag(item);
                     break;
                 default:
@@ -307,7 +307,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 holder.icon.setImageResource(R.drawable.vd_group_black_24px);
                 break;
             case helpArticle:
-                holder.icon.setImageResource(R.drawable.content_newspaper_black_24dp);
+                holder.icon.setImageResource(R.drawable.ic_content_newspaper_black_24dp);
                 break;
             case protectedUserList:
                 if (item.iconUrl == null) {
