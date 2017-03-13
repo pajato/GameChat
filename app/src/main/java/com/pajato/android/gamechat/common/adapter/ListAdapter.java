@@ -298,7 +298,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 break;
             case expRoom:
             case chatRoom:
-                holder.icon.setImageResource(R.drawable.ic_casino_black_24dp);
+                holder.icon.setImageResource(R.drawable.ic_checkers_black_24dp);
                 break;
             case expList:
                 holder.icon.setImageResource(item.iconResId);
