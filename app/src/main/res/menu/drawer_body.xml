@@ -4,7 +4,7 @@
         <menu>
             <group>
                 <item
-                    android:icon="@drawable/ic_chat_bubble_outline_black_24dp"
+                    android:icon="@drawable/ic_chat_bubble_circle_black_24dp"
                     android:id="@+id/nav_groups"
                     android:title="@string/navigation_drawer_label_your_groups"/>
                 <item
