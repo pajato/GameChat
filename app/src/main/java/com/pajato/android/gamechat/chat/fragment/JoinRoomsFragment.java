@@ -144,7 +144,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
     private List<MenuEntry> getSelectionMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.SelectAllMenuTitle, R.drawable.ic_done_all_black_24dp));
-        menu.add(getTintEntry(R.string.SelectRoomsMenuTitle, R.drawable.ic_casino_black_24dp));
+        menu.add(getTintEntry(R.string.SelectRoomsMenuTitle, R.drawable.ic_checkers_black_24dp));
         menu.add(getTintEntry(R.string.SelectMembersMenuTitle, R.drawable.vd_group_black_24px));
         menu.add(getTintEntry(R.string.ClearSelectionsMenuTitle, R.drawable.ic_clear_black_24dp));
         return menu;

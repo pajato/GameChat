@@ -388,7 +388,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.id.IconChess:
                 expFragmentType = chess;
                 break;
-            case R.drawable.ic_casino_black_24dp:
+            case R.drawable.ic_checkers_black_24dp:
                 // And do it for the rooms option buttons.
                 showFutureFeatureMessage(R.string.FutureSelectRooms);
                 FabManager.game.dismissMenu(this);

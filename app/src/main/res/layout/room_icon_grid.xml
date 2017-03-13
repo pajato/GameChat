@@ -30,23 +30,23 @@ http://www.gnu.org/licenses
         android:layout_height="48dp"
         android:tint="@color/colorRed"
         android:contentDescription="@string/GridRoomIconRed"
-        app:srcCompat="@drawable/ic_casino_black_24dp" />
+        app:srcCompat="@drawable/ic_checkers_black_24dp" />
     <ImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:tint="@color/colorBlue"
         android:contentDescription="@string/GridRoomIconBlue"
-        app:srcCompat="@drawable/ic_casino_black_24dp" />
+        app:srcCompat="@drawable/ic_tic_tac_toe_black_24dp" />
     <ImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:tint="@color/colorGray"
         android:contentDescription="@string/GridRoomIconGray"
-        app:srcCompat="@drawable/ic_casino_black_24dp" />
+        app:srcCompat="@drawable/ic_tic_tac_toe_black_24dp" />
     <ImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:tint="@color/colorGreen"
         android:contentDescription="@string/GridRoomIconGreen"
-        app:srcCompat="@drawable/ic_casino_black_24dp" />
+        app:srcCompat="@drawable/ic_checkers_black_24dp" />
 </GridLayout>

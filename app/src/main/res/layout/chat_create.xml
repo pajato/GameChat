@@ -51,7 +51,7 @@ http://www.gnu.org/licenses
             android:onClick="onClick"
             android:background="@color/colorLightGray"
             android:contentDescription="@string/SetCreateIconDesc"
-            app:srcCompat="@drawable/ic_casino_black_24dp" />
+            app:srcCompat="@drawable/ic_checkers_black_24dp" />
         <EditText
             android:layout_width="0dp"
             android:layout_weight="1.0"

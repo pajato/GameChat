@@ -58,7 +58,7 @@ public enum ToolbarManager {
     /** The set of menu item types. */
     public enum MenuItemType {
         chat (R.string.SwitchToChat, 0, IF_ROOM, R.drawable.ic_chat_bubble_circle_white_24dp),
-        game (R.string.SwitchToExp, 0, IF_ROOM, R.drawable.ic_games_white),
+        game (R.string.SwitchToExp, 0, IF_ROOM, R.drawable.ic_checkers_white_24dp),
         helpAndFeedback (R.string.MenuItemHelpAndFeedback, 55, NEVER, -1), // should always be included
         invite (R.string.InviteFriendsOverflow, 20, NEVER, R.drawable.ic_share_white_24dp),
         search (R.string.MenuItemSearch, 20, NEVER, R.drawable.ic_search_white_24px),
