@@ -514,6 +514,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
 
     /** Dispatch to the game indicated by the given type */
     private void dispatchToGame(FragmentActivity activity, FragmentType type) {
+        if (type == null || type.expType == null)
+            return;
         if (this.type != noExperiences) {
             Dispatcher dispatcher = new Dispatcher(getNextType(type), type.expType);
             DispatchManager.instance.chainFragment(activity, dispatcher);
