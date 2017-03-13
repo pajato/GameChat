@@ -230,6 +230,9 @@ public enum ToolbarManager {
         switch (item.type) {
             case expList:
                 return GroupManager.instance.getGroupName(item.groupKey);
+            case chatGroup:
+            case chatRoom:
+                return GroupManager.instance.getGroupName(item.groupKey);
             default:
                 return item.key == null
                         ? GroupManager.instance.getGroupName(item.groupKey)

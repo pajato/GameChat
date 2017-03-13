@@ -169,7 +169,7 @@ public enum RoomManager {
     /** Obtain a name for the room with the given key, "Anonymous" if a name is not available. */
     public String getRoomName(final String roomKey) {
         Room room = roomMap.get(roomKey);
-        return room != null ? room.name : "Anonymous";
+        return room != null ? room.name : null;
     }
 
     /** Get the profile for a given room. */
