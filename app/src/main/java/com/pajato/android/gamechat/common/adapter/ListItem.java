@@ -162,6 +162,10 @@ public class ListItem {
         this.type = type;
         this.groupKey = groupKey;
         this.roomKey = roomKey;
+        if (roomKey != null)
+            key = roomKey;
+        else
+            key = groupKey;
         this.name = name;
         this.count = count;
         this.text = text;

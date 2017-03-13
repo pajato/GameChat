@@ -28,7 +28,6 @@ import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
-import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -44,7 +43,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
-import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -102,7 +100,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
             DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface d, int id) {
                     save(account, true);
-                    DispatchManager.instance.startNextFragment(getActivity(), chat);
+                    getActivity().onBackPressed(); // Go back
                 }
             };
             showAlertDialog(title, message, null, okListener);

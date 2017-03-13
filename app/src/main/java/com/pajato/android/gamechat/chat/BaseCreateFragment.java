@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
-import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -38,7 +37,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
 
@@ -72,7 +70,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) {
                     if (save(account, false))
-                        DispatchManager.instance.startNextFragment(getActivity(), chat);
+                        getActivity().onBackPressed(); // Go back
                 } else {
                     dismissKeyboard();
                     abort(getString(R.string.InvalidAccountError));
