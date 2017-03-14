@@ -122,12 +122,13 @@ public enum CheckersEngine implements Engine {
         // Ignore clicks on invalid positions.  If the position represents a valid piece then
         // mark it as the selected piece and get a list of possible move positions that exclude
         // the possibility of putting the moving player into check.
-        if (mModel.board.hasPiece(position)) {
-            mModel.board.setSelectedPosition(position);
-            mModel.board.getPossibleMoves().clear();
+        mModel.board.setSelectedPosition(position);
+        mModel.board.getPossibleMoves().clear();
+        if (mModel.board.hasPiece(position))
             mModel.board.getPossibleMoves().addAll(getPossibleMoves(position));
-            ExperienceManager.instance.updateExperience(mModel);
-        }
+        else
+            mModel.board.clearSelectedPiece();
+        ExperienceManager.instance.updateExperience(mModel);
     }
 
     // Private instance methods.

@@ -45,14 +45,21 @@ public class Checkerboard {
 
     // Private class constants.
 
-    /** The amount of space taken by a smart phone toolbar in dp units. */
-    private static final int SMART_PHONE_HEIGHT = 56;
+    /**
+     * The space taken by a smart phone notification bar and digital buttons in dp units. The
+     * number comes from the calculation of 56dp * 1.5. 56 comes from an estimation of the DP of the
+     * phone's lower digital button area, and the additional half of the 1.5 comes from the
+     * notification bar at the top of the phone's screen, which was eyeballed to be roughly half the
+     * size of the digital button area. This is something that could potentially be improved upon.
+     */
+    private static final int SMART_PHONE_HEIGHT = 84;
 
-    /** The amount of space taken by a tablet toolbar in dp units. */
-    private static final int TABLET_HEIGHT = 64;
-
-    /** The amount of vertical space allocated for the player controls. */
-    private static final int CONTROLS_HEIGHT = 112;
+    /**
+     * The space taken by a tablet notification bar and digital buttons in dp units. Similar to the
+     * Smart Phone Height variable, it is based on a calculation of 28dp * 1.5, which was a similar
+     * estimate of the tablet's digital button area, and the roughly-half-the-size notification bar.
+     */
+    private static final int TABLET_HEIGHT = 42;
 
     /**
      * The amount of vertical space allocated to the mini FAB control, which consists of three
@@ -160,7 +167,20 @@ public class Checkerboard {
         final int dipsHeight = getDips(metrics, metrics.heightPixels);
         final int dipsWidth = getDips(metrics, metrics.widthPixels);
         final int toolbarDps = PaneManager.instance.isTablet() ? TABLET_HEIGHT : SMART_PHONE_HEIGHT;
-        final int unavailableHeight = CONTROLS_HEIGHT + FAB_HEIGHT + toolbarDps;
+
+        // Establish the controls height. Remember to convert the SP of text in the layout to DP.
+        // The default is 1-1, but is not necessarily, as SP can scale based on user settings.
+        // This is very arbitrary based on the current physical XML layouts -- if those are changed
+        // (particularly those in exp_toolbar_game_inc.xml and exp_checkers.xml) then this should be
+        // changed to reflect them.
+        int toolbarTextRow1 = convertSPtoDP(20, metrics);
+        int toolbarTextRow2 = Math.max(toolbarTextRow1, (4 + convertSPtoDP(14, metrics)));
+        int controlsRow1 = Math.max(toolbarTextRow1, (40 + convertSPtoDP(14, metrics)));
+        int controlsRow2 = Math.max(convertSPtoDP(20, metrics), (36 + convertSPtoDP(14, metrics)));
+        controlsRow2 = Math.max(56, controlsRow2);
+        final int controlsHeight = toolbarTextRow1 + toolbarTextRow2 + controlsRow1 + controlsRow2;
+
+        final int unavailableHeight = controlsHeight + FAB_HEIGHT + toolbarDps;
         final int boardHeight = dipsHeight - unavailableHeight;
         final int boardWidth = (PaneManager.instance.isTablet() ? dipsWidth / 2 : dipsWidth) - 32;
         boolean useWidth = boardHeight > boardWidth;
@@ -194,9 +214,16 @@ public class Checkerboard {
         mGrid.getChildAt(position).setBackgroundColor(ContextCompat.getColor(context, colorResId));
     }
 
+    /** Convert a given pixel number to dps. */
     private int getDips(final DisplayMetrics metrics, final int px) {
         // float dp = px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return (px * DisplayMetrics.DENSITY_DEFAULT) / metrics.densityDpi;
 
+    }
+
+    /** Convert a given sp value into dps in order to account for variable text size. */
+    private int convertSPtoDP(final int spValue, final DisplayMetrics displayMetrics) {
+        int px = (int) (spValue * displayMetrics.scaledDensity);
+        return getDips(displayMetrics, px);
     }
 }
