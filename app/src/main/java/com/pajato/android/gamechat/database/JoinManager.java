@@ -157,10 +157,9 @@ public enum JoinManager {
 
     // Private instance methods.
 
-    /** Return a list of available room entries from the given group excluding joined ones. */
+    /** Return a list of member room entries excluding joined ones and disallowing duplicates */
     public List<ListItem> getAvailableMembers(final ListItem item) {
         // Get a list of all members visible to the current User.
-        List<ListItem> result = new ArrayList<>();
         List<ListItem> items = new ArrayList<>();
         List<String> groupList = GroupManager.instance.getGroups(item);
         String currentAccountId = AccountManager.instance.getCurrentAccountId();
@@ -172,18 +171,26 @@ public enum JoinManager {
                 // Don't add the member to the list of members if there is already a room which
                 // is private, contains only two members and they are the current account and
                 // the member we're considering now.
-                boolean hasMemberRoom = false;
+                boolean canAdd = true;
                 for (Map.Entry<String, Room> entry : RoomManager.instance.roomMap.entrySet()) {
                     Room room = entry.getValue();
                     if (room.isMemberPrivateRoom(member.id, currentAccountId)) {
-                        hasMemberRoom = true;
+                        canAdd = false;
                         break;
                     }
                 }
-                if (!hasMemberRoom)
+                // Check for duplicate member (member in > 1 group)
+                for (ListItem anItem : items) {
+                    if (anItem.key.equals(member.id)) {
+                        // modify the already added item and remember we can't add this one
+                        anItem.addGroupKey(groupKey);
+                        canAdd = false;
+                    }
+                }
+                if (canAdd)
                     items.add(new ListItem(selectableMember, groupKey, member.id,
-                            member.getNickName(),
-                            GroupManager.instance.getGroupName(groupKey), member.url));
+                            member.getNickName(), GroupManager.instance.getGroupName(groupKey),
+                            member.url));
             }
         }
 
@@ -191,6 +198,7 @@ public enum JoinManager {
         int noAvailableMembers = R.string.MembersNotAvailableHeaderText;
         int availableMembers = R.string.MembersAvailableHeaderText;
         int resourceId = items.size() == 0 ? noAvailableMembers : availableMembers;
+        List<ListItem> result = new ArrayList<>();
         result.add(new ListItem(roomsHeader, resourceId));
         result.addAll(items);
         return result;
@@ -230,7 +238,8 @@ public enum JoinManager {
     private Room joinMember(@NonNull final String groupKey, @NonNull final String memberKey) {
         // Ensure that a current account, member and group profile all exist. Abort if not,
         // otherwise determine if the room already exists.  Return it if so, otherwise obtain a
-        // push key for the new room.
+        // push key for the new room. To get started, work using the first item in the groupKeys
+        // list (it may also be the only item).
         Group group = GroupManager.instance.getGroupProfile(groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
         Account member = MemberManager.instance.getMember(groupKey, memberKey);

@@ -16,6 +16,8 @@
  */
 package com.pajato.android.gamechat.common.adapter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -30,8 +32,8 @@ public class PlayModeMenuEntry {
     /** The associated account push key, or null if not a user entry */
     public String accountKey;
 
-    /** The group key associated with the target member, if any */
-    public String groupKey;
+    /** Group keys list, usually contains one entry, except when a member belongs to > 1 group */
+    public List<String> groupKeyList;
 
     /** A description of the item. */
     private String mDescription;
@@ -46,7 +48,8 @@ public class PlayModeMenuEntry {
     public PlayModeMenuEntry(String text, String accountKey, String groupKey) {
         this.type = MENU_TEXT_TYPE;
         this.accountKey = accountKey;
-        this.groupKey = groupKey;
+        this.groupKeyList = new ArrayList<>();
+        this.groupKeyList.add(groupKey);
         this.title = text;
         String format = "Play Mode Menu item with title {%s}, account id {%s} and group key {%s}.";
         mDescription = String.format(Locale.US, format, title, accountKey, groupKey);

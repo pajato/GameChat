@@ -292,7 +292,7 @@ public class MainActivity extends BaseActivity
         // Handle a result from either the intro activity or the invite activity.
         super.onActivityResult(request, result, intent);
         if (result != RESULT_OK)
-            logFailedResult(request, intent);
+            logFailedResult(request, intent, result == RESULT_CANCELED);
         else if (request == RC_INVITE) {
             // Invite activity result; process in the invitation manager.
             Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + result);
@@ -357,7 +357,7 @@ public class MainActivity extends BaseActivity
     }
 
     /** Provide a logcat message about a failed result. */
-    private void logFailedResult(int request, Intent intent) {
+    private void logFailedResult(int request, Intent intent, boolean isCancelled) {
         String requester;
         switch (request) {
             case RC_INTRO:
@@ -370,8 +370,14 @@ public class MainActivity extends BaseActivity
                 requester = "Unknown";
                 break;
         }
-        String format = "onActivityResult: %s, FAILED, \nIntent: %s";
-        Log.d(TAG, String.format(Locale.US, format, requester, intent.toString()));
+        // Intent may be null so prevent null-pointer-exception crash
+        if (isCancelled) {
+            String message = String.format(Locale.US, "%s CANCELED", request);
+            Log.d(TAG, message);
+        } else {
+            String format = "onActivityResult: %s, FAILED, \nIntent: %s";
+            Log.d(TAG, String.format(Locale.US, format, requester, intent.toString()));
+        }
     }
 
     /** Determine if the intro screen needs to be presented and do so. */

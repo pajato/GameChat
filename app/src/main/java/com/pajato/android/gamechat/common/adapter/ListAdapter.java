@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -359,11 +360,23 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
         holder.name.setText(item.name);
-        if (holder.text != null)
+        if (holder.text != null) {
             if (item.text == null || item.text.length() == 0)
                 holder.text.setVisibility(View.GONE);
+            else if (item.mGroupKeyList != null) {
+                List<String> groupNames = new ArrayList<>();
+                for (String aGroupKey : item.mGroupKeyList) {
+                    Group g = GroupManager.instance.getGroupProfile(aGroupKey);
+                    if (g != null)
+                        groupNames.add(g.name);
+                }
+                String groupList = TextUtils.join(", ", groupNames);
+                holder.text.setText(groupList);
+            }
             else
                 holder.text.setText(CompatUtils.fromHtml(item.text));
+
+        }
         setIcon(holder, item);
         setEndIcon(holder, item);
         holder.itemView.setTag(item);

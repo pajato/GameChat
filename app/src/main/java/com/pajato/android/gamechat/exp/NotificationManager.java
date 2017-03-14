@@ -27,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.InviteEvent;
@@ -139,14 +140,22 @@ public enum NotificationManager {
             mType = type;
         }
 
+        /** Show the FAB when the snackbar is dismissed */
         @Override public void onDismissed(final Snackbar snackbar, final int event) {
+            // Prevent null pointer exception by checking for fragment is active.
+            if (!(mFragment instanceof BaseFragment) || !((BaseFragment)mFragment).isActive())
+                return;
             if (mType == chat)
                 FabManager.chat.setVisibility(mFragment, View.VISIBLE);
             else
                 FabManager.game.setVisibility(mFragment, View.VISIBLE);
         }
 
+        /** Hide the FAB when the snackbar is shown */
         @Override public void onShown(final android.support.design.widget.Snackbar snackbar) {
+            // Prevent null pointer exception by checking for fragment is active
+            if (!(mFragment instanceof BaseFragment) || !((BaseFragment)mFragment).isActive())
+                return;
             if (mType == chat)
                 FabManager.chat.setVisibility(mFragment, View.INVISIBLE);
             else

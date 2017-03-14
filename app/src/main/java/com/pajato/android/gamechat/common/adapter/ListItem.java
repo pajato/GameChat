@@ -25,6 +25,8 @@ import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.exp.Experience;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.contact;
@@ -123,6 +125,9 @@ public class ListItem {
     /** The group (push) key, possibly null, used for many list items (groups, rooms, messages) */
     public String groupKey;
 
+    /** A list of group keys, used only for an item that overlaps multiple groups */
+    List<String> mGroupKeyList;
+
     /** The item image resource id for dynamic images, as used with experiences. */
     public int iconResId;
 
@@ -162,10 +167,7 @@ public class ListItem {
         this.type = type;
         this.groupKey = groupKey;
         this.roomKey = roomKey;
-        if (roomKey != null)
-            key = roomKey;
-        else
-            key = groupKey;
+        key = roomKey != null ? roomKey : groupKey;
         this.name = name;
         this.count = count;
         this.text = text;
@@ -260,6 +262,16 @@ public class ListItem {
         Group group = GroupManager.instance.getGroupProfile(groupKey);
         text = group != null ? group.name : "";
         enabled = type == inviteRoom;
+    }
+
+    /** Add a new group key to the group key list. Initialize the list if necessary. */
+    public void addGroupKey(String additionalGroupKey) {
+        if (mGroupKeyList == null) {
+            mGroupKeyList = new ArrayList<>();
+            if (groupKey != null)
+                mGroupKeyList.add(groupKey);
+        }
+        mGroupKeyList.add(additionalGroupKey);
     }
 
     // Public instance methods.
