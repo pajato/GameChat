@@ -45,14 +45,14 @@ public class Checkerboard {
 
     // Private class constants.
 
-    /** The amount of space taken by a smart phone toolbar in dp units. */
-    private static final int SMART_PHONE_HEIGHT = 56;
+    /** The space taken by a smart phone notification bar and digital buttons in dp units. */
+    private static final int SMART_PHONE_HEIGHT = 84; // 56 * 1.5
 
-    /** The amount of space taken by a tablet toolbar in dp units. */
-    private static final int TABLET_HEIGHT = 64;
+    /** The space taken by a tablet notification bar and digital buttons in dp units. */
+    private static final int TABLET_HEIGHT = 42; // 28 * 1.5
 
     /** The amount of vertical space allocated for the player controls. */
-    private static final int CONTROLS_HEIGHT = 112;
+    private static int CONTROLS_HEIGHT;
 
     /**
      * The amount of vertical space allocated to the mini FAB control, which consists of three
@@ -73,6 +73,16 @@ public class Checkerboard {
 
     /** Build an instance to establish the cell size for a given context. */
     Checkerboard(final Context context) {
+        // Establish the controls height. Remember to convert the SP of text in the layout to DP.
+        // The default is 1-1, but is not necessarily, as SP can scale based on user settings.
+        DisplayMetrics d = context.getResources().getDisplayMetrics();
+
+        int toolbarTextRow1 = convertSPtoDP(20, d);
+        int toolbarTextRow2 = Math.max(toolbarTextRow1, (4 + convertSPtoDP(14, d)));
+        int controlsRow1 = Math.max(toolbarTextRow1, (40 + convertSPtoDP(14, d)));
+        int controlsRow2 = Math.max(56, Math.max(convertSPtoDP(20, d), (36 + convertSPtoDP(14, d))));
+        CONTROLS_HEIGHT = toolbarTextRow1 + toolbarTextRow2 + controlsRow1 + controlsRow2;
+
         mCellSize = getCellSize(context);
     }
 
@@ -198,5 +208,9 @@ public class Checkerboard {
         // float dp = px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return (px * DisplayMetrics.DENSITY_DEFAULT) / metrics.densityDpi;
 
+    }
+    private int convertSPtoDP(final int spValue, final DisplayMetrics displayMetrics) {
+        int px = (int) (spValue * displayMetrics.scaledDensity);
+        return getDips(displayMetrics, px);
     }
 }

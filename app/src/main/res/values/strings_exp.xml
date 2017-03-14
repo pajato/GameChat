@@ -41,7 +41,7 @@
     <string name="TieMessage">Tie game!</string>
     <string name="TieMessageNotification">Well done players</string>
     <string name="WinMessageFormat">%1$s Wins!</string>
-    <string name="WinMessageNotificationFormat">Congratulations %s, you win</string>
+    <string name="WinMessageNotificationFormat">Congratulations %s, you win!</string>
     <string name="chess_promotion_bishop">Bishop</string>
     <string name="chess_promotion_knight">Knight</string>
     <string name="chess_promotion_queen">Queen</string>

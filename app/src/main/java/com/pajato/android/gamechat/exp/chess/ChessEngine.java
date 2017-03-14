@@ -123,14 +123,16 @@ public enum ChessEngine implements Engine {
         // Ignore clicks on invalid positions.  If the position represents a valid piece then
         // mark it as the selected piece and get a list of possible move positions that exclude
         // the possibility of putting the moving player into check.
+        mModel.board.setSelectedPosition(position);
+        mModel.board.getPossibleMoves().clear();
         if (mModel.board.hasPiece(position)) {
-            mModel.board.setSelectedPosition(position);
-            mModel.board.getPossibleMoves().clear();
             List<Integer> possibleMoves = getPossibleMoves(position);
-            removeCheckExposingMoves(possibleMoves);
+            removeCheckExposingMoves(possibleMoves, mModel.board.getSelectedPosition());
             mModel.board.getPossibleMoves().addAll(possibleMoves);
-            ExperienceManager.instance.updateExperience(mModel);
+        } else {
+            mModel.board.clearSelectedPiece();
         }
+        ExperienceManager.instance.updateExperience(mModel);
     }
 
     // Private instance methods.
@@ -138,11 +140,12 @@ public enum ChessEngine implements Engine {
     /** Check to see if the game is over or not by counting the kings on the board. */
     private boolean checkFinished() {
         // Generate win conditions. If one side runs out of pieces, the other side wins.
-        if (!mModel.board.containsKing(Team.SECONDARY)) {
-            mModel.state = primary_wins;
-            mModel.setWinCount();
-        } else if (!mModel.board.containsKing(Team.PRIMARY)) {
+        Team team = mModel.turn ? SECONDARY : PRIMARY;
+        if (team == PRIMARY && isInCheck(team) && getAllMoves(team).isEmpty()) {
             mModel.state = secondary_wins;
+            mModel.setWinCount();
+        } else if (team == SECONDARY && isInCheck(team) && getAllMoves(team).isEmpty()) {
+            mModel.state = primary_wins;
             mModel.setWinCount();
         } else
             return false;
@@ -150,6 +153,7 @@ public enum ChessEngine implements Engine {
         // A side has won. Generate a suitable message.
         // TODO: is the following OK?
         if (mModel.state.isWin() || mModel.state.isTie()) {
+            mModel.board.clearSelectedPiece();
             String doneMessage = getDoneMessage();
             BaseFragment fragment = ExpHelper.getBaseFragment(mModel);
             NotificationManager.instance.notifyGameDone(fragment, doneMessage);
@@ -158,13 +162,38 @@ public enum ChessEngine implements Engine {
         return true;
     }
 
+    /** Returns a list containing the end position for all valid moves for the given team. */
+    private List<Integer> getAllMoves(Team team) {
+        List<Integer> allMoves = new ArrayList<>();
+
+        // Deep copy the key set to allow our helper methods to modify the board while we iterate
+        // through it.
+        List<String> keys = new ArrayList<>();
+        for (String key : mModel.board.getKeySet()) {
+            keys.add(key);
+        }
+
+        // Get all valid moves. Note that this does not get moves that would put the user in check.
+        for (String key : keys) {
+            int position = mModel.board.getPosition(key);
+            if (!mModel.board.getPiece(position).isTeam(team))
+                continue;
+            List<Integer> possibleMoves = getPossibleMoves(position);
+            removeCheckExposingMoves(possibleMoves, position);
+            for(Integer possibleMove : possibleMoves) {
+                allMoves.add(possibleMove);
+            }
+        }
+        return allMoves;
+    }
+
     /** Return a done message text to show in a snackbar.  The given model provides the state. */
     private String getDoneMessage() {
         // Determine if there is a winner.  If not, return the "tie" message.
         BaseFragment fragment = ExpHelper.getBaseFragment(mModel);
         String name = mModel.getWinningPlayer().name;
         int resId = R.string.WinMessageNotificationFormat;
-        String format = name != null ? fragment.getString(resId): null;
+        String format = name != null ? "Checkmate! " + fragment.getString(resId): null;
         String message = format != null ? String.format(Locale.getDefault(), format, name) : null;
         return message != null ? message : fragment.getString(R.string.TieMessageNotification);
     }
@@ -337,24 +366,25 @@ public enum ChessEngine implements Engine {
     }
 
     /** Remove any possible moves that would result in placing the active King in check. */
-    private void removeCheckExposingMoves(final List<Integer> possibleMoves) {
+    private void removeCheckExposingMoves(final List<Integer> possibleMoves, final int piecePosition) {
         // Collect the rejected moves for removal after all possible positions have been tested.
         List<Integer> exposedMoves = new ArrayList<>();
         for (int possiblePosition : possibleMoves)
-            if (testForCheck(possiblePosition))
+            if (testForCheck(possiblePosition, piecePosition))
                 exposedMoves.add(possiblePosition);
         for (int position : exposedMoves)
             possibleMoves.remove(Integer.valueOf(position));
     }
 
     /** Return true if moving the selected piece to the given position would expose a check. */
-    private boolean testForCheck(final int position) {
+    private boolean testForCheck(final int position, final int selectedPosition) {
         // Move the selected piece to the possible move and test to see if the associated King
-        // would be in check.  First, save any displaced piece information.
+        // would be in check.  First, save any displaced piece information. Moving nothing cannot
+        // put the player in check, so if there is no piece at the position, then return false.
         boolean result;
         ChessBoard board = mModel.board;
-        int savedSelectedPosition = board.getSelectedPosition();
-        ChessPiece savedSelectedPiece = board.delete(savedSelectedPosition);
+        ChessPiece savedSelectedPiece = board.delete(selectedPosition);
+        if(savedSelectedPiece == null) return false;
         ChessPiece savedMovePiece = board.hasPiece(position) ? board.getPiece(position) : null;
 
         // Add the selected piece to the move position, clear it from the board and test for check.
@@ -368,8 +398,8 @@ public enum ChessEngine implements Engine {
             board.add(position, savedMovePiece);
         else
             board.delete(position);
-        board.add(savedSelectedPosition, savedSelectedPiece);
-        board.setSelectedPosition(savedSelectedPosition);
+        board.add(selectedPosition, savedSelectedPiece);
+        board.setSelectedPosition(selectedPosition);
         return result;
     }
 

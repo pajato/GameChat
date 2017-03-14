@@ -71,7 +71,7 @@ public class TileClickHandler implements View.OnClickListener {
         // If so, return false, otherwise true.
         Board board = mModel.getBoard();
         Team team = board.getTeam(position);
-        if (team == Team.NONE) // clicking on an empty cell should be ignored
+        if (team == Team.NONE) // clicking on an empty cell is not playing out of turn
             return false;
         boolean turn = mModel.getTurn();
         boolean isOwnPlayer = (team == Team.PRIMARY && turn) || (team == Team.SECONDARY && !turn);
