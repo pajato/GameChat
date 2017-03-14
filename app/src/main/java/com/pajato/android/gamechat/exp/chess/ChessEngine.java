@@ -384,7 +384,8 @@ public enum ChessEngine implements Engine {
         boolean result;
         ChessBoard board = mModel.board;
         ChessPiece savedSelectedPiece = board.delete(selectedPosition);
-        if(savedSelectedPiece == null) return false;
+        if(savedSelectedPiece == null)
+            return false;
         ChessPiece savedMovePiece = board.hasPiece(position) ? board.getPiece(position) : null;
 
         // Add the selected piece to the move position, clear it from the board and test for check.

@@ -68,10 +68,11 @@ public class TileClickHandler implements View.OnClickListener {
     /** Return TRUE iff the piece selected is from the other team and not being captured. */
     private boolean isPlayingOutOfTurn(final int position) {
         // Ensure that the piece played is correct according to the turn or is being captured.
-        // If so, return false, otherwise true.
+        // If the tile clicked has no piece, return false. Otherwise ensure it's not being played
+        // out of turn.
         Board board = mModel.getBoard();
         Team team = board.getTeam(position);
-        if (team == Team.NONE) // clicking on an empty cell is not playing out of turn
+        if (team == Team.NONE)
             return false;
         boolean turn = mModel.getTurn();
         boolean isOwnPlayer = (team == Team.PRIMARY && turn) || (team == Team.SECONDARY && !turn);
