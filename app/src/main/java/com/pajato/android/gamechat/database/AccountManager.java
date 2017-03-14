@@ -180,6 +180,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // just sign in. Otherwise, create a new Firebase user.
         if (accountIsKnown)
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(new AuthSuccessListener())
                     .addOnFailureListener(new AuthFailureListener());
         else
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
@@ -693,6 +694,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                 message = String.format(mMessageMap.get(R.string.AuthSignInFailure),
                         e.getLocalizedMessage());
             AppEventManager.instance.post(new ProtectedUserAuthFailureEvent(message));
+        }
+    }
+
+    /** A listener for authorization success. */
+    public class AuthSuccessListener implements OnSuccessListener<AuthResult> {
+        @Override public void onSuccess(@NonNull AuthResult result) {
+            // Clean up the stashed credentials after authorization is successful
+            ProtectedUserManager.instance.removeEMailCredentials();
         }
     }
 

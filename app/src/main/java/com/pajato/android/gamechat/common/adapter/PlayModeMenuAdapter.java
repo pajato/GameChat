@@ -110,7 +110,6 @@ public class PlayModeMenuAdapter extends RecyclerView.Adapter<ViewHolder> implem
         /** The text view showing the simple text */
         TextView title;
 
-
         /** Build a simple text menu item view holder from the given adapter item view. */
         MenuTextViewHolder(final View adapterItemView) {
             super(adapterItemView);

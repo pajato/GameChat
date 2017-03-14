@@ -43,6 +43,7 @@ import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.model.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,17 +88,18 @@ public enum PlayModeManager {
         if (payload == null || !(payload instanceof PlayModeMenuEntry))
             return;
         PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
-        Account member = MemberManager.instance.getMember(entry.groupKey, entry.accountKey);
+        Account member = MemberManager.instance.getMember(entry.groupKeyList.get(0), entry.accountKey);
         if (member == null)
             return;
-        // Handle selecting another User by chaining to the fragment that will select the
-        // User, copy the experience to a new room, and continue the game in that room with
-        // the current state.
+        // Handle selecting another User by moving the experience to a new room with an appropriate
+        // name, and continuing the game in that room with the current state.
         String userName = String.format(Locale.US, "%s (%s)", member.getNickName(), member.email);
-        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKey,
-                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKey),
+        ListItem selectUserListItem = new ListItem(selectUser, entry.groupKeyList.get(0),
+                entry.accountKey, userName, GroupManager.instance.getGroupName(entry.groupKeyList.get(0)),
                 member.url);
         Experience experience = fragment.getExperience();
+        // Create a list item before 'experience' is modified so we don't delete the new experience.
+        ListItem expListItem = new ListItem(experience);
         JoinManager.instance.joinRoom(selectUserListItem);
         for (Player p : experience.getPlayers()) {
             if (p.id == null) {
@@ -108,8 +110,8 @@ public enum PlayModeManager {
         }
         experience.setName(fragment.createTwoPlayerName(experience.getPlayers(),
                 experience.getCreateTime()));
-        ExperienceManager.instance.move(experience, entry.groupKey, selectUserListItem.roomKey);
-        ExperienceManager.instance.deleteExperience(new ListItem(experience));
+        ExperienceManager.instance.move(experience, entry.groupKeyList.get(0), selectUserListItem.roomKey);
+        ExperienceManager.instance.deleteExperience(expListItem);
         PlayModeManager.instance.closePlayModeMenu();
     }
 
@@ -165,16 +167,28 @@ public enum PlayModeManager {
         List<PlayModeMenuEntry> result = new ArrayList<>();
         result.add(new PlayModeMenuEntry(activity.getString(R.string.PlayModeLocalMenuTitle), null, null));
         result.add(new PlayModeMenuEntry(activity.getString(R.string.PlayModeComputerMenuTitle), null, null));
+
         Account account = AccountManager.instance.getCurrentAccount();
         if (account == null)
             return result;
+
+        Map<String, PlayModeMenuEntry> memberMap = new HashMap<>();
         for (String groupKey : account.joinMap.keySet()) {
             List<Account> accountList = MemberManager.instance.getMemberList(groupKey);
             for(Account member : accountList) {
-                if (!account.id.equals(member.id))
-                    result.add(new PlayModeMenuEntry(member.getDisplayName(), member.id, groupKey));
+                if (account.id.equals(member.id))
+                    continue;
+
+                // If a member exists in more than one group, only add that member once
+                if (memberMap.containsKey(member.id)) {
+                    PlayModeMenuEntry entry = memberMap.get(member.id);
+                    entry.groupKeyList.add(groupKey);
+                } else
+                    memberMap.put(member.id, new PlayModeMenuEntry(member.getDisplayName(),
+                            member.id, groupKey));
             }
         }
+        result.addAll(memberMap.values());
         return result;
     }
 

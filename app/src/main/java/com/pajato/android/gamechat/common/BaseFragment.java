@@ -121,6 +121,11 @@ public abstract class BaseFragment extends Fragment {
         return type != null ? type.toolbarType : null;
     }
 
+    /** Determine if this fragment is active */
+    public boolean isActive() {
+        return mActive;
+    }
+
     @Override public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
         logEvent("onActivityCreated", bundle);
