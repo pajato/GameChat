@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -48,6 +49,7 @@ import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.NetworkManager;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -64,7 +66,7 @@ import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
-import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expRoom;
@@ -144,7 +146,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             PlayModeManager.instance.closePlayModeMenu();
             return;
         }
-        PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
+        PlayModeManager.instance.handlePlayModeUserSelection((TextView)event.view, this);
     }
 
     @Subscribe public void onExperienceListChange(ExpListChangeEvent event) {
@@ -451,10 +453,15 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         // Case on the item resource id if there is one to be had.
         FragmentActivity activity = getActivity();
         switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.InviteFriendsOverflow:
+            case R.string.InviteFriendMessage:
+                // If not on a tablet, make sure that we switch to the chat perspective
+                if (!PaneManager.instance.isTablet()) {
+                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                }
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(activity, selectExpGroupsRooms);
+                    DispatchManager.instance.chainFragment(activity, selectGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(activity, groupKey);
                 break;

@@ -20,7 +20,7 @@
         android:icon="@drawable/ic_verified_user_black_24dp" />
     <item
         android:id="@+id/inviteFriends"
-        android:title="@string/InviteFriendNav"
+        android:title="@string/InviteFriendMessage"
         android:icon="@drawable/ic_share_black_24dp"/>
     <group android:orderInCategory="100">
         <item android:title=""/>

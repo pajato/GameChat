@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
@@ -83,11 +84,13 @@ public enum PlayModeManager {
     }
 
     /** Handle a use selection in the play mode menu */
-    public void handlePlayModeUserSelection(View view, BaseExperienceFragment fragment) {
+    public void handlePlayModeUserSelection(TextView view, BaseExperienceFragment fragment) {
         Object payload = view.getTag();
         if (payload == null || !(payload instanceof PlayModeMenuEntry))
             return;
         PlayModeMenuEntry entry = (PlayModeMenuEntry) payload;
+        if (entry.groupKeyList == null || entry.groupKeyList.size() == 0)
+            return;
         Account member = MemberManager.instance.getMember(entry.groupKeyList.get(0), entry.accountKey);
         if (member == null)
             return;

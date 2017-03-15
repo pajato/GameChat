@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.support.v4.view.ViewPager;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
@@ -29,13 +31,14 @@ import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
-import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
@@ -88,9 +91,15 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
             return;
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.InviteFriendsOverflow:
+            case R.string.InviteFriendMessage:
+                // If not on a tablet, make sure that we switch to the chat perspective
+                if (!PaneManager.instance.isTablet()) {
+                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    if (viewPager != null)
+                        viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                }
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
+                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());

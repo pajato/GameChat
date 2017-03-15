@@ -52,7 +52,7 @@ import static com.pajato.android.gamechat.common.FragmentKind.chat;
  * Provide a fragment class used to choose groups and rooms to include in an invite.
  */
 
-public class SelectChatInviteFragment extends BaseChatFragment {
+public class SelectInviteFragment extends BaseChatFragment {
 
     // Public constants.
 

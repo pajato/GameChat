@@ -103,8 +103,7 @@ public abstract class BaseChatFragment extends BaseFragment {
                 case messageList:
                 case protectedUsers:
                 case roomMembersList:
-                case selectChatGroupsRooms:
-                case selectExpGroupsRooms:
+                case selectGroupsRooms:
                     updateAdapterList();   // Update the state of the list adapter.
                     break;
                 default:            // Ignore all other fragments.

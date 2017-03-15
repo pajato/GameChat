@@ -308,8 +308,7 @@ public abstract class BaseFragment extends Fragment {
                 return MessageManager.instance.getListItemData(item);
             case roomMembersList: // Get the data to be shown in a list of room members.
                 return MemberManager.instance.getRoomMemberListItemData(item.groupKey, item.roomKey);
-            case selectExpGroupsRooms:
-            case selectChatGroupsRooms: // Get the group and room selections.
+            case selectGroupsRooms: // Get the group and room selections.
                 return InvitationManager.instance.getListItemData();
             case selectRoom:    // Get all the visible rooms for the current players.
                 return PlayModeManager.instance.getListItemData(type);
