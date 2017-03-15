@@ -63,7 +63,7 @@ public class ChatShowMembersFragment extends BaseChatFragment {
         FabManager.chat.dismissMenu(this);
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
-            case R.string.InviteFriendFromChat:
+            case R.string.InviteFriendMessage:
                 InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
             default:
                 break;
@@ -92,7 +92,7 @@ public class ChatShowMembersFragment extends BaseChatFragment {
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getFabMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
-        menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));
+        menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
         return menu;
     }
 }

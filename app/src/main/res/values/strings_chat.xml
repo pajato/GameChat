@@ -44,7 +44,6 @@
     <string name="InsertPhoto">Inserting a photo from your device</string>
     <string name="InsertPhotoDesc">Insert photo from file image button.</string>
     <string name="InvalidAccountError">The User account does not exist.</string>
-    <string name="InviteFriendsOverflow">Invite friends</string>
     <string name="JoinedGroupsMessage">You have joined group %s</string>
     <string name="JoinedOneRoom">You have joined the %1$s room in group %2$s</string>
     <string name="JoinedMultiRooms">You have joined rooms: %1$s in group %2$s</string>

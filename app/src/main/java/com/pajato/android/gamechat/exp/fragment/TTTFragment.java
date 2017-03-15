@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.exp.fragment;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -47,6 +48,7 @@ import com.pajato.android.gamechat.exp.NotificationManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.exp.model.TTTBoard;
 import com.pajato.android.gamechat.exp.model.TicTacToe;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -56,7 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.selectExpGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
@@ -132,9 +134,15 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             return;
         // Case on the item resource id if there is one to be had.
         switch (event.item != null ? event.item.getItemId() : -1) {
-            case R.string.InviteFriendsOverflow:
+            case R.string.InviteFriendMessage:
+                // If not on a tablet, make sure that we switch to the chat perspective
+                if (!PaneManager.instance.isTablet()) {
+                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    if (viewPager != null)
+                        viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                }
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectExpGroupsRooms);
+                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -486,9 +494,12 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         if (name == null)
             return;
         name.setText(model.players.get(index).name);
-        // If there is a user assigned, don't allow click (no popup menu in this case)
-        if (model.players.get(index).id != null && !model.players.get(index).id.equals(""))
+        // If a user is assigned, don't allow click (no popup menu) and remove down-arrow drawable
+        // used on player-2
+        if (model.players.get(index).id != null && !model.players.get(index).id.equals("")) {
             name.setClickable(false);
+            name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        }
     }
 
     /** Set the sigil (X or O) for a given player. */

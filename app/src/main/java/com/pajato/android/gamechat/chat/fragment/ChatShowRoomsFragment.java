@@ -96,7 +96,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, mItem);
                 break;
-            case R.string.InviteFriendFromChat:
+            case R.string.InviteFriendMessage:
                 InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
                 break;
             default:
@@ -155,7 +155,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         if(!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         }
-        menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));
+        menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
         return menu;
     }
 

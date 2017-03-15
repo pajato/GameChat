@@ -19,6 +19,7 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
@@ -37,6 +38,7 @@ import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.help.HelpManager;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -46,7 +48,7 @@ import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
-import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
 
 /**
@@ -95,10 +97,15 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
+                // If not on a tablet, make sure that we switch to the chat perspective
+                if (!PaneManager.instance.isTablet()) {
+                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                }
                 DispatchManager.instance.chainFragment(getActivity(), protectedUsers);
                 break;
             case R.id.inviteFriends:
-                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms);
+                DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
                 break;
             case R.id.settings:
                 showFutureFeatureMessage(R.string.MenuItemSettings);

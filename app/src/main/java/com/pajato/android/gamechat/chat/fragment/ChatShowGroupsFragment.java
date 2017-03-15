@@ -43,7 +43,7 @@ import java.util.Locale;
 import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
-import static com.pajato.android.gamechat.common.FragmentType.selectChatGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 
@@ -84,8 +84,8 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom);
                 break;
-            case R.string.InviteFriendFromChat:
-                DispatchManager.instance.chainFragment(getActivity(), selectChatGroupsRooms);
+            case R.string.InviteFriendMessage:
+                DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
                 break;
             case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.isRestricted()) {
@@ -159,7 +159,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
             menu.add(getTintEntry(R.string.ManageRestrictedUserTitle,
                     R.drawable.ic_verified_user_black_24dp));
         }
-        menu.add(getTintEntry(R.string.InviteFriendFromChat, R.drawable.ic_share_black_24dp));
+        menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
         return menu;
     }
 

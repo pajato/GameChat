@@ -31,7 +31,7 @@ import com.pajato.android.gamechat.chat.fragment.CreateProtectedUsersFragment;
 import com.pajato.android.gamechat.chat.fragment.CreateRoomFragment;
 import com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment;
 import com.pajato.android.gamechat.chat.fragment.ManageProtectedUsersFragment;
-import com.pajato.android.gamechat.chat.fragment.SelectChatInviteFragment;
+import com.pajato.android.gamechat.chat.fragment.SelectInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.SelectGroupsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
@@ -45,7 +45,6 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowGroupsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
-import com.pajato.android.gamechat.exp.fragment.SelectExpInviteFragment;
 import com.pajato.android.gamechat.exp.fragment.SelectRoomFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
@@ -95,9 +94,8 @@ public enum FragmentType {
     noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),
     noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
     roomMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
-    selectChatGroupsRooms(SelectChatInviteFragment.class, standardBlack,
+    selectGroupsRooms(SelectInviteFragment.class, standardBlack,
             R.layout.select_for_invite),
-    selectExpGroupsRooms (SelectExpInviteFragment.class, standardBlack, R.layout.select_for_invite),
     selectRoom (SelectRoomFragment.class, standardBlack, R.layout.exp_select_user),
     showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, standardWhite, R.layout.chat_no_joined_rooms),
     tictactoe (TTTFragment.class, standardWhite, R.layout.exp_ttt, tttET);
@@ -167,7 +165,7 @@ public enum FragmentType {
             case messageList:
             case protectedUsers:
             case roomMembersList:
-            case selectChatGroupsRooms:
+            case selectGroupsRooms:
             case showNoJoinedRooms:
                 return chat;
             case createExpGroup:

@@ -163,9 +163,12 @@ public class ExpHelper {
         if (name == null)
             return;
         name.setText(model.getPlayers().get(index).name);
-        // If there is a user assigned, don't allow click (no popup menu in this case)
-        if (model.getPlayers().get(index).id != null && !model.getPlayers().get(index).id.equals(""))
+        // If a user is assigned, don't allow click (no popup menu) and remove down-arrow drawable
+        // used on player-2
+        if (model.getPlayers().get(index).id != null && !model.getPlayers().get(index).id.equals("")) {
             name.setClickable(false);
+            name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        }
     }
 
     /** Set the given visibility state on the give list of identifiers. */
