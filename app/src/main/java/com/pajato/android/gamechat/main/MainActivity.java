@@ -158,7 +158,8 @@ public class MainActivity extends BaseActivity
 
     /** Handle a back button press event delivered by the system. */
     @Override public void onBackPressed() {
-        if (NavigationManager.instance.closeDrawerIfOpen(this)) return;
+        if (NavigationManager.instance.closeDrawerIfOpen(this))
+            return;
         super.onBackPressed();
     }
 

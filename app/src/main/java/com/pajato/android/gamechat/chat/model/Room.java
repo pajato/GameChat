@@ -54,6 +54,9 @@ public class Room {
     /** The room member identifiers. These are the Users joined to the room. */
     private List<String> memberIdList = new ArrayList<>();
 
+    /** The assoication of members and device tokens used in sending change notifiations. */
+    public Map<String, List<String>> memberTokenMap = new HashMap<>();
+
     /** The last modification timestamp. */
     public long modTime;
 
@@ -82,37 +85,16 @@ public class Room {
         addMember(owner);
     }
 
-    /** Provide a default map for a Firebase create/update. */
-    @Exclude
-    public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("createTime", createTime);
-        result.put("groupKey", groupKey);
-        result.put("key", key);
-        result.put("name", name);
-        result.put("owner", owner);
-        result.put("memberIdList", memberIdList);
-        result.put("modTime", modTime);
-        result.put("type", type);
-        return result;
-    }
-
-    /** Mutator for member list */
-    @SuppressWarnings("unused")
-    public void setMemberIdList(List<String> newList) {
-        memberIdList = newList;
-    }
-
-    /** Get the list of member ids for this room */
-    public List<String> getMemberIdList() {
-        return memberIdList;
-    }
-
     /** add a member to the list (if the member already on the list, just return) */
     @Exclude public void addMember(final String member) {
         if (memberIdList.contains(member))
             return;
         memberIdList.add(member);
+    }
+
+    /** Get the list of member ids for this room */
+    public List<String> getMemberIdList() {
+        return memberIdList;
     }
 
     /** determine if a member already has been added to this room */
@@ -143,6 +125,27 @@ public class Room {
             default:
                 return name;
         }
+    }
+
+    /** Mutator for member list */
+    @SuppressWarnings("unused")
+    public void setMemberIdList(List<String> newList) {
+        memberIdList = newList;
+    }
+
+    /** Provide a default map for a Firebase create/update. */
+    @Exclude public Map<String, Object> toMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("createTime", createTime);
+        result.put("groupKey", groupKey);
+        result.put("key", key);
+        result.put("name", name);
+        result.put("owner", owner);
+        result.put("memberIdList", memberIdList);
+        result.put("memberTokenMap", memberTokenMap);
+        result.put("modTime", modTime);
+        result.put("type", type);
+        return result;
     }
 
     // Private instance methods.
