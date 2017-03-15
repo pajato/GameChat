@@ -31,15 +31,7 @@ http://www.gnu.org/licenses
         tools:replace="android:supportsRtl"
         android:theme="@style/AppTheme"
         android:name="android.support.multidex.MultiDexApplication">
-        <provider
-            android:authorities="com.pajato.fileprovider"
-            android:name="android.support.v4.content.FileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_provider_paths" />
-        </provider>
+
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
@@ -49,6 +41,16 @@ http://www.gnu.org/licenses
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".help.HelpActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+
+        <activity
+            android:name=".intro.IntroActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
+
         <activity
             android:name=".main.MainActivity"
             android:label="@string/app_name"
@@ -61,16 +63,21 @@ http://www.gnu.org/licenses
                 <data android:host="https://aq5ca.app.goo.gl/" android:scheme="https"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".intro.IntroActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-        <service android:name=".main.MainService"
+
+        <provider
+            android:authorities="com.pajato.fileprovider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
+        <service
+            android:name=".main.MainService"
             android:exported="false">
         </service>
-
-        <activity android:name=".help.HelpActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
 
         <service
             android:name=".main.GameChatMessagingService"

@@ -1,6 +1,6 @@
 # Message and Game Change Notifications Design
 
-When a new message is created or a move has been made in a game, Users running the app will see these changes immediately (within milliseconds) assuming they are "in" the room where the changes occur.  If the assumption is wrong, the Users need to be notified using Android's standard status bar notification practice.  The mechanism used to make this work is non-trivial.  This document describes two approaches to implementing this mechanism and the form status bar notifications will take on a given device.
+When a new message is created or a move has been made in a game, Users running the app will see these changes immediately (within milliseconds) assuming they are "in" the room where the changes occur.  If the assumption is wrong, the Users need to be notified using Android's standard status bar notification practice.  The mechanism used to make this work is non-trivial.  This document describes some approaches considered to implementing this mechanism and the form status bar notifications will take on a given device.
 
 ## Notification Server Approach
 
@@ -8,7 +8,7 @@ This approach is based on Firebase Cloud Messaging (FCM, previously known as Goo
 
 ### Overview
 
-When the app is started, it registers the device on which it is running with a cloud based GameChat notification server. The app provides both a device id and sufficient User credentials for the server to authenticate with Firebase. Firebase then uses these credentials to monitor the message and game move state of the rooms the User has joined.  
+When the app is started, it registers the device on which it is running with a cloud based GameChat notification server. The app provides both a device id and sufficient User credentials for the server to authenticate with Firebase. Firebase then uses these credentials to monitor the message and game move state of the rooms the User has joined.
 
 When state changes are detected, the GameChat server will determine if the User needs to be notified.  If so, the server will provide a Firebase Cloud Messaging push notification to the device.  The notification will be added to the status bar by system software even if the app is not running.
 
@@ -58,9 +58,35 @@ An inattentive User could configure a device to cause a serious battery drain pr
 
 The service approach is necessarily more complex than the server approach but not overly so.  Much of the application's code can be shared.  And much of the service code is standard practice with Android.  The Firebase JobDispatcher library provides a compatible facility to support job scheduling.  In recent devices the JobDisatcher uses Android's JobSchedular class to efficiently manage the battery use.
 
+Both this approach and the server approach rely on polling via database change listeners to trigger notifications.
+
 ### Conclusion
 
-Eliminating the need for a notification server, creating one less moving part (and a big moving part at that) and the ability to reuse and localize code with the app itself is compelling, even with the risk of battery abuse and more complex code (especially User configuration and job scheduling).  Thus, the service approach carries the day, in our humble opinion.
+Eliminating the need for a notification server, creating one less moving part (and a big moving part at that) and the ability to reuse and localize code with the app itself is compelling, even with the risk of battery abuse and more complex code (especially User configuration and job scheduling).  Thus, the service approach is more appealing than the server approach.
+
+## Cloud Functions Approach
+
+The Google Firebase team has provided a light-weight capability to execute (JavaScript using NodeJS) functions when certain database events take place.  These functions are developed separately from the app and deployed to a Firebase project using a NodeJS framework/infrastructure supplied by the Firebase team.
+
+### Ramifications and Conclusion
+
+There is a cost to using the Firebase Cloud Functions (FCF) albeit small.  More importantly, FCF is another moving part separate from the application.  While it is simpler than both a hosted server and avoids all the problems with a background service, FCF is still not an optimal solution.
+
+## Direct Notifications Approach
+
+In this approach the app drives notifications directly.  On the posting of a new message or a game move (or partial move) the app sends push notifcations to the FCM servers using the HTTP method (as opposed to XMPP).
+
+### Overview
+
+To implement direct notifications, each room profile maintains a list of device tokens associated with the members of the room.  When a new message is posted or a game move occurs push notifications are queued up to be sent by a background service (MainService) to each room.  A device running the app in the foreground processes the notification to determine it should be added to the status bar, otherwise the Android framework diretly adds the notification to the status bar.
+
+### Ramifications and Conclusion
+
+Doing all the work from the app has enormous benefits: it follows the recommended external server approach (with the twist that the device running the app takes on the role of external server); it is proactive rather than reactive; it can be completely executed as a background task; there are no extra costs to achieving notifcations; the computing requirements placed on the device are minimal.
+
+The only concern is the extra care that must be taken to secure the API keys, but even this is not a major big deal because this has to be done in general for the app.
+
+Given the cost/benefit tradeoffs this approach has the most appeal.
 
 ## Status Bar Notifications Format
 

@@ -104,7 +104,8 @@ public enum FabManager {
         View layout = getFragmentLayout(fragment);
         RecyclerView recyclerView;
         recyclerView = layout != null ? (RecyclerView) layout.findViewById(R.id.MenuList) : null;
-        if (layout == null || recyclerView == null) return;
+        if (layout == null || recyclerView == null)
+            return;
 
         // Set up the recycler view by establishing a layout manager, item animator and adapter.
         Context context = fragment.getContext();
@@ -120,10 +121,11 @@ public enum FabManager {
             case chess:
             case checkers:
             case tictactoe:
-                setGameFAB(fragment);
+                fab.setSize(SIZE_MINI);
+                setImage(R.drawable.ic_refresh_white_24dp);
                 break;
             default:
-                setSizeNormal(fragment);
+                fab.setSize(SIZE_NORMAL);
                 break;
         }
         dismissMenu(fragment, layout);
@@ -143,20 +145,6 @@ public enum FabManager {
         // Cache the menu and make it the default.
         mMenuMap.put(name, menu);
         mDefaultMenuName = name;
-    }
-
-    /** Set FAB to small size */
-    public void setSizeSmall(@NonNull final Fragment fragment) {
-        View layout = getFragmentLayout(fragment);
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        fab.setSize(SIZE_MINI);
-    }
-
-    /** Set FAB to normal size */
-    public void setSizeNormal(@NonNull final Fragment fragment) {
-        View layout = getFragmentLayout(fragment);
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        fab.setSize(SIZE_NORMAL);
     }
 
     /** Set the FAB state. */
@@ -188,7 +176,8 @@ public enum FabManager {
         if (fragment instanceof BaseFragment && !((BaseFragment) fragment).mActive)
             return;
         View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
+        if (layout == null)
+            return;
         FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
         fab.setVisibility(View.VISIBLE);
     }
@@ -203,35 +192,35 @@ public enum FabManager {
         // Determine if the fragment layout exists.  Continue if it does.  Return if it does not.
         // An error message with stack trace will have been generated if the view cannot be
         // accessed.
+        FloatingActionButton fab;
         View layout = getFragmentLayout(fragment);
-        if (layout == null) return;
+        fab = layout != null ? (FloatingActionButton) layout.findViewById(mFabId) : null;
+        Object payload = fab != null ? fab.getTag(R.integer.fabStateKey) : null;
+        if (fab == null || !(payload instanceof State))
+            return;
 
-        // The layout view is valid.  Use it to toggle the fab state.
+        // The layout view is valid and the payload is of type State.  Toggle the fab state by
+        // casing on the value to show and hide the relevant views.
         View dimmerView = layout.findViewById(mFabDimmerId);
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
-        Object payload = fab.getTag(R.integer.fabStateKey);
-        if (payload instanceof State) {
-            // It does.  Toggle it by casing on the value to show and hide the relevant views.
-            State value = (State) payload;
-            String format = "Toggle the FAB/FAM state: {%s}.";
-            Log.d(TAG, String.format(Locale.US, format, value));
-            switch (value) {
-                case opened:
-                    // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
-                    // the menu and un-dim the frame.
-                    dismissMenu(fragment, layout);
-                    break;
-                case closed:
-                    // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
-                    // open the named menu (if name is set) or the last one used.
-                    setMenu(fragment, name);
-                    fab.setImageResource(R.drawable.ic_clear_white_24dp);
-                    fab.setTag(R.integer.fabStateKey, opened);
-                    dimmerView.setVisibility(View.VISIBLE);
-                    View menu = layout.findViewById(mFabMenuId);
-                    menu.setVisibility(View.VISIBLE);
-                    break;
-            }
+        State value = (State) payload;
+        String format = "Toggle the FAB/FAM state: {%s}.";
+        Log.d(TAG, String.format(Locale.US, format, value));
+        switch (value) {
+            case opened:
+                // The FAB is showing 'X' and it's menu is visible.  Set the icon to '+', close
+                // the menu and un-dim the frame.
+                dismissMenu(fragment, layout);
+                break;
+            case closed:
+                // The FAB is showing '+' and the menu is not visible.  Set the icon to X and
+                // open the named menu (if name is set) or the last one used.
+                setMenu(fragment, name);
+                fab.setImageResource(R.drawable.ic_clear_white_24dp);
+                fab.setTag(R.integer.fabStateKey, opened);
+                dimmerView.setVisibility(View.VISIBLE);
+                View menu = layout.findViewById(mFabMenuId);
+                menu.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
@@ -279,12 +268,6 @@ public enum FabManager {
         Throwable stack = new Throwable();
         Log.e(TAG, String.format(Locale.US, format, fragment), stack);
         return null;
-    }
-
-    /** Convenience method to set the FAB for a game (small size and "reset" icon) */
-    private void setGameFAB(@NonNull final BaseFragment fragment) {
-        setSizeSmall(fragment);
-        setImage(R.drawable.ic_refresh_white_24dp);
     }
 
     /** Set the current FAM using the cached item with the given name. */
