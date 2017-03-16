@@ -21,6 +21,7 @@
     <string name="DeleteExperienceTitle">Delete Experience?</string>
     <string name="DeleteUserTitle">Delete Protected User</string>
     <string name="DeleteUserConfirm">Are you sure you want to delete %s?</string>
+    <string name="dummy">Placeholder</string>
     <string name="EmailHint">Email (does not need to be a real email account)</string>
     <string name="EmailInvalidMessage">Invalid email format</string>
     <string name="FutureFeature">is a future feature. Volunteer by sending feedback using the Help &amp; Feedback menu item.</string>
