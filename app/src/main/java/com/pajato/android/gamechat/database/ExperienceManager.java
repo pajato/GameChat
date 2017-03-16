@@ -75,7 +75,7 @@ public enum ExperienceManager {
     /** The map associating group and room push keys with a map of experiences. */
     public Map<String, Map<String, Map<String, Experience>>> expGroupMap = new HashMap<>();
 
-    /** The experience map associating an experience with it's self reference key. */
+    /** The experience map associating an experience with its self reference key. */
     public Map<String, Experience> experienceMap = new HashMap<>();
 
     // Private instance variables.
@@ -90,10 +90,10 @@ public enum ExperienceManager {
     private Map<String, Map<String, Map<DateHeaderType, List<String>>>> mDateHeaderExpMap =
             new HashMap<>();
 
-    /** A map associating a group push key with it's most recent changed experience. */
+    /** A map associating a group key with its most recently changed experience. */
     private Map<String, Experience> mGroupToRecentMap = new HashMap<>();
 
-    /** A map of maps associating recent experiences with rooms in a group. */
+    /** A map of maps associating most recently modified experience in a room in a group. */
     private Map<String, Map<String, Experience>> mRoomToRecentMap = new HashMap<>();
 
     // Public instance methods.
@@ -183,11 +183,11 @@ public enum ExperienceManager {
             case 0:
             case 1:             // Get the experiences from the rooms in the joined group that have
                                 // experiences and the me room if it has any experiences.
-                String roomKey = expGroupMap.keySet().iterator().next();
+                String groupKey = expGroupMap.keySet().iterator().next(); // this is actually a group key ?!!!??????????????
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String meRoomKey = AccountManager.instance.getMeRoomKey();
-                result.addAll(getItemListRooms(roomKey));
-                if (roomKey.equals(meRoomKey) || roomKey.equals(meGroupKey))
+                result.addAll(getItemListRooms(groupKey));
+                if (groupKey.equals(meRoomKey) || groupKey.equals(meGroupKey))
                     return result;
                 result.addAll(getItemListRooms(meGroupKey));
                 return result;
@@ -240,7 +240,7 @@ public enum ExperienceManager {
     /** Handle an experience change event by updating the date headers ... */
     @Subscribe public void onExperienceChangeEvent(@NonNull final ExperienceChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
-        updateHeaderMaps(event.experience);
+        updateAllMaps(event.experience);
         AppEventManager.instance.post(new ExpListChangeEvent());
     }
 
@@ -415,18 +415,19 @@ public enum ExperienceManager {
             updateMap(nowTimestamp, entry.getValue().getModTime(), entry.getKey(), roomMap);
     }
 
-    /** Update the headers used to bracket the messages in the main list. */
-    private void updateHeaderMaps(final Experience experience) {
+    /** Update the various maps used to track experiences. */
+    private void updateAllMaps(final Experience experience) {
         // Deal with a changed experience (like a turn, for example) by making the given experience
         // the most recent in both the group and room recent experience maps.
         String groupKey = experience.getGroupKey();
+
+        // Remember the last updated experience in the group and room.
         String roomKey = experience.getRoomKey();
         mGroupToRecentMap.put(groupKey, experience);
         Map<String, Experience> roomMap = mRoomToRecentMap.get(groupKey);
-        if (roomMap == null) {
+        if (roomMap == null)
             roomMap = new HashMap<>();
-            roomMap.put(roomKey, experience);
-        }
+        roomMap.put(roomKey, experience);
         mRoomToRecentMap.put(groupKey, roomMap);
 
         // Update the group list headers for each group and room with at least one experience.
@@ -438,7 +439,7 @@ public enum ExperienceManager {
             updateHeaders(key, nowTimestamp);
     }
 
-    /** Update the headers for the given group and all of it's rooms. */
+    /** Update the headers for the given group and all of its rooms. */
     private void updateHeaders(final String groupKey, final long nowTimestamp) {
         // Determine which date header type the current group should be associated with using
         // the time stamp from the most recent experience in the group.
@@ -447,15 +448,15 @@ public enum ExperienceManager {
 
         // for all rooms in the group, update the mDateHeaderRoomMap
         Map<String, Experience> map = mRoomToRecentMap.get(groupKey);
+        Map<DateHeaderType, List<String>> roomMap = new HashMap<>();
         for (String roomKey : map.keySet()) {
             long roomTimestamp = map.get(roomKey).getModTime();
-            Map<DateHeaderType, List<String>> roomMap = new HashMap<>();
             updateMap(nowTimestamp, roomTimestamp, roomKey, roomMap);
             if (roomMap.size() == 0)
                 continue;
-            mDateHeaderRoomMap.put(groupKey, roomMap);
             updateExpMap(groupKey, roomKey, nowTimestamp);
         }
+        mDateHeaderRoomMap.put(groupKey, roomMap);
     }
 
     /** Update a list in a map keyed by the closest matching time code. */

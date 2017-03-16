@@ -84,7 +84,7 @@ public enum PlayModeManager {
     }
 
     /** Handle a use selection in the play mode menu */
-    public void handlePlayModeUserSelection(TextView view, BaseExperienceFragment fragment) {
+    public void handlePlayModeUserSelection(View view, BaseExperienceFragment fragment) {
         Object payload = view.getTag();
         if (payload == null || !(payload instanceof PlayModeMenuEntry))
             return;
