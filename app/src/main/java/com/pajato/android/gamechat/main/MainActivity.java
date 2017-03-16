@@ -235,9 +235,6 @@ public class MainActivity extends BaseActivity
                 viewPager = (ViewPager) findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
-            case R.id.fileBugReport:
-                SupportManager.instance.handleBugReport(this, event);
-                break;
             default:
                 // Handle all other events by logging a message for now.
                 final String format = "Default handling for menu item with title: {%s}";

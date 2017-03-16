@@ -53,6 +53,7 @@
     <string name="MembersNotAvailableHeaderText">No Available Members</string>
     <string name="MembersMenuItem">Members</string>
     <string name="MembersToolbarTitle">Members of %s</string>
+    <string name="MessageSentText">Message posted.</string>
     <string name="NoGroupsHeaderText">Welcome to GameChat!</string>
     <string name="NoJoinableRoomsHeaderText">No Available Rooms or Members</string>
     <string name="NoMessagesText">There are no messages to show in this room. That\'s weird.</string>

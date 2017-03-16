@@ -26,7 +26,6 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
-import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.Engine;
 import com.pajato.android.gamechat.exp.ExpHelper;
@@ -104,7 +103,7 @@ public enum ChessEngine implements Engine {
             mModel.setStateType(isInCheck(team) ? check : active);
         }
         mModel.toggleTurn();
-        ExperienceManager.instance.updateExperience(mModel);
+        ExpHelper.updateModel(mModel);
     }
 
     /** Establish the experience model (chess) and board for this handler. */
@@ -132,7 +131,7 @@ public enum ChessEngine implements Engine {
         } else {
             mModel.board.clearSelectedPiece();
         }
-        ExperienceManager.instance.updateExperience(mModel);
+        ExpHelper.updateModel(mModel);
     }
 
     // Private instance methods.
