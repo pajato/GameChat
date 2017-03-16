@@ -1,16 +1,28 @@
 {
   "articles": [
     {
-      "name": "Using Protected Users",
-      "path": "file:///android_asset/misc/protectedUsers.html"
+      "name": "Get started with GameChat",
+      "path": "file:///android_asset/misc/getStarted.html"
     },
     {
       "name": "Creating Groups",
       "path": "file:///android_asset/misc/creatingGroups.html"
     },
     {
+      "name": "Creating Rooms",
+      "path": "file:///android_asset/misc/creatingRooms.html"
+    },
+    {
+      "name": "Using Protected Users",
+      "path": "file:///android_asset/misc/protectedUsers.html"
+    },
+    {
       "name": "Invitations",
       "path": "file:///android_asset/misc/invitations.html"
+    },
+    {
+      "name": "Future features",
+      "path": "file:///android_asset/misc/futureFeatures.html"
     }
   ]
 }
