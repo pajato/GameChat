@@ -349,7 +349,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Abort if not.
         View view = mLayout.findViewWithTag(buttonTag);
         TicTacToe model = getModel();
-        if (view == null || !(view instanceof Button) || model == null) return;
+        if (view == null || !(view instanceof Button) || model == null)
+            return;
 
         // Handle the button click based on the current state.
         Button button = (Button) view;
@@ -377,7 +378,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         model.state = getState(model, buttonTag);
         model.setWinCount();
         model.toggleTurn();
-        ExperienceManager.instance.updateExperience(mExperience);
+        ExpHelper.updateModel(mExperience);
     }
 
     /** Handle a new game by resetting the data model. */
@@ -392,7 +393,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         // Reset the data model, update the database and clear the notification manager one-shot.
         model.board = null;
         model.state = ACTIVE;
-        ExperienceManager.instance.updateExperience(mExperience);
+        ExpHelper.updateModel(mExperience);
     }
 
     /** Initialize the board model and values and clear the winner text. */
@@ -542,7 +543,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         }
 
         // Determine if the game has ended (winner or tie).  Abort if not.
-        if (message == null) return;
+        if (message == null)
+            return;
 
         // Update the UI to celebrate the winner or a tie and update the database game state to
         // pending.
@@ -551,7 +553,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         winner.setVisibility(View.VISIBLE);
         NotificationManager.instance.notifyGameDone(this, getDoneMessage(model));
         model.state = TicTacToe.PENDING;
-        ExperienceManager.instance.updateExperience(mExperience);
+        ExpHelper.updateModel(mExperience);
     }
 
     /** Set up the game board based on the data model state. */

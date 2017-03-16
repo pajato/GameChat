@@ -33,9 +33,8 @@ android {
     }
 
     lintOptions {
-        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
-
-        warning 'RestrictedApi', 'GradleCompatible', 'InvalidPackage'
+        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency', 'InvalidPackage'
+        warning 'RestrictedApi', 'GradleCompatible'
         abortOnError true
     }
 

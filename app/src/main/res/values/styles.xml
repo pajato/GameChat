@@ -186,6 +186,13 @@ http://www.gnu.org/licenses
         <item name="android:windowBackground">@mipmap/signin_background</item>
     </style>
 
+    <style name="SimpleText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/colorLightGray</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
     <style name="DimmerTheme">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>

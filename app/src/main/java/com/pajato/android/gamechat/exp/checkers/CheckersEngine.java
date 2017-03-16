@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.exp.checkers;
 
-import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.Engine;
 import com.pajato.android.gamechat.exp.ExpHelper;
@@ -103,7 +102,7 @@ public enum CheckersEngine implements Engine {
                 mModel.setStateType(mModel.turn ? secondary_wins : primary_wins);
             checkFinished();
         }
-        ExperienceManager.instance.updateExperience(mModel);
+        ExpHelper.updateModel(mModel);
     }
 
     /** Establish the experience model (chess) and board for this handler. */
@@ -128,7 +127,7 @@ public enum CheckersEngine implements Engine {
             mModel.board.getPossibleMoves().addAll(getPossibleMoves(position));
         else
             mModel.board.clearSelectedPiece();
-        ExperienceManager.instance.updateExperience(mModel);
+        ExpHelper.updateModel(mModel);
     }
 
     // Private instance methods.

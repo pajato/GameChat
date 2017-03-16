@@ -20,14 +20,10 @@
     <string name="InviteFriendMessage">Invite friends</string>
     <string name="ItemCreatedMessage">%s is created</string>
     <string name="ManageRestrictedUserTitle">Protected Users</string>
-    <string name="MenuItemFileBugReport">File Bug Report</string>
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
-    <string name="MenuItemFeedback">Feedback</string>
-    <string name="MenuItemLearnMore">Learn More</string>
     <string name="MenuItemSearch">Search</string>
     <string name="MenuItemSettings">Settings</string>
     <string name="MenuItemSwitchAccount">Switch account</string>
-    <string name="SignInMessageText">Use the \u2630 menu in the toolbar to sign in.</string>
     <string name="SignedOutToolbarTitle">Signed Out</string>
     <string name="SwitchToChat">Switch to Chat</string>
     <string name="SwitchToExp">Switch to Game</string>
@@ -53,7 +49,6 @@
     <string name="nav_header_label_android_studio_android_com">android.studio@android.com</string>
     <string name="navigation_drawer_action_close">Close navigation drawer</string>
     <string name="navigation_drawer_action_open">Open navigation drawer</string>
-    <string name="navigation_drawer_account_management">Account Management</string>
     <string name="navigation_drawer_label_your_groups">Your Group List</string>
     <string name="navigation_drawer_label_your_room">Your Private Room</string>
     <string name="navigation_drawer_label_yours">Your Groups</string>

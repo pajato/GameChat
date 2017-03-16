@@ -98,7 +98,8 @@ public enum MessageManager {
         // Ensure database consistency.  Abort quietly (for now) if any path parts are invalid.
         // If the parts are valid, get a push key.
         // TODO: say something about an invalid path piece.
-        if (room.groupKey == null || room.key == null) return;
+        if (room.groupKey == null || room.key == null)
+            return;
         String path = String.format(Locale.US, MESSAGES_PATH, room.groupKey, room.key);
         String key = FirebaseDatabase.getInstance().getReference().child(path).push().getKey();
 
@@ -112,7 +113,7 @@ public enum MessageManager {
         members.addAll(room.getMemberIdList());
         Message message = new Message(key, account.id, name, url, tStamp, text, type, members);
 
-        // Persist the message.
+        // Persist (i.e. post) the message.
         path = String.format(Locale.US, MESSAGE_PATH, room.groupKey, room.key, key);
         DBUtils.updateChildren(path, message.toMap());
     }

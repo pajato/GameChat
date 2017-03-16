@@ -36,7 +36,6 @@ http://www.gnu.org/licenses
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView style="@style/ListItemTitle" android:id="@+id/Name"
-                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
                     tools:text="General"/>
