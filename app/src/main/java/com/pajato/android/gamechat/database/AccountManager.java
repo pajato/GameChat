@@ -73,7 +73,9 @@ import java.util.Map;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
+import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 
 /**
@@ -574,8 +576,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // the common room member list, make sure to add it.
         if (!isRestricted() || event.key == null || event.room == null)
             return;
-        if (getCurrentAccount().joinMap.containsKey(event.room.groupKey) &&
-            !event.room.getMemberIdList().contains(getCurrentAccountId())) {
+        if (getCurrentAccount().joinMap.containsKey(event.room.groupKey) && event.room.type == COMMON
+                && !event.room.getMemberIdList().contains(getCurrentAccountId())) {
             List<String> roomMembers = event.room.getMemberIdList();
             roomMembers.add(getCurrentAccountId());
             // Add a message stating the user has joined
@@ -583,6 +585,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String text = String.format(Locale.getDefault(), format, getCurrentAccount().getDisplayName());
             MessageManager.instance.createMessage(text, STANDARD, getCurrentAccount(), event.room);
             RoomManager.instance.updateRoomProfile(event.room);
+        }
+        // If the room is a private room and the current account has not joined it, remove the
+        // watcher on it.
+        if (!(event.room.getMemberIdList().contains(getCurrentAccountId()))
+                && event.room.type == PRIVATE) {
+            RoomManager.instance.roomMap.remove(event.room.key);
+            RoomManager.instance.removeWatcher(event.room.key);
         }
     }
 

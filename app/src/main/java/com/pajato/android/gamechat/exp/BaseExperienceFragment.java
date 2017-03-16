@@ -146,7 +146,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             PlayModeManager.instance.closePlayModeMenu();
             return;
         }
-        PlayModeManager.instance.handlePlayModeUserSelection((TextView)event.view, this);
+        PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
     }
 
     @Subscribe public void onExperienceListChange(ExpListChangeEvent event) {
