@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,6 +39,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.main.MainService;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -52,6 +54,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.mem
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.model.JoinState.JoinType.chat;
+import static com.pajato.android.gamechat.main.MainService.ROOM_KEY;
 
 /**
  * Display the chat associated with the room selected by the current logged in User.
@@ -141,7 +144,8 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Setup the toolbar. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, mItem, helpAndFeedback, members, game, search, invite, settings);
+        ToolbarManager.instance.init(this, mItem, helpAndFeedback, members, game, search, invite,
+                settings);
     }
 
     // Private instance methods.
@@ -159,8 +163,8 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     private void postMessage(final View view) {
         // Ensure that the edit text field and the account exist.
         View layout = getView();
-        EditText editText = layout != null
-                ? (EditText) layout.findViewById(R.id.messageEditText) : null;
+        int id = R.id.messageEditText;
+        EditText editText = layout != null ? (EditText) layout.findViewById(id) : null;
         Account account = AccountManager.instance.getCurrentAccount();
         if (account == null || editText == null) {
             // Something is wrong.  Log it and tell the User.
@@ -169,14 +173,21 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
             return;
         }
 
-        // The account and the edit text field exist.  Persist the message to the database and
-        // inform the User that the message has been sent.
+        // The account and the edit text field exist.  Persist the message to the database, inform
+        // the User that the message has been sent.
         String text = editText.getText().toString();
         String roomKey = mItem.roomKey;
         Room room = RoomManager.instance.getRoomProfile(roomKey);
         MessageManager.instance.createMessage(text, STANDARD, account, room);
+        String snackbarMessage = getResources().getString(R.string.MessageSentText);
+        Snackbar.make(layout, snackbarMessage, Snackbar.LENGTH_SHORT);
+
+        // Wrap-up by notifying room members, clearing the edit text field and dismissing the
+        // keyboard.
+        Intent intent = new Intent(this.getActivity(), MainService.class);
+        intent.putExtra(ROOM_KEY, room.key);
+        getContext().startService(intent);
         editText.setText("");
-        Snackbar.make(layout, "Message sent.", Snackbar.LENGTH_SHORT);
         dismissKeyboard();
     }
 

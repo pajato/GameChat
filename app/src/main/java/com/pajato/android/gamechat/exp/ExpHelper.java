@@ -1,6 +1,7 @@
 package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -16,6 +17,7 @@ import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.main.MainService;
 
 import java.util.List;
 import java.util.Locale;
@@ -118,6 +120,16 @@ public class ExpHelper {
         if (name == null)
             return;
         name.setText(RoomManager.instance.getRoomName(model.getRoomKey()));
+    }
+
+    /** Update the move on the database and generate notifications to room members. */
+    public static void updateModel(@NonNull Experience model) {
+        ExperienceManager.instance.updateExperience(model);
+        BaseFragment fragment = getBaseFragment(model);
+        Intent intent = new Intent(fragment.getActivity(), MainService.class);
+        //intent.putExtra(MainService.NOTIFICATION_KEY, getJsonData(model));
+        intent.putExtra(MainService.ROOM_KEY, model.getRoomKey());
+        fragment.getContext().startService(intent);
     }
 
     // Private class methods.

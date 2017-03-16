@@ -17,13 +17,9 @@ http://www.gnu.org/licenses
 
 Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
 -->
-<LinearLayout
+<LinearLayout style="@style/SimpleText"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorLightGray"
-    android:orientation="horizontal">
+    xmlns:tools="http://schemas.android.com/tools">
     <TextView
         android:id="@+id/playerModeTextItem"
         android:layout_width="match_parent"
