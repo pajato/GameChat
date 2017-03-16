@@ -49,6 +49,11 @@ http://www.gnu.org/licenses
             android:onClick="onClick"
             android:textAppearance="?android:attr/textAppearanceListItem"
             tools:text="Help article title" />
+        <ImageView
+            android:id="@+id/DummyItemIcon"
+            android:contentDescription="@string/dummy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <View
