@@ -51,6 +51,7 @@
     <string name="wins">wins</string>
     <string name="xValue">X</string>
     <string name="SelectUserListIcon">Select User</string>
+    <string name="NotAPlayerMessageText">You are not a player in this game.</string>
     <string name="PlayOutOfTurnMessageText">Please wait for your turn.</string>
     <string name="CheckMateText">Checkmate!</string>
 </resources>

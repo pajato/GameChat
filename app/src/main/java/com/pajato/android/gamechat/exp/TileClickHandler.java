@@ -23,6 +23,8 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FragmentType;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.exp.model.Player;
 
 import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.experience;
 
@@ -40,8 +42,17 @@ public class TileClickHandler implements View.OnClickListener {
 
     /** Handle a click event by validating the player doing the click and processing the move. */
     @Override public void onClick(final View v) {
-        // Detect a player playing out of turn.  If so, notify politely with a snackbar and
-        // abort.
+        // If the player is not a valid player, then notify them that they need to make or join
+        // their own game via a snackbar and abort.
+        if (isNotAPlayer()) {
+            FragmentType fragmentType = mModel.getExperienceType().getFragmentType();
+            BaseFragment fragment = DispatchManager.instance.getFragment(fragmentType);
+            int id = R.string.NotAPlayerMessageText;
+            NotificationManager.instance.notifyNoAction(fragment, id, experience);
+            return;
+        }
+
+        // Detect a player playing out of turn.  If so, notify politely with a snackbar and abort.
         int position = Integer.parseInt((String)v.getTag());
         if (isPlayingOutOfTurn(position)) {
             FragmentType fragmentType = mModel.getExperienceType().getFragmentType();
@@ -65,6 +76,15 @@ public class TileClickHandler implements View.OnClickListener {
 
     // Private instance methods.
 
+    /** Return true if the current user is a player in the current experience. Otherwise, false. */
+    private boolean isNotAPlayer() {
+        for (Player player :  mModel.getPlayers()) {
+            if(player.id != null && player.id.equals(AccountManager.instance.getCurrentAccountId()))
+                return false;
+        }
+        return true;
+    }
+
     /** Return TRUE iff the piece selected is from the other team and not being captured. */
     private boolean isPlayingOutOfTurn(final int position) {
         // Ensure that the piece played is correct according to the turn or is being captured.
@@ -74,8 +94,22 @@ public class TileClickHandler implements View.OnClickListener {
         Team team = board.getTeam(position);
         if (team == Team.NONE)
             return false;
+
+        // Ensure that the current user is choosing a piece that belongs to their team. If they are
+        // playing with a "Friend", then we don't need to worry about confirming players' identities
+        Team playerTeam = team;
+        for (Player player :  mModel.getPlayers()) {
+            if(player.id == null && player.name.equals("Friend")) {
+                playerTeam = team;
+                break;
+            } else if(player.id.equals(AccountManager.instance.getCurrentAccountId())) {
+                playerTeam = Team.valueOf(player.team.toUpperCase());
+            }
+        }
+
         boolean turn = mModel.getTurn();
-        boolean isOwnPlayer = (team == Team.PRIMARY && turn) || (team == Team.SECONDARY && !turn);
+        boolean isOwnPlayer = (team == Team.PRIMARY && playerTeam == Team.PRIMARY && turn)
+                || (team == Team.SECONDARY && playerTeam == Team.SECONDARY && !turn);
         boolean isCapture = !isOwnPlayer && board.isHighlighted(position);
         return !isOwnPlayer && !isCapture;
     }
