@@ -100,12 +100,12 @@ public enum HelpManager {
     /** Get list items for help activity display */
     public List<ListItem> getList(Activity activity) {
         List<ListItem> items = new ArrayList<>();
+        items.add(new ListItem(helpHeader, R.string.HelpAllTitle));
+        items.addAll(getAllArticles(activity));
         items.add(new ListItem(helpHeader, R.string.HelpMostPopularTitle));
         items.addAll(getMostPopularArticles(activity));
         items.add(new ListItem(helpHeader, R.string.HelpRecentTitle));
         items.addAll(getRecentArticles(activity));
-        items.add(new ListItem(helpHeader, R.string.HelpAllTitle));
-        items.addAll(getAllArticles(activity));
         return items;
     }
 

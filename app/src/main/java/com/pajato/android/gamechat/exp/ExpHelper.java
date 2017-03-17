@@ -2,8 +2,11 @@ package com.pajato.android.gamechat.exp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -169,8 +172,7 @@ public class ExpHelper {
 
     /** Set the name for a given player index. */
     private static void setPlayerName(final int resId, final int index, final Experience model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
+        // If the name text view exists, set the value from the model, otherwise abort.
         TextView name = getTextView(model, resId);
         if (name == null)
             return;
@@ -180,6 +182,12 @@ public class ExpHelper {
         if (model.getPlayers().get(index).id != null && !model.getPlayers().get(index).id.equals("")) {
             name.setClickable(false);
             name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        } else {
+            name.setClickable(true);
+            Resources resources = getBaseFragment(model).getActivity().getResources();
+            int downArrowResId = R.drawable.ic_arrow_drop_down_white_24px;
+            Drawable downArrow = ResourcesCompat.getDrawable(resources, downArrowResId, null);
+            name.setCompoundDrawablesWithIntrinsicBounds(null, null, downArrow, null);
         }
     }
 

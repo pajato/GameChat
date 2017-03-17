@@ -428,21 +428,20 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
-    /** Process an experience change event by ... */
+    /**
+     * Process an experience change event. If this is an inactive fragment, the event has an
+     * empty experience, is a different type of experience, or the specified experience is NOT the
+     * experience of this type that we are currently viewing, abort. Otherwise resume the experience
+     * and update the UI to reflect the changes in the event.
+     */
     protected void processExperienceChange(@NonNull final ExperienceChangeEvent event) {
-        // Determine of this is an inactive fragment, the event has an empty experience or a
-        // different type of experience . If so, abort, otherwise continue processing the event
-        // experience.
         ExpType expType = event.experience != null ? event.experience.getExperienceType() : null;
         if (!mActive || expType == null || expType != type.expType)
             return;
-
-        // Determine if this experience is waiting to be initialized.  If so, do it using the
-        // experience from the event.  If not, just continue to initialize the engine and start
-        // updating the UI from the data model.
+        if (!mExperience.getExperienceKey().equals(event.experience.getExperienceKey()))
+            return;
         logEvent("experienceChange");
-        if (mExperience == null)
-            mExperience = event.experience;
+        mExperience = event.experience;
         resumeExperience();
     }
 
