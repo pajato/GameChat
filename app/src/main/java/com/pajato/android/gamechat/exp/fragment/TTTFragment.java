@@ -18,8 +18,11 @@
 package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -64,6 +67,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
+import static com.pajato.android.gamechat.exp.ExpHelper.getBaseFragment;
 import static com.pajato.android.gamechat.exp.ExpType.tttET;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BOT_ROW;
@@ -152,12 +156,19 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         }
     }
 
-    /** Handle an experience posting event to see if this is a tictactoe experience. */
+    /**
+     * Handle an experience change event. If this is an inactive fragment, the event has an empty
+     * experience, is not a tic-tac-toe experience, or the specified experience is NOT the
+     * tic-tac-toe experience that we are currently viewing, abort. Otherwise resume the experience
+     * and update the UI to reflect the changes in the event.
+     */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
-        if (event.experience == null || event.experience.getExperienceType() != tttET) return;
-
-        // The experience is a tictactoe experience.  Start the game.
+        if (!mActive || event.experience == null || event.experience.getExperienceType() != tttET)
+            return;
+        if (!mExperience.getExperienceKey().equals(event.experience.getExperienceKey()))
+            return;
+        logEvent("tictactoe experienceChange");
         mExperience = event.experience;
         resume();
     }
@@ -489,8 +500,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
 
     /** Set the name for a given player index. */
     private void setPlayerName(final int resId, final int index, final TicTacToe model) {
-        // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
-        // does.
+        // If the name text view exists, set the value from the model, otherwise abort.
         TextView name = (TextView) mLayout.findViewById(resId);
         if (name == null)
             return;
@@ -500,6 +510,12 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         if (model.players.get(index).id != null && !model.players.get(index).id.equals("")) {
             name.setClickable(false);
             name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        } else {
+            name.setClickable(true);
+            Resources resources = getBaseFragment(model).getActivity().getResources();
+            int downArrowResId = R.drawable.ic_arrow_drop_down_white_24px;
+            Drawable downArrow = ResourcesCompat.getDrawable(resources, downArrowResId, null);
+            name.setCompoundDrawablesWithIntrinsicBounds(null, null, downArrow, null);
         }
     }
 
