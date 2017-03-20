@@ -368,6 +368,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
         holder.itemView.setTag(item);
         String name = holder.itemView.getContext().getResources().getString(id);
         holder.title.setText(name);
+        holder.title.setTag(item);
     }
 
     /** Update the given view holder using the data from the given item. */
