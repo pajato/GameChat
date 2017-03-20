@@ -76,7 +76,7 @@ public class SelectGroupsFragment extends BaseChatFragment {
                 finish.setEnabled(hasSelection);
                 break;
             default:
-                processClickEvent(event.view, "createProtectedUsers");
+                processClickEvent(event.view, this.type.name());
                 break;
         }
     }

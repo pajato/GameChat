@@ -47,11 +47,9 @@ public class ChatShowMembersFragment extends BaseChatFragment {
     /** The lookup key for the FAB game home menu. */
     public static final String CHAT_MEMBERS_FAM_KEY = "chatMembersFamKey";
 
-    /** Process a given button click event looking for the chat FAB. */
-    @Subscribe
-    public void onClick(final ClickEvent event) {
-        // Delegate the processing to the super class.
-        processClickEvent(event.view, "showMembers");
+    /** Handle a button click event by delegating the event to the base class. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Process a menu click event ... */

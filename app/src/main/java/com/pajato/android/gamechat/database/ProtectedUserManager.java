@@ -39,6 +39,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.newItem;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.protectedUserList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
@@ -172,10 +173,13 @@ public enum ProtectedUserManager {
             result.add(new ListItem(protectedUserList, "", pUser.id, displayName, pUser.email,
                     pUser.url));
         }
-        if (result.size() > 0)
+        if (result.size() > 0) {
+            result.add(new ListItem(newItem, R.string.NewProtectedUserText));
             return result;
+        }
         // There are no protected users, so add a header to that effect. */
         result.add(new ListItem(resourceHeader, R.string.NoProtectedUsersHeaderText));
+        result.add(new ListItem(newItem, R.string.NewProtectedUserText));
         return result;
     }
 

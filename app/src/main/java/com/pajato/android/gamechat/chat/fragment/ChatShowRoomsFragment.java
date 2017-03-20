@@ -39,7 +39,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.groupMembersList;
 import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
-import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -72,10 +71,9 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
             updateAdapterList();
     }
 
-    /** Process a given button click event looking for the chat FAB. */
+    /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Delegate the processing to the super class.
-        processClickEvent(event.view, "showRooms");
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Process a menu click event ... */
@@ -89,9 +87,6 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), createChatGroup);
-                break;
-            case R.string.CreateRoomMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createRoom, mItem);
                 break;
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom, mItem);
@@ -151,7 +146,6 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
     private List<MenuEntry> getRoomMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_checkers_black_24dp));
-        menu.add(getTintEntry(R.string.CreateRoomMenuTitle, R.drawable.ic_checkers_black_24dp));
         if(!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.CreateGroupMenuTitle, R.drawable.ic_group_add_black_24dp));
         }

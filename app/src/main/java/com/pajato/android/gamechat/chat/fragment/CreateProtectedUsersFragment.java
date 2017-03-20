@@ -158,7 +158,7 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
 
                 break;
             default:
-                processClickEvent(event.view, "createProtectedUsers");
+                processClickEvent(event.view, this.type.name());
                 break;
         }
     }

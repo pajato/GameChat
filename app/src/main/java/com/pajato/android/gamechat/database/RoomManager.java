@@ -20,6 +20,7 @@ package com.pajato.android.gamechat.database;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -44,6 +45,7 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.newItem;
 
 /**
  * Provide a class to manage database access to Room objects.
@@ -163,6 +165,7 @@ public enum RoomManager {
                 }
             }
         }
+        result.add(new ListItem(newItem, R.string.NewRoomText));
         return result;
     }
 

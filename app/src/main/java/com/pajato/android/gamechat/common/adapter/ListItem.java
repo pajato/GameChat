@@ -92,6 +92,7 @@ public class ListItem {
         roomList("Room item with name {%s}, key: {%s} and group key: {%s}"),
         member ("Member item with name {%s}, key: {%s}, email: {%s} and iconUrl {%s}"),
         message ("Message item with name {%s}, key: {%s}, count: {%s} and text {%s}."),
+        newItem("Item indicating a new entry should be added for %s"),
         protectedUserList("Protected user list item with name {%s}, e-mail {%s}, iconUrl {%s} and key {%s}."),
         resourceHeader ("Resource header with id: {%d}."),
         roomsHeader ("Rooms header with id: {%d}."),
@@ -325,6 +326,8 @@ public class ListItem {
                 return String.format(Locale.US, type.format, name);
             case inviteRoom:
                 return String.format(Locale.US, type.format, name, text);
+            case newItem:
+                return String.format(Locale.US, type.format, nameResourceId);
             case protectedUserList:
                 return String.format(Locale.US, type.format, name, email, iconUrl, key);
             case resourceHeader:

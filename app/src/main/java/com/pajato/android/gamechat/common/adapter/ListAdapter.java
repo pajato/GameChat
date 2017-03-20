@@ -141,6 +141,8 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_invites_room));
             case inviteGroup:
                 return new ItemListViewHolder(getView(parent, R.layout.item_select_for_invites));
+            case newItem:
+                return new NewItemViewHolder(getView(parent, R.layout.item_create_new));
             default:
                 Log.e(TAG, String.format(Locale.US, UNHANDLED_FORMAT, viewType));
                 return null;
@@ -160,10 +162,7 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case resourceHeader:
                 case roomsHeader:
                 case helpHeader:
-                    // The header item types simply update the section title.
-                    int id = item.nameResourceId;
-                    String name = holder.itemView.getContext().getResources().getString(id);
-                    ((HeaderViewHolder) holder).title.setText(name);
+                    updateHeaderItemHolder((HeaderViewHolder) holder, item);
                     break;
                 case chatGroup:
                 case chatRoom:
@@ -179,16 +178,15 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 case selectUser:
                 case selectableMember:
                 case selectableRoom:
-                    // The group item has to update the group title, the number of new messages,
+                     // The group item has to update the group title, the number of new messages,
                     // and the list of rooms with messages (possibly old).
                     updateHolder((ItemListViewHolder) holder, item);
                     break;
+                case newItem:
+                    updateNewItemHolder((NewItemViewHolder)holder, item);
+                    break;
                 case helpArticle:
-                    HelpListViewHolder hh = (HelpListViewHolder) holder;
-                    hh.title.setText(item.name);
-                    hh.title.setTag(item);
-                    hh.icon.setImageResource(R.drawable.ic_content_newspaper_black_24dp);
-                    hh.icon.setTag(item);
+                    updateHelpItemHolder((HelpListViewHolder) holder, item);
                     break;
                 default:
                     Log.e(TAG, String.format(Locale.US, UNHANDLED_FORMAT, item.type));
@@ -356,6 +354,32 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /** Update the given view holder using the data from the given item. */
+    private void updateNewItemHolder(NewItemViewHolder holder, final ListItem item) {
+        holder.name.setText(holder.name.getContext().getResources().
+                getString(item.nameResourceId));
+        holder.name.setTag(item);
+        holder.icon.setTag(item);
+        holder.itemView.setTag(item);
+    }
+
+    /** Update the section title for the given header view holder. */
+    private void updateHeaderItemHolder(HeaderViewHolder holder, ListItem item) {
+        int id = item.nameResourceId;
+        holder.itemView.setTag(item);
+        String name = holder.itemView.getContext().getResources().getString(id);
+        holder.title.setText(name);
+    }
+
+    /** Update the given view holder using the data from the given item. */
+    private void updateHelpItemHolder(HelpListViewHolder holder, ListItem item) {
+        holder.title.setText(item.name);
+        holder.title.setTag(item);
+        holder.icon.setImageResource(R.drawable.ic_content_newspaper_black_24dp);
+        holder.icon.setTag(item);
+        holder.itemView.setTag(item);
+    }
+
+    /** Update the given view holder using the data from the given item. */
     private void updateHolder(ItemListViewHolder holder, final ListItem item) {
         // Set the title and list text view content based on the given item.  Provide the item in
         // the view holder tag field.
@@ -490,6 +514,22 @@ public class ListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return;
             button.setVisibility(View.GONE);
             button = (Button) itemView.findViewById(R.id.altSelector);
+        }
+    }
+
+    /** Provide a view holder for 'new' item */
+    private class NewItemViewHolder extends RecyclerView.ViewHolder {
+
+        // Private instance variables.
+
+        TextView name;
+        ImageView icon;
+
+        /** Build an instance give the item view. */
+        NewItemViewHolder(View itemView) {
+            super(itemView);
+            name = (TextView) itemView.findViewById(R.id.NewName);
+            icon = (ImageView) itemView.findViewById(R.id.NewListItemIcon);
         }
     }
 
