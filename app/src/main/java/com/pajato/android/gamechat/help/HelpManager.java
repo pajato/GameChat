@@ -129,44 +129,14 @@ public enum HelpManager {
         return articlesList;
     }
 
-    /** Get a list of popular articles - TODO: how to get popular? (Future feature) */
-    private List<ListItem> getMostPopularArticles(Activity activity) {
-        List<ListItem> articlesList = new ArrayList<>();
-        // Read list of articles from JSON list
-        try {
-            String inputText = loadJSONFromAsset("article_list.json", activity);
-            JSONObject inputJson = new JSONObject(inputText);
-            JSONArray jsonArray = inputJson.getJSONArray("articles");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject article = (JSONObject) jsonArray.get(i);
-                article.get("name");
-                article.get("path");
-                articlesList.add(new ListItem((String)article.get("name"), (String)article.get("path")));
-            }
-        } catch (JSONException e){
-            Log.e(TAG, "Error reading JSON");
-        }
-        return articlesList;
+    /** Get a list of popular articles. Currently displays a 'future feature' message. */
+    private List<ListItem> getMostPopularArticles(@SuppressWarnings("unused") Activity activity) {
+        return new ArrayList<>();
     }
 
-    /** Get a list of recent articles - TODO: how to get recent? (Future feature) */
-    private List<ListItem> getRecentArticles(Activity activity) {
-        List<ListItem> articlesList = new ArrayList<>();
-        // Read list of articles from JSON list
-        try {
-            String inputText = loadJSONFromAsset("article_list.json", activity);
-            JSONObject inputJson = new JSONObject(inputText);
-            JSONArray jsonArray = inputJson.getJSONArray("articles");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject article = (JSONObject) jsonArray.get(i);
-                article.get("name");
-                article.get("path");
-                articlesList.add(new ListItem((String)article.get("name"), (String)article.get("path")));
-            }
-        } catch (JSONException e){
-            Log.e(TAG, "Error reading JSON");
-        }
-        return articlesList;
+    /** Get a list of recent articles. Currently displays a 'future feature' message.  */
+    private List<ListItem> getRecentArticles(@SuppressWarnings("unused") Activity activity) {
+        return new ArrayList<>();
     }
 
     /** Read JSON data from specified file */

@@ -20,7 +20,8 @@ http://www.gnu.org/licenses
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:onClick="onClick">
     <TextView
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -31,5 +32,6 @@ http://www.gnu.org/licenses
         android:textSize="16sp"
         android:textColor="@color/tw__composer_black"
         android:textStyle="bold"
+        android:onClick="onClick"
         tools:text="Header Title"/>
 </LinearLayout>

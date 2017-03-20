@@ -25,6 +25,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
@@ -73,6 +75,20 @@ public class HelpActivity extends Activity {
                 SupportManager.instance.sendFeedback(this, "GameChat Feedback",
                         "Feedback: ", mBitmapPath, mLogCatPath);
 
+                break;
+            case R.id.header:
+                // Handle click on a header. If it's either of the future-feature values, show msg.
+                TextView textView = (view instanceof TextView) ? (TextView)view : null;
+                if (textView == null)
+                    return;
+                if (textView.getText().equals(getString(R.string.HelpMostPopularTitle)) ||
+                        textView.getText().equals(getString(R.string.HelpRecentTitle))) {
+                    String prefix = String.format(getString(R.string.HelpFutureFeatureMessage),
+                            textView.getText().toString());
+                    String suffix = getString(R.string.HelpFutureFeature);
+                    CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+                    Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+                }
                 break;
             default:
                 // Use the Event bus to post the click event.
