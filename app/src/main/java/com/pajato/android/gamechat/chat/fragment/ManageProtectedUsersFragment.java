@@ -41,7 +41,7 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        processClickEvent(event.view, this.type.name());
+        processClickEvent(event.view, this.type);
     }
 
     /** Handle protected user deleted events by updating the adapter */

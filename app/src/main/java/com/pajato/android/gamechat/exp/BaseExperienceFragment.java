@@ -376,9 +376,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Process a click event on the given view for an experience fragment. */
-    protected void processClickEvent(final View view, final String tag) {
+    protected void processClickEvent(final View view, final FragmentType type) {
         // Grab the View ID and the floating action button and dimmer views.
-        logEvent(String.format("onClick: (%s) with event {%s};", tag, view));
+        logEvent(String.format("onClick: (%s) with event {%s};", type.name(), view));
         FragmentType expFragmentType = null;
         switch (view.getId()) {
             case R.id.IconTicTacToe:
@@ -504,10 +504,10 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     }
 
     /** Process a tag click event on a given view by logging the event and handling the payload. */
-    protected void processTagClickEvent(final TagClickEvent event, final String name) {
+    protected void processTagClickEvent(final TagClickEvent event, final FragmentType type) {
         // Determine if this event is for this fragment.  Abort if not, otherwise process a FAM
         // entry click.
-        logEvent(String.format("onClick: (%s) with event {%s};", name, event.view));
+        logEvent(String.format("onClick: (%s) with event {%s};", type, event.view));
         if (!mActive)
             return;
         Object tag = event.view.getTag();
