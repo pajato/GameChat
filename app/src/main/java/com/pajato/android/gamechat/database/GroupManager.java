@@ -48,6 +48,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatG
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.groupList;
+import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.newItem;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 
 /**
@@ -157,12 +158,18 @@ public enum GroupManager {
     public List<ListItem> getListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
         // group rooms) or more than one group (a set of groups).
+        List<ListItem> returnList = new ArrayList<>();
         switch (groupMap.size()) {
             case 0:
-                return getMeGroupItemList();
+                returnList.addAll(getMeGroupItemList());
+                break;
             default:
-                return getGroupsItemList();
+                returnList.addAll(getGroupsItemList());
+                break;
         }
+        if (!AccountManager.instance.isRestricted())
+            returnList.add(new ListItem(newItem, R.string.NewGroupText));
+        return returnList;
     }
 
     /** Get a list of groups without any headers */

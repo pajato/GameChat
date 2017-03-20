@@ -82,9 +82,8 @@ public class CheckersFragment extends BaseExperienceFragment {
 
     // Public instance methods.
 
-    /** Process a given button click event looking for one on the game fab button. */
+    /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Delegate the event to the base class.
         processClickEvent(event.view, this.type.name());
     }
 

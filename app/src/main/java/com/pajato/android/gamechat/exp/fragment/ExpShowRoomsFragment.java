@@ -39,16 +39,15 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 
 public class ExpShowRoomsFragment extends BaseExperienceFragment {
 
-    /** Process a given button click event looking for one on the game fab button. */
+    /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Delegate the event to the base class.
-        processClickEvent(event.view, "expShowRooms");
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Handle a FAM or Snackbar click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, "expShowRooms");
+        processTagClickEvent(event, this.type.name());
     }
 
     @Override public void onResume() {

@@ -22,15 +22,11 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
-import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
 import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -41,29 +37,11 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 
 public class ManageProtectedUsersFragment extends BaseChatFragment {
 
-    // Public class constants.
-
-    /**
-     * The lookup key for the FAB game home menu.
-     */
-    private static final String MANAGE_PROTECTED_USERS_FAM_KEY = "manageProtectedUsersFamKey";
-
     // Public instance methods.
 
-    /**
-     * Handle click events.
-     */
-    @Subscribe
-    public void onClick(final ClickEvent event) {
-        if (event == null || event.view == null)
-            return;
-
-        // The event appears to be expected.  Confirm by finding the selector check view.
-        switch (event.view.getId()) {
-            default:
-                processClickEvent(event.view, "manageProtectedUsers");
-                break;
-        }
+    /** Handle a button click event by delegating the event to the base class. */
+    @Subscribe public void onClick(final ClickEvent event) {
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Handle protected user deleted events by updating the adapter */
@@ -86,9 +64,7 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
         // FAM is not and the FAM is set to the home chat menu.
         super.onResume();
-        FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
-        FabManager.chat.init(this, MANAGE_PROTECTED_USERS_FAM_KEY);
-        FabManager.chat.setVisibility(this, View.VISIBLE);
+        FabManager.chat.setVisibility(this, View.GONE);
     }
 
     /** Set up toolbar and FAM */
@@ -98,14 +74,5 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         super.onStart();
         int titleResId = R.string.ProtectedUsersTitle;
         ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
-        FabManager.chat.setMenu(MANAGE_PROTECTED_USERS_FAM_KEY, getSelectionMenu());
     }
-
-    // Private instance methods.
-
-    /** Get the FAM menu contents */
-    private List<MenuEntry> getSelectionMenu() {
-        return new ArrayList<>();
-    }
-
 }

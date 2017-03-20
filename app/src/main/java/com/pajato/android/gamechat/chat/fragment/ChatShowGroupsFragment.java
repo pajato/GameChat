@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
@@ -63,10 +62,9 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Process a given button click event looking for the chat FAB. */
+    /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Delegate the processing to the super class.
-        processClickEvent(event.view, "showGroups");
+        processClickEvent(event.view, this.type.name());
     }
 
     /** Process a menu click event ... */
@@ -78,9 +76,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         FabManager.chat.dismissMenu(this);
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
-            case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createChatGroup);
-                break;
             case R.string.JoinRoomsMenuTitle:
                 DispatchManager.instance.chainFragment(getActivity(), joinRoom);
                 break;
@@ -154,8 +149,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_checkers_black_24dp));
         if (!AccountManager.instance.isRestricted()) {
-            menu.add(getTintEntry(R.string.CreateGroupMenuTitle,
-                    R.drawable.ic_group_add_black_24dp));
             menu.add(getTintEntry(R.string.ManageRestrictedUserTitle,
                     R.drawable.ic_verified_user_black_24dp));
         }

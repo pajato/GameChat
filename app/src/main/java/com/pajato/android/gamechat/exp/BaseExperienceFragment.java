@@ -436,9 +436,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
      */
     protected void processExperienceChange(@NonNull final ExperienceChangeEvent event) {
         ExpType expType = event.experience != null ? event.experience.getExperienceType() : null;
-        if (!mActive || expType == null || expType != type.expType)
-            return;
-        if (!mExperience.getExperienceKey().equals(event.experience.getExperienceKey()))
+        if (!mActive || expType == null || expType != type.expType ||
+                !mExperience.getExperienceKey().equals(event.experience.getExperienceKey()))
             return;
         logEvent("experienceChange");
         mExperience = event.experience;
