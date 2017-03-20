@@ -84,13 +84,13 @@ public class CheckersFragment extends BaseExperienceFragment {
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        processClickEvent(event.view, this.type.name());
+        processClickEvent(event.view, this.type);
     }
 
     /** Handle a FAM or Snackbar click event. */
     @Subscribe public void onClick(final TagClickEvent event) {
         // Delegate the event to the base class.
-        processTagClickEvent(event, this.type.name());
+        processTagClickEvent(event, this.type);
     }
 
     /** Handle an experience posting event to see if this is a checkers experience. */

@@ -73,7 +73,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
-        processClickEvent(event.view, this.type.name());
+        processClickEvent(event.view, this.type);
     }
 
     /** Process a menu click event ... */
