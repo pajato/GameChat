@@ -122,16 +122,12 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 }
                 // If not on a tablet, make sure that we switch to the chat perspective and remember
                 // the type that we came from.
-                FragmentType activeFragmentType = this.type;
                 if (!PaneManager.instance.isTablet()) {
                     ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                    if (viewPager != null && viewPager.getCurrentItem() != PaneManager.CHAT_INDEX) {
+                    if (viewPager != null)
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
-                    }
-                    activeFragmentType = getCurrentFragmentType();
                 }
-                DispatchManager.instance.dispatchToFragment(this, protectedUsers,
-                        activeFragmentType, null);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type, null);
                 break;
             case R.id.inviteFriends:
                 DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type, null);

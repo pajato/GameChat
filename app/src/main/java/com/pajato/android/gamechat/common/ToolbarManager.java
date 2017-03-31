@@ -165,6 +165,20 @@ public enum ToolbarManager {
             addMenuItem(toolbar, value);
     }
 
+    /** Reset the current toolbar overflow menu */
+    public void resetOverflowMenu(@NonNull Resources resources, final ToolbarType type,
+                                  final Toolbar toolbar) {
+        int id = type.overflowMenuIconResourceId;
+        if (toolbar.getMenu() != null) {
+            toolbar.getMenu().clear();
+        }
+        toolbar.inflateMenu(type.overflowMenuResourceId);
+        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
+        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
+    }
+
+    // Private instance methods.
+
     /** Add a menu item to the toolbar's action menu. */
     private void addMenuItem(@NonNull final Toolbar toolbar, @NonNull final MenuItemType type) {
         // Never add 'chat' or 'game' menu items on a tablet
@@ -182,20 +196,6 @@ public enum ToolbarManager {
         }
         item.setShowAsAction(type.flag);
     }
-
-    /** Reset the current toolbar overflow menu */
-    public void resetOverflowMenu(@NonNull Resources resources, final ToolbarType type,
-                                  final Toolbar toolbar) {
-        int id = type.overflowMenuIconResourceId;
-        if (toolbar.getMenu() != null) {
-            toolbar.getMenu().clear();
-        }
-        toolbar.inflateMenu(type.overflowMenuResourceId);
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
-        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
-    }
-
-    // Private instance methods.
 
     /** Set the titles in the given toolbar using the given (possibly null) titles. */
     private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {

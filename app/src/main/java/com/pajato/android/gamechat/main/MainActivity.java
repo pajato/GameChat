@@ -370,7 +370,6 @@ public class MainActivity extends BaseActivity
         InvitationManager.instance.init(this);
         JoinManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
-        RoomManager.instance.init(this);
 
         // Register the first of many app event listeners.
         AppEventManager.instance.register(AccountManager.instance);
