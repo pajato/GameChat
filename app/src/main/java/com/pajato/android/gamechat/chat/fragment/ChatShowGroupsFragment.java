@@ -17,17 +17,21 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -62,6 +66,39 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return GroupManager.instance.getListItemData();
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        // Show the app title if there is no current account (impossible), the standard groups
+        // toolbar title if there are joined groups, otherwise show the me room name (account
+        // display name.)
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account == null)
+            return getString(R.string.app_name);
+        if (account.joinMap.size() > 0)
+            return getString(R.string.ChatGroupsToolbarTitle);
+        return getString(R.string.GroupMeToolbarTitle);
+    }
+
+    /** Manage the list UI every time a message change occurs. */
+    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
+        // Determine if this fragment cares about chat list changes.  If so, update the list
+        // content.
+        String format = "onChatListChange with event {%s}";
+        logEvent(String.format(Locale.US, format, event));
+        if (mActive)
+            updateAdapterList();
+    }
+
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
         processClickEvent(event.view, this.type);
@@ -77,10 +114,10 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.JoinRoomsMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), joinRoom);
+                DispatchManager.instance.dispatchToFragment(this, joinRoom, null, null);
                 break;
             case R.string.InviteFriendMessage:
-                DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type, null);
                 break;
             case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.isRestricted()) {
@@ -88,7 +125,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                DispatchManager.instance.chainFragment(getActivity(), protectedUsers);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type, null);
                 break;
             default:
                 break;
@@ -109,16 +146,6 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         }
     }
 
-    /** Manage the list UI every time a message change occurs. */
-    @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
-        // Determine if this fragment cares about chat list changes.  If so, update the list
-        // content.
-        String format = "onChatListChange with event {%s}";
-        logEvent(String.format(Locale.US, format, event));
-        if (mActive)
-            updateAdapterList();
-    }
-
     @Subscribe public void onProfileGroupDelete(final ProfileGroupDeleteEvent event) {
         String format = "onProfileGroupDelete with event {%s}";
         logEvent(String.format(Locale.US, format, event));
@@ -135,10 +162,18 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, getTitleResId(), game, search);
+        ToolbarManager.instance.init(this, game, search);
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 
@@ -154,18 +189,5 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         }
         menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
         return menu;
-    }
-
-    /** Return the toolbar title resource id based on the presence or absence of groups. */
-    private int getTitleResId() {
-        // Show the app title if there is no current account (impossible), the standard groups
-        // toolbar title if there are joined groups, otherwise show the me room name (account
-        // display name.)
-        Account account = AccountManager.instance.getCurrentAccount();
-        if (account == null)
-            return R.string.app_name;
-        if (account.joinMap.size() > 0)
-            return R.string.ChatGroupsToolbarTitle;
-        return R.string.GroupMeToolbarTitle;
     }
 }

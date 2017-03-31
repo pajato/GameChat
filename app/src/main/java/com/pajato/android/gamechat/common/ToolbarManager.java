@@ -26,10 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.main.MainActivity;
@@ -39,7 +35,6 @@ import com.pajato.android.gamechat.main.PaneManager;
 import static android.view.Menu.NONE;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
-import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 
 /** Provide a singleton to manage the rooms panel fab button. */
 public enum ToolbarManager {
@@ -145,27 +140,6 @@ public enum ToolbarManager {
 
     /** Initialize the toolbar for a given fragment and menu entries. */
     public void init(@NonNull final BaseFragment fragment, final MenuItemType... menuEntries) {
-        init(fragment, null, null, menuEntries);
-    }
-
-    /** Initialize the toolbar for a given fragment, list item and menu entries. */
-    public void init(@NonNull final BaseFragment fragment, ListItem item,
-                     final MenuItemType... menuEntries) {
-        // Determine if the group name or the room name should be the title.
-        String title = getTitle(fragment, item);
-        String subtitle = getSubtitle(item);
-        init(fragment, title, subtitle, menuEntries);
-    }
-
-    /** Initialize the toolbar for a given fragment, title resource id and menu entries. */
-    public void init(@NonNull final BaseFragment fragment, int resId,
-                     final MenuItemType... menuEntries) {
-        init(fragment, fragment.getString(resId), null, menuEntries);
-    }
-
-    /** Initialize the toolbar for a given fragment, title, subtitle, and menu entries. */
-    public void init(@NonNull final BaseFragment fragment, final String title, final String subtitle,
-                     final MenuItemType... menuEntries) {
         // Determine if this fragment exists and supports a managed toolbar.  Abort if not,
         // otherwise handle the toolbar based on the fragment's toolbar type.
         Toolbar toolbar = fragment.getToolbar();
@@ -184,10 +158,26 @@ public enum ToolbarManager {
         }
 
         // Set the title, subtitle and add the menu items to the action menu.
+        String title = fragment.getToolbarTitle();
+        String subtitle = fragment.getToolbarSubtitle();
         setTitles(toolbar, title, subtitle);
         for (MenuItemType value : menuEntries)
             addMenuItem(toolbar, value);
     }
+
+    /** Reset the current toolbar overflow menu */
+    public void resetOverflowMenu(@NonNull Resources resources, final ToolbarType type,
+                                  final Toolbar toolbar) {
+        int id = type.overflowMenuIconResourceId;
+        if (toolbar.getMenu() != null) {
+            toolbar.getMenu().clear();
+        }
+        toolbar.inflateMenu(type.overflowMenuResourceId);
+        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
+        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
+    }
+
+    // Private instance methods.
 
     /** Add a menu item to the toolbar's action menu. */
     private void addMenuItem(@NonNull final Toolbar toolbar, @NonNull final MenuItemType type) {
@@ -207,74 +197,6 @@ public enum ToolbarManager {
         item.setShowAsAction(type.flag);
     }
 
-    /** Reset the current toolbar overflow menu */
-    public void resetOverflowMenu(@NonNull Resources resources, final ToolbarType type,
-                                  final Toolbar toolbar) {
-        int id = type.overflowMenuIconResourceId;
-        if (toolbar.getMenu() != null) {
-            toolbar.getMenu().clear();
-        }
-        toolbar.inflateMenu(type.overflowMenuResourceId);
-        toolbar.setOverflowIcon(VectorDrawableCompat.create(resources, id, null));
-        toolbar.setOnMenuItemClickListener(mOverflowMenuItemClickHandler);
-    }
-
-    // Private instance methods.
-
-    /** Return a subtitle string for a given list item. */
-    private String getSubtitle(final ListItem item) {
-        // Ensure that the item is not empty.  Abort if so.  Otherwise case on the item type to get
-        // the value to return.
-        if (item == null)
-            return null;
-        switch (item.type) {
-            case expList:
-                return GroupManager.instance.getGroupName(item.groupKey);
-            case chatGroup:
-            case chatRoom:
-                return GroupManager.instance.getGroupName(item.groupKey);
-            default:
-                return item.key == null
-                        ? GroupManager.instance.getGroupName(item.groupKey)
-                        : RoomManager.instance.getRoomName(item.key);
-        }
-    }
-
-    /** Return a title string for a given list item. */
-    private String getTitle(@NonNull BaseFragment fragment, final ListItem item) {
-        // Ensure that the item is not empty.  Abort if so.  Otherwise case on the item type to get
-        // the value to return.
-        if (item == null)
-            return null;
-        switch (item.type) {
-            case expGroup:
-                return fragment.getString(R.string.ExpGroupsToolbarTitle);
-            case chatGroup:
-                if (fragment.type == chatRoomList) {
-                    return fragment.getString(R.string.RoomsToolbarTitle);
-                }
-                return fragment.getString(R.string.ChatGroupsToolbarTitle);
-            case expRoom:
-                if (AccountManager.instance.isMeGroup(item.groupKey))
-                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
-                return fragment.getString(R.string.ExpRoomsToolbarTitle);
-            case expList:
-                // Determine if the group is the me group and give it special handling.
-                if (AccountManager.instance.isMeGroup(item.groupKey))
-                    return fragment.getString(R.string.MyExperiencesToolbarTitle);
-                return RoomManager.instance.getRoomName(item.roomKey);
-            case chatRoom:
-                // Determine if the group is the me group and give it special handling.
-                if (AccountManager.instance.isMeGroup(item.groupKey))
-                    return fragment.getString(R.string.GroupMeToolbarTitle);
-                return RoomManager.instance.getRoomName(item.roomKey);
-            default:
-                return item.key == null
-                        ? GroupManager.instance.getGroupName(item.groupKey)
-                        : RoomManager.instance.getRoomName(item.key);
-        }
-    }
-
     /** Set the titles in the given toolbar using the given (possibly null) titles. */
     private void setTitles(@NonNull final Toolbar bar, final String title, final String subtitle) {
         // Apply the given titles to the toolbar; nulls will clear the fields.
@@ -292,7 +214,7 @@ public enum ToolbarManager {
             return;
         toolbar.setNavigationIcon(toolbarType.navigationIconResourceId);
         MainActivity mainActivity = (MainActivity) fragment.getActivity();
-        View.OnClickListener upHandler = mainActivity.getUpHandler();
+        View.OnClickListener upHandler = mainActivity.getUpHandler(fragment.type.kind);
         toolbar.setNavigationOnClickListener(upHandler);
     }
 

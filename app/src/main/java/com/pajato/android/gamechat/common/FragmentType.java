@@ -34,8 +34,6 @@ import com.pajato.android.gamechat.chat.fragment.ManageProtectedUsersFragment;
 import com.pajato.android.gamechat.chat.fragment.SelectInviteFragment;
 import com.pajato.android.gamechat.chat.fragment.SelectGroupsFragment;
 import com.pajato.android.gamechat.chat.fragment.ShowMessagesFragment;
-import com.pajato.android.gamechat.chat.fragment.ShowNoJoinedRoomsFragment;
-import com.pajato.android.gamechat.chat.fragment.ShowNoMessagesFragment;
 import com.pajato.android.gamechat.common.ToolbarManager.ToolbarType;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.fragment.CheckersFragment;
@@ -45,7 +43,6 @@ import com.pajato.android.gamechat.exp.fragment.ExpShowGroupsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowOfflineFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowRoomsFragment;
 import com.pajato.android.gamechat.exp.fragment.ExpShowSignedOutFragment;
-import com.pajato.android.gamechat.exp.fragment.SelectRoomFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.ShowNoExperiencesFragment;
 import com.pajato.android.gamechat.exp.fragment.TTTFragment;
@@ -67,38 +64,35 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
  * @author Paul Michael Reilly
  */
 public enum FragmentType {
-    chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope),
-    chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list),
-    chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline),
-    chatRoomList (ChatShowRoomsFragment.class, standardWhite, R.layout.chat_list),
-    chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out),
-    checkers (CheckersFragment.class, standardWhite, R.layout.exp_checkers, checkersET),
-    chess (ChessFragment.class, standardWhite, R.layout.exp_checkers, chessET),
-    createChatGroup(CreateGroupFragment.class, standardBlack, R.layout.chat_create),
-    createExpGroup(CreateGroupFragment.class, standardBlack, R.layout.chat_create),
+    chatEnvelope (ChatEnvelopeFragment.class, none, R.layout.chat_envelope, chat),
+    chatGroupList (ChatShowGroupsFragment.class, chatMain, R.layout.chat_list, chat),
+    chatOffline (ChatShowOfflineFragment.class, chatMain, R.layout.chat_offline, chat),
+    chatRoomList (ChatShowRoomsFragment.class, standardWhite, R.layout.chat_list, chat),
+    chatSignedOut (ChatShowSignedOutFragment.class, chatMain, R.layout.chat_signed_out, chat),
+    checkers (CheckersFragment.class, standardWhite, R.layout.exp_checkers, checkersET, exp),
+    chess (ChessFragment.class, standardWhite, R.layout.exp_checkers, chessET, exp),
+    createChatGroup(CreateGroupFragment.class, standardBlack, R.layout.chat_create, chat),
     createProtectedUser(CreateProtectedUsersFragment.class, standardBlack,
-            R.layout.chat_create_protected_user),
-    createRoom (CreateRoomFragment.class, standardBlack, R.layout.chat_create),
-    expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope),
-    expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_list),
-    expOffline (ExpShowOfflineFragment.class, expMain, R.layout.exp_offline),
-    expRoomList (ExpShowRoomsFragment.class, standardWhite, R.layout.exp_list),
-    expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out),
-    experienceList (ShowExperiencesFragment.class, standardWhite, R.layout.exp_list),
-    groupMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
-    groupsForProtectedUser(SelectGroupsFragment.class, standardBlack, R.layout.chat_select_groups),
-    joinRoom (JoinRoomsFragment.class, standardBlack, R.layout.chat_join_rooms),
+            R.layout.chat_create_protected_user, chat),
+    createRoom (CreateRoomFragment.class, standardBlack, R.layout.chat_create, chat),
+    expEnvelope (ExpEnvelopeFragment.class, none, R.layout.exp_envelope, exp),
+    expGroupList (ExpShowGroupsFragment.class, expMain, R.layout.exp_list, exp),
+    expOffline (ExpShowOfflineFragment.class, expMain, R.layout.exp_offline, exp),
+    expRoomList (ExpShowRoomsFragment.class, standardWhite, R.layout.exp_list, exp),
+    expSignedOut (ExpShowSignedOutFragment.class, expMain, R.layout.exp_signed_out, exp),
+    experienceList (ShowExperiencesFragment.class, standardWhite, R.layout.exp_list, exp),
+    groupMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members, chat),
+    groupsForProtectedUser(SelectGroupsFragment.class, standardBlack, R.layout.chat_select_groups,
+            chat),
+    joinRoom (JoinRoomsFragment.class, standardBlack, R.layout.chat_join_rooms, chat),
     protectedUsers (ManageProtectedUsersFragment.class, standardBlack,
-            R.layout.chat_protected_users),
-    messageList (ShowMessagesFragment.class, standardWhite, R.layout.chat_messages),
-    noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none),
-    noMessages (ShowNoMessagesFragment.class, chatMain, R.layout.chat_no_messages),
-    roomMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members),
+            R.layout.chat_protected_users, chat),
+    messageList (ShowMessagesFragment.class, standardWhite, R.layout.chat_messages, chat),
+    noExperiences (ShowNoExperiencesFragment.class, expMain, R.layout.exp_none, exp),
+    roomMembersList(ChatShowMembersFragment.class, standardBlack, R.layout.chat_members, chat),
     selectGroupsRooms(SelectInviteFragment.class, standardBlack,
-            R.layout.select_for_invite),
-    selectRoom (SelectRoomFragment.class, standardBlack, R.layout.exp_select_user),
-    showNoJoinedRooms (ShowNoJoinedRoomsFragment.class, standardWhite, R.layout.chat_no_joined_rooms),
-    tictactoe (TTTFragment.class, standardWhite, R.layout.exp_ttt, tttET);
+            R.layout.select_for_invite, chat),
+    tictactoe (TTTFragment.class, standardWhite, R.layout.exp_ttt, tttET, exp);
 
     // Public instance variables.
 
@@ -107,6 +101,9 @@ public enum FragmentType {
 
     /** The fragment base class for the type. */
     public  Class<? extends BaseFragment> fragmentClass;
+
+    /** The fragment kind (exp or chat) for this fragment type */
+    public FragmentKind kind;
 
     /** The fragment layout resource id. */
     public int layoutResId;
@@ -118,10 +115,11 @@ public enum FragmentType {
 
     /** Build an instance with a given fragment class, toolbar type and layout resource id. */
     FragmentType(@NonNull final Class<? extends BaseFragment> fragmentClass,
-                 final ToolbarType toolbarType, final int layoutResId) {
+                 final ToolbarType toolbarType, final int layoutResId, final FragmentKind kind) {
         this.fragmentClass = fragmentClass;
         this.toolbarType = toolbarType;
         this.layoutResId = layoutResId;
+        this.kind = kind;
     }
 
     /**
@@ -133,8 +131,9 @@ public enum FragmentType {
      * @param expType The Firebase model type information.
      */
     FragmentType(@NonNull final Class<? extends BaseFragment> fragmentClass,
-                 final ToolbarType toolbarType, final int layoutResId, final ExpType expType) {
-        this(fragmentClass, toolbarType, layoutResId);
+                 final ToolbarType toolbarType, final int layoutResId, final ExpType expType,
+                 final FragmentKind kind) {
+        this(fragmentClass, toolbarType, layoutResId, kind);
         this.expType = expType;
     }
 
@@ -142,35 +141,10 @@ public enum FragmentType {
 
     /** Return the fragment envelope resource id for given type. */
     public int getEnvelopeId() {
-        if (getKind() == chat)
+        if (this.kind == chat)
             return R.id.chatFragmentContainer;
         else
             return R.id.expFragmentContainer;
     }
 
-    /** Return the dispatch kind for this fragment type. */
-    public FragmentKind getKind() {
-        switch(this) {
-            case chatEnvelope:
-            case chatGroupList:
-            case chatOffline:
-            case chatRoomList:
-            case chatSignedOut:
-            case createChatGroup:
-            case createProtectedUser:
-            case createRoom:
-            case groupMembersList:
-            case groupsForProtectedUser:
-            case joinRoom:
-            case messageList:
-            case protectedUsers:
-            case roomMembersList:
-            case selectGroupsRooms:
-            case showNoJoinedRooms:
-                return chat;
-            case createExpGroup:
-            default:
-                return exp;
-        }
-    }
 }

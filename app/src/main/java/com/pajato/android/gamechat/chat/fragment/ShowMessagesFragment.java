@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -28,12 +29,16 @@ import android.widget.EditText;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
@@ -43,6 +48,7 @@ import com.pajato.android.gamechat.main.MainService;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
@@ -64,6 +70,36 @@ import static com.pajato.android.gamechat.main.MainService.ROOM_KEY;
 public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
 
     // Public instance methods.
+
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return MessageManager.instance.getListItemData(mDispatcher);
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        if (AccountManager.instance.isMeGroup(mDispatcher.groupKey))
+            return getString(R.string.GroupMeToolbarTitle);
+        return RoomManager.instance.getRoomName(mDispatcher.roomKey);
+    }
+
+    /** Ensure that all the messages in a given room are marked as seen by the account holder. */
+    private void markMessagesSeen(@NonNull final String groupKey, @NonNull final String roomKey) {
+        List<Message> list = MessageManager.instance.getMessageList(groupKey, roomKey);
+        String accountId = AccountManager.instance.getCurrentAccountId();
+        if (list == null || list.size() == 0 || accountId == null)
+            return;
+        for (Message message : list)
+            if (message.unseenList.contains(accountId)) {
+                message.unseenList.remove(accountId);
+                MessageManager.instance.updateMessage(message);
+            }
+    }
 
     /** Process a given button click event looking for one on the chat fab button. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -119,7 +155,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;
             case R.string.MembersMenuItem:
-                DispatchManager.instance.chainFragment(getActivity(), roomMembersList, mItem);
+                DispatchManager.instance.dispatchToFragment(this, roomMembersList, null, null);
                 break;
             default:
                 break;
@@ -129,8 +165,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
     /** Deal with the fragment's lifecycle by marking the join inactive. */
     @Override public void onPause() {
         super.onPause();
-        if (mItem != null)
-            clearJoinState(mItem.groupKey, mItem.roomKey, chat);
+        clearJoinState(mDispatcher.groupKey, mDispatcher.roomKey, chat);
     }
 
     /** Deal with the fragment's lifecycle by managing the FAB. */
@@ -138,14 +173,19 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         super.onResume();        // Turn off the FAB and force a recycler view update.
         initEditText(mLayout);
         FabManager.chat.setVisibility(this, View.GONE);
-        setJoinState(mItem.groupKey, mItem.roomKey, chat);
+        setJoinState(mDispatcher.groupKey, mDispatcher.roomKey, chat);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+        markMessagesSeen(mDispatcher.groupKey, mDispatcher.roomKey);
     }
 
     /** Setup the toolbar. */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, mItem, helpAndFeedback, members, game, search, invite,
-                settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, members, game, search, invite, settings);
     }
 
     // Private instance methods.
@@ -176,7 +216,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         // The account and the edit text field exist.  Persist the message to the database, inform
         // the User that the message has been sent.
         String text = editText.getText().toString();
-        String roomKey = mItem.roomKey;
+        String roomKey = mDispatcher.roomKey;
         Room room = RoomManager.instance.getRoomProfile(roomKey);
         MessageManager.instance.createMessage(text, STANDARD, account, room);
         String snackbarMessage = getResources().getString(R.string.MessageSentText);

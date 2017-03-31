@@ -17,18 +17,45 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.content.Context;
+
+import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
+
 public class ExpShowOfflineFragment extends BaseExperienceFragment {
 
     // Public instance methods.
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return "";
+    }
+
+    /** Get the toolbar title (none for offline) */
+    public String getToolbarTitle() {
+        return getString(R.string.OfflineToolbarTitle);
+    }
 
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Use a logging placeholder.
         logEvent("onClick (showOffline)");
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
     }
 }

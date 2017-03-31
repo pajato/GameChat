@@ -18,7 +18,6 @@
 package com.pajato.android.gamechat.common;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,14 +25,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.PlayModeMenuAdapter;
 import com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.GroupManager;
@@ -50,7 +47,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static android.widget.LinearLayout.VERTICAL;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectUser;
 
 /**
@@ -118,16 +114,6 @@ public enum PlayModeManager {
         PlayModeManager.instance.closePlayModeMenu();
     }
 
-    /** Return null or a list of Users or rooms which the current user can access. */
-    public List<ListItem> getListItemData(@NonNull final FragmentType type) {
-        switch(type) {
-            case selectRoom:
-                return getUserItems();
-            default:
-                return null;
-        }
-    }
-
     /**
      * Create and show the play mode popup menu. The popup menu must be created with the anchor in
      * the current fragment layout, so it cannot be shared across fragments.
@@ -192,28 +178,6 @@ public enum PlayModeManager {
             }
         }
         result.addAll(memberMap.values());
-        return result;
-    }
-
-    /** Return a possibly empty list of Users the current User can access. */
-    private List<ListItem> getUserItems() {
-        List<ListItem> result = new ArrayList<>();
-        Account account = AccountManager.instance.getCurrentAccount();
-        if (!AccountManager.hasSelectableMembers(account))
-            // No users exist so create a header stating this.
-            result.add(new ListItem(resourceHeader, R.string.NoUsersFound));
-        else
-            for (Map.Entry<String, JoinState> entry : account.joinMap.entrySet()) {
-                String groupKey = entry.getKey();
-                for (Account member : MemberManager.instance.getMemberList(groupKey))
-                    if (!member.id.equals(account.id)) {
-                        String nickName = member.getNickName();
-                        String name = String.format(Locale.US, "%s (%s)", nickName, member.email);
-                        String text = GroupManager.instance.getGroupName(groupKey);
-                        String url = member.url;
-                        result.add(new ListItem(selectUser, groupKey, member.id, name, text, url));
-                    }
-            }
         return result;
     }
 }

@@ -22,6 +22,8 @@ import android.support.annotation.NonNull;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
 import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
@@ -50,6 +52,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
+import static com.pajato.android.gamechat.event.BaseChangeEvent.REMOVED;
 
 /**
  * Provide a class to manage the experience database objects.
@@ -117,36 +120,64 @@ public enum ExperienceManager {
 
     public void deleteExperience(final ListItem item) {
         // Delete experience from database
-        String path = String.format(Locale.US, EXPERIENCE_PATH, item.groupKey, item.roomKey, item.key);
+        String path = String.format(Locale.US, EXPERIENCE_PATH, item.groupKey, item.roomKey,
+                item.experienceKey);
         FirebaseDatabase.getInstance().getReference().child(path).removeValue();
 
         // Delete experience from various lists
-        experienceMap.remove(item.key);
+        experienceMap.remove(item.experienceKey);
+
+        if (expGroupMap.containsKey(item.groupKey)) {
+            Map<String, Map<String, Experience>> roomsMap = expGroupMap.get(item.groupKey);
+            if (roomsMap.containsKey(item.roomKey)) {
+                Map<String, Experience> experiencesMap = roomsMap.get(item.roomKey);
+                if (experiencesMap.containsKey(item.experienceKey)) {
+                    experiencesMap.remove(item.experienceKey);
+                }
+                if (experiencesMap.size() == 0) {
+                    roomsMap.remove(item.roomKey);
+                }
+            }
+            if (roomsMap.size() == 0)
+                expGroupMap.remove(item.groupKey);
+        }
 
         Map<String, Map<DateHeaderType, List<String>>> groupMap = mDateHeaderExpMap.get(item.groupKey);
         Map<DateHeaderType, List<String>> roomMap = groupMap.get(item.roomKey);
         for (DateHeaderType dht : roomMap.keySet()) {
             List<String> experiences = roomMap.get(dht);
-            if (experiences.contains(item.key)) {
-                experiences.remove(item.key);
-                roomMap.put(dht, experiences);
+            if (experiences.contains(item.experienceKey)) {
+                experiences.remove(item.experienceKey);
+                if (experiences.size() == 0)
+                    roomMap.remove(dht);
+                else
+                    roomMap.put(dht, experiences);
                 break;
             }
         }
+        if (roomMap.size() == 0)
+            groupMap.remove(item.roomKey);
+        if (groupMap.size() == 0)
+            mDateHeaderExpMap.remove(item.groupKey);
         Map<String, Experience> recentExpMap = mRoomToRecentMap.get(item.groupKey);
         for(Map.Entry entry : recentExpMap.entrySet())
-            if (entry.getValue().equals(item.key))
+            if (entry.getValue().equals(item.roomKey))
                 recentExpMap.remove(entry.getKey().toString());
 
-        removeWatcher(item.key);
+        removeWatcher(item.experienceKey);
 
-        AppEventManager.instance.post(new ExperienceDeleteEvent(item.key));
+        AppEventManager.instance.post(new ExperienceDeleteEvent(item.experienceKey));
 
     }
 
     /** Return an experience push key to use with a subsequent room object persistence. */
     public String getExperienceKey() {
         return FirebaseDatabase.getInstance().getReference().child(EXPERIENCE_PATH).push().getKey();
+    }
+
+    /** Return null or an experience based on the specified experience key */
+    public Experience getExperience(@NonNull final String experienceKey) {
+        return experienceMap.get(experienceKey);
     }
 
     /** Return null or an experience of the given type from the given group and room. */
@@ -169,27 +200,29 @@ public enum ExperienceManager {
 
     /** Update an experience in the database after its model has been reset */
     @Subscribe void handleExperienceResetEvent(ExperienceResetEvent event) {
-        Experience experience = experienceMap.get(event.experienceKey);
+        Experience experience = getExperience(event.experienceKey);
         if (experience != null)
             ExperienceManager.instance.updateExperience(experience);
     }
 
     /** Get the data as a set of list items for all groups. */
-    private List<ListItem> getGroupListItemData() {
+    public List<ListItem> getGroupListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
         // group rooms) or more than one group (a set of groups).
         List<ListItem> result = new ArrayList<>();
         switch (expGroupMap.size()) {
             case 0:
+                return result;
             case 1:             // Get the experiences from the rooms in the joined group that have
                                 // experiences and the me room if it has any experiences.
-                String groupKey = expGroupMap.keySet().iterator().next(); // this is actually a group key ?!!!??????????????
+                String groupKey = expGroupMap.keySet().iterator().next();
                 String meGroupKey = AccountManager.instance.getMeGroupKey();
                 String meRoomKey = AccountManager.instance.getMeRoomKey();
                 result.addAll(getItemListRooms(groupKey));
                 if (groupKey.equals(meRoomKey) || groupKey.equals(meGroupKey))
                     return result;
-                result.addAll(getItemListRooms(meGroupKey));
+                if (expGroupMap.containsKey(meGroupKey))
+                    result.addAll(getItemListRooms(meGroupKey));
                 return result;
             default:
                 result.addAll(getItemListGroups());
@@ -199,33 +232,20 @@ public enum ExperienceManager {
     }
 
     /** Return a list of items showing the rooms in a given group. */
-    private List<ListItem> getRoomListItemData(@NonNull final String groupKey) {
+    public List<ListItem> getRoomListItemData(@NonNull final String groupKey) {
         List<ListItem> result = new ArrayList<>();
         result.addAll(getItemListRooms(groupKey));
         return result;
     }
 
-    /** Return a list of items based on the given item. */
-    public List<ListItem> getListItemData(final ListItem item) {
-        // If item is null return a list of groups with experiences.  If item has both a group
-        // and room key return a list of experiences in that room.  If item only has a group key
-        // return a list of rooms with experiences from that group.
-        if (item == null || item.groupKey == null)
-            return getGroupListItemData();
-        else if (item.roomKey != null)
-            return getItemListExperiences(item);
-        else
-            return getRoomListItemData(item.groupKey);
-    }
-
     /** Move an experience from one room to another. */
-    public void move(@NonNull final Experience experience, final String gKey, final String rKey) {
-        //String srcGroupKey = experience.getGroupKey();
-        //String srcRoomKey = experience.getRoomKey();
-        experience.setGroupKey(gKey);
-        experience.setRoomKey(rKey);
+    public void move(@NonNull final Experience experience, final String groupKey, final String roomKey) {
+        experience.setGroupKey(groupKey);
+        experience.setRoomKey(roomKey);
         experience.setExperienceKey(null);
         createExperience(experience);
+        // Notify the dispatch manager so that back navigation is reoriented to this new group/room.
+        DispatchManager.instance.moveExperience(experience);
     }
 
     /** Handle a account change event by setting up or clearing variables. */
@@ -237,10 +257,10 @@ public enum ExperienceManager {
         experienceMap.clear();
     }
 
-    /** Handle an experience change event by updating the date headers ... */
+    /** Handle an experience change event by updating the date headers. */
     @Subscribe public void onExperienceChangeEvent(@NonNull final ExperienceChangeEvent event) {
         // Update the date headers for this message and post an event to trigger an adapter refresh.
-        updateAllMaps(event.experience);
+        updateAllMaps(event.experience, event.changeType);
         AppEventManager.instance.post(new ExpListChangeEvent());
     }
 
@@ -275,7 +295,7 @@ public enum ExperienceManager {
 
     // Private instance methods.
 
-    /** Add a group list item for the given kind (chat message or game experience) and group. */
+    /** Add a group list item for the given kind and group. */
     private void addItem(@NonNull final List<ListItem> result, @NonNull final ItemType itemType,
                          @NonNull final String key) {
         Map<String, Integer> countMap = new HashMap<>();
@@ -298,7 +318,7 @@ public enum ExperienceManager {
                 String roomKey = exp.getRoomKey();
                 ListItem item = new ListItem(itemType, groupKey, roomKey, exp.getName(), 0, null);
                 item.iconResId = getIconResId(exp.getExperienceType());
-                item.key= key;
+                item.experienceKey = key;
                 result.add(item);
                 break;
             default:
@@ -319,14 +339,14 @@ public enum ExperienceManager {
         }
     }
 
-    /** Return a list of experience items for the group and room in the given item. */
-    private List<ListItem> getItemListExperiences(@NonNull final ListItem item) {
+    /** Return a list of experience items for the group and room in the given configuration. */
+    public List<ListItem> getItemListExperiences(@NonNull final Dispatcher dispatcher) {
         // Ensure that there are experience items to show.  Return an empty list if not.
         List<ListItem> result = new ArrayList<>();
         Map<DateHeaderType, List<String>> expMap;
         Map<String, Map<DateHeaderType, List<String>>> roomMap;
-        roomMap = item.groupKey != null ? mDateHeaderExpMap.get(item.groupKey) : null;
-        expMap = roomMap != null && item.roomKey != null ? roomMap.get(item.roomKey) : null;
+        roomMap = dispatcher.groupKey != null ? mDateHeaderExpMap.get(dispatcher.groupKey) : null;
+        expMap = roomMap != null && dispatcher.roomKey != null ? roomMap.get(dispatcher.roomKey) : null;
         if (expMap == null || expMap.size() == 0)
             return result;
         processHeaders(result, expList, expMap);
@@ -416,19 +436,33 @@ public enum ExperienceManager {
     }
 
     /** Update the various maps used to track experiences. */
-    private void updateAllMaps(final Experience experience) {
+    private void updateAllMaps(final Experience experience, final int changeType) {
         // Deal with a changed experience (like a turn, for example) by making the given experience
-        // the most recent in both the group and room recent experience maps.
+        // the most recent in both the group and room recent experience maps. If the change was to
+        // remove the experience, delete it from various maps.
         String groupKey = experience.getGroupKey();
 
         // Remember the last updated experience in the group and room.
         String roomKey = experience.getRoomKey();
-        mGroupToRecentMap.put(groupKey, experience);
+        if (changeType == REMOVED) {
+            Map<String, Map<String, Experience>> groupMap = expGroupMap.get(groupKey);
+            if (groupMap != null && groupMap.containsKey(groupKey)) {
+                groupMap.remove(groupKey);
+            }
+        } else
+            mGroupToRecentMap.put(groupKey, experience);
+
         Map<String, Experience> roomMap = mRoomToRecentMap.get(groupKey);
-        if (roomMap == null)
-            roomMap = new HashMap<>();
-        roomMap.put(roomKey, experience);
-        mRoomToRecentMap.put(groupKey, roomMap);
+        if (changeType == REMOVED) {
+            if (roomMap != null && roomMap.containsKey(roomKey)) {
+                roomMap.remove(roomKey);
+            }
+        }  else {
+            if (roomMap == null)
+                roomMap = new HashMap<>();
+            roomMap.put(roomKey, experience);
+            mRoomToRecentMap.put(groupKey, roomMap);
+        }
 
         // Update the group list headers for each group and room with at least one experience.
         mDateHeaderGroupMap.clear();

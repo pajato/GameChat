@@ -17,11 +17,15 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.content.Context;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
@@ -47,6 +51,11 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
  */
 public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
+    // Private static variables
+
+    /** The fragment which is currently active within the envelope */
+    private static FragmentType mCurrentFragmentType;
+
     // Public constants.
 
     /** The lookup key for the FAB game home menu. */
@@ -61,10 +70,37 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
     // Public instance methods.
 
+    /** Get the type of the most recent (current) fragment */
+    public static FragmentType getCurrentFragmentType() {
+        return mCurrentFragmentType;
+    }
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        // For the envelope, the toolbar subtitle will be handled by the various fragments
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        // For the envelope, the toolbar title will be handled by the various fragments
+        return null;
+    }
+
     /** There has been a handled authentication change event.  Deal with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeHandled event) {
         // Simply start the next logical fragment.
-        DispatchManager.instance.startNextFragment(getActivity(), exp);
+        DispatchManager.instance.dispatchToFragment(this, exp);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
     }
 
     /** Initialize the game fragment envelope. */
@@ -80,8 +116,14 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     @Override public void onResume() {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
-        DispatchManager.instance.startNextFragment(getActivity(), exp);
+        DispatchManager.instance.dispatchToFragment(this, exp);
     }
+
+    /** Set the type of the most recent (current) fragment */
+    public static void setCurrentFragment(FragmentType type) {
+        mCurrentFragmentType = type;
+    }
+
 
     // Private instance methods.
 
@@ -93,4 +135,5 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));
         return menu;
     }
+
 }

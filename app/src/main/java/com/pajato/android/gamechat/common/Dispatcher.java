@@ -38,63 +38,64 @@ public class Dispatcher {
     /** The group key. */
     public String groupKey;
 
-    /** The experience or message key. */
+    /** The experience key. */
     public String key;
 
     /** The room key. */
     public String roomKey;
 
-    /** The fragment type denoting the fragment index and the experience type. */
+    /** The type of the fragment which is launching a dispatch transition */
+    public FragmentType startType;
+
+    /** The type of the originating fragment in a dispatch chain; may be null */
+    public FragmentType launchType;
+
+    /** The type of the desired target fragment. */
     public FragmentType type;
 
     // Public Constructors.
 
-    /** Build an instance given a type. */
-    Dispatcher(final FragmentType type) {
-        // Capture the type and handle any of the experience types.
-        this.type = type;
-    }
-
-    /** Build an instance given a list item. */
-    Dispatcher(final FragmentType type, final ListItem item) {
-        // Determine if either the type or the item is null.  Abort if so, otherwise case on the
-        // type to handle the dispatch setup.
-        this.type = type;
-        if (type == null || item == null)
-            return;
-        switch (type) {
-            case checkers:
-            case chess:
-            case tictactoe:
-                groupKey = item.groupKey;
-                roomKey = item.roomKey;
-                key = item.key;
-                break;
-            case messageList:
-                groupKey = item.groupKey;
-                roomKey = item.roomKey;
-                break;
-            case roomMembersList:
-                groupKey = item.groupKey;
-                key = item.roomKey;
-                roomKey = item.roomKey;
-                break;
-            case experienceList:
-                groupKey = item.groupKey;
-                roomKey = item.roomKey;
-                break;
-            default:
-                groupKey = item.groupKey;
-                roomKey = item.key;
-                break;
+    /**
+     * Create a dispatcher object
+     * @param fragment the fragment initiating this transition
+     * @param type the desired target fragment type
+     * @param launchType the type of the fragment which initiated this chain (or null)
+     * @param item a ListItem object used to configure the dispatcher (or null)
+     */
+    Dispatcher(final BaseFragment fragment, final FragmentType type,
+               final FragmentType launchType, final ListItem item) {
+        this.expType = type.expType;
+        if (item != null) {
+            this.groupKey = item.groupKey;
+            this.roomKey = item.roomKey;
+            this.key = item.experienceKey;
+        } else if (fragment.mDispatcher != null) {
+            this.groupKey = fragment.mDispatcher.groupKey;
+            this.roomKey = fragment.mDispatcher.roomKey;
+            this.key = fragment.mDispatcher.key;
         }
+        this.startType = fragment.type;
+        this.type = type;
+        this.launchType = launchType;
+        if (this.launchType == null && fragment.mDispatcher != null)
+            this.launchType = fragment.mDispatcher.launchType;
     }
 
-    /** Build an instance providing a fragment type and a target (experience) fragment type. */
-    public Dispatcher(final FragmentType type, final ExpType expType) {
+    /** Build an instance given a target type. */
+    Dispatcher(final FragmentType type) {
+        this.type = type;
+        this.startType = null;
+    }
+
+    /**
+     * Build an instance providing a start fragment type and a target (experience) fragment type. Only
+     * used by DispatchManager.dispatchToGame and always assumes the 'me' group/room.
+     */
+    Dispatcher(final FragmentType startFragmentType, final FragmentType type, final ExpType expType) {
+        this.startType = startFragmentType;
         this.type = type;
         this.expType = expType;
-        groupKey = AccountManager.instance.getMeGroupKey();
-        roomKey = AccountManager.instance.getMeRoomKey();
+        this.groupKey = AccountManager.instance.getMeGroupKey();
+        this.roomKey = AccountManager.instance.getMeRoomKey();
     }
 }

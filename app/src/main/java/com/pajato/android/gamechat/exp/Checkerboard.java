@@ -79,7 +79,7 @@ public class Checkerboard {
     // Public constructor.
 
     /** Build an instance to establish the cell size for a given context. */
-    Checkerboard(final Context context) {
+    public Checkerboard(final Context context) {
         mCellSize = getCellSize(context);
     }
 

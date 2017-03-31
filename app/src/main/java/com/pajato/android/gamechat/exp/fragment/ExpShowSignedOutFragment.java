@@ -17,19 +17,20 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
-import android.support.annotation.NonNull;
+import android.content.Context;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.FragmentKind.exp;
+import java.util.List;
+
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -37,15 +38,24 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 
 public class ExpShowSignedOutFragment extends BaseExperienceFragment {
 
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.SignedOutTitleText);
+    }
+
     @Subscribe public void onClick(final ClickEvent event) {
         // todo add some code here.
         logEvent("onClick (showSignedOut)");
-    }
-
-    /** Handle a group profile change by trying again to start a better fragment. */
-    @Subscribe public void onExperienceChange(@NonNull final ExperienceChangeEvent event) {
-        // An experience event has occurred.  Ensure that we are in the right fragment.
-        DispatchManager.instance.startNextFragment(this.getActivity(), exp);
     }
 
     /** Deal with the fragment's activity's lifecycle by managing the FAB. */
@@ -59,12 +69,16 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize the fragment by setting up the FAB/FAM. */
     @Override public void onStart() {
         // Set up the FAB.
         super.onStart();
         FabManager.game.init(this);
-        int titleResId = R.string.SignedOutTitleText;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 }

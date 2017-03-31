@@ -16,17 +16,23 @@
  */
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ProtectedUserChangeEvent;
 import com.pajato.android.gamechat.event.ProtectedUserDeleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.List;
 
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -38,6 +44,21 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 public class ManageProtectedUsersFragment extends BaseChatFragment {
 
     // Public instance methods.
+
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return ProtectedUserManager.instance.getProtectedUsersItemData();
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.ProtectedUsersTitle);
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -58,7 +79,6 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         updateAdapterList();
     }
 
-
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
@@ -67,12 +87,14 @@ public class ManageProtectedUsersFragment extends BaseChatFragment {
         FabManager.chat.setVisibility(this, View.GONE);
     }
 
-    /** Set up toolbar and FAM */
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
+    /** Set up toolbar */
     @Override public void onStart() {
-        // Establish the create type, the list type, setup the toolbar and turn off the access
-        // control.
         super.onStart();
-        int titleResId = R.string.ProtectedUsersTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
     }
 }

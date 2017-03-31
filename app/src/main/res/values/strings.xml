@@ -1,4 +1,5 @@
 <resources>
+    <string name="AnonymousTitle">Anonymous</string>
     <string name="AuthFailureInvalidCredentials">Invalid credentials specified.</string>
     <string name="AuthFailureInvalidUser">This user is no longer valid in the Firebase database.</string>
     <string name="AuthSignInFailure">Sign in failed: %s</string>
@@ -24,7 +25,11 @@
     <string name="MenuItemSearch">Search</string>
     <string name="MenuItemSettings">Settings</string>
     <string name="MenuItemSwitchAccount">Switch account</string>
-    <string name="SignedOutToolbarTitle">Signed Out</string>
+    <string name="NotLoggedInMessage">Not logged in!  Please sign in.</string>
+    <string name="OfflineToolbarTitle">The network is not available.</string>
+    <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
+    <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
+    <string name="SignedOutTitleText">Signed Out</string>
     <string name="SwitchToChat">Switch to Chat</string>
     <string name="SwitchToExp">Switch to Game</string>
     <string name="action_save">SAVE</string>
@@ -56,7 +61,4 @@
     <string name="sign_out">Sign out</string>
     <string name="switch_account">\u25bc Switch account</string>
     <string name="me">me</string>
-    <string name="OfflineMessageText">The network is not available.  You can continue to play games while offline.</string>
-    <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
-    <string name="SignedOutTitleText">Signed Out</string>
 </resources>

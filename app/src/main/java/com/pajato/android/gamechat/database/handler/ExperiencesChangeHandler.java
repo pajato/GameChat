@@ -111,12 +111,14 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
     }
 
     /** Return a map of experiences for the room and group in the given experience. */
-    private Map<String, Experience> getExpMap(final Experience experience) {
+    private Map<String, Experience> getExpMap(final Experience experience, int type) {
         // Ensure that the room map exists for the group in the master map, creating it if need be.
-        Map<String, Experience> expMap;
+        Map<String, Experience> expMap = new HashMap<>();
         Map<String, Map<String, Experience>> roomMap;
         roomMap = ExperienceManager.instance.expGroupMap.get(experience.getGroupKey());
         if (roomMap == null) {
+            if (type == REMOVED)
+                return expMap;
             // This would be the first room map entry for the group.  Create an empty room map and
             // associate it with the group key.
             roomMap = new HashMap<>();
@@ -127,8 +129,10 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
         // be created.
         expMap = roomMap.get(experience.getRoomKey());
         if (expMap == null) {
-            // The profile map needs to be created.  Do it now and associate it with the room.
             expMap = new HashMap<>();
+            if (type == REMOVED)
+                return expMap;
+            // The profile map needs to be created.  Do it now and associate it with the room.
             roomMap.put(experience.getRoomKey(), expMap);
         }
         return expMap;
@@ -139,7 +143,7 @@ public class ExperiencesChangeHandler extends DatabaseEventHandler implements Ch
         // Validate the snapshot and the experience.  Abort if either is invalid.
         Log.d(TAG, "Processing a data snapshot.");
         Experience experience = snapshot.exists() ? getExperience(snapshot) : null;
-        Map<String, Experience> expMap = experience != null ? getExpMap(experience) : null;
+        Map<String, Experience> expMap = experience != null ? getExpMap(experience, type) : null;
         if (expMap == null) return;
 
         // A snapshot exists with a valid experience. Case on the change type to update the cached

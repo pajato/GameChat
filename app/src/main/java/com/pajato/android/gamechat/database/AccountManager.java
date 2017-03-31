@@ -274,20 +274,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return false;
     }
 
-    /** Determine if the specified account belongs to any groups which have members */
-    public static boolean hasSelectableMembers(Account account) {
-        if (account == null || account.joinMap.size() == 0)
-            return false;
-        for (String groupKey : account.joinMap.keySet()) {
-            Group group = GroupManager.instance.getGroupProfile(groupKey);
-            if (group == null)
-                continue;
-            if (group.memberList.size() > 1) // don't count current account!
-                return true;
-        }
-        return false;
-    }
-
     /** Return the database path to an experience for a given experience profile. */
     public String getAccountPath(final String accountKey) {
         return String.format(Locale.US, ACCOUNT_PATH, accountKey);
@@ -304,7 +290,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         if (mCurrentAccount != null) return mCurrentAccount;
 
         // The User is not signed in.  Prompt them to do so now.
-        String text = "Not logged in!  Please sign in.";
+        String text = context.getString(R.string.NotLoggedInMessage);
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
         return null;
     }

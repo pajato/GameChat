@@ -17,19 +17,19 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
-import android.support.annotation.NonNull;
+import android.content.Context;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
-import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
-import com.pajato.android.gamechat.event.ChatListChangeEvent;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.AccountManager;
 
-import org.greenrobot.eventbus.Subscribe;
+import java.util.List;
 
-import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
@@ -43,11 +43,28 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
 
     // Public instance methods.
 
-    /** Handle a group profile change by trying again to start a better fragment. */
-    @Subscribe public void onChatListChange(@NonNull final ChatListChangeEvent event) {
-        // On the first chat list change event, attempt to present another fragment based on the
-        // chat list change.
-        DispatchManager.instance.startNextFragment(this.getActivity(), chat);
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.SignedOutTitleText);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        dispatcher.groupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = AccountManager.instance.getMeRoomKey();
+        mDispatcher = dispatcher;
     }
 
     /** Handle the setup for the groups panel. */
@@ -55,8 +72,7 @@ public class ChatShowSignedOutFragment extends BaseChatFragment {
         // Provide an account loading indicator for a brief period before showing the fragment.
         // This will likely be enough time to load the account and message data.
         super.onStart();
-        int titleResId = R.string.SignedOutToolbarTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, game, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, game, settings);
         FabManager.chat.setVisibility(this, View.GONE);
     }
 }

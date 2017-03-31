@@ -27,7 +27,7 @@
     <string name="ResetGameTitle">Restart Game?</string>
     <string name="ResetGameMessage">Restarting this game will clear the board and any previous moves. Do you really want to restart this game?</string>
     <string name="SelectRoomToolbarTitle">Select Room</string>
-    <string name="SignedOutMessageText">You are signed out.  You can play games while signed out but it is way more fun to use GameChat while signed in.</string>
+    <string name="SignedOutMessageText">You are signed out.  You can play games, but it is more fun to use GameChat while signed in.</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeDisplayName">Tic-Tac-Toe</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>

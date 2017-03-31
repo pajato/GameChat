@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -25,6 +26,7 @@ import android.widget.CheckBox;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
@@ -45,7 +47,6 @@ import java.util.Map;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.all;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.members;
 import static com.pajato.android.gamechat.chat.fragment.JoinRoomsFragment.SelectionType.rooms;
-import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.selectableMember;
@@ -67,6 +68,21 @@ public class JoinRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Return null or a list to be displayed by a list adapter */
+    public List<ListItem> getList() {
+        return JoinManager.instance.getListItemData(mDispatcher);
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.JoinRoomsMenuTitle);
+    }
+
     /** Provide a placeholder subscriber to satisfy the event bus contract. */
     @Subscribe public void onClick(final ClickEvent event) {
         // Log the event and determine if the event looks right.  Abort if it doesn't.
@@ -81,7 +97,7 @@ public class JoinRoomsFragment extends BaseChatFragment {
                 for (ListItem item : mJoinMap.values())
                     JoinManager.instance.joinRoom(item);
                 mJoinMap.clear();
-                DispatchManager.instance.startNextFragment(getActivity(), chat);
+                DispatchManager.instance.dispatchReturn(this);
                 break;
             case R.id.selector:
                 processSelection(event, (CheckBox) event.view);
@@ -130,11 +146,15 @@ public class JoinRoomsFragment extends BaseChatFragment {
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Establish the toolbar and FAB. */
     @Override public void onStart() {
         super.onStart();
-        int titleResId = R.string.JoinRoomsMenuTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_SELECTION_FAM_KEY, getSelectionMenu());
     }
 
@@ -163,10 +183,11 @@ public class JoinRoomsFragment extends BaseChatFragment {
         // Toggle the selection state and operate accordingly on the join map.
         item.selected = !item.selected;
         checkBox.setChecked(item.selected);
+        String itemKey = item.memberKey != null ? item.memberKey : item.roomKey;
         if (item.selected)
-            mJoinMap.put(item.key, item);
+            mJoinMap.put(itemKey, item);
         else
-            mJoinMap.remove(item.key);
+            mJoinMap.remove(itemKey);
         updateSaveButton();
     }
 
@@ -185,8 +206,10 @@ public class JoinRoomsFragment extends BaseChatFragment {
         // Update the join map based on the update arguments.
         mJoinMap.clear();
         for (ListItem item : itemList)
-            if (item.selected)
-                mJoinMap.put(item.key, item);
+            if (item.selected) {
+                String itemKey = item.memberKey != null ? item.memberKey : item.roomKey;
+                mJoinMap.put(itemKey, item);
+            }
         updateSaveButton();
     }
 

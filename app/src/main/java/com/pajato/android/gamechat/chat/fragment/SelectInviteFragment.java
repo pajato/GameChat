@@ -16,6 +16,7 @@
  */
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.CheckBox;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
@@ -46,7 +48,6 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
-import static com.pajato.android.gamechat.common.FragmentKind.chat;
 
 /**
  * Provide a fragment class used to choose groups and rooms to include in an invite.
@@ -61,6 +62,21 @@ public class SelectInviteFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return InvitationManager.instance.getListItemData();
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.PickForInvitationTitle);
+    }
+
     /** Provide subscriber to listen for click events. */
     @Subscribe public void onClick(final ClickEvent event) {
         if (event == null || event.view == null)
@@ -70,7 +86,7 @@ public class SelectInviteFragment extends BaseChatFragment {
             case R.id.inviteButton:
                 // Handle the invitation
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
-                DispatchManager.instance.startNextFragment(getActivity(), chat);
+                DispatchManager.instance.dispatchReturn(this);
                 break;
             case R.id.chatFab:
                 // It is a chat fab button.  Toggle the state.
@@ -104,16 +120,6 @@ public class SelectInviteFragment extends BaseChatFragment {
         }
     }
 
-    /** Set up toolbar and FAM */
-    @Override public void onStart() {
-        // Establish the create type, the list type, setup the toolbar and turn off the access
-        // control.
-        super.onStart();
-        int titleResId = R.string.PickForInvitationTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
-        FabManager.chat.setMenu(INVITE_CHAT_FAM_KEY, getSelectionMenu());
-    }
-
     /** Deal with the fragment's lifecycle by managing the progress bar and the FAB. */
     @Override public void onResume() {
         // Set the titles in the toolbar to the app title only; ensure that the FAB is visible, the
@@ -122,6 +128,19 @@ public class SelectInviteFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, INVITE_CHAT_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
+    /** Set up toolbar and FAM */
+    @Override public void onStart() {
+        // Setup the toolbar and FAM
+        super.onStart();
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
+        FabManager.chat.setMenu(INVITE_CHAT_FAM_KEY, getSelectionMenu());
     }
 
     // Private instance methods
@@ -134,7 +153,7 @@ public class SelectInviteFragment extends BaseChatFragment {
         // First loop through adapter items and handle groups
         for (ListItem item : adapter.getItems()) {
             if (item.selected && item.type == inviteGroup)
-                selections.put(item.key, new GroupInviteData(item.key, item.name));
+                selections.put(item.groupKey, new GroupInviteData(item.groupKey, item.name));
         }
         // Next, add rooms from adapter list
         for (ListItem item : adapter.getItems()) {
@@ -142,9 +161,9 @@ public class SelectInviteFragment extends BaseChatFragment {
             if (!item.selected)
                 continue;
             if (item.type == inviteCommonRoom)
-                data.commonRoomKey = item.key;
+                data.commonRoomKey = item.roomKey;
             else if (item.type == inviteRoom)
-                data.rooms.add(item.key);
+                data.rooms.add(item.roomKey);
         }
         return selections;
     }
@@ -241,7 +260,7 @@ public class SelectInviteFragment extends BaseChatFragment {
     /** When a non-common room is selected, also select its group and common room */
     private void selectRoomForInvite(ListItem groupItem, List<ListItem> adapterList) {
         for (ListItem adapterItem : adapterList) {
-            if (adapterItem.type == inviteGroup && adapterItem.key.equals(groupItem.groupKey))
+            if (adapterItem.type == inviteGroup && adapterItem.groupKey.equals(groupItem.groupKey))
                 adapterItem.selected = true;
             else if (adapterItem.type == inviteCommonRoom &&
                     adapterItem.groupKey.equals(groupItem.groupKey))

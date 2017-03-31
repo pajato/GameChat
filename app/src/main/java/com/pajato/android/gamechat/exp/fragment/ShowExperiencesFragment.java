@@ -17,14 +17,20 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.content.Context;
 import android.support.v4.view.ViewPager;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
@@ -35,16 +41,15 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
 import java.util.Locale;
 
-import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.NEW;
 import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
@@ -52,6 +57,26 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 public class ShowExperiencesFragment extends BaseExperienceFragment {
 
     // Public instance methods.
+
+    /** Return null or a list to be displayed by a list adapter */
+    public List<ListItem> getList() {
+        return ExperienceManager.instance.getItemListExperiences(mDispatcher);
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        if (AccountManager.instance.isMeGroup(mDispatcher.groupKey))
+            return getString(R.string.MyGameRoomToolbarTitle);
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        // Determine if the group is the me group and give it special handling.
+        if (AccountManager.instance.isMeGroup(mDispatcher.groupKey))
+            return getString(R.string.MyExperiencesToolbarTitle);
+        return RoomManager.instance.getRoomName(mDispatcher.roomKey);
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -69,7 +94,8 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                DispatchManager.instance.startNextFragment(getActivity(), exp);
+                if (mActive)
+                    updateAdapterList();
                 break;
             default:
                 break;
@@ -98,7 +124,8 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
+                            null);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -119,21 +146,27 @@ public class ShowExperiencesFragment extends BaseExperienceFragment {
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
-        // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
-        // initialize the FAB manager and set up the toolbar.
+        // If the dispatcher has an experience type set, then this is a pass-through to an
+        // experience fragment. If not, then set up the toolbar and FAB.
         super.onStart();
         if (mDispatcher.expType == null) {
             FabManager.game.init(this);
-            ToolbarManager.instance.init(this, mItem, helpAndFeedback, chat, search, invite, settings);
+            ToolbarManager.instance.init(this, helpAndFeedback, chat, search, invite, settings);
             return;
         }
-
-        // Handle a pass through by handing to the target fragment type while leaving an item object
-        // in place for a back press or exit from the experience back to the experience list display.
-        mDispatcher.type = mDispatcher.expType.getFragmentType();
-        DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
-        mItem = new ListItem(expList, mDispatcher.groupKey, mDispatcher.roomKey, null, 0, null);
+        // Handle a pass-through to an experience.
+        DispatchManager.instance.dispatchToGame(this, mDispatcher.expType.getFragmentType());
     }
 }

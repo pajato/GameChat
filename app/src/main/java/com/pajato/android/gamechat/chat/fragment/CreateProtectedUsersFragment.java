@@ -1,5 +1,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -24,8 +25,10 @@ import com.google.firebase.auth.ProviderQueryResult;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.credentials.Credentials;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -127,6 +130,21 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.CreateRestrictedUserTitle);
+    }
+
     /** Handle click events. */
     @Subscribe public void onClick(final ClickEvent event) {
         FragmentActivity activity = getActivity();
@@ -144,7 +162,8 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
                             getUserName(), getPassword(), accountIsKnown);
                     // Dismiss the Keyboard and return to the previous fragment.
                     dismissKeyboard();
-                    DispatchManager.instance.chainFragment(getActivity(), groupsForProtectedUser);
+                    DispatchManager.instance.dispatchToFragment(this, groupsForProtectedUser,
+                            mDispatcher.launchType, null);
                 }
                 break;
             case R.id.email_next_button:
@@ -215,11 +234,15 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
         }
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Set up toolbar and FAM */
     @Override public void onStart() {
         super.onStart();
-        int titleResId = R.string.CreateRestrictedUserTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
 
         final TextInputEditText editText =
                 (TextInputEditText) getActivity().findViewById(R.id.emailEditText);

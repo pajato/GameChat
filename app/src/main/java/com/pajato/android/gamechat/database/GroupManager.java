@@ -132,11 +132,11 @@ public enum GroupManager {
     }
 
     /** Return a list of joined group push keys based on the given item. */
-    public List<String> getGroups(final ListItem item) {
+    public List<String> getGroups(final String groupKey) {
         List<String> result = new ArrayList<>();
         Account account = AccountManager.instance.getCurrentAccount();
-        if (item != null && item.groupKey != null)
-            result.add(item.groupKey);
+        if (groupKey != null && !groupKey.equals(""))
+            result.add(groupKey);
         if (result.isEmpty() && account != null)
             result.addAll(account.joinMap.keySet());
         return result;
