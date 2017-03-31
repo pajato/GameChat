@@ -17,14 +17,18 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
+import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.HashMap;
@@ -37,7 +41,9 @@ import static com.pajato.android.gamechat.common.FragmentType.chatOffline;
 import static com.pajato.android.gamechat.common.FragmentType.chatSignedOut;
 import static com.pajato.android.gamechat.common.FragmentType.expGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.expOffline;
+import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.expSignedOut;
+import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
 
 /**
@@ -63,49 +69,82 @@ public enum DispatchManager {
     // Public instance methods.
 
     /**
-     * Attach a drill down fragment identified by a type, creating that fragment as necessary.
-     *
-     * @param context The activity attached to the fragment that spawned this call.
-     * @param type The type of the fragment to drill into.  One will be created if necessary.
+     * Dispatch from the given fragment to the game indicated by the destination type. Used when
+     * chaining to games.
+     * @param fragment the fragment which is initiating this transition
+     * @param destinationType the type of the desired target fragment
      */
-    public void chainFragment(final FragmentActivity context, final FragmentType type) {
-        chainFragment(context, type, new ListItem());
-    }
-
-    /** Chain to a fragment using the given dispatcher. */
-    public void chainFragment(final FragmentActivity context, final Dispatcher dispatcher) {
-        BaseFragment fragment = getFragment(dispatcher.type);
-        if (fragment == null)
+    public void dispatchToGame(final BaseFragment fragment, final FragmentType destinationType) {
+        if (destinationType == null || destinationType.expType == null)
             return;
-
-        // Setup the fragment using the dispatcher and chain to the fragment such that the back
-        // arrow and a back press return to the originating fragment.
-        fragment.onSetup(context, dispatcher);
-        FragmentManager manager = context.getSupportFragmentManager();
-        FragmentManager.enableDebugLogging(true);
-        manager.beginTransaction()
-            .replace(dispatcher.type.getEnvelopeId(), fragment)
-            .addToBackStack(dispatcher.type.toString())
-            .commit();
+        FragmentType toType;
+        if (fragment.type == noExperiences)
+            toType = expGroupList;
+        else if (fragment.type == expGroupList)
+            toType = expRoomList;
+        else if (fragment.type == expRoomList)
+            toType = experienceList;
+        else
+            toType = destinationType;
+        Dispatcher dispatcher = new Dispatcher(fragment.type, toType, destinationType.expType);
+        BaseFragment targetFragment = getFragment(toType);
+        targetFragment.onSetup(fragment.getActivity(), dispatcher); // sets mDispatcher
+        initiateTransition(fragment, dispatcher, targetFragment);
     }
 
     /**
-     * Attach a drill down fragment identified by a type, creating that fragment as necessary.
-     *
-     * @param context The activity attached to the fragment that spawned this call.
-     * @param type The type of the fragment to drill into.  One will be created if necessary.
-     * @param item Encapsulates the push key information appropriate to the fragment.
+     * Dispatch to a new fragment
+     * @param fragment the fragment which is initiating this transition (may be one in a chain)
+     * @param kind the target fragment kind
      */
-    public void chainFragment(final FragmentActivity context, final FragmentType type,
-                              final ListItem item) {
-        // Ensure that type is valid.  Abort if not, otherwise validate the fragment, aborting if
-        // invalid.
-        if (type == null)
+    public void dispatchToFragment(final BaseFragment fragment, final FragmentKind kind) {
+        Dispatcher dispatcher = getDispatcher(kind);
+        BaseFragment targetFragment = getFragment(dispatcher.type);
+        if (targetFragment == null)
             return;
-        Dispatcher dispatcher = getDispatcher(type, item);
-        chainFragment(context, dispatcher);
+        targetFragment.onSetup(fragment.getActivity(), dispatcher); // sets mDispatcher
+        initiateTransition(fragment, dispatcher, targetFragment);
     }
 
+    /**
+     * Dispatch to a new fragment
+     * @param fragment the fragment which is initiating this transition (may be one in a chain)
+     * @param type the type of the desired target fragment to which to transition
+     * @param launchType the type of the fragment which initiated this chain (or null)
+     * @param item a ListItem object containing relevant push keys; may be null
+     */
+    public void dispatchToFragment(final BaseFragment fragment, final FragmentType type,
+                                      final FragmentType launchType, final ListItem item) {
+        Dispatcher dispatcher = new Dispatcher(fragment, type, launchType, item);
+        BaseFragment targetFragment = getFragment(dispatcher.type);
+        if (targetFragment == null)
+            return;
+        targetFragment.onSetup(fragment.getActivity(), dispatcher); // sets mDispatcher
+        initiateTransition(fragment, dispatcher, targetFragment);
+    }
+
+    /**
+     * Return from a fragment to the appropriate previous place based on the dispatcher object in
+     * the current fragment.
+     * @param fragment the current fragment which is initiating this return transition
+     */
+    public void dispatchReturn(final BaseFragment fragment) {
+        Dispatcher currentDispatcher = fragment.mDispatcher;
+        // If the launcher type is set, that's where we want to go. If not, then go back to the
+        // start type. If it is null, determine the fragment kind and go to it's default group list.
+        FragmentType toType;
+        if (currentDispatcher.launchType == null && currentDispatcher.startType == null)
+            toType = fragment.type.kind == chat ? chatGroupList : expGroupList;
+        else
+            toType = currentDispatcher.launchType == null ? currentDispatcher.startType :
+                    currentDispatcher.launchType;
+        BaseFragment toFragment = getFragment(toType);
+        if (toFragment == null)
+            return;
+        // For back nav, clear the experience type from the 'to' fragment dispatcher
+        toFragment.mDispatcher.expType = null;
+        initiateTransition(fragment, toFragment.mDispatcher, toFragment);
+    }
 
     /** Return null or the fragment associated with the given type, creating it as needed. */
     public BaseFragment getFragment(final FragmentType type) {
@@ -114,61 +153,38 @@ public enum DispatchManager {
         return result == null ? getFragmentInstance(type) : result;
     }
 
-    /**
-     * Start the next fragment as indicated by the current app state.  The fragment will be of the
-     * given kind.
-     *
-     * @param context The activity that will attach to the next fragment.
-     * @param kind The fragment kind, either chat or experience.
-     *
-     * @return TRUE iff the next fragment is started.
-     */
-    public boolean startNextFragment(final FragmentActivity context, final FragmentKind kind) {
-        // Ensure that the dispatcher has a valid kind.  If not then abort, otherwise create a
-        // dispatcher of the given kind and determine if an associated fragment can be started.
-        // Return false if not, otherwise start the fragment and return true iff the fragment is
-        // successfully started.
-        if (kind == null)
-            return false;
-        Dispatcher dispatcher = getDispatcher(kind);
-        return dispatcher.type != null && startNextFragment(context, dispatcher);
+    /** Prepare to handle a dispatch for back navigation */
+    public void handleBackDispatch(FragmentType type) {
+        BaseFragment fragment = DispatchManager.instance.getFragment(type);
+        if (fragment == null)
+            return;
+        FragmentActivity activity = fragment.getActivity();
+        if (activity == null) {
+            fragment.getActivity().onBackPressed();
+            return;
+        }
+        DispatchManager.instance.dispatchReturn(fragment);
     }
 
-    /**
-     * Start the next fragment of a given type as indicated by the current app state.  The fragment
-     * type will determine the dispatch kind.
-     *
-     * @param context The activity that will attach to the next fragment.
-     * @param type The fragment type, which determines the dispatch kind.
-     *
-     * @return TRUE iff the next fragment is started.
-     */
-    public boolean startNextFragment(final FragmentActivity context, final FragmentType type) {
-        // Ensure that the dispatcher has a valid type.  Abort if not. Set up the fragment using the
-        // dispatcher if so.
-        if (type == null)
-            return false;
-        Dispatcher dispatcher = getDispatcher(type, null);
-        return dispatcher.type != null && startNextFragment(context, dispatcher);
+    // Notify the dispatch manager so that back navigation is reoriented to this new experience.
+    public void moveExperience(@NonNull final Experience experience) {
+        FragmentType type = experience.getExperienceType().getFragmentType();
+        BaseFragment fragment = getFragment(type);
+        do {
+            type = fragment.mDispatcher.startType;
+            if (!mFragmentMap.containsKey(type))
+                break;
+            fragment = mFragmentMap.get(type);
+            fragment.mDispatcher.groupKey = experience.getGroupKey();
+            fragment.mDispatcher.roomKey = experience.getRoomKey();
+        } while (type != expGroupList);
     }
 
     // Private instance methods.
 
-    /**
-     *  Return a dispatcher object for a predisposed experience type.
-     *
-     * @param type An predisposed experience type or null to indicate the type should be computed.
-     * @param item The chat list item carrying the group key.
-     */
-    private Dispatcher getDispatcher(final FragmentType type, final ListItem item) {
-        // Determine if the dispatcher should be generated based on the kind, in which case a
-        // suitable dispatcher will be returned, otherwise set up an experience dispatcher based
-        // on the given type and item.
-        return item != null ? new Dispatcher(type, item) : getDispatcher(type.getKind());
-    }
-
-    /** Return a dispatcher object based on the current message list state. */
+    /** Return a dispatcher object based on fragment kind specified. */
     private Dispatcher getDispatcher(final FragmentKind kind) {
+
         // Deal with an off line user, a signed out user, or no messages or experiences at all, in
         // that order.  In each case, return an empty dispatcher but for the fragment type of the
         // next screen to show.
@@ -192,7 +208,7 @@ public enum DispatchManager {
         }
     }
 
-    /** Return an instance for a given class, null if no such instance can be created. */
+    /** Return an instance for a given fragment type, null if no such instance can be created. */
     private BaseFragment getFragmentInstance(final FragmentType type) {
         // Create the fragment instance. Log any exceptions.
         try {
@@ -204,22 +220,26 @@ public enum DispatchManager {
             String format = "Failed to create a fragment for the class: %s";
             Log.e(TAG, String.format(Locale.US, format, type.fragmentClass.getSimpleName()), exc);
         }
-
         return null;
     }
 
-    /** Return true iff a fragment for the given experience is started. */
-    public boolean startNextFragment(final FragmentActivity context, final Dispatcher dispatcher) {
-        // Ensure that the fragment exists, creating it as necessary, based on the dispatcher type.
-        // If not, abort, signalling false.  Otherwise, setup the fragment using the dispatcher and
-        // use the fragment support manager to initiate the lifecycle on the fragment.
-        BaseFragment fragment = getFragment(dispatcher.type);
-        if (fragment == null)
-            return false;
-        fragment.onSetup(context, dispatcher);
-        context.getSupportFragmentManager().beginTransaction()
-            .replace(dispatcher.type.getEnvelopeId(), fragment)
-            .commit();
-        return true;
+    /** Initiate a transition from a specified fragment to a target fragment using the dispatcher */
+    private void initiateTransition(final BaseFragment fragment, final Dispatcher dispatcher,
+                                    final BaseFragment toFragment) {
+        FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
+        FragmentManager.enableDebugLogging(true);
+        setEnvelopeCurrentFragment(toFragment.type);
+        manager.beginTransaction()
+                .replace(dispatcher.type.getEnvelopeId(), toFragment)
+                .commit();
+    }
+
+    /** Tell the envelope fragment to remember the specified fragment */
+    private void setEnvelopeCurrentFragment(FragmentType type) {
+        if (type.kind == chat) {
+            ChatEnvelopeFragment.setCurrentFragment(type);
+        } else {
+            ExpEnvelopeFragment.setCurrentFragment(type);
+        }
     }
 }

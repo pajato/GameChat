@@ -44,13 +44,7 @@ import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.common.model.JoinState.JoinType;
 import com.pajato.android.gamechat.database.AccountManager;
-import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.JoinManager;
 import com.pajato.android.gamechat.database.MemberManager;
-import com.pajato.android.gamechat.database.MessageManager;
-import com.pajato.android.gamechat.database.ProtectedUserManager;
-import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
@@ -98,9 +92,6 @@ public abstract class BaseFragment extends Fragment {
     /** The dispatcher information. */
     protected Dispatcher mDispatcher;
 
-    /** The item information passed from the parent fragment. */
-    protected ListItem mItem;
-
     /** The persisted layout view for this fragment. */
     protected View mLayout;
 
@@ -108,6 +99,16 @@ public abstract class BaseFragment extends Fragment {
 
     /** Provide a default, no args constructor. */
     public BaseFragment() {}
+
+    // Public abstract instance methods.
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public abstract String getToolbarSubtitle();
+
+    /** Get the toolbar title */
+    public abstract String getToolbarTitle();
+
+    public abstract void onSetup(Context context, Dispatcher dispatcher);
 
     // Public instance methods.
 
@@ -187,13 +188,6 @@ public abstract class BaseFragment extends Fragment {
         mActive = true;
     }
 
-    /** Provide a means to setup the fragment once it has been created. */
-    public void onSetup(Context context, Dispatcher dispatcher) {
-        // Save the dispatcher information for processing by the started fragment.
-        mDispatcher = dispatcher;
-        onDispatch(context);
-    }
-
     /** Log the lifecycle event. */
     @Override public void onStart() {
         super.onStart();
@@ -239,9 +233,6 @@ public abstract class BaseFragment extends Fragment {
     /** Provide a logger to show the given message. */
     protected abstract void logEvent(String message);
 
-    /** Delegate the dispatch setup to the subclasses. */
-    protected abstract void onDispatch(Context context);
-
     /** Provide a way to handle volunteer solicitations for unimplemented functions. */
     protected void showFutureFeatureMessage(final int resourceId) {
         // Post a toast message.
@@ -275,7 +266,7 @@ public abstract class BaseFragment extends Fragment {
         // list when showing messages.
         ListAdapter listAdapter = (ListAdapter) adapter;
         listAdapter.clearItems();
-        List<ListItem> items = getList(type, mItem);
+        List<ListItem> items = getList();
         int size = items != null ? items.size() : 0;
         Log.d(TAG, String.format(Locale.US, "Updating with %d items.", size));
         listAdapter.addItems(items);
@@ -284,38 +275,7 @@ public abstract class BaseFragment extends Fragment {
         return true;
     }
 
-    /** Return null or a list to be displayed by a list adapter for a given fragment type. */
-    private List<ListItem> getList(@NonNull final FragmentType type, final ListItem item) {
-        // TODO: this has gotten too ugly.  Fix it!
-        switch (type) {
-            case chatGroupList: // Get the data to be shown in a list of groups.
-                return GroupManager.instance.getListItemData();
-            case chatRoomList:    // Get the data to be shown in a list of rooms.
-                return RoomManager.instance.getListItemData(item.groupKey);
-            case expGroupList:    // Get the groups with experiences.
-            case expRoomList:     // Get the rooms with experiences.
-            case experienceList:  // Get the groups with experiences.
-                return ExperienceManager.instance.getListItemData(item);
-            case joinRoom:      // Get the candidate list of rooms and members.
-                return JoinManager.instance.getListItemData(item);
-            case groupMembersList: // Get the data to be shown in a list of group members.
-                return MemberManager.instance.getGroupMemberListItemData(item.groupKey);
-            case groupsForProtectedUser:
-                return GroupManager.instance.getGroupsOnlyListItemData();
-            case protectedUsers:
-                return ProtectedUserManager.instance.getProtectedUsersItemData();
-            case messageList:   // Get the data to be shown in a room.
-                return MessageManager.instance.getListItemData(item);
-            case roomMembersList: // Get the data to be shown in a list of room members.
-                return MemberManager.instance.getRoomMemberListItemData(item.groupKey, item.roomKey);
-            case selectGroupsRooms: // Get the group and room selections.
-                return InvitationManager.instance.getListItemData();
-            case selectRoom:    // Get all the visible rooms for the current players.
-                return PlayModeManager.instance.getListItemData(type);
-            default:
-                return null;
-        }
-    }
+    public abstract List<ListItem> getList();
 
     /** Clear the join state using the given value which must be one of 'chat' or 'exp'. */
     protected void clearJoinState(final String gKey, final String rKey, final JoinType value) {

@@ -17,14 +17,21 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
+import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 
@@ -33,6 +40,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pajato.android.gamechat.common.FragmentType.groupMembersList;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -46,6 +54,34 @@ public class ChatShowMembersFragment extends BaseChatFragment {
 
     /** The lookup key for the FAB game home menu. */
     public static final String CHAT_MEMBERS_FAM_KEY = "chatMembersFamKey";
+
+    // Public instance methods.
+
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        if (this.type == groupMembersList)
+            return MemberManager.instance.getGroupMemberListItemData(mDispatcher.groupKey);
+        else
+            return MemberManager.instance.getRoomMemberListItemData(mDispatcher.groupKey,
+                mDispatcher.roomKey);
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        if (this.type == groupMembersList)
+            return null;
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        if (this.type == groupMembersList) {
+            String groupName = GroupManager.instance.getGroupName(mDispatcher.groupKey);
+            return String.format(getString(R.string.MembersToolbarTitle), groupName);
+        }
+        String roomName = RoomManager.instance.getRoomName(mDispatcher.roomKey);
+        return String.format(getString(R.string.MembersToolbarTitle), roomName);
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -62,7 +98,8 @@ public class ChatShowMembersFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.InviteFriendMessage:
-                InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
+                InvitationManager.instance.extendGroupInvitation(getActivity(),
+                        mDispatcher.groupKey);
             default:
                 break;
         }
@@ -76,12 +113,21 @@ public class ChatShowMembersFragment extends BaseChatFragment {
         FabManager.chat.setVisibility(this, View.VISIBLE);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        String groupKey = dispatcher.groupKey;
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        mDispatcher = dispatcher;
+    }
+
     /** Set up the toolbar */
     @Override public void onStart() {
         super.onStart();
-        String title =
-                String.format(getActivity().getString(R.string.MembersToolbarTitle), mItem.name);
-        ToolbarManager.instance.init(this, title, null, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_MEMBERS_FAM_KEY, getFabMenu());
     }
 

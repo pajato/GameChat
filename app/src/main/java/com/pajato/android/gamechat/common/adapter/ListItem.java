@@ -123,6 +123,9 @@ public class ListItem {
     /** The item enabled state */
     public boolean enabled;
 
+    /** The experience push key, possibly null */
+    public String experienceKey;
+
     /** The group (push) key, possibly null, used for many list items (groups, rooms, messages) */
     public String groupKey;
 
@@ -135,8 +138,11 @@ public class ListItem {
     /** The URL for the item, possibly null, used for icons with contacts and chat list items. */
     String iconUrl;
 
-    /** The item (push) key, possibly null, either a room, member or experience key. */
-    public String key;
+    /** The member id (push key), possibly null */
+    public String memberKey;
+
+    /** The message push key, possibly null */
+    private String messageKey;
 
     /** The item name, possibly null, used for all items. */
     public String name;
@@ -168,7 +174,6 @@ public class ListItem {
         this.type = type;
         this.groupKey = groupKey;
         this.roomKey = roomKey;
-        key = roomKey != null ? roomKey : groupKey;
         this.name = name;
         this.count = count;
         this.text = text;
@@ -186,7 +191,7 @@ public class ListItem {
     /** Build a header instance for a given resource id. */
     public ListItem(final ItemType type, final int resId) {
         this.type = type;
-        nameResourceId = resId;
+        this.nameResourceId = resId;
     }
 
     /** Build an instance for a help article with a name and path */
@@ -206,7 +211,7 @@ public class ListItem {
 
     /** Build an instance for a contact item. */
     public ListItem(final String name, final String email, final String phone, final String url) {
-        type = contact;
+        this.type = contact;
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -215,18 +220,30 @@ public class ListItem {
 
     /** Build an instance for a given experience */
     public ListItem(@NonNull final Experience exp) {
-        type = experience;
+        this.type = experience;
         this.groupKey = exp.getGroupKey();
         this.roomKey = exp.getRoomKey();
-        this.key = exp.getExperienceKey();
+        this.experienceKey = exp.getExperienceKey();
+    }
+
+    /** Build an instance for a message */
+    public ListItem (final ItemType type, final String groupKey, final String roomKey,
+                     final String name, final String text, final String iconUrl, final String key) {
+        this.type = type;
+        this.groupKey = groupKey;
+        this.roomKey = roomKey;
+        this.name = name;
+        this.text = text;
+        this.iconUrl = iconUrl;
+        this.messageKey = key;
     }
 
     /** Build an instance for a room and selectable room or member list items. */
-    public ListItem(final ItemType type, final String groupKey, final String key,
+    public ListItem(final ItemType type, final String groupKey, final String memberKey,
                     final String name, final String text, final String iconUrl) {
         this.type = type;
         this.groupKey = groupKey;
-        this.key = key;
+        this.memberKey = memberKey;
         this.name = name;
         this.text = text;
         this.iconUrl = iconUrl;
@@ -244,25 +261,25 @@ public class ListItem {
     /** Build an instance for a given selectable group. */
     public ListItem(final ItemType type, final String groupKey, final String name) {
         this(type, groupKey, groupKey, name, null, null);
-        enabled = true;
+        this.enabled = true;
     }
 
     /** Build an instance for a selectable room list item. */
     public ListItem(final ItemType type, final String groupKey, final String roomKey,
                     final String name, final String text) {
         this(type, groupKey, roomKey, name, text, null);
-        enabled = true;
+        this.enabled = true;
     }
 
     /** Build an instance for a room or common room invitation. */
     public ListItem(final ItemType type, final Room room) {
         this.type = type;
-        groupKey = room.groupKey;
-        key = room.key;
-        name = room.name;
+        this.groupKey = room.groupKey;
+        this.roomKey = room.key;
+        this.name = room.name;
         Group group = GroupManager.instance.getGroupProfile(groupKey);
-        text = group != null ? group.name : "";
-        enabled = type == inviteRoom;
+        this.text = group != null ? group.name : "";
+        this.enabled = type == inviteRoom;
     }
 
     /** Add a new group key to the group key list. Initialize the list if necessary. */
@@ -291,7 +308,7 @@ public class ListItem {
             return "Uninitialized list item.";
         switch (type) {
             case chatGroup:
-                return String.format(Locale.US, type.format, name, key, count, text);
+                return String.format(Locale.US, type.format, name, groupKey, count, text);
             case chatRoom:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case contact:
@@ -301,13 +318,13 @@ public class ListItem {
             case date:
                 return String.format(Locale.US, type.format, nameResourceId);
             case expGroup:
-                return String.format(Locale.US, type.format, name, key, count, text);
+                return String.format(Locale.US, type.format, name, experienceKey, count, text);
             case expList:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case expRoom:
                 return String.format(Locale.US, type.format, name, groupKey, roomKey, count, text);
             case experience:
-                return String.format(Locale.US, type.format, groupKey, roomKey, key);
+                return String.format(Locale.US, type.format, groupKey, roomKey, experienceKey);
             case groupList:
                 return String.format(Locale.US, type.format, name, groupKey);
             case helpArticle:
@@ -319,7 +336,7 @@ public class ListItem {
             case member:
                 return String.format(Locale.US, type.format, name, email, iconUrl);
             case message:
-                return String.format(Locale.US, type.format, name, key, count, text);
+                return String.format(Locale.US, type.format, name, messageKey, count, text);
             case inviteCommonRoom:
                 return String.format(Locale.US, type.format, name, text);
             case inviteGroup:
@@ -329,7 +346,7 @@ public class ListItem {
             case newItem:
                 return String.format(Locale.US, type.format, nameResourceId);
             case protectedUserList:
-                return String.format(Locale.US, type.format, name, email, iconUrl, key);
+                return String.format(Locale.US, type.format, name, email, iconUrl, memberKey);
             case resourceHeader:
                 return String.format(Locale.US, type.format, nameResourceId);
             case roomsHeader:

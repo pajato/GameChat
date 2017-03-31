@@ -17,17 +17,14 @@
 
 package com.pajato.android.gamechat.chat;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
-import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -36,11 +33,12 @@ import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
-import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
+import com.pajato.android.gamechat.event.ChatListChangeEvent;
 
-import java.util.List;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
@@ -50,10 +48,6 @@ import static com.pajato.android.gamechat.common.FragmentType.createProtectedUse
 import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.FragmentType.messageList;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatGroup;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatRoom;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.groupList;
-import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.roomList;
 
 /**
  * Provide a base class to support fragment lifecycle debugging.  All lifecycle events except for
@@ -77,10 +71,17 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     // Public instance methods.
 
+    /** Handle a group profile change by trying again to start a better fragment. */
+    @Subscribe
+    public void onChatListChange(final ChatListChangeEvent event) {
+        updateAdapterList();
+    }
+
     /** Log the lifecycle event and kill the ads. */
     @Override public void onDestroy() {
         super.onDestroy();
-        if (mAdView != null) mAdView.destroy();
+        if (mAdView != null)
+            mAdView.destroy();
     }
 
     /** Log the lifecycle event, stop showing ads and turn off the app event bus. */
@@ -122,11 +123,6 @@ public abstract class BaseChatFragment extends BaseFragment {
         initAdView(mLayout);
     }
 
-    /** Set the item defining this fragment (passed from the parent (spawning) fragment. */
-    public void setItem(final ListItem item) {
-        mItem = item;
-    }
-
     // Protected instance methods.
 
     /** Log a lifecycle event that has no bundle. */
@@ -143,79 +139,14 @@ public abstract class BaseChatFragment extends BaseFragment {
         Log.v(TAG, String.format(Locale.US, SUFFIX_FORMAT, type, state, bundleMessage));
     }
 
-    /** Return TRUE iff the fragment setup is handled successfully. */
-    @Override protected void onDispatch(@NonNull final Context context) {
-        // Ensure that the type is valid.  Signal failure if not, otherwise handle each possible
-        // case signalling success.  If there are no valid cases signal failure.
-        if (mDispatcher.type == null)
-            return;
-        switch (type) {
-            case messageList:   // The messages in a room require both the group and room keys.
-                String groupKey = mDispatcher.groupKey;
-                String roomKey = mDispatcher.roomKey;
-                String name = RoomManager.instance.getRoomName(roomKey);
-                markMessagesSeen(groupKey, roomKey);
-                mItem = new ListItem(chatRoom, groupKey, roomKey, name, 0, null);
-                break;
-            case roomMembersList:
-                if (mDispatcher.groupKey == null || mDispatcher.roomKey == null)
-                    return;
-                String roomName = RoomManager.instance.getRoomName(mDispatcher.roomKey);
-                mItem = new ListItem(roomList, mDispatcher.groupKey, mDispatcher.roomKey, roomName);
-                break;
-            case groupMembersList:
-                if (mDispatcher.groupKey == null)
-                    return;
-                String groupName = GroupManager.instance.getGroupName(mDispatcher.groupKey);
-                mItem = new ListItem(groupList, mDispatcher.groupKey, groupName);
-                break;
-            case createRoom:
-            case joinRoom:
-            case protectedUsers:
-            case chatRoomList:  // The rooms in a group need the group key.
-                if (mDispatcher.groupKey == null)
-                    return;
-                mItem = new ListItem(chatGroup, mDispatcher.groupKey, null, null, 0, null);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /** Ensure that all the messages in a given room are marked as seen by the account holder. */
-    private void markMessagesSeen(@NonNull final String groupKey, @NonNull final String roomKey) {
-        List<Message> list = MessageManager.instance.getMessageList(groupKey, roomKey);
-        String accountId = AccountManager.instance.getCurrentAccountId();
-        if (list == null || list.size() == 0 || accountId == null)
-            return;
-        for (Message message : list)
-            if (message.unseenList.contains(accountId)) {
-                message.unseenList.remove(accountId);
-                MessageManager.instance.updateMessage(message);
-            }
-    }
-
     /** Process a click event by either toggling the FAB or handling a list item click. */
     protected void processClickEvent(final View view, final FragmentType type) {
         // Determine if this event is for the chat fab button.
         logEvent(String.format("onClick: (%s) with event {%s};", type.name(), view));
         switch (view.getId()) {
             case R.id.chatFab:
-                // Handle the no-menu case for protected users
-                switch (this.type) {
-                    case protectedUsers:
-                        if (AccountManager.instance.isRestricted()) {
-                            String protectedWarning = getString(R.string.CannotMakeProtectedUser);
-                            Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
-                            break;
-                        }
-                        DispatchManager.instance.chainFragment(getActivity(), createProtectedUser);
-                        break;
-                    default:
-                        // It is a chat fab button.  Toggle the state.
-                        FabManager.chat.toggle(this);
-                        break;
-                }
+                // It is a chat fab button.  Toggle the state.
+                FabManager.chat.toggle(this);
                 break;
             case R.id.endIcon:
             case R.id.veryEndIcon:
@@ -261,7 +192,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         String message = String.format(getString(R.string.PromoteUserConfirm), item.name);
         DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int id) {
-                ProtectedUserManager.instance.promoteUser(item.key);
+                ProtectedUserManager.instance.promoteUser(item.memberKey);
             }
         };
         showAlertDialog(getString(R.string.PromoteUserTitle), message, null, okListener);
@@ -272,7 +203,7 @@ public abstract class BaseChatFragment extends BaseFragment {
         String message = String.format(getString(R.string.DeleteUserConfirm), item.name);
         DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int id) {
-                ProtectedUserManager.instance.deleteProtectedUser(item.key);
+                ProtectedUserManager.instance.deleteProtectedUser(item.memberKey);
             }
         };
         showAlertDialog(getString(R.string.DeleteUserTitle), message, null, okListener);
@@ -324,10 +255,10 @@ public abstract class BaseChatFragment extends BaseFragment {
         ListItem item = (ListItem) payload;
         switch (item.type) {
             case chatGroup: // Drill into the rooms in group.
-                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, item);
+                DispatchManager.instance.dispatchToFragment(this, chatRoomList, null, item);
                 break;
             case chatRoom: // Show the messages in a room.
-                DispatchManager.instance.chainFragment(getActivity(), messageList, item);
+                DispatchManager.instance.dispatchToFragment(this, messageList, null, item);
                 break;
             case newItem:
                 handleNewItem(type);
@@ -339,16 +270,16 @@ public abstract class BaseChatFragment extends BaseFragment {
 
     /** Determine the type of the desired new item and dispatch accordingly */
     protected void handleNewItem(final FragmentType type) {
-        if (type.name().equals(protectedUsers.name())) {
+        if (type == protectedUsers) {
             if (AccountManager.instance.isRestricted()) {
                 String protectedWarning = getString(R.string.CannotMakeProtectedUser);
                 Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
             }
-            DispatchManager.instance.chainFragment(getActivity(), createProtectedUser);
-        } else if (type.name().equals(chatGroupList.name())) {
-            DispatchManager.instance.chainFragment(getActivity(), createChatGroup);
-        } else if (type.name().equals(chatRoomList.name())) {
-            DispatchManager.instance.chainFragment(getActivity(), createRoom, mItem);
+            DispatchManager.instance.dispatchToFragment(this, createProtectedUser, null, null);
+        } else if (type == chatGroupList) {
+            DispatchManager.instance.dispatchToFragment(this, createChatGroup, null, null);
+        } else if (type == chatRoomList) {
+            DispatchManager.instance.dispatchToFragment(this, createRoom, null, null);
         }
     }
 }

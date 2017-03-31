@@ -36,6 +36,9 @@ import android.widget.Toast;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
+import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.FragmentKind;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.credentials.CredentialsManager;
@@ -68,6 +71,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
+import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
@@ -104,16 +108,31 @@ public class MainActivity extends BaseActivity
 
     // Private instance variables.
 
-    /** The current, possibly null, fragment back press handler. */
-    private View.OnClickListener mUpHandler;
+    /** The current, possibly null, fragment back press handler for chat. */
+    private View.OnClickListener mChatUpHandler;
+
+    /** The current, possibly null, fragment back press handler for experiences. */
+    private View.OnClickListener mExpUpHandler;
 
     // Public instance methods.
 
-    /** Lazily create a navigation back press handler for fragment toolbars. */
-    public View.OnClickListener getUpHandler() {
-        if (mUpHandler == null)
-            mUpHandler = new UpHandler();
-        return mUpHandler;
+    /** Lazily create a navigation back press handler for chat fragment toolbars. */
+    private View.OnClickListener getChatUpHandler() {
+        if (mChatUpHandler == null)
+            mChatUpHandler = new UpHandler();
+        return mChatUpHandler;
+    }
+
+    /** Lazily create a navigation back press handler for chat fragment toolbars. */
+    private View.OnClickListener getExpUpHandler() {
+        if (mExpUpHandler == null)
+            mExpUpHandler = new UpHandler();
+        return mExpUpHandler;
+    }
+
+    /** Get the UpHandler based on the fragment type */
+    public View.OnClickListener getUpHandler(FragmentKind kind) {
+        return (kind == chat) ? getChatUpHandler() : getExpUpHandler();
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
@@ -160,7 +179,10 @@ public class MainActivity extends BaseActivity
     @Override public void onBackPressed() {
         if (NavigationManager.instance.closeDrawerIfOpen(this))
             return;
-        super.onBackPressed();
+        FragmentType type =
+                this.equals(mChatUpHandler) ? ChatEnvelopeFragment.getCurrentFragmentType() :
+                        ExpEnvelopeFragment.getCurrentFragmentType();
+        DispatchManager.instance.handleBackDispatch(type);
     }
 
     /** Process a given button click event handling the nav drawer closing. */
@@ -348,6 +370,7 @@ public class MainActivity extends BaseActivity
         InvitationManager.instance.init(this);
         JoinManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
+        RoomManager.instance.init(this);
 
         // Register the first of many app event listeners.
         AppEventManager.instance.register(AccountManager.instance);
@@ -414,7 +437,10 @@ public class MainActivity extends BaseActivity
     private class UpHandler implements View.OnClickListener {
         /** Handle a click on the back arrow button by generating a back press. */
         public void onClick(final View view) {
-            onBackPressed();
+            FragmentType type =
+                    this.equals(mChatUpHandler) ? ChatEnvelopeFragment.getCurrentFragmentType() :
+                            ExpEnvelopeFragment.getCurrentFragmentType();
+            DispatchManager.instance.handleBackDispatch(type);
         }
     }
 }

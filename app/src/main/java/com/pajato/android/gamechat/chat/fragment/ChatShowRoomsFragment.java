@@ -17,14 +17,20 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
+
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
+import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ChatListChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -62,6 +68,21 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
 
     // Public instance methods.
 
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return RoomManager.instance.getListItemData(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.RoomsToolbarTitle);
+    }
+
     /** Manage the list UI every time a message change occurs. */
     @Subscribe public void onChatListChange(final ChatListChangeEvent event) {
         // Determine if this fragment cares about chat list changes.  If so, do a redisplay.
@@ -86,13 +107,13 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), createChatGroup);
+                DispatchManager.instance.dispatchToFragment(this, createChatGroup, null, null);
                 break;
             case R.string.JoinRoomsMenuTitle:
-                DispatchManager.instance.chainFragment(getActivity(), joinRoom, mItem);
+                DispatchManager.instance.dispatchToFragment(this, joinRoom, null, null);
                 break;
             case R.string.InviteFriendMessage:
-                InvitationManager.instance.extendGroupInvitation(getActivity(), mItem.groupKey);
+                InvitationManager.instance.extendGroupInvitation(getActivity(), mDispatcher.groupKey);
                 break;
             default:
                 break;
@@ -109,7 +130,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;
             case R.string.MembersMenuItem:
-                DispatchManager.instance.chainFragment(getActivity(), groupMembersList, mItem);
+                DispatchManager.instance.dispatchToFragment(this, groupMembersList, null, null);
                 break;
             default:
                 break;
@@ -133,10 +154,15 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         FabManager.chat.init(this, CHAT_ROOM_FAM_KEY);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, mItem, game, search, members, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, game, search, members, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_ROOM_FAM_KEY, getRoomMenu());
     }
 

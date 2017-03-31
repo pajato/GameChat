@@ -17,13 +17,17 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.content.Context;
 import android.support.v4.view.ViewPager;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
@@ -32,6 +36,8 @@ import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.List;
 
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
@@ -45,6 +51,21 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 public class ShowNoExperiencesFragment extends BaseExperienceFragment {
 
     // Public instance methods.
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.NoGamesToolbarTitle);
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -62,7 +83,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
         switch (event.changeType) {
             case CHANGED:
             case NEW:
-                DispatchManager.instance.startNextFragment(getActivity(), exp);
+                DispatchManager.instance.dispatchToFragment(this, exp);
                 break;
             default:
                 break;
@@ -84,7 +105,8 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
                 }
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
+                            null);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(), groupKey);
                 break;
@@ -103,11 +125,18 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
         super.onStart();
         FabManager.game.init(this);
-        int titleResId = R.string.NoGamesToolbarTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, chat, settings);
     }
 }

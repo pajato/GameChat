@@ -33,13 +33,16 @@ import android.widget.TextView;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
@@ -67,6 +70,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
+import static com.pajato.android.gamechat.event.BaseChangeEvent.REMOVED;
 import static com.pajato.android.gamechat.exp.ExpHelper.getBaseFragment;
 import static com.pajato.android.gamechat.exp.ExpType.tttET;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.BEG_COL;
@@ -101,6 +105,23 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
     private static final String TAG = TTTFragment.class.getSimpleName();
 
     // Public instance methods.
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        if (mExperience == null)
+            mExperience = ExperienceManager.instance.getExperience(mDispatcher.key);
+        return mExperience.getName();
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -145,7 +166,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
+                            null);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -163,6 +185,8 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
      */
     @Subscribe public void onExperienceChange(final ExperienceChangeEvent event) {
         // Check the payload to see if this is not tictactoe.  Abort if not.
+        if (event.changeType == REMOVED)
+            return;
         if (!mActive || event.experience == null || event.experience.getExperienceType() != tttET)
             return;
         if (!mExperience.getExperienceKey().equals(event.experience.getExperienceKey()))
@@ -189,11 +213,26 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         resume();
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        if (dispatcher.roomKey == null) {
+            Log.e(TAG, "Got to onSetup without a room key - this shouldn't be possible!");
+            return;
+        }        mExperience = ExperienceManager.instance.getExperience(dispatcher.groupKey, dispatcher.roomKey, tttET);
+        if (mExperience == null)
+            createExperience(context, getPlayers(dispatcher.roomKey));
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize by setting up tile click handlers on the board. */
     @Override public void onStart() {
         // Initialize the FAB/FAM and the toolbar.
         super.onStart();
-        mDispatcher.expType = null;
         FabManager.game.setMenu(TIC_TAC_TOE_FAM_KEY, getTTTMenu());
         FabManager.game.init(this);
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);

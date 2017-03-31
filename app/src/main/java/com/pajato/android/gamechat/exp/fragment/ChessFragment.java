@@ -19,20 +19,25 @@ package com.pajato.android.gamechat.exp.fragment;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
+import com.pajato.android.gamechat.exp.Checkerboard;
 import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.chess.ChessBoard;
@@ -52,6 +57,7 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.hel
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 import static com.pajato.android.gamechat.common.model.JoinState.JoinType.exp;
+import static com.pajato.android.gamechat.exp.ExpType.chessET;
 
 /**
  * A simple Chess game for use in GameChat.
@@ -73,6 +79,23 @@ public class ChessFragment extends BaseExperienceFragment {
     private static final String TAG = ChessFragment.class.getSimpleName();
 
     // Public instance methods.
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return GroupManager.instance.getGroupName(mDispatcher.groupKey);
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        if (mExperience == null)
+            mExperience = ExperienceManager.instance.getExperience(mDispatcher.key);
+        return mExperience.getName();
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -116,10 +139,31 @@ public class ChessFragment extends BaseExperienceFragment {
         resumeExperience();
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        if (dispatcher.roomKey == null) {
+            Log.e(TAG, "Got to onSetup without a room key - this shouldn't be possible!");
+            return;
+        }
+        mBoard = new Checkerboard(context);
+
+        // If a Chess experience is available in the given room, use it; else create a new one
+        mExperience = ExperienceManager.instance.getExperience(dispatcher.groupKey,
+                dispatcher.roomKey, chessET);
+        if (mExperience == null)
+            createExperience(context, getPlayers(dispatcher.roomKey));
+
+        mDispatcher = dispatcher;
+    }
+
     @Override public void onStart() {
         // Setup the FAM, add a new game item to the overflow menu, and obtain the board.
         super.onStart();
-        mDispatcher.expType = null;
         FabManager.game.setMenu(CHESS_FAM_KEY, getChessMenu());
         ToolbarManager.instance.init(this, helpAndFeedback, settings, chat, invite);
         mBoard.init(this, mTileClickHandler);

@@ -90,6 +90,6 @@
     <string name="TakeVideoDesc">Take a video image button.</string>
     <string name="UserNameHint">First and Last Name</string>
     <string name="WelcomeMessageText">Welcome to your private messages. Use this space to take notes and stash files. Enjoy!</string>
-    <string name="YourGroupTitle">Your Group Name</string>
+    <string name="YourGroupTitle">Your Group</string>
     <string name="editMessageHint">Type a message</string>
 </resources>

@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 
@@ -25,7 +26,10 @@ import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -35,7 +39,10 @@ import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.NotificationManager;
 
+import java.util.List;
+
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
+import static com.pajato.android.gamechat.common.FragmentType.createRoom;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -59,24 +66,40 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
     // Public instance methods.
 
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.CreateRoomMenuTitle);
+    }
+
+    /** Save the dispatcher in the member variable. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Establish the create time state. */
     @Override public void onStart() {
         // Ensure that there is a group to use in creating the new room.
         super.onStart();
-        mGroup = GroupManager.instance.getGroupProfile(mItem.groupKey);
+        mGroup = GroupManager.instance.getGroupProfile(mDispatcher.groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
         mMember = MemberManager.instance.getMember(mGroup.key, account.id);
         if (mGroup == null || mMember == null) {
-            // Return to the previous fragment using a back press.
-            getActivity().onBackPressed();
-            // Probably good to put a toast or snackbar here.
+            DispatchManager.instance.dispatchReturn(this); // Dispatch back
             return;
         }
 
         // Establish the list type and setup the toolbar.
-        mCreateType = CreateType.room;
-        int titleResId = R.string.CreateRoomMenuTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
 
         // Set up the room profile.
         mRoom = new Room();
@@ -100,7 +123,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
             DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface d, int id) {
                     save(account, true);
-                    getActivity().onBackPressed(); // Go back
+                    DispatchManager.instance.handleBackDispatch(createRoom); // Dispatch back
                 }
             };
             showAlertDialog(title, message, null, okListener);

@@ -1,5 +1,6 @@
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -7,12 +8,14 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.credentials.Credentials;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 
@@ -36,6 +39,23 @@ public class SelectGroupsFragment extends BaseChatFragment {
      * The logcat tag.
      */
     private static final String TAG = SelectGroupsFragment.class.getSimpleName();
+
+    // Public instance methods
+
+    /** Return null or a list to be displayed by the list adapter */
+    public List<ListItem> getList() {
+        return GroupManager.instance.getGroupsOnlyListItemData();
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.AccessToGroupsTitle);
+    }
 
     /**
      * Handle click events.
@@ -86,14 +106,19 @@ public class SelectGroupsFragment extends BaseChatFragment {
         super.onResume();
         FabManager.chat.setVisibility(this, View.INVISIBLE);
         TextView finish = (TextView) getActivity().findViewById(R.id.button_finish);
+        AccountManager.instance.protectedUserGroupKeys.clear();
         finish.setEnabled(false);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
     }
 
     /** Set up toolbar and FAM */
     @Override public void onStart() {
         super.onStart();
-        int titleResId = R.string.AccessToGroupsTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
     }
 
     // Private instance methods.

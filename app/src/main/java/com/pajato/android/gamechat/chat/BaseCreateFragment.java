@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -35,23 +36,13 @@ import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Locale;
-
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PUBLIC;
 
 /** Provide a base class for fragments that create something. */
 public abstract class BaseCreateFragment extends BaseChatFragment {
 
-    // Public enum.
-
-    /** The create type. */
-    protected enum CreateType {group, room}
-
     // Protected instance variables.
-
-    /** The current create type. */
-    protected CreateType mCreateType;
 
     /** Set the room type. */
     protected abstract void setType(final RoomType type);
@@ -60,9 +51,9 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
 
     /** Provide a click event handler. */
     @Subscribe public void onClick(final ClickEvent event) {
-        // Log the event and determine if the event looks right.  Abort if it doesn't.
-        logEvent(String.format(Locale.US, "onClick (create %s) event: {%s}.", mCreateType, event));
-        if (event == null || event.view == null) return;
+        // Determine if the event looks right.  Abort if it doesn't.
+        if (event == null || event.view == null)
+            return;
 
         // The event appears to be expected.  Confirm by finding the selector check view.
         switch (event.view.getId()) {
@@ -70,7 +61,7 @@ public abstract class BaseCreateFragment extends BaseChatFragment {
                 Account account = AccountManager.instance.getCurrentAccount();
                 if (account != null) {
                     if (save(account, false))
-                        getActivity().onBackPressed(); // Go back
+                        DispatchManager.instance.handleBackDispatch(this.type); // Go back
                 } else {
                     dismissKeyboard();
                     abort(getString(R.string.InvalidAccountError));

@@ -17,6 +17,7 @@
 
 package com.pajato.android.gamechat.chat.fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -28,7 +29,10 @@ import com.pajato.android.gamechat.chat.BaseCreateFragment;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.chat.model.Room.RoomType;
+import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
 import com.pajato.android.gamechat.database.AccountManager;
@@ -39,10 +43,12 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.NotificationManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
+import static com.pajato.android.gamechat.common.FragmentType.createChatGroup;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
@@ -55,14 +61,32 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
     // Public instance methods.
 
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return getString(R.string.CreateGroupMenuTitle);
+    }
+
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Establish the create time state. */
     @Override public void onStart() {
         // Establish the create type, the list type, setup the toolbar and turn off the access
         // control.
         super.onStart();
-        mCreateType = CreateType.group;
-        int titleResId = R.string.CreateGroupMenuTitle;
-        ToolbarManager.instance.init(this, titleResId, helpAndFeedback, settings);
+        ToolbarManager.instance.init(this, helpAndFeedback, settings);
         RadioGroup accessControl = (RadioGroup) mLayout.findViewById(R.id.AccessControl);
         accessControl.setVisibility(View.GONE);
 
@@ -100,7 +124,7 @@ public class CreateGroupFragment extends BaseCreateFragment {
             DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface d, int id) {
                     save(account, true);
-                    getActivity().onBackPressed(); // Go back
+                    DispatchManager.instance.handleBackDispatch(createChatGroup); // Dispatch back
                 }
             };
             showAlertDialog(title, message, null, okListener);

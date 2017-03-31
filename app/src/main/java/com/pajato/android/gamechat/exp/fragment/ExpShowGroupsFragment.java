@@ -17,13 +17,17 @@
 
 package com.pajato.android.gamechat.exp.fragment;
 
+import android.content.Context;
 import android.support.v4.view.ViewPager;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.DispatchManager;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
+import com.pajato.android.gamechat.common.adapter.ListItem;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
@@ -34,7 +38,8 @@ import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
+import java.util.List;
+
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -54,6 +59,25 @@ import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_
 public class ExpShowGroupsFragment extends BaseExperienceFragment {
 
     // Public instance methods.
+
+    /** Return null or a list to be displayed by a list adapter */
+    public List<ListItem> getList() {
+        return ExperienceManager.instance.getGroupListItemData();
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        // If the experiences are in more than one group (including the me group) use a groups
+        // toolbar title, otherwise use a rooms toolbar title.
+        if (ExperienceManager.instance.expGroupMap.size() > 1)
+            return getString(R.string.ExpGroupsToolbarTitle);
+        return getString(R.string.MyGameRoomToolbarTitle);
+    }
 
     /** Handle a button click event by delegating the event to the base class. */
     @Subscribe public void onClick(final ClickEvent event) {
@@ -93,7 +117,8 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 if (isInMeGroup())
-                    DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms,
+                            this.type, null);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -111,29 +136,27 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
         FabManager.game.init(this, GAME_HOME_FAM_KEY);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        // The experiences in a room require both the group and room keys.  Determine if the
+        // group is the me group and give it special handling.
+        String meGroupKey = AccountManager.instance.getMeGroupKey();
+        dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
+                ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
+        mDispatcher = dispatcher;
+    }
+
     /** Initialize the fragment by setting up the FAB and toolbar. */
     @Override public void onStart() {
-        // Ensure that this is not a pass-through to a particular experience fragment.  If not, then
-        // set up the toolbar.
+        // If the dispatcher has an experience type set, then this is a pass-through to an
+        // experience fragment. If not, then set up the toolbar.
         super.onStart();
         if (mDispatcher.expType == null) {
-            int titleResId = getTitleResId();
-            ToolbarManager.instance.init(this, titleResId, helpAndFeedback, chat, invite, settings);
+            ToolbarManager.instance.init(this, helpAndFeedback, chat, invite, settings);
             return;
         }
 
-        // Handle a pass through by handing off to the experience room list fragment.
-        mDispatcher.type = expRoomList;
-        DispatchManager.instance.chainFragment(getActivity(), mDispatcher);
-        mItem = null;
-    }
-
-    /** Return the toolbar title resource id to use. */
-    private int getTitleResId() {
-        // If the experiences are in more than one group (including the me group) use a groups
-        // toolbar title, otherwise use a rooms toolbar title.
-        if (ExperienceManager.instance.expGroupMap.size() > 1)
-            return R.string.ExpGroupsToolbarTitle;
-        return R.string.MyGameRoomToolbarTitle;
+        // Handle a pass-through to an experience.
+        DispatchManager.instance.dispatchToGame(this, mDispatcher.expType.getFragmentType());
     }
 }

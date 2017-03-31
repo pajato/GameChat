@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
@@ -83,12 +84,12 @@ public enum JoinManager {
             case selectUser:
             case selectableMember:
                 // Create and persist the private chat room and get it's push key.
-                room = joinMember(item.groupKey, item.key);
+                room = joinMember(item.groupKey, item.memberKey);
                 item.roomKey = room != null ? room.key : null;
                 break;
             case selectableRoom:
                 // Update and persist the room.
-                room = joinRoom(item.groupKey, item.key);
+                room = joinRoom(item.groupKey, item.roomKey);
                 item.roomKey = room != null ? room.key : null;
                 break;
             default:
@@ -110,11 +111,11 @@ public enum JoinManager {
     }
 
     /** Return a set of explicit (public) and implicit (member) rooms the current User can join. */
-    public List<ListItem> getListItemData(final ListItem item) {
+    public List<ListItem> getListItemData(final Dispatcher dispatcher) {
         // Determine if there are any rooms to present (excludes joined rooms).
         List<ListItem> result = new ArrayList<>();
-        result.addAll(getAvailableRooms(item));
-        result.addAll(getAvailableMembers(item));
+        result.addAll(getAvailableRooms());
+        result.addAll(getAvailableMembers(dispatcher));
         if (result.size() > 0) return result;
 
         // There are no rooms to join.  Provide a header message to that effect.
@@ -158,10 +159,10 @@ public enum JoinManager {
     // Private instance methods.
 
     /** Return a list of member room entries excluding joined ones and disallowing duplicates */
-    public List<ListItem> getAvailableMembers(final ListItem item) {
+    public List<ListItem> getAvailableMembers(final Dispatcher dispatcher) {
         // Get a list of all members visible to the current User.
         List<ListItem> items = new ArrayList<>();
-        List<String> groupList = GroupManager.instance.getGroups(item);
+        List<String> groupList = GroupManager.instance.getGroups(dispatcher.groupKey);
         String currentAccountId = AccountManager.instance.getCurrentAccountId();
         for (String groupKey : groupList) {
             Map<String, Account> map = MemberManager.instance.memberMap.get(groupKey);
@@ -181,7 +182,7 @@ public enum JoinManager {
                 }
                 // Check for duplicate member (member in > 1 group)
                 for (ListItem anItem : items) {
-                    if (anItem.key.equals(member.id)) {
+                    if (anItem.memberKey.equals(member.id)) {
                         // modify the already added item and remember we can't add this one
                         anItem.addGroupKey(groupKey);
                         canAdd = false;
@@ -205,10 +206,10 @@ public enum JoinManager {
     }
 
     /** Return a possibly empty list of items consisting of unjoined rooms. */
-    private List<ListItem> getAvailableRooms(final ListItem item) {
+    private List<ListItem> getAvailableRooms() {
         // Determine if there are groups to look at.  If not, return an empty result.
         List<ListItem> result = new ArrayList<>();
-        List<String> groupList = GroupManager.instance.getGroups(item);
+        List<String> groupList = GroupManager.instance.getGroups(null);
 
         // The group list is not empty.  Determine if there are any joinable rooms.
         List<String> joinedRoomList = JoinManager.instance.getJoinedRooms(groupList);

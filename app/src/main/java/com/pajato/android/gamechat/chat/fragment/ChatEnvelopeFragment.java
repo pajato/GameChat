@@ -37,14 +37,17 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
 import java.util.Locale;
 
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
+import static com.pajato.android.gamechat.common.FragmentType.chatEnvelope;
 import static com.pajato.android.gamechat.common.FragmentType.chatGroupList;
 import static com.pajato.android.gamechat.common.FragmentType.chatRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
@@ -58,20 +61,40 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatG
  */
 public class ChatEnvelopeFragment extends BaseChatFragment {
 
+    // Private static variables
+
+    /** The fragment which is currently active within the envelope */
+    private static FragmentType mCurrentFragmentType;
+
     // Default constructor.
 
     /** Build an instance setting the fragment type. */
     public ChatEnvelopeFragment() {
-        type = FragmentType.chatEnvelope;
+        type = chatEnvelope;
     }
 
     // Public instance methods.
+
+    /** Satisfy base class */
+    public List<ListItem> getList() {
+        return null;
+    }
+
+    /** Get the toolbar subTitle, or null if none is used */
+    public String getToolbarSubtitle() {
+        return null;
+    }
+
+    /** Get the toolbar title */
+    public String getToolbarTitle() {
+        return null;
+    }
 
     /** Handle a authentication change event by dealing with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
         logEvent(String.format("onAuthenticationChange: with event {%s};", event));
-        DispatchManager.instance.startNextFragment(getActivity(), chat);
+        DispatchManager.instance.dispatchToFragment(this, chat);
     }
 
     /** Process a given button click event looking for the navigation drawer. */
@@ -84,10 +107,10 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             case R.id.nav_me_room:
                 String groupKey = AccountManager.instance.getMeGroupKey();
                 ListItem listItem = new ListItem(chatGroup, groupKey, null, null, 0, null);
-                DispatchManager.instance.chainFragment(getActivity(), chatRoomList, listItem);
+                DispatchManager.instance.dispatchToFragment(this, chatRoomList, null, listItem);
                 break;
             case R.id.nav_groups:
-                DispatchManager.instance.startNextFragment(getActivity(), chatGroupList);
+                DispatchManager.instance.dispatchToFragment(this, chatGroupList, null, null);
                 break;
             case R.id.manageProtectedUsers:
                 // Ensure that the current user is not a protected user. Then, start the process of
@@ -97,15 +120,21 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                // If not on a tablet, make sure that we switch to the chat perspective
+                // If not on a tablet, make sure that we switch to the chat perspective and remember
+                // the type that we came from.
+                FragmentType activeFragmentType = this.type;
                 if (!PaneManager.instance.isTablet()) {
                     ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-                    if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                    if (viewPager != null && viewPager.getCurrentItem() != PaneManager.CHAT_INDEX) {
+                        viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                    }
+                    activeFragmentType = getCurrentFragmentType();
                 }
-                DispatchManager.instance.chainFragment(getActivity(), protectedUsers);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers,
+                        activeFragmentType, null);
                 break;
             case R.id.inviteFriends:
-                DispatchManager.instance.chainFragment(getActivity(), selectGroupsRooms);
+                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type, null);
                 break;
             case R.id.settings:
                 showFutureFeatureMessage(R.string.MenuItemSettings);
@@ -132,6 +161,11 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
             InvitationManager.instance.acceptGroupInvite(account, groupKey);
     }
 
+    /** Setup the fragment configuration using the specified dispatcher. */
+    public void onSetup(Context context, Dispatcher dispatcher) {
+        mDispatcher = dispatcher;
+    }
+
     /** Create the view to do essentially nothing. */
     @Override public void onStart() {
         // Initialize the FAB.
@@ -148,11 +182,17 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
     @Override public void onResume() {
         // The experience manager will load a fragment to view into this envelope fragment.
         super.onResume();
-        DispatchManager.instance.startNextFragment(getActivity(), chat);
+        DispatchManager.instance.dispatchToFragment(this, chat);
     }
 
-    /** Setup the fragment with what would otherwise be constructor arguments. */
-    @Override public void onSetup(final Context context, final Dispatcher dispatcher) {
-
+    /** Get the type of the most recent (current) fragment */
+    public static FragmentType getCurrentFragmentType() {
+        return mCurrentFragmentType;
     }
+
+    /** Set the type of the most recent (current) fragment */
+    public static void setCurrentFragment(FragmentType type) {
+        mCurrentFragmentType = type;
+    }
+
 }

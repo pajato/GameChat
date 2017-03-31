@@ -18,6 +18,8 @@
 package com.pajato.android.gamechat.database;
 
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.util.SparseArray;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.R;
@@ -74,6 +76,11 @@ public enum RoomManager {
 
     /** The collection of room profiles for the joined rooms, keyed by the room push key. */
     public Map<String, Room> roomMap = new HashMap<>();
+
+    // Private instance variables.
+
+    /** The repository for any messages needed. */
+    private SparseArray<String> mMessageMap = new SparseArray<>();
 
     // Public instance methods.
 
@@ -172,7 +179,7 @@ public enum RoomManager {
     /** Obtain a name for the room with the given key, "Anonymous" if a name is not available. */
     public String getRoomName(final String roomKey) {
         Room room = roomMap.get(roomKey);
-        return room != null ? room.name : null;
+        return room != null ? room.getName() : null;
     }
 
     /** Get the profile for a given room. */
@@ -183,6 +190,12 @@ public enum RoomManager {
     /** Return the database path to the given group's profile. */
     public String getRoomProfilePath(final String groupKey, final String roomKey) {
         return String.format(Locale.US, ROOM_PROFILE_PATH, groupKey, roomKey);
+    }
+
+    /** Initialize the room manager */
+    public void init(final AppCompatActivity context) {
+        mMessageMap.clear();
+        mMessageMap.put(R.string.AnonymousTitle, context.getString(R.string.AnonymousTitle));
     }
 
     /** Remove the current account from the room member list and the room map. Remove the watcher. */

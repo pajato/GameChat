@@ -22,6 +22,7 @@ import android.support.annotation.NonNull;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pajato.android.gamechat.chat.model.Message;
 import com.pajato.android.gamechat.chat.model.Room;
+import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType;
 import com.pajato.android.gamechat.common.adapter.ListItem.ItemType;
@@ -136,12 +137,12 @@ public enum MessageManager {
     }
 
     /** Return a list of messages, an empty list if there are none to be had, for a given item. */
-    public List<ListItem> getListItemData(@NonNull final ListItem item) {
+    public List<ListItem> getListItemData(@NonNull final Dispatcher dispatcher) {
         // Generate a map of date header types to a list of messages, i.e. a chronological ordering
         // of the messages.
         List<ListItem> result = new ArrayList<>();
-        String groupKey = item.groupKey;
-        String roomKey = getRoomKey(item);
+        String groupKey = dispatcher.groupKey;
+        String roomKey = getRoomKey(dispatcher);
         if (roomKey == null)
             return result;
         return getItems(getMessageMap(getGroupMessages(groupKey).get(roomKey)));
@@ -221,21 +222,20 @@ public enum MessageManager {
                 DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
                 String tStamp = dateFormat.format(new Date(message.createTime));
                 String name = String.format(Locale.getDefault(), "%s  %s", message.name, tStamp);
-                String text = message.text;
-                String url = message.url;
-                result.add(new ListItem(ItemType.message, groupKey, roomKey, name, text, url));
+                result.add(new ListItem(ItemType.message, groupKey, roomKey, name, message.text,
+                        message.url, message.key));
             }
         }
         return result;
     }
 
-    /** Return null or a valid room key for the given item. */
-    private String getRoomKey(@NonNull final ListItem item) {
-        if (item.groupKey == null)
+    /** Return null or a valid room key for the given configuration. */
+    private String getRoomKey(@NonNull final Dispatcher dispatcher) {
+        if (dispatcher.groupKey == null)
             return null;
-        if (item.groupKey.equals(AccountManager.instance.getMeGroupKey()))
+        if (dispatcher.groupKey.equals(AccountManager.instance.getMeGroupKey()))
             return AccountManager.instance.getMeRoomKey();
-        return item.roomKey != null ? item.roomKey : item.key;
+        return dispatcher.roomKey;
     }
 
     /** Sort lists of messages after they've been sorted into date categories. */
