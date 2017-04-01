@@ -75,6 +75,7 @@ import static com.pajato.android.gamechat.common.FragmentKind.chat;
 import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
+import static com.pajato.android.gamechat.main.PaneManager.CHAT_INDEX;
 
 /**
  * Provide a main activity to display the chat and game fragments.
@@ -179,9 +180,23 @@ public class MainActivity extends BaseActivity
     @Override public void onBackPressed() {
         if (NavigationManager.instance.closeDrawerIfOpen(this))
             return;
-        FragmentType type =
-                this.equals(mChatUpHandler) ? ChatEnvelopeFragment.getCurrentFragmentType() :
-                        ExpEnvelopeFragment.getCurrentFragmentType();
+        FragmentType type = ChatEnvelopeFragment.getCurrentFragmentType(); // Default to chat
+        if (PaneManager.instance.isTablet()) {
+            View v = this.getCurrentFocus();
+            View chatLayout = findViewById(R.id.chatFragmentContainer);
+            if (v != null && chatLayout != null) {
+                if (chatLayout.findViewById(v.getId()) != null)
+                    type = ChatEnvelopeFragment.getCurrentFragmentType();
+                else
+                    type = ExpEnvelopeFragment.getCurrentFragmentType();
+            }
+        } else {
+            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+            if (viewPager != null && viewPager.getCurrentItem() == CHAT_INDEX)
+                type = ChatEnvelopeFragment.getCurrentFragmentType();
+            else
+                type = ExpEnvelopeFragment.getCurrentFragmentType();
+        }
         DispatchManager.instance.handleBackDispatch(type);
     }
 
@@ -250,7 +265,7 @@ public class MainActivity extends BaseActivity
             case R.string.SwitchToChat:
                 // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
                 ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-                if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
+                if (viewPager != null) viewPager.setCurrentItem(CHAT_INDEX);
                 break;
             case R.string.SwitchToExp:
                 // If the toolbar game icon is clicked, on smart phone devices we can change panes.
