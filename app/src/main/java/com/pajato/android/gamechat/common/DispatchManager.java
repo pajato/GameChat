@@ -20,8 +20,10 @@ package com.pajato.android.gamechat.common;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 
+import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
@@ -30,6 +32,7 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.main.NetworkManager;
+import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -99,6 +102,13 @@ public enum DispatchManager {
      */
     public void dispatchToFragment(final BaseFragment fragment, final FragmentKind kind) {
         Dispatcher dispatcher = getDispatcher(kind);
+        // When offline, switch automatically to experience (game) pane on a smartphone
+        if (dispatcher.type == chatOffline || dispatcher.type == expOffline &&
+                !PaneManager.instance.isTablet()) {
+            ViewPager viewPager = (ViewPager) fragment.getActivity().findViewById(R.id.viewpager);
+            if (viewPager != null)
+                viewPager.setCurrentItem(PaneManager.GAME_INDEX);
+        }
         BaseFragment targetFragment = getFragment(dispatcher.type);
         if (targetFragment == null)
             return;
@@ -189,7 +199,8 @@ public enum DispatchManager {
         // that order.  In each case, return an empty dispatcher but for the fragment type of the
         // next screen to show.
         FragmentType type = kind == chat ? chatOffline : expOffline;
-        if (!NetworkManager.instance.isConnected()) return new Dispatcher(type);
+        if (!NetworkManager.instance.isConnected())
+            return new Dispatcher(type);
         Account account = AccountManager.instance.getCurrentAccount();
         int joinSize = account != null ? account.joinMap.size() : -1;
 

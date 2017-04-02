@@ -18,17 +18,18 @@
 package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
+import android.view.View;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
 import com.pajato.android.gamechat.common.Dispatcher;
+import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
-
 
 public class ChatShowOfflineFragment extends BaseChatFragment {
 
@@ -58,5 +59,13 @@ public class ChatShowOfflineFragment extends BaseChatFragment {
     /** Setup the fragment configuration using the specified dispatcher. */
     public void onSetup(Context context, Dispatcher dispatcher) {
         mDispatcher = dispatcher;
+    }
+
+    /** Handle the setup for the groups panel. */
+    @Override public void onStart() {
+        // Provide an account loading indicator for a brief period before showing the fragment.
+        // This will likely be enough time to load the account and message data.
+        super.onStart();
+        FabManager.chat.setVisibility(this, View.GONE);
     }
 }

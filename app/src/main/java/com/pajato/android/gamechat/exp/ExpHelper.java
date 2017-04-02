@@ -25,6 +25,8 @@ import com.pajato.android.gamechat.main.MainService;
 import java.util.List;
 import java.util.Locale;
 
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
+
 /**
  * Provide a helper class for experience fragment classes.
  *
@@ -96,25 +98,6 @@ public class ExpHelper {
             engine.startMove(position);
     }
 
-    /** Notify the user about an error and log it. */
-    public static void reportError(final BaseFragment fragment, final int resId, String...
-            args) {
-        // Let the User know that something is amiss.
-        String message = fragment.getContext().getString(resId);
-        NotificationManager.instance.notifyNoAction(fragment, message);
-
-        // Generate a logcat item casing on the given resource id.
-        String format;
-        switch (resId) {
-            case R.string.ErrorCheckersCreation:
-                format = "Failed to create a Checkers experience with group/room keys: {%s/%s}";
-                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
-                break;
-            default:
-                break;
-        }
-    }
-
     /** Set the name for a given player index. */
     public static void setRoomName(final Experience model) {
         // Ensure that the name text view exists. Abort if not.  Set the value from the model if it
@@ -178,7 +161,9 @@ public class ExpHelper {
             return;
         name.setText(model.getPlayers().get(index).name);
         // If a user is assigned, don't allow click (no popup menu) and remove down-arrow drawable
-        // used on player-2
+        // used on player-2. But don't do anything if we're playing offline.
+        if (model.getExperienceKey().equals(OFFLINE_EXPERIENCE_KEY))
+            return;
         if (model.getPlayers().get(index).id != null && !model.getPlayers().get(index).id.equals("")) {
             name.setClickable(false);
             name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);

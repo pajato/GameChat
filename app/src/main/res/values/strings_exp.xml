@@ -14,6 +14,7 @@
     <string name="MyExperiencesToolbarTitle">Your Games</string>
     <string name="MyGameRoomToolbarTitle">Your Game Room</string>
     <string name="NoExperiencesMessage">You have no experiences</string>
+    <string name="NoGamesOfflineText">Select a game button to create a game.</string>
     <string name="NoGamesMessageText">Select a game button to create a game, or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
     <string name="NoUsersFound">No Available Users</string>
@@ -40,6 +41,7 @@
     <string name="chess_promotion_queen">Queen</string>
     <string name="chess_promotion_rook">Rook</string>
     <string name="friend">Friend</string>
+    <string name="you">You</string>
     <string name="game">Game</string>
     <string name="oValue">O</string>
     <string name="player1">Player 1</string>

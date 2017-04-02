@@ -82,6 +82,7 @@ import static com.pajato.android.gamechat.exp.model.TTTBoard.MID_ROW;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.RIGHT_DIAG;
 import static com.pajato.android.gamechat.exp.model.TTTBoard.TOP_ROW;
 import static com.pajato.android.gamechat.exp.model.TicTacToe.ACTIVE;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 
 /**
  * A Tic-Tac-Toe game that stores its current state on Firebase, allowing for cross-device play.
@@ -221,9 +222,9 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
                 ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
         if (dispatcher.roomKey == null) {
-            Log.e(TAG, "Got to onSetup without a room key - this shouldn't be possible!");
-            return;
-        }        mExperience = ExperienceManager.instance.getExperience(dispatcher.groupKey, dispatcher.roomKey, tttET);
+            Log.e(TAG, "Got to onSetup without a room key - we may be offline");
+        }
+        mExperience = ExperienceManager.instance.getExperience(dispatcher.groupKey, dispatcher.roomKey, tttET);
         if (mExperience == null)
             createExperience(context, getPlayers(dispatcher.roomKey));
         mDispatcher = dispatcher;
@@ -269,26 +270,33 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
-        else
-            reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
+//        else
+//            reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
 
     /** Return a list of default TicTacToe players. */
     protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        // Handle the offline case (no players available)
+        String name;
+        if (players == null)
+            name = context.getString(R.string.you);
+        else
+            name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
         String accountId = null;
-        String symbol = context.getString(R.string.xValue);
-        if (players.size() >= 1)
+        if (players != null && players.size() >= 1)
             accountId = players.get(0).id;
-        result.add(new Player(name, symbol, "", accountId));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        symbol = context.getString(R.string.oValue);
-        if (players.size() >= 2)
+        result.add(new Player(name, context.getString(R.string.xValue), "", accountId));
+
+        if (players == null)
+            name = context.getString(R.string.friend);
+        else
+            name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        if (players != null && players.size() >= 2)
             accountId = players.get(1).id;
         else
             accountId = null;
-        result.add(new Player(name, symbol, "", accountId));
+        result.add(new Player(name, context.getString(R.string.oValue), "", accountId));
         return result;
     }
 
@@ -466,24 +474,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         }
     }
 
-    /** Notify the user about an error and log it. */
-    private void reportError(final Context context, final int messageResId, String... args) {
-        // Let the User know that something is amiss.
-        String message = context.getString(messageResId);
-        NotificationManager.instance.notifyNoAction(this, message);
-
-        // Generate a logcat item casing on the given resource id.
-        String format;
-        switch (messageResId) {
-            case R.string.ErrorTTTCreation:
-                format = "Failed to create a TicTacToe experience with group/room keys: {%s/%s}";
-                Log.e(TAG, String.format(Locale.US, format, args[0], args[1]));
-                break;
-            default:
-                break;
-        }
-    }
-
     /** Process a resumption by testing and waiting for the experience. */
     private void resume() {
         if (mExperience == null) {
@@ -544,7 +534,9 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             return;
         name.setText(model.players.get(index).name);
         // If a user is assigned, don't allow click (no popup menu) and remove down-arrow drawable
-        // used on player-2
+        // used on player-2. But don't do anything if we're playing offline.
+        if (model.key.equals(OFFLINE_EXPERIENCE_KEY))
+            return;
         if (model.players.get(index).id != null && !model.players.get(index).id.equals("")) {
             name.setClickable(false);
             name.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);

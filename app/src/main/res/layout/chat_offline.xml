@@ -23,5 +23,5 @@ http://www.gnu.org/licenses
     android:text="@string/OfflineMessageText"
     android:textAlignment="center"
     android:textSize="24sp"
-    android:drawableTop="@drawable/ic_launcher"
+    android:drawableTop="@drawable/signin_logo"
     android:drawablePadding="24dp" />

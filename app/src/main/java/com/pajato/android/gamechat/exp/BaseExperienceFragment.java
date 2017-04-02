@@ -195,19 +195,26 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     protected List<Player> getDefaultPlayers(final Context context, final List<Account> players) {
         // TODO: make this part of an interface implementation.
         List<Player> result = new ArrayList<>();
-        String name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
+        // Handle the offline case (no players available)
+        String name;
+        if (players == null)
+            name = context.getString(R.string.you);
+        else
+            name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
         String accountId = null;
-        if (players.size() >= 1)
+        if (players != null && players.size() >= 1)
             accountId = players.get(0).id;
-        String team = context.getString(R.string.primaryTeam);
-        result.add(new Player(name, "", team, accountId));
-        name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
-        if (players.size() >= 2)
+        result.add(new Player(name, "", context.getString(R.string.primaryTeam), accountId));
+
+        if (players == null)
+            name = context.getString(R.string.friend);
+        else
+            name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
+        if (players != null && players.size() >= 2)
             accountId = players.get(1).id;
         else
             accountId = null;
-        team = context.getString(R.string.secondaryTeam);
-        result.add(new Player(name, "", team, accountId));
+        result.add(new Player(name, "", context.getString(R.string.secondaryTeam), accountId));
         return result;
     }
 

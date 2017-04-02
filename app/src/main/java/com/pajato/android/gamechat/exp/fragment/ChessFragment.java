@@ -38,7 +38,6 @@ import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.BaseExperienceFragment;
 import com.pajato.android.gamechat.exp.Checkerboard;
-import com.pajato.android.gamechat.exp.ExpHelper;
 import com.pajato.android.gamechat.exp.chess.Chess;
 import com.pajato.android.gamechat.exp.chess.ChessBoard;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -147,8 +146,7 @@ public class ChessFragment extends BaseExperienceFragment {
         dispatcher.roomKey = meGroupKey != null && meGroupKey.equals(dispatcher.groupKey)
                 ? AccountManager.instance.getMeRoomKey() : dispatcher.roomKey;
         if (dispatcher.roomKey == null) {
-            Log.e(TAG, "Got to onSetup without a room key - this shouldn't be possible!");
-            return;
+            Log.e(TAG, "Got to onSetup without a room key - we may be offline");
         }
         mBoard = new Checkerboard(context);
 
@@ -197,8 +195,8 @@ public class ChessFragment extends BaseExperienceFragment {
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
-        else
-            ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
+//        else
+//            ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
 
     // Private instance methods.
