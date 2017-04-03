@@ -101,7 +101,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     protected Experience mExperience;
 
     /** A click handler for the board tiles. */
-    protected TileClickHandler mTileClickHandler = new TileClickHandler();
+    protected TileClickHandler mTileClickHandler;
 
     // Public constructors.
 
@@ -182,6 +182,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         super.onStart();
         if (mAdView != null && mLayout != null && type != null && type.expType == null)
             initAdView(mLayout);
+        // Initialize tile click handler
+        mTileClickHandler = new TileClickHandler(getString(R.string.friend), getString(R.string.you));
     }
 
     // Protected instance methods.

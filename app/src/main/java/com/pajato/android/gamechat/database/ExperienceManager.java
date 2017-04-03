@@ -37,6 +37,7 @@ import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
+import com.pajato.android.gamechat.main.NetworkManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -289,6 +290,13 @@ public enum ExperienceManager {
         String groupKey = experience.getGroupKey();
         String roomKey = experience.getRoomKey();
         String expKey = experience.getExperienceKey();
+        // Handle offline game play
+        if (groupKey == null && roomKey == null &&
+                experience.getExperienceKey().equals(NetworkManager.OFFLINE_EXPERIENCE_KEY)) {
+            AppEventManager.instance.post(new ExperienceChangeEvent(experience,
+                    ExperienceChangeEvent.CHANGED));
+            return;
+        }
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
         FirebaseDatabase.getInstance().getReference().child(path).setValue(experience.toMap());
     }
