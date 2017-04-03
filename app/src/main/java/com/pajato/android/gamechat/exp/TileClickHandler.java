@@ -39,8 +39,10 @@ public class TileClickHandler implements View.OnClickListener {
     /** The experience model class. */
     private Experience mModel;
 
+    /** The default name to use for the second player */
     private String friendName;
 
+    /** The name to use for the primary player when in offline mode */
     private String youName;
 
     // Constructor
