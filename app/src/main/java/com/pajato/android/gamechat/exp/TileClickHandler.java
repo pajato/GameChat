@@ -25,6 +25,7 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.exp.model.Player;
+import com.pajato.android.gamechat.main.NetworkManager;
 
 import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.experience;
 
@@ -37,6 +38,17 @@ public class TileClickHandler implements View.OnClickListener {
 
     /** The experience model class. */
     private Experience mModel;
+
+    private String friendName;
+
+    private String youName;
+
+    // Constructor
+
+    TileClickHandler(String friend, String you) {
+        friendName = friend;
+        youName = you;
+    }
 
     // Public instance methods.
 
@@ -81,6 +93,10 @@ public class TileClickHandler implements View.OnClickListener {
         for (Player player :  mModel.getPlayers()) {
             if(player.id != null && player.id.equals(AccountManager.instance.getCurrentAccountId()))
                 return false;
+            // Handle offline case
+            if (player.id == null &&
+                    mModel.getExperienceKey().equals(NetworkManager.OFFLINE_EXPERIENCE_KEY))
+                return false;
         }
         return true;
     }
@@ -99,7 +115,10 @@ public class TileClickHandler implements View.OnClickListener {
         // playing with a "Friend", then we don't need to worry about confirming players' identities
         Team playerTeam = team;
         for (Player player :  mModel.getPlayers()) {
-            if(player.id == null && player.name.equals("Friend")) {
+            if(player.id == null && player.name.equals(friendName)) {
+                playerTeam = team;
+                break;
+            } else if (player.id == null && player.name.equals(youName)) {
                 playerTeam = team;
                 break;
             } else if(player.id.equals(AccountManager.instance.getCurrentAccountId())) {
