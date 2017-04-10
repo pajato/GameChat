@@ -167,8 +167,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 if (isInMeGroup())
-                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
-                            null);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());
@@ -270,8 +269,6 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
-//        else
-//            reportError(context, R.string.ErrorTTTCreation, groupKey, roomKey);
     }
 
     /** Return a list of default TicTacToe players. */

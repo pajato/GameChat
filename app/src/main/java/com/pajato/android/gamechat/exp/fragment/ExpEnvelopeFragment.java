@@ -51,11 +51,6 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
  */
 public class ExpEnvelopeFragment extends BaseExperienceFragment {
 
-    // Private static variables
-
-    /** The fragment which is currently active within the envelope */
-    private static FragmentType mCurrentFragmentType;
-
     // Public constants.
 
     /** The lookup key for the FAB game home menu. */
@@ -69,11 +64,6 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     }
 
     // Public instance methods.
-
-    /** Get the type of the most recent (current) fragment */
-    public static FragmentType getCurrentFragmentType() {
-        return mCurrentFragmentType;
-    }
 
     /** Satisfy base class */
     public List<ListItem> getList() {
@@ -118,12 +108,6 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
         super.onResume();
         DispatchManager.instance.dispatchToFragment(this, exp);
     }
-
-    /** Set the type of the most recent (current) fragment */
-    public static void setCurrentFragment(FragmentType type) {
-        mCurrentFragmentType = type;
-    }
-
 
     // Private instance methods.
 

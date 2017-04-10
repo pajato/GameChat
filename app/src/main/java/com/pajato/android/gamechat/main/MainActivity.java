@@ -180,22 +180,22 @@ public class MainActivity extends BaseActivity
     @Override public void onBackPressed() {
         if (NavigationManager.instance.closeDrawerIfOpen(this))
             return;
-        FragmentType type = ChatEnvelopeFragment.getCurrentFragmentType(); // Default to chat
+        FragmentType type = DispatchManager.instance.currentChatFragmentType; // Default to chat
         if (PaneManager.instance.isTablet()) {
             View v = this.getCurrentFocus();
             View chatLayout = findViewById(R.id.chatFragmentContainer);
             if (v != null && chatLayout != null) {
                 if (chatLayout.findViewById(v.getId()) != null)
-                    type = ChatEnvelopeFragment.getCurrentFragmentType();
+                    type = DispatchManager.instance.currentChatFragmentType;
                 else
-                    type = ExpEnvelopeFragment.getCurrentFragmentType();
+                    type = DispatchManager.instance.currentExpFragmentType;
             }
         } else {
             ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
             if (viewPager != null && viewPager.getCurrentItem() == CHAT_INDEX)
-                type = ChatEnvelopeFragment.getCurrentFragmentType();
+                type = DispatchManager.instance.currentChatFragmentType;
             else
-                type = ExpEnvelopeFragment.getCurrentFragmentType();
+                type = DispatchManager.instance.currentExpFragmentType;
         }
         DispatchManager.instance.handleBackDispatch(type);
     }
@@ -452,8 +452,8 @@ public class MainActivity extends BaseActivity
         /** Handle a click on the back arrow button by generating a back press. */
         public void onClick(final View view) {
             FragmentType type =
-                    this.equals(mChatUpHandler) ? ChatEnvelopeFragment.getCurrentFragmentType() :
-                            ExpEnvelopeFragment.getCurrentFragmentType();
+                    this.equals(mChatUpHandler) ? DispatchManager.instance.currentChatFragmentType :
+                            DispatchManager.instance.currentExpFragmentType;
             DispatchManager.instance.handleBackDispatch(type);
         }
     }

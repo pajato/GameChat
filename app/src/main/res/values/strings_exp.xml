@@ -4,8 +4,6 @@
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessDisplayName">Chess</string>
     <string name="ChessImageDesc">Chess image.</string>
-    <string name="ErrorCheckersCreation">Error: cannot create a Checkers experience</string>
-    <string name="ErrorTTTCreation">Error: cannot create a TicTacToe experience</string>
     <string name="ExpGroupsToolbarTitle">Groups with Games</string>
     <string name="ExpRoomsToolbarTitle">Rooms with Games</string>
     <string name="FutureSelectRooms">Select rooms</string>
@@ -17,7 +15,6 @@
     <string name="NoGamesOfflineText">Select a game button to create a game.</string>
     <string name="NoGamesMessageText">Select a game button to create a game, or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
-    <string name="NoUsersFound">No Available Users</string>
     <string name="PlayAgain">Play Again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
@@ -27,7 +24,6 @@
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
     <string name="ResetGameTitle">Restart Game?</string>
     <string name="ResetGameMessage">Restarting this game will clear the board and any previous moves. Do you really want to restart this game?</string>
-    <string name="SelectRoomToolbarTitle">Select Room</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games, but it is more fun to use GameChat while signed in.</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeDisplayName">Tic-Tac-Toe</string>

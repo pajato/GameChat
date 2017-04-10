@@ -105,8 +105,7 @@ public class ShowNoExperiencesFragment extends BaseExperienceFragment {
                 }
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
-                            null);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, type);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(), groupKey);
                 break;

@@ -155,7 +155,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;
             case R.string.MembersMenuItem:
-                DispatchManager.instance.dispatchToFragment(this, roomMembersList, null, null);
+                DispatchManager.instance.dispatchToFragment(this, roomMembersList);
                 break;
             default:
                 break;

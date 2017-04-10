@@ -176,13 +176,11 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
-    /** Handle ad setup for experience fragments. */
+    /** Initialize ads when necessary and set up the tile click handler for the base game. */
     @Override public void onStart() {
-        // Initialize ads except on game (or other non-list) fragments (i.e., expType is not null)
         super.onStart();
         if (mAdView != null && mLayout != null && type != null && type.expType == null)
             initAdView(mLayout);
-        // Initialize tile click handler
         mTileClickHandler = new TileClickHandler(getString(R.string.friend), getString(R.string.you));
     }
 
@@ -404,8 +402,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 }
                 String groupKey = mExperience.getGroupKey();
                 if (isInMeGroup())
-                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type,
-                            null);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type);
                 else
                     InvitationManager.instance.extendGroupInvitation(activity, groupKey);
                 break;

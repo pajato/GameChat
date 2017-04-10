@@ -255,10 +255,10 @@ public abstract class BaseChatFragment extends BaseFragment {
         ListItem item = (ListItem) payload;
         switch (item.type) {
             case chatGroup: // Drill into the rooms in group.
-                DispatchManager.instance.dispatchToFragment(this, chatRoomList, null, item);
+                DispatchManager.instance.dispatchToFragment(this, chatRoomList);
                 break;
             case chatRoom: // Show the messages in a room.
-                DispatchManager.instance.dispatchToFragment(this, messageList, null, item);
+                DispatchManager.instance.dispatchToFragment(this, messageList);
                 break;
             case newItem:
                 handleNewItem(type);
@@ -275,11 +275,11 @@ public abstract class BaseChatFragment extends BaseFragment {
                 String protectedWarning = getString(R.string.CannotMakeProtectedUser);
                 Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
             }
-            DispatchManager.instance.dispatchToFragment(this, createProtectedUser, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createProtectedUser);
         } else if (type == chatGroupList) {
-            DispatchManager.instance.dispatchToFragment(this, createChatGroup, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createChatGroup);
         } else if (type == chatRoomList) {
-            DispatchManager.instance.dispatchToFragment(this, createRoom, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createRoom);
         }
     }
 }

@@ -37,7 +37,6 @@ import com.pajato.android.gamechat.event.ExperienceDeleteEvent;
 import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
-import com.pajato.android.gamechat.main.NetworkManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -53,7 +52,9 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.DateHeaderType
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.date;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.expList;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
+import static com.pajato.android.gamechat.event.BaseChangeEvent.CHANGED;
 import static com.pajato.android.gamechat.event.BaseChangeEvent.REMOVED;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 
 /**
  * Provide a class to manage the experience database objects.
@@ -283,18 +284,14 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
-    /** Persist the given experience. */
+    /** Persist the experience. Handle off-line behavior by short-circuiting the Firebase update. */
     public void updateExperience(final Experience experience) {
-        // Persist the experience.
         experience.setModTime(new Date().getTime());
         String groupKey = experience.getGroupKey();
         String roomKey = experience.getRoomKey();
         String expKey = experience.getExperienceKey();
-        // Handle offline game play
-        if (groupKey == null && roomKey == null &&
-                experience.getExperienceKey().equals(NetworkManager.OFFLINE_EXPERIENCE_KEY)) {
-            AppEventManager.instance.post(new ExperienceChangeEvent(experience,
-                    ExperienceChangeEvent.CHANGED));
+        if (groupKey == null && roomKey == null && expKey.equals(OFFLINE_EXPERIENCE_KEY)) {
+            AppEventManager.instance.post(new ExperienceChangeEvent(experience, CHANGED));
             return;
         }
         String path = String.format(Locale.US, EXPERIENCE_PATH, groupKey, roomKey, expKey);
