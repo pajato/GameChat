@@ -24,13 +24,11 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.exp.Experience;
-import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.main.NetworkManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -58,6 +56,14 @@ import static com.pajato.android.gamechat.common.FragmentType.noExperiences;
  */
 public enum DispatchManager {
     instance;
+
+    // Public instance variables.
+
+    /** The current chat fragment type */
+    public FragmentType currentChatFragmentType;
+
+    /** The current experience fragment type */
+    public FragmentType currentExpFragmentType;
 
     // Private class constants.
 
@@ -114,6 +120,26 @@ public enum DispatchManager {
             return;
         targetFragment.onSetup(fragment.getActivity(), dispatcher); // sets mDispatcher
         initiateTransition(fragment, dispatcher, targetFragment);
+    }
+
+    /**
+     * Dispatch to a new fragment
+     * @param fragment the fragment which is initiating this transition (may be one in a chain)
+     * @param type the type of the desired target fragment to which to transition
+     */
+    public void dispatchToFragment(final BaseFragment fragment, final FragmentType type) {
+        dispatchToFragment(fragment, type, null, null);
+    }
+
+    /**
+     * Dispatch to a new fragment
+     * @param fragment the fragment which is initiating this transition (may be one in a chain)
+     * @param type the type of the desired target fragment to which to transition
+     * @param launchType the type of the fragment which initiated this chain (or null)
+     */
+    public void dispatchToFragment(final BaseFragment fragment, final FragmentType type,
+                                   final FragmentType launchType) {
+        dispatchToFragment(fragment, type, launchType, null);
     }
 
     /**
@@ -239,18 +265,13 @@ public enum DispatchManager {
                                     final BaseFragment toFragment) {
         FragmentManager manager = fragment.getActivity().getSupportFragmentManager();
         FragmentManager.enableDebugLogging(true);
-        setEnvelopeCurrentFragment(toFragment.type);
+        if (toFragment.type.kind == chat) {
+            currentChatFragmentType = toFragment.type;
+        } else {
+            currentExpFragmentType = toFragment.type;
+        }
         manager.beginTransaction()
                 .replace(dispatcher.type.getEnvelopeId(), toFragment)
                 .commit();
-    }
-
-    /** Tell the envelope fragment to remember the specified fragment */
-    private void setEnvelopeCurrentFragment(FragmentType type) {
-        if (type.kind == chat) {
-            ChatEnvelopeFragment.setCurrentFragment(type);
-        } else {
-            ExpEnvelopeFragment.setCurrentFragment(type);
-        }
     }
 }

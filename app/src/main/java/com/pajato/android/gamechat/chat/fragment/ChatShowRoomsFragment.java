@@ -107,10 +107,10 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.CreateGroupMenuTitle:
-                DispatchManager.instance.dispatchToFragment(this, createChatGroup, null, null);
+                DispatchManager.instance.dispatchToFragment(this, createChatGroup);
                 break;
             case R.string.JoinRoomsMenuTitle:
-                DispatchManager.instance.dispatchToFragment(this, joinRoom, null, null);
+                DispatchManager.instance.dispatchToFragment(this, joinRoom);
                 break;
             case R.string.InviteFriendMessage:
                 InvitationManager.instance.extendGroupInvitation(getActivity(), mDispatcher.groupKey);
@@ -130,7 +130,7 @@ public class ChatShowRoomsFragment extends BaseChatFragment {
                 showFutureFeatureMessage(R.string.MenuItemSearch);
                 break;
             case R.string.MembersMenuItem:
-                DispatchManager.instance.dispatchToFragment(this, groupMembersList, null, null);
+                DispatchManager.instance.dispatchToFragment(this, groupMembersList);
                 break;
             default:
                 break;

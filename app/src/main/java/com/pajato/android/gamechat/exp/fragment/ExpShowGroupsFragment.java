@@ -117,8 +117,7 @@ public class ExpShowGroupsFragment extends BaseExperienceFragment {
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 if (isInMeGroup())
-                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms,
-                            this.type, null);
+                    DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, type);
                 else
                     InvitationManager.instance.extendGroupInvitation(getActivity(),
                             mExperience.getGroupKey());

@@ -28,7 +28,6 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
-import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
@@ -37,7 +36,6 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
-import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -60,11 +58,6 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.chatG
  * @author Paul Michael Reilly (based on ExpEnvelopeFragment written by Bryan Scott)
  */
 public class ChatEnvelopeFragment extends BaseChatFragment {
-
-    // Private static variables
-
-    /** The fragment which is currently active within the envelope */
-    private static FragmentType mCurrentFragmentType;
 
     // Default constructor.
 
@@ -110,7 +103,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 DispatchManager.instance.dispatchToFragment(this, chatRoomList, null, listItem);
                 break;
             case R.id.nav_groups:
-                DispatchManager.instance.dispatchToFragment(this, chatGroupList, null, null);
+                DispatchManager.instance.dispatchToFragment(this, chatGroupList);
                 break;
             case R.id.manageProtectedUsers:
                 // Ensure that the current user is not a protected user. Then, start the process of
@@ -127,10 +120,10 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                     if (viewPager != null)
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
-                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type, null);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers, type);
                 break;
             case R.id.inviteFriends:
-                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type, null);
+                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, type);
                 break;
             case R.id.settings:
                 showFutureFeatureMessage(R.string.MenuItemSettings);
@@ -180,15 +173,4 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
         super.onResume();
         DispatchManager.instance.dispatchToFragment(this, chat);
     }
-
-    /** Get the type of the most recent (current) fragment */
-    public static FragmentType getCurrentFragmentType() {
-        return mCurrentFragmentType;
-    }
-
-    /** Set the type of the most recent (current) fragment */
-    public static void setCurrentFragment(FragmentType type) {
-        mCurrentFragmentType = type;
-    }
-
 }

@@ -195,8 +195,6 @@ public class ChessFragment extends BaseExperienceFragment {
         mExperience = model;
         if (groupKey != null && roomKey != null)
             ExperienceManager.instance.createExperience(model);
-//        else
-//            ExpHelper.reportError(this, R.string.ErrorCheckersCreation, groupKey, roomKey);
     }
 
     // Private instance methods.

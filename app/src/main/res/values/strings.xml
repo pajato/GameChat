@@ -1,5 +1,4 @@
 <resources>
-    <string name="AnonymousTitle">Anonymous</string>
     <string name="AuthFailureInvalidCredentials">Invalid credentials specified.</string>
     <string name="AuthFailureInvalidUser">This user is no longer valid in the Firebase database.</string>
     <string name="AuthSignInFailure">Sign in failed: %s</string>

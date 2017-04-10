@@ -25,9 +25,9 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.exp.model.Player;
-import com.pajato.android.gamechat.main.NetworkManager;
 
 import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.experience;
+import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 
 /**
  * A View.OnClickListener that is called whenever a board tile is clicked.
@@ -96,8 +96,7 @@ public class TileClickHandler implements View.OnClickListener {
             if(player.id != null && player.id.equals(AccountManager.instance.getCurrentAccountId()))
                 return false;
             // Handle offline case
-            if (player.id == null &&
-                    mModel.getExperienceKey().equals(NetworkManager.OFFLINE_EXPERIENCE_KEY))
+            if (player.id == null && mModel.getExperienceKey().equals(OFFLINE_EXPERIENCE_KEY))
                 return false;
         }
         return true;

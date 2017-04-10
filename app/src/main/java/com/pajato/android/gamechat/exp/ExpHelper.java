@@ -21,7 +21,6 @@ import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.exp.model.Player;
 import com.pajato.android.gamechat.main.MainService;
-import com.pajato.android.gamechat.main.NetworkManager;
 
 import java.util.List;
 import java.util.Locale;
@@ -106,8 +105,7 @@ public class ExpHelper {
         TextView name = getTextView(model, R.id.roomName);
         if (name == null)
             return;
-        if (model.getRoomKey() == null &&
-                model.getExperienceKey().equals(NetworkManager.OFFLINE_EXPERIENCE_KEY)) {
+        if (model.getRoomKey() == null && model.getExperienceKey().equals(OFFLINE_EXPERIENCE_KEY)) {
             BaseFragment fragment = getBaseFragment(model);
             name.setText(fragment.getString(R.string.offline));
         }

@@ -114,10 +114,10 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
         MenuEntry entry = (MenuEntry) payload;
         switch (entry.titleResId) {
             case R.string.JoinRoomsMenuTitle:
-                DispatchManager.instance.dispatchToFragment(this, joinRoom, null, null);
+                DispatchManager.instance.dispatchToFragment(this, joinRoom);
                 break;
             case R.string.InviteFriendMessage:
-                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type, null);
+                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type);
                 break;
             case R.string.ManageRestrictedUserTitle:
                 if (AccountManager.instance.isRestricted()) {
@@ -125,7 +125,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                     Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
                     break;
                 }
-                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type, null);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type);
                 break;
             default:
                 break;

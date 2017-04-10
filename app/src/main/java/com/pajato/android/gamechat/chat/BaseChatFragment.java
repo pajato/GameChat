@@ -275,11 +275,11 @@ public abstract class BaseChatFragment extends BaseFragment {
                 String protectedWarning = getString(R.string.CannotMakeProtectedUser);
                 Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
             }
-            DispatchManager.instance.dispatchToFragment(this, createProtectedUser, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createProtectedUser);
         } else if (type == chatGroupList) {
-            DispatchManager.instance.dispatchToFragment(this, createChatGroup, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createChatGroup);
         } else if (type == chatRoomList) {
-            DispatchManager.instance.dispatchToFragment(this, createRoom, null, null);
+            DispatchManager.instance.dispatchToFragment(this, createRoom);
         }
     }
 }

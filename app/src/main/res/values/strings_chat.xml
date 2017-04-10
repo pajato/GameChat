@@ -57,15 +57,12 @@
     <string name="MembersMenuItem">Members</string>
     <string name="MembersToolbarTitle">Members of %s</string>
     <string name="MessageSentText">Message posted.</string>
-    <string name="NewItemIcon">Add new item icon.</string>
     <string name="NewGroupText">Add a new group&#8230;</string>
     <string name="NewRoomText">Add a new room&#8230;</string>
     <string name="NewProtectedUserText">Add a new protected user&#8230;</string>
     <string name="NoGroupsHeaderText">Welcome to GameChat!</string>
     <string name="NoJoinableRoomsHeaderText">No Available Rooms or Members</string>
-    <string name="NoMessagesText">There are no messages to show in this room. That\'s weird.</string>
     <string name="NoProtectedUsersHeaderText">You have no protected users.</string>
-    <string name="NoRoomsMessageText">You must join a room to see messages.</string>
     <string name="NoSelectableItemsHeaderText">No Groups or Rooms to select</string>
     <string name="PasswordHint">Password</string>
     <string name="PasswordInvalidMessage">Password must be more than 6 characters</string>
