@@ -176,7 +176,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         }
     }
 
-    /** Initialize ads when necessary and set up the tile click handler for the base game. */
+    /** Initialize ads when necessary and set up the tile click handler for the experience. */
     @Override public void onStart() {
         super.onStart();
         if (mAdView != null && mLayout != null && type != null && type.expType == null)

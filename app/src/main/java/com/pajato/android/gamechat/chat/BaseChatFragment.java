@@ -255,10 +255,10 @@ public abstract class BaseChatFragment extends BaseFragment {
         ListItem item = (ListItem) payload;
         switch (item.type) {
             case chatGroup: // Drill into the rooms in group.
-                DispatchManager.instance.dispatchToFragment(this, chatRoomList);
+                DispatchManager.instance.dispatchToFragment(this, chatRoomList, null, item);
                 break;
             case chatRoom: // Show the messages in a room.
-                DispatchManager.instance.dispatchToFragment(this, messageList);
+                DispatchManager.instance.dispatchToFragment(this, messageList, null, item);
                 break;
             case newItem:
                 handleNewItem(type);
