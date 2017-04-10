@@ -284,7 +284,7 @@ public enum ExperienceManager {
         DatabaseRegistrar.instance.registerHandler(handler);
     }
 
-    /** Persist the experience. Handle off-line behavior by short-circuiting the Firebase update. */
+    /** Persist the experience. Handle offline behavior by short-circuiting the Firebase update. */
     public void updateExperience(final Experience experience) {
         experience.setModTime(new Date().getTime());
         String groupKey = experience.getGroupKey();
