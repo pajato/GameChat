@@ -257,6 +257,11 @@ public enum ExperienceManager {
         if (event.account != null) return;
         expGroupMap.clear();
         experienceMap.clear();
+        mGroupToRecentMap.clear();
+        mDateHeaderGroupMap.clear();
+        mDateHeaderExpMap.clear();
+        mDateHeaderRoomMap.clear();
+        mRoomToRecentMap.clear();
     }
 
     /** Handle an experience change event by updating the date headers. */
