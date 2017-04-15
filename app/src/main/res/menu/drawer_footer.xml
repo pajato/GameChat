@@ -3,7 +3,7 @@
     <item
         android:id="@+id/settings"
         android:title="@string/MenuItemSettings"
-        android:icon="@drawable/vd_settings_applications_black_24px"/>
+        android:icon="@drawable/ic_settings_black_24dp"/>
     <item
         android:id="@+id/helpAndFeedback"
         android:title="@string/MenuItemHelpAndFeedback"
