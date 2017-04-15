@@ -26,6 +26,8 @@ import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.exp.model.Player;
 
+import java.util.Locale;
+
 import static com.pajato.android.gamechat.exp.NotificationManager.NotifyType.experience;
 import static com.pajato.android.gamechat.main.NetworkManager.OFFLINE_EXPERIENCE_KEY;
 
@@ -123,7 +125,7 @@ public class TileClickHandler implements View.OnClickListener {
                 playerTeam = team;
                 break;
             } else if(player.id.equals(AccountManager.instance.getCurrentAccountId())) {
-                playerTeam = Team.valueOf(player.team.toUpperCase());
+                playerTeam = Team.valueOf(player.team.toUpperCase(Locale.getDefault()));
             }
         }
 
