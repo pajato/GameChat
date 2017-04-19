@@ -1,6 +1,10 @@
 package com.pajato.android.gamechat.main;
 
+import com.pajato.android.gamechat.BaseTest;
+import com.pajato.android.gamechat.common.FragmentKind;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,16 +13,47 @@ import org.junit.Test;
  *
  * Created by pmr on 7/15/16.
  */
-public class MainActivityTest {
-    @Before public void setUp() throws Exception {}
+public class MainActivityTest extends BaseTest {
 
-    @After public void tearDown() throws Exception {}
+    @Test public void getUpHandler() throws Exception {
+        // Trigger both kinds twice to exercise both paths.
+        Assert.assertTrue(mRule.getActivity().getUpHandler(FragmentKind.chat) != null);
+        Assert.assertTrue(mRule.getActivity().getUpHandler(FragmentKind.exp) != null);
+        Assert.assertTrue(mRule.getActivity().getUpHandler(FragmentKind.chat) != null);
+        Assert.assertTrue(mRule.getActivity().getUpHandler(FragmentKind.exp) != null);
+    }
 
-    @Test public void onCreate() throws Exception {}
+    //@Test public void onAuthenticationChange() throws Exception {}
 
-    @Test public void onBackPressed() throws Exception {}
+    //@Test public void onGroupJoined() throws Exception {}
 
-    @Test public void onNavigationItemSelected() throws Exception {}
+    //@Test public void onBackPressed1() throws Exception {}
 
-    @Test public void tileOnClick() throws Exception {}
+    //@Test public void onClick() throws Exception {}
+
+    //@Test public void onClick1() throws Exception {}
+
+    //@Test public void onClick2() throws Exception {}
+
+    //@Test public void onNavigationItemSelected1() throws Exception {}
+
+    //@Test public void onMenuItem() throws Exception {}
+
+    //@Test public void onProtectedUserAuthFailureEvent() throws Exception {}
+
+    //@Test public void showOkCancelDialog() throws Exception {}
+
+    //@Test public void showAlertDialog() throws Exception {}
+
+    //@Test public void onRequestPermissionsResult() throws Exception {}
+
+    //@Test public void onActivityResult() throws Exception {}
+
+    //@Test public void onCreate() throws Exception {}
+
+    //@Test public void onBackPressed() throws Exception {}
+
+    //@Test public void onNavigationItemSelected() throws Exception {}
+
+    //@Test public void tileOnClick() throws Exception {}
 }

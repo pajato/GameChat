@@ -117,20 +117,6 @@ public class MainActivity extends BaseActivity
 
     // Public instance methods.
 
-    /** Lazily create a navigation back press handler for chat fragment toolbars. */
-    private View.OnClickListener getChatUpHandler() {
-        if (mChatUpHandler == null)
-            mChatUpHandler = new UpHandler();
-        return mChatUpHandler;
-    }
-
-    /** Lazily create a navigation back press handler for chat fragment toolbars. */
-    private View.OnClickListener getExpUpHandler() {
-        if (mExpUpHandler == null)
-            mExpUpHandler = new UpHandler();
-        return mExpUpHandler;
-    }
-
     /** Get the UpHandler based on the fragment type */
     public View.OnClickListener getUpHandler(FragmentKind kind) {
         return (kind == chat) ? getChatUpHandler() : getExpUpHandler();
@@ -361,6 +347,20 @@ public class MainActivity extends BaseActivity
     }
 
     // Private instance methods.
+
+    /** Lazily create a navigation back press handler for chat fragment toolbars. */
+    private View.OnClickListener getChatUpHandler() {
+        if (mChatUpHandler == null)
+            mChatUpHandler = new UpHandler();
+        return mChatUpHandler;
+    }
+
+    /** Lazily create a navigation back press handler for chat fragment toolbars. */
+    private View.OnClickListener getExpUpHandler() {
+        if (mExpUpHandler == null)
+            mExpUpHandler = new UpHandler();
+        return mExpUpHandler;
+    }
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
