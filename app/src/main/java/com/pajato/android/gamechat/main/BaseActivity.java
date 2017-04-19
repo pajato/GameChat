@@ -68,10 +68,14 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     /** Log the onDestroy() state. */
     @Override protected void onDestroy() {
-        super.onDestroy();
         logEvent("onDestroy");
         AppEventManager.instance.unregisterAll();
         DatabaseRegistrar.instance.unregisterAll();
+        try {
+            super.onDestroy();
+        } catch (IndexOutOfBoundsException exc) {
+            Log.d(TAG, "Got the oob exception while dieing.", exc);
+        }
     }
 
     /** Log the onPause() state. */

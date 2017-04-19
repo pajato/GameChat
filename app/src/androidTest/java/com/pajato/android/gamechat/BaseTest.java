@@ -18,6 +18,7 @@ import com.pajato.android.gamechat.main.MainActivity;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,6 +61,10 @@ public abstract class BaseTest {
         intent.putExtra(TEST_PROVIDER_KEY, getProperty("testAccountProvider", "email"));
         intent.putExtra(TEST_PASSWORD_KEY, getProperty("testAccountPassword", null));
         mRule.launchActivity(intent);
+    }
+
+    @After public void teardown() {
+        mRule.getActivity().finish();
     }
 
     /** Ensure that doing nothing breaks nothing but generates some code coverage results. */
