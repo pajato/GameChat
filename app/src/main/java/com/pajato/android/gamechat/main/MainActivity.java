@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -201,7 +202,9 @@ public class MainActivity extends BaseActivity
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
-                AccountManager.instance.signOut(this);
+                FragmentActivity activity = DispatchManager.instance.getFragment(FragmentType
+                        .chatEnvelope).getActivity();
+                AccountManager.instance.signOut(activity);
                 break;
             case R.id.switchAccount:
                 // Post a toast message indicating this is a future feature

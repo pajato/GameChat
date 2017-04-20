@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="tw__composer_black">#000000</color>
     <color name="colorPrimary">#03A9F4</color>
     <color name="colorPrimaryDark">#0288D1</color>
     <color name="colorAccent">#8707ff</color>
+    <color name="errorColor">#d50000</color>
     <color name="colorRed">#d50000</color>
     <color name="colorBlue">#3f51b5</color>
     <color name="colorGreen">#00c853</color>

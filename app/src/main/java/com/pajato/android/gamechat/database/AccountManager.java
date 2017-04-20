@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
@@ -637,7 +638,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         context.startActivity(intent);
     }
 
-    public void signOut(final Activity activity) {
+    public void signOut(final FragmentActivity activity) {
         AuthUI.getInstance()
             .signOut(activity)
             .addOnCompleteListener(new OnCompleteListener<Void>() {

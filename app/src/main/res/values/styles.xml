@@ -186,10 +186,10 @@ http://www.gnu.org/licenses
         <item name="android:onClick">onClick</item>
     </style>
 
-    <style name="signInTheme" parent="FirebaseUI">
-        <item name="colorPrimary">@color/authui_colorPrimary</item>
-        <item name="colorPrimaryDark">@color/authui_colorPrimaryDark</item>
-        <item name="colorAccent">@color/authui_colorAccent</item>
+    <style name="signInTheme">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowBackground">@mipmap/signin_background</item>
     </style>
