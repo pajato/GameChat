@@ -32,8 +32,9 @@ android {
     }
 
     lintOptions {
-        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency', 'InvalidPackage'
-        warning 'RestrictedApi', 'GradleCompatible'
+        disable 'IconMissingDensityFolder', 'GoogleAppIndexingWarning', 'GradleDependency'
+        disable 'InvalidPackage', 'GradleCompatible'
+        warning 'RestrictedApi'
         abortOnError true
     }
 
@@ -76,18 +77,6 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:1.3.0'
     compile 'org.greenrobot:eventbus:3.0.0'
 
-    // Android Testing Support Library's runner and rules. In the
-    // following, exclude the support annotations library to resolve a
-    // transitive dependency issue between test and production
-    // APKs. This is required since Espresso internally has a
-    // dependency on support-annotations.
-    androidTestCompile("com.android.support.test:runner:$rootProject.ext.runnerVersion") {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    }
-    androidTestCompile("com.android.support.test:rules:$rootProject.ext.runnerVersion") {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    }
-
     // Espresso UI testing dependencies.
     androidTestCompile("com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion") {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -99,7 +88,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'design'
     }
-    androidTestCompile "com.android.support:support-annotations:$rootProject.ext.supportLibraryVersion"
 
     // UIAuotmator testing dependencies.
     androidTestCompile("com.android.support.test.uiautomator:uiautomator-v18:$rootProject.ext.uiautomatorVersion") {
