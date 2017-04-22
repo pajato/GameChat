@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Provide a POJO to encapsulate a recycler view list item for use in the player mode menu.
+ * Provide a POJO to encapsulate a recycler view list item for use in the location menu.
  */
 public class PlayLocationMenuEntry {
 
