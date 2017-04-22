@@ -35,6 +35,8 @@ http://www.gnu.org/licenses
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="20sp"
+            android:drawableEnd="@drawable/ic_arrow_drop_down_white_24px"
+            android:onClick="onClick"
             app:layout_constraintLeft_toRightOf="parent"
             app:layout_constraintRight_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"

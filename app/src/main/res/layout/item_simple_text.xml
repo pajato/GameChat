@@ -21,12 +21,12 @@ Sign in icon (Login Rounded Right) courtesy of: https://icons8.com
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <TextView
-        android:id="@+id/playerModeTextItem"
+        android:id="@+id/textItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:textSize="16sp"
-        tools:text="Player Mode Menu Item"/>
+        tools:text="Menu Item"/>
 </LinearLayout>

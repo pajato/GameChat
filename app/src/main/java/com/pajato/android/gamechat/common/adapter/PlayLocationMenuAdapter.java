@@ -25,29 +25,30 @@ import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.PlayModeChangeEvent;
+import com.pajato.android.gamechat.event.PlayLocationChangeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pajato.android.gamechat.common.adapter.PlayModeMenuEntry.MENU_TEXT_TYPE;
+import static com.pajato.android.gamechat.common.adapter.PlayLocationMenuEntry.MENU_TEXT_TYPE;
 
 /**
- * Provide a recycler view adapter menu entries containing simple text for the player2 menu. To
+ * Provide a recycler view adapter menu entries containing simple text for the room menu. To
  * avoid confusion, documentation for this class attempts to always prefix "item" with either
- * "adapter" or "menu" to make the context very clear and unambiguous.
+ * "adapter" or "menu" to make the context very clear and unambiguous. Plagiarized heavily from
+ * PlayModeMenuAdapter.
  */
-public class PlayModeMenuAdapter extends RecyclerView.Adapter<ViewHolder> implements View.OnClickListener {
+public class PlayLocationMenuAdapter extends RecyclerView.Adapter<ViewHolder> implements View.OnClickListener {
 
     // Private instance variables.
 
     /** A list of menu (group) headers or menu items. */
-    private List<PlayModeMenuEntry> mList = new ArrayList<>();
+    private List<PlayLocationMenuEntry> mList = new ArrayList<>();
 
     // Public instance methods.
 
     /** Add menu entries to the adapter's main list. */
-    public void addEntries(final List<PlayModeMenuEntry> entries) {
+    public void addEntries(final List<PlayLocationMenuEntry> entries) {
         // Add all the items after clearing the current ones.
         mList.addAll(entries);
         notifyDataSetChanged();
@@ -60,14 +61,14 @@ public class PlayModeMenuAdapter extends RecyclerView.Adapter<ViewHolder> implem
 
     /** Populate the widgets for the item at the given position */
     @Override public void onBindViewHolder(ViewHolder holder, int position) {
-        PlayModeMenuEntry menuEntry = mList.get(position);
+        PlayLocationMenuEntry menuEntry = mList.get(position);
         if (menuEntry != null && menuEntry.type == MENU_TEXT_TYPE)
             updateMenuTextHolder((MenuTextViewHolder) holder, menuEntry);
     }
 
     /** Post any item clicks to the app */
     @Override public void onClick(final View view) {
-        AppEventManager.instance.post(new PlayModeChangeEvent(view));
+        AppEventManager.instance.post(new PlayLocationChangeEvent(view));
     }
 
     /** Create the recycler view holder */
@@ -91,7 +92,7 @@ public class PlayModeMenuAdapter extends RecyclerView.Adapter<ViewHolder> implem
     /** Obtain a view by inflating the given resource id. */
     private View getView(final ViewGroup parent, final int resourceId) {
         // Inflate the entry view and set the click handlers for the fields.
-        View result = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
+        View result = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent,false);
         View view = result.findViewById(R.id.textItem);
         if (view != null)
             view.setOnClickListener(this);
@@ -99,7 +100,7 @@ public class PlayModeMenuAdapter extends RecyclerView.Adapter<ViewHolder> implem
     }
 
     /** Update the given view holder using the data from the given menu entry */
-    private void updateMenuTextHolder(final MenuTextViewHolder holder,final PlayModeMenuEntry entry) {
+    private void updateMenuTextHolder(final MenuTextViewHolder holder,final PlayLocationMenuEntry entry) {
         holder.title.setText(entry.title);
         holder.title.setTag(entry);
     }

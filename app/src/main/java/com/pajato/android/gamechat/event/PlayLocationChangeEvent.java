@@ -19,14 +19,14 @@ package com.pajato.android.gamechat.event;
 import android.view.View;
 
 /**
- * Provides an event class indicating that the play mode selection has changed.
+ * Provides an event class indicating that the play location selection has changed.
  */
-public class PlayModeChangeEvent {
+public class PlayLocationChangeEvent {
 
     public View view;
 
     /** Build the event, saving the selected menu item. */
-    public PlayModeChangeEvent(View view) {
+    public PlayLocationChangeEvent(View view) {
         this.view = view;
     }
 }
