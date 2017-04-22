@@ -34,6 +34,7 @@ import com.pajato.android.gamechat.common.DispatchManager;
 import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
+import com.pajato.android.gamechat.common.PlayLocationManager;
 import com.pajato.android.gamechat.common.PlayModeManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.adapter.MenuEntry;
@@ -44,6 +45,7 @@ import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.ExpListChangeEvent;
 import com.pajato.android.gamechat.event.ExperienceChangeEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
+import com.pajato.android.gamechat.event.PlayLocationChangeEvent;
 import com.pajato.android.gamechat.event.PlayModeChangeEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
 import com.pajato.android.gamechat.exp.model.Player;
@@ -143,6 +145,13 @@ public abstract class BaseExperienceFragment extends BaseFragment {
         PlayModeManager.instance.handlePlayModeUserSelection(event.view, this);
     }
 
+    /** Handle a play location selection change. */
+    @Subscribe public void handlePlayLocationChange(PlayLocationChangeEvent event) {
+        if (!mActive || mExperience == null || !(event.view instanceof TextView))
+            return;
+        PlayLocationManager.instance.handlePlayLocationSelection(event.view, this);
+    }
+
     @Subscribe public void onExperienceListChange(ExpListChangeEvent event) {
         if (mActive)
             updateAdapterList();
@@ -152,6 +161,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     @Override public void onPause() {
         super.onPause();
         PlayModeManager.instance.dismissPlayModeMenu();
+        PlayLocationManager.instance.dismissPlayLocationMenu();
     }
 
     /** Log the lifecycle event and resume showing ads. */
@@ -352,6 +362,9 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                         FabManager.game.toggle(this);
                         break;
                 }
+                break;
+            case R.id.roomName:
+                PlayLocationManager.instance.togglePlayLocationMenu(getActivity(), view);
                 break;
             case R.id.player2Name:
                 PlayModeManager.instance.togglePlayModeMenu(getActivity(), view);
