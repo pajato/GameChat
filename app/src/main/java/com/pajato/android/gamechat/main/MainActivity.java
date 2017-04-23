@@ -202,8 +202,8 @@ public class MainActivity extends BaseActivity
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
-                FragmentActivity activity = DispatchManager.instance.getFragment(FragmentType
-                        .chatEnvelope).getActivity();
+                FragmentType type = DispatchManager.instance.currentChatFragmentType;
+                FragmentActivity activity = DispatchManager.instance.getFragment(type).getActivity();
                 AccountManager.instance.signOut(activity);
                 break;
             case R.id.switchAccount:
