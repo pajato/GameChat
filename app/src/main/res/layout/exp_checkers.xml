@@ -48,8 +48,10 @@ http://www.gnu.org/licenses
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:textSize="20sp"
-            app:layout_constraintCenterX_toCenterX="@+id/player_1_icon"
-            app:layout_constraintCenterY_toCenterY="@id/wins"
+            app:layout_constraintLeft_toLeftOf="@+id/player_1_icon"
+            app:layout_constraintRight_toRightOf="@+id/player_1_icon"
+            app:layout_constraintTop_toTopOf="@id/wins"
+            app:layout_constraintBottom_toBottomOf="@id/wins"
             tools:text="0" />
 
         <TextView android:id="@+id/player2WinCount"
@@ -57,8 +59,10 @@ http://www.gnu.org/licenses
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:textSize="20sp"
-            app:layout_constraintCenterX_toCenterX="@+id/player_2_icon"
-            app:layout_constraintCenterY_toCenterY="@id/wins"
+            app:layout_constraintLeft_toLeftOf="@+id/player_2_icon"
+            app:layout_constraintRight_toRightOf="@+id/player_2_icon"
+            app:layout_constraintTop_toTopOf="@id/wins"
+            app:layout_constraintBottom_toBottomOf="@id/wins"
             tools:layout_editor_absoluteY="0dp"
             tools:text="0" />
 
@@ -81,7 +85,8 @@ http://www.gnu.org/licenses
             android:layout_margin="8dp"
             android:contentDescription="@string/player1"
             app:srcCompat="@drawable/ic_account_circle_black_36dp"
-            app:layout_constraintCenterY_toCenterY="@id/turn"
+            app:layout_constraintTop_toTopOf="@id/turn"
+            app:layout_constraintBottom_toBottomOf="@id/turn"
             app:layout_constraintRight_toLeftOf="@+id/rightIndicator1" />
 
         <TextView android:id="@+id/leftIndicator1"
@@ -117,7 +122,8 @@ http://www.gnu.org/licenses
             android:layout_marginEnd="8dp"
             android:contentDescription="@string/player2"
             app:srcCompat="@drawable/ic_account_circle_black_36dp"
-            app:layout_constraintCenterY_toCenterY="@+id/turn"
+            app:layout_constraintTop_toTopOf="@+id/turn"
+            app:layout_constraintBottom_toBottomOf="@+id/turn"
             app:layout_constraintLeft_toRightOf="@+id/leftIndicator2" />
 
         <TextView android:id="@+id/leftIndicator2"

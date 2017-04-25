@@ -3,9 +3,7 @@ package com.pajato.android.gamechat.main;
 import com.pajato.android.gamechat.BaseTest;
 import com.pajato.android.gamechat.common.FragmentKind;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 /**

@@ -49,7 +49,8 @@ http://www.gnu.org/licenses
             android:textAlignment="center"
             android:textSize="20sp"
             android:id="@+id/player1WinCount"
-            app:layout_constraintCenterY_toCenterY="@id/wins"
+            app:layout_constraintTop_toTopOf="@id/wins"
+            app:layout_constraintBottom_toBottomOf="@id/wins"
             app:layout_constraintRight_toLeftOf="@+id/wins" />
 
         <TextView
@@ -59,7 +60,8 @@ http://www.gnu.org/licenses
             android:id="@+id/player2WinCount"
             android:textAlignment="center"
             android:textSize="20sp"
-            app:layout_constraintCenterY_toCenterY="@id/wins"
+            app:layout_constraintTop_toTopOf="@id/wins"
+            app:layout_constraintBottom_toBottomOf="@id/wins"
             app:layout_constraintLeft_toRightOf="@+id/wins" />
 
         <TextView
@@ -83,7 +85,8 @@ http://www.gnu.org/licenses
             android:textSize="60sp"
             android:id="@+id/player1Symbol"
             android:textColor="@color/colorAccent"
-            app:layout_constraintCenterY_toCenterY="@id/turn"
+            app:layout_constraintTop_toTopOf="@id/turn"
+            app:layout_constraintBottom_toBottomOf="@id/turn"
             app:layout_constraintRight_toLeftOf="@+id/turn" />
 
         <TextView
@@ -118,7 +121,8 @@ http://www.gnu.org/licenses
             android:textSize="45sp"
             android:id="@+id/player2Symbol"
             android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintCenterY_toCenterY="@+id/turn"
+            app:layout_constraintTop_toTopOf="@+id/turn"
+            app:layout_constraintBottom_toBottomOf="@+id/turn"
             app:layout_constraintLeft_toRightOf="@+id/turn" />
 
         <TextView
