@@ -275,29 +275,28 @@ public class MainActivity extends BaseActivity
         String userEmail = ProtectedUserManager.instance.getEMailCredentials().email;
         String format = getString(R.string.AuthProtectedUserFailureMessage);
         String message = String.format(Locale.US, format, userEmail, event.message);
-        showAlertDialog(title, message, false, null, true, null);
+        showAlertDialog(title, message, false, null, null);
     }
 
     /** Show an alert dialog with "ok" and "cancel". */
     public void showOkCancelDialog(final String title, final String message,
                                    DialogInterface.OnClickListener cancelListener,
                                    DialogInterface.OnClickListener okListener) {
-        showAlertDialog(title, message, true, cancelListener, true, okListener);
+        showAlertDialog(title, message, true, cancelListener, okListener);
     }
 
     /** Show an alert dialog with cancel and/or ok button(s). */
     public void showAlertDialog(final String title, final String message, boolean showCancel,
-                                DialogInterface.OnClickListener cancelListener, boolean showOk,
+                                DialogInterface.OnClickListener cancelListener,
                                 DialogInterface.OnClickListener okListener) {
-        if (!showCancel && !showOk)
-            Log.e(TAG, "showAlertDialog called but no buttons are specified.");
         AlertDialog.Builder builder = new AlertDialog.Builder(this).
                 setTitle(title).
                 setMessage(message);
         if (showCancel)
             builder.setNegativeButton(android.R.string.cancel, cancelListener);
-        if (showOk)
-            builder.setPositiveButton(android.R.string.ok, okListener);
+        else
+            Log.e(TAG, "showAlertDialog called but no buttons are specified.");
+        builder.setPositiveButton(android.R.string.ok, okListener);
         builder.create().show();
     }
 

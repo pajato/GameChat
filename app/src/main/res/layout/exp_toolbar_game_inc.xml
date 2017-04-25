@@ -65,7 +65,8 @@ http://www.gnu.org/licenses
             android:textStyle="bold"
             android:textColor="@color/white"
             android:textSize="20sp"
-            app:layout_constraintCenterY_toCenterY="@id/vs"
+            app:layout_constraintTop_toTopOf="@id/vs"
+            app:layout_constraintBottom_toBottomOf="@id/vs"
             app:layout_constraintRight_toLeftOf="@+id/vs"
             tools:text="theShovel" />
 
@@ -81,7 +82,8 @@ http://www.gnu.org/licenses
             android:textSize="20sp"
             android:drawableEnd="@drawable/ic_arrow_drop_down_white_24px"
             android:onClick="onClick"
-            app:layout_constraintCenterY_toCenterY="@id/vs"
+            app:layout_constraintTop_toTopOf="@id/vs"
+            app:layout_constraintBottom_toBottomOf="@id/vs"
             app:layout_constraintLeft_toRightOf="@+id/vs"
             tools:text="Friend"/>
 
