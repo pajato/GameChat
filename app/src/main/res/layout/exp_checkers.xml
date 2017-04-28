@@ -46,10 +46,10 @@ http://www.gnu.org/licenses
         <TextView android:id="@+id/player1WinCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
             android:textAlignment="center"
             android:textSize="20sp"
-            app:layout_constraintLeft_toLeftOf="@+id/player_1_icon"
-            app:layout_constraintRight_toRightOf="@+id/player_1_icon"
+            app:layout_constraintRight_toLeftOf="@+id/wins"
             app:layout_constraintTop_toTopOf="@id/wins"
             app:layout_constraintBottom_toBottomOf="@id/wins"
             tools:text="0" />
@@ -57,13 +57,12 @@ http://www.gnu.org/licenses
         <TextView android:id="@+id/player2WinCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:textAlignment="center"
             android:textSize="20sp"
-            app:layout_constraintLeft_toLeftOf="@+id/player_2_icon"
-            app:layout_constraintRight_toRightOf="@+id/player_2_icon"
+            app:layout_constraintLeft_toRightOf="@+id/wins"
             app:layout_constraintTop_toTopOf="@id/wins"
             app:layout_constraintBottom_toBottomOf="@id/wins"
-            tools:layout_editor_absoluteY="0dp"
             tools:text="0" />
 
         <TextView android:id="@+id/turn"
@@ -110,10 +109,9 @@ http://www.gnu.org/licenses
             android:textColor="@color/colorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"
-            app:layout_constraintLeft_toRightOf="@+id/player_1_icon"
             app:layout_constraintRight_toLeftOf="@id/turn"
-            app:layout_constraintTop_toTopOf="@+id/player_1_icon" />
+            app:layout_constraintTop_toTopOf="@+id/player_1_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/player_1_icon"/>
 
         <ImageView android:id="@+id/player_2_icon"
             android:layout_width="wrap_content"
@@ -138,7 +136,6 @@ http://www.gnu.org/licenses
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/player_2_icon"
             app:layout_constraintLeft_toRightOf="@id/turn"
-            app:layout_constraintRight_toLeftOf="@+id/player_2_icon"
             app:layout_constraintTop_toTopOf="@+id/player_2_icon" />
 
         <TextView android:id="@+id/rightIndicator2"
