@@ -2,10 +2,11 @@
 
 buildscript {
     repositories {
+        maven { url 'https://maven.google.com' }
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha3'
         classpath 'com.google.gms:google-services:3.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -16,6 +17,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://maven.google.com' }
         maven { url 'https://maven.fabric.io/public' }
         mavenLocal()
     }
@@ -52,7 +54,7 @@ ext {
     // App dependencies
     espressoVersion = '2.2.2'
     firebaseAuthUIVersion = '1.2.0'
-    gmsVersion = '10.2.1'
+    gmsVersion = '10.2.6'
     runnerVersion = '0.5'
     supportLibraryVersion = '25.3.1'
     uiautomatorVersion = '2.1.2'
