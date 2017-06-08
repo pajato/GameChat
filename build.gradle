@@ -43,6 +43,11 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+// Define and load the hidden property file holding API keys and other secrets.
+def secretsPropertiesFile = file("secrets.properties")
+def secretsProperties = new Properties()
+secretsProperties.load(new FileInputStream(secretsPropertiesFile))
+
 // Define versions in a single place
 ext {
     // Sdk and tools
@@ -54,8 +59,16 @@ ext {
     // App dependencies
     espressoVersion = '2.2.2'
     firebaseAuthUIVersion = '1.2.0'
-    gmsVersion = '10.2.6'
+    gmsVersion = '11.0.0'
     runnerVersion = '0.5'
     supportLibraryVersion = '25.3.1'
     uiautomatorVersion = '2.1.2'
+
+    // GameChat secrets
+    GC_STORE_FILE = secretsProperties['gcStoreFile']
+    GC_STORE_PASSWORD = secretsProperties['gcStorePassword']
+    GC_RELEASE_KEY_ALIAS = secretsProperties['gcReleaseKeyAlias']
+    GC_RELEASE_KEY_PASSWORD = secretsProperties['gcReleaseKeyPassword']
+    GC_STAGE_KEY_ALIAS = secretsProperties['gcStageKeyAlias']
+    GC_STAGE_KEY_PASSWORD = secretsProperties['gcStagePassword']
 }
