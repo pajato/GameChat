@@ -25,6 +25,9 @@ proguard/
 # The Google Services plugin configuration file
 google-services.json
 
+# Secrets file
+secrets.properties
+
 # Log Files
 *.log
 
