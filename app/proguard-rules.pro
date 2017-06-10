@@ -18,9 +18,9 @@
 #-dontshrink
 #-dontoptimize
 -dontpreverify
--repackageclasses ''
--allowaccessmodification
--optimizations !code/simplification/arithmetic
+#-repackageclasses ''
+#-allowaccessmodification
+#-optimizations !code/simplification/arithmetic
 -keepattributes *Annotation*
 -keep class com.pajato.** {
     *;

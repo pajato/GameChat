@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext.kotlin_version = '1.1.2-4'
     repositories {
         maven { url 'https://maven.google.com' }
         jcenter()
@@ -8,6 +9,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0-alpha3'
         classpath 'com.google.gms:google-services:3.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -43,7 +45,8 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-// Define and load the hidden property file holding API keys and other secrets.
+// Define and load the hidden property file holding API keys and other secrets. Idea borrowed from
+// https://medium.com/@cassioso/a-strategy-to-secure-your-api-keys-using-gradle-b9c107272860
 def secretsPropertiesFile = file("secrets.properties")
 def secretsProperties = new Properties()
 secretsProperties.load(new FileInputStream(secretsPropertiesFile))
@@ -61,7 +64,7 @@ ext {
     firebaseAuthUIVersion = '1.2.0'
     gmsVersion = '11.0.0'
     runnerVersion = '0.5'
-    supportLibraryVersion = '25.3.1'
+    supportLibraryVersion = '25.4.0'
     uiautomatorVersion = '2.1.2'
 
     // GameChat secrets
