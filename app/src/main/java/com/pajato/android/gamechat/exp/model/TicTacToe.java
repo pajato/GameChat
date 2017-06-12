@@ -18,22 +18,21 @@
 package com.pajato.android.gamechat.exp.model;
 
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.database.model.Base;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
 import com.pajato.android.gamechat.exp.State;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.exp.ExpType.tttET;
 
 /** Provide a Firebase model class for a tictactoe game experience. */
-@IgnoreExtraProperties public class TicTacToe implements Experience {
+public class TicTacToe extends Base implements Experience {
 
     // Public class constants.
 
@@ -57,23 +56,8 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     /** A POJO encapsulating the board moves and wining tallies. */
     public TTTBoard board;
 
-    /** The creation timestamp. */
-    public long createTime;
-
-    /** The experience push key. */
-    public String key;
-
     /** The group push key. */
     public String groupKey;
-
-    /** The last modification timestamp. */
-    public long modTime;
-
-    /** The experience display name. */
-    public String name;
-
-    /** The member account identifier who created the experience. */
-    public String owner;
 
     /** The list of players, for tictactoe, two of them. */
     public List<Player> players;
@@ -99,17 +83,15 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    @SuppressWarnings("unused") public TicTacToe() {}
+    @SuppressWarnings("unused") public TicTacToe() {
+        super();
+    }
 
     /** Build a default TicTacToe using the given parameters and defaulting the rest. */
-    public TicTacToe(final String key, final String id, final String name, final long createTime,
+    public TicTacToe(final String key, final String owner, final String name, final long createTime,
                      final String groupKey, final String roomKey, final List<Player> players) {
-        this.createTime = createTime;
-        this.key = key;
+        super(key, owner, name, createTime);
         this.groupKey = groupKey;
-        this.modTime = createTime;
-        this.name = name;
-        this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
         state = ACTIVE;
@@ -127,14 +109,9 @@ import static com.pajato.android.gamechat.exp.ExpType.tttET;
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude @Override public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = super.toMap();
         result.put("board", board);
-        result.put("createTime", createTime);
-        result.put("key", key);
         result.put("groupKey", groupKey);
-        result.put("modTime", modTime);
-        result.put("name", name);
-        result.put("owner", owner);
         result.put("players", players);
         result.put("roomKey", roomKey);
         result.put("state", state);

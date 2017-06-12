@@ -138,15 +138,15 @@ public class CreateGroupFragment extends BaseCreateFragment {
 
         // Update and persist the group adding the default room to it's room list.
         mGroup.key = groupKey;
-        mGroup.owner = account.id;
+        mGroup.owner = account.key;
         mGroup.roomList.add(roomKey);
-        mGroup.memberList.add(account.id);
+        mGroup.memberList.add(account.key);
         mGroup.commonRoomKey = roomKey; // we'll create the 'common' room below
         GroupManager.instance.createGroupProfile(mGroup);
 
         // Create and persist the default (common) room.
-        Room room = new Room(roomKey, mGroup.owner, "Common", groupKey, 0, 0, COMMON);
-        room.addMember(account.id);
+        Room room = new Room(roomKey, mGroup.owner, "Common", 0, groupKey, COMMON);
+        room.addMember(account.key);
         RoomManager.instance.createRoomProfile(room);
 
         // Create and persist a member object to the database joined to the default room.

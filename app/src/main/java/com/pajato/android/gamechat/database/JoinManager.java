@@ -101,12 +101,12 @@ public enum JoinManager {
         if (room == null || member.joinMap.keySet().contains(room.key))
             return;
         member.joinMap.put(room.key, new JoinState());
-        String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.id);
+        String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, item.groupKey, member.key);
         DBUtils.updateChildren(path, member.toMap());
 
         // Post a message to the room announcing the user has joined
         String format = mMessageMap.get(R.string.HasJoinedMessage);
-        String text = String.format(Locale.getDefault(), format, member.displayName);
+        String text = String.format(Locale.getDefault(), format, member.name);
         MessageManager.instance.createMessage(text, STANDARD, member, room);
     }
 
@@ -167,7 +167,8 @@ public enum JoinManager {
         for (String groupKey : groupList) {
             Map<String, Account> map = MemberManager.instance.memberMap.get(groupKey);
             for (Account member : map.values()) {
-                if (member.id.equals(currentAccountId)) continue;
+                if (member.key.equals(currentAccountId))
+                    continue;
 
                 // Don't add the member to the list of members if there is already a room which
                 // is private, contains only two members and they are the current account and
@@ -175,21 +176,21 @@ public enum JoinManager {
                 boolean canAdd = true;
                 for (Map.Entry<String, Room> entry : RoomManager.instance.roomMap.entrySet()) {
                     Room room = entry.getValue();
-                    if (room.isMemberPrivateRoom(member.id, currentAccountId)) {
+                    if (room.isMemberPrivateRoom(member.key, currentAccountId)) {
                         canAdd = false;
                         break;
                     }
                 }
                 // Check for duplicate member (member in > 1 group)
                 for (ListItem anItem : items) {
-                    if (anItem.memberKey.equals(member.id)) {
+                    if (anItem.memberKey.equals(member.key)) {
                         // modify the already added item and remember we can't add this one
                         anItem.addGroupKey(groupKey);
                         canAdd = false;
                     }
                 }
                 if (canAdd)
-                    items.add(new ListItem(selectableMember, groupKey, member.id,
+                    items.add(new ListItem(selectableMember, groupKey, member.key,
                             member.getNickName(), GroupManager.instance.getGroupName(groupKey),
                             member.url));
             }
@@ -256,8 +257,8 @@ public enum JoinManager {
 
         // Build, update and persist a room object adding the two principals as members.
         long tStamp = new Date().getTime();
-        room = new Room(roomKey, account.id, null, groupKey, tStamp, 0, PRIVATE);
-        room.addMember(account.id);
+        room = new Room(roomKey, account.key, null, tStamp, groupKey, PRIVATE);
+        room.addMember(account.key);
         room.addMember(memberKey);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.updateChildren(path, room.toMap());

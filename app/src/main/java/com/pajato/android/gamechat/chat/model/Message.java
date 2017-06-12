@@ -18,15 +18,14 @@
 package com.pajato.android.gamechat.chat.model;
 
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.database.AccountManager;
+import com.pajato.android.gamechat.database.model.Base;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class representing a chat message, an icon, a name and text. */
-@IgnoreExtraProperties public class Message {
+public class Message extends Base {
 
     // Public class constants.
 
@@ -35,23 +34,10 @@ import java.util.Map;
     public final static int STANDARD = 1;
     // TODO: add this real soon: public final static int PROTECTED = 2;
 
-    /** The creation timestamp. */
-    public long createTime;
+    // Public instance variables.
 
     /** The push key of the group to which the message belongs. */
     public String groupKey;
-
-    /** The message push key. */
-    public String key;
-
-    /** The last modification timestamp. */
-    private long modTime;
-
-    /** The poster's display name. */
-    public String name;
-
-    /** The member account identifier who posted the message. */
-    public String owner;
 
     /** The push key for the room in which the message was created. */
     public String roomKey;
@@ -71,17 +57,15 @@ import java.util.Map;
     // Public constructors.
 
     /** Build an empty args constructor for the database. */
-    public Message() {}
+    public Message() {
+        super();
+    }
 
     /** Build a default Message using all the parameters. */
-    public Message(final String key, final String owner, final String name, final String url,
-                   final long createTime, final String text, final int type,
+    public Message(final String key, final String owner, final String name, final long createTime,
+                   final String text, final int type, final String url,
                    final List<String> unseenList) {
-        this.createTime = createTime;
-        this.key = key;
-        this.modTime = 0;
-        this.name = name;
-        this.owner = owner;
+        super(key, owner, name, createTime);
         this.text = text;
         this.type = type;
         this.url = url;
@@ -90,17 +74,11 @@ import java.util.Map;
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("createTime", createTime);
-        result.put("key", key);
-        result.put("modTime", modTime);
-        result.put("name", name);
-        result.put("owner", owner);
+        Map<String, Object> result = super.toMap();
         result.put("text", text);
         result.put("type", type);
         result.put("unseenList", unseenList);
         result.put("url", url);
-
         return result;
     }
 

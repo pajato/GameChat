@@ -17,65 +17,41 @@
 
 package com.pajato.android.gamechat.chat.model;
 
-import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.database.model.Base;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class representing a chat group, a collection of members and rooms. */
-@IgnoreExtraProperties public class Group  {
+public class Group extends Base {
 
     /** The key for the group's common room */
     public String commonRoomKey;
 
-    /** The creation timestamp. */
-    public long createTime;
-
-    /** The group push key value. */
-    public String key;
-
-    /** The group name. */
-    public String name;
-
     /** The map associating a member name with the a push key. */
     public List<String> memberList;
-
-    /** The last modification timestamp. */
-    public long modTime;
-
-    /** The group owner/creator. */
-    public String owner;
 
     /** The list of room push keys in the group. */
     public List<String> roomList;
 
     /** Build an empty args constructor for the database. */
-    public Group() {}
+    public Group() {
+        super();
+    }
 
     /** Build a default Group. */
     public Group(final String key, final String owner, final String name, final long createTime,
                  final List<String> members, final List<String> rooms) {
-        this.createTime = createTime;
-        this.key = key;
-        this.name = name;
+        super(key, owner, name, createTime);
         memberList = members;
-        modTime = 0;
-        this.owner = owner;
         roomList = rooms;
     }
 
     /** Provide a default map for a Firebase create/update. */
-    @Exclude public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = super.toMap();
         result.put("commonRoomKey", commonRoomKey);
-        result.put("createTime", createTime);
-        result.put("key", key);
-        result.put("name", name);
         result.put("memberList", memberList);
-        result.put("modTime", modTime);
-        result.put("owner", owner);
         result.put("roomList", roomList);
         return result;
     }

@@ -20,7 +20,7 @@ package com.pajato.android.gamechat.common.model;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
+import com.pajato.android.gamechat.database.model.Base;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,28 +48,15 @@ import java.util.Map;
  *
  * @author Paul Michael Reilly
  */
-@IgnoreExtraProperties public class Account {
-
-    // Public constants.
-
-    // The account types.
-
-    // ? public final static int ADMIN = 1;
-
+public class Account extends Base {
 
     // Public instance variables
-
-    /** The account creation timestamp. */
-    public /*final*/ long createTime;
-
-    /** The account display name, usually something like "Fred C. Jones". */
-    public /*final*/ String displayName;
 
     /** The account email. */
     public /*final*/ String email;
 
     /** The key to the account's chaperone, if applicable. */
-    public String chaperone;
+    public /*final*/ String chaperone;
 
     /** The database keys to any accounts that this account is the chaperone of. */
     public final List<String> protectedUsers = new ArrayList<>();
@@ -82,9 +69,6 @@ import java.util.Map;
      */
     public String groupKey;
 
-    /** The account identifier, the backend push key. */
-    public /*final*/ String id;
-
     /**
      * In an account context, this is a map of group push keys for which the User is a member.  In a
      * member context, this is a map of room push keys the User has joined. The value is one of:
@@ -95,9 +79,6 @@ import java.util.Map;
      * experience.
      */
     public final Map<String, JoinState> joinMap = new HashMap<>();
-
-    /** The modification timestamp. */
-    public long modTime;
 
     /** The account nickname.  Defaults to the first name. */
     public String nickname;
@@ -111,17 +92,16 @@ import java.util.Map;
     // Public constructors.
 
     /** Build a default no-arg instance. */
-    public Account() {}
+    public Account() {
+        super();
+    }
 
     /** Build a copy of an account. */
     public Account(final Account account) {
-        createTime = new Date().getTime();
-        displayName = account.displayName;
+        super(account.key, account.key, account.name, new Date().getTime());
         nickname = account.nickname;
         email = account.email;
         chaperone = account.chaperone;
-        id = account.id;
-        modTime = 0;
         type = account.type;
         url = account.url;
     }
@@ -131,11 +111,11 @@ import java.util.Map;
     /** Return a display name: either the nickname, the display name, the the email name. */
     @Exclude public String getDisplayName() {
         // Return the first non-null value of which the email address must not be null.
-        if (displayName != null)
-            return displayName;
+        if (name != null)
+            return name;
         if (nickname != null)
             return nickname;
-        return getPrefix(email, "@");
+        return getPrefix(email);
     }
 
     /** Return the nickname, the first name, the base email name, or a default, in that order. */
@@ -143,23 +123,19 @@ import java.util.Map;
         // Return the first non-null value of which the email address must not be null.
         if (nickname != null)
             return nickname;
-        if (displayName != null)
-            return displayName;
-        return getPrefix(email, "@");
+        if (name != null)
+            return name;
+        return getPrefix(email);
     }
 
     /** Generate the map of data to persist into Firebase. */
     @Exclude public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("createTime", createTime);
-        result.put("displayName", displayName);
+        Map<String, Object> result = super.toMap();
         result.put("email", email);
         result.put("chaperone", chaperone);
         result.put("protectedUsers", protectedUsers);
         result.put("groupKey", groupKey);
         result.put("joinMap", joinMap);
-        result.put("id", id);
-        result.put("modTime", modTime);
         result.put("nickname", nickname);
         result.put("type", type);
         result.put("url", url);
@@ -168,9 +144,9 @@ import java.util.Map;
     }
 
     /** Return the name part of the email address. */
-    private String getPrefix(@NonNull final String value, final String splitterText) {
+    private String getPrefix(@NonNull final String value) {
         // Split the value and return the first part.
-        String[] parts = value.split(splitterText);
+        String[] parts = value.split("@");
         if (parts.length > 0) return parts[0];
         return value;
     }

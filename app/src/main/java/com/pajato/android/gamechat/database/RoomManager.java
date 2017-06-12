@@ -256,6 +256,6 @@ public enum RoomManager {
 
     /** Return true iff the given room contains the given members. */
     private boolean contains(@NonNull final Room room, final Account... members) {
-        return room.isMemberPrivateRoom(members[0].id, members[1].id);
+        return room.isMemberPrivateRoom(members[0].key, members[1].key);
     }
 }

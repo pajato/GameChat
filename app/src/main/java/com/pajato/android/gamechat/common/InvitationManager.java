@@ -72,6 +72,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
+import static com.pajato.android.gamechat.database.MemberManager.MEMBERS_PATH;
 
 /**
  * Handle invitations to groups, rooms and experiences.
@@ -127,11 +128,11 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         AccountManager.instance.updateAccount(account);
         Account member = new Account(account);
         member.groupKey = groupKey;
-        String path = MemberManager.instance.getMembersPath(groupKey, member.id);
+        String path = MemberManager.instance.getMembersPath(groupKey, member.key);
         DBUtils.updateChildren(path, member.toMap());
 
         // Finally add the invited account to the accepting group's profile member list.
-        group.memberList.add(member.id);
+        group.memberList.add(member.key);
         path = GroupManager.instance.getGroupProfilePath(groupKey);
         DBUtils.updateChildren(path, group.toMap());
     }
@@ -265,8 +266,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         GroupInviteData data = mInviteMap.get(event.key);
 
         // Add this account to the group profile member list; add a new member object to the group
-        if (!changedGroup.memberList.contains(currAccount.id)) {
-            changedGroup.memberList.add(currAccount.id);
+        if (!changedGroup.memberList.contains(currAccount.key)) {
+            changedGroup.memberList.add(currAccount.key);
             GroupManager.instance.updateGroupProfile(changedGroup);
 
             // Create and persist a member object to the database and join to the specified rooms
@@ -320,33 +321,33 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         for (Map.Entry<String, GroupInviteData> entry : mInviteMap.entrySet()) {
             GroupInviteData data = entry.getValue();
             if (data.commonRoomKey.equals(event.key)) {
-                if (!event.room.hasMember(currAccount.id)) {
+                if (!event.room.hasMember(currAccount.key)) {
                     // Add account as member, update the profile and the invitation map data
-                    event.room.addMember(currAccount.id);
+                    event.room.addMember(currAccount.key);
                     RoomManager.instance.updateRoomProfile(event.room);
                     data.addedToCommRoomMemberList = true;
                     // Post a message to the common room announcing the user has joined
                     String format = mMessageMap.get(R.string.HasJoinedMessage);
-                    String text = String.format(Locale.getDefault(), format, currAccount.displayName);
+                    String text = String.format(Locale.getDefault(), format, currAccount.name);
                     MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
                 }
             } else if (data.rooms.contains(event.key)) {
-                if (!event.room.getMemberIdList().contains(currAccount.id)) {
+                if (!event.room.getMemberIdList().contains(currAccount.key)) {
                     // Add account as member, update the profile and the invitation map data
-                    event.room.addMember(currAccount.id);
+                    event.room.addMember(currAccount.key);
                     RoomManager.instance.updateRoomProfile(event.room);
 
                     // Update the member within the group to include this room
                     Account member = MemberManager.instance.getMember(data.groupKey);
                     if (member != null) {
                         member.joinMap.put(event.key, new JoinState());
-                        String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, data.groupKey, member.id);
+                        String path = String.format(Locale.US, MemberManager.MEMBERS_PATH, data.groupKey, member.key);
                         DBUtils.updateChildren(path, member.toMap());
                     }
 
                     // Post a message to the room announcing the user has joined
                     String format = mMessageMap.get(R.string.HasJoinedMessage);
-                    String text = String.format(Locale.getDefault(), format, currAccount.displayName);
+                    String text = String.format(Locale.getDefault(), format, currAccount.name);
                     MessageManager.instance.createMessage(text, STANDARD, currAccount, event.room);
                     // Increment the room complete count
                     data.roomsCompleted++;
@@ -466,10 +467,10 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         if (invitedMembers == null) return false;
 
         // Ensure that the invited members list includes the account owner.
-        if (!invitedMembers.contains(account.id)) return false;
+        if (!invitedMembers.contains(account.key)) return false;
 
         // Remove the invited account holder from the list and possibly the list from the map.
-        invitedMembers.remove(account.id);
+        invitedMembers.remove(account.key);
         if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
         return true;
     }

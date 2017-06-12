@@ -112,7 +112,7 @@ public enum MessageManager {
         long tStamp = new Date().getTime();
         List<String> members = new ArrayList<>();
         members.addAll(room.getMemberIdList());
-        Message message = new Message(key, account.id, name, url, tStamp, text, type, members);
+        Message message = new Message(key, account.key, name, tStamp, text, type, url, members);
 
         // Persist (i.e. post) the message.
         path = String.format(Locale.US, MESSAGE_PATH, room.groupKey, room.key, key);

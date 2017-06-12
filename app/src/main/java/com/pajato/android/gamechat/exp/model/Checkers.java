@@ -3,9 +3,9 @@ package com.pajato.android.gamechat.exp.model;
 import android.content.DialogInterface;
 
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.database.model.Base;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.Board;
@@ -15,7 +15,6 @@ import com.pajato.android.gamechat.exp.State;
 import com.pajato.android.gamechat.exp.checkers.CheckersBoard;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +22,7 @@ import static com.pajato.android.gamechat.exp.ExpType.checkersET;
 import static com.pajato.android.gamechat.exp.State.active;
 
 /** Provide a Firebase model class for a checkers game experience. */
-@IgnoreExtraProperties
-public class Checkers implements Experience {
+public class Checkers extends Base implements Experience {
 
     /**
      * A map of board position (0->63) to piece type (where piece type can be PRIMARY_PIECE,
@@ -32,26 +30,11 @@ public class Checkers implements Experience {
      */
     public CheckersBoard board;
 
-    /** The creation timestamp. */
-    public long createTime;
-
     /** The group push key. */
     public String groupKey;
 
-    /** The experience push key. */
-    public String key;
-
     /** The game level. */
     public int level;
-
-    /** The last modification timestamp. */
-    public long modTime;
-
-    /** The experience display name. */
-    public String name;
-
-    /** The member account identifier who created the experience. */
-    public String owner;
 
     /** The list of players, for checkers, two of them. */
     public List<Player> players;
@@ -67,9 +50,6 @@ public class Checkers implements Experience {
 
     /** The experience type name. */
     public String type;
-    // TODO:
-    //
-    // figure this one out, but use a placeholder hack for now.
 
     /** A list of users (by account identifier) in the room, that have not yet seen the message. */
     private List<String> unseenList = new ArrayList<>();
@@ -78,20 +58,18 @@ public class Checkers implements Experience {
     public String url;
 
     /** Build an empty args constructor for the database. */
-    @SuppressWarnings("unused") public Checkers() {}
+    @SuppressWarnings("unused") public Checkers() {
+        super();
+    }
 
     /** Build a default Checkers using the given parameters and defaulting the rest. */
-    public Checkers(final CheckersBoard board, String key, final String id, final int level,
-                    final String name, final long createTime, final String groupKey,
+    public Checkers(final CheckersBoard board, final String key, final String owner, final
+                    String name, final long createTime, final int level, final String groupKey,
                     final String roomKey, final List<Player> players) {
+        super(key, owner, name, createTime);
         this.board = board;
-        this.createTime = createTime;
-        this.key = key;
         this.groupKey = groupKey;
-        this.modTime = createTime;
         this.level = level;
-        this.name = name;
-        this.owner = id;
         this.players = players;
         this.roomKey = roomKey;
         state = active;
@@ -109,15 +87,10 @@ public class Checkers implements Experience {
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude @Override public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = super.toMap();
         result.put("board", board);
-        result.put("createTime", createTime);
-        result.put("key", key);
         result.put("level", level);
         result.put("groupKey", groupKey);
-        result.put("modTime", modTime);
-        result.put("name", name);
-        result.put("owner", owner);
         result.put("players", players);
         result.put("roomKey", roomKey);
         result.put("state", getState());
