@@ -92,7 +92,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
         super.onStart();
         mGroup = GroupManager.instance.getGroupProfile(mDispatcher.groupKey);
         Account account = AccountManager.instance.getCurrentAccount();
-        mMember = MemberManager.instance.getMember(mGroup.key, account.id);
+        mMember = MemberManager.instance.getMember(mGroup.key, account.key);
         if (mGroup == null || mMember == null) {
             DispatchManager.instance.dispatchReturn(this); // Dispatch back
             return;
@@ -103,10 +103,10 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Set up the room profile.
         mRoom = new Room();
-        mRoom.owner = account.id;
+        mRoom.owner = account.key;
         mRoom.name = getDefaultName();
         mRoom.groupKey = mGroup.key;
-        mRoom.owner = mMember.id;
+        mRoom.owner = mMember.key;
         mRoom.type = RoomType.PUBLIC;
     }
 
@@ -132,7 +132,7 @@ public class CreateRoomFragment extends BaseCreateFragment {
 
         // Persist the configured room.
         mRoom.key = RoomManager.instance.getRoomKey(mGroup.key);
-        mRoom.addMember(account.id);
+        mRoom.addMember(account.key);
         RoomManager.instance.createRoomProfile(mRoom);
 
         // Update and persist the group adding the new room to it's room list.

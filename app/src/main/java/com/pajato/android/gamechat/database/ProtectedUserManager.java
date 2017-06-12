@@ -102,7 +102,7 @@ public enum ProtectedUserManager {
             MemberManager.instance.removeMember(groupKey, accountId);
             Group group = GroupManager.instance.getGroupProfile(groupKey);
             if (group != null)
-                group.memberList.remove(protectedAccount.id);
+                group.memberList.remove(protectedAccount.key);
         }
 
         mProtectedUserAccounts.remove(protectedAccount);
@@ -119,7 +119,7 @@ public enum ProtectedUserManager {
     /** Get the account for a specified protected user key */
     public Account getProtectedUserAccount(String accountId) {
         for (Account account : mProtectedUserAccounts) {
-            if (account.id.equals(accountId)) {
+            if (account.key.equals(accountId)) {
                 return account;
             }
         }
@@ -170,7 +170,7 @@ public enum ProtectedUserManager {
         List<ListItem> result = new ArrayList<>();
         for (Account pUser : mProtectedUserAccounts) {
             String displayName = pUser.getDisplayName();
-            result.add(new ListItem(protectedUserList, "", pUser.id, displayName, pUser.email,
+            result.add(new ListItem(protectedUserList, "", pUser.key, displayName, pUser.email,
                     pUser.url));
         }
         if (result.size() > 0) {
@@ -191,7 +191,7 @@ public enum ProtectedUserManager {
 
     /** Keep track of protected users that belong to the current account */
     @Subscribe public void onProtectedUserChange(ProtectedUserChangeEvent event) {
-        if (!AccountManager.instance.getCurrentAccount().protectedUsers.contains(event.account.id))
+        if (!AccountManager.instance.getCurrentAccount().protectedUsers.contains(event.account.key))
             return;
         if (!event.account.chaperone.equals(AccountManager.instance.getCurrentAccountId()))
             return;

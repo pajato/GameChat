@@ -24,6 +24,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.MemberManager;
+import com.pajato.android.gamechat.database.model.Base;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Provide a Firebase model class for representing a chat room. */
-@IgnoreExtraProperties
-public class Room {
+public class Room extends Base {
 
     // The room types.
     public enum RoomType {
@@ -42,14 +42,8 @@ public class Room {
         COMMON // the 'general' room for a group; all group members are joined automatically
     }
 
-    /** The creation timestamp. */
-    public long createTime;
-
     /** The parent group push key. */
     public String groupKey;
-
-    /** The room push key. */
-    public String key;
 
     /** The room member identifiers. These are the Users joined to the room. */
     private List<String> memberIdList = new ArrayList<>();
@@ -57,30 +51,19 @@ public class Room {
     /** The assoication of members and device tokens used in sending change notifiations. */
     public Map<String, List<String>> memberTokenMap = new HashMap<>();
 
-    /** The last modification timestamp. */
-    public long modTime;
-
-    /** The room name. */
-    public String name;
-
-    /** The room owner/creator, an account identifier. */
-    public String owner;
-
     /** The room type, one of "public", "private" or "me". */
     public RoomType type;
 
     /** Build an empty args constructor for the database. */
-    public Room() {}
+    public Room() {
+        super();
+    }
 
     /** Build a default room. */
-    public Room(final String key, final String owner, final String name, final String groupKey,
-                final long createTime, final long modTime, final RoomType type) {
-        this.createTime = createTime;
+    public Room(final String key, final String owner, final String name, final long createTime,
+                final String groupKey, final RoomType type) {
+        super(key, owner, name, createTime);
         this.groupKey = groupKey;
-        this.key = key;
-        this.modTime = modTime;
-        this.name = name;
-        this.owner = owner;
         this.type = type;
         addMember(owner);
     }
@@ -135,15 +118,10 @@ public class Room {
 
     /** Provide a default map for a Firebase create/update. */
     @Exclude public Map<String, Object> toMap() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("createTime", createTime);
+        Map<String, Object> result = super.toMap();
         result.put("groupKey", groupKey);
-        result.put("key", key);
-        result.put("name", name);
-        result.put("owner", owner);
         result.put("memberIdList", memberIdList);
         result.put("memberTokenMap", memberTokenMap);
-        result.put("modTime", modTime);
         result.put("type", type);
         return result;
     }
@@ -156,7 +134,7 @@ public class Room {
         for (String key : memberIdList) {
             // Determine if this member is the current User, in which case just continue.
             Account member = MemberManager.instance.getMember(groupKey, key);
-            if (key.equals(account.id) || member == null) continue;
+            if (key.equals(account.key) || member == null) continue;
 
             // Add the member's, display name to the list.
             if (result.length() > 0) result.append(", ");

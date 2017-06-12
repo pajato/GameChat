@@ -146,7 +146,7 @@ public enum NavigationManager {
     /** Load the display name, if available, using a placeholder otherwise. */
     private void setDisplayName(final Account account, final View header) {
         // Determine if there is a display name to use.
-        String name = account.displayName;
+        String name = account.name;
         if (name == null) {
             // There is no display name, use a conjured name based on the email address, i.e. the
             // username part of the email address with an initial cap.

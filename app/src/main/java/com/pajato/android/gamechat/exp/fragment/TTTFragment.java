@@ -282,7 +282,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
             name = getPlayerName(getPlayer(players, 0), context.getString(R.string.player1));
         String accountId = null;
         if (players != null && players.size() >= 1)
-            accountId = players.get(0).id;
+            accountId = players.get(0).key;
         result.add(new Player(name, context.getString(R.string.xValue), "", accountId));
 
         if (players == null)
@@ -290,7 +290,7 @@ public class TTTFragment extends BaseExperienceFragment implements View.OnClickL
         else
             name = getPlayerName(getPlayer(players, 1), context.getString(R.string.friend));
         if (players != null && players.size() >= 2)
-            accountId = players.get(1).id;
+            accountId = players.get(1).key;
         else
             accountId = null;
         result.add(new Player(name, context.getString(R.string.oValue), "", accountId));

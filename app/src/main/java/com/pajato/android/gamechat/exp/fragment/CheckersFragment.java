@@ -198,14 +198,13 @@ public class CheckersFragment extends BaseExperienceFragment {
         // create the object on the database.
         CheckersBoard board = new CheckersBoard();
         board.init();
-        String groupKey = AccountManager.instance.getMeGroupKey();
-        String roomKey = AccountManager.instance.getMeRoomKey();
-        String id = getOwnerId();
+        String gKey = AccountManager.instance.getMeGroupKey();
+        String rKey = AccountManager.instance.getMeRoomKey();
+        String owner = getOwnerId();
         // TODO: DEFINE LEVEL INT ENUM VALUES - this is passing "0" for now
-        Checkers model = new Checkers(board, key, id, 0, name, tStamp, groupKey,
-                roomKey, players);
+        Checkers model = new Checkers(board, key, owner, name, tStamp, 0, gKey, rKey, players);
         mExperience = model;
-        if (groupKey != null && roomKey != null)
+        if (gKey != null && rKey != null)
             ExperienceManager.instance.createExperience(model);
     }
 

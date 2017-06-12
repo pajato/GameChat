@@ -200,10 +200,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         String roomKey = database.child(path).push().getKey();
 
         // Check for a chaperone account. If one exists, update this account.
-        if (currentChaperone != null && !currentChaperone.equals(account.id)) {
+        if (currentChaperone != null && !currentChaperone.equals(account.key)) {
             account.chaperone = currentChaperone;
-            if (account.displayName == null || account.displayName.equals("")) {
-                account.displayName = protectedUserName;
+            if (account.name == null || account.name.equals("")) {
+                account.name = protectedUserName;
                 protectedUserName = null;
             }
             account.type = AccountType.restricted.name();
@@ -216,15 +216,15 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Set up and persist the account for the given user.
         long tStamp = account.createTime;
         account.groupKey = groupKey;
-        path = String.format(Locale.US, ACCOUNT_PATH, account.id);
+        path = String.format(Locale.US, ACCOUNT_PATH, account.key);
         DBUtils.updateChildren(path, account.toMap());
 
         // Leave the breadcrumbs for the chaperone account in the database. This must be done after
         // the new account has been added, because the database authorization rules don't allow
         // non-authorized users to have access.
-        if (currentChaperone != null && !currentChaperone.equals(account.id)) {
+        if (currentChaperone != null && !currentChaperone.equals(account.key)) {
             Map<String, Object> protectedUsers = new HashMap<>();
-            protectedUsers.put(currentChaperone, account.id);
+            protectedUsers.put(currentChaperone, account.key);
             String protectedUserPath = String.format(PROTECTED_PATH, currentChaperone);
             DBUtils.updateChildren(protectedUserPath, protectedUsers);
             currentChaperone = null;
@@ -234,8 +234,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         List<String> rooms = new ArrayList<>();
         rooms.add(roomKey);
         List<String> members = new ArrayList<>();
-        members.add(account.id);
-        Group group = new Group(groupKey, account.id, null, tStamp, members, rooms);
+        members.add(account.key);
+        Group group = new Group(groupKey, account.key, null, tStamp, members, rooms);
         path = String.format(Locale.US, GroupManager.GROUP_PROFILE_PATH, groupKey);
         DBUtils.updateChildren(path, group.toMap());
 
@@ -247,12 +247,12 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         Account member = new Account(account);
         member.joinMap.put(roomKey, new JoinState());
         member.groupKey = groupKey;
-        path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.id);
+        path = String.format(Locale.US, MemberManager.MEMBERS_PATH, groupKey, account.key);
         DBUtils.updateChildren(path, member.toMap());
 
         // Update the "me" room profile on the database.
         String name = account.getDisplayName();
-        Room room = new Room(roomKey, account.id, name, groupKey, tStamp, 0, ME);
+        Room room = new Room(roomKey, account.key, name, tStamp, groupKey, ME);
         path = String.format(Locale.US, RoomManager.ROOM_PROFILE_PATH, groupKey, roomKey);
         DBUtils.updateChildren(path, room.toMap());
 
@@ -364,7 +364,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             List<String> roomMembers = room.getMemberIdList();
             if (roomMembers.contains(mCurrentAccountKey)) {
                 String format = mMessageMap.get(R.string.HasDepartedMessage);
-                String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+                String text = String.format(Locale.getDefault(), format, mCurrentAccount.name);
                 MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
                 RoomManager.instance.leaveRoom(room);
             }
@@ -391,7 +391,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // The account has joined the room, so now un-join it. Start by putting a message in the
         // room indicating the account has departed.
         String format = mMessageMap.get(R.string.HasDepartedMessage);
-        String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+        String text = String.format(Locale.getDefault(), format, mCurrentAccount.name);
         MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
         RoomManager.instance.leaveRoom(room);
 
@@ -411,7 +411,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // change event on the account.  It is also possible to get a new account event without
         // first getting a sign out event (this has been observed when we are switching to a
         // protected user).
-        String id = event.account != null ? event.account.id : null;
+        String id = event.account != null ? event.account.key : null;
         String cid = mCurrentAccountKey;
         if (cid != null && id != null && !cid.equals(id)) {
             cid = null;
@@ -443,7 +443,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // Check for protected user data and update the account if there are any.
         if (event.account != null) {
             DatabaseReference invite = FirebaseDatabase.getInstance().getReference()
-                    .child(String.format(AccountManager.PROTECTED_PATH, mCurrentAccount.id));
+                    .child(String.format(AccountManager.PROTECTED_PATH, mCurrentAccount.key));
 
             invite.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override public void onDataChange(DataSnapshot dataSnapshot) {
@@ -546,7 +546,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
                     roomMembers.add(getCurrentAccountId());
                     // Add a message stating the user has joined
                     String format = mMessageMap.get(R.string.HasJoinedMessage);
-                    String text = String.format(Locale.getDefault(), format, mCurrentAccount.displayName);
+                    String text = String.format(Locale.getDefault(), format, mCurrentAccount.name);
                     MessageManager.instance.createMessage(text, STANDARD, mCurrentAccount, room);
                     RoomManager.instance.updateRoomProfile(room);
                 }
@@ -651,7 +651,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Update the given account on the database. */
     public void updateAccount(final Account account) {
-        String path = String.format(Locale.US, ACCOUNT_PATH, account.id);
+        String path = String.format(Locale.US, ACCOUNT_PATH, account.key);
         account.modTime = new Date().getTime();
         DBUtils.updateChildren(path, account.toMap());
     }
@@ -710,7 +710,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         @Override public void onComplete(@NonNull Task<Void> task) {
             // TODO: This executes even if the name change fails, since the account creation
             // succeeded and we want to save the credential to SmartLock (if enabled).
-            AccountManager.instance.mCurrentAccount.displayName = displayName;
+            AccountManager.instance.mCurrentAccount.name = displayName;
             AccountManager.instance.updateAccount(mCurrentAccount);
             ProtectedUserManager.instance.removeEMailCredentials();
         }

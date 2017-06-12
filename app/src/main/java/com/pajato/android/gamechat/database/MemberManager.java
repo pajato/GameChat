@@ -64,7 +64,7 @@ public enum MemberManager {
     /** Persist the given member to the database. */
     public void createMember(final Account member) {
         member.createTime = new Date().getTime();
-        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
+        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.key);
         DBUtils.updateChildren(path, member.toMap());
     }
 
@@ -78,7 +78,7 @@ public enum MemberManager {
         // Return the account if so.
         Map<String, Account> map = memberMap.get(groupKey);
         if (map == null) return null;
-        return map.get(account.id);
+        return map.get(account.key);
     }
 
     /** Return null or a group member using the specified account id and given group key. */
@@ -131,15 +131,15 @@ public enum MemberManager {
         Map<String, Account> map = memberMap.get(event.member.groupKey);
         if (map == null)
             map = new HashMap<>();
-        String id = event.member != null ? event.member.id : null;
+        String id = event.member != null ? event.member.key : null;
         if (id == null || event.member.groupKey == null)
             return;
-        map.put(event.member.id, event.member);
+        map.put(event.member.key, event.member);
         memberMap.put(event.member.groupKey, map);
 
         // Determine if the payload is for the current account holder.  If so, set a message and
         // experience watcher on the joined rooms.
-        if (event.member.id.equals(AccountManager.instance.getCurrentAccountId()))
+        if (event.member.key.equals(AccountManager.instance.getCurrentAccountId()))
             for (String roomKey : event.member.joinMap.keySet()) {
                 RoomManager.instance.setWatcher(event.member.groupKey, roomKey);
                 MessageManager.instance.setWatcher(event.member.groupKey, roomKey);
@@ -185,7 +185,7 @@ public enum MemberManager {
 
     /** Update the given group profile on the database. */
     public void updateMember(final Account member) {
-        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.id);
+        String path = String.format(Locale.US, MEMBERS_PATH, member.groupKey, member.key);
         member.modTime = new Date().getTime();
         DBUtils.updateChildren(path, member.toMap());
     }

@@ -80,9 +80,9 @@ public class AccountChangeHandler extends DatabaseEventHandler implements ValueE
     private Account getAccount(final FirebaseUser user) {
         long tStamp = new Date().getTime();
         Account account = new Account();
-        account.id = user.getUid();
+        account.key = user.getUid();
         account.email = user.getEmail();
-        account.displayName = user.getDisplayName();
+        account.name = user.getDisplayName();
         account.url = getPhotoUrl(user);
         account.type = AccountManager.AccountType.standard.name();
         account.createTime = tStamp;

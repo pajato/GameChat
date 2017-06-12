@@ -102,7 +102,7 @@ public enum PlayModeManager {
         JoinManager.instance.joinRoom(selectUserListItem);
         for (Player p : experience.getPlayers()) {
             if (p.id == null) {
-                p.id = member.id;
+                p.id = member.key;
                 p.name = member.getNickName();
                 break;
             }
@@ -165,16 +165,16 @@ public enum PlayModeManager {
         for (String groupKey : account.joinMap.keySet()) {
             List<Account> accountList = MemberManager.instance.getMemberList(groupKey);
             for(Account member : accountList) {
-                if (account.id.equals(member.id))
+                if (account.key.equals(member.key))
                     continue;
 
                 // If a member exists in more than one group, only add that member once
-                if (memberMap.containsKey(member.id)) {
-                    PlayModeMenuEntry entry = memberMap.get(member.id);
+                if (memberMap.containsKey(member.key)) {
+                    PlayModeMenuEntry entry = memberMap.get(member.key);
                     entry.groupKeyList.add(groupKey);
                 } else
-                    memberMap.put(member.id, new PlayModeMenuEntry(member.getDisplayName(),
-                            member.id, groupKey));
+                    memberMap.put(member.key, new PlayModeMenuEntry(member.getDisplayName(),
+                            member.key, groupKey));
             }
         }
         result.addAll(memberMap.values());
