@@ -191,7 +191,7 @@ http://www.gnu.org/licenses
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowActionBar">false</item>
-        <item name="android:windowBackground">@mipmap/signin_background</item>
+        <item name="android:windowBackground">@drawable/background_gradient</item>
     </style>
 
     <style name="SimpleText">
