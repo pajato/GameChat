@@ -43,6 +43,7 @@ captures/
 # Android Studio other
 *.iml
 .idea/
+app/release
 
 # Mac OS X detritus
 .DS_Store

@@ -10,7 +10,7 @@ android {
         applicationId "com.pajato.android.gamechat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
+        versionCode 9
         versionName "b1.$versionCode"
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
@@ -23,6 +23,7 @@ android {
             storePassword GC_STORE_PASSWORD
             keyAlias GC_RELEASE_KEY_ALIAS
             keyPassword GC_RELEASE_KEY_PASSWORD
+            v2SigningEnabled false
         }
         stage {
             storeFile file(GC_STORE_FILE)
@@ -34,25 +35,30 @@ android {
 
     buildTypes {
         debug {
+            debuggable true
             shrinkResources true
             minifyEnabled true
             useProguard false
-            proguardFile getDefaultProguardFile('proguard-android.txt')
             proguardFile 'proguard-rules.pro'
-            debuggable true
             testCoverageEnabled = true
         }
         release {
-            initWith debug
-            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
-            debuggable false
+            shrinkResources true
+            minifyEnabled true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
         stage {
             initWith debug
-            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
             signingConfig signingConfigs.stage
         }
+    }
+
+    buildTypes.each {
+        it.buildConfigField 'String', 'GC_TEST_EMAIL_KEY', GC_TEST_EMAIL
+        it.buildConfigField 'String', 'GC_TEST_PASSWORD_KEY', GC_TEST_PASSWORD
+        it.buildConfigField 'String', 'GC_TEST_PROVIDER_KEY', GC_TEST_PROVIDER
     }
 
     packagingOptions {

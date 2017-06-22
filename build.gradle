@@ -74,4 +74,7 @@ ext {
     GC_RELEASE_KEY_PASSWORD = secretsProperties['gcReleaseKeyPassword']
     GC_STAGE_KEY_ALIAS = secretsProperties['gcStageKeyAlias']
     GC_STAGE_KEY_PASSWORD = secretsProperties['gcStagePassword']
+    GC_TEST_EMAIL = secretsProperties['gcTestAddress']
+    GC_TEST_PASSWORD = secretsProperties['gcTestPassword']
+    GC_TEST_PROVIDER = secretsProperties['gcTestProvider']
 }
