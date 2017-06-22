@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
 import org.junit.After;
@@ -35,8 +33,8 @@ public abstract class BaseTest {
 
     // Private class constants.
 
-    /** The logcat tag. */
-    private static final String TAG = BaseTest.class.getSimpleName();
+    ///** The logcat tag. */
+    //private static final String TAG = BaseTest.class.getSimpleName();
 
     // Public instance variables.
 
@@ -47,9 +45,9 @@ public abstract class BaseTest {
     @Before public void setup() {
         Intent intent = new Intent();
         intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
-        intent.putExtra(TEST_USER_KEY, getProperty("testAccountName", "nobody@gamechat.com"));
-        intent.putExtra(TEST_PROVIDER_KEY, getProperty("testAccountProvider", "email"));
-        intent.putExtra(TEST_PASSWORD_KEY, getProperty("testAccountPassword", null));
+        intent.putExtra(TEST_USER_KEY, getProperty(BuildConfig.GC_TEST_EMAIL_KEY, "nobody@gamechat.com"));
+        intent.putExtra(TEST_PROVIDER_KEY, getProperty(BuildConfig.GC_TEST_PROVIDER_KEY, "email"));
+        intent.putExtra(TEST_PASSWORD_KEY, getProperty(BuildConfig.GC_TEST_PASSWORD_KEY, null));
         mRule.launchActivity(intent);
     }
 
