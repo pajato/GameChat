@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
 import org.junit.After;
