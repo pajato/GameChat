@@ -39,7 +39,7 @@ android {
             shrinkResources true
             minifyEnabled true
             useProguard false
-            proguardFile 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled = true
         }
         release {
