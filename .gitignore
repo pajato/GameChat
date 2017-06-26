@@ -44,6 +44,9 @@ captures/
 *.iml
 .idea/
 app/release
+app/src/release
+app/src/debug
+app/src/stage
 
 # Mac OS X detritus
 .DS_Store
