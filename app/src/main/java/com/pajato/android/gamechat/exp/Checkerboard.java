@@ -27,51 +27,23 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 
 import com.pajato.android.gamechat.common.BaseFragment;
-import com.pajato.android.gamechat.main.PaneManager;
 
 import java.util.List;
 
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import static com.pajato.android.gamechat.R.color.colorLightGray;
 import static com.pajato.android.gamechat.R.id.board;
+import static com.pajato.android.gamechat.R.id.expFragmentContainer;
 
 /**
  * Provide a checkerboard class to be used for chess and checkers.
  *
  * @author Paul Michael Reilly on 2/12/17.
+ * @author Bryan Scott on 6/25/17
  */
 
 public class Checkerboard {
-
-    // Private class constants.
-
-    /**
-     * The space taken by a smart phone notification bar and digital buttons in dp units. The
-     * number comes from the calculation of 56dp * 1.5. 56 comes from an estimation of the DP of the
-     * phone's lower digital button area, and the additional half of the 1.5 comes from the
-     * notification bar at the top of the phone's screen, which was eyeballed to be roughly half the
-     * size of the digital button area. This is something that could potentially be improved upon.
-     */
-    private static final int SMART_PHONE_HEIGHT = 84;
-
-    /**
-     * The space taken by a tablet notification bar and digital buttons in dp units. Similar to the
-     * Smart Phone Height variable, it is based on a calculation of 28dp * 1.5, which was a similar
-     * estimate of the tablet's digital button area, and the roughly-half-the-size notification bar.
-     */
-    private static final int TABLET_HEIGHT = 42;
-
-    /**
-     * The amount of vertical space allocated to the mini FAB control, which consists of three
-     * parts: the (implicit) top margin for the FAB control, the FAB icon size and the bottom
-     * margin.
-     */
-    private static final int FAB_HEIGHT = 48 + 40 + 16;
-
     // Private instance variables.
-
-    /** The size, in pixels, of the checkerboard cells to use on this device. */
-    private int mCellSize;
 
     /** The GridLayout used to build the checkerboard UI. */
     private GridLayout mGrid;
@@ -79,8 +51,8 @@ public class Checkerboard {
     // Public constructor.
 
     /** Build an instance to establish the cell size for a given context. */
-    public Checkerboard(final Context context) {
-        mCellSize = getCellSize(context);
+    public Checkerboard() {
+
     }
 
     // Public instance methods.
@@ -93,9 +65,11 @@ public class Checkerboard {
     /** Initialize the checkerboard by finding the grid layout and computing the cell size. */
     public void init(@NonNull BaseFragment fragment, final View.OnClickListener handler) {
         mGrid = (GridLayout) fragment.getActivity().findViewById(board);
-        if (mGrid == null)
+        View gameArea = fragment.getActivity().findViewById(expFragmentContainer);
+        if (mGrid == null || gameArea == null)
             return;
 
+        int cellSize = getCellSize(gameArea);
         // Reset the grid layout.
         // There appears to be a bug with GridLayout in that if the row and column counts are not
         // specified, an illegal argument exception can occur, so explicitly set the row and column
@@ -104,7 +78,7 @@ public class Checkerboard {
         mGrid.setRowCount(8);
         mGrid.setColumnCount(8);
         for (int i = 0; i < 64; i++) {
-            TextView currentTile = getCellView(fragment.getContext(), i, mCellSize);
+            TextView currentTile = getCellView(fragment.getContext(), i, cellSize);
             currentTile.setOnClickListener(handler);
             mGrid.addView(currentTile);
         }
@@ -160,31 +134,29 @@ public class Checkerboard {
 
     // Private instance methods.
 
-    /** Return the computed cell size based on the device size provided by the given context. */
-    private int getCellSize(@NonNull final Context context) {
-        // Establish the cell size for the checkerboard.
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        final int dipsHeight = getDips(metrics, metrics.heightPixels);
-        final int dipsWidth = getDips(metrics, metrics.widthPixels);
-        final int toolbarDps = PaneManager.instance.isTablet() ? TABLET_HEIGHT : SMART_PHONE_HEIGHT;
+    /** Return the computed cell size based on the device size (in pixels). */
+    private int getCellSize(@NonNull final View gameArea) {
+        DisplayMetrics metrics = gameArea.getContext().getResources().getDisplayMetrics();
 
-        // Establish the controls height. Remember to convert the SP of text in the layout to DP.
-        // The default is 1-1, but is not necessarily, as SP can scale based on user settings.
-        // This is very arbitrary based on the current physical XML layouts -- if those are changed
-        // (particularly those in exp_toolbar_game_inc.xml and exp_checkers.xml) then this should be
-        // changed to reflect them.
-        int toolbarTextRow1 = convertSPtoDP(20, metrics);
-        int toolbarTextRow2 = Math.max(toolbarTextRow1, (4 + convertSPtoDP(14, metrics)));
-        int controlsRow1 = Math.max(toolbarTextRow1, (40 + convertSPtoDP(14, metrics)));
-        int controlsRow2 = Math.max(convertSPtoDP(20, metrics), (36 + convertSPtoDP(14, metrics)));
-        controlsRow2 = Math.max(56, controlsRow2);
-        final int controlsHeight = toolbarTextRow1 + toolbarTextRow2 + controlsRow1 + controlsRow2;
+        // Horizontally, we have the entire width of the panel to work with, minus 8dp on both sides
+        // As that is the left margin and right margin for the board object.
+        int cellSizeHorizontal = gameArea.getWidth() - dipsToPx(metrics, 8 + 8);
 
-        final int unavailableHeight = controlsHeight + FAB_HEIGHT + toolbarDps;
-        final int boardHeight = dipsHeight - unavailableHeight;
-        final int boardWidth = (PaneManager.instance.isTablet() ? dipsWidth / 2 : dipsWidth) - 32;
-        boolean useWidth = boardHeight > boardWidth;
-        return Math.round((useWidth ? boardWidth : boardHeight) / 8) * Math.round(metrics.density);
+        // Vertically, we must remove the height of the controls and the FAB.
+        // The controls height is either a 12dp margin top and 12dp margin bottom on a 16sp text
+        // view OR a 36dp image view, whichever is larger.
+        int controlsHeightDP = Math.max((12 + 12 + Math.max(16, convertSPtoDP(16, metrics))), 36);
+        int controlsHeight = dipsToPx(metrics, controlsHeightDP);
+
+        // The height taken by the FAB consists of an 8dp margin top and 8dp margin bottom, along
+        // with either a 40dp button size for the actual floating action button (40dp for mini
+        // sized, 56dp for normal sized)
+        int fabHeight = dipsToPx(metrics, 8 + 8 + 40);
+        int cellSizeVertical = gameArea.getHeight() - (controlsHeight + fabHeight);
+
+        // Finally, choose either the horizontal or vertical to return, whichever is smaller, so our
+        // board does not go off the screen.
+        return Math.min(cellSizeHorizontal, cellSizeVertical) / 8;
     }
 
     /** Return a text view representing a cell at a given index of a given size. */
@@ -216,9 +188,12 @@ public class Checkerboard {
 
     /** Convert a given pixel number to dps. */
     private int getDips(final DisplayMetrics metrics, final int px) {
-        // float dp = px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return (px * DisplayMetrics.DENSITY_DEFAULT) / metrics.densityDpi;
+    }
 
+    /** Convert a given dps number to pixels. */
+    private int dipsToPx(final DisplayMetrics metrics, final int dp) {
+        return (dp * metrics.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
     }
 
     /** Convert a given sp value into dps in order to account for variable text size. */

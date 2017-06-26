@@ -148,7 +148,7 @@ public class ChessFragment extends BaseExperienceFragment {
         if (dispatcher.roomKey == null) {
             Log.e(TAG, "Got to onSetup without a room key - we may be offline");
         }
-        mBoard = new Checkerboard(context);
+        mBoard = new Checkerboard();
 
         // If a Chess experience is available in the given room, use it; else create a new one
         mExperience = ExperienceManager.instance.getExperience(dispatcher.groupKey,
