@@ -25,18 +25,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.appinvite.AppInviteInvitationResult;
-import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.appinvite.FirebaseAppInvite;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
@@ -72,15 +73,13 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resourceHeader;
-import static com.pajato.android.gamechat.database.MemberManager.MEMBERS_PATH;
 
 /**
  * Handle invitations to groups, rooms and experiences.
  *
  * @author Sandy Scott
  */
-public enum InvitationManager implements ResultCallback<AppInviteInvitationResult>,
-        GoogleApiClient.OnConnectionFailedListener {
+public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListener {
     instance;
 
     // Private constants.
@@ -203,21 +202,35 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
     }
 
     /** Initialize the invitation manager */
-    public void init(final AppCompatActivity context) {
+    public void init(final AppCompatActivity context, final Intent intent) {
         mMessageMap.clear();
         mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
 
-        // Build GoogleApiClient with AppInvite API for receiving deep links
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .enableAutoManage(context, InvitationManager.instance)
-                .addApi(AppInvite.API)
-                .build();
+        // Check for App Invite invitations and launch deep-link activity if possible.
+        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
+                .addOnSuccessListener(context, new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData data) {
+                        if (data == null) {
+                            Log.d(TAG, "getInvitation: no data");
+                            return;
+                        }
 
-        // Check if this app was launched from a deep link. Setting autoLaunchDeepLink to true
-        // would automatically launch the deep link if one is found.
-        final boolean autoLaunchDeepLink = false;
-        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, context, autoLaunchDeepLink)
-                .setResultCallback(InvitationManager.instance);
+                        // Extract invite
+                        FirebaseAppInvite invite = FirebaseAppInvite.getInvitation(data);
+                        if (invite != null) {
+                            // Save invitation id for use after authentication
+                            String invitationId = invite.getInvitationId();
+                            mInvitationIds.add(invitationId);
+                        }
+                    }
+                })
+                .addOnFailureListener(context, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "getDynamicLink:onFailure", e);
+                    }
+                });
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
@@ -246,7 +259,7 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
         }
     }
 
-    /**
+    /*
      * Handle an error connecting the client to the  GoogleApiClient service (required for
      * AppInvite API
      */
@@ -298,19 +311,6 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 saveInvitation(id);
             }
         }
-    }
-
-    /** Handle result of invitation intent (after receiving invitation) */
-    public void onResult(@NonNull AppInviteInvitationResult result) {
-        Log.i(TAG, "getInvitation intent=" + result.getInvitationIntent());
-        if (!result.getStatus().isSuccess()) {
-            Log.i(TAG, "getInvitation: no deep link found.");
-            return;
-        }
-        // Save invitation id for use after authentication
-        Intent intent = result.getInvitationIntent();
-        String invitationId = AppInviteReferral.getInvitationId(intent);
-        mInvitationIds.add(invitationId);
     }
 
     /** Handle the room profile change */
@@ -443,6 +443,8 @@ public enum InvitationManager implements ResultCallback<AppInviteInvitationResul
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     String key = child.getKey();
                     GroupInviteData value = child.getValue(GroupInviteData.class);
+                    if (value == null)
+                        continue;
                     if (value.rooms == null) // avoid null pointer exceptions
                         value.rooms = new ArrayList<>();
                     mInviteMap.put(key, value);
