@@ -1,3 +1,9 @@
+# Release b1.11
+
+## Bug fixes
+
+Fix the bug whereby a pawn on column position 7 (base 1) in any row was not able to take a piece to the right.
+
 # Release b1.10
 
 ## Bug fixes

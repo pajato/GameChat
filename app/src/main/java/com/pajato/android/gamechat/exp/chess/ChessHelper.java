@@ -300,7 +300,7 @@ public class ChessHelper {
                     && board.getTeam(downRight).equals(Team.PRIMARY)) {
                 threatRange.add(downRight);
             }
-            if (board.getPiece(downLeft) != null && downRight % 8 != 7
+            if (board.getPiece(downLeft) != null && downLeft % 8 != 7
                     && board.getTeam(downLeft).equals(Team.PRIMARY)) {
                 threatRange.add(downLeft);
             }
