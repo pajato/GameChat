@@ -1,3 +1,9 @@
+# Release b1.12
+
+## Bug fixes
+
+Fix the bug whereby a chess or checkers reset on a release build did not take effect immediately.
+
 # Release b1.11
 
 ## Bug fixes
