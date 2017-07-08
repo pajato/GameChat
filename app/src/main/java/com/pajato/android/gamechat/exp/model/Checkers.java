@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import com.google.firebase.database.Exclude;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.model.Base;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceResetEvent;
@@ -178,7 +179,7 @@ public class Checkers extends Base implements Experience {
         DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int id) {
                 resetModel();
-                AppEventManager.instance.post(new ExperienceResetEvent(key));
+                ExperienceManager.instance.updateExperience(Checkers.this);
             }
         };
         fragment.showAlertDialog(fragment.getString(R.string.ResetGameTitle),

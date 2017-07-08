@@ -200,13 +200,6 @@ public enum ExperienceManager {
         return null;
     }
 
-    /** Update an experience in the database after its model has been reset */
-    @Subscribe void handleExperienceResetEvent(ExperienceResetEvent event) {
-        Experience experience = getExperience(event.experienceKey);
-        if (experience != null)
-            ExperienceManager.instance.updateExperience(experience);
-    }
-
     /** Get the data as a set of list items for all groups. */
     public List<ListItem> getGroupListItemData() {
         // Determine whether to handle no groups (a set of welcome list items), one group (a set of
