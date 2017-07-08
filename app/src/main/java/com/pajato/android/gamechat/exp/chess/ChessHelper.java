@@ -332,8 +332,8 @@ public class ChessHelper {
         int leftLeftUp = highlightedIndex - 10;
 
         // Ensure we obey the sides of the board when we set up our movement options.
-        if(upUpLeft % 8 == 7) upUpLeft = -1;
-        if(upUpRight % 8 == 0) upUpRight = -1;
+        if (upUpLeft % 8 == 7) upUpLeft = -1;
+        if (upUpRight % 8 == 0) upUpRight = -1;
         if (rightRightUp % 8 == 0 || rightRightUp % 8 == 1) rightRightUp = -1;
         if (rightRightDown % 8 == 0 || rightRightDown % 8 == 1) rightRightDown = -1;
         if (downDownRight % 8 == 0) downDownRight = -1;

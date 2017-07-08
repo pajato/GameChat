@@ -6,6 +6,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
+import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.Board;
@@ -212,7 +213,7 @@ import static com.pajato.android.gamechat.exp.State.active;
         DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int id) {
                 resetModel();
-                AppEventManager.instance.post(new ExperienceResetEvent(key));
+                ExperienceManager.instance.updateExperience(Chess.this);
             }
         };
         fragment.showAlertDialog(fragment.getString(R.string.ResetGameTitle),
