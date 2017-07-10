@@ -1,3 +1,9 @@
+# Release b1.13
+
+## Bug fixes
+
+Fix the bug whereby when a move puts the opposing King in check, an opposing piece is inappropriately selected.
+
 # Release b1.12
 
 ## Bug fixes

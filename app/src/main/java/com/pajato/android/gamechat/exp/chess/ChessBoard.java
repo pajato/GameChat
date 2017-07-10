@@ -98,14 +98,6 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
         mSelectedPosition = -1;
     }
 
-    /** Return TRUE iff the board contains a king for the given team. */
-    boolean containsKing(final Team team) {
-        for (int i = 0; i < 64; i++)
-            if (cellHasTeamPiece(i, KING, team))
-                return true;
-        return false;
-    }
-
     /** Implement the interface by returning and removing the piece at the given position. */
     @Override public ChessPiece delete(final int position) {
         return mPieceMap.remove(CELL_ID + String.valueOf(position));
@@ -204,11 +196,6 @@ import static com.pajato.android.gamechat.exp.chess.ChessPiece.PieceType.ROOK;
     }
 
     // Private instance methods.
-
-    /** Return TRUE iff the piece at the given position is of the given type and team. */
-    private boolean cellHasTeamPiece(final int index, PieceType type, Team team) {
-        return getPieceType(index).equals(type) && getTeam(index).equals(team);
-    }
 
     /** Initialize the pieces for a given team using the given offset to calculate positions. */
     private void setPiecesForTeamUsingOffsets(final Team team, final int row1, final int row2) {

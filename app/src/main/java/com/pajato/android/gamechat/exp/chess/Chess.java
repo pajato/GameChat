@@ -7,8 +7,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.database.ExperienceManager;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
