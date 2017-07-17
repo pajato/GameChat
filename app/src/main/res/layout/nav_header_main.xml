@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (C) 2016 Pajato Technologies LLC.
 
 This file is part of Pajato GameChat.
@@ -14,8 +13,7 @@ details.
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
@@ -28,9 +26,9 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="@string/sign_in"
         android:gravity="center"
         android:onClick="onClick"
+        android:text="@string/sign_in"
         tools:visibility="gone" />
 
     <LinearLayout
@@ -38,9 +36,10 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
         android:gravity="bottom"
+        android:orientation="horizontal"
         tools:visibility="visible">
+
         <ImageView
             android:id="@+id/currentAccountIcon"
             android:layout_width="48dp"
@@ -50,17 +49,20 @@ http://www.gnu.org/licenses
             android:scaleType="fitXY"
             android:src="@android:drawable/sym_def_app_icon"
             tools:ignore="ContentDescription" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/currentAccountDisplayName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/nav_header_label_android_studio"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
             <TextView
                 android:id="@+id/currentAccountEmail"
                 android:layout_width="wrap_content"
@@ -68,28 +70,31 @@ http://www.gnu.org/licenses
                 android:text="@string/nav_header_label_android_studio_android_com" />
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal">
+
         <TextView
             android:id="@+id/switchAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1.0"
-            android:text="@string/switch_account"
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:text="@string/switch_account" />
+
         <TextView
             android:id="@+id/signOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:gravity="center"
-            android:text="@string/sign_out"
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            android:text="@string/sign_out" />
     </LinearLayout>
 
 </LinearLayout>
