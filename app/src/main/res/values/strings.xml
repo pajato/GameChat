@@ -58,6 +58,6 @@
     <string name="navigation_drawer_label_yours">Your Groups</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
-    <string name="switch_account">\u25bc Switch account</string>
+    <string name="switch_account">\u25bc</string>
     <string name="me">me</string>
 </resources>
