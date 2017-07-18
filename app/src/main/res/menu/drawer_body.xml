@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/navigation_drawer_label_yours">
-        <menu>
-            <group>
-                <item
-                    android:icon="@drawable/ic_chat_bubble_circle_black_24dp"
-                    android:id="@+id/nav_groups"
-                    android:title="@string/navigation_drawer_label_your_groups"/>
-                <item
-                    android:icon="@drawable/ic_account_circle_black_24dp"
-                    android:id="@+id/nav_me_room"
-                    android:title="@string/navigation_drawer_label_your_room"/>
-            </group>
-        </menu>
-    </item>
-    <item
-        android:id="@+id/manageProtectedUsers"
-        android:title="@string/ManageRestrictedUserTitle"
-        android:icon="@drawable/ic_verified_user_black_24dp" />
-    <item
-        android:id="@+id/inviteFriends"
-        android:title="@string/InviteFriendMessage"
-        android:icon="@drawable/ic_share_black_24dp"/>
-    <group android:orderInCategory="100">
-        <item android:title=""/>
-        <item android:title=""/>
+    <group android:id="@+id/menu_group_main">
+        <item android:title="@string/navigation_drawer_label_yours">
+            <menu>
+                <group>
+                    <item android:id="@+id/nav_groups"
+                        android:icon="@drawable/ic_chat_bubble_circle_black_24dp"
+                        android:title="@string/navigation_drawer_label_your_groups"/>
+                    <item android:id="@+id/nav_me_room"
+                        android:icon="@drawable/ic_account_circle_black_24dp"
+                        android:title="@string/navigation_drawer_label_your_room"/>
+                </group>
+            </menu>
+        </item>
+        <item android:id="@+id/manageProtectedUsers"
+            android:title="@string/ManageRestrictedUserTitle"
+            android:icon="@drawable/ic_verified_user_black_24dp" />
+        <item android:id="@+id/inviteFriends"
+            android:title="@string/InviteFriendMessage"
+            android:icon="@drawable/ic_share_black_24dp"/>
+        <group android:orderInCategory="100">
+            <item android:title=""/>
+            <item android:title=""/>
+        </group>
+    </group>
+    <group android:id="@+id/menu_group_users">
+        <item
+            android:title="user1@gmail.com"
+            android:icon="@drawable/ic_verified_user_black_24dp" />
+        <item
+            android:title="user2@gmail.com"
+            android:icon="@drawable/ic_share_black_24dp"/>
     </group>
 </menu>

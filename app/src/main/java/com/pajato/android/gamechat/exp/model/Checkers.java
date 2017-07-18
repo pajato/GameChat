@@ -7,8 +7,6 @@ import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.BaseFragment;
 import com.pajato.android.gamechat.database.ExperienceManager;
 import com.pajato.android.gamechat.database.model.Base;
-import com.pajato.android.gamechat.event.AppEventManager;
-import com.pajato.android.gamechat.event.ExperienceResetEvent;
 import com.pajato.android.gamechat.exp.Board;
 import com.pajato.android.gamechat.exp.ExpType;
 import com.pajato.android.gamechat.exp.Experience;
@@ -175,7 +173,6 @@ public class Checkers extends Base implements Experience {
             resetModel();
             return true;
         }
-        final String key = this.key;
         DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int id) {
                 resetModel();

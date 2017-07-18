@@ -29,6 +29,8 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -51,11 +53,22 @@ import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chat
 public enum NavigationManager {
     instance;
 
+    /** Provide an enumeration of account switching states. */
+    private enum AccountSwitchState {
+        main,                   // Show the main navigation drawer menu items.
+        users;                  // Show the list of selectable users.
+    }
+
     // Private class constants
 
     // Navigation drawer action constants.
     private static final int OPEN_ID = R.string.navigation_drawer_action_open;
     private static final int CLOSE_ID = R.string.navigation_drawer_action_close;
+
+    // Private instance variables.
+
+    /** The current account switch state. */
+    private AccountSwitchState mAccountSwitchState;
 
     // Public instance methods
 
@@ -74,7 +87,7 @@ public enum NavigationManager {
         return drawer.isDrawerOpen(GravityCompat.START);
     }
 
-    /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type.*/
+    /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type. */
     public void init(final Activity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
         DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
@@ -83,14 +96,15 @@ public enum NavigationManager {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set up the handle navigation menu item clicks and register this manager with the app
-        // event manager.
+        // Set up to hamburger menu navigation and register this manager for app events.
         NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((MainActivity) activity);
         NavigationView footer = (NavigationView) activity.findViewById(R.id.nav_footer);
         footer.setNavigationItemSelectedListener((MainActivity) activity);
 
-        // Have toolbar manager set up overflow menu, etc.
+        // Establish the account switch state and Have the toolbar manager set up the overflow menu.
+        mAccountSwitchState = AccountSwitchState.main;
+        enableDrawerMenuGroup(activity);
         if (toolbar != null)
             ToolbarManager.instance.resetOverflowMenu(activity.getResources(), chatMain, toolbar);
     }
@@ -103,8 +117,7 @@ public enum NavigationManager {
 
     /** Set up the navigation header to show an account. */
     public void setAccount(final Account account, final View header) {
-        // Hide the sign in text and show the current profile and the sign
-        // out text.
+        // Hide the sign in text and show the current profile and the sign out text.
         View view = header.findViewById(R.id.signIn);
         view.setVisibility(account != null ? View.GONE : View.VISIBLE);
         view = header.findViewById(R.id.signOut);
@@ -119,6 +132,13 @@ public enum NavigationManager {
         setDisplayName(account, header);
         TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
         email.setText(account.email);
+    }
+
+    /** Toggle the account switch state. */
+    public void toggleAccountSwitchState(final Activity activity) {
+        mAccountSwitchState = mAccountSwitchState == AccountSwitchState.main
+            ? AccountSwitchState.users : AccountSwitchState.main;
+        enableDrawerMenuGroup(activity);
     }
 
     // Private instance methods.
@@ -158,6 +178,28 @@ public enum NavigationManager {
         TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
         view.setText(name);
         view.setVisibility(View.VISIBLE);
+    }
+
+    /** Establish the current menu in the navigation drawer based on the account switch state. */
+    private void enableDrawerMenuGroup(final Activity activity) {
+        // Ensure that there is a menu in the drawer body; abort if not.
+        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        Menu menu = navigationView != null ? navigationView.getMenu() : null;
+        if (menu == null)
+            return;
+
+        // Set the menu state.
+        switch (mAccountSwitchState) {
+            case main:
+                menu.setGroupVisible(R.id.menu_group_main, true);
+                menu.setGroupVisible(R.id.menu_group_users, false);
+                break;
+
+            case users:
+                menu.setGroupVisible(R.id.menu_group_main, false);
+                menu.setGroupVisible(R.id.menu_group_users, true);
+                break;
+        }
     }
 
     // Inner classes.
