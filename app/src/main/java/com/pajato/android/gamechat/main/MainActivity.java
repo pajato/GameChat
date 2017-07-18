@@ -207,11 +207,8 @@ public class MainActivity extends BaseActivity
                 AccountManager.instance.signOut(activity);
                 break;
             case R.id.switchAccount:
-                // Post a toast message indicating this is a future feature
-                String prefix = getString(R.string.MenuItemSwitchAccount);
-                String suffix = getString(R.string.FutureFeature);
-                CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+                NavigationManager.instance.toggleAccountSwitchState(this);
+                break;
             default:
                 // Ignore everything else.
                 break;

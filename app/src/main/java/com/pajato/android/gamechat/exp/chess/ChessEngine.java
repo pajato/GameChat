@@ -169,9 +169,7 @@ public enum ChessEngine implements Engine {
                 continue;
             List<Integer> possibleMoves = getPossibleMoves(position);
             removeCheckExposingMoves(possibleMoves, position);
-            for(Integer possibleMove : possibleMoves) {
-                allMoves.add(possibleMove);
-            }
+            allMoves.addAll(possibleMoves);
         }
         return allMoves;
     }

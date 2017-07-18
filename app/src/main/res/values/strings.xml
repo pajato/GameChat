@@ -23,7 +23,6 @@
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemSearch">Search</string>
     <string name="MenuItemSettings">Settings</string>
-    <string name="MenuItemSwitchAccount">Switch account</string>
     <string name="NotLoggedInMessage">Not logged in!  Please sign in.</string>
     <string name="OfflineToolbarTitle">The network is not available.</string>
     <string name="OfflineMessageText">The network is not available.  You can play local games while offline.</string>
@@ -37,9 +36,9 @@
     <string name="arrow_left"><![CDATA[<]]></string>
     <string name="arrow_right"><![CDATA[>]]></string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="facebook_application_id" translatable="false">477157459160674</string>
+    <!--<string name="facebook_application_id" translatable="false">477157459160674</string> -->
     <!-- Facebook Application ID, prefixed by 'fb'.  Enables Chrome Custom tabs. -->
-    <string name="facebook_login_protocol_scheme" translatable="false">fb477157459160674</string>
+    <!--<string name="facebook_login_protocol_scheme" translatable="false">fb477157459160674</string> -->
     <string name="intro_chat_message">Public, private, and secure messaging</string>
     <string name="intro_chat_title">Chat</string>
     <string name="intro_game_message">Play games with GameChat members or against the computer</string>
