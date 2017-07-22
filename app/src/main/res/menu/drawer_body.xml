@@ -24,12 +24,5 @@
             <item android:title=""/>
         </group>
     </group>
-    <group android:id="@+id/menu_group_users">
-        <item
-            android:title="user1@gmail.com"
-            android:icon="@drawable/ic_verified_user_black_24dp" />
-        <item
-            android:title="user2@gmail.com"
-            android:icon="@drawable/ic_share_black_24dp"/>
-    </group>
+    <group android:id="@+id/menu_group_users"/>
 </menu>

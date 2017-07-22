@@ -49,6 +49,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
+import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -472,34 +473,26 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Deal with authentication backend changes: sign in and sign out */
     @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
-        // Determine if this state represents a User signing in or signing out.
+        // Deal with a User sign-out or a new user sign-in by un-registering the current account
+        // handler.
+        String name = mCurrentAccount != null ? mCurrentAccount.email : null;
+        if (name != null) {
+            String handler = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, mCurrentAccount.key);
+            DatabaseRegistrar.instance.unregisterHandler(handler);
+            Log.i(TAG, "Authentication sign-out from: " + name);
+            AppEventManager.instance.post(new AccountChangeEvent(null));
+        }
+
+        // Determine if this state change represents a User signing in.
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            // A user has signed in. Ensure an account change listener is registered.
-            if (user.getDisplayName() == null)
-                Log.i(TAG, "authentication change with FirebaseUser: " + user.getEmail());
-            else
-                Log.i(TAG, "authentication change with FirebaseUser: " + user.getDisplayName());
-
-            // If there is a previous account UID and we have a listener registered for it, get
-            // rid of it. First send an account change event indicating the change to unregistered.
-            if (mCurrentAccountKey != null && !mCurrentAccountKey.equals("") &&
-                    !mCurrentAccountKey.equals(user.getUid())) {
-                AppEventManager.instance.post(new AccountChangeEvent(null));
-                DatabaseRegistrar.instance.unregisterHandler(
-                        DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, mCurrentAccountKey));
-            }
-
-            // Register a handler for the current user account
-            String name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, user.getUid());
+            // A user has signed in. Ensure an account change listener is registered and persist the
+            // credentials.
+            name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, user.getUid());
             String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
-        } else {
-            Log.i(TAG, "authentication change with NULL FirebaseUser");
-            String name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, mCurrentAccountKey);
-            // The user is signed out so remove the listener and notify the app.
-            DatabaseRegistrar.instance.unregisterHandler(name);
-            AppEventManager.instance.post(new AccountChangeEvent(null));
+            Log.i(TAG, "Authentication sign-in for: " + user.getEmail());
+            CredentialsManager.instance.persist(user);
         }
     }
 

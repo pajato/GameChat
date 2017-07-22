@@ -214,7 +214,7 @@ public class CreateProtectedUsersFragment extends BaseChatFragment {
                 showNameLayout(true, false);
             }
             showPasswordLayout(true, false);
-            passwordText.setText(credentials.secret);
+            passwordText.setText("");
             enableFinishButton(true);
             pwdBtn.setEnabled(true);
         } else {

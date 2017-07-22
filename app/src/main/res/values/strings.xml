@@ -1,4 +1,5 @@
 <resources>
+    <string name="AddAccountMenuTitle">Add account</string>
     <string name="AuthFailureInvalidCredentials">Invalid credentials specified.</string>
     <string name="AuthFailureInvalidUser">This user is no longer valid in the Firebase database.</string>
     <string name="AuthSignInFailure">Sign in failed: %s</string>
@@ -19,6 +20,7 @@
     <string name="InviteToGroupFormat">You are invited to join my GameChat group: %s</string>
     <string name="InviteFriendMessage">Invite friends</string>
     <string name="ItemCreatedMessage">%s is created</string>
+    <string name="ManageAccountsMenuTitle">Manage accounts</string>
     <string name="ManageRestrictedUserTitle">Protected Users</string>
     <string name="MenuItemHelpAndFeedback">Help &amp; Feedback</string>
     <string name="MenuItemSearch">Search</string>

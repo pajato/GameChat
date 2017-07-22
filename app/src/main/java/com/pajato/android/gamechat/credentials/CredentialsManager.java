@@ -22,8 +22,8 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
 
@@ -58,11 +58,8 @@ public enum CredentialsManager {
     /** The preferences key for the last saved email address. */
     public static final String LAST_USED_EMAIL_KEY = "lastUsedEmailKey";
 
-    /** The preferences key for the credentials secret. */
-    public static final String SECRET_KEY = "secretKey";
-
-    /** The preferences key for the credentials token. */
-    public static final String TOKEN_KEY = "tokenKey";
+    /** The preferences key for the credentials icon URL. */
+    public static final String URL_KEY = "urlKey";
 
     // Private class constants.
 
@@ -75,11 +72,8 @@ public enum CredentialsManager {
     /** The format used to persist a credential provider. */
     private static final String FORMAT_PROVIDER = "%s:provider:%s";
 
-    /** The format used to persist a credential secret. */
-    private static final String FORMAT_SECRET = "%s:secret:%s";
-
-    /** The format used to persist a credential token. */
-    private static final String FORMAT_TOKEN = "%s:token:%s";
+    /** The format used to persist a credential icon URL. */
+    private static final String FORMAT_URL = "%s:url:%s";
 
     /** The logcat tag. */
     private static final String TAG = CredentialsManager.class.getSimpleName();
@@ -89,33 +83,11 @@ public enum CredentialsManager {
     /** The map associating an email address with a provider and token/password. */
     private Map<String, Credentials> mCredentialsMap = new HashMap<>();
 
-    /** The last used email address. */
-    private String mLastUsedEmailAddress;
-
     // Public instance methods
 
-    /** Return credentials for a given User account by email address, null on no account. */
-    public AuthCredential getAuthCredential(final String emailAddress) {
-        // Determine if there is no such account.
-        Credentials credentials = mCredentialsMap.get(emailAddress);
-        if (credentials == null)
-            return null;
-
-        // Case on the provider type.
-        switch (credentials.provider) {
-            case GoogleAuthProvider.PROVIDER_ID:
-                return GoogleAuthProvider.getCredential(credentials.token, null);
-            case FacebookAuthProvider.PROVIDER_ID:
-                return FacebookAuthProvider.getCredential(credentials.secret);
-            case TwitterAuthProvider.PROVIDER_ID:
-                return TwitterAuthProvider.getCredential(credentials.secret, credentials.secret);
-            default: return null;
-        }
-    }
-
-    /** Return null or the last email address used to sign in to Firebase. */
-    public String getLastUsedEmailAddress() {
-        return mLastUsedEmailAddress;
+    /** Return the credentials map. */
+    public Map<String, Credentials> getMap() {
+        return mCredentialsMap;
     }
 
     /** Build the object by reading in the saved credentials. */
@@ -126,18 +98,20 @@ public enum CredentialsManager {
                 cacheValue(value);
             cacheValidate();
         }
-        mLastUsedEmailAddress = prefs.getString(LAST_USED_EMAIL_KEY, null);
     }
 
-    /** Save a set of credentials to the preferences store. */
+    /** Persist the given User data by updating the shared preferences User persistence store. */
+    public void persist(final FirebaseUser user) {
+        // tbd is this necessary or does saveCredential provide the solution needed.
+    }
+
+    /** Save a set of credentials from the given intent to the preferences store. */
     public void saveCredentials(final Intent intent, SharedPreferences prefs) {
-        // Extract the credentials from the given intent.
+        // Extract and persist the credentials from the given intent.
         String provider = intent.getStringExtra(PROVIDER_KEY);
         String email = intent.getStringExtra(EMAIL_KEY);
-        String secret = intent.getStringExtra(SECRET_KEY);
-        String token = intent.getStringExtra(TOKEN_KEY);
-        // Cache the credentials.
-        Credentials credentials = new Credentials(provider, email, secret, token);
+        String url = intent.getStringExtra(URL_KEY);
+        Credentials credentials = new Credentials(provider, email, url);
         mCredentialsMap.put(email, credentials);
 
         // Persist the credentials.
@@ -165,8 +139,7 @@ public enum CredentialsManager {
         List<String> result = new ArrayList<>();
         result.add(String.format(Locale.US, FORMAT_EMAIL, key, credentials.email));
         result.add(String.format(Locale.US, FORMAT_PROVIDER, key, credentials.provider));
-        result.add(String.format(Locale.US, FORMAT_SECRET, key, credentials.secret));
-        result.add(String.format(Locale.US, FORMAT_TOKEN, key, credentials.token));
+        result.add(String.format(Locale.US, FORMAT_URL, key, credentials.url));
         return result;
     }
 
@@ -215,19 +188,15 @@ public enum CredentialsManager {
             case "provider":
                 credentials.provider = content;
                 break;
-            case "secret":
-                credentials.secret = content;
-                break;
-            case "token":
-                credentials.token = content;
+            case "url":
+                credentials.url = content;
                 break;
         }
     }
 
     /** Return TRUE iff the given credentials are not complete and sensible. */
     private boolean isValid(@NonNull final Credentials credentials) {
-        return isValidEmail(credentials.email) && isValidProvider(credentials.provider)
-                && (credentials.secret != null || credentials.token != null);
+        return isValidEmail(credentials.email) && isValidProvider(credentials.provider);
     }
 
     /** Return TRUE iff the given email address is valid. */

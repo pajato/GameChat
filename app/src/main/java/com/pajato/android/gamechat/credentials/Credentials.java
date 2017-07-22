@@ -35,11 +35,8 @@ public class Credentials {
     /** The identity provider. */
     public String provider;
 
-    /** The identity secret. */
-    public String secret;
-
-    /** The identity token. */
-    public String token;
+    /** The identity icon url. */
+    public String url;
 
     /** The user name */
     public String name;
@@ -51,20 +48,19 @@ public class Credentials {
 
 
     /** Build an instance for e-mail login (used when creating a protected user) */
-    public Credentials(final String email, final String name, final String password, final boolean isKnown) {
+    public Credentials(final String email, final String name, final String url,
+                       final boolean isKnown) {
         this.email = email;
         this.name = name;
-        this.secret = password;
+        this.url = url;
         this.accountIsKnown = isKnown;
     }
 
     /** Build an instance */
-    public Credentials(final String provider, final String email, final String secret,
-                       final String token) {
+    public Credentials(final String provider, final String email, final String url) {
         this.email = email;
         this.provider = provider;
-        this.secret = secret;
-        this.token = token;
+        this.url = url;
     }
 
 }
