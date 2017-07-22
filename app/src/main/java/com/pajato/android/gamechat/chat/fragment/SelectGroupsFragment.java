@@ -72,7 +72,7 @@ public class SelectGroupsFragment extends BaseChatFragment {
                     break;
                 }
                 AccountManager.instance.createProtectedAccount(credentials.email, credentials.name,
-                        credentials.secret, credentials.accountIsKnown, getGroupSelections());
+                        credentials.url, credentials.accountIsKnown, getGroupSelections());
                 break;
             case R.id.selector:
                 // Checkbox click, just update the adapter

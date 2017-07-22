@@ -30,7 +30,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,9 +40,14 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
+import com.pajato.android.gamechat.credentials.Credentials;
+import com.pajato.android.gamechat.credentials.CredentialsManager;
+import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.Map;
 
 import static android.graphics.Shader.TileMode.CLAMP;
 import static com.pajato.android.gamechat.common.ToolbarManager.ToolbarType.chatMain;
@@ -56,7 +60,7 @@ public enum NavigationManager {
     /** Provide an enumeration of account switching states. */
     private enum AccountSwitchState {
         main,                   // Show the main navigation drawer menu items.
-        users;                  // Show the list of selectable users.
+        users                   // Show the list of selectable users.
     }
 
     // Private class constants
@@ -143,6 +147,55 @@ public enum NavigationManager {
 
     // Private instance methods.
 
+    /** Populate the Users menu. */
+    private void addUsers(final Menu menu, final Context context) {
+        menu.removeGroup(R.id.menu_group_users);
+        addUsersWithCredentials(menu);
+        String title = context.getString(R.string.AddAccountMenuTitle);
+        menu.add(R.id.menu_group_users, 1, 0, title).setIcon(R.drawable.ic_add_black_24dp);
+        title = context.getString(R.string.ManageAccountsMenuTitle);
+        menu.add(R.id.menu_group_users, 2, 0, title).setIcon(R.drawable.ic_settings_black_24dp);
+    }
+
+    /** Add the set of Users from this device that have previously logged in. */
+    private void addUsersWithCredentials(final Menu menu) {
+        // Walk through the previously signed in Users on this device making each available as a
+        // menu option while excluding the current User's email address.  Ensure that each has a
+        // unique menu id.
+        Map<String, Credentials> map = CredentialsManager.instance.getMap();
+        String currentEmail = AccountManager.instance.getCurrentAccount().email;
+        final int icon = R.drawable.ic_account_circle_black_24dp;
+        int id = 3;
+        for (String email : map.keySet()) {
+            if (email.equals(currentEmail))
+                continue;
+            menu.add(R.id.menu_group_users, id++, 0, email).setIcon(icon);
+        }
+    }
+
+    /** Establish the current menu in the navigation drawer based on the account switch state. */
+    private void enableDrawerMenuGroup(final Activity activity) {
+        // Ensure that there is a menu in the drawer body; abort if not.
+        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        Menu menu = navigationView != null ? navigationView.getMenu() : null;
+        if (menu == null)
+            return;
+
+        // Set the menu state.
+        switch (mAccountSwitchState) {
+            case main:
+                menu.setGroupVisible(R.id.menu_group_main, true);
+                menu.setGroupVisible(R.id.menu_group_users, false);
+                break;
+
+            case users:
+                addUsers(menu, activity);
+                menu.setGroupVisible(R.id.menu_group_main, false);
+                menu.setGroupVisible(R.id.menu_group_users, true);
+                break;
+        }
+    }
+
     /** Load the account icon, if available, using a placeholder otherwise. */
     private void loadAccountIcon(final Account account, final View header) {
         // Determine if there is an image to be loaded.
@@ -178,28 +231,6 @@ public enum NavigationManager {
         TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
         view.setText(name);
         view.setVisibility(View.VISIBLE);
-    }
-
-    /** Establish the current menu in the navigation drawer based on the account switch state. */
-    private void enableDrawerMenuGroup(final Activity activity) {
-        // Ensure that there is a menu in the drawer body; abort if not.
-        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
-        Menu menu = navigationView != null ? navigationView.getMenu() : null;
-        if (menu == null)
-            return;
-
-        // Set the menu state.
-        switch (mAccountSwitchState) {
-            case main:
-                menu.setGroupVisible(R.id.menu_group_main, true);
-                menu.setGroupVisible(R.id.menu_group_users, false);
-                break;
-
-            case users:
-                menu.setGroupVisible(R.id.menu_group_main, false);
-                menu.setGroupVisible(R.id.menu_group_users, true);
-                break;
-        }
     }
 
     // Inner classes.
