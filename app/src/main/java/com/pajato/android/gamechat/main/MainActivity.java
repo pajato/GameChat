@@ -54,10 +54,11 @@ import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthStateChangedEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.GroupJoinedEvent;
+import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
@@ -73,7 +74,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.main.PaneManager.CHAT_INDEX;
@@ -124,8 +124,12 @@ public class MainActivity extends BaseActivity
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe
-    public void onAuthenticationChange(final AuthenticationChangeEvent event) {
+    @Subscribe public void onAuthStateChange(@NonNull final AuthStateChangedEvent event) {
+        CredentialsManager.instance.persist(this, event.user);
+    }
+
+    /** Handle an account state change by updating the navigation drawer header. */
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.  But first, turn
         // off the sign in spinner.
@@ -139,28 +143,10 @@ public class MainActivity extends BaseActivity
         if (layout != null) layout.setOnClickListener(this);
         NavigationManager.instance.setAccount(account, header);
 
-        // Turn off all database handlers if the account has been signed out.
+        // Turn off all database handlers if the account has been signed out, otherwise update the
+        // persisted credentials.
         if (account == null)
             DatabaseRegistrar.instance.unregisterAll();
-    }
-
-    /** Handle group joined event */
-    @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
-        if (event.groupName != null && !event.groupName.equals("")) {
-            String message;
-            if (event.rooms.size() == 1) {
-                message = String.format(Locale.US, getString(R.string.JoinedOneRoom),
-                        event.rooms.get(0), event.groupName);
-            } else if (event.rooms.size() > 1) {
-                String roomList = TextUtils.join(", ", event.rooms);
-                message = String.format(Locale.US, getString(R.string.JoinedMultiRooms),
-                        roomList, event.groupName);
-            } else {
-                String format = getString(R.string.JoinedGroupsMessage);
-                message = String.format(Locale.US, format, event.groupName);
-            }
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        }
     }
 
     /** Handle a back button press event delivered by the system. */
@@ -230,6 +216,25 @@ public class MainActivity extends BaseActivity
     public void onClick(final View view) {
         // Use the Event bus to post the click event.
         AppEventManager.instance.post(new ClickEvent(view));
+    }
+
+    /** Handle group joined event */
+    @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
+        if (event.groupName != null && !event.groupName.equals("")) {
+            String message;
+            if (event.rooms.size() == 1) {
+                message = String.format(Locale.US, getString(R.string.JoinedOneRoom),
+                                        event.rooms.get(0), event.groupName);
+            } else if (event.rooms.size() > 1) {
+                String roomList = TextUtils.join(", ", event.rooms);
+                message = String.format(Locale.US, getString(R.string.JoinedMultiRooms),
+                                        roomList, event.groupName);
+            } else {
+                String format = getString(R.string.JoinedGroupsMessage);
+                message = String.format(Locale.US, format, event.groupName);
+            }
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /** Process a navigation menu item click by posting a click event. */
@@ -320,7 +325,7 @@ public class MainActivity extends BaseActivity
         } else if (request == RC_INTRO)
             // Intro activity result: Update the account data based on the result from the intro
             // activity intent data.
-            saveAccountData(intent);
+            CredentialsManager.instance.persist(this, intent);
     }
 
     /** Set up the app per the characteristics of the running device. */
@@ -430,18 +435,6 @@ public class MainActivity extends BaseActivity
         // sign in.
         Intent introIntent = new Intent(this, IntroActivity.class);
         startActivityForResult(introIntent, RC_INTRO);
-    }
-
-    /** Handle the intro activity result by saving the account availability information. */
-    private void saveAccountData(@NonNull final Intent intent) {
-        Log.d(TAG, "onActivityResult: IntroActivity, SUCCESS");
-        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        boolean hasAccount = intent.getStringExtra(EMAIL_KEY) != null;
-        editor.putBoolean(ACCOUNT_AVAILABLE_KEY, hasAccount);
-        editor.apply();
-        if (hasAccount)
-            CredentialsManager.instance.saveCredentials(intent, prefs);
     }
 
     // Protected inner classes.
