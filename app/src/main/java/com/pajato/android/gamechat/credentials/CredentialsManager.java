@@ -17,8 +17,11 @@
 
 package com.pajato.android.gamechat.credentials;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -34,6 +37,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
+import static com.pajato.android.gamechat.main.MainActivity.PREFS;
 
 /**
  * Provide a singleton to manage User credentials.  Each time a User signs into the app, the
@@ -100,25 +106,22 @@ public enum CredentialsManager {
         }
     }
 
-    /** Persist the given User data by updating the shared preferences User persistence store. */
-    public void persist(final FirebaseUser user) {
-        // tbd is this necessary or does saveCredential provide the solution needed.
+    /** Persist the given account credentials by updating the User persistence store. */
+    public void persist(final Activity activity, final FirebaseUser user) {
+        String email = user != null ? user.getEmail() : null;
+        List<String> list = user != null ? user.getProviders() : null;
+        String provider = list != null && list.size() > 0 ? list.get(0) : null;
+        Uri uri = user != null ? user.getPhotoUrl() : null;
+        persist(activity, new Credentials(provider, email, uri));
     }
 
-    /** Save a set of credentials from the given intent to the preferences store. */
-    public void saveCredentials(final Intent intent, SharedPreferences prefs) {
-        // Extract and persist the credentials from the given intent.
-        String provider = intent.getStringExtra(PROVIDER_KEY);
-        String email = intent.getStringExtra(EMAIL_KEY);
-        String url = intent.getStringExtra(URL_KEY);
-        Credentials credentials = new Credentials(provider, email, url);
-        mCredentialsMap.put(email, credentials);
-
-        // Persist the credentials.
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(CREDENTIALS_KEY, getStringSet());
-        editor.putString(LAST_USED_EMAIL_KEY, email);
-        editor.apply();
+    /** Persist the given intent credentials by updating the User persistence store. */
+    public void persist(final Activity activity, final Intent intent) {
+        // Ensure the intent exists and has complete credentials. Abort if not.
+        String email = intent != null ? intent.getStringExtra(EMAIL_KEY) : null;
+        String provider = email != null ? intent.getStringExtra(PROVIDER_KEY) : null;
+        String url = intent != null ? intent.getStringExtra(URL_KEY) : null;
+        persist(activity, new Credentials(provider, email, url));
     }
 
     // Private instance methods.
@@ -224,5 +227,21 @@ public enum CredentialsManager {
             default:
                 return false;
         }
+    }
+
+    /** Save the given credentials to the persistence store (shared preferences). */
+    private void persist(final Activity activity, final Credentials credentials) {
+        // Ensure that the credential email and provider properties exist. Abort if not.
+        if (credentials.provider == null)
+            return;
+
+        // Persist and cache the credentials.
+        mCredentialsMap.put(credentials.email, credentials);
+        SharedPreferences prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(ACCOUNT_AVAILABLE_KEY, true);
+        editor.putStringSet(CREDENTIALS_KEY, getStringSet());
+        editor.putString(LAST_USED_EMAIL_KEY, credentials.email);
+        editor.apply();
     }
 }

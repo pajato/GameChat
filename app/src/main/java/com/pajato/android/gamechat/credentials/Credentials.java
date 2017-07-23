@@ -17,6 +17,8 @@
 
 package com.pajato.android.gamechat.credentials;
 
+import android.net.Uri;
+
 /**
  * Provide a POJO to model an a User.
  *
@@ -56,11 +58,17 @@ public class Credentials {
         this.accountIsKnown = isKnown;
     }
 
-    /** Build an instance */
+    /** Build an instance accepting all string properties. */
     public Credentials(final String provider, final String email, final String url) {
         this.email = email;
         this.provider = provider;
         this.url = url;
     }
 
+    /** Build an instance accepting a URI for the photo URL. */
+    public Credentials(String provider, String email, Uri uri) {
+        this.provider = provider;
+        this.email = email;
+        url = uri != null ? uri.toString() : null;
+    }
 }

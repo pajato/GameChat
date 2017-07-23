@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.AuthUI.IdpConfig.Builder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,10 +50,10 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
-import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthStateChangedEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeHandled;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -492,7 +493,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             String path = getAccountPath(user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
             Log.i(TAG, "Authentication sign-in for: " + user.getEmail());
-            CredentialsManager.instance.persist(user);
+            AppEventManager.instance.post(new AuthStateChangedEvent(user));
         }
     }
 
@@ -556,13 +557,14 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         // the common room member list, make sure to add it.
         if (!isRestricted() || event.key == null || event.room == null)
             return;
-        if (getCurrentAccount().joinMap.containsKey(event.room.groupKey) && event.room.type == COMMON
+        Account account = getCurrentAccount();
+        if (account.joinMap.containsKey(event.room.groupKey) && event.room.type == COMMON
                 && !event.room.getMemberIdList().contains(getCurrentAccountId())) {
             List<String> roomMembers = event.room.getMemberIdList();
             roomMembers.add(getCurrentAccountId());
             // Add a message stating the user has joined
             String format = mMessageMap.get(R.string.HasJoinedMessage);
-            String text = String.format(Locale.getDefault(), format, getCurrentAccount().getDisplayName());
+            String text = String.format(Locale.getDefault(), format, account.getDisplayName());
             MessageManager.instance.createMessage(text, STANDARD, getCurrentAccount(), event.room);
             RoomManager.instance.updateRoomProfile(event.room);
         }
@@ -612,25 +614,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
     }
 
-    /** Sign in using the Firebase intent. */
-    public void signIn(final Context context) {
-        // Get an instance of AuthUI based on the default app, and build an intent.
-        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
-        intentBuilder.setProviders(Arrays.asList(
-                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
-        intentBuilder.setLogo(R.drawable.signin_logo);
-        intentBuilder.setTheme(R.style.signInTheme);
-
-        // Disable Smart Lock to ensure logging in processes work correctly, then trigger the intent
-        intentBuilder.setIsSmartLockEnabled(false);
-
-        Intent intent = intentBuilder.build();
-        intent.putExtra("signin", true);
-        context.startActivity(intent);
-    }
-
     public void signOut(final FragmentActivity activity) {
         AuthUI.getInstance()
             .signOut(activity)
@@ -649,7 +632,26 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         DBUtils.updateChildren(path, account.toMap());
     }
 
-    // Private classes
+    // Private instance methods.
+
+    /** Sign in using the Firebase intent. */
+    private void signIn(final Context context) {
+        // Get an AuthUI instance based on the default app, build an intent with Android
+        // SmartLock disabled and use the intent to get the result.
+        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
+        AuthUI.IdpConfig emailConfig = new Builder(AuthUI.EMAIL_PROVIDER).build();
+        AuthUI.IdpConfig facebookConfig = new Builder(AuthUI.FACEBOOK_PROVIDER).build();
+        AuthUI.IdpConfig googleConfig = new Builder(AuthUI.GOOGLE_PROVIDER).build();
+        intentBuilder.setProviders(Arrays.asList(emailConfig, facebookConfig, googleConfig));
+        intentBuilder.setLogo(R.drawable.signin_logo);
+        intentBuilder.setTheme(R.style.signInTheme);
+        intentBuilder.setIsSmartLockEnabled(false);
+        Intent intent = intentBuilder.build();
+        intent.putExtra("signin", true);
+        context.startActivity(intent);
+    }
+
+    // Private classes.
 
     /** A listener for account create success. */
     private class CreateSuccessListener implements OnSuccessListener<AuthResult> {
