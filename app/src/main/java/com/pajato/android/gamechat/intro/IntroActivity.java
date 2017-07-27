@@ -40,8 +40,7 @@ import com.pajato.android.gamechat.R;
 import java.util.Arrays;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.PROVIDER_KEY;
+import static com.pajato.android.gamechat.main.MainActivity.RC_SIGN_IN;
 
 /**
  * Provide an intro activity ala Telegram.
@@ -50,11 +49,6 @@ import static com.pajato.android.gamechat.credentials.CredentialsManager.PROVIDE
  * @author Bryan Scott
  */
 public class IntroActivity extends AppCompatActivity {
-
-    // Private class constants.
-
-    /** The request code passed into the sign in activity. */
-    private static final int RC_SIGN_IN = 1;
 
     // Private class variables.
 
@@ -79,9 +73,8 @@ public class IntroActivity extends AppCompatActivity {
             String format = "Sign in completed with provider type: %s, e-mail: %s, url: %s";
             Log.i(IntroActivity.class.getSimpleName(),
                     String.format(format, response.getProviderType(), response.getEmail()));
-            intent.putExtra(PROVIDER_KEY, response.getProviderType());
-            intent.putExtra(EMAIL_KEY, response.getEmail());
         }
+
         // Pass the intent obtained from the sign in activity through to the calling intent.
         setResult(RESULT_OK, intent);
         finish();
