@@ -17,8 +17,6 @@
 
 package com.pajato.android.gamechat.credentials;
 
-import android.net.Uri;
-
 /**
  * Provide a POJO to model an a User.
  *
@@ -37,6 +35,12 @@ public class Credentials {
     /** The identity provider. */
     public String provider;
 
+    /** The identity password for email and twitter providers. */
+    public String secret;
+
+    /** The id token supplied by Firebase that is part of the re-authentication credentials. */
+    public String token;
+
     /** The identity icon url. */
     public String url;
 
@@ -46,7 +50,7 @@ public class Credentials {
     // Public constructors.
 
     /** Build an empty constructor. */
-    public Credentials() {}
+    Credentials() {}
 
 
     /** Build an instance for e-mail login (used when creating a protected user) */
@@ -58,17 +62,90 @@ public class Credentials {
         this.accountIsKnown = isKnown;
     }
 
-    /** Build an instance accepting all string properties. */
-    public Credentials(final String provider, final String email, final String url) {
-        this.email = email;
+    /** Build an instance accepting a URI for the photo URL. */
+    Credentials(final String provider, final String email, final String token,
+                final String secret) {
         this.provider = provider;
-        this.url = url;
+        this.email = email;
+        this.token = token;
+        this.secret = secret;
     }
 
-    /** Build an instance accepting a URI for the photo URL. */
-    public Credentials(String provider, String email, Uri uri) {
-        this.provider = provider;
-        this.email = email;
-        url = uri != null ? uri.toString() : null;
+    /** Build an instance accepting an encoded persistence string. */
+    Credentials(final String value) {
+        // Sanity check the value by detecting an empty or non-existent value. Abort silently when
+        // an error is detected.
+        if (value == null || value.isEmpty())
+            return;
+
+        // Use a brute force approach to parsing the value, which is encoded as follows:
+        // <email-length>:<provider-length>:<secret-length>:<token-length>:<url-length>:<rest>
+        //
+        // In other words, the lengths of the properties separated by colons followed by the
+        // concatenated property values.
+
+        // Step 1) separate the lengths part from the concatenated property values part by indexing
+        // on the '@' character in the email address.
+        int atIndex = value.indexOf("@");
+        int splitIndex = getSplitIndex(atIndex, value);
+        if (splitIndex == -1)
+            return;
+        String values = value.substring(splitIndex + 1);
+
+        // Step 2) build an array of lengths by splitting the lengths part on the colon characters.
+        int[] lengthArray = getLengths(value.substring(0, splitIndex));
+
+        // Step 3) extract the properties using the array of lengths and a running index into the
+        // values part.
+        int runningIndex = 0;
+        email = values.substring(runningIndex, runningIndex + lengthArray[0]);
+        runningIndex += lengthArray[0];
+        provider = values.substring(runningIndex, runningIndex + lengthArray[1]);
+        runningIndex += lengthArray[1];
+        if (lengthArray[2] > 0)
+            secret = values.substring(runningIndex, runningIndex + lengthArray[2]);
+        runningIndex += lengthArray[2];
+        if (lengthArray[3] > 0)
+            token = values.substring(runningIndex, runningIndex + lengthArray[3]);
+        runningIndex += lengthArray[3];
+        if (lengthArray[4] > 0)
+            url = values.substring(runningIndex);
+    }
+
+    // Public instance methods.
+
+    /** Return an encoded representation of the credential. */
+    public String toString() {
+        StringBuilder indices = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        String[] props = {email, provider, secret, token, url};
+        for (String prop : props) {
+            int length = prop != null ? prop.length() : 0;
+            indices.append(String.valueOf(length)).append(":");
+            values.append(prop != null ? prop : "");
+        }
+        return indices.toString() + values.toString();
+    }
+
+    // Private instance methods.
+
+    /** Return a five element string array containing the credential property lengths. */
+    private int[] getLengths(final String indices) {
+        String[] strings = indices.split(":");
+        int[] result = new int[strings.length];
+        for (int i = 0; i < strings.length; i++)
+            result[i] = Integer.parseInt(strings[i]);
+        return result;
+    }
+
+    /** Return the index where the lengths part ends and the values part begins. */
+    private int getSplitIndex(final int atIndex, final String value) {
+        int index = atIndex - 1;
+        while (index > 1) {
+            if (value.charAt(index--) != ':')
+                continue;
+            return index + 1;
+        }
+        return -1;
     }
 }

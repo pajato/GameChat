@@ -24,7 +24,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Stack;
 
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.UNREGISTERED;
@@ -47,9 +46,6 @@ public enum AppEventManager {
     /** The EventBus event listener map. */
     private Map<String, Object> mHandlerMap = new HashMap<>();
 
-    /** The stack containing events being propagated. */
-    private Stack<Object> mStack = new Stack<>();
-
     // Public instance methods.
 
     /** Cancel further processing on a given event. */
@@ -58,22 +54,13 @@ public enum AppEventManager {
         EventBus.getDefault().cancelEventDelivery(event);
     }
 
-    /** Return true iff an event is being propagated. */
-    public boolean isPropagatingEvent() {
-        String format = "Testing for active event propagation; stack size: {%d}.";
-        Log.d(TAG, String.format(Locale.US, format, mStack.size()));
-        return !mStack.empty();
-    }
-
     /** Post an event using the GreenRobot library. */
     public void post(final Object event) {
         // Maintain the posting level using a stack; report the start and end of the post.
-        mStack.push(event);
         String name = event != null ? event.getClass().getSimpleName() : "null";
         Log.d(TAG, String.format(Locale.US, "Posting event {%s(%s)}.", name, event));
         EventBus.getDefault().post(event);
         Log.d(TAG, String.format(Locale.US, "Posted event {%s(%s)}.", name, event));
-        mStack.pop();
     }
 
     /** Register a given value event listener. */
