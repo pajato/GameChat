@@ -40,10 +40,7 @@ import com.pajato.android.gamechat.R;
 import java.util.Arrays;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.PROVIDER_KEY;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.SECRET_KEY;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.TOKEN_KEY;
+import static com.pajato.android.gamechat.main.MainActivity.RC_SIGN_IN;
 
 /**
  * Provide an intro activity ala Telegram.
@@ -53,17 +50,12 @@ import static com.pajato.android.gamechat.credentials.CredentialsManager.TOKEN_K
  */
 public class IntroActivity extends AppCompatActivity {
 
-    // Private class constants.
-
-    /** The request code passed into the sign in activity. */
-    private static final int RC_SIGN_IN = 1;
-
     // Private class variables.
 
     /** Handle signing into an existing account by invoking the sign-in activity. */
     public void doSignIn(final View view) {
         // Prepare an intent to handle sign in and let it rip.
-        startActivityForResult(getAuthIntent("signin"), RC_SIGN_IN);
+        startActivityForResult(getAuthIntent(), RC_SIGN_IN);
     }
 
     // Protected instance methods.
@@ -72,26 +64,22 @@ public class IntroActivity extends AppCompatActivity {
      * Handle the sign in activity result. If the sign-in completes with an "OK status, this
      * intro activity is done so return to the main activity with an "OK" status.
      */
-    @Override protected void onActivityResult(final int requestCode, final int resultCode,
-                                              final Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
-            IdpResponse response = IdpResponse.fromResultIntent(intent);
-            if (response != null) {
-                String format = "Sign in completed with provider type: %s, e-mail: %s, secret: %s, token: %s";
-                Log.i(IntroActivity.class.getSimpleName(),
-                        String.format(format, response.getProviderType(), response.getEmail(),
-                                response.getIdpSecret(), response.getIdpToken()));
-                intent.putExtra(PROVIDER_KEY, response.getProviderType());
-                intent.putExtra(EMAIL_KEY, response.getEmail());
-                intent.putExtra(SECRET_KEY, response.getIdpSecret());
-                intent.putExtra(TOKEN_KEY, response.getIdpToken());
-            }
-            // Pass the intent obtained from the sign in activity through to the calling intent.
-            setResult(RESULT_OK, intent);
-            finish();
+    @Override
+    protected void onActivityResult(final int request, final int result, final Intent intent) {
+        super.onActivityResult(request, result, intent);
+        IdpResponse response = request == RC_SIGN_IN && result == RESULT_OK
+                ? IdpResponse.fromResultIntent(intent) : null;
+        if (response != null) {
+            String format = "Sign in completed with provider type: %s, e-mail: %s, url: %s";
+            Log.i(IntroActivity.class.getSimpleName(),
+                    String.format(format, response.getProviderType(), response.getEmail()));
         }
+
+        // Pass the intent obtained from the sign in activity through to the calling intent.
+        setResult(RESULT_OK, intent);
+        finish();
     }
+
     /** Create the intro activity to highlight some features and provide a get started operation. */
     @Override protected void onCreate(final Bundle savedInstanceState) {
         // Establish the activity state and set up the intro layout
@@ -117,7 +105,7 @@ public class IntroActivity extends AppCompatActivity {
     // Private instance methods.
 
     /** Finish the intro screen and handle the given mode in a new activity. */
-    private Intent getAuthIntent(final String mode) {
+    private Intent getAuthIntent() {
         // Get an intent for which to handle the authentication mode.  While in development mode,
         // disable smart lock.
         AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
@@ -129,7 +117,7 @@ public class IntroActivity extends AppCompatActivity {
         intentBuilder.setTheme(R.style.signInTheme);
         //intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
         Intent intent = intentBuilder.build();
-        intent.putExtra(mode, true);
+        intent.putExtra("signin", true);
         return intent;
     }
 
@@ -143,11 +131,8 @@ public class IntroActivity extends AppCompatActivity {
         for (int index = 0; index < count; index++) {
             TextView child = (TextView) pageMonitor.getChildAt(index);
             child.setText(R.string.intro_page_circle);
-            if (index == position) {
-                child.setTextSize(TypedValue.COMPLEX_UNIT_SP, LARGE);
-            } else {
-                child.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMALL);
-            }
+            float size = index == position ? LARGE : SMALL;
+            child.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
         }
     }
 

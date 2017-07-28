@@ -54,10 +54,11 @@ import com.pajato.android.gamechat.database.MessageManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;
 import com.pajato.android.gamechat.database.RoomManager;
 import com.pajato.android.gamechat.event.AppEventManager;
+import com.pajato.android.gamechat.event.AuthStateChangedEvent;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.ClickEvent;
-import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.GroupJoinedEvent;
+import com.pajato.android.gamechat.event.InviteEvent;
 import com.pajato.android.gamechat.event.MenuItemEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
@@ -73,7 +74,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
-import static com.pajato.android.gamechat.credentials.CredentialsManager.EMAIL_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.main.PaneManager.CHAT_INDEX;
@@ -91,8 +91,14 @@ public class MainActivity extends BaseActivity
     /** The preferences file name. */
     public static final String PREFS = "GameChatPrefs";
 
+    /** The Intro activity request code. */
+    private static final int RC_INTRO = 1;
+
     /** The invite activity request code. */
     public static final int RC_INVITE = 2;
+
+    /** The request code passed into the sign in activity. */
+    public static final int RC_SIGN_IN = 3;
 
     /** ... */
     public static final String SKIP_INTRO_ACTIVITY_KEY = "skipIntroActivityKey";
@@ -104,9 +110,6 @@ public class MainActivity extends BaseActivity
 
     /** The logcat tag constant. */
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    /** The Intro activity request code. */
-    private static final int RC_INTRO = 1;
 
     // Private instance variables.
 
@@ -124,8 +127,12 @@ public class MainActivity extends BaseActivity
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
-    @Subscribe
-    public void onAuthenticationChange(final AuthenticationChangeEvent event) {
+    @Subscribe public void onAuthStateChange(@NonNull final AuthStateChangedEvent event) {
+        CredentialsManager.instance.update(this, event.user);
+    }
+
+    /** Handle an account state change by updating the navigation drawer header. */
+    @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.  But first, turn
         // off the sign in spinner.
@@ -139,28 +146,10 @@ public class MainActivity extends BaseActivity
         if (layout != null) layout.setOnClickListener(this);
         NavigationManager.instance.setAccount(account, header);
 
-        // Turn off all database handlers if the account has been signed out.
+        // Turn off all database handlers if the account has been signed out, otherwise update the
+        // persisted credentials.
         if (account == null)
             DatabaseRegistrar.instance.unregisterAll();
-    }
-
-    /** Handle group joined event */
-    @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
-        if (event.groupName != null && !event.groupName.equals("")) {
-            String message;
-            if (event.rooms.size() == 1) {
-                message = String.format(Locale.US, getString(R.string.JoinedOneRoom),
-                        event.rooms.get(0), event.groupName);
-            } else if (event.rooms.size() > 1) {
-                String roomList = TextUtils.join(", ", event.rooms);
-                message = String.format(Locale.US, getString(R.string.JoinedMultiRooms),
-                        roomList, event.groupName);
-            } else {
-                String format = getString(R.string.JoinedGroupsMessage);
-                message = String.format(Locale.US, format, event.groupName);
-            }
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        }
     }
 
     /** Handle a back button press event delivered by the system. */
@@ -198,20 +187,18 @@ public class MainActivity extends BaseActivity
             case R.id.signIn:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
+                AccountManager.instance.signIn(this);
                 break;
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 FragmentType type = DispatchManager.instance.currentChatFragmentType;
                 FragmentActivity activity = DispatchManager.instance.getFragment(type).getActivity();
-                AccountManager.instance.signOut(activity);
+                AccountManager.instance.signOut(activity, null);
                 break;
             case R.id.switchAccount:
-                // Post a toast message indicating this is a future feature
-                String prefix = getString(R.string.MenuItemSwitchAccount);
-                String suffix = getString(R.string.FutureFeature);
-                CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
-                Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+                NavigationManager.instance.toggleAccountSwitchState(this);
+                break;
             default:
                 // Ignore everything else.
                 break;
@@ -219,8 +206,7 @@ public class MainActivity extends BaseActivity
     }
 
     /** Handle Snackbar click event. */
-    @Subscribe
-    public void onClick(final InviteEvent event) {
+    @Subscribe public void onClick(final InviteEvent event) {
         // Send the invitation
         if (event.type == group) {
             InvitationManager.instance.extendGroupInvitation(this, event.key);
@@ -235,12 +221,41 @@ public class MainActivity extends BaseActivity
         AppEventManager.instance.post(new ClickEvent(view));
     }
 
+    /** Handle group joined event */
+    @Subscribe public void onGroupJoined(final GroupJoinedEvent event) {
+        if (event.groupName != null && !event.groupName.equals("")) {
+            String message;
+            if (event.rooms.size() == 1) {
+                message = String.format(Locale.US, getString(R.string.JoinedOneRoom),
+                                        event.rooms.get(0), event.groupName);
+            } else if (event.rooms.size() > 1) {
+                String roomList = TextUtils.join(", ", event.rooms);
+                message = String.format(Locale.US, getString(R.string.JoinedMultiRooms),
+                                        roomList, event.groupName);
+            } else {
+                String format = getString(R.string.JoinedGroupsMessage);
+                message = String.format(Locale.US, format, event.groupName);
+            }
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     /** Process a navigation menu item click by posting a click event. */
     @Override public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-        // Handle navigation view item clicks here by posting a click event and closing the drawer.
-        String format =  "Navigation Item Selected on view: {%s}";
+        // Determine if this is a switch user menu item.
+        String format =  "Navigation item selected on view: {%s}";
         Log.v(TAG, String.format(Locale.US, format, item.getClass().getSimpleName()));
+        boolean handled = false;
+        if (item.getGroupId() == R.id.menu_group_users) {
+            NavigationManager.instance.toggleAccountSwitchState(this);
+            AccountManager.instance.signOut(this, item.getTitle().toString());
+            handled = true;
+        }
+
+        // Close the navigation drawer and treat all unhandled menu item clicks as future features.
         AppEventManager.instance.post(new NavDrawerOpenEvent(this, item));
+        if (!handled)
+            showFutureFeatureMessage(R.string.FutureNavigationOperation);
         return true;
     }
 
@@ -316,14 +331,10 @@ public class MainActivity extends BaseActivity
         super.onActivityResult(request, result, intent);
         if (result != RESULT_OK)
             logFailedResult(request, intent, result == RESULT_CANCELED);
-        else if (request == RC_INVITE) {
-            // Invite activity result; process in the invitation manager.
-            Log.d(TAG, "onActivityResult: requestCode=RC_INVITE, resultCode=" + result);
+        else if (request == RC_SIGN_IN)
+            AccountManager.instance.onSignIn(this, intent);
+        else if (request == RC_INVITE)
             InvitationManager.instance.onInvitationResult(result, intent);
-        } else if (request == RC_INTRO)
-            // Intro activity result: Update the account data based on the result from the intro
-            // activity intent data.
-            saveAccountData(intent);
     }
 
     /** Set up the app per the characteristics of the running device. */
@@ -435,16 +446,13 @@ public class MainActivity extends BaseActivity
         startActivityForResult(introIntent, RC_INTRO);
     }
 
-    /** Handle the intro activity result by saving the account availability information. */
-    private void saveAccountData(@NonNull final Intent intent) {
-        Log.d(TAG, "onActivityResult: IntroActivity, SUCCESS");
-        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        boolean hasAccount = intent.getStringExtra(EMAIL_KEY) != null;
-        editor.putBoolean(ACCOUNT_AVAILABLE_KEY, hasAccount);
-        editor.apply();
-        if (hasAccount)
-            CredentialsManager.instance.saveCredentials(intent, prefs);
+    /** Indicate to the User that the selected operation is a future feature. */
+    private void showFutureFeatureMessage(final int resourceId) {
+        // Post a toast message.
+        String prefix = getString(resourceId);
+        String suffix = getString(R.string.FutureFeature);
+        CharSequence text = String.format(Locale.getDefault(), "%s %s", prefix, suffix);
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
     }
 
     // Protected inner classes.
