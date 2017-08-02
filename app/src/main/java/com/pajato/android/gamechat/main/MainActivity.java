@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.main;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,6 +64,7 @@ import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
 import com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment;
 import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.intro.IntroActivity;
+import com.pajato.android.gamechat.preferences.SharedPreferencesProvider;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -128,7 +128,8 @@ public class MainActivity extends BaseActivity
 
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void onAuthStateChange(@NonNull final AuthStateChangedEvent event) {
-        CredentialsManager.instance.update(this, event.user);
+        if (event.user != null)
+            CredentialsManager.instance.update(event.user.getEmail(), event.user.getPhotoUrl());
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
@@ -332,7 +333,7 @@ public class MainActivity extends BaseActivity
         if (result != RESULT_OK)
             logFailedResult(request, intent, result == RESULT_CANCELED);
         else if (request == RC_SIGN_IN)
-            AccountManager.instance.onSignIn(this, intent);
+            AccountManager.instance.onSignIn(intent);
         else if (request == RC_INVITE)
             InvitationManager.instance.onInvitationResult(result, intent);
     }
@@ -385,13 +386,12 @@ public class MainActivity extends BaseActivity
         list.add(ChatEnvelopeFragment.class.getName());
         list.add(ExpEnvelopeFragment.class.getName());
         AccountManager.instance.init(this, list);
-        CredentialsManager.instance.init(getSharedPreferences(PREFS, Context.MODE_PRIVATE));
 
-        // TODO: figure out where this needs to be after it is working.
+        // Initialize the credentials manager, start the main background service, and then
+        // initialize the rest of the app managers.
+        CredentialsManager.instance.init(new SharedPreferencesProvider(this, PREFS, MODE_PRIVATE));
         Intent serviceIntent = new Intent(this, MainService.class);
         startService(serviceIntent);
-
-        // Finish initializing the important manager modules.
         DBUtils.instance.init(this);
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
@@ -434,7 +434,7 @@ public class MainActivity extends BaseActivity
         // during a connected test run) or if there is an available account.  Abort in either case.
         Intent intent = getIntent();
         boolean skipIntro = intent.hasExtra(SKIP_INTRO_ACTIVITY_KEY);
-        SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         boolean hasAccount = prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false);
         if (skipIntro || hasAccount)
             return;

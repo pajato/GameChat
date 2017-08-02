@@ -17,16 +17,12 @@
 
 package com.pajato.android.gamechat.credentials;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.firebase.ui.auth.IdpResponse;
-import com.google.firebase.auth.FacebookAuthProvider;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.TwitterAuthProvider;
+import com.pajato.android.gamechat.preferences.Preference;
+import com.pajato.android.gamechat.preferences.PreferencesProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
-import static com.pajato.android.gamechat.main.MainActivity.PREFS;
 
 /**
  * Provide a singleton to manage User credentials.  Each time a User signs into the app, the
@@ -50,15 +45,9 @@ public enum CredentialsManager {
     // Public class constants.
 
     /** The persistence key for the saved set of credentials. */
-    public static final String CREDENTIALS_SET_KEY = "credentialsKey";
-
-    /** The preferences key for the last saved email address. */
-    public static final String LAST_USED_EMAIL_KEY = "lastUsedEmailKey";
+    public static final String CREDENTIALS_SET_KEY = "credentialsSetKey";
 
     // Private class constants.
-
-    /** The email provider type. */
-    private static final String EMAIL_PROVIDER = "emailProvider";
 
     ///** The logcat tag. */
     //private static final String TAG = CredentialsManager.class.getSimpleName();
@@ -68,6 +57,9 @@ public enum CredentialsManager {
     /** The map associating an email address with a provider and token/password. */
     private Map<String, Credentials> mCredentialsMap = new HashMap<>();
 
+    /** The current preferences provider. */
+    private PreferencesProvider mPrefs;
+
     // Public instance methods
 
     /** Return the credentials map. */
@@ -76,25 +68,43 @@ public enum CredentialsManager {
     }
 
     /** Build the object by reading in the saved credentials. */
-    public void init(final SharedPreferences prefs) {
+    public void init(final PreferencesProvider prefs) {
+        mPrefs = prefs;
         mCredentialsMap = new HashMap<>();
         Set<String> stringSet = prefs.getStringSet(CREDENTIALS_SET_KEY, null);
         if (stringSet != null) {
             for (String value : stringSet)
-                cacheValue(value);
-            cacheValidate();
+                if (isValid(value))
+                    cacheValue(value);
         }
     }
 
     /** Persist the given IDP credentials by updating the User persistence store. */
-    public void persist(@NonNull final Activity activity, @NonNull final IdpResponse response) {
+    public void persist(@NonNull final IdpResponse response) {
         // Persist the login information that will be necessary to display the switch user menu and
         // will enable re-authentication.
         final String email = response.getEmail();
         final String provider = response.getProviderType();
         final String token = response.getIdpToken();
         final String secret = response.getIdpSecret();
-        persist(activity, new Credentials(provider, email, token, secret));
+        persist(new Credentials(provider, email, token, secret));
+    }
+
+    /** Update the User properties into the persistence store. */
+    public void update(@NonNull final String email, final Uri uri) {
+        // Ensure that the given User's credentials are cached.  Ignore them if not.
+        Credentials credentials = mCredentialsMap.get(email);
+        String url = uri != null ? uri.toString() : null;
+        if (credentials == null)
+            return;
+
+        // Determine if there are any changes to the photo URL. Update and persist the credentials
+        // if so.
+        if ((credentials.url == null && url != null) || (credentials.url != null && url == null)
+                || (credentials.url != null && !credentials.url.equals(url))) {
+            credentials.url = url;
+            persist(credentials);
+        }
     }
 
     // Private instance methods.
@@ -108,17 +118,6 @@ public enum CredentialsManager {
         return result;
     }
 
-    /** Validate the entries in the cache, removing any invalid entries. */
-    private void cacheValidate() {
-        // Build a list of invalid entry key values, then strip those entries from the cache.
-        List<String> invalidEntryList = new ArrayList<>();
-        for (Credentials credentials : mCredentialsMap.values())
-            if (!isValid(credentials))
-                invalidEntryList.add(credentials.email);
-        for (String key : invalidEntryList)
-            mCredentialsMap.remove(key);
-    }
-
     /** Cache the given, tag encoded value, */
     private void cacheValue(final String value) {
         Credentials credentials = new Credentials(value);
@@ -126,66 +125,22 @@ public enum CredentialsManager {
     }
 
     /** Return TRUE iff the given credentials are not complete and sensible. */
-    private boolean isValid(@NonNull final Credentials credentials) {
-        return isValidEmail(credentials.email) && isValidProvider(credentials.provider);
-    }
-
-    /** Return TRUE iff the given email address is valid. */
-    private boolean isValidEmail(final String email) {
-        // Detect an invalid email address by looking for a null or empty string, or no "@" in
-        // the string.
-        return email != null && !email.isEmpty() && email.contains("@");
-    }
-
-    /** Return TRUE iff the given provider is valid. */
-    private boolean isValidProvider(final String provider) {
-        // Detect a null or empty provider.
-        return provider != null && !provider.isEmpty() && isSupported(provider);
-    }
-
-    /** Return TRUE iff the given provider is not supported. */
-    private boolean isSupported(final String provider) {
-        // Detect an unsupported provider.
-        switch (provider) {
-            case GoogleAuthProvider.PROVIDER_ID:
-            case FacebookAuthProvider.PROVIDER_ID:
-            case TwitterAuthProvider.PROVIDER_ID:
-            case EMAIL_PROVIDER:
-                return true;
-            default:
-                return false;
-        }
+    private boolean isValid(@NonNull final String value) {
+        Credentials credentials = new Credentials(value);
+        return credentials.provider != null && !credentials.provider.isEmpty();
     }
 
     /** Save the given credentials to the persistence store (shared preferences). */
-    private void persist(final Activity activity, final Credentials credentials) {
+    private void persist(final Credentials credentials) {
         // Ensure that the credential provider property exists. Abort if not.
         if (credentials.provider == null)
             return;
 
         // Persist and cache the credentials.
         mCredentialsMap.put(credentials.email, credentials);
-        SharedPreferences prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(ACCOUNT_AVAILABLE_KEY, true);
-        editor.putStringSet(CREDENTIALS_SET_KEY, getStringSet());
-        editor.putString(LAST_USED_EMAIL_KEY, credentials.email);
-        editor.apply();
-    }
-
-    /** Update the User properties into the persistence store. */
-    public void update(Activity activity, FirebaseUser user) {
-        // Ensure that the given User's credentials are cached.  Ignore them if not.
-        Credentials credentials = mCredentialsMap.get(user.getEmail());
-        if (credentials == null || credentials.email == null)
-            return;
-
-        // Determine if there are any changes to the credentials. Update and persist them if so.
-        String url = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
-        boolean doUpdate = credentials.url != null && !credentials.url.equals(url);
-        if (doUpdate) {
-            credentials.url = url;
-            persist(activity, credentials);
-        }
+        List<Preference> list = new ArrayList<>();
+        list.add(new Preference(ACCOUNT_AVAILABLE_KEY, true));
+        list.add(new Preference(CREDENTIALS_SET_KEY, getStringSet()));
+        mPrefs.persist(list);
     }
 }

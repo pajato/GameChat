@@ -1,6 +1,9 @@
 package com.pajato.android.gamechat;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -14,6 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.pajato.android.gamechat.main.MainActivity.*;
 import static com.pajato.android.gamechat.main.MainActivity.TEST_USER_KEY;
 
 /**
@@ -46,11 +51,12 @@ public abstract class BaseTest {
 
     @Before public void setup() {
         Intent intent = new Intent();
-        intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
+        intent.putExtra(SKIP_INTRO_ACTIVITY_KEY, true);
         intent.putExtra(TEST_USER_KEY, getProperty(BuildConfig.GC_TEST_EMAIL_KEY, "nobody@gamechat.com"));
         intent.putExtra(TEST_PROVIDER_KEY, getProperty(BuildConfig.GC_TEST_PROVIDER_KEY, "email"));
         intent.putExtra(TEST_PASSWORD_KEY, getProperty(BuildConfig.GC_TEST_PASSWORD_KEY, null));
         mRule.launchActivity(intent);
+        Activity activity = mRule.getActivity();
     }
 
     @After public void teardown() {
@@ -83,7 +89,4 @@ public abstract class BaseTest {
         String result = System.getProperty(propName);
         return result != null ? result : defaultValue;
     }
-
-    // Private classes.
-
 }
