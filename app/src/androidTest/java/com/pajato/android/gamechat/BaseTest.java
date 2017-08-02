@@ -49,9 +49,6 @@ public abstract class BaseTest {
     @Rule public ActivityTestRule<MainActivity> mRule =
             new ActivityTestRule<>(MainActivity.class, true, false);
 
-    /** Provide a temp for saving and restoring the shared preferences. */
-    private SharedPreferences mPrefsSave;
-
     @Before public void setup() {
         Intent intent = new Intent();
         intent.putExtra(SKIP_INTRO_ACTIVITY_KEY, true);
@@ -60,8 +57,6 @@ public abstract class BaseTest {
         intent.putExtra(TEST_PASSWORD_KEY, getProperty(BuildConfig.GC_TEST_PASSWORD_KEY, null));
         mRule.launchActivity(intent);
         Activity activity = mRule.getActivity();
-        SharedPreferences prefs = activity.getSharedPreferences(PREFS, MODE_PRIVATE);
-        mPrefsSave = prefs;
     }
 
     @After public void teardown() {
@@ -94,7 +89,4 @@ public abstract class BaseTest {
         String result = System.getProperty(propName);
         return result != null ? result : defaultValue;
     }
-
-    // Private classes.
-
 }
