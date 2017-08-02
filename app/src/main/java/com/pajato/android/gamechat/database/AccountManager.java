@@ -597,10 +597,10 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     }
 
     /** Handle a sign in operation by obtaining and persisting an identity provider id token. */
-    public void onSignIn(Activity activity, Intent intent) {
+    public void onSignIn(Intent intent) {
         IdpResponse response = IdpResponse.fromResultIntent(intent);
         if (response != null)
-            CredentialsManager.instance.persist(activity, response);
+            CredentialsManager.instance.persist(response);
     }
 
     /** Handle a sign in with the given credentials. Currently only used by BaseTest. */
