@@ -33,11 +33,9 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.pajato.android.gamechat.R;
-
-import java.util.Arrays;
+import com.pajato.android.gamechat.authentication.AuthenticationManager;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
 import static com.pajato.android.gamechat.main.MainActivity.RC_SIGN_IN;
@@ -54,8 +52,8 @@ public class IntroActivity extends AppCompatActivity {
 
     /** Handle signing into an existing account by invoking the sign-in activity. */
     public void doSignIn(final View view) {
-        // Prepare an intent to handle sign in and let it rip.
-        startActivityForResult(getAuthIntent(), RC_SIGN_IN);
+        // Start the Firebase sign-in process using the standard sign-in intent.
+        startActivityForResult(AuthenticationManager.getAuthIntent(), RC_SIGN_IN);
     }
 
     // Protected instance methods.
@@ -87,14 +85,14 @@ public class IntroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_intro);
 
         // Set up icon switching animation.
-        ImageView topImage1 = (ImageView) findViewById(R.id.icon_image1);
-        ImageView topImage2 = (ImageView) findViewById(R.id.icon_image2);
-        ViewGroup pageMonitor = (ViewGroup) findViewById(R.id.page_monitor);
+        ImageView topImage1 = findViewById(R.id.icon_image1);
+        ImageView topImage2 = findViewById(R.id.icon_image2);
+        ViewGroup pageMonitor = findViewById(R.id.page_monitor);
         topImage2.setVisibility(View.GONE);
 
         // Set up the view pager adapter, change handler and the view pager.
         IntroAdapter adapter = new IntroAdapter(pageMonitor);
-        ViewPager pager = (ViewPager) findViewById(R.id.intro_view_pager);
+        ViewPager pager = findViewById(R.id.intro_view_pager);
         pager.setAdapter(adapter);
         pager.setPageMargin(0);
         pager.setOffscreenPageLimit(1);
@@ -103,23 +101,6 @@ public class IntroActivity extends AppCompatActivity {
     }
 
     // Private instance methods.
-
-    /** Finish the intro screen and handle the given mode in a new activity. */
-    private Intent getAuthIntent() {
-        // Get an intent for which to handle the authentication mode.  While in development mode,
-        // disable smart lock.
-        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
-        intentBuilder.setProviders(Arrays.asList(
-                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
-        intentBuilder.setLogo(R.drawable.signin_logo);
-        intentBuilder.setTheme(R.style.signInTheme);
-        //intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
-        Intent intent = intentBuilder.build();
-        intent.putExtra("signin", true);
-        return intent;
-    }
 
     /** Update a given page monitor for a given selected position. */
     private void updatePageMonitor(final ViewGroup pageMonitor, final int position) {
@@ -161,8 +142,8 @@ public class IntroActivity extends AppCompatActivity {
         /** Satisfy the instantiateItem interface to provide the page. */
         @Override public Object instantiateItem(final ViewGroup container, final int position) {
             View view = View.inflate(container.getContext(), R.layout.intro_page, null);
-            TextView headerTextView = (TextView) view.findViewById(R.id.header_text);
-            TextView messageTextView = (TextView) view.findViewById(R.id.message_text);
+            TextView headerTextView = view.findViewById(R.id.header_text);
+            TextView messageTextView = view.findViewById(R.id.message_text);
             container.addView(view, 0);
             Pages page = Pages.values()[position];
             headerTextView.setText(view.getContext().getString(page.titleId));

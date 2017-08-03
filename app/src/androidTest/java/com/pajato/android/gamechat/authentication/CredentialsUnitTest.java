@@ -1,4 +1,4 @@
-package com.pajato.android.gamechat.credentials;
+package com.pajato.android.gamechat.authentication;
 
 import android.support.test.runner.AndroidJUnit4;
 

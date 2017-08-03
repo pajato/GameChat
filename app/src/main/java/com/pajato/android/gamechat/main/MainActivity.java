@@ -29,11 +29,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.IdpResponse;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.authentication.AuthenticationManager;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -41,7 +44,7 @@ import com.pajato.android.gamechat.common.FragmentKind;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.credentials.CredentialsManager;
+import com.pajato.android.gamechat.authentication.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
@@ -128,8 +131,9 @@ public class MainActivity extends BaseActivity
 
     /** Handle an account state change by updating the navigation drawer header. */
     @Subscribe public void onAuthStateChange(@NonNull final AuthStateChangedEvent event) {
-        if (event.user != null)
-            CredentialsManager.instance.update(event.user.getEmail(), event.user.getPhotoUrl());
+        String email = event.user != null ? event.user.getEmail() : null;
+        if (email != null)
+            CredentialsManager.instance.update(email, event.user.getPhotoUrl());
     }
 
     /** Handle an account state change by updating the navigation drawer header. */
@@ -139,7 +143,7 @@ public class MainActivity extends BaseActivity
         // off the sign in spinner.
         ProgressManager.instance.hide();
         Account account = event != null ? event.account : null;
-        NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navView = findViewById(R.id.nav_view);
         View header = navView.getHeaderView(0) != null
             ? navView.getHeaderView(0)
             : navView.inflateHeaderView(R.layout.nav_header_main);
@@ -168,7 +172,7 @@ public class MainActivity extends BaseActivity
                     type = DispatchManager.instance.currentExpFragmentType;
             }
         } else {
-            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+            ViewPager viewPager = findViewById(R.id.viewpager);
             if (viewPager != null && viewPager.getCurrentItem() == CHAT_INDEX)
                 type = DispatchManager.instance.currentChatFragmentType;
             else
@@ -188,14 +192,14 @@ public class MainActivity extends BaseActivity
             case R.id.signIn:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
-                AccountManager.instance.signIn(this);
+                AuthenticationManager.signIn(this);
                 break;
             case R.id.signOut:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 FragmentType type = DispatchManager.instance.currentChatFragmentType;
                 FragmentActivity activity = DispatchManager.instance.getFragment(type).getActivity();
-                AccountManager.instance.signOut(activity, null);
+                AuthenticationManager.signOut(activity, null);
                 break;
             case R.id.switchAccount:
                 NavigationManager.instance.toggleAccountSwitchState(this);
@@ -249,7 +253,7 @@ public class MainActivity extends BaseActivity
         boolean handled = false;
         if (item.getGroupId() == R.id.menu_group_users) {
             NavigationManager.instance.toggleAccountSwitchState(this);
-            AccountManager.instance.signOut(this, item.getTitle().toString());
+            AuthenticationManager.signOut(this, item.getTitle().toString());
             handled = true;
         }
 
@@ -269,12 +273,12 @@ public class MainActivity extends BaseActivity
                 break;
             case R.string.SwitchToChat:
                 // If the toolbar chat icon is clicked, on smart phone devices we can change panes.
-                ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+                ViewPager viewPager = findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(CHAT_INDEX);
                 break;
             case R.string.SwitchToExp:
                 // If the toolbar game icon is clicked, on smart phone devices we can change panes.
-                viewPager = (ViewPager) findViewById(R.id.viewpager);
+                viewPager = findViewById(R.id.viewpager);
                 if (viewPager != null) viewPager.setCurrentItem(PaneManager.GAME_INDEX);
                 break;
             default:
@@ -332,9 +336,11 @@ public class MainActivity extends BaseActivity
         super.onActivityResult(request, result, intent);
         if (result != RESULT_OK)
             logFailedResult(request, intent, result == RESULT_CANCELED);
-        else if (request == RC_SIGN_IN)
-            AccountManager.instance.onSignIn(intent);
-        else if (request == RC_INVITE)
+        else if (request == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(intent);
+            if (response != null)
+                CredentialsManager.instance.persist(response);
+        } else if (request == RC_INVITE)
             InvitationManager.instance.onInvitationResult(result, intent);
     }
 
@@ -378,14 +384,24 @@ public class MainActivity extends BaseActivity
 
     /** Initialize the main activity and all of it's subsystems. */
     private void init() {
-        // Set up the account manager with a list of class names.  These classes must be registered
-        // with the app event manager before Firebase can be enabled.  And when any of them are
-        // unregistered, Firebase will be turned off.
+        // Set up the account manager with a set of localized strings and a list of class names.
+        // These classes must be registered with the app event manager before Firebase can be
+        // enabled.  And when any of them are unregistered, Firebase will be turned off.
+        int[] messages = new int[] {R.string.HasDepartedMessage, R.string.HasJoinedMessage,
+                R.string.AuthFailureInvalidCredentials, R.string.AuthFailureInvalidUser,
+                R.string.AuthSignInFailure};
+        SparseArray<String> strings = new SparseArray<>();
+        for (int message : messages)
+            strings.put(message, getString(message));
+        AccountManager.instance.init(strings);
+
+        // Initialize the Firebase authentication manager with a list of class names.  These classes
+        // must all be registered in order for Firebase to be enabled.
         List<String> list = new ArrayList<>();
         list.add(this.getClass().getName());
         list.add(ChatEnvelopeFragment.class.getName());
         list.add(ExpEnvelopeFragment.class.getName());
-        AccountManager.instance.init(this, list);
+        AuthenticationManager.instance.init(list);
 
         // Initialize the credentials manager, start the main background service, and then
         // initialize the rest of the app managers.
