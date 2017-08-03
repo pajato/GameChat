@@ -13,7 +13,7 @@ import com.pajato.android.gamechat.common.FabManager;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListAdapter;
 import com.pajato.android.gamechat.common.adapter.ListItem;
-import com.pajato.android.gamechat.credentials.Credentials;
+import com.pajato.android.gamechat.authentication.Credentials;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.GroupManager;
 import com.pajato.android.gamechat.database.ProtectedUserManager;

@@ -40,8 +40,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.credentials.Credentials;
-import com.pajato.android.gamechat.credentials.CredentialsManager;
+import com.pajato.android.gamechat.authentication.Credentials;
+import com.pajato.android.gamechat.authentication.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 

@@ -15,7 +15,7 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.credentials;
+package com.pajato.android.gamechat.authentication;
 
 /**
  * Provide a POJO to model an a User.

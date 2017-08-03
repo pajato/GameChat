@@ -62,8 +62,8 @@ public class Preference {
     public Type type;
 
     /** The boolean data value property. */
-    public boolean booleanValue;
+    boolean booleanValue;
 
     /** The string set data value property. */
-    public Set<String> stringSetValue;
+    Set<String> stringSetValue;
 }

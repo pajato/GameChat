@@ -15,12 +15,16 @@
  * see http://www.gnu.org/licenses
  */
 
-package com.pajato.android.gamechat.credentials;
+package com.pajato.android.gamechat.authentication;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.firebase.ui.auth.IdpResponse;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.TwitterAuthProvider;
 import com.pajato.android.gamechat.preferences.Preference;
 import com.pajato.android.gamechat.preferences.PreferencesProvider;
 
@@ -61,6 +65,24 @@ public enum CredentialsManager {
     private PreferencesProvider mPrefs;
 
     // Public instance methods
+
+    /** Return the authentication credential for the given provider type and token. */
+    public AuthCredential getAuthCredential(@NonNull final String email) {
+        Credentials credentials = mCredentialsMap.get(email);
+        if (credentials == null)
+            return null;
+
+        // Return the appropriate authentication credential.
+        switch (credentials.provider) {
+            case GoogleAuthProvider.PROVIDER_ID:
+                return GoogleAuthProvider.getCredential(credentials.token, null);
+            case FacebookAuthProvider.PROVIDER_ID:
+                return FacebookAuthProvider.getCredential(credentials.token);
+            case TwitterAuthProvider.PROVIDER_ID:
+                return TwitterAuthProvider.getCredential(credentials.token, credentials.secret);
+            default: return null;
+        }
+    }
 
     /** Return the credentials map. */
     public Map<String, Credentials> getMap() {
