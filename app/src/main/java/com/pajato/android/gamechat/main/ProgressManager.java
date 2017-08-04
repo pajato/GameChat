@@ -17,7 +17,6 @@
 
 package com.pajato.android.gamechat.main;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -33,9 +32,6 @@ public enum ProgressManager {
 
     // Private instance variables.
 
-    /** The view pager adapter used to manage paging on a smartphone layout. */
-    private ProgressDialog mProgressDialog;
-
     /** Indicates if the dialog is showing. */
     private boolean mIsShowing;
 
@@ -44,9 +40,9 @@ public enum ProgressManager {
     /** Dismiss the initial loading dialog if one is showing. */
     public void hide() {
         Log.d(TAG, "Attempting to hide the progress dialog.");
-        if (mIsShowing && mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
+        if (mIsShowing) {
+            //mProgressBar.setVisibility(View.GONE);
+            //mProgressBar = null;
             mIsShowing = false;
         }
     }
@@ -58,23 +54,19 @@ public enum ProgressManager {
 
     /** Show the initial loading dialog. */
     public void show(@NonNull final Context context) {
-        // Create and display the progress dialog.
-        Log.d(TAG, "Turning on progress spinner now.");
-        mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setTitle("Starting...");
-        mProgressDialog.setMessage("Please wait while the app starts up...");
-        mProgressDialog.show();
-        mIsShowing = true;
+        show(context, "Starting...", "Please wait while the app starts up...");
     }
 
     /** Show a loading dialog with a given message. */
-    public void show(@NonNull final Context context, final String title, final String message) {
+    public void show(@SuppressWarnings("unused") final Context context,
+                     @SuppressWarnings("unused") final String title,
+                     @SuppressWarnings("unused") final String message) {
         // Create and display the progress dialog.
         Log.d(TAG, "Turning on progress spinner now.");
-        mProgressDialog = new ProgressDialog(context);
-        mProgressDialog.setTitle(title);
-        mProgressDialog.setMessage(message);
-        mProgressDialog.show();
+        //mProgressBar = new ProgressBar(context);
+        //mProgressBar.setTitle(title);
+        //mProgressBar.setMessage(message);
+        //mProgressBar.setVisibility(View.VISIBLE);
         mIsShowing = true;
     }
 

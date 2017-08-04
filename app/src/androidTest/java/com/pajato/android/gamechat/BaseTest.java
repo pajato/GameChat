@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.main.MainActivity;
 
 import org.junit.After;
@@ -14,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static com.pajato.android.gamechat.main.MainActivity.SKIP_INTRO_ACTIVITY_KEY;
 import static com.pajato.android.gamechat.main.MainActivity.TEST_USER_KEY;
 
 /**
@@ -46,7 +45,7 @@ public abstract class BaseTest {
 
     @Before public void setup() {
         Intent intent = new Intent();
-        intent.putExtra(MainActivity.SKIP_INTRO_ACTIVITY_KEY, true);
+        intent.putExtra(SKIP_INTRO_ACTIVITY_KEY, true);
         intent.putExtra(TEST_USER_KEY, getProperty(BuildConfig.GC_TEST_EMAIL_KEY, "nobody@gamechat.com"));
         intent.putExtra(TEST_PROVIDER_KEY, getProperty(BuildConfig.GC_TEST_PROVIDER_KEY, "email"));
         intent.putExtra(TEST_PASSWORD_KEY, getProperty(BuildConfig.GC_TEST_PASSWORD_KEY, null));
@@ -64,18 +63,6 @@ public abstract class BaseTest {
 
     // Protected methods.
 
-    /** Setup the test user to run connected tests. */
-    protected void setupTestUser(final Intent intent) {
-        String login = intent.getStringExtra(TEST_USER_KEY);
-        String pass = intent.getStringExtra(TEST_PASSWORD_KEY);
-        if (login == null || pass == null)
-            return;
-
-        // Perform the sign in.
-        FirebaseAuth.getInstance().signOut();
-        AccountManager.instance.signIn(mRule.getActivity(), login, pass);
-    }
-
     // Private instance methods.
 
     /** Return a named system property or the given default value if there is no such property. */
@@ -83,7 +70,4 @@ public abstract class BaseTest {
         String result = System.getProperty(propName);
         return result != null ? result : defaultValue;
     }
-
-    // Private classes.
-
 }

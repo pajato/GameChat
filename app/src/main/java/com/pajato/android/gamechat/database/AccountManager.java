@@ -17,33 +17,21 @@
 
 package com.pajato.android.gamechat.database;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.AuthUI.IdpConfig.Builder;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthProvider;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.TwitterAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -55,8 +43,6 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.model.Account;
 import com.pajato.android.gamechat.common.model.JoinState;
-import com.pajato.android.gamechat.credentials.Credentials;
-import com.pajato.android.gamechat.credentials.CredentialsManager;
 import com.pajato.android.gamechat.database.handler.AccountChangeHandler;
 import com.pajato.android.gamechat.event.AccountChangeEvent;
 import com.pajato.android.gamechat.event.AppEventManager;
@@ -68,12 +54,10 @@ import com.pajato.android.gamechat.event.ProfileGroupDeleteEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomDeleteEvent;
 import com.pajato.android.gamechat.event.ProtectedUserAuthFailureEvent;
-import com.pajato.android.gamechat.event.RegistrationChangeEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -85,18 +69,15 @@ import static com.pajato.android.gamechat.chat.model.Message.SYSTEM;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.ME;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.PRIVATE;
-import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
-import static com.pajato.android.gamechat.main.MainActivity.RC_SIGN_IN;
 
 /**
- * Manages the account related aspects of the GameChat application.  These include setting up the
- * first time sign-in result, creating and persisting a profile on this device and switching
- * accounts.
+ * Manages the account database related aspects of the GameChat application.  These include
+ * creating and persisting all accounts, standard and protected.
  *
  * @author Paul Michael Reilly on 5/26/16
  * @author Sandy Scott on 1/20/17
  */
-public enum AccountManager implements FirebaseAuth.AuthStateListener {
+public enum AccountManager {
     instance;
 
     /**
@@ -114,8 +95,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
      * only be a member of a group that the chaperone is a member of.
      */
     public enum AccountType {
-        // TODO: figure out if we need an admin type.  I suspect we do.
-        // admin,
+        // admin, placeholder in the event that we actually need an admin account type.
         standard,
         restricted
     }
@@ -167,14 +147,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
     /** The me group profile. */
     private Group mGroup;
 
-    /** A flag indicating that Firebase is enabled (registered) or not. */
-    private boolean mIsFirebaseEnabled = false;
-
     /** The repository for any messages needed. */
     private SparseArray<String> mMessageMap = new SparseArray<>();
-
-    /** A map tracking registrations from the key classed that are needed to enable Firebase. */
-    private Map<String, Boolean> mRegistrationClassNameMap = new HashMap<>();
 
     // Public instance methods
 
@@ -336,23 +310,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         return mCurrentAccount != null;
     }
 
-    /** Handle initialization by setting up the Firebase required list of registered classes. */
-    public void init(final AppCompatActivity context, final List<String> classNameList) {
-        // Setup the class map that drives enabling and disabling Firebase. Each of these classes
-        // must be registered with the app event manager before Firebase can be enabled.  If any are
-        // unregistered, Firebase will effectively be disabled.
-        for (String name : classNameList)
-            mRegistrationClassNameMap.put(name, false);
-
-        // Save any messages necessary later
-        mMessageMap.clear();
-        mMessageMap.put(R.string.HasDepartedMessage, context.getString(R.string.HasDepartedMessage));
-        mMessageMap.put(R.string.HasJoinedMessage, context.getString(R.string.HasJoinedMessage));
-        mMessageMap.put(R.string.AuthFailureInvalidCredentials,
-                context.getString(R.string.AuthFailureInvalidCredentials));
-        mMessageMap.put(R.string.AuthFailureInvalidUser,
-                context.getString(R.string.AuthFailureInvalidUser));
-        mMessageMap.put(R.string.AuthSignInFailure, context.getString(R.string.AuthSignInFailure));
+    /** Initialize the account manager with the given set of localized messages and class names. */
+    public void init(@NonNull final SparseArray<String> map) {
+        // Initialize the account manager by setting the list localized messages that may be
+        // used subsequently.
+        mMessageMap = map;
     }
 
     /** Return true iff the current user is a restricted/protected user. */
@@ -416,8 +378,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
 
     /** Handle an account change by providing an authentication change on a sign in or sign out. */
     @Subscribe public void onAccountChange(@NonNull final AccountChangeEvent event) {
-        // Detect a sign in or sign out event.  If either is found, generate an authentication
-        // change event on the account.  It is also possible to get a new account event without
+        // Detect an account sign in or sign out event.  If either is found, generate an
+        // authentication change event.  It is also possible to get a new account event without
         // first getting a sign out event (this has been observed when we are switching to a
         // protected user).
         String id = event.account != null ? event.account.key : null;
@@ -479,8 +441,8 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Deal with authentication backend changes: sign in and sign out */
-    @Override public void onAuthStateChanged(@NonNull final FirebaseAuth auth) {
+    /** Deal with authentication sign-out changes. */
+    @Subscribe public void onAuthStateChanged(@NonNull final AuthStateChangedEvent event) {
         // Deal with a User sign-out or a new user sign-in by un-registering the current account
         // handler.
         String name = mCurrentAccount != null ? mCurrentAccount.email : null;
@@ -491,16 +453,13 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             AppEventManager.instance.post(new AccountChangeEvent(null));
         }
 
-        // Determine if this state change represents a User signing in.
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
+        // Deal with a sign-in by setting up an account change listener.
+        if (event.user != null) {
             // A user has signed in. Ensure an account change listener is registered and persist the
             // credentials.
-            name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, user.getUid());
-            String path = getAccountPath(user.getUid());
+            name = DBUtils.getHandlerName(ACCOUNT_CHANGE_HANDLER, event.user.getUid());
+            String path = getAccountPath(event.user.getUid());
             DatabaseRegistrar.instance.registerHandler(new AccountChangeHandler(name, path));
-            Log.i(TAG, "Authentication sign-in for: " + user.getEmail());
-            AppEventManager.instance.post(new AuthStateChangedEvent(user));
         }
     }
 
@@ -541,6 +500,7 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
+    /** ... */
     @Subscribe public void onRoomProfileChange(@NonNull final ProfileRoomChangeEvent event) {
         // If the current account is protected and has been joined to a group, but is not yet in
         // the common room member list, make sure to add it.
@@ -566,144 +526,11 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
         }
     }
 
-    /** Handle a registration event by enabling and/or disabling Firebase, as necessary. */
-    @Subscribe public void onRegistrationChange(final RegistrationChangeEvent event) {
-        // Determine if this is a relevant registration event.
-        if (!mRegistrationClassNameMap.containsKey(event.name)) return;
-
-        // The event is of interest. Update the map and determine if Firebase needs to be enabled or
-        // disabled.  When all of the values in the registration class name map are true, the app is
-        // ready for the account manager to be registered.  When any of the values are false, the
-        // account manager will be unregistered.
-        mRegistrationClassNameMap.put(event.name, event.changeType == REGISTERED);
-        for (Boolean value : mRegistrationClassNameMap.values()) {
-            if (!value) {
-                // If the account manager is currently listening for account changes, make it stop.
-                if (mIsFirebaseEnabled) {
-                    Log.d(TAG, "Unregister the AccountManager from Firebase.");
-                    FirebaseAuth.getInstance().removeAuthStateListener(this);
-                    mIsFirebaseEnabled = false;
-                }
-                return;
-            }
-        }
-
-        // If the account manager is not currently listening for account changes, do so now.
-        if (!mIsFirebaseEnabled) {
-            Log.d(TAG, "Registering the account manager with Firebase.");
-            FirebaseAuth.getInstance().addAuthStateListener(this);
-            mIsFirebaseEnabled = true;
-        }
-    }
-
-    /** Handle a sign in operation by obtaining and persisting an identity provider id token. */
-    public void onSignIn(Activity activity, Intent intent) {
-        IdpResponse response = IdpResponse.fromResultIntent(intent);
-        if (response != null)
-            CredentialsManager.instance.persist(activity, response);
-    }
-
-    /** Handle a sign in with the given credentials. Currently only used by BaseTest. */
-    public void signIn(final Activity activity, final String login, final String pass) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        SignInCompletionHandler handler = new SignInCompletionHandler(activity, login);
-        auth.signInWithEmailAndPassword(login, pass).addOnCompleteListener(activity, handler);
-    }
-
-    public void signOut(final FragmentActivity activity, final String email) {
-        AuthUI.getInstance()
-            .signOut(activity)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                public void onComplete(@NonNull Task<Void> task) {
-                    // The User is now signed out. Determine if another User should be signed in.
-                    Log.d(TAG, "Log out is complete.");
-                    Map<String, Credentials> map = CredentialsManager.instance.getMap();
-                    if (map.containsKey(email))
-                        signIn(map.get(email));
-                }
-            });
-    }
-
     /** Update the given account on the database. */
     public void updateAccount(final Account account) {
         String path = String.format(Locale.US, ACCOUNT_PATH, account.key);
         account.modTime = new Date().getTime();
         DBUtils.updateChildren(path, account.toMap());
-    }
-
-    // Private instance methods.
-
-    /** Sign in using the Firebase intent. */
-    public void signIn(final Activity activity) {
-        // Get an AuthUI instance based on the default app, build an intent with Android
-        // SmartLock disabled and use the intent to get the result.
-        AuthUI.SignInIntentBuilder intentBuilder = AuthUI.getInstance().createSignInIntentBuilder();
-        AuthUI.IdpConfig emailConfig = new Builder(AuthUI.EMAIL_PROVIDER).build();
-        AuthUI.IdpConfig facebookConfig = new Builder(AuthUI.FACEBOOK_PROVIDER).build();
-        AuthUI.IdpConfig googleConfig = new Builder(AuthUI.GOOGLE_PROVIDER).build();
-        intentBuilder.setProviders(Arrays.asList(emailConfig, facebookConfig, googleConfig));
-        intentBuilder.setLogo(R.drawable.signin_logo);
-        intentBuilder.setTheme(R.style.signInTheme);
-        intentBuilder.setIsSmartLockEnabled(false);
-        Intent intent = intentBuilder.build();
-        intent.putExtra("signin", true);
-        activity.startActivityForResult(intent, RC_SIGN_IN);
-    }
-
-    /** Return the authentication credential for the given provider type and token. */
-    private AuthCredential getCredential(@NonNull final Credentials credentials) {
-        switch (credentials.provider) {
-            case GoogleAuthProvider.PROVIDER_ID:
-                return GoogleAuthProvider.getCredential(credentials.token, null);
-            case FacebookAuthProvider.PROVIDER_ID:
-                return FacebookAuthProvider.getCredential(credentials.token);
-            case TwitterAuthProvider.PROVIDER_ID:
-                return TwitterAuthProvider.getCredential(credentials.token, credentials.secret);
-            default: return null;
-        }
-    }
-
-    /** Handle a switch user event by attempting a sign-in. */
-    private void signIn(@NonNull final Credentials credentials) {
-        // Ensure that there are valid credentials.  Abort if not.
-        if (credentials.email == null || credentials.provider == null)
-            return;
-
-        // case on the provider type to set up the credentials and perform the sign-in.
-        AuthCredential authCredential = null;
-        switch (credentials.provider) {
-            case EmailAuthProvider.PROVIDER_ID:
-                // Email has to prompt the User for the password then execute the sign-in-from-email
-                // interface.
-                String password = credentials.secret;
-                authCredential = EmailAuthProvider.getCredential(credentials.email, password);
-                break;
-            case GoogleAuthProvider.PROVIDER_ID:
-            case FacebookAuthProvider.PROVIDER_ID:
-            case TwitterAuthProvider.PROVIDER_ID:
-                if (credentials.token != null)
-                    authCredential = getCredential(credentials);
-            default:
-                // All other cases are ignored.
-                break;
-        }
-
-        // Ensure that there is a valid authentication credential for the provider.  If not, abort.
-        if (authCredential == null)
-            return;
-
-        // Perform the sign in.
-        Log.d(TAG, "Sign in with credentials: " + credentials);
-        FirebaseAuth.getInstance().signInWithCredential(authCredential)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            Exception exc = task.getException();
-                            String excMessage = exc != null ? exc.getMessage() : "N/A";
-                            Log.i(TAG, "Sign operation failed with exception: " + excMessage);
-                        }
-                    }
-                });
     }
 
     // Private classes.
@@ -763,25 +590,6 @@ public enum AccountManager implements FirebaseAuth.AuthStateListener {
             AccountManager.instance.mCurrentAccount.name = displayName;
             AccountManager.instance.updateAccount(mCurrentAccount);
             ProtectedUserManager.instance.removeEMailCredentials();
-        }
-    }
-
-    /** Used only in test context */
-    private class SignInCompletionHandler implements OnCompleteListener<AuthResult> {
-        Activity mActivity;
-        String mLogin;
-        SignInCompletionHandler(final Activity activity, final String login) {
-            mActivity = activity;
-            mLogin = login;
-        }
-        @Override public void onComplete(@NonNull Task<AuthResult> task) {
-            if (!task.isSuccessful()) {
-                // Log and report a signin error.
-                String format = mActivity.getString(R.string.SignInFailedFormat);
-                String message = String.format(Locale.US, format, mLogin);
-                Log.d(TAG, message);
-                Toast.makeText(mActivity, message, Toast.LENGTH_LONG).show();
-            }
         }
     }
 }

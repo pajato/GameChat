@@ -28,7 +28,6 @@
     <string name="NotLoggedInMessage">Not logged in!  Please sign in.</string>
     <string name="OfflineToolbarTitle">The network is not available.</string>
     <string name="OfflineMessageText">The network is not available.  You can play local games while offline.</string>
-    <string name="SignInFailedFormat">The email/password sign in using {%s} failed.</string>
     <string name="SignedOutTitleText">Signed Out</string>
     <string name="SwitchToChat">Switch to Chat</string>
     <string name="SwitchToExp">Switch to Game</string>

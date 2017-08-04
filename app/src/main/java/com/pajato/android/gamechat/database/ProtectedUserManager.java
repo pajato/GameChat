@@ -27,7 +27,7 @@ import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.credentials.Credentials;
+import com.pajato.android.gamechat.authentication.Credentials;
 import com.pajato.android.gamechat.database.handler.ProtectedUserChangeHandler;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
