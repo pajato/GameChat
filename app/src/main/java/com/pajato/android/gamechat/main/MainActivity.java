@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.main;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -37,6 +36,7 @@ import android.widget.Toast;
 import com.firebase.ui.auth.IdpResponse;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.authentication.AuthenticationManager;
+import com.pajato.android.gamechat.authentication.CredentialsManager;
 import com.pajato.android.gamechat.chat.ContactManager;
 import com.pajato.android.gamechat.chat.fragment.ChatEnvelopeFragment;
 import com.pajato.android.gamechat.common.DispatchManager;
@@ -44,7 +44,6 @@ import com.pajato.android.gamechat.common.FragmentKind;
 import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.InvitationManager;
 import com.pajato.android.gamechat.common.model.Account;
-import com.pajato.android.gamechat.authentication.CredentialsManager;
 import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.database.DBUtils;
 import com.pajato.android.gamechat.database.DatabaseRegistrar;
@@ -77,7 +76,6 @@ import java.util.Locale;
 
 import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.common.FragmentKind.chat;
-import static com.pajato.android.gamechat.database.AccountManager.ACCOUNT_AVAILABLE_KEY;
 import static com.pajato.android.gamechat.event.InviteEvent.ItemType.group;
 import static com.pajato.android.gamechat.main.PaneManager.CHAT_INDEX;
 
@@ -121,6 +119,25 @@ public class MainActivity extends BaseActivity
 
     /** The current, possibly null, fragment back press handler for experiences. */
     private View.OnClickListener mExpUpHandler;
+
+    // Public class methods.
+
+    /** Provide a logcat message about a failed result. */
+    public static void logFailedResult(int request, Intent intent, boolean isCancelled) {
+        if (isCancelled)
+            Log.d(TAG, String.format(Locale.US, "Request {%s} canceled by User.", request));
+        else {
+            String format = "onActivityResult: %s, FAILED, \nIntent: %s";
+            Log.d(TAG, String.format(Locale.US, format, getRequester(request), intent.toString()));
+        }
+    }
+
+    /** Process a successful sign-in from the given intent. */
+    public static void processSignIn(@NonNull final Intent intent) {
+        IdpResponse response = IdpResponse.fromResultIntent(intent);
+        if (response != null)
+            CredentialsManager.instance.persist(response);
+    }
 
     // Public instance methods.
 
@@ -337,9 +354,7 @@ public class MainActivity extends BaseActivity
         if (result != RESULT_OK)
             logFailedResult(request, intent, result == RESULT_CANCELED);
         else if (request == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(intent);
-            if (response != null)
-                CredentialsManager.instance.persist(response);
+            processSignIn(intent);
         } else if (request == RC_INVITE)
             InvitationManager.instance.onInvitationResult(result, intent);
     }
@@ -360,10 +375,21 @@ public class MainActivity extends BaseActivity
         AppEventManager.instance.register(InvitationManager.instance);
         AppEventManager.instance.register(ProtectedUserManager.instance);
 
-        // Deal with initial sign in via the intro activity and normal processing.
+        // Deal with initial sign in via the intro activity and then normal processing.
         processIntroPage();
         setContentView(R.layout.activity_main);
         init();
+    }
+
+    // Private class methods.
+
+    /** Return a name for the given request. */
+    private static String getRequester(final int request) {
+        switch (request) {
+            case RC_INTRO: return "IntroActivity";
+            case RC_INVITE: return "InvitationActivity";
+            default: return "Unknown";
+        }
     }
 
     // Private instance methods.
@@ -403,9 +429,7 @@ public class MainActivity extends BaseActivity
         list.add(ExpEnvelopeFragment.class.getName());
         AuthenticationManager.instance.init(list);
 
-        // Initialize the credentials manager, start the main background service, and then
-        // initialize the rest of the app managers.
-        CredentialsManager.instance.init(new SharedPreferencesProvider(this, PREFS, MODE_PRIVATE));
+        // Start the main background service, and then initialize the rest of the app managers.
         Intent serviceIntent = new Intent(this, MainService.class);
         startService(serviceIntent);
         DBUtils.instance.init(this);
@@ -417,31 +441,8 @@ public class MainActivity extends BaseActivity
 
         // Register the first of many app event listeners.
         AppEventManager.instance.register(AccountManager.instance);
+        AppEventManager.instance.register(AuthenticationManager.instance);
         AppEventManager.instance.register(this);
-    }
-
-    /** Provide a logcat message about a failed result. */
-    private void logFailedResult(int request, Intent intent, boolean isCancelled) {
-        String requester;
-        switch (request) {
-            case RC_INTRO:
-                requester = "IntroActivity";
-                break;
-            case RC_INVITE:
-                requester = "InvitationActivity";
-                break;
-            default:
-                requester = "Unknown";
-                break;
-        }
-        // Intent may be null so prevent null-pointer-exception crash
-        if (isCancelled) {
-            String message = String.format(Locale.US, "%s CANCELED", request);
-            Log.d(TAG, message);
-        } else {
-            String format = "onActivityResult: %s, FAILED, \nIntent: %s";
-            Log.d(TAG, String.format(Locale.US, format, requester, intent.toString()));
-        }
     }
 
     /** Determine if the intro screen needs to be presented and do so. */
@@ -450,8 +451,8 @@ public class MainActivity extends BaseActivity
         // during a connected test run) or if there is an available account.  Abort in either case.
         Intent intent = getIntent();
         boolean skipIntro = intent.hasExtra(SKIP_INTRO_ACTIVITY_KEY);
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        boolean hasAccount = prefs.getBoolean(ACCOUNT_AVAILABLE_KEY, false);
+        CredentialsManager.instance.init(new SharedPreferencesProvider(this, PREFS, MODE_PRIVATE));
+        boolean hasAccount = CredentialsManager.instance.getMap().size() > 0;
         if (skipIntro || hasAccount)
             return;
 

@@ -25,7 +25,6 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,9 +32,9 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.ui.auth.IdpResponse;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.authentication.AuthenticationManager;
+import com.pajato.android.gamechat.main.MainActivity;
 
 import static android.view.animation.AnimationUtils.loadAnimation;
 import static com.pajato.android.gamechat.main.MainActivity.RC_SIGN_IN;
@@ -58,23 +57,15 @@ public class IntroActivity extends AppCompatActivity {
 
     // Protected instance methods.
 
-    /**
-     * Handle the sign in activity result. If the sign-in completes with an "OK status, this
-     * intro activity is done so return to the main activity with an "OK" status.
-     */
+    /** Process the activity result by passing sign-in success onto the main activity. */
     @Override
     protected void onActivityResult(final int request, final int result, final Intent intent) {
+        // Handle a successful result directly and a failed result by passing it back to the
+        // invoking activity via the intent.
         super.onActivityResult(request, result, intent);
-        IdpResponse response = request == RC_SIGN_IN && result == RESULT_OK
-                ? IdpResponse.fromResultIntent(intent) : null;
-        if (response != null) {
-            String format = "Sign in completed with provider type: %s, e-mail: %s, url: %s";
-            Log.i(IntroActivity.class.getSimpleName(),
-                    String.format(format, response.getProviderType(), response.getEmail()));
-        }
-
-        // Pass the intent obtained from the sign in activity through to the calling intent.
-        setResult(RESULT_OK, intent);
+        if (result == RESULT_OK && request == RC_SIGN_IN)
+            MainActivity.processSignIn(intent);
+        setResult(result, intent);
         finish();
     }
 
