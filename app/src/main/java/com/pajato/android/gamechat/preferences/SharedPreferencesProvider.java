@@ -20,7 +20,9 @@ package com.pajato.android.gamechat.preferences;
 import android.app.Activity;
 import android.content.SharedPreferences;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,18 +38,31 @@ public class SharedPreferencesProvider implements PreferencesProvider {
     /** The shared preferences being managed. */
     private SharedPreferences mPrefs;
 
+    /** The cache providing immediate access to the preference values. */
+    private Map<String, Preference> mCache;
+
     // Public constructor.
 
     /** Build an instance accepting the Activity containing the shared preferences. */
     public SharedPreferencesProvider(final Activity activity, final String name, final int mode) {
+        // Load the shared preferences and cache the values.
         mPrefs = activity.getSharedPreferences(name, mode);
+        mCache = new HashMap<>();
+        Map<String, ?> prefs = mPrefs.getAll();
+        for (String key : prefs.keySet()) {
+            Object item = prefs.get(key);
+            Preference pref = getPreference(key, item);
+            if (pref != null)
+                mCache.put(key, pref);
+        }
+        mCache = getAll();
     }
 
     // Public instance methods.
 
-    /** Return a string set associated with the given key. If none, return a default set. */
-    @Override public Set<String> getStringSet(final String key, final Set<String> defaultValues) {
-        return mPrefs.getStringSet(key, defaultValues);
+    /** Return a possibly empty map of all the preferences. */
+    @Override public Map<String, Preference> getAll() {
+        return mCache;
     }
 
     /** Return a boolean flag associated with the given key. In none, return a default value. */
@@ -55,21 +70,52 @@ public class SharedPreferencesProvider implements PreferencesProvider {
         return mPrefs.getBoolean(key, defaultValue);
     }
 
+    /** Return a string set associated with the given key. If none, return a default set. */
+    @Override public Set<String> getStringSet(final String key, final Set<String> defaultValues) {
+        return mPrefs.getStringSet(key, defaultValues);
+    }
+
     /** Persist a list of preference values. */
     @Override public void persist(final List<Preference> values) {
         SharedPreferences.Editor editor = mPrefs.edit();
+        if (values == null) {
+            editor.clear().apply();
+            mCache.clear();
+            return;
+        }
+
+        // Persist the elements of the list.
         for (Preference item : values) {
             switch (item.type) {
                 case bool:
                     editor.putBoolean(item.key, item.booleanValue);
+                    mCache.put(item.key, new Preference(item.key, item.booleanValue));
                     break;
                 case stringset:
                     editor.putStringSet(item.key, item.stringSetValue);
-                    break;
-                default:
+                    mCache.put(item.key, new Preference(item.key, item.stringSetValue));
                     break;
             }
         }
         editor.apply();
+    }
+
+    // Private instance methods.
+
+    /** Return null or a Preference object with the given key and value. */
+    private Preference getPreference(String key, Object value) {
+        if (value instanceof Boolean)
+            return new Preference(key, (Boolean) value);
+        else if (value instanceof Set<?>) {
+            Set<?> set = (Set<?>) value;
+            for (Object item : set) {
+                if (!(item instanceof String))
+                    return null;
+            }
+            @SuppressWarnings("unchecked")
+            Set<String> stringSet = (Set<String>) value;
+            return new Preference(key, stringSet);
+        } else
+            return null;
     }
 }

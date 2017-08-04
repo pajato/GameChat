@@ -24,7 +24,6 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.AuthUI.IdpConfig.Builder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -140,7 +139,7 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
         // account manager will be unregistered.
         mRegistrationClassNameMap.put(event.name, event.changeType == REGISTERED);
         for (Boolean value : mRegistrationClassNameMap.values())
-            if (!value && mIsFirebaseEnabled) {
+            if (!value) {
                 setFirebaseState(false);
                 return;
             }
@@ -177,13 +176,21 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
 
     /** Set the Firebase state per the given value. */
     private void setFirebaseState(final boolean value) {
+        // Ensure that no work is done unnecessarily by detecting unchanged state.
+        if ((value && mIsFirebaseEnabled) || (!value && !mIsFirebaseEnabled))
+            return;
+
         // Disable Firebase by turning off the authentication change listener.
         String state = value ? "enabled" : "disabled";
         Log.d(TAG, "Firebase is now " + state + ".");
         if (value)
             FirebaseAuth.getInstance().addAuthStateListener(this);
-        else
+        else {
+            // Disable Firebase by removing the auth state change listener and ensure that the
+            // current account (if any) is cleared.
             FirebaseAuth.getInstance().removeAuthStateListener(this);
+            AppEventManager.instance.post(new AuthStateChangedEvent(null));
+        }
         mIsFirebaseEnabled = value;
     }
 }
