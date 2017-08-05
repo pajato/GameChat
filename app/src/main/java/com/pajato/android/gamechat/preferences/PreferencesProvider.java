@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provide an interface that models the use of shared preferences within GameChat to facilitate
- * testing.
+ * Provide an interface to model the app use of shared preferences to facilitate testing.
  *
  * @author Paul Michael Reilly on 7/29/2017
  */

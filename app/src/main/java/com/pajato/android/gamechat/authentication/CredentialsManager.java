@@ -22,6 +22,8 @@ import android.support.annotation.NonNull;
 
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
@@ -74,6 +76,9 @@ public enum CredentialsManager {
 
         // Return the appropriate authentication credential.
         switch (credentials.provider) {
+            case EmailAuthProvider.PROVIDER_ID:
+                // Provide a Beta hack to permit email users to leverage "switch user".
+                return EmailAuthProvider.getCredential(email, "gamechat");
             case GoogleAuthProvider.PROVIDER_ID:
                 return GoogleAuthProvider.getCredential(credentials.token, null);
             case FacebookAuthProvider.PROVIDER_ID:

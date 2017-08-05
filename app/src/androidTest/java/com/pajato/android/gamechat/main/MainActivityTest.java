@@ -1,17 +1,10 @@
 package com.pajato.android.gamechat.main;
 
 import com.pajato.android.gamechat.BaseTest;
-import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.FragmentKind;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 /**
  * Provide a placeholder for testing the main activity class.
