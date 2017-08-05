@@ -30,6 +30,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthStateChangedEvent;
@@ -40,6 +41,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.pajato.android.gamechat.event.RegistrationChangeEvent.REGISTERED;
@@ -81,7 +83,7 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()));
         intentBuilder.setLogo(R.drawable.signin_logo);
         intentBuilder.setTheme(R.style.signInTheme);
-        //intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
+        intentBuilder.setIsSmartLockEnabled(!BuildConfig.DEBUG);
         Intent intent = intentBuilder.build();
         intent.putExtra("signin", true);
         return intent;
@@ -155,6 +157,7 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
     /** Handle a switch user event by attempting a sign-in to the given email address. */
     private static void signIn(@NonNull final String email) {
         // Ensure that the given email address is valid.  Abort if not.
+        Log.d(TAG, String.format(Locale.US, "Signing in with email address: {%s}.", email));
         AuthCredential authCredential = CredentialsManager.instance.getAuthCredential(email);
         if (authCredential == null)
             return;
@@ -166,8 +169,9 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
                         if (!task.isSuccessful()) {
                             Exception exc = task.getException();
                             String excMessage = exc != null ? exc.getMessage() : "N/A";
-                            Log.i(TAG, "Sign operation failed with exception: " + excMessage);
-                        }
+                            Log.d(TAG, "Sign operation failed with exception: " + excMessage);
+                        } else
+                            Log.d(TAG, "Sign in successful and complete.");
                     }
                 });
     }
