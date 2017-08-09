@@ -18,11 +18,11 @@
 package com.pajato.android.gamechat.preferences;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * Provide an interface that models the use of shared preferences within GameChat to facilitate
- * testing.
+ * Provide an interface to model the app use of shared preferences to facilitate testing.
  *
  * @author Paul Michael Reilly on 7/29/2017
  */
@@ -35,6 +35,9 @@ public interface PreferencesProvider {
     /** Return a boolean flag associated with the given key. In none, return a default value. */
     boolean getBoolean(String key, boolean defaultValue);
 
-    /** Persist a given boolean value. */
+    /** Return a map of all preference values. */
+    Map<String, Preference> getAll();
+
+    /** Persist a given list of preference values.  Clear the values when list is null. */
     void persist(List<Preference> list);
 }

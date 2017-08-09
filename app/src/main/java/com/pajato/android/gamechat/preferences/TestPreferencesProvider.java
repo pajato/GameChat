@@ -42,16 +42,21 @@ public class TestPreferencesProvider implements PreferencesProvider {
 
     // Public instance methods.
 
-    /** Return a string set associated with the given key. If none, return a default set. */
-    @Override public Set<String> getStringSet(final String key, final Set<String> defaultValues) {
-        Preference pref = mPrefs.get(key);
-        return pref != null ? pref.stringSetValue : defaultValues;
+    /** Return a map of the preferences. */
+    @Override public Map<String, Preference> getAll() {
+        return mPrefs;
     }
 
     /** Return a boolean flag associated with the given key. In none, return a default value. */
     @Override public boolean getBoolean(final String key, final boolean defaultValue) {
         Preference pref = mPrefs.get(key);
         return pref != null ? pref.booleanValue : defaultValue;
+    }
+
+    /** Return a string set associated with the given key. If none, return a default set. */
+    @Override public Set<String> getStringSet(final String key, final Set<String> defaultValues) {
+        Preference pref = mPrefs.get(key);
+        return pref != null ? pref.stringSetValue : defaultValues;
     }
 
     /** Persist a list of preference values. */
