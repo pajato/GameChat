@@ -37,7 +37,7 @@ android {
             debuggable true
             shrinkResources false
             minifyEnabled true
-            useProguard true
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled = true
         }
@@ -45,7 +45,7 @@ android {
             debuggable false
             shrinkResources false
             minifyEnabled true
-            useProguard true
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
