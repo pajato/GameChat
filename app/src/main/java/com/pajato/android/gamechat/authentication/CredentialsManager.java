@@ -33,6 +33,7 @@ import com.pajato.android.gamechat.preferences.PreferencesProvider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,10 @@ public enum CredentialsManager {
 
     /** The map associating an email address with a provider and token/password. */
     private Map<String, Credentials> mCredentialsMap = new HashMap<>();
+
+
+    /** The list tracking the most recently used email keys and their positions for the icons. */
+    private List<String> mEmailList = new LinkedList<>();
 
     /** The current preferences provider. */
     private PreferencesProvider mPrefs;
@@ -94,10 +99,16 @@ public enum CredentialsManager {
         return mCredentialsMap;
     }
 
+    /** Return the list of emails stored. */
+    public List<String> getEmailList() {
+        return mEmailList;
+    }
+
     /** Build the object by reading in the saved credentials. */
     public void init(final PreferencesProvider prefs) {
         mPrefs = prefs;
         mCredentialsMap = new HashMap<>();
+        mEmailList = new LinkedList<>();
         Set<String> stringSet = prefs.getStringSet(CREDENTIALS_SET_KEY, null);
         if (stringSet != null) {
             for (String value : stringSet)
@@ -115,6 +126,17 @@ public enum CredentialsManager {
         final String token = response.getIdpToken();
         final String secret = response.getIdpSecret();
         persist(new Credentials(provider, email, token, secret));
+    }
+
+    /** Remove a credential and persist the updated credentials to our preferences provider. */
+    public void removeCredentialAndPersist(@NonNull final String email) {
+        mCredentialsMap.remove(email);
+        mEmailList.remove(email);
+
+        List<Preference> list = new ArrayList<>();
+        list.add(new Preference(ACCOUNT_AVAILABLE_KEY, true));
+        list.add(new Preference(CREDENTIALS_SET_KEY, getStringSet()));
+        mPrefs.persist(list);
     }
 
     /** Update the User properties into the persistence store. */
@@ -149,6 +171,7 @@ public enum CredentialsManager {
     private void cacheValue(final String value) {
         Credentials credentials = new Credentials(value);
         mCredentialsMap.put(credentials.email, credentials);
+        mEmailList.add(0, credentials.email);
     }
 
     /** Return TRUE iff the given credentials are not complete and sensible. */
@@ -165,6 +188,10 @@ public enum CredentialsManager {
 
         // Persist and cache the credentials.
         mCredentialsMap.put(credentials.email, credentials);
+        while (mEmailList.contains(credentials.email))
+            mEmailList.remove(credentials.email);
+        mEmailList.add(0, credentials.email);
+
         List<Preference> list = new ArrayList<>();
         list.add(new Preference(ACCOUNT_AVAILABLE_KEY, true));
         list.add(new Preference(CREDENTIALS_SET_KEY, getStringSet()));

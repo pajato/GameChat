@@ -164,8 +164,17 @@ public class MainActivity extends BaseActivity
         View header = navView.getHeaderView(0) != null
             ? navView.getHeaderView(0)
             : navView.inflateHeaderView(R.layout.nav_header_main);
-        View layout = header.findViewById(R.id.currentProfile);
+
+        // Set onClickListeners for the different account icons.
+        View layout = header.findViewById(R.id.alternateAccountIcon1);
         if (layout != null) layout.setOnClickListener(this);
+        layout = header.findViewById(R.id.alternateAccountIcon2);
+        if (layout != null) layout.setOnClickListener(this);
+        layout = header.findViewById(R.id.alternateAccountIcon3);
+        if (layout != null) layout.setOnClickListener(this);
+        layout = header.findViewById(R.id.alternateAccountIcon4);
+        if (layout != null) layout.setOnClickListener(this);
+
         NavigationManager.instance.setAccount(account, header);
 
         // Turn off all database handlers if the account has been signed out, otherwise update the
@@ -205,7 +214,17 @@ public class MainActivity extends BaseActivity
         String format = "Button click event on view: {%s}.";
         Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
         switch (view.getId()) {
-            case R.id.currentProfile:
+            // When the user switches accounts, make sure the navigation drawer gets closed.
+            case R.id.alternateAccountIcon1:
+            case R.id.alternateAccountIcon2:
+            case R.id.alternateAccountIcon3:
+            case R.id.alternateAccountIcon4: {
+                AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
+                FragmentType type = DispatchManager.instance.currentChatFragmentType;
+                FragmentActivity activity = DispatchManager.instance.getFragment(type).getActivity();
+                AuthenticationManager.signOut(activity, (String) view.getTag(view.getId()));
+                break;
+            }
             case R.id.signIn:
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
