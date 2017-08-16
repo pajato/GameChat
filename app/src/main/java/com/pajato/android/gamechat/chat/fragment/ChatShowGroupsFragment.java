@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.chat.fragment;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -48,7 +47,9 @@ import static com.pajato.android.gamechat.common.FragmentType.joinRoom;
 import static com.pajato.android.gamechat.common.FragmentType.protectedUsers;
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.game;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.search;
+import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.settings;
 
 /**
  * Provide a fragment to handle the display of the groups available to the current user.  This is
@@ -117,15 +118,10 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
                 DispatchManager.instance.dispatchToFragment(this, joinRoom);
                 break;
             case R.string.InviteFriendMessage:
-                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, this.type);
+                DispatchManager.instance.dispatchToFragment(this, selectGroupsRooms, type);
                 break;
             case R.string.ManageRestrictedUserTitle:
-                if (AccountManager.instance.isRestricted()) {
-                    String protectedWarning = getString(R.string.CannotManageProtectedUser);
-                    Toast.makeText(getActivity(), protectedWarning, Toast.LENGTH_SHORT).show();
-                    break;
-                }
-                DispatchManager.instance.dispatchToFragment(this, protectedUsers, this.type);
+                DispatchManager.instance.dispatchToFragment(this, protectedUsers, type);
                 break;
             default:
                 break;
@@ -173,7 +169,7 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
     /** Initialize ... */
     @Override public void onStart() {
         super.onStart();
-        ToolbarManager.instance.init(this, game, search);
+        ToolbarManager.instance.init(this, game, search, helpAndFeedback, settings);
         FabManager.chat.setMenu(CHAT_GROUP_FAM_KEY, getGroupMenu());
     }
 
@@ -181,13 +177,17 @@ public class ChatShowGroupsFragment extends BaseChatFragment {
 
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getGroupMenu() {
+        // Let everyone join rooms, standard Users can manage protected Users and invitations can
+        // be extended if at least one group is available with rooms to join.
         final List<MenuEntry> menu = new ArrayList<>();
         menu.add(getTintEntry(R.string.JoinRoomsMenuTitle, R.drawable.ic_checkers_black_24dp));
         if (!AccountManager.instance.isRestricted()) {
             menu.add(getTintEntry(R.string.ManageRestrictedUserTitle,
                     R.drawable.ic_verified_user_black_24dp));
         }
-        menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
+        Account account = AccountManager.instance.getCurrentAccount();
+        if (account != null && account.joinMap.size() > 0)
+            menu.add(getTintEntry(R.string.InviteFriendMessage, R.drawable.ic_share_black_24dp));
         return menu;
     }
 }

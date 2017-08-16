@@ -49,10 +49,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 
-/**
- * Provide a fragment class used to choose groups and rooms to include in an invite.
- */
-
+/** Provide a fragment class used to choose groups and rooms to include in an invite. */
 public class SelectInviteFragment extends BaseChatFragment {
 
     // Public constants.
