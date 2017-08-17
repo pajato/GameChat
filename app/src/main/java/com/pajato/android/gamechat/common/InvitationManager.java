@@ -63,6 +63,7 @@ import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.main.MainActivity;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -315,6 +316,7 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
 
     /** Handle app invitation result. Called only from MainActivity onResult method. */
     public void onInvitationResult(final int resultCode, final Intent intent) {
+        ProgressManager.instance.hide();
         if (resultCode != RESULT_OK)
             clearInvitationMap();
         else {

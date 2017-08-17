@@ -32,8 +32,6 @@ http://www.gnu.org/licenses
 
     <View style="@style/DimmerTheme"
         android:id="@+id/chatDimmer"
-        android:layout_height="0dp"
-        android:layout_width="0dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:visibility="visible" />
@@ -69,5 +67,22 @@ http://www.gnu.org/licenses
             tools:visibility="visible"/>
 
     </android.support.design.widget.CoordinatorLayout>
+
+    <View style="@style/DimmerTheme"
+        android:id="@+id/chatProgressDimmer"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="gone" />
+
+    <ProgressBar style="?android:attr/progressBarStyle"
+        android:id="@+id/chatProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="visible" />
 
 </android.support.constraint.ConstraintLayout>
