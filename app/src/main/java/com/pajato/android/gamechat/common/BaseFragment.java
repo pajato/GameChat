@@ -147,7 +147,8 @@ public abstract class BaseFragment extends Fragment {
                                        final Bundle savedInstanceState) {
         // Determine if the layout exists and reuse it if so.
         logEvent("onCreateView", savedInstanceState);
-        if (mLayout != null) return mLayout;
+        if (mLayout != null)
+            return mLayout;
 
         // The layout does not exist.  Create and save it by initializing the fragment layout.
         mLayout = inflater.inflate(type.layoutResId, container, false);
