@@ -111,7 +111,7 @@ public enum DispatchManager {
         // When offline, switch automatically to experience (game) pane on a smartphone
         if (dispatcher.type == chatOffline || dispatcher.type == expOffline &&
                 !PaneManager.instance.isTablet()) {
-            ViewPager viewPager = (ViewPager) fragment.getActivity().findViewById(R.id.viewpager);
+            ViewPager viewPager = fragment.getActivity().findViewById(R.id.viewpager);
             if (viewPager != null)
                 viewPager.setCurrentItem(PaneManager.GAME_INDEX);
         }

@@ -221,7 +221,7 @@ public abstract class BaseFragment extends Fragment {
 
     /** Initialize the ad view by building and loading an ad request. */
     protected void initAdView(@NonNull final View layout) {
-        mAdView = (AdView) layout.findViewById(R.id.adView);
+        mAdView = layout.findViewById(R.id.adView);
         if (mAdView != null) {
             AdRequest adRequest = new AdRequest.Builder().build();
             mAdView.loadAd(adRequest);
@@ -305,7 +305,7 @@ public abstract class BaseFragment extends Fragment {
         // Determine if the keyboard is active before dismissing it.
         InputMethodManager manager;
         manager = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
-        if (manager.isAcceptingText() && getActivity().getCurrentFocus() != null)
+        if (manager != null && manager.isAcceptingText() && getActivity().getCurrentFocus() != null)
             manager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 
@@ -331,8 +331,8 @@ public abstract class BaseFragment extends Fragment {
 
     /** Show an alert dialog with "ok" and "cancel". */
     public void showAlertDialog(final String title, final String message,
-                                   DialogInterface.OnClickListener cancelListener,
-                                   DialogInterface.OnClickListener okListener) {
+                                DialogInterface.OnClickListener cancelListener,
+                                DialogInterface.OnClickListener okListener) {
         MainActivity activity = (MainActivity) this.getActivity();
         activity.showOkCancelDialog(title, message, cancelListener, okListener);
     }

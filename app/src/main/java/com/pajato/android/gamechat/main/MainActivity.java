@@ -158,7 +158,6 @@ public class MainActivity extends BaseActivity
         // Due to a "bug" in Android, using XML to configure the navigation header current profile
         // click handler does not work.  Instead we do it here programmatically.  But first, turn
         // off the sign in spinner.
-        ProgressManager.instance.hide();
         Account account = event != null ? event.account : null;
         NavigationView navView = findViewById(R.id.nav_view);
         View header = navView.getHeaderView(0) != null
@@ -176,6 +175,7 @@ public class MainActivity extends BaseActivity
 
     /** Handle a back button press event delivered by the system. */
     @Override public void onBackPressed() {
+        ProgressManager.instance.hide();
         if (NavigationManager.instance.closeDrawerIfOpen(this))
             return;
         FragmentType type = DispatchManager.instance.currentChatFragmentType; // Default to chat
@@ -351,11 +351,12 @@ public class MainActivity extends BaseActivity
     protected void onActivityResult(final int request, final int result, final Intent intent) {
         // Handle a result from either the intro activity or the invite activity.
         super.onActivityResult(request, result, intent);
+        ProgressManager.instance.hide();
         if (result != RESULT_OK)
             logFailedResult(request, intent, result == RESULT_CANCELED);
-        else if (request == RC_SIGN_IN) {
+        else if (request == RC_SIGN_IN)
             processSignIn(intent);
-        } else if (request == RC_INVITE)
+        else if (request == RC_INVITE)
             InvitationManager.instance.onInvitationResult(result, intent);
     }
 
@@ -436,6 +437,7 @@ public class MainActivity extends BaseActivity
         NetworkManager.instance.init(this);
         PaneManager.instance.init(this);
         InvitationManager.instance.init(this, getIntent());
+        ProgressManager.instance.init();
         JoinManager.instance.init(this);
         NavigationManager.instance.init(this, (Toolbar) findViewById(R.id.toolbar));
 
