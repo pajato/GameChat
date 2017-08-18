@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-package com.pajato.android.gamechat.preferences;
+package com.pajato.android.gamechat.intro;
 
 import junit.framework.Assert;
 
@@ -23,25 +23,30 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.pajato.android.gamechat.preferences.Preference.Type.bool;
-import static com.pajato.android.gamechat.preferences.Preference.Type.stringset;
-import static com.pajato.android.gamechat.preferences.Preference.Type.valueOf;
-import static com.pajato.android.gamechat.preferences.Preference.Type.values;
+import static com.pajato.android.gamechat.intro.Pages.home;
+import static com.pajato.android.gamechat.intro.Pages.chat;
+import static com.pajato.android.gamechat.intro.Pages.game;
+import static com.pajato.android.gamechat.intro.Pages.levels;
+import static com.pajato.android.gamechat.intro.Pages.valueOf;
+import static com.pajato.android.gamechat.intro.Pages.values;
 
 /**
  * Provide a unit test class in order to achieve acceptable coverage on the Preference class code.
  *
  * Created by pmr on 8/2/17.
  */
-public class PreferenceUnitTest {
+public class PagesUnitTest {
     @Before public void setUp() throws Exception { }
 
     @After public void tearDown() throws Exception { }
 
     @Test public void testType() {
         // Test the implicit enum methods.
-        Assert.assertEquals("The type size is wrong!", 2, values().length);
-        Assert.assertEquals("The value is wrong!", bool, valueOf("bool"));
-        Assert.assertEquals("The value is wrong!", stringset, valueOf("stringset"));
+        Assert.assertEquals("The type size is wrong!", 4, values().length);
+        Assert.assertEquals("The value is wrong!", home, valueOf("home"));
+        Assert.assertEquals("The value is wrong!", chat, valueOf("chat"));
+        Assert.assertEquals("The value is wrong!", game, valueOf("game"));
+        Assert.assertEquals("The value is wrong!", levels, valueOf("levels"));
+
     }
 }

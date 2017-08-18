@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2017 Pajato Technologies, Inc.
+ *
+ * This file is part of Pajato GameChat.
+
+ * GameChat is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * GameChat is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along with GameChat.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
 package com.pajato.android.gamechat.preferences;
 
 import android.app.Activity;
@@ -19,6 +36,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -57,12 +75,24 @@ public class SharedPreferencesProviderUnitTest {
         Assert.assertTrue("The shared preferences file is not empty!", map.size() == 0);
 
         // Next test...
+        Set<String> set = new TreeSet<>();
+        set.add("first");
+        set.add("second");
+        set.add("third");
         final String BOOL_KEY = "boolKey";
         final String STRING_SET_KEY = "stringSetKey";
         List<Preference> list = new ArrayList<>();
         list.add(new Preference(BOOL_KEY, true));
-        list.add(new Preference(STRING_SET_KEY, new TreeSet<String>()));
+        list.add(new Preference(STRING_SET_KEY, set));
+        Preference pref = new Preference(BOOL_KEY, false);
+        pref.type = null;
+        list.add(pref);
         prefs.persist(list);
+        Assert.assertEquals("The shared preferences file size is wrong!", 2, map.size());
+        Assert.assertEquals("The boolean value is wrong.", true, prefs.getBoolean(BOOL_KEY, false));
+
+        // Another test to get more constructor coverage.
+        prefs = new SharedPreferencesProvider(activity, name, mode);
         Assert.assertEquals("The shared preferences file size is wrong!", 2, map.size());
         Assert.assertEquals("The boolean value is wrong.", true, prefs.getBoolean(BOOL_KEY, false));
     }

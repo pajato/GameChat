@@ -63,7 +63,7 @@ ext {
     // App dependencies
     espressoVersion = '2.2.2'
     firebaseAuthUIVersion = '1.2.0'
-    gmsVersion = '11.0.4'
+    gmsVersion = '11.2.0'
     runnerVersion = '0.5'
     supportLibraryVersion = '26.0.1'
     uiautomatorVersion = '2.1.2'
