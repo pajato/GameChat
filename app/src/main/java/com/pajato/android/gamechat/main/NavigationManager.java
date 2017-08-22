@@ -164,8 +164,8 @@ public enum NavigationManager {
             loadAccountIcon(currentCredentials.url, icon);
         }
         // Hide unfilled icons.
-        for (i = i; i < 4; i++) {
-            int id = getAlternateAccountIconId(i);
+        for (int j = i; j < 4; j++) {
+            int id = getAlternateAccountIconId(j);
             ImageView altAccountIcon = header.findViewById(id);
             altAccountIcon.setVisibility(View.INVISIBLE);
         }
@@ -226,7 +226,7 @@ public enum NavigationManager {
 
     /** Access one of four possible alternate account icon ids. */
     private int getAlternateAccountIconId(final int index) {
-        switch(index) {
+        switch (index) {
             default:
                 return -1;
             case 0:
