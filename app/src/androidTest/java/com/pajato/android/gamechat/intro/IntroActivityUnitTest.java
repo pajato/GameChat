@@ -23,7 +23,6 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.widget.AlphabetIndexer;
 
 import com.pajato.android.gamechat.R;
 

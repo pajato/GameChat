@@ -95,8 +95,7 @@ public class SharedPreferencesProvider implements PreferencesProvider {
             } else if (item.type == stringset) {
                 editor.putStringSet(item.key, item.stringSetValue);
                 mCache.put(item.key, new Preference(item.key, item.stringSetValue));
-            } else
-                continue;
+            }
         }
         editor.apply();
     }

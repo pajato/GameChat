@@ -58,7 +58,7 @@ ext {
     buildToolsVersion = '26.0.1'
 
     // App release version.
-    versionCode = 13
+    versionCode = 14
 
     // App dependencies
     espressoVersion = '2.2.2'

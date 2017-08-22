@@ -1,3 +1,15 @@
+# Release b1.14
+
+## Enhancements
+
+Make invitations help more robust.
+
+Make switch User more robust.
+
+## Internals
+
+Add more testing to double the code coverage percentage from ~15% to nearly 30%.
+
 # Release b1.13
 
 ## Bug fixes
