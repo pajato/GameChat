@@ -32,7 +32,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.pajato.android.gamechat.BuildConfig;
 import com.pajato.android.gamechat.R;
-import com.pajato.android.gamechat.database.AccountManager;
 import com.pajato.android.gamechat.event.AppEventManager;
 import com.pajato.android.gamechat.event.AuthStateChangedEvent;
 import com.pajato.android.gamechat.event.RegistrationChangeEvent;
@@ -98,11 +97,6 @@ public enum AuthenticationManager implements FirebaseAuth.AuthStateListener {
 
     /** Perform a signout or switch to the User with the given (non-null) email address. */
     public static void signOut(final FragmentActivity activity, final String email) {
-        if (email == null) {
-            String currentEmail = AccountManager.instance.getCurrentAccount().email;
-            CredentialsManager.instance.removeCredentialAndPersist(currentEmail);
-            // TODO: Sign in with the next most recently accessed account
-        }
         AuthUI.getInstance()
                 .signOut(activity)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -71,6 +71,7 @@ import com.pajato.android.gamechat.preferences.SharedPreferencesProvider;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -165,14 +166,12 @@ public class MainActivity extends BaseActivity
             : navView.inflateHeaderView(R.layout.nav_header_main);
 
         // Set onClickListeners for the different account icons.
-        View layout = header.findViewById(R.id.alternateAccountIcon1);
-        if (layout != null) layout.setOnClickListener(this);
-        layout = header.findViewById(R.id.alternateAccountIcon2);
-        if (layout != null) layout.setOnClickListener(this);
-        layout = header.findViewById(R.id.alternateAccountIcon3);
-        if (layout != null) layout.setOnClickListener(this);
-        layout = header.findViewById(R.id.alternateAccountIcon4);
-        if (layout != null) layout.setOnClickListener(this);
+        for(int id : Arrays.asList(R.id.alternateAccountIcon1, R.id.alternateAccountIcon2,
+                R.id.alternateAccountIcon3, R.id.alternateAccountIcon4)) {
+            View altIcon = header.findViewById(id);
+            if (altIcon != null)
+                altIcon.setOnClickListener(this);
+        }
 
         NavigationManager.instance.setAccount(account, header);
 
@@ -214,7 +213,7 @@ public class MainActivity extends BaseActivity
         String format = "Button click event on view: {%s}.";
         Log.v(TAG, String.format(Locale.US, format, view.getClass().getSimpleName()));
         switch (view.getId()) {
-            // When the user switches accounts, make sure the navigation drawer gets closed.
+            // When the user switches accounts, close the nav drawer and do the switch.
             case R.id.alternateAccountIcon1:
             case R.id.alternateAccountIcon2:
             case R.id.alternateAccountIcon3:
@@ -230,13 +229,14 @@ public class MainActivity extends BaseActivity
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 AuthenticationManager.signIn(this);
                 break;
-            case R.id.signOut:
+            case R.id.signOut: {
                 // On a sign in or sign out event, make sure the navigation drawer gets closed.
                 AppEventManager.instance.post(new NavDrawerOpenEvent(this, null));
                 FragmentType type = DispatchManager.instance.currentChatFragmentType;
                 FragmentActivity activity = DispatchManager.instance.getFragment(type).getActivity();
                 AuthenticationManager.signOut(activity, null);
                 break;
+            }
             case R.id.switchAccount:
                 NavigationManager.instance.toggleAccountSwitchState(this);
                 break;

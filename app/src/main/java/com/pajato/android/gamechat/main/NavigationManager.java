@@ -132,7 +132,8 @@ public enum NavigationManager {
 
         // Determine if there is an account to set up.  Abort if not, otherwise load the account
         // image, display name and email address.
-        if (account == null) return;
+        if (account == null)
+            return;
         loadAccountIcon(account.url, (ImageView) header.findViewById(R.id.currentAccountIcon));
         updateHeader(account.email, header);
         setDisplayName(account, header);
@@ -225,23 +226,18 @@ public enum NavigationManager {
 
     /** Access one of four possible alternate account icon ids. */
     private int getAlternateAccountIconId(final int index) {
-        int id;
         switch(index) {
             default:
+                return -1;
             case 0:
-                id = R.id.alternateAccountIcon1;
-                break;
+                return R.id.alternateAccountIcon1;
             case 1:
-                id = R.id.alternateAccountIcon2;
-                break;
+                return R.id.alternateAccountIcon2;
             case 2:
-                id = R.id.alternateAccountIcon3;
-                break;
+                return R.id.alternateAccountIcon3;
             case 3:
-                id = R.id.alternateAccountIcon4;
-                break;
+                return R.id.alternateAccountIcon4;
         }
-        return id;
     }
 
     /** Load the account icon, if available, using a placeholder otherwise. */
@@ -297,7 +293,8 @@ public enum NavigationManager {
         }
 
         private static Bitmap circleCrop(BitmapPool pool, Bitmap source) {
-            if (source == null) return null;
+            if (source == null)
+                return null;
             int size = Math.min(source.getWidth(), source.getHeight());
             int x = (source.getWidth() - size) / 2;
             int y = (source.getHeight() - size) / 2;
