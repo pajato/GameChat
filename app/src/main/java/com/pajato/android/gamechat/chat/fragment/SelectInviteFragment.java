@@ -35,6 +35,7 @@ import com.pajato.android.gamechat.common.adapter.MenuEntry;
 import com.pajato.android.gamechat.common.model.GroupInviteData;
 import com.pajato.android.gamechat.event.ClickEvent;
 import com.pajato.android.gamechat.event.TagClickEvent;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -49,10 +50,7 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.invit
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteGroup;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteRoom;
 
-/**
- * Provide a fragment class used to choose groups and rooms to include in an invite.
- */
-
+/** Provide a fragment class used to choose groups and rooms to include in an invite. */
 public class SelectInviteFragment extends BaseChatFragment {
 
     // Public constants.
@@ -85,6 +83,8 @@ public class SelectInviteFragment extends BaseChatFragment {
         switch (event.view.getId()) {
             case R.id.inviteButton:
                 // Handle the invitation
+                logEvent("Extending an invitation using a progress spinner.");
+                ProgressManager.instance.show();
                 InvitationManager.instance.extendInvitation(getActivity(), getSelections());
                 DispatchManager.instance.dispatchReturn(this);
                 break;
@@ -128,6 +128,7 @@ public class SelectInviteFragment extends BaseChatFragment {
         FabManager.chat.setImage(R.drawable.ic_add_white_24dp);
         FabManager.chat.init(this, INVITE_CHAT_FAM_KEY);
         FabManager.chat.setVisibility(this, View.VISIBLE);
+        updateSelections(false);
     }
 
     /** Setup the fragment configuration using the specified dispatcher. */
@@ -148,7 +149,7 @@ public class SelectInviteFragment extends BaseChatFragment {
     /** Return a map of group key to data representing the current selections of groups/rooms */
     private Map<String, GroupInviteData> getSelections() {
         Map<String, GroupInviteData> selections = new HashMap<>();
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
+        RecyclerView view = mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         // First loop through adapter items and handle groups
         for (ListItem item : adapter.getItems()) {
@@ -218,7 +219,7 @@ public class SelectInviteFragment extends BaseChatFragment {
         // Toggle the selection state and operate accordingly on the selected items lists.
         clickedItem.selected = !clickedItem.selected;
 
-        RecyclerView recyclerView = (RecyclerView) mLayout.findViewById(R.id.ItemList);
+        RecyclerView recyclerView = mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) recyclerView.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
 
@@ -270,7 +271,7 @@ public class SelectInviteFragment extends BaseChatFragment {
 
     /** Called from FAM click handling to update selections in the recycler view adapter list */
     private void updateSelections(final boolean selectedState) {
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
+        RecyclerView view = mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> itemList = adapter.getItems();
 
@@ -286,7 +287,7 @@ public class SelectInviteFragment extends BaseChatFragment {
     /** Update the invite button state based on the current join map content. */
     private void updateSendInviteButton() {
         View inviteButton = mLayout.findViewById(R.id.inviteButton);
-        RecyclerView view = (RecyclerView) mLayout.findViewById(R.id.ItemList);
+        RecyclerView view = mLayout.findViewById(R.id.ItemList);
         ListAdapter adapter = (ListAdapter) view.getAdapter();
         List <ListItem> adapterList = adapter.getItems();
         for (ListItem item : adapterList) {

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.pajato.android.gamechat.preferences.Preference.Type.bool;
+import static com.pajato.android.gamechat.preferences.Preference.Type.stringset;
+
 /**
  * Implement the preferences provider interface for use with the app shared preferences.
  *
@@ -86,16 +89,14 @@ public class SharedPreferencesProvider implements PreferencesProvider {
 
         // Persist the elements of the list.
         for (Preference item : values) {
-            switch (item.type) {
-                case bool:
-                    editor.putBoolean(item.key, item.booleanValue);
-                    mCache.put(item.key, new Preference(item.key, item.booleanValue));
-                    break;
-                case stringset:
-                    editor.putStringSet(item.key, item.stringSetValue);
-                    mCache.put(item.key, new Preference(item.key, item.stringSetValue));
-                    break;
-            }
+            if (item.type == bool) {
+                editor.putBoolean(item.key, item.booleanValue);
+                mCache.put(item.key, new Preference(item.key, item.booleanValue));
+            } else if (item.type == stringset) {
+                editor.putStringSet(item.key, item.stringSetValue);
+                mCache.put(item.key, new Preference(item.key, item.stringSetValue));
+            } else
+                continue;
         }
         editor.apply();
     }
@@ -106,12 +107,7 @@ public class SharedPreferencesProvider implements PreferencesProvider {
     private Preference getPreference(String key, Object value) {
         if (value instanceof Boolean)
             return new Preference(key, (Boolean) value);
-        else if (value instanceof Set<?>) {
-            Set<?> set = (Set<?>) value;
-            for (Object item : set) {
-                if (!(item instanceof String))
-                    return null;
-            }
+        else if (value instanceof Set) {
             @SuppressWarnings("unchecked")
             Set<String> stringSet = (Set<String>) value;
             return new Preference(key, stringSet);

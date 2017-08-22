@@ -95,7 +95,8 @@ public enum FabManager {
     public void dismissMenu(@NonNull final Fragment fragment) {
         // Determine if the chat fragment is accessible.  If so, dismiss the FAM.
         View layout = getFragmentLayout(fragment);
-        if (layout != null) dismissMenu(fragment, layout);
+        if (layout != null)
+            dismissMenu(fragment, layout);
     }
 
     /** Initialize the FAB. Use small FAB size for game fragments; all others use normal size. */
@@ -114,7 +115,7 @@ public enum FabManager {
         recyclerView.setAdapter(new MenuAdapter());
 
         // Set the FAB state to closed by assuming an open FAM and dismissing it.
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        FloatingActionButton fab = layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, opened);
         fab.setVisibility(View.VISIBLE);
         switch (fragment.type) {
@@ -155,7 +156,7 @@ public enum FabManager {
         View layout = getFragmentLayout(fragment);
         if (layout == null)
             return;
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        FloatingActionButton fab = layout.findViewById(mFabId);
         fab.setVisibility(state);
     }
 
@@ -178,7 +179,7 @@ public enum FabManager {
         View layout = getFragmentLayout(fragment);
         if (layout == null)
             return;
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        FloatingActionButton fab = layout.findViewById(mFabId);
         fab.setVisibility(View.VISIBLE);
     }
 
@@ -231,10 +232,11 @@ public enum FabManager {
         // Dismiss the FAM and ensure that the default menu has been setup.
         View menu = layout.findViewById(mFabMenuId);
         menu.setVisibility(View.GONE);
-        if (mDefaultMenuName != null) setMenu(fragment, mDefaultMenuName);
+        if (mDefaultMenuName != null)
+            setMenu(fragment, mDefaultMenuName);
 
         // Restore the FAB to the closed state and dismiss the dimmer view.
-        FloatingActionButton fab = (FloatingActionButton) layout.findViewById(mFabId);
+        FloatingActionButton fab = layout.findViewById(mFabId);
         fab.setTag(R.integer.fabStateKey, State.closed);
         fab.setImageResource(mImageResourceId);
         View dimmerView = layout.findViewById(mFabDimmerId);

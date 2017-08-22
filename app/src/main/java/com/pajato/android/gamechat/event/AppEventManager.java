@@ -54,6 +54,11 @@ public enum AppEventManager {
         EventBus.getDefault().cancelEventDelivery(event);
     }
 
+    /** Return TRUE iff the given class name is registered to receive events. */
+    public boolean isRegistered(final String name) {
+        return mHandlerMap.containsKey(name);
+    }
+
     /** Post an event using the GreenRobot library. */
     public void post(final Object event) {
         // Maintain the posting level using a stack; report the start and end of the post.

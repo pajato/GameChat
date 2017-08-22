@@ -20,6 +20,8 @@ package com.pajato.android.gamechat.chat.fragment;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.pajato.android.gamechat.R;
@@ -36,6 +38,7 @@ import com.pajato.android.gamechat.event.AuthenticationChangeEvent;
 import com.pajato.android.gamechat.event.MemberChangeEvent;
 import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
+import com.pajato.android.gamechat.event.ProgressSpinnerEvent;
 import com.pajato.android.gamechat.help.HelpManager;
 import com.pajato.android.gamechat.main.PaneManager;
 
@@ -83,6 +86,24 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
         return null;
     }
 
+    /** Handle a request to show a progress spinner. */
+    @Subscribe public void onProgressSpinnerChange(final ProgressSpinnerEvent event) {
+        // Ensure that the event is well formed. Abort if not.
+        if (event == null)
+            return;
+
+        // Process the event by setting the visibility on the progress bar (spinner) and the
+        // progress dimmer view.
+        int visibility = event.state ? View.VISIBLE : View.GONE;
+        logEvent(String.format(Locale.US, "onProgressSpinnerChange with state: {%s}", event.state));
+        ProgressBar progressBar = getActivity().findViewById(R.id.chatProgressBar);
+        View progressDimmer = getActivity().findViewById(R.id.chatProgressDimmer);
+        if (progressBar != null)
+            progressBar.setVisibility(visibility);
+        if (progressDimmer != null)
+            progressDimmer.setVisibility(visibility);
+    }
+
     /** Handle a authentication change event by dealing with the fragment to display. */
     @Subscribe public void onAuthenticationChange(final AuthenticationChangeEvent event) {
         // Simply start the next logical fragment.
@@ -116,7 +137,7 @@ public class ChatEnvelopeFragment extends BaseChatFragment {
                 // If not on a tablet, make sure that we switch to the chat perspective and remember
                 // the type that we came from.
                 if (!PaneManager.instance.isTablet()) {
-                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    ViewPager viewPager = getActivity().findViewById(R.id.viewpager);
                     if (viewPager != null)
                         viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }

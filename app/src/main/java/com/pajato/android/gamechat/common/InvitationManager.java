@@ -17,10 +17,15 @@
 
 package com.pajato.android.gamechat.common;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
@@ -39,6 +44,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.pajato.android.gamechat.R;
+import com.pajato.android.gamechat.authentication.CredentialsManager;
 import com.pajato.android.gamechat.chat.model.Group;
 import com.pajato.android.gamechat.chat.model.Room;
 import com.pajato.android.gamechat.common.adapter.ListItem;
@@ -57,6 +63,7 @@ import com.pajato.android.gamechat.event.GroupJoinedEvent;
 import com.pajato.android.gamechat.event.ProfileGroupChangeEvent;
 import com.pajato.android.gamechat.event.ProfileRoomChangeEvent;
 import com.pajato.android.gamechat.main.MainActivity;
+import com.pajato.android.gamechat.main.ProgressManager;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -66,7 +73,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.Manifest.permission.GET_ACCOUNTS;
 import static android.app.Activity.RESULT_OK;
+import static com.google.android.gms.appinvite.AppInviteInvitation.IntentBuilder.MAX_MESSAGE_LENGTH;
+import static com.pajato.android.gamechat.chat.ContactManager.REQUEST_CONTACTS;
 import static com.pajato.android.gamechat.chat.model.Message.STANDARD;
 import static com.pajato.android.gamechat.chat.model.Room.RoomType.COMMON;
 import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.inviteCommonRoom;
@@ -82,14 +92,17 @@ import static com.pajato.android.gamechat.common.adapter.ListItem.ItemType.resou
 public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListener {
     instance;
 
-    // Private constants.
+    // Public class constants.
+
+    public static final String APP_INVITE_ID_PATH =  "invites/%s/";
+
+    // Private class constants.
 
     private static final String APP_CODE = "aq5ca";
     private static final String PLAY_STORE_LINK =
             "https://play.google.com/apps/testing/com.pajato.android.gamechat";
     private static final String APP_PACKAGE_NAME = "com.pajato.android.gamechat";
     private static final String WEB_LINK = "https://github.com/pajato/GameChat";
-    public static final String APP_INVITE_ID_PATH =  "invites/%s/";
 
     /** The logcat TAG. */
     private static final String TAG = InvitationManager.class.getSimpleName();
@@ -107,8 +120,6 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
 
     /** The repository for any messages needed. */
     private SparseArray<String> mMessageMap = new SparseArray<>();
-
-    // Public instance variables.
 
     // Public instance methods.
 
@@ -141,53 +152,57 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
         mInviteMap.clear();
     }
 
-    /**
-     * Extend an invitation to join GameChat using AppInviteInvitation and specify a map of
-     * groups and their rooms to join (always has at least the Common room).
-     */
+    /** Extend a GameChat invitation specifying a collection of groups and rooms. */
     public void extendInvitation(final FragmentActivity activity,
-                                 final Map<String, GroupInviteData> keys) {
-        Log.i(TAG, "extendInvitation with list of keys");
-        // Save the groups/rooms map to write to Firebase after the invite id(s) are returned */
-        mInviteMap = keys;
-        startInvitationIntent(activity, null);
+                                 final Map<String, GroupInviteData> map) {
+        // Save the given groups and rooms provided in the given map, create the intent builder and
+        // conditionally set the sender account if there is a device account that matches the
+        // GameChat account and finally start the activity to select recipients for the invitation.
+        Log.i(TAG, "Extend an invitation with a possibly empty set of groups and rooms.");
+        mInviteMap = map;
+        String msgText = getMessage(activity);
+        String title = activity.getString(R.string.InviteTitle);
+        AppInviteInvitation.IntentBuilder builder = new AppInviteInvitation.IntentBuilder(title)
+            .setMessage(msgText)
+            .setDeepLink(Uri.parse(buildDynamicLink()));
+        android.accounts.Account senderAccount = getAndroidAccount(activity);
+        if (senderAccount != null)
+            builder.setAccount(senderAccount);
+        Intent intent = builder.build();
+        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
-    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a room to join. */
+    /** Extend a GameChat invitation specifying the room to join. */
     public void extendRoomInvitation(final FragmentActivity activity, final String roomKey) {
+        // Ensure that both the room and group exist.  Abort if not.
         Room room = RoomManager.instance.getRoomProfile(roomKey);
-        if (room == null) {
-            Log.e(TAG, "Room manager cannot find room " + roomKey + "; invitation aborted!");
-            return;
-        }
-        Group group = GroupManager.instance.getGroupProfile(room.groupKey);
+        Group group = room != null ? GroupManager.instance.getGroupProfile(room.groupKey) : null;
         if (group == null) {
-            Log.e(TAG, "Group manager cannot find group " + room.groupKey + "; invitation aborted!");
+            String key = room == null ? roomKey : room.groupKey;
+            String item = room == null ? "room" : "group";
+            String format = "The %s with key {%s} does not exist.  Invitation aborted.";
+            Log.e(TAG, String.format(Locale.US, format, item, key));
             return;
         }
-        Map<String, GroupInviteData> dataMap = new HashMap<>();
-        List<String> roomList = new ArrayList<>();
-        roomList.add(room.key);
-        GroupInviteData map = new GroupInviteData(group.key, group.name, group.commonRoomKey,
-                roomList);
-        dataMap.put(group.key, map);
-        extendInvitation(activity, dataMap);
+
+        // Extend the invitation.
+        Log.i(TAG, String.format(Locale.US, "Extend a room invitation using key {%s}.", roomKey));
+        extendInvitation(activity, group, roomKey);
     }
 
-    /** Extend an invitation to join GameChat using AppInviteInvitation and specify a group to join. */
+    /** Extend a GameChat group invitation specifying the group to join. */
     public void extendGroupInvitation(final FragmentActivity activity, final String groupKey) {
-
-        Log.i(TAG, "extendGroupInvitation with groupKey=" + groupKey);
+        // Ensure that the group exists.  Abort if not.
         Group group = GroupManager.instance.getGroupProfile(groupKey);
         if (group == null) {
-            Log.e(TAG, "Received invitation with groupKey: " + groupKey + " but GroupManager " +
-                    "can't find this group");
+            String format = "The group with key {%s} does not exist.  Invitation aborted.";
+            Log.e(TAG, String.format(Locale.US, format, groupKey));
             return;
         }
+
         // Create an entry for the invite map for the specified group.
-        GroupInviteData data = new GroupInviteData(group.key, group.name, group.commonRoomKey);
-        mInviteMap.put(data.groupKey, data);
-        startInvitationIntent(activity, group.name);
+        Log.i(TAG, String.format(Locale.US, "Extend a group invitation using key {%s}.", groupKey));
+        extendInvitation(activity, group, null);
     }
 
     /** Return a set of groups and rooms for invitations */
@@ -301,6 +316,7 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
 
     /** Handle app invitation result. Called only from MainActivity onResult method. */
     public void onInvitationResult(final int resultCode, final Intent intent) {
+        ProgressManager.instance.hide();
         if (resultCode != RESULT_OK)
             clearInvitationMap();
         else {
@@ -386,6 +402,46 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
         return dynamicLink;
     }
 
+    /** Extend and invitation to a given group and room. */
+    private void extendInvitation(final FragmentActivity activity, final Group group,
+                                  final String roomKey) {
+        Map<String, GroupInviteData> dataMap = new HashMap<>();
+        GroupInviteData data = new GroupInviteData(group.key, group.name, group.commonRoomKey);
+        if (roomKey != null) {
+            List<String> list = new ArrayList<>();
+            list.add(roomKey);
+            data.rooms = list;
+        }
+        dataMap.put(group.key, data);
+        extendInvitation(activity, dataMap);
+    }
+
+    /** Return null or an Android account that matches the current GameChat account. */
+    private android.accounts.Account getAndroidAccount(final Activity context) {
+        // Walk through the list of Android accounts matching the current GameChat account to find a
+        // match returning that match if found, null otherwise.
+
+        int permissionCheck = ContextCompat.checkSelfPermission(context, GET_ACCOUNTS);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            // we can proceed
+            String email = AccountManager.instance.getCurrentAccount().email;
+            String type = CredentialsManager.instance.getAuthCredential(email).getProvider();
+            android.accounts.Account[] accounts;
+            accounts = android.accounts.AccountManager.get(context).getAccounts(); //getAccountsByType(type);
+            if (accounts.length == 0)
+                return null;
+            for (android.accounts.Account account : accounts) {
+                if (email.equals(account.name))
+                    return account;
+            }
+            return null;
+        }
+
+        // ask the user for permission (assume no explanation is needed)
+        ActivityCompat.requestPermissions(context, new String[]{GET_ACCOUNTS}, REQUEST_CONTACTS);
+        return null;
+    }
+
     /**
      * Return a list of items which represent the available groups and their rooms.
      */
@@ -409,6 +465,19 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
             }
         }
         return result;
+    }
+
+    /** Return an invitation message that is a function of the given group name. */
+    private String getMessage(final Context context) {
+        // Ensure that the appropriate message is generated and that the message size is constrained
+        // in size optimizing the case of a single group to show that group name on the UI.
+        String result = context.getString(R.string.InviteMessage);
+        if (mInviteMap.size() == 1) {
+            String groupName = mInviteMap.values().iterator().next().groupName;
+            result = String.format(context.getString(R.string.InviteToGroupFormat), groupName);
+        }
+        boolean tooLong = result.length() > MAX_MESSAGE_LENGTH;
+        return tooLong ? result.substring(0, MAX_MESSAGE_LENGTH - 4) + "..." : result;
     }
 
     /** Check for group invitation completed. If so, post event and clean up. */
@@ -475,28 +544,6 @@ public enum InvitationManager implements GoogleApiClient.OnConnectionFailedListe
         invitedMembers.remove(account.key);
         if (invitedMembers.size() == 0) mGroupInviteMap.remove(groupKey);
         return true;
-    }
-
-    /**
-     * Build the dynamic link to be used for Firebase invitations. Optionally specify a group
-     * name if there is only one group in the invitation.
-     */
-    private void startInvitationIntent(final FragmentActivity activity, final String groupName) {
-        String msgText;
-        int max = AppInviteInvitation.IntentBuilder.MAX_MESSAGE_LENGTH;
-        // invitation text is limited max size
-        if (groupName != null) {
-            msgText = String.format(activity.getString(R.string.InviteToGroupFormat), groupName);
-            if (msgText.length() > max)
-                msgText = msgText.substring(0, max-4) + "...";
-        } else {
-            msgText = activity.getString(R.string.InviteMessage);
-        }
-        Intent intent = new AppInviteInvitation.IntentBuilder(activity.getString(R.string.InviteTitle))
-                .setMessage(msgText)
-                .setDeepLink(Uri.parse(buildDynamicLink()))
-                .build();
-        activity.startActivityForResult(intent, MainActivity.RC_INVITE);
     }
 
     /** Start to process an invitation: a series of steps to update various Firebase objects */
