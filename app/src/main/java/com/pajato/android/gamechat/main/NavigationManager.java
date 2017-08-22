@@ -47,6 +47,7 @@ import com.pajato.android.gamechat.event.NavDrawerOpenEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
 import java.util.Map;
 
 import static android.graphics.Shader.TileMode.CLAMP;
@@ -78,7 +79,7 @@ public enum NavigationManager {
 
     /** Return true iff the navigation drawer was open and is now closed. */
     public boolean closeDrawerIfOpen(final Activity activity) {
-        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = activity.findViewById(R.id.drawer_layout);
         if (isDrawerOpen(activity)) {
             drawer.closeDrawer(GravityCompat.START);
             return true;
@@ -87,23 +88,23 @@ public enum NavigationManager {
     }
 
     public boolean isDrawerOpen(final Activity activity) {
-        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = activity.findViewById(R.id.drawer_layout);
         return drawer.isDrawerOpen(GravityCompat.START);
     }
 
     /** Initialize the navigation drawer. Only used for 'chatMain' toolbar type. */
     public void init(final Activity activity, final Toolbar toolbar) {
         // Set up the action bar drawer toggle.
-        DrawerLayout drawer = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = activity.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle;
         toggle = new ActionBarDrawerToggle(activity, drawer, toolbar, OPEN_ID, CLOSE_ID);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // Set up to hamburger menu navigation and register this manager for app events.
-        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        NavigationView navigationView = activity.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((MainActivity) activity);
-        NavigationView footer = (NavigationView) activity.findViewById(R.id.nav_footer);
+        NavigationView footer = activity.findViewById(R.id.nav_footer);
         footer.setNavigationItemSelectedListener((MainActivity) activity);
 
         // Establish the account switch state and Have the toolbar manager set up the overflow menu.
@@ -131,10 +132,12 @@ public enum NavigationManager {
 
         // Determine if there is an account to set up.  Abort if not, otherwise load the account
         // image, display name and email address.
-        if (account == null) return;
-        loadAccountIcon(account, header);
+        if (account == null)
+            return;
+        loadAccountIcon(account.url, (ImageView) header.findViewById(R.id.currentAccountIcon));
+        updateHeader(account.email, header);
         setDisplayName(account, header);
-        TextView email = (TextView) header.findViewById(R.id.currentAccountEmail);
+        TextView email = header.findViewById(R.id.currentAccountEmail);
         email.setText(account.email);
     }
 
@@ -143,6 +146,30 @@ public enum NavigationManager {
         mAccountSwitchState = mAccountSwitchState == AccountSwitchState.main
             ? AccountSwitchState.users : AccountSwitchState.main;
         enableDrawerMenuGroup(activity);
+    }
+
+    /** Redraw the alternate account icons based on the stored credentials in CredentialsManager */
+    public void updateHeader(final String currentEmail, final View header) {
+        List<String> emails = CredentialsManager.instance.getEmailList();
+        Map<String, Credentials> map = CredentialsManager.instance.getMap();
+        int i;
+        // For the emails we have stored, load the account icon.
+        for (i = 0; i < 4 && i < emails.size(); i++) {
+            int id = getAlternateAccountIconId(i);
+            Credentials currentCredentials = map.get(emails.get(i));
+            ImageView icon = header.findViewById(id);
+            icon.setVisibility(View.VISIBLE);
+
+            icon.setTag(id, emails.get(i));
+            loadAccountIcon(currentCredentials.url, icon);
+        }
+        // Hide unfilled icons.
+        for (int j = i; j < 4; j++) {
+            int id = getAlternateAccountIconId(j);
+            ImageView altAccountIcon = header.findViewById(id);
+            altAccountIcon.setVisibility(View.INVISIBLE);
+        }
+        emails.add(currentEmail);
     }
 
     // Private instance methods.
@@ -164,6 +191,7 @@ public enum NavigationManager {
         // unique menu id.
         Map<String, Credentials> map = CredentialsManager.instance.getMap();
         String currentEmail = AccountManager.instance.getCurrentAccount().email;
+        // TODO: Use the stored image URLs for the accounts as icons.
         final int icon = R.drawable.ic_account_circle_black_24dp;
         int id = 3;
         for (String email : map.keySet()) {
@@ -176,7 +204,7 @@ public enum NavigationManager {
     /** Establish the current menu in the navigation drawer based on the account switch state. */
     private void enableDrawerMenuGroup(final Activity activity) {
         // Ensure that there is a menu in the drawer body; abort if not.
-        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view);
+        NavigationView navigationView = activity.findViewById(R.id.nav_view);
         Menu menu = navigationView != null ? navigationView.getMenu() : null;
         if (menu == null)
             return;
@@ -196,17 +224,32 @@ public enum NavigationManager {
         }
     }
 
+    /** Access one of four possible alternate account icon ids. */
+    private int getAlternateAccountIconId(final int index) {
+        switch (index) {
+            default:
+                return -1;
+            case 0:
+                return R.id.alternateAccountIcon1;
+            case 1:
+                return R.id.alternateAccountIcon2;
+            case 2:
+                return R.id.alternateAccountIcon3;
+            case 3:
+                return R.id.alternateAccountIcon4;
+        }
+    }
+
     /** Load the account icon, if available, using a placeholder otherwise. */
-    private void loadAccountIcon(final Account account, final View header) {
+    private void loadAccountIcon(final String url, final ImageView icon) {
         // Determine if there is an image to be loaded.
-        ImageView icon = (ImageView) header.findViewById(R.id.currentAccountIcon);
-        Uri imageUri = account.url != null ? Uri.parse(account.url) : null;
+        Uri imageUri = url != null ? Uri.parse(url) : null;
         if (imageUri != null) {
             // There is an image to load.  Use Glide to do the heavy lifting.
             icon.setImageURI(imageUri);
-            Glide.with(header.getContext())
-                .load(account.url)
-                .transform(new CircleTransform(header.getContext()))
+            Glide.with(icon.getContext())
+                .load(url)
+                .transform(new CircleTransform(icon.getContext()))
                 .into(icon);
         } else {
             // There is no image.  Use an anonymous image.
@@ -214,7 +257,6 @@ public enum NavigationManager {
         }
         icon.setVisibility(View.VISIBLE);
     }
-
 
     /** Load the display name, if available, using a placeholder otherwise. */
     private void setDisplayName(final Account account, final View header) {
@@ -228,7 +270,7 @@ public enum NavigationManager {
             name = name.substring(0, index);
             name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
         }
-        TextView view = (TextView) header.findViewById(R.id.currentAccountDisplayName);
+        TextView view = header.findViewById(R.id.currentAccountDisplayName);
         view.setText(name);
         view.setVisibility(View.VISIBLE);
     }
@@ -251,7 +293,8 @@ public enum NavigationManager {
         }
 
         private static Bitmap circleCrop(BitmapPool pool, Bitmap source) {
-            if (source == null) return null;
+            if (source == null)
+                return null;
             int size = Math.min(source.getWidth(), source.getHeight());
             int x = (source.getWidth() - size) / 2;
             int y = (source.getHeight() - size) / 2;

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (C) 2016 Pajato Technologies LLC.
 
 This file is part of Pajato GameChat.
@@ -14,8 +13,7 @@ details.
 You should have received a copy of the GNU General Public License along with GameChat.  If not, see
 http://www.gnu.org/licenses
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
@@ -28,9 +26,9 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="@string/sign_in"
         android:gravity="center"
         android:onClick="onClick"
+        android:text="@string/sign_in"
         tools:visibility="gone" />
 
     <LinearLayout
@@ -38,58 +36,142 @@ http://www.gnu.org/licenses
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
         android:gravity="bottom"
+        android:orientation="vertical"
         tools:visibility="visible">
-        <ImageView
-            android:id="@+id/currentAccountIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="8dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@android:drawable/sym_def_app_icon"
-            tools:ignore="ContentDescription" />
+
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/profiles"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/currentAccountDisplayName"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/currentAccountIcon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@android:drawable/sym_def_app_icon"
+                tools:ignore="ContentDescription" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/nav_header_label_android_studio"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-            <TextView
-                android:id="@+id/currentAccountEmail"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/otherProfiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/alternateAccountIcon1"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:scaleType="fitXY"
+                        android:src="@android:drawable/sym_def_app_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/alternateAccountIcon2"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:scaleType="fitXY"
+                        android:src="@android:drawable/sym_def_app_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/alternateAccountIcon3"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:scaleType="fitXY"
+                        android:src="@android:drawable/sym_def_app_icon"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/alternateAccountIcon4"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:adjustViewBounds="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:scaleType="fitXY"
+                        android:src="@android:drawable/sym_def_app_icon"
+                        tools:ignore="ContentDescription" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/signOut"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@color/colorAccent"
+                    android:gravity="center_horizontal"
+                    android:onClick="onClick"
+                    android:text="@string/sign_out" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/nav_header_label_android_studio_android_com" />
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentAccountDisplayName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nav_header_label_android_studio"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                <TextView
+                    android:id="@+id/currentAccountEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nav_header_label_android_studio_android_com" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/switchAccount"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="4dp"
+                android:gravity="center"
+                android:onClick="onClick"
+                android:text="@string/switch_account"
+                android:textSize="20sp" />
+
         </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/switchAccount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1.0"
-            android:text="@string/switch_account"
-            android:onClick="onClick"/>
-        <TextView
-            android:id="@+id/signOut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.0"
-            android:gravity="center"
-            android:text="@string/sign_out"
-            android:onClick="onClick"/>
+
     </LinearLayout>
 
 </LinearLayout>
