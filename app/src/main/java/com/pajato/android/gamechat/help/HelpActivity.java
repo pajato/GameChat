@@ -50,21 +50,14 @@ public class HelpActivity extends Activity {
     private String mBitmapPath;
     private String mLogCatPath;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.help_activity);
-        ImageView image = (ImageView) findViewById(R.id.feedbackIcon);
-        image.setImageResource(R.drawable.ic_feedback_black_24dp);
-        // Save attachments in case user selects 'feedback'
-        mBitmapPath = getIntent().getStringExtra("bitmapPath");
-        mLogCatPath = getIntent().getStringExtra("logCatPath");
-    }
+    // Public instance methods.
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateAdapterList();
+    /** Handle a back press event by popping the back stack. */
+    @Override public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() > 0)
+            getFragmentManager().popBackStack();
+        else
+            super.onBackPressed();
     }
 
     /** Process a click on a given view by posting a button click event. */
@@ -105,14 +98,28 @@ public class HelpActivity extends Activity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (getFragmentManager().getBackStackEntryCount() > 0)
-            getFragmentManager().popBackStack();
-        else
-            super.onBackPressed();
+    // Protected instance methods.
+
+    /** Deal with the creation life-cycle callback by setting up the send form. */
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.help_activity);
+        ImageView image = (ImageView) findViewById(R.id.feedbackIcon);
+        image.setImageResource(R.drawable.ic_feedback_black_24dp);
+        // Save attachments in case user selects 'feedback'
+        mBitmapPath = getIntent().getStringExtra("bitmapPath");
+        mLogCatPath = getIntent().getStringExtra("logCatPath");
     }
 
+    /** Deal with the foreground life-cycle callback by updating the help adapter. */
+    @Override protected void onResume() {
+        super.onResume();
+        updateAdapterList();
+    }
+
+    // Private instance methods. */
+
+    /** Return TRUE iff the adapter has been set up, FALSE otherwise. */
     private boolean updateAdapterList() {
         // Determine if the fragment has a view and that it has a list type.  Abort if not,
         // otherwise ensure that the list adapter exists, creating it if necessary.
