@@ -19,7 +19,6 @@ package com.pajato.android.gamechat.intro;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
@@ -143,8 +142,10 @@ public class IntroActivity extends AppCompatActivity {
             return view;
         }
 
+        /** Allow the adapter to prune elements to conserve resources. */
         @Override public void destroyItem(final ViewGroup container, final int position,
                                           final Object object) {
+            // Use the identified object to guide the pruning.
             container.removeView((View) object);
         }
 
@@ -162,11 +163,6 @@ public class IntroActivity extends AppCompatActivity {
             return null;
         }
 
-        @Override public void unregisterDataSetObserver(final DataSetObserver observer) {
-            if (observer != null) {
-                super.unregisterDataSetObserver(observer);
-            }
-        }
     }
 
     /** Provide a nested class to handle page changes with animation. */
