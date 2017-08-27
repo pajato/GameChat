@@ -376,9 +376,13 @@ public abstract class BaseExperienceFragment extends BaseFragment {
                 break;
         }
 
-        // Chain to the game experience, if one was found.
+        // Chain to the game experience, if one was found and if the user is currently signed in.
         if (expFragmentType != null) {
-            DispatchManager.instance.dispatchToGame(this, expFragmentType);
+            if (AccountManager.instance.hasAccount()) {
+                DispatchManager.instance.dispatchToGame(this, expFragmentType);
+            } else {
+                showFutureFeatureMessage(R.string.signedOutGames);
+            }
         }
     }
 
