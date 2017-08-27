@@ -22,6 +22,7 @@ import android.content.Context;
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.common.Dispatcher;
 import com.pajato.android.gamechat.common.FabManager;
+import com.pajato.android.gamechat.common.FragmentType;
 import com.pajato.android.gamechat.common.ToolbarManager;
 import com.pajato.android.gamechat.common.adapter.ListItem;
 import com.pajato.android.gamechat.event.ClickEvent;
@@ -54,7 +55,7 @@ public class ExpShowSignedOutFragment extends BaseExperienceFragment {
     }
 
     @Subscribe public void onClick(final ClickEvent event) {
-        // todo add some code here.
+        processClickEvent(event.view, FragmentType.expSignedOut);
         logEvent("onClick (showSignedOut)");
     }
 
