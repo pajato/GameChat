@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/spacer"
+        android:layout_width="16dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="148dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <include layout="@layout/exp_toolbar_inc" />
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/friendLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@color/colorPrimary"
+        android:onClick="onClick"
+        android:orientation="horizontal"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/spacer">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:text="@string/friend"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/friend"
+            app:srcCompat="@drawable/ic_arrow_drop_down_white_24px" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/colorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/friendLayout">
+
+        <ImageView
+            android:id="@+id/player1Icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_background_selected"
+            android:contentDescription="@string/player1"
+            android:onClick="onClick"
+            app:srcCompat="@drawable/ic_account_circle_black_36dp" />
+
+        <ImageView
+            android:id="@+id/player2Icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_background"
+            android:contentDescription="@string/player2"
+            android:onClick="onClick"
+            app:srcCompat="@drawable/ic_account_circle_black_36dp" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/timerLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/colorLayout">
+
+        <TextView
+            android:id="@+id/timerZero"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/button_background_selected"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:text="@string/TimerZero"
+            android:textSize="32sp" />
+
+        <TextView
+            android:id="@+id/timerFifteen"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/button_background"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:text="@string/Timer15"
+            android:textSize="32sp" />
+
+        <TextView
+            android:id="@+id/timerThirty"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/button_background"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:text="@string/Timer30"
+            android:textSize="32sp" />
+
+        <TextView
+            android:id="@+id/timerFortyFive"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/button_background"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:text="@string/Timer45"
+            android:textSize="32sp" />
+
+        <TextView
+            android:id="@+id/timerSixty"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/button_background"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:text="@string/Timer60"
+            android:textSize="32sp" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/tutorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/timerLayout">
+
+        <ImageView
+            android:id="@+id/noTutor"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_background_selected"
+            android:contentDescription="@string/player1"
+            android:onClick="onClick"
+            app:srcCompat="@drawable/ic_clear_black_24dp" />
+
+        <ImageView
+            android:id="@+id/tutorMode"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_background"
+            android:contentDescription="@string/player1"
+            android:onClick="onClick"
+            app:srcCompat="@drawable/ic_verified_user_black_24dp" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:id="@+id/gameChoiceLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/tutorLayout">
+
+        <ImageView
+            android:id="@+id/IconTicTacToe"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/button_background_selected"
+            android:contentDescription="@string/TicTacToeImageDesc"
+            android:onClick="onClick"
+            android:src="@mipmap/ic_tictactoe_red" />
+
+        <ImageView
+            android:id="@+id/IconCheckers"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_background"
+            android:contentDescription="@string/CheckersImageDesc"
+            android:onClick="onClick"
+            android:src="@mipmap/ic_checkers" />
+
+        <ImageView
+            android:id="@+id/IconChess"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_background"
+            android:contentDescription="@string/ChessImageDesc"
+            android:onClick="onClick"
+            android:src="@mipmap/ic_chess" />
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/Opponent"
+        android:textSize="16sp"
+
+        app:layout_constraintBottom_toBottomOf="@id/friendLayout"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toTopOf="@id/friendLayout" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/PlayAs"
+        android:textSize="16sp"
+
+        app:layout_constraintBottom_toBottomOf="@id/colorLayout"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toTopOf="@id/colorLayout" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/TurnTimer"
+        android:textSize="16sp"
+
+        app:layout_constraintBottom_toBottomOf="@id/timerLayout"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toTopOf="@id/timerLayout" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/TutorMode"
+        android:textSize="16sp"
+
+        app:layout_constraintBottom_toBottomOf="@id/tutorLayout"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toTopOf="@id/tutorLayout" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/GameChoice"
+        android:textSize="16sp"
+
+        app:layout_constraintBottom_toBottomOf="@id/gameChoiceLayout"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toTopOf="@id/gameChoiceLayout" />
+
+    <TextView
+        android:id="@+id/playWithSetup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorPrimary"
+        android:onClick="onClick"
+        android:paddingBottom="8dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:text="@string/PlayButton"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+
+        app:layout_constraintLeft_toRightOf="@id/spacer"
+        app:layout_constraintRight_toLeftOf="@id/spacer"
+        app:layout_constraintTop_toBottomOf="@id/gameChoiceLayout" />
+
+</android.support.constraint.ConstraintLayout>

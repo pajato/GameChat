@@ -4,9 +4,12 @@
     <string name="CheckersImageDesc">Checkers image.</string>
     <string name="ChessDisplayName">Chess</string>
     <string name="ChessImageDesc">Chess image.</string>
+    <string name="ChooseColor">Choose your Color</string>
+    <string name="ChooseOpponent">Choose Opponent</string>
     <string name="ExpGroupsToolbarTitle">Groups with Games</string>
     <string name="ExpRoomsToolbarTitle">Rooms with Games</string>
     <string name="FutureSelectRooms">Select rooms</string>
+    <string name="GameChoice">Game:</string>
     <string name="InvalidButton">You must click on an empty button!  Try again.</string>
     <string name="MenuIconDesc">Floating action menu icon.</string>
     <string name="MyExperiencesToolbarTitle">Your Games</string>
@@ -15,6 +18,7 @@
     <string name="NoGamesOfflineText">Select a game button to create a game.</string>
     <string name="NoGamesMessageText">Select a game button to create a game, or join other rooms to play or watch ongoing games.</string>
     <string name="NoGamesToolbarTitle">No Games</string>
+    <string name="Opponent">Opponent:</string>
     <string name="PlayAgain">Play Again</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
@@ -24,12 +28,16 @@
     <string name="PromotePawnMsg">Promote Your Pawn:</string>
     <string name="ResetGameTitle">Restart Game?</string>
     <string name="ResetGameMessage">Restarting this game will clear the board and any previous moves. Do you really want to restart this game?</string>
+    <string name="SetupNewExp">Set Up a New Game</string>
+    <string name="SettingUnavailable">This game configuration</string>
     <string name="SignedOutMessageText">You are signed out.  You can play games, but it is more fun to use GameChat while signed in.</string>
     <string name="StartNewGame">Starting a new game.  Enjoy!</string>
     <string name="TicTacToeDisplayName">Tic-Tac-Toe</string>
     <string name="TicTacToeImageDesc">TicTacToe image.</string>
     <string name="TieMessage">Tie game!</string>
     <string name="TieMessageNotification">Well done players</string>
+    <string name="TurnTimer">Turn Timer:</string>
+    <string name="TutorMode">Tutor Mode:</string>
     <string name="WinMessageFormat">%1$s Wins!</string>
     <string name="WinMessageNotificationFormat">Congratulations %s, you win!</string>
     <string name="chess_promotion_bishop">Bishop</string>
@@ -53,4 +61,10 @@
     <string name="NotAPlayerMessageText">You are not a player in this game.</string>
     <string name="PlayOutOfTurnMessageText">Please wait for your turn.</string>
     <string name="CheckMateText">Checkmate!</string>
+    <string name="TimerZero">0</string>
+    <string name="Timer15">15</string>
+    <string name="Timer30">30</string>
+    <string name="Timer45">45</string>
+    <string name="Timer60">60</string>
+    <string name="PlayAs">Play as:</string>
 </resources>

@@ -38,6 +38,7 @@ import java.util.List;
 import static com.pajato.android.gamechat.common.FragmentKind.exp;
 import static com.pajato.android.gamechat.common.FragmentType.checkers;
 import static com.pajato.android.gamechat.common.FragmentType.chess;
+import static com.pajato.android.gamechat.common.FragmentType.setupExp;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
@@ -114,6 +115,7 @@ public class ExpEnvelopeFragment extends BaseExperienceFragment {
     /** Return the home FAM used in the top level show games and show no games fragments. */
     private List<MenuEntry> getHomeMenu() {
         final List<MenuEntry> menu = new ArrayList<>();
+        menu.add(getEntry(R.string.SetupNewExp, R.drawable.ic_settings_black_24dp, setupExp));
         menu.add(getEntry(R.string.PlayTicTacToe, R.mipmap.ic_tictactoe_red, tictactoe));
         menu.add(getEntry(R.string.PlayCheckers, R.mipmap.ic_checkers, checkers));
         menu.add(getEntry(R.string.PlayChess, R.mipmap.ic_chess, chess));

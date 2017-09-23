@@ -167,9 +167,9 @@ public class ChessFragment extends BaseExperienceFragment {
         mBoard.init(this, mTileClickHandler);
 
         // Color the Player Icons.
-        ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player_1_icon);
+        ImageView playerOneIcon = (ImageView) mLayout.findViewById(R.id.player1Icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
-        ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
+        ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player2Icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
 
