@@ -20,6 +20,7 @@
     <string name="NoGamesToolbarTitle">No Games</string>
     <string name="Opponent">Opponent:</string>
     <string name="PlayAgain">Play Again</string>
+    <string name="PlayButton">Play!</string>
     <string name="PlayCheckers">Play Checkers</string>
     <string name="PlayChess">Play Chess</string>
     <string name="PlayModeComputerMenuTitle">Play the computer</string>

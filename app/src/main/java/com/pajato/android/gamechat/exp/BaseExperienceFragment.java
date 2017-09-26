@@ -417,7 +417,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.string.InviteFriendMessage:
                 // If not on a tablet, make sure that we switch to the chat perspective
                 if (!PaneManager.instance.isTablet()) {
-                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    ViewPager viewPager = getActivity().findViewById(R.id.viewpager);
                     if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 String groupKey = mExperience.getGroupKey();
