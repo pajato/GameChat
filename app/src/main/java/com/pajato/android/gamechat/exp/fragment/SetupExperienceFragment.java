@@ -28,7 +28,8 @@ import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.set
 import static com.pajato.android.gamechat.exp.fragment.ExpEnvelopeFragment.GAME_HOME_FAM_KEY;
 
 /**
- *
+ * Handles setup of an experience, from choosing an opponent and choosing a game, to enabling fully
+ * optional settings like a tutor mode or game timer.
  */
 public class SetupExperienceFragment extends BaseExperienceFragment {
     private int mExpId = R.id.IconTicTacToe;
