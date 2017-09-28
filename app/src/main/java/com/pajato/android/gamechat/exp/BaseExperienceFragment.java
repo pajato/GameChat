@@ -66,6 +66,7 @@ import static com.pajato.android.gamechat.common.FragmentType.chess;
 import static com.pajato.android.gamechat.common.FragmentType.expRoomList;
 import static com.pajato.android.gamechat.common.FragmentType.experienceList;
 import static com.pajato.android.gamechat.common.FragmentType.selectGroupsRooms;
+import static com.pajato.android.gamechat.common.FragmentType.setupExp;
 import static com.pajato.android.gamechat.common.FragmentType.tictactoe;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_EXPERIENCE_KEY;
 import static com.pajato.android.gamechat.database.AccountManager.SIGNED_OUT_OWNER_ID;
@@ -383,6 +384,8 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             } else {
                 showFutureFeatureMessage(R.string.signedOutGames);
             }
+        } else if (type.equals(setupExp)) {
+            showFutureFeatureMessage(R.string.SettingUnavailable);
         }
     }
 
@@ -414,7 +417,7 @@ public abstract class BaseExperienceFragment extends BaseFragment {
             case R.string.InviteFriendMessage:
                 // If not on a tablet, make sure that we switch to the chat perspective
                 if (!PaneManager.instance.isTablet()) {
-                    ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+                    ViewPager viewPager = getActivity().findViewById(R.id.viewpager);
                     if (viewPager != null) viewPager.setCurrentItem(PaneManager.CHAT_INDEX);
                 }
                 String groupKey = mExperience.getGroupKey();
@@ -495,7 +498,11 @@ public abstract class BaseExperienceFragment extends BaseFragment {
     private void processFamItem(final MenuEntry entry) {
         // Dismiss the FAB and dispatch
         FabManager.game.dismissMenu(this);
-        DispatchManager.instance.dispatchToGame(this, entry.fragmentType);
+        if (entry.fragmentType == setupExp) {
+            DispatchManager.instance.dispatchToFragment(this, setupExp);
+        } else {
+            DispatchManager.instance.dispatchToGame(this, entry.fragmentType);
+        }
     }
 
     /** Resume the current fragment experience. */

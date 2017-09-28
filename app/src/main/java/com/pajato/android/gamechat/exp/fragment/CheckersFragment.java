@@ -51,7 +51,7 @@ import java.util.List;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static com.pajato.android.gamechat.R.color.colorAccent;
 import static com.pajato.android.gamechat.R.color.colorPrimary;
-import static com.pajato.android.gamechat.R.id.player_1_icon;
+import static com.pajato.android.gamechat.R.id.player1Icon;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.chat;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.helpAndFeedback;
 import static com.pajato.android.gamechat.common.ToolbarManager.MenuItemType.invite;
@@ -177,9 +177,9 @@ public class CheckersFragment extends BaseExperienceFragment {
         mBoard.init(this, mTileClickHandler); // = (GridLayout) mLayout.findViewById(board);
 
         // Color the player icons and create a tile click handler.
-        ImageView playerOneIcon = (ImageView) mLayout.findViewById(player_1_icon);
+        ImageView playerOneIcon = (ImageView) mLayout.findViewById(player1Icon);
         playerOneIcon.setColorFilter(ContextCompat.getColor(getContext(), colorPrimary), SRC_ATOP);
-        ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player_2_icon);
+        ImageView playerTwoIcon = (ImageView) mLayout.findViewById(R.id.player2Icon);
         playerTwoIcon.setColorFilter(ContextCompat.getColor(getContext(), colorAccent), SRC_ATOP);
     }
 
