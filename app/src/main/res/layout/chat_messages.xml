@@ -65,8 +65,9 @@ http://www.gnu.org/licenses
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
-            android:inputType="textAutoCorrect"
-            android:hint="@string/editMessageHint" />
+            android:hint="@string/editMessageHint"
+            android:imeOptions="actionSend"
+            android:inputType="textAutoCorrect" />
         <LinearLayout
             android:id="@+id/sendButtonBox"
             android:layout_width="match_parent"
