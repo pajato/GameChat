@@ -24,8 +24,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.pajato.android.gamechat.R;
 import com.pajato.android.gamechat.chat.BaseChatFragment;
@@ -67,7 +70,8 @@ import static com.pajato.android.gamechat.main.MainService.ROOM_KEY;
  *
  * @author Paul Michael Reilly
  */
-public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener {
+public class ShowMessagesFragment extends BaseChatFragment implements View.OnClickListener,
+        TextView.OnEditorActionListener {
 
     // Public instance methods.
 
@@ -145,6 +149,14 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
             updateAdapterList();
     }
 
+    /** Handle an enter key press to allow the user to press enter to send their text. */
+    @Override public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+        if (i == EditorInfo.IME_NULL) {
+            postMessage(textView);
+        }
+        return false;
+    }
+
     /** Handle a menu item selection. */
     @Subscribe public void onMenuItem(final MenuItemEvent event) {
         if (!this.mActive)
@@ -195,6 +207,7 @@ public class ShowMessagesFragment extends BaseChatFragment implements View.OnCli
         // Set up the edit text field and the send button.
         EditText editText = (EditText) layout.findViewById(R.id.messageEditText);
         editText.addTextChangedListener(new EditTextWatcher(layout));
+        editText.setOnEditorActionListener(this);
         View sendButton = layout.findViewById(R.id.sendButton);
         sendButton.setOnClickListener(this);
     }
