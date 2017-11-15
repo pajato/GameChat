@@ -119,6 +119,7 @@ dependencies {
     androidTestImplementation "com.android.support:design:$rootProject.ext.supportLibraryVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
+    androidTestCompile "com.android.support.test.espresso:espresso-web:$rootProject.ext.espressoVersion"
 
     // UIAutomator testing dependencies.
     androidTestImplementation "com.android.support.test.uiautomator:uiautomator-v18:$rootProject.ext.uiautomatorVersion"
